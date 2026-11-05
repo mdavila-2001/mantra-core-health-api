@@ -53,3 +53,38 @@ export function canActorReadOwnFile(
   }
   return actor.roles.some((role) => FILE_REVIEWER_ROLES.includes(role));
 }
+
+/**
+ * Roles que pueden **modificar** un archivo que no subieron ellos mismos.
+ *
+ * Es deliberadamente más corto que {@link FILE_REVIEWER_ROLES}: revisar
+ * evidencia (leer) no es lo mismo que versionarla, derivarla, vincularla o
+ * borrarla. `SECURITY_ADMIN` lee; sólo la plataforma (`SUPERADMIN`, comodín
+ * que `RolesGuard` ya trata como total) escribe sobre archivos ajenos.
+ */
+export const FILE_WRITER_ROLES = ['SUPERADMIN'];
+
+/**
+ * Si el actor puede **modificar** el archivo: añadirle una versión, derivarlo,
+ * vincularlo a un dueño o borrarlo (AUTHZ-T03).
+ *
+ * Política de escritura propia, no la de lectura: el archivo es del usuario que
+ * lo subió (`createdByUserId`) y, sobre archivos ajenos, sólo escribe un rol de
+ * {@link FILE_WRITER_ROLES}. Un archivo sin dueño (pre-carga anónima sin
+ * reclamar) no se atribuye a nadie. Todos los archivos nacen bajo el tenant
+ * semilla, así que la barrera RLS por tenant no distingue autores: esta regla
+ * es la única que separa a dos usuarios del mismo tenant.
+ *
+ * @param file - El archivo del que se decide.
+ * @param actor - Sesión que pide modificarlo.
+ * @returns `true` si puede modificarlo.
+ */
+export function canActorMutateOwnFile(
+  file: FileOwnershipFacts,
+  actor: AuthenticatedUser,
+): boolean {
+  if (file.createdByUserId !== undefined && file.createdByUserId === actor.id) {
+    return true;
+  }
+  return actor.roles.some((role) => FILE_WRITER_ROLES.includes(role));
+}

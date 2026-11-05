@@ -8,8 +8,31 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import { AutomationDefinitionService } from './automation-definition.service';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['AUTOMATION_ENGINEER'] } as any;
 const WORKFLOW_ID = '11111111-1111-1111-1111-111111111111';
@@ -41,7 +64,7 @@ function build() {
     })),
   };
   const agentsRepo = {
-    findAgentById: mockFn(async () => ({ id: AGENT_ID })),
+    findAgentById: mockFn(async () => ({ id: AGENT_ID, tenantId: TENANT_A })),
     findToolById: mockFn(async () => ({ id: TOOL_ID })),
   };
   const outbox = {
@@ -49,14 +72,25 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new AutomationDefinitionService(
+  const raw = new AutomationDefinitionService(
     em as any,
     governanceRepo as any,
     agentsRepo as any,
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, governanceRepo, agentsRepo, outbox, logger };
+  const service = inTenant(raw, TENANT_A);
+  return {
+    service,
+    raw,
+    asTenantB: inTenant(raw, TENANT_B),
+    em,
+    tx,
+    governanceRepo,
+    agentsRepo,
+    outbox,
+    logger,
+  };
 }
 
 const WORKFLOW_DTO = {
@@ -217,6 +251,7 @@ describe('AutomationDefinitionService', () => {
     ) {
       d.governanceRepo.findWorkflowById.mockResolvedValue({
         id: WORKFLOW_ID,
+        tenantId: TENANT_A,
         stateConceptId: state,
       });
     }
@@ -314,6 +349,177 @@ describe('AutomationDefinitionService', () => {
       await expect(
         d.service.configureTrigger(TRIGGER_DTO, actor),
       ).rejects.toThrow(/archivado/);
+    });
+  });
+  describe('alcance de tenant (AUTO-01)', () => {
+    const NOT_FOUND = 404;
+
+    /**
+     * Captura el rechazo para inspeccionar status, code, reason y details.
+     *
+     * @param promise - Operación que debe fallar.
+     * @returns La excepción lanzada.
+     */
+    async function rejection(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Se esperaba un rechazo');
+    }
+
+    it('el engineer de A define workflow, y el tenant sale del contexto', async () => {
+      const d = build();
+
+      const result = await d.service.defineWorkflow(WORKFLOW_DTO, actor);
+
+      expect(result.id).toBe(WORKFLOW_ID);
+      expect(d.governanceRepo.createWorkflow.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+      expect(d.outbox.publishDomainEvent.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('ignora el tenantId del cuerpo: nunca es fuente de verdad', async () => {
+      const d = build();
+
+      await d.service.defineWorkflow(
+        { ...WORKFLOW_DTO, tenantId: TENANT_B },
+        actor,
+      );
+
+      expect(d.governanceRepo.createWorkflow.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('sin tenant en el contexto no define nada (denegar por defecto)', async () => {
+      const d = build();
+
+      const error = await rejection(d.raw.defineWorkflow(WORKFLOW_DTO, actor));
+
+      expect(error.getStatus()).toBe(422);
+      expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+      expect(d.governanceRepo.createWorkflow).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un agente de B referenciado por un paso responde igual que uno inexistente', async () => {
+      const foreign = build();
+      foreign.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_B,
+      });
+      const absent = build();
+      absent.agentsRepo.findAgentById.mockResolvedValue(null);
+
+      const a = await rejection(
+        foreign.service.defineWorkflow(WORKFLOW_DTO, actor),
+      );
+      const b = await rejection(
+        absent.service.defineWorkflow(WORKFLOW_DTO, actor),
+      );
+
+      expect(a.getStatus()).toBe(NOT_FOUND);
+      expect(a.reason).toBe(AutomationErrorReason.STEP_AGENT_NOT_FOUND);
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(a.details).toBeUndefined();
+      expect(foreign.governanceRepo.createWorkflow).not.toHaveBeenCalled();
+      expect(foreign.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un agente sin tenant (huérfano) tampoco se acepta', async () => {
+      const d = build();
+      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+
+      await expect(
+        d.service.defineWorkflow(WORKFLOW_DTO, actor),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.STEP_AGENT_NOT_FOUND,
+      });
+    });
+
+    it('configura el disparador de A con el tenant del contexto', async () => {
+      const d = build();
+      d.governanceRepo.findWorkflowById.mockResolvedValue({
+        id: WORKFLOW_ID,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.AUTO_WORKFLOW_ACTIVE,
+      });
+
+      await d.service.configureTrigger(
+        {
+          code: 't',
+          name: 'T',
+          triggerTypeConceptId: CONCEPTS.AUTO_TRIGGER_TYPE_EVENT,
+          eventType: 'E',
+          workflowId: WORKFLOW_ID,
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+
+      expect(d.governanceRepo.createTrigger.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+      expect(d.outbox.publishDomainEvent.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('el workflow de B configurado desde A responde igual que uno inexistente', async () => {
+      const foreign = build();
+      foreign.governanceRepo.findWorkflowById.mockResolvedValue({
+        id: WORKFLOW_ID,
+        tenantId: TENANT_B,
+        stateConceptId: CONCEPTS.AUTO_WORKFLOW_ACTIVE,
+      });
+      const absent = build();
+      absent.governanceRepo.findWorkflowById.mockResolvedValue(null);
+      const dto = {
+        code: 't',
+        name: 'T',
+        triggerTypeConceptId: CONCEPTS.AUTO_TRIGGER_TYPE_EVENT,
+        eventType: 'E',
+        workflowId: WORKFLOW_ID,
+      } as any;
+
+      const a = await rejection(foreign.service.configureTrigger(dto, actor));
+      const b = await rejection(absent.service.configureTrigger(dto, actor));
+
+      expect(a.getStatus()).toBe(NOT_FOUND);
+      expect(a.reason).toBe(AutomationErrorReason.WORKFLOW_NOT_FOUND);
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(foreign.governanceRepo.createTrigger).not.toHaveBeenCalled();
+      expect(foreign.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('el mismo workflow es visible desde su propio tenant y ajeno desde B', async () => {
+      const d = build();
+      d.governanceRepo.findWorkflowById.mockResolvedValue({
+        id: WORKFLOW_ID,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.AUTO_WORKFLOW_ACTIVE,
+      });
+      const dto = {
+        code: 't',
+        name: 'T',
+        triggerTypeConceptId: CONCEPTS.AUTO_TRIGGER_TYPE_EVENT,
+        eventType: 'E',
+        workflowId: WORKFLOW_ID,
+      } as any;
+
+      await expect(
+        d.asTenantB.configureTrigger(dto, actor),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.WORKFLOW_NOT_FOUND,
+      });
+      await expect(
+        d.service.configureTrigger(dto, actor),
+      ).resolves.toBeDefined();
     });
   });
 });

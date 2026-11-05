@@ -94,7 +94,7 @@ EJECUCIÓN
   runs/:id/finalize ───> cierra agent_runs abiertos, suma coste, run COMPLETED|FAILED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El agente y su versión 1 nacen en borrador.** Un agente sin versión publicada no puede
   ejecutarse; crearlo ya activo daría a entender que sí.
@@ -157,7 +157,19 @@ ha superado, o facturar de más al sumar.
 `record_automations` guarda `target_resource_type`, `field_mapping_json` y `dedupe_key_expr`
 precisamente para escribir en un destino que no se conoce al compilar. Como el identificador SQL no
 admite *bind*, esquema, tabla y columnas pasan por la lista blanca `^[a-z_][a-z0-9_]{0,62}$` antes de
-entrecomillarse.
+entrecomillarse. Además, el esquema de destino tiene que estar en una lista permitida
+(`crm`, `marketing`, `promotions`, `scheduling`, `surveys`, `education`, `tracking`): un destino
+clínico, de identidad o financiero se rechaza antes de ejecutar. Un destino, columna o mapeo inválido
+responde `400 VALIDATION_FAILED` con `reason` `AUTOMATION_RECORD_TARGET_INVALID` o
+`AUTOMATION_RECORD_MAPPING_EMPTY`, sin SQL ni identificadores en el mensaje.
+
+### El alcance de tenant
+
+Toda operación del módulo, salvo el barrido de calendario de `SYSTEM`, exige un tenant en el contexto
+y lo usa como único propietario: el `tenantId` del cuerpo se ignora. Workflow, disparador, agente,
+política, run y automatización de registro tienen que ser de ese tenant; el run de agente y la
+aprobación (que no tienen `tenant_id`) lo heredan de su agente y de su workflow run. Un recurso ajeno
+responde igual que uno inexistente: `404`, mismo mensaje y mismo `reason`, sin `details`.
 
 ### La gramática que el modelo no define
 
@@ -184,7 +196,7 @@ Ninguna ruta es pública.
 Los servicios no aplican el alcance de tenant de la identidad a la cadena de
 workflows, runs y automatizaciones de registro.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el agente al publicar o adjuntar guardrail, sobre el `agent_run` al registrar paso
 o decidir, sobre la aprobación al decidirla, sobre el `workflow_run` al pausarlo o cerrarlo, sobre
@@ -197,7 +209,7 @@ registro al ejecutarla.
 aprobación —los dos momentos en que una persona tiene que intervenir—. No se loguean
 `payloadJson`, `thought_text` ni el contenido de la memoria.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/automation --runInBand --silent` — 6 suites y 133 pruebas
 aprobadas durante la revisión. No cubren dos tenants ni los errores HTTP

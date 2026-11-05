@@ -17,6 +17,7 @@ function build() {
   const offeringsRepo = {
     findLiveHoldsOfProfessional: mockFn(async () => []),
     findLiveServiceSlotsOfProfessional: mockFn(async () => []),
+    findLiveFlexibleSlotsOfProfessional: mockFn(async () => []),
     findRetractedSlotsOfProfessional: mockFn(async () => []),
     findOfferingById: mockFn(),
     findCatalogItem: mockFn(),
@@ -209,6 +210,32 @@ describe('SchedulingServiceAgendaService', () => {
         // 12:00–12:45 con 5 de preparación antes y 10 de limpieza después.
         { startAt: monday(11, 55), endAt: monday(12, 55) },
       ]);
+    });
+
+    it('P36 · cuenta los turnos flexibles vivos —también los solicitados— como ocupado', async () => {
+      const d = build();
+      d.offeringsRepo.findLiveFlexibleSlotsOfProfessional.mockResolvedValue([
+        { slotId: 'f', startAt: monday(15), endAt: monday(15, 30) },
+      ]);
+
+      const busy = await d.service.practitionerBusyTime(
+        d.em,
+        PRACTITIONER_ACTOR,
+        monday(0),
+        monday(23),
+        monday(7),
+      );
+
+      expect(busy).toEqual([{ startAt: monday(15), endAt: monday(15, 30) }]);
+      const [, practitioner, , , ids, now] =
+        d.offeringsRepo.findLiveFlexibleSlotsOfProfessional.mock.calls[0];
+      expect(practitioner).toBe(PRACTITIONER_ACTOR);
+      expect(ids).toEqual({
+        bookedStatusConceptId: CONCEPTS.SLOT_BOOKED,
+        heldStatusConceptId: CONCEPTS.SLOT_HELD,
+        activeHoldStatusConceptId: CONCEPTS.HOLD_ACTIVE,
+      });
+      expect(now).toEqual(monday(7));
     });
 
     it('mira un margen alrededor del rango: un colchón puede llegar desde afuera', async () => {

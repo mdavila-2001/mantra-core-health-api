@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AddDocumentVersionDto,
   CreateRegulatoryDocumentDto,
@@ -52,6 +57,11 @@ export class RegulatoryDocumentsController {
   constructor(private readonly service: RegulatoryDocumentsService) {}
 
   /** UC-17-31. */
+  @Audited({
+    action: 'REGULATORY_DOCUMENT_CREATED',
+    entity: 'regulatory_document',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un documento con su primera versión' })
@@ -89,6 +99,11 @@ export class RegulatoryDocumentsController {
   }
 
   /** UC-17-32. */
+  @Audited({
+    action: 'REGULATORY_DOCUMENT_SUPERSEDED',
+    entity: 'regulatory_document',
+    entityId: 'param:documentId',
+  })
   @Post(':documentId/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Sustituir el documento por una versión nueva' })
@@ -102,6 +117,11 @@ export class RegulatoryDocumentsController {
   }
 
   /** Descarga de una versión; queda registrada. */
+  @Audited({
+    action: 'REGULATORY_DOCUMENT_DOWNLOADED',
+    entity: 'regulatory_document_version',
+    entityId: 'param:versionId',
+  })
   @Post(':documentId/versions/:versionId/download')
   @ApiOperation({ summary: 'Registrar la descarga de una versión' })
   download(
@@ -119,6 +139,11 @@ export class RegulatoryDocumentsController {
   }
 
   /** UC-17-33. */
+  @Audited({
+    action: 'REGULATORY_DOCUMENT_INVALIDATED',
+    entity: 'regulatory_document',
+    entityId: 'param:documentId',
+  })
   @Post(':documentId/invalidate')
   @ApiOperation({ summary: 'Invalidar el documento sin borrarlo' })
   invalidate(
@@ -141,6 +166,10 @@ export class RegulatoryDocumentsController {
   }
 
   /** Revisión de vencimientos y alertas (spec 5626). */
+  @Audited({
+    action: 'REGULATORY_DOCUMENT_EXPIRATIONS_REVIEWED',
+    entity: 'regulatory_document',
+  })
   @Post('expirations/review')
   @ApiOperation({
     summary: 'Revisar vencimientos y notificar al personal',

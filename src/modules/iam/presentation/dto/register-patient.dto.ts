@@ -8,6 +8,7 @@ import {
   PHONE_PATTERN,
   PHONE_PATTERN_MESSAGE,
 } from '../../../../common/constants/person-field-limits';
+import { IsStrictEmail } from '../../../../common/validators/strict-email.validator';
 export {
   EMPLOYER_FREE_TEXT_MAX_LENGTH,
   OCCUPATION_FREE_TEXT_MAX_LENGTH,
@@ -19,7 +20,6 @@ export {
 import {
   ArrayMaxSize,
   IsArray,
-  IsEmail,
   IsIn,
   IsISO8601,
   IsNumber,
@@ -325,7 +325,7 @@ export class RegisterPatientDto {
    * obligatoria porque es con lo que se entra.
    */
   @ApiProperty({ format: 'email', maxLength: 320 })
-  @IsEmail()
+  @IsStrictEmail()
   @MaxLength(320)
   email!: string;
 
@@ -525,6 +525,19 @@ export class RegisterPatientDto {
   homeAddressLines?: string;
 
   /**
+   * Distrito o zona del domicilio, tal como lo da el mapa (ADR-0028). Va en
+   * `common.addresses.district_text`; antes viajaba pegado a la calle.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del domicilio',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  homeDistrict?: string;
+
+  /**
    * Latitud del domicilio.
    *
    * El par de coordenadas es **ambos o ninguno**: el `ValidateIf` mira las dos
@@ -576,6 +589,16 @@ export class RegisterPatientDto {
   @MinLength(1)
   @MaxLength(500)
   workAddressLines?: string;
+
+  /** Distrito o zona del trabajo. Ver {@link RegisterPatientDto.homeDistrict}. */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del lugar de trabajo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  workDistrict?: string;
 
   /** Latitud del trabajo. Mismo par ambos-o-ninguno que el domicilio. */
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })

@@ -19,7 +19,8 @@
 //   … --skip-regions                                                 (solo fuentes propias)
 // =============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -40,9 +41,15 @@ import { aimlRows } from './lib/own-sources.mjs';
 import {
   CACHE_DIR,
   MIRRORS,
+  OFFICIAL,
   mirrorFilePath,
   mirrorVersion,
+  officialFilePath,
 } from './lib/sources.mjs';
+import {
+  comparePcdCopies,
+  parseOpenfdaClassification,
+} from './lib/openfda-classification.mjs';
 import { Taxonomy } from './lib/taxonomy.mjs';
 import { mentionIdOf, resolveManufacturers } from './lib/manufacturers.mjs';
 import { consolidate, labelKey } from './lib/consolidate.mjs';
@@ -88,14 +95,15 @@ const retrievedAtOfCache = () => {
 const retrievedAt = retrievedAtOfCache().replace(/\.\d+Z$/, 'Z');
 
 // --- 1. Taxonomía FDA --------------------------------------------------------
+// Primaria: la exportación oficial de openFDA si está en el caché con el hash
+// fijado; si no, la copia literal en git. La otra copia completa los códigos
+// que falten y se compara campo a campo (coverage.json → fdaCopies).
 const taxonomy = new Taxonomy();
 const pcdFile = MIRRORS['ej86-fda-ai'].files.foiclass;
-const pcdRows = parsePcd(
+const mirrorPcdRows = parsePcd(
   readFileSync(mirrorFilePath('ej86-fda-ai', 'foiclass'), 'utf8'),
 );
-const panelParts = derivePanelParts(pcdRows);
-const ivdPanels = ivdPanelsFrom(panelParts);
-const pcdProvenance = {
+const mirrorPcdProvenance = {
   source: pcdFile.source,
   sourceUrl: pcdFile.officialUrl,
   sourceVersion: mirrorVersion('ej86-fda-ai'),
@@ -107,10 +115,84 @@ const pcdProvenance = {
     sha256: pcdFile.sha256,
   },
 };
+const openfda = OFFICIAL['openfda-device-classification'];
+const openfdaPath = officialFilePath('openfda-device-classification');
+const openfdaText =
+  existsSync(openfdaPath) &&
+  createHash('sha256').update(readFileSync(openfdaPath)).digest('hex') ===
+    openfda.sha256
+    ? readFileSync(openfdaPath, 'utf8')
+    : null;
+const openfdaRows = openfdaText
+  ? parseOpenfdaClassification(openfdaText).rows
+  : null;
+const pcdRows = openfdaRows ?? mirrorPcdRows;
+const panelParts = derivePanelParts(pcdRows);
+const ivdPanels = ivdPanelsFrom(panelParts);
+const pcdProvenance = openfdaRows
+  ? {
+      source: openfda.source,
+      sourceUrl: openfda.officialUrl,
+      sourceVersion: `openFDA device/classification export ${openfda.exportDate}`,
+      retrievedAt,
+      download: {
+        url: openfda.url,
+        downloadSha256: openfda.downloadSha256,
+        path: openfda.path,
+        sha256: openfda.sha256,
+      },
+    }
+  : mirrorPcdProvenance;
 for (const r of pcdRows) taxonomy.addNode(pcdNode(r, pcdProvenance, ivdPanels));
+let pcdMirrorAdded = 0;
+if (openfdaRows)
+  for (const r of mirrorPcdRows) {
+    if (taxonomy.nodes.has(`fda-product-code|${r.PRODUCTCODE.trim()}`))
+      continue;
+    taxonomy.addNode(pcdNode(r, mirrorPcdProvenance, ivdPanels));
+    pcdMirrorAdded++;
+  }
+const fdaCheck = openfdaRows
+  ? {
+      a: `openFDA ${openfda.exportDate}`,
+      b: mirrorVersion('ej86-fda-ai'),
+      ...comparePcdCopies(openfdaRows, mirrorPcdRows),
+    }
+  : null;
 console.log(
-  `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
+  `taxonomía FDA: ${pcdRows.length} product codes (${openfdaRows ? `openFDA ${openfda.exportDate}; copia en git: +${pcdMirrorAdded}, difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}` : 'copia en git; openFDA no está en el caché'}); paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
 );
+
+// --- 1a. Suplemento del PCD: solo los product codes que la copia literal no
+// tiene, del foiclass más nuevo de bjoleary/fdadata (ver
+// extract-pcd-supplement.py y data/fda-pcd-supplement.json).
+const pcdSupplementPath = join(HERE, 'data', 'fda-pcd-supplement.json');
+let pcdSupplementAdded = 0;
+if (existsSync(pcdSupplementPath)) {
+  const sup = JSON.parse(readFileSync(pcdSupplementPath, 'utf8'));
+  for (const r of sup.rows) {
+    if (taxonomy.nodes.has(`fda-product-code|${r.PRODUCTCODE}`)) continue;
+    const node = pcdNode(
+      r,
+      {
+        source: sup.source,
+        sourceUrl: sup.officialUrl,
+        sourceVersion: `git:bjoleary/fdadata@${sup.via.commit.slice(0, 12)} (${sup.via.commitDate.slice(0, 10)})`,
+        retrievedAt,
+        mirror: sup.via,
+        transformation: sup.transformation,
+      },
+      ivdPanels,
+    );
+    node.attributes.reviewPanelName = r.reviewPanelName;
+    node.attributes.submissionType = r.submissionType;
+    taxonomy.addNode(node);
+    pcdSupplementAdded++;
+  }
+  console.log(
+    `suplemento del PCD (bjoleary/fdadata): ${pcdSupplementAdded} product codes que no están en ${openfdaRows ? 'openFDA ni en la copia en git' : 'la copia literal'}`,
+  );
+}
 
 // --- 1b. EMDN completa (copia fijada + verificación con una segunda copia) ---
 const emdnFile = MIRRORS['batirmedical-emdn'].files.emdn;
@@ -151,8 +233,76 @@ if (emdn.problems.length)
   throw new Error(
     `EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`,
   );
+// EMDN oficial más nueva (Excel de la Comisión, en el caché con el hash
+// fijado): es la principal. De la V2 solo quedan los códigos que la versión
+// nueva ya no trae, decididos con el árbol de la V2 y marcados.
+const emdnOfficial = OFFICIAL['ec-emdn-2026'];
+const emdnOfficialPath = officialFilePath('ec-emdn-2026');
+const emdnOfficialRows =
+  existsSync(emdnOfficialPath) &&
+  createHash('sha256').update(readFileSync(emdnOfficialPath)).digest('hex') ===
+    emdnOfficial.sha256
+    ? parseEmdn(readFileSync(emdnOfficialPath, 'utf8'))
+    : null;
+let emdnVersions = null;
+if (emdnOfficialRows) {
+  const latest = emdnNodes(emdnOfficialRows, {
+    source: emdnOfficial.source,
+    sourceUrl: emdnOfficial.officialUrl,
+    sourceVersion: `EMDN ${emdnOfficial.exportDate} · ${emdnOfficial.index}`,
+    retrievedAt,
+    download: {
+      url: emdnOfficial.url,
+      downloadSha256: emdnOfficial.downloadSha256,
+      path: emdnOfficial.path,
+      sha256: emdnOfficial.sha256,
+    },
+    license: emdnOfficial.license,
+  });
+  if (latest.problems.length)
+    throw new Error(
+      `EMDN ${emdnOfficial.exportDate}: estructura inconsistente: ${latest.problems.slice(0, 5).join('; ')}`,
+    );
+  const cmp = compareEmdnCopies(emdnOfficialRows, emdnRows);
+  const v2ByCode = new Map(emdn.nodes.map((n) => [n.code, n]));
+  const decisionChanged = latest.nodes
+    .filter(
+      (n) =>
+        v2ByCode.has(n.code) &&
+        v2ByCode.get(n.code).diagnostic !== n.diagnostic,
+    )
+    .map((n) => ({
+      code: n.code,
+      v2: v2ByCode.get(n.code).diagnostic,
+      latest: n.diagnostic,
+    }));
+  emdnVersions = {
+    latest: emdnOfficial.exportDate,
+    previous: 'V2',
+    rowsLatest: cmp.rowsA,
+    rowsPrevious: cmp.rowsB,
+    onlyLatest: cmp.onlyA,
+    onlyPrevious: cmp.onlyB,
+    termChanged: cmp.differ,
+    decisionChanged,
+  };
+  const onlyPrevious = new Set(cmp.onlyB);
+  emdn.nodes = [
+    ...latest.nodes,
+    ...emdn.nodes
+      .filter((n) => onlyPrevious.has(n.code))
+      .map((n) => ({
+        ...n,
+        attributes: {
+          ...n.attributes,
+          notInVersion: emdnOfficial.exportDate,
+        },
+      })),
+  ];
+}
 for (const n of emdn.nodes) {
-  if (fromB.has(n.code))
+  // Solo los nodos de la V2 (los de la versión oficial no traen `mirror`).
+  if (fromB.has(n.code) && n.provenance.mirror)
     n.provenance = {
       ...n.provenance,
       mirror: {
@@ -165,7 +315,7 @@ for (const n of emdn.nodes) {
   taxonomy.addNode(n);
 }
 console.log(
-  `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
+  `taxonomía EMDN: ${emdn.nodes.length} términos (V2: copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})${emdnVersions ? `; ${emdnVersions.latest} oficial ${emdnVersions.rowsLatest}: nuevos ${emdnVersions.onlyLatest.length}, solo en V2 ${emdnVersions.onlyPrevious.length}, término cambiado ${emdnVersions.termChanged.length}, decisión cambiada ${emdnVersions.decisionChanged.length}` : '; EMDN oficial no está en el caché'}`,
 );
 
 // --- 2. Fuentes de filas ------------------------------------------------------
@@ -458,12 +608,19 @@ const coverage = coverageReport({
   resolution,
   industry: industry.stats,
   emdnCheck,
+  emdnVersions,
+  fdaCheck,
   actorStats,
   sourceStats: [...sourceStats.values()],
   regionStatus,
   panelParts,
   ivdPanels: [...ivdPanels].sort(),
   mirrors: MIRRORS,
+  official: Object.fromEntries(
+    Object.entries(OFFICIAL).filter(([k]) =>
+      k === 'ec-emdn-2026' ? emdnOfficialRows : openfdaRows,
+    ),
+  ),
 });
 writeFileSync(
   join(OUT, 'coverage.json'),

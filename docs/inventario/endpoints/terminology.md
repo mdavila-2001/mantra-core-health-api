@@ -3,51 +3,729 @@
 # Endpoints del módulo `terminology`
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
-- **Operaciones:** 25 (25 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 11 · BAJO 12
-- **Tablas distintas que tocan:** 15
+- **Operaciones:** 31 (31 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 15 · BAJO 14
+- **Tablas distintas que tocan:** 16
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/terminology.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/terminology/code-systems` | Sistemas de códigos registrados | BAJO | 1 | SECURITY_ADMIN |
-| 2 | POST | `/terminology/code-systems` | UC-03-01: crea un sistema de códigos y su fuente | MEDIO | 4 | SECURITY_ADMIN |
-| 3 | GET | `/terminology/code-systems/{id}/versions` | Versiones de un sistema de códigos | BAJO | 1 | SECURITY_ADMIN |
-| 4 | POST | `/terminology/code-systems/{id}/versions` | UC-03-02: crea una versión (borrador) de un sistema de códigos | MEDIO | 3 | SECURITY_ADMIN |
-| 5 | GET | `/terminology/CodeSystem/$lookup` | UC-03-11: resuelve un concepto por sistema y código | BAJO | 5 | sesión (sin roles) |
-| 6 | POST | `/terminology/ConceptMap/$translate` | UC-03-09: cura o consulta un mapeo entre conceptos | ALTO | 4 | sesión (sin roles) |
-| 7 | GET | `/terminology/concepts` | UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta | BAJO | 7 | sesión (sin roles) |
-| 8 | GET | `/terminology/concepts/{conceptId}` | Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas | BAJO | 7 | sesión (sin roles) |
-| 9 | POST | `/terminology/concepts/{conceptId}/$deprecate` | UC-03-10: retira el concepto y lo excluye de las expansiones | MEDIO | 4 | SECURITY_ADMIN |
-| 10 | POST | `/terminology/concepts/{conceptId}/designations` | UC-03-05: añade una designación (y opcionalmente propiedades) | MEDIO | 5 | SECURITY_ADMIN |
-| 11 | GET | `/terminology/concepts/{conceptId}/glossary-article` | Lee el artículo enciclopédico de un término del glosario | BAJO | 1 | sesión (sin roles) |
-| 12 | GET | `/terminology/concepts/{conceptId}/glossary-neighborhood` | Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo | BAJO | 7 | sesión (sin roles) |
-| 13 | POST | `/terminology/concepts/{conceptId}/properties` | UC-03-05: alta o actualización de propiedades del concepto | MEDIO | 4 | SECURITY_ADMIN |
-| 14 | POST | `/terminology/concepts/{conceptId}/relationships` | UC-03-06: crea una relación dirigida entre conceptos | MEDIO | 3 | SECURITY_ADMIN |
-| 15 | GET | `/terminology/concepts/glossary-graph` | Lee el grafo de términos publicados del glosario médico | BAJO | 7 | sesión (sin roles) |
-| 16 | GET | `/terminology/import-template` | UC-03-03: descarga la plantilla de importación de un perfil | BAJO | 0 | SECURITY_ADMIN |
-| 17 | PUT | `/terminology/tenants/{tenantId}/catalog-policies` | UC-03-12: define la política de catálogo del tenant | MEDIO | 8 | SECURITY_ADMIN |
-| 18 | GET | `/terminology/value-sets` | Listar conjuntos de valores por código interno o texto | BAJO | 3 | pública |
-| 19 | POST | `/terminology/value-sets` | UC-03-07: crea un conjunto de valores con versión y reglas | MEDIO | 4 | SECURITY_ADMIN |
-| 20 | GET | `/terminology/value-sets/{id}/$expand` | UC-03-08: lee la expansión vigente de un conjunto de valores | BAJO | 5 | pública |
-| 21 | GET | `/terminology/value-sets/$glossary-facets` | Facetas del glosario: conteo por categoría y etiqueta | BAJO | 5 | pública |
-| 22 | POST | `/terminology/ValueSet/{id}/$expand` | UC-03-08: materializa los miembros de la expansión | ALTO | 10 | SECURITY_ADMIN |
-| 23 | POST | `/terminology/versions/{versionId}/import` | UC-03-03: importa conceptos en una versión en borrador | MEDIO | 3 | SECURITY_ADMIN |
-| 24 | POST | `/terminology/versions/{versionId}/import-file` | UC-03-03: importa filas desde un archivo, o las valida sin escribir | MEDIO | 7 | SECURITY_ADMIN |
-| 25 | POST | `/terminology/versions/{versionId}/publish` | UC-03-04: publica una versión (borrador → activa) | MEDIO | 4 | SECURITY_ADMIN |
+| 1 | GET | `/admin/catalogs/glossary` | Listar términos del glosario por tipo de usuario | BAJO | 3 | SECURITY_ADMIN, SUPERADMIN |
+| 2 | POST | `/admin/catalogs/glossary` | Crear un término (idempotente por slug) | MEDIO | 10 | SUPERADMIN |
+| 3 | GET | `/admin/catalogs/glossary/{conceptId}` | Ver un término con su versión | BAJO | 3 | SECURITY_ADMIN, SUPERADMIN |
+| 4 | PATCH | `/admin/catalogs/glossary/{conceptId}` | Editar un término con precondición de versión | MEDIO | 6 | SUPERADMIN |
+| 5 | POST | `/admin/catalogs/glossary/{conceptId}/deactivate` | Retirar un término (no se borra) | MEDIO | 6 | SUPERADMIN |
+| 6 | POST | `/admin/catalogs/glossary/{conceptId}/reactivate` | Reactivar un término retirado | MEDIO | 6 | SUPERADMIN |
+| 7 | GET | `/terminology/code-systems` | Sistemas de códigos registrados | BAJO | 1 | SECURITY_ADMIN |
+| 8 | POST | `/terminology/code-systems` | UC-03-01: crea un sistema de códigos y su fuente | MEDIO | 4 | SECURITY_ADMIN |
+| 9 | GET | `/terminology/code-systems/{id}/versions` | Versiones de un sistema de códigos | BAJO | 1 | SECURITY_ADMIN |
+| 10 | POST | `/terminology/code-systems/{id}/versions` | UC-03-02: crea una versión (borrador) de un sistema de códigos | MEDIO | 3 | SECURITY_ADMIN |
+| 11 | GET | `/terminology/CodeSystem/$lookup` | UC-03-11: resuelve un concepto por sistema y código | BAJO | 5 | sesión (sin roles) |
+| 12 | POST | `/terminology/ConceptMap/$translate` | UC-03-09: cura o consulta un mapeo entre conceptos | ALTO | 4 | sesión (sin roles) |
+| 13 | GET | `/terminology/concepts` | UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta | BAJO | 7 | sesión (sin roles) |
+| 14 | GET | `/terminology/concepts/{conceptId}` | Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas | BAJO | 7 | sesión (sin roles) |
+| 15 | POST | `/terminology/concepts/{conceptId}/$deprecate` | UC-03-10: retira el concepto y lo excluye de las expansiones | MEDIO | 4 | SECURITY_ADMIN |
+| 16 | POST | `/terminology/concepts/{conceptId}/designations` | UC-03-05: añade una designación (y opcionalmente propiedades) | MEDIO | 5 | SECURITY_ADMIN |
+| 17 | GET | `/terminology/concepts/{conceptId}/glossary-article` | Lee el artículo enciclopédico de un término del glosario | BAJO | 1 | sesión (sin roles) |
+| 18 | GET | `/terminology/concepts/{conceptId}/glossary-neighborhood` | Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo | BAJO | 8 | sesión (sin roles) |
+| 19 | POST | `/terminology/concepts/{conceptId}/properties` | UC-03-05: alta o actualización de propiedades del concepto | MEDIO | 4 | SECURITY_ADMIN |
+| 20 | POST | `/terminology/concepts/{conceptId}/relationships` | UC-03-06: crea una relación dirigida entre conceptos | MEDIO | 3 | SECURITY_ADMIN |
+| 21 | GET | `/terminology/concepts/glossary-graph` | Lee el grafo de términos publicados del glosario médico | BAJO | 7 | sesión (sin roles) |
+| 22 | GET | `/terminology/import-template` | UC-03-03: descarga la plantilla de importación de un perfil | BAJO | 0 | SECURITY_ADMIN |
+| 23 | PUT | `/terminology/tenants/{tenantId}/catalog-policies` | UC-03-12: define la política de catálogo del tenant | MEDIO | 8 | SECURITY_ADMIN |
+| 24 | GET | `/terminology/value-sets` | Listar conjuntos de valores por código interno o texto | BAJO | 3 | pública |
+| 25 | POST | `/terminology/value-sets` | UC-03-07: crea un conjunto de valores con versión y reglas | MEDIO | 4 | SECURITY_ADMIN |
+| 26 | GET | `/terminology/value-sets/{id}/$expand` | UC-03-08: lee la expansión vigente de un conjunto de valores | BAJO | 6 | pública |
+| 27 | GET | `/terminology/value-sets/$glossary-facets` | Facetas del glosario: conteo por categoría y etiqueta | BAJO | 5 | pública |
+| 28 | POST | `/terminology/ValueSet/{id}/$expand` | UC-03-08: materializa los miembros de la expansión | ALTO | 10 | SECURITY_ADMIN |
+| 29 | POST | `/terminology/versions/{versionId}/import` | UC-03-03: importa conceptos en una versión en borrador | MEDIO | 3 | SECURITY_ADMIN |
+| 30 | POST | `/terminology/versions/{versionId}/import-file` | UC-03-03: importa filas desde un archivo, o las valida sin escribir | MEDIO | 7 | SECURITY_ADMIN |
+| 31 | POST | `/terminology/versions/{versionId}/publish` | UC-03-04: publica una versión (borrador → activa) | MEDIO | 4 | SECURITY_ADMIN |
 
 ---
 
-## 1. GET /terminology/code-systems
+## 1. GET /admin/catalogs/glossary
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar términos del glosario por tipo de usuario
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.list` — `src/modules/terminology/controllers/admin-glossary.controller.ts:85`
+
+### Qué es y para qué sirve (negocio)
+
+Listar términos del glosario por tipo de usuario. Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/catalogs/glossary` la atiende `AdminGlossaryController.list` (src/modules/terminology/controllers/admin-glossary.controller.ts:85). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN. Delega en `AdminGlossaryService.list`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:85` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | audience (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.list → AdminGlossaryService.list | `src/modules/terminology/services/admin-glossary.service.ts:120` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.list → AdminGlossaryService.list → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.list → AdminGlossaryService.list → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `audience` | query | Sí | `string` | — |
+| `state` | query | No | `string` | — |
+| `q` | query | No | `string` | — |
+| `cursor` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdminGlossaryPageDto>` · DTO `AdminGlossaryPageDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<AdminGlossaryTermDto>` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:197` |
+| `items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `items[].slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `items[].display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `items[].nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `items[].state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `items[].audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `items[].text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `items[].text.es` | `string` | Sí | — | — | — | sin fuente |
+| `items[].text.en` | `string` | No | — | — | — | sin fuente |
+| `items[].rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `items[].updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+| `count` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:200` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:203` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:206` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /admin/catalogs/glossary
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear un término (idempotente por slug)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.create` — `src/modules/terminology/controllers/admin-glossary.controller.ts:106`
+
+### Qué es y para qué sirve (negocio)
+
+Crear un término (idempotente por slug). Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/glossary` la atiende `AdminGlossaryController.create` (src/modules/terminology/controllers/admin-glossary.controller.ts:106). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `AdminCreateGlossaryTermDto` (7 campos, 6 obligatorios). Delega en `AdminGlossaryService.create`. Crea filas en terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.value_set_members. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create | `src/modules/terminology/services/admin-glossary.service.ts:191` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
+| `terminology.concept_designations` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → ConceptDesignationsRepository.createDesignation | `src/modules/terminology/repositories/concept-designations.repository.ts:73` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+| `terminology.concept_properties` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → ConceptDesignationsRepository.createProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:92` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
+| `terminology.value_set_members` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → ValueSetsRepository.createMember | `src/modules/terminology/repositories/value-sets.repository.ts:576` |
+| `terminology.value_set_members` | LEE | LEE | POR_SQL | AdminGlossaryController.create → AdminGlossaryService.create → ValueSetsRepository.countMembersByVersionIds | `src/modules/terminology/repositories/value-sets.repository.ts:222` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | AdminGlossaryController.create → AdminGlossaryService.create → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
+
+### Cuerpo — DTO `AdminCreateGlossaryTermDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `slug` | `string` | Sí | longitud máxima 80; patrón runtime /^[a-z0-9]+(?:-[a-z0-9]+)*$/ | `@IsString()` `@MaxLength(80)` `@Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'El slug es kebab-case en minúsculas, sin tildes ni espacios', })` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:89` |
+| `display` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre canónico (`display` del concepto) | `src/modules/terminology/dto/admin-glossary.dto.ts:98` |
+| `nameEs` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Designación preferida en español | `src/modules/terminology/dto/admin-glossary.dto.ts:107` |
+| `audience` | `string` | Sí | valores: patient, professional | `@IsIn(GLOSSARY_ADMIN_AUDIENCES)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:111` |
+| `text` | `AdminGlossaryTextDto` | Sí | — | `@ValidateNested()` `@Type(() => AdminGlossaryTextDto)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:116` |
+| `text.es` | `string` | Sí | longitud mínima 1; longitud máxima 4000 | `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:33` |
+| `text.en` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:39` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "slug": "hipertension-arterial",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo"
+  }
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "slug": "hipertension-arterial",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  }
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminGlossaryTermDto>` · DTO `AdminGlossaryTermDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `text.es` | `string` | Sí | — | — | — | sin fuente |
+| `text.en` | `string` | No | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un término del glosario con ese slug |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El glosario no está inicializado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. GET /admin/catalogs/glossary/{conceptId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Ver un término con su versión
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.get` — `src/modules/terminology/controllers/admin-glossary.controller.ts:95`
+
+### Qué es y para qué sirve (negocio)
+
+Ver un término con su versión. Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/catalogs/glossary/{conceptId}` la atiende `AdminGlossaryController.get` (src/modules/terminology/controllers/admin-glossary.controller.ts:95). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN. Delega en `AdminGlossaryService.get`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:95` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | audience (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/admin-glossary.controller.ts:95` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.get → AdminGlossaryService.get → AdminGlossaryService.loadTerm → CatalogConceptsRepository.findByIdForUpdate | `src/modules/terminology/repositories/catalog-concepts.repository.ts:123` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.get → AdminGlossaryService.get → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.get → AdminGlossaryService.get → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conceptId` | path | Sí | `string` | — |
+| `audience` | query | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdminGlossaryTermDto>` · DTO `AdminGlossaryTermDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `text.es` | `string` | Sí | — | — | — | sin fuente |
+| `text.en` | `string` | No | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Término no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. PATCH /admin/catalogs/glossary/{conceptId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar un término con precondición de versión
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.update` — `src/modules/terminology/controllers/admin-glossary.controller.ts:125`
+
+### Qué es y para qué sirve (negocio)
+
+Editar un término con precondición de versión. Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /admin/catalogs/glossary/{conceptId}` la atiende `AdminGlossaryController.update` (src/modules/terminology/controllers/admin-glossary.controller.ts:125). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `AdminUpdateGlossaryTermDto` (6 campos, 2 obligatorios). Delega en `AdminGlossaryService.update`. Crea filas en terminology.concept_designations, terminology.concept_properties. Actualiza terminology.concept_properties. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:125` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/admin-glossary.controller.ts:125` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.update → AdminGlossaryService.update → AdminGlossaryService.loadTerm → CatalogConceptsRepository.findByIdForUpdate | `src/modules/terminology/repositories/catalog-concepts.repository.ts:123` |
+| `terminology.concept_designations` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.update → AdminGlossaryService.update → ConceptDesignationsRepository.createDesignation | `src/modules/terminology/repositories/concept-designations.repository.ts:73` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.update → AdminGlossaryService.update → ConceptDesignationsRepository.findByLanguageForUpdate | `src/modules/terminology/repositories/concept-designations.repository.ts:115` |
+| `terminology.concept_properties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminGlossaryController.update → AdminGlossaryService.update | `src/modules/terminology/services/admin-glossary.service.ts:273` |
+| `terminology.concept_properties` | ESCRIBE | CREA | DIRECTA | AdminGlossaryController.update → AdminGlossaryService.update → ConceptDesignationsRepository.createProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:92` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.update → AdminGlossaryService.update → ConceptDesignationsRepository.findProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:139` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conceptId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminUpdateGlossaryTermDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:124` |
+| `audience` | `string` | Sí | valores: patient, professional | `@IsIn(GLOSSARY_ADMIN_AUDIENCES)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:128` |
+| `text` | `AdminGlossaryTextDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => AdminGlossaryTextDto)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:134` |
+| `text.es` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:33` |
+| `text.en` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:39` |
+| `nameEs` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:141` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "nameEs": "Nombre de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminGlossaryTermDto>` · DTO `AdminGlossaryTermDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `text.es` | `string` | Sí | — | — | — | sin fuente |
+| `text.en` | `string` | No | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: No hay nada que cambiar: envíe text o nameEs |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Término no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /admin/catalogs/glossary/{conceptId}/deactivate
+
+- **Origen:** CONTRATO
+- **Nombre:** Retirar un término (no se borra)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.deactivate` — `src/modules/terminology/controllers/admin-glossary.controller.ts:143`
+
+### Qué es y para qué sirve (negocio)
+
+Retirar un término (no se borra). Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/glossary/{conceptId}/deactivate` la atiende `AdminGlossaryController.deactivate` (src/modules/terminology/controllers/admin-glossary.controller.ts:143). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `AdminGlossaryStateChangeDto` (2 campos, 2 obligatorios). Delega en `AdminGlossaryService.setActive`. Actualiza terminology.catalog_concepts, terminology.value_set_members. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.value_set_members.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/admin-glossary.controller.ts:143` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminGlossaryController.deactivate → AdminGlossaryService.setActive | `src/modules/terminology/services/admin-glossary.service.ts:335` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.deactivate → AdminGlossaryService.setActive → AdminGlossaryService.loadTerm → CatalogConceptsRepository.findByIdForUpdate | `src/modules/terminology/repositories/catalog-concepts.repository.ts:123` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.deactivate → AdminGlossaryService.setActive → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.deactivate → AdminGlossaryService.setActive → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
+| `terminology.value_set_members` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminGlossaryController.deactivate → AdminGlossaryService.setActive | `src/modules/terminology/services/admin-glossary.service.ts:343` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | AdminGlossaryController.deactivate → AdminGlossaryService.setActive → ValueSetsRepository.findMembersByConceptForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:598` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conceptId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminGlossaryStateChangeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:149` |
+| `audience` | `string` | Sí | valores: patient, professional | `@IsIn(GLOSSARY_ADMIN_AUDIENCES)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:154` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminGlossaryTermDto>` · DTO `AdminGlossaryTermDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `text.es` | `string` | Sí | — | — | — | sin fuente |
+| `text.en` | `string` | No | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Término no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. POST /admin/catalogs/glossary/{conceptId}/reactivate
+
+- **Origen:** CONTRATO
+- **Nombre:** Reactivar un término retirado
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminGlossaryController.reactivate` — `src/modules/terminology/controllers/admin-glossary.controller.ts:167`
+
+### Qué es y para qué sirve (negocio)
+
+Reactivar un término retirado. Dentro del módulo (descripción del modelo, en inglés): «A governed engine for every coded value the platform uses (diagnoses, statuses, units, roles...) based on international standards (SNOMED, LOINC, ICD, ATC, UCUM) plus local catalogs.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_03_terminology.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/glossary/{conceptId}/reactivate` la atiende `AdminGlossaryController.reactivate` (src/modules/terminology/controllers/admin-glossary.controller.ts:167). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `AdminGlossaryStateChangeDto` (2 campos, 2 obligatorios). Delega en `AdminGlossaryService.setActive`. Actualiza terminology.catalog_concepts, terminology.value_set_members. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.value_set_members.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPERADMIN | `src/modules/terminology/controllers/admin-glossary.controller.ts:167` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/admin-glossary.controller.ts:167` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminGlossaryController.reactivate → AdminGlossaryService.setActive | `src/modules/terminology/services/admin-glossary.service.ts:335` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminGlossaryController.reactivate → AdminGlossaryService.setActive → AdminGlossaryService.loadTerm → CatalogConceptsRepository.findByIdForUpdate | `src/modules/terminology/repositories/catalog-concepts.repository.ts:123` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | AdminGlossaryController.reactivate → AdminGlossaryService.setActive → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | AdminGlossaryController.reactivate → AdminGlossaryService.setActive → AdminGlossaryService.toTerms → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
+| `terminology.value_set_members` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminGlossaryController.reactivate → AdminGlossaryService.setActive | `src/modules/terminology/services/admin-glossary.service.ts:343` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | AdminGlossaryController.reactivate → AdminGlossaryService.setActive → ValueSetsRepository.findMembersByConceptForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:598` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conceptId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminGlossaryStateChangeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:149` |
+| `audience` | `string` | Sí | valores: patient, professional | `@IsIn(GLOSSARY_ADMIN_AUDIENCES)` | — | `src/modules/terminology/dto/admin-glossary.dto.ts:154` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminGlossaryTermDto>` · DTO `AdminGlossaryTermDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:160` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:163` |
+| `code` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:166` |
+| `display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:169` |
+| `nameEs` | `string` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:172` |
+| `state` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:175` |
+| `audience` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `src/modules/terminology/dto/admin-glossary.dto.ts:178` |
+| `text` | `object` | Sí | admite null | — | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `src/modules/terminology/dto/admin-glossary.dto.ts:182` |
+| `text.es` | `string` | Sí | — | — | — | sin fuente |
+| `text.en` | `string` | No | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:185` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:188` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/terminology/dto/admin-glossary.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Término no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Terminology module — etapa `ctrl:AdminGlossaryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /terminology/code-systems
 
 - **Origen:** CONTRATO
 - **Nombre:** Sistemas de códigos registrados
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyCodeSystemsController.listCodeSystems` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:51`
+- **Implementación:** `TerminologyCodeSystemsController.listCodeSystems` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:56`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -57,16 +735,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/code-systems` la atiende `TerminologyCodeSystemsController.listCodeSystems` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemsReadService.listCodeSystems`. Lee terminology.code_systems.
+`GET /terminology/code-systems` la atiende `TerminologyCodeSystemsController.listCodeSystems` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemsReadService.listCodeSystems`. Lee terminology.code_systems.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:56` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -111,14 +789,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 2. POST /terminology/code-systems
+## 8. POST /terminology/code-systems
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-01: crea un sistema de códigos y su fuente
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyCodeSystemsController.createCodeSystem` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:83`
+- **Implementación:** `TerminologyCodeSystemsController.createCodeSystem` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -128,18 +806,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/code-systems` la atiende `TerminologyCodeSystemsController.createCodeSystem` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:83). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCodeSystemDto` (5 campos, 5 obligatorios). Delega en `CodeSystemsService.createCodeSystem`. Crea filas en terminology.code_systems, terminology.terminology_sources. Lee terminology.code_systems, terminology.terminology_sources.
+`POST /terminology/code-systems` la atiende `TerminologyCodeSystemsController.createCodeSystem` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCodeSystemDto` (5 campos, 5 obligatorios). Delega en `CodeSystemsService.createCodeSystem`. Crea filas en terminology.code_systems, terminology.terminology_sources. Lee terminology.code_systems, terminology.terminology_sources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -221,14 +899,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 3. GET /terminology/code-systems/{id}/versions
+## 9. GET /terminology/code-systems/{id}/versions
 
 - **Origen:** CONTRATO
 - **Nombre:** Versiones de un sistema de códigos
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyCodeSystemsController.listVersions` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:67`
+- **Implementación:** `TerminologyCodeSystemsController.listVersions` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -238,17 +916,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/code-systems/{id}/versions` la atiende `TerminologyCodeSystemsController.listVersions` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemsReadService.listVersions`. Lee terminology.code_system_versions.
+`GET /terminology/code-systems/{id}/versions` la atiende `TerminologyCodeSystemsController.listVersions` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:72). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemsReadService.listVersions`. Lee terminology.code_system_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:67` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:72` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -302,14 +980,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 4. POST /terminology/code-systems/{id}/versions
+## 10. POST /terminology/code-systems/{id}/versions
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-02: crea una versión (borrador) de un sistema de códigos
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyCodeSystemsController.createVersion` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:102`
+- **Implementación:** `TerminologyCodeSystemsController.createVersion` — `src/modules/terminology/controllers/terminology-code-systems.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -319,19 +997,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/code-systems/{id}/versions` la atiende `TerminologyCodeSystemsController.createVersion` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCodeSystemVersionDto` (2 campos, 1 obligatorio). Delega en `CodeSystemsService.createVersion`. Crea filas en terminology.code_system_versions. Lee terminology.code_system_versions, terminology.code_systems.
+`POST /terminology/code-systems/{id}/versions` la atiende `TerminologyCodeSystemsController.createVersion` (src/modules/terminology/controllers/terminology-code-systems.controller.ts:112). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCodeSystemVersionDto` (2 campos, 1 obligatorio). Delega en `CodeSystemsService.createVersion`. Crea filas en terminology.code_system_versions. Lee terminology.code_system_versions, terminology.code_systems.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:102` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:112` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-code-systems.controller.ts:112` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -409,14 +1087,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 5. GET /terminology/CodeSystem/$lookup
+## 11. GET /terminology/CodeSystem/$lookup
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-11: resuelve un concepto por sistema y código
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyFhirController.lookup` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:107`
+- **Implementación:** `TerminologyFhirController.lookup` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:122`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -426,18 +1104,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/CodeSystem/$lookup` la atiende `TerminologyFhirController.lookup` (src/modules/terminology/controllers/terminology-fhir.controller.ts:107). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.lookupConcept`. Lee terminology.catalog_concepts, terminology.code_system_versions, terminology.code_systems, terminology.concept_designations, terminology.concept_properties.
+`GET /terminology/CodeSystem/$lookup` la atiende `TerminologyFhirController.lookup` (src/modules/terminology/controllers/terminology-fhir.controller.ts:122). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.lookupConcept`. Lee terminology.catalog_concepts, terminology.code_system_versions, terminology.code_systems, terminology.concept_designations, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-fhir.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-fhir.controller.ts:122` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | system (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | code (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -464,20 +1142,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conceptId` | `string` | Sí | — | — | Id del concepto resuelto | `src/modules/terminology/dto/concept-properties.dto.ts:153` |
-| `code` | `string` | Sí | — | — | Código dentro del sistema | `src/modules/terminology/dto/concept-properties.dto.ts:159` |
-| `display` | `string` | Sí | — | — | Denominación principal | `src/modules/terminology/dto/concept-properties.dto.ts:165` |
-| `definition` | `string` | No | — | — | Definición del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:171` |
-| `selectable` | `boolean` | No | — | — | Si el concepto puede seleccionarse | `src/modules/terminology/dto/concept-properties.dto.ts:177` |
-| `stateConceptId` | `string` | No | — | — | Estado del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:183` |
-| `designations` | `array<LookupDesignationDto>` | Sí | — | — | Designaciones multilingües | `src/modules/terminology/dto/concept-properties.dto.ts:192` |
+| `conceptId` | `string` | Sí | — | — | Id del concepto resuelto | `src/modules/terminology/dto/concept-properties.dto.ts:188` |
+| `code` | `string` | Sí | — | — | Código dentro del sistema | `src/modules/terminology/dto/concept-properties.dto.ts:194` |
+| `display` | `string` | Sí | — | — | Denominación principal | `src/modules/terminology/dto/concept-properties.dto.ts:200` |
+| `definition` | `string` | No | — | — | Definición del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:206` |
+| `selectable` | `boolean` | No | — | — | Si el concepto puede seleccionarse | `src/modules/terminology/dto/concept-properties.dto.ts:212` |
+| `stateConceptId` | `string` | No | — | — | Estado del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:218` |
+| `designations` | `array<LookupDesignationDto>` | Sí | — | — | Designaciones multilingües | `src/modules/terminology/dto/concept-properties.dto.ts:227` |
 | `designations[].value` | `string` | Sí | — | — | Texto de la designación | `src/modules/terminology/dto/concept-properties.dto.ts:109` |
 | `designations[].languageConceptId` | `string` | No | — | — | Idioma (concepto) | `src/modules/terminology/dto/concept-properties.dto.ts:115` |
 | `designations[].preferred` | `boolean` | No | — | — | Si es la designación preferida de su idioma | `src/modules/terminology/dto/concept-properties.dto.ts:123` |
-| `properties` | `array<LookupPropertyDto>` | Sí | — | — | Propiedades del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:201` |
-| `properties[].propertyCode` | `string` | Sí | — | — | Código de la propiedad | `src/modules/terminology/dto/concept-properties.dto.ts:132` |
-| `properties[].dataType` | `string` | No | — | — | Tipo de dato técnico | `src/modules/terminology/dto/concept-properties.dto.ts:138` |
-| `properties[].valueJson` | `object` | Sí | — | — | Valor de la propiedad | `src/modules/terminology/dto/concept-properties.dto.ts:144` |
+| `properties` | `array<LookupPropertyDto>` | Sí | — | — | Propiedades del concepto | `src/modules/terminology/dto/concept-properties.dto.ts:236` |
+| `properties[].propertyCode` | `string` | Sí | — | — | Código de la propiedad | `src/modules/terminology/dto/concept-properties.dto.ts:156` |
+| `properties[].dataType` | `string` | No | — | — | Tipo de dato técnico | `src/modules/terminology/dto/concept-properties.dto.ts:162` |
+| `properties[].valueJson` | `object` | Sí | — | — | Valor de la propiedad | `src/modules/terminology/dto/concept-properties.dto.ts:168` |
+| `properties[].sourceAge` | `PropertySourceAgeDto` | No | — | — | Antigüedad del dato (estado S7). Solo en las secciones de farmacología clínica. known=false: antigüedad desconocida | `src/modules/terminology/dto/concept-properties.dto.ts:179` |
+| `properties[].sourceAge.known` | `boolean` | No | — | — | Falso si la fuente no publica la fecha de la versión (p. ej. fichas de CIMA de autorización centralizada): la antigüedad es desconocida y la fecha que vale es la de consulta | `src/modules/terminology/dto/concept-properties.dto.ts:135` |
+| `properties[].sourceAge.sourceDate` | `string` | No | — | — | Fecha de la versión de la fuente tal como se cargó (ISO, o mm/aaaa en las fichas de CIMA que solo la traen en el texto). Solo si known es verdadero | `src/modules/terminology/dto/concept-properties.dto.ts:141` |
+| `properties[].sourceAge.retrievedAt` | `string` | No | formato date-time | — | Cuándo se consultó la fuente | `src/modules/terminology/dto/concept-properties.dto.ts:147` |
 
 ### Respuestas posibles
 
@@ -504,14 +1186,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 6. POST /terminology/ConceptMap/$translate
+## 12. POST /terminology/ConceptMap/$translate
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-09: cura o consulta un mapeo entre conceptos
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyFhirController.translate` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:87`
+- **Implementación:** `TerminologyFhirController.translate` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -521,25 +1203,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/ConceptMap/$translate` la atiende `TerminologyFhirController.translate` (src/modules/terminology/controllers/terminology-fhir.controller.ts:87). Exige sesión; el controlador no declara roles. Valida el cuerpo como `TranslateConceptDto` (5 campos, 1 obligatorio). Delega en `ConceptMapsService.translate`. Crea filas en terminology.concept_maps. Actualiza terminology.concept_maps. Lee terminology.catalog_concepts, terminology.concept_maps.
+`POST /terminology/ConceptMap/$translate` la atiende `TerminologyFhirController.translate` (src/modules/terminology/controllers/terminology-fhir.controller.ts:97). Exige sesión; el controlador no declara roles. Valida el cuerpo como `TranslateConceptDto` (5 campos, 1 obligatorio). Delega en `ConceptMapsService.translate`. Crea filas en terminology.concept_maps. Actualiza terminology.concept_maps. Lee terminology.catalog_concepts, terminology.concept_maps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-fhir.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-fhir.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.concept_maps` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate | `src/modules/terminology/services/concept-maps.service.ts:156` |
+| `terminology.concept_maps` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate | `src/modules/terminology/services/concept-maps.service.ts:180` |
 | `terminology.concept_maps` | ESCRIBE | CREA | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → ConceptMapsRepository.create | `src/modules/terminology/repositories/concept-maps.repository.ts:100` |
 | `terminology.concept_maps` | LEE | LEE | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → ConceptMapsRepository.findEquivalent | `src/modules/terminology/repositories/concept-maps.repository.ts:59` |
 
@@ -595,7 +1277,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Curar un mapeo exige un rol de terminología |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado; ResourceNotFoundException: El mapeo dejó de existir durante el curado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Curar un mapeo exige declarar la equivalencia; PreconditionFailedException: Un concepto no puede mapearse a sí mismo; PreconditionFailedException: Los conceptos del mapeo tienen que estar activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -614,14 +1296,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 7. GET /terminology/concepts
+## 13. GET /terminology/concepts
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.searchConcepts` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:152`
+- **Implementación:** `TerminologyConceptsController.searchConcepts` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:153`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -631,16 +1313,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/concepts` la atiende `TerminologyConceptsController.searchConcepts` (src/modules/terminology/controllers/terminology-concepts.controller.ts:152). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.searchConcepts`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/concepts` la atiende `TerminologyConceptsController.searchConcepts` (src/modules/terminology/controllers/terminology-concepts.controller.ts:153). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.searchConcepts`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:153` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -649,10 +1331,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → CatalogConceptsRepository.search | `src/modules/terminology/repositories/catalog-concepts.repository.ts:257` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptsService.resolveTexts → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptDesignationsRepository.findPropertyForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:200` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:110` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.searchGlossaryPage → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:132` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ConceptsService.searchGlossaryPage → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.searchConcepts → ConceptsService.searchConcepts → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -721,8 +1403,8 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:108` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:116` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:123` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:580` |
-| INTEGRACION | `test/integration/glossary.int-spec.ts:77` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:589` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:86` |
 | CONTROLADOR | `src/modules/terminology/controllers/terminology-concepts.controller.spec.ts:194` |
 
 ### Flujos
@@ -731,14 +1413,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 8. GET /terminology/concepts/{conceptId}
+## 14. GET /terminology/concepts/{conceptId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.readConcept` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:342`
+- **Implementación:** `TerminologyConceptsController.readConcept` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:344`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -748,17 +1430,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/concepts/{conceptId}` la atiende `TerminologyConceptsController.readConcept` (src/modules/terminology/controllers/terminology-concepts.controller.ts:342). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readConcept`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/concepts/{conceptId}` la atiende `TerminologyConceptsController.readConcept` (src/modules/terminology/controllers/terminology-concepts.controller.ts:344). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readConcept`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:342` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:342` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:344` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:344` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -767,10 +1449,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ConceptDesignationsRepository.findByConcept | `src/modules/terminology/repositories/concept-designations.repository.ts:127` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ConceptDesignationsRepository.findPropertiesByConcept | `src/modules/terminology/repositories/concept-designations.repository.ts:147` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:110` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:367` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:373` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:382` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:132` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:368` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:374` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readConcept → ConceptsService.readConcept → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:383` |
 
 ### Parámetros
 
@@ -849,7 +1531,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:225` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:234` |
 
 ### Flujos
 
@@ -857,14 +1539,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 9. POST /terminology/concepts/{conceptId}/$deprecate
+## 15. POST /terminology/concepts/{conceptId}/$deprecate
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-10: retira el concepto y lo excluye de las expansiones
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.deprecateConcept` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:435`
+- **Implementación:** `TerminologyConceptsController.deprecateConcept` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:457`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -874,28 +1556,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/concepts/{conceptId}/$deprecate` la atiende `TerminologyConceptsController.deprecateConcept` (src/modules/terminology/controllers/terminology-concepts.controller.ts:435). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeprecateConceptDto` (1 campo, 0 obligatorios). Delega en `ConceptsService.deprecateConcept`. Actualiza terminology.catalog_concepts, terminology.value_set_members. Lee terminology.catalog_concepts, terminology.value_set_members.
+`POST /terminology/concepts/{conceptId}/$deprecate` la atiende `TerminologyConceptsController.deprecateConcept` (src/modules/terminology/controllers/terminology-concepts.controller.ts:457). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeprecateConceptDto` (1 campo, 0 obligatorios). Delega en `ConceptsService.deprecateConcept`. Actualiza terminology.catalog_concepts, terminology.value_set_members. Lee terminology.catalog_concepts, terminology.value_set_members.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:435` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:435` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:457` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:457` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.catalog_concepts` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept | `src/modules/terminology/services/concepts.service.ts:521` |
+| `terminology.catalog_concepts` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept | `src/modules/terminology/services/concepts.service.ts:543` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept → CatalogConceptsRepository.findByIdForUpdate | `src/modules/terminology/repositories/catalog-concepts.repository.ts:123` |
-| `terminology.value_set_members` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept | `src/modules/terminology/services/concepts.service.ts:533` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept → ValueSetsRepository.findMembersByConceptForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:597` |
+| `terminology.value_set_members` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept | `src/modules/terminology/services/concepts.service.ts:555` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.deprecateConcept → ConceptsService.deprecateConcept → ValueSetsRepository.findMembersByConceptForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:598` |
 
 ### Parámetros
 
@@ -962,14 +1644,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 10. POST /terminology/concepts/{conceptId}/designations
+## 16. POST /terminology/concepts/{conceptId}/designations
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-05: añade una designación (y opcionalmente propiedades)
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.addDesignation` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:369`
+- **Implementación:** `TerminologyConceptsController.addDesignation` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:376`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -979,26 +1661,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/concepts/{conceptId}/designations` la atiende `TerminologyConceptsController.addDesignation` (src/modules/terminology/controllers/terminology-concepts.controller.ts:369). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDesignationDto` (8 campos, 1 obligatorio). Delega en `ConceptsService.addDesignation`. Crea filas en terminology.concept_designations, terminology.concept_properties. Actualiza terminology.concept_designations. Lee terminology.catalog_concepts, terminology.concept_designations.
+`POST /terminology/concepts/{conceptId}/designations` la atiende `TerminologyConceptsController.addDesignation` (src/modules/terminology/controllers/terminology-concepts.controller.ts:376). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDesignationDto` (8 campos, 1 obligatorio). Delega en `ConceptsService.addDesignation`. Crea filas en terminology.concept_designations, terminology.concept_properties. Actualiza terminology.concept_designations. Lee terminology.catalog_concepts, terminology.concept_designations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:369` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:369` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:376` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:376` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.concept_designations` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation | `src/modules/terminology/services/concepts.service.ts:233` |
+| `terminology.concept_designations` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation | `src/modules/terminology/services/concepts.service.ts:255` |
 | `terminology.concept_designations` | ESCRIBE | CREA | DIRECTA | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation → ConceptDesignationsRepository.createDesignation | `src/modules/terminology/repositories/concept-designations.repository.ts:73` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation → ConceptDesignationsRepository.findByLanguageForUpdate | `src/modules/terminology/repositories/concept-designations.repository.ts:115` |
 | `terminology.concept_properties` | ESCRIBE | CREA | DIRECTA | TerminologyConceptsController.addDesignation → ConceptsService.addDesignation → ConceptDesignationsRepository.createProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:92` |
@@ -1088,14 +1770,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 11. GET /terminology/concepts/{conceptId}/glossary-article
+## 17. GET /terminology/concepts/{conceptId}/glossary-article
 
 - **Origen:** CONTRATO
 - **Nombre:** Lee el artículo enciclopédico de un término del glosario
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.readGlossaryArticle` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:317`
+- **Implementación:** `TerminologyConceptsController.readGlossaryArticle` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:318`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1105,17 +1787,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/concepts/{conceptId}/glossary-article` la atiende `TerminologyConceptsController.readGlossaryArticle` (src/modules/terminology/controllers/terminology-concepts.controller.ts:317). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryArticle`. Lee terminology.concept_properties.
+`GET /terminology/concepts/{conceptId}/glossary-article` la atiende `TerminologyConceptsController.readGlossaryArticle` (src/modules/terminology/controllers/terminology-concepts.controller.ts:318). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryArticle`. Lee terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:317` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:317` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:318` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:318` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1162,14 +1844,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 12. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+## 18. GET /terminology/concepts/{conceptId}/glossary-neighborhood
 
 - **Origen:** CONTRATO
 - **Nombre:** Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.readGlossaryNeighborhood` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:288`
+- **Implementación:** `TerminologyConceptsController.readGlossaryNeighborhood` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:289`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1179,17 +1861,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/concepts/{conceptId}/glossary-neighborhood` la atiende `TerminologyConceptsController.readGlossaryNeighborhood` (src/modules/terminology/controllers/terminology-concepts.controller.ts:288). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryNeighborhood`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/concepts/{conceptId}/glossary-neighborhood` la atiende `TerminologyConceptsController.readGlossaryNeighborhood` (src/modules/terminology/controllers/terminology-concepts.controller.ts:289). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryNeighborhood`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationship_evidence, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:288` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:288` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:289` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:289` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1198,10 +1880,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ConceptsService.resolveTexts → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ConceptsService.resolveTexts → ConceptDesignationsRepository.findPropertyForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:200` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.collectSortedNeighbors → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:110` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:367` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:373` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:382` |
+| `terminology.concept_relationship_evidence` | LEE | LEE | POR_SQL | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.resolveNeighborEvidence → ConceptRelationshipsRepository.findEvidenceSummaries | `src/modules/terminology/repositories/concept-relationships.repository.ts:277` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.collectSortedNeighbors → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:132` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:368` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:374` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryNeighborhood → ConceptsService.readGlossaryNeighborhood → ConceptsService.readGlossaryFocus → ValueSetsRepository.findValueSetsByConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:383` |
 
 ### Parámetros
 
@@ -1223,7 +1906,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `focus` | `GlossaryGraphNodeDto` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:137` |
+| `focus` | `GlossaryGraphNodeDto` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:200` |
 | `focus.conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:251` |
 | `focus.slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:254` |
 | `focus.display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:257` |
@@ -1231,17 +1914,28 @@ La operación no recibe cuerpo.
 | `focus.category.internalCode` | `string` | Sí | — | — | Código interno estable, como `glossary-category-anatomy`. | `src/modules/terminology/dto/search-concepts.dto.ts:163` |
 | `focus.category.name` | `string` | Sí | — | — | Nombre legible de la categoría. | `src/modules/terminology/dto/search-concepts.dto.ts:167` |
 | `focus.shortDefinition` | `string` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:263` |
-| `groups` | `array<GlossaryNeighborGroupDto>` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:140` |
-| `groups[].type` | `object` | Sí | — | — | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:121` |
-| `groups[].direction` | `string` | Sí | valores: outgoing, incoming | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:124` |
-| `groups[].total` | `number` | Sí | — | — | Tamaño real del grupo, no lo que vino en `items`. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:128` |
-| `groups[].items` | `array<GlossaryNeighborDto>` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:131` |
-| `groups[].items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:106` |
-| `groups[].items[].slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:109` |
-| `groups[].items[].display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:112` |
-| `groups[].items[].category` | `ConceptTaxonomyRefDto` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:115` |
+| `groups` | `array<GlossaryNeighborGroupDto>` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:203` |
+| `groups[].type` | `object` | Sí | — | — | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:184` |
+| `groups[].direction` | `string` | Sí | valores: outgoing, incoming | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:187` |
+| `groups[].total` | `number` | Sí | — | — | Tamaño real del grupo, no lo que vino en `items`. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:191` |
+| `groups[].items` | `array<GlossaryNeighborDto>` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:194` |
+| `groups[].items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:147` |
+| `groups[].items[].slug` | `string` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:150` |
+| `groups[].items[].display` | `string` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:153` |
+| `groups[].items[].category` | `ConceptTaxonomyRefDto` | Sí | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:156` |
 | `groups[].items[].category.internalCode` | `string` | Sí | — | — | Código interno estable, como `glossary-category-anatomy`. | `src/modules/terminology/dto/search-concepts.dto.ts:163` |
 | `groups[].items[].category.name` | `string` | Sí | — | — | Nombre legible de la categoría. | `src/modules/terminology/dto/search-concepts.dto.ts:167` |
+| `groups[].items[].strength` | `number` | No | — | — | Fuerza de la relación, de 0 a 1 (`strength_score`). Ordena el grupo. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:160` |
+| `groups[].items[].frequency` | `object` | No | — | — | Frecuencia del hallazgo según la mejor evidencia. `EXCLUDED` significa que la fuente lo descarta: no es una relación positiva. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:167` |
+| `groups[].items[].evidenceTier` | `object` | No | — | — | Mejor nivel de evidencia de la relación. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:171` |
+| `groups[].items[].sourceCodes` | `array<string>` | No | — | — | Ids de origen de cada evidencia (`source_reference`), sin repetir. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:175` |
+| `groups[].items[].qualifiers` | `GlossaryNeighborQualifiersDto` | No | — | — | — | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:178` |
+| `groups[].items[].qualifiers.sex` | `string` | No | — | — | Código del sexo al que aplica (`sex_concept_id`). | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:115` |
+| `groups[].items[].qualifiers.ageMinDays` | `number` | No | — | — | Edad mínima en días: la menor entre las evidencias. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:119` |
+| `groups[].items[].qualifiers.ageMaxDays` | `number` | No | — | — | Edad máxima en días: la mayor entre las evidencias. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:123` |
+| `groups[].items[].qualifiers.pregnancy` | `string` | No | — | — | Código de aplicabilidad en el embarazo. | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:127` |
+| `groups[].items[].qualifiers.careLevel` | `string` | No | — | — | Código del nivel de atención (`FIRST_LEVEL`, `SECOND_LEVEL`, `THIRD_LEVEL`). | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:131` |
+| `groups[].items[].qualifiers.lineOfTherapy` | `string` | No | — | — | Código de la línea de tratamiento (`FIRST_LINE`, `SECOND_LINE`). | `src/modules/terminology/dto/glossary-neighborhood.dto.ts:135` |
 
 ### Respuestas posibles
 
@@ -1259,7 +1953,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:385` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:399` |
 | CONTROLADOR | `src/modules/terminology/controllers/terminology-concepts.controller.spec.ts:132` |
 
 ### Flujos
@@ -1268,14 +1962,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 13. POST /terminology/concepts/{conceptId}/properties
+## 19. POST /terminology/concepts/{conceptId}/properties
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-05: alta o actualización de propiedades del concepto
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.upsertProperties` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:413`
+- **Implementación:** `TerminologyConceptsController.upsertProperties` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:430`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1285,26 +1979,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/concepts/{conceptId}/properties` la atiende `TerminologyConceptsController.upsertProperties` (src/modules/terminology/controllers/terminology-concepts.controller.ts:413). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertConceptPropertiesDto` (4 campos, 3 obligatorios). Delega en `ConceptsService.upsertProperties`. Crea filas en terminology.concept_properties. Actualiza terminology.concept_properties. Lee terminology.catalog_concepts, terminology.concept_properties.
+`POST /terminology/concepts/{conceptId}/properties` la atiende `TerminologyConceptsController.upsertProperties` (src/modules/terminology/controllers/terminology-concepts.controller.ts:430). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertConceptPropertiesDto` (4 campos, 3 obligatorios). Delega en `ConceptsService.upsertProperties`. Crea filas en terminology.concept_properties. Actualiza terminology.concept_properties. Lee terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:413` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:413` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:430` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:430` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.upsertProperties → ConceptsService.upsertProperties → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.concept_properties` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.upsertProperties → ConceptsService.upsertProperties | `src/modules/terminology/services/concepts.service.ts:415` |
+| `terminology.concept_properties` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyConceptsController.upsertProperties → ConceptsService.upsertProperties | `src/modules/terminology/services/concepts.service.ts:437` |
 | `terminology.concept_properties` | ESCRIBE | CREA | DIRECTA | TerminologyConceptsController.upsertProperties → ConceptsService.upsertProperties → ConceptDesignationsRepository.createProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:92` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyConceptsController.upsertProperties → ConceptsService.upsertProperties → ConceptDesignationsRepository.findProperty | `src/modules/terminology/repositories/concept-designations.repository.ts:139` |
 
@@ -1385,14 +2079,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 14. POST /terminology/concepts/{conceptId}/relationships
+## 20. POST /terminology/concepts/{conceptId}/relationships
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-06: crea una relación dirigida entre conceptos
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.addRelationship` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:391`
+- **Implementación:** `TerminologyConceptsController.addRelationship` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:403`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1402,27 +2096,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/concepts/{conceptId}/relationships` la atiende `TerminologyConceptsController.addRelationship` (src/modules/terminology/controllers/terminology-concepts.controller.ts:391). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `TerminologyCreateRelationshipDto` (3 campos, 2 obligatorios). Delega en `ConceptsService.addRelationship`. Crea filas en terminology.concept_relationships. Lee terminology.catalog_concepts, terminology.concept_relationships.
+`POST /terminology/concepts/{conceptId}/relationships` la atiende `TerminologyConceptsController.addRelationship` (src/modules/terminology/controllers/terminology-concepts.controller.ts:403). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `TerminologyCreateRelationshipDto` (3 campos, 2 obligatorios). Delega en `ConceptsService.addRelationship`. Crea filas en terminology.concept_relationships. Lee terminology.catalog_concepts, terminology.concept_relationships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:391` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:391` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-concepts.controller.ts:403` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/terminology/controllers/terminology-concepts.controller.ts:403` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.addRelationship → ConceptsService.addRelationship → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.concept_relationships` | ESCRIBE | CREA | DIRECTA | TerminologyConceptsController.addRelationship → ConceptsService.addRelationship → ConceptRelationshipsRepository.create | `src/modules/terminology/repositories/concept-relationships.repository.ts:233` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.addRelationship → ConceptsService.addRelationship → ConceptRelationshipsRepository.findEquivalent | `src/modules/terminology/repositories/concept-relationships.repository.ts:64` |
+| `terminology.concept_relationships` | ESCRIBE | CREA | DIRECTA | TerminologyConceptsController.addRelationship → ConceptsService.addRelationship → ConceptRelationshipsRepository.create | `src/modules/terminology/repositories/concept-relationships.repository.ts:315` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.addRelationship → ConceptsService.addRelationship → ConceptRelationshipsRepository.findEquivalent | `src/modules/terminology/repositories/concept-relationships.repository.ts:86` |
 
 ### Parámetros
 
@@ -1496,14 +2190,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 15. GET /terminology/concepts/glossary-graph
+## 21. GET /terminology/concepts/glossary-graph
 
 - **Origen:** CONTRATO
 - **Nombre:** Lee el grafo de términos publicados del glosario médico
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyConceptsController.readGlossaryGraph` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:249`
+- **Implementación:** `TerminologyConceptsController.readGlossaryGraph` — `src/modules/terminology/controllers/terminology-concepts.controller.ts:250`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1513,16 +2207,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/concepts/glossary-graph` la atiende `TerminologyConceptsController.readGlossaryGraph` (src/modules/terminology/controllers/terminology-concepts.controller.ts:249). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryGraph`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/concepts/glossary-graph` la atiende `TerminologyConceptsController.readGlossaryGraph` (src/modules/terminology/controllers/terminology-concepts.controller.ts:250). Exige sesión; el controlador no declara roles. Delega en `ConceptsService.readGlossaryGraph`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/terminology/controllers/terminology-concepts.controller.ts:250` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1531,10 +2225,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → CatalogConceptsRepository.search | `src/modules/terminology/repositories/catalog-concepts.repository.ts:257` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptsService.resolveTexts → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ConceptsService.buildSearchItems → ConceptDesignationsRepository.findPropertyForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:200` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:110` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ConceptsService.searchGlossaryPage → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.resolveGlossaryRelations → ConceptRelationshipsRepository.findByTypesForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:132` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ConceptsService.searchGlossaryPage → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyConceptsController.readGlossaryGraph → ConceptsService.readGlossaryGraph → ConceptsService.searchConcepts → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -1562,7 +2256,7 @@ La operación no recibe cuerpo.
 | `edges` | `array<GlossaryGraphEdgeDto>` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:284` |
 | `edges[].sourceConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:269` |
 | `edges[].targetConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:272` |
-| `edges[].type` | `object` | Sí | — | — | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `src/modules/terminology/dto/search-concepts.dto.ts:275` |
+| `edges[].type` | `object` | Sí | — | — | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `src/modules/terminology/dto/search-concepts.dto.ts:275` |
 | `count` | `number` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:287` |
 | `limit` | `number` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:290` |
 | `possiblyTruncated` | `boolean` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:293` |
@@ -1591,7 +2285,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 16. GET /terminology/import-template
+## 22. GET /terminology/import-template
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-03: descarga la plantilla de importación de un perfil
@@ -1608,7 +2302,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/import-template` la atiende `TerminologyImportTemplateController.descargarPlantilla` (src/modules/terminology/controllers/terminology-import-template.controller.ts:34). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ImportTemplateService.generate`. No se determinaron tablas para esta operación.
+`GET /terminology/import-template` la atiende `TerminologyImportTemplateController.descargarPlantilla` (src/modules/terminology/controllers/terminology-import-template.controller.ts:34). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ImportTemplateService.generate`. No toca tablas relacionales: Arma la plantilla en memoria a partir de la definición del perfil de importación y la devuelve como archivo; no consulta la base de datos..
 
 ### Requerimientos
 
@@ -1616,12 +2310,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-import-template.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: Arma la plantilla en memoria a partir de la definición del perfil de importación y la devuelve como archivo; no consulta la base de datos.. _(manual, 2026-10-25; fuente: `src/modules/terminology/services/import-template.service.ts:79`)_
 
 ### Parámetros
 
@@ -1662,14 +2356,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 17. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 23. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-12: define la política de catálogo del tenant
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyTenantCatalogController.upsertPolicy` — `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:41`
+- **Implementación:** `TerminologyTenantCatalogController.upsertPolicy` — `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1679,32 +2373,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /terminology/tenants/{tenantId}/catalog-policies` la atiende `TerminologyTenantCatalogController.upsertPolicy` (src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertTenantCatalogPolicyDto` (13 campos, 1 obligatorio). Delega en `TenantCatalogService.upsertPolicy`. Crea filas en terminology.tenant_catalog_policies, terminology.tenant_concept_config. Actualiza terminology.tenant_catalog_policies, terminology.tenant_concept_config. Lee terminology.catalog_concepts, terminology.tenant_catalog_policies, terminology.tenant_concept_config, terminology.value_sets.
+`PUT /terminology/tenants/{tenantId}/catalog-policies` la atiende `TerminologyTenantCatalogController.upsertPolicy` (src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:46). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertTenantCatalogPolicyDto` (13 campos, 1 obligatorio). Delega en `TenantCatalogService.upsertPolicy`. Crea filas en terminology.tenant_catalog_policies, terminology.tenant_concept_config. Actualiza terminology.tenant_catalog_policies, terminology.tenant_concept_config. Lee terminology.catalog_concepts, terminology.tenant_catalog_policies, terminology.tenant_concept_config, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:41` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:46` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/terminology/controllers/terminology-tenant-catalog.controller.ts:46` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.tenant_catalog_policies` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy | `src/modules/terminology/services/tenant-catalog.service.ts:123` |
+| `terminology.tenant_catalog_policies` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy | `src/modules/terminology/services/tenant-catalog.service.ts:145` |
 | `terminology.tenant_catalog_policies` | ESCRIBE | CREA | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → TenantCatalogRepository.createPolicy | `src/modules/terminology/repositories/tenant-catalog.repository.ts:108` |
 | `terminology.tenant_catalog_policies` | LEE | LEE | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → TenantCatalogRepository.findPolicyForUpdate | `src/modules/terminology/repositories/tenant-catalog.repository.ts:96` |
-| `terminology.tenant_concept_config` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy | `src/modules/terminology/services/tenant-catalog.service.ts:157` |
+| `terminology.tenant_concept_config` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy | `src/modules/terminology/services/tenant-catalog.service.ts:179` |
 | `terminology.tenant_concept_config` | ESCRIBE | CREA | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → TenantCatalogRepository.createConfig | `src/modules/terminology/repositories/tenant-catalog.repository.ts:160` |
 | `terminology.tenant_concept_config` | LEE | LEE | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → TenantCatalogRepository.findDefaultsForUpdate | `src/modules/terminology/repositories/tenant-catalog.repository.ts:148` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:112` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyTenantCatalogController.upsertPolicy → TenantCatalogService.upsertPolicy → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:113` |
 
 ### Parámetros
 
@@ -1801,14 +2495,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 18. GET /terminology/value-sets
+## 24. GET /terminology/value-sets
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar conjuntos de valores por código interno o texto
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyValueSetsController.searchValueSets` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:118`
+- **Implementación:** `TerminologyValueSetsController.searchValueSets` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:124`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1818,22 +2512,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/value-sets` la atiende `TerminologyValueSetsController.searchValueSets` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:118). Es una ruta pública: no exige token. Delega en `ValueSetsService.searchValueSets`. Lee terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/value-sets` la atiende `TerminologyValueSetsController.searchValueSets` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:124). Es una ruta pública: no exige token. Delega en `ValueSetsService.searchValueSets`. Lee terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:118` |
-| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:118` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:124` |
+| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:124` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.value_set_members` | LEE | LEE | POR_SQL | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.countMembersByVersionIds | `src/modules/terminology/repositories/value-sets.repository.ts:221` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.findDefaultVersionsByValueSetIds | `src/modules/terminology/repositories/value-sets.repository.ts:187` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.searchPage | `src/modules/terminology/repositories/value-sets.repository.ts:170` |
+| `terminology.value_set_members` | LEE | LEE | POR_SQL | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.countMembersByVersionIds | `src/modules/terminology/repositories/value-sets.repository.ts:222` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.findDefaultVersionsByValueSetIds | `src/modules/terminology/repositories/value-sets.repository.ts:188` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.searchValueSets → ValueSetsService.searchValueSets → ValueSetsRepository.searchPage | `src/modules/terminology/repositories/value-sets.repository.ts:171` |
 
 ### Parámetros
 
@@ -1879,7 +2573,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:61` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:70` |
 | INTEGRACION | `test/integration/organization-legal-entity-type.int-spec.ts:113` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:475` |
 | INTEGRACION | `test/integration/terminology.int-spec.ts:182` |
@@ -1891,14 +2585,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 19. POST /terminology/value-sets
+## 25. POST /terminology/value-sets
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-07: crea un conjunto de valores con versión y reglas
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyValueSetsController.createValueSet` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:79`
+- **Implementación:** `TerminologyValueSetsController.createValueSet` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1908,27 +2602,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/value-sets` la atiende `TerminologyValueSetsController.createValueSet` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:79). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateValueSetDto` (9 campos, 3 obligatorios). Delega en `ValueSetsService.createValueSet`. Crea filas en terminology.value_set_rules, terminology.value_set_versions, terminology.value_sets. Lee terminology.value_sets.
+`POST /terminology/value-sets` la atiende `TerminologyValueSetsController.createValueSet` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:80). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateValueSetDto` (9 campos, 3 obligatorios). Delega en `ValueSetsService.createValueSet`. Crea filas en terminology.value_set_rules, terminology.value_set_versions, terminology.value_sets. Lee terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.value_set_rules` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createRule | `src/modules/terminology/repositories/value-sets.repository.ts:480` |
-| `terminology.value_set_versions` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createVersion | `src/modules/terminology/repositories/value-sets.repository.ts:465` |
-| `terminology.value_sets` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:447` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_rules` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createRule | `src/modules/terminology/repositories/value-sets.repository.ts:481` |
+| `terminology.value_set_versions` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createVersion | `src/modules/terminology/repositories/value-sets.repository.ts:466` |
+| `terminology.value_sets` | ESCRIBE | CREA | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.createValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:448` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.createValueSet → ValueSetsService.createValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `CreateValueSetDto` · `application/json`
 
@@ -2009,14 +2703,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 20. GET /terminology/value-sets/{id}/$expand
+## 26. GET /terminology/value-sets/{id}/$expand
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-08: lee la expansión vigente de un conjunto de valores
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyValueSetsController.readExpansion` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:212`
+- **Implementación:** `TerminologyValueSetsController.readExpansion` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:218`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2026,25 +2720,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/value-sets/{id}/$expand` la atiende `TerminologyValueSetsController.readExpansion` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:212). Es una ruta pública: no exige token. Delega en `ValueSetsService.readExpansion`. Lee terminology.catalog_concepts, terminology.concept_properties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/value-sets/{id}/$expand` la atiende `TerminologyValueSetsController.readExpansion` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:218). Es una ruta pública: no exige token. Delega en `ValueSetsService.readExpansion`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.concept_properties, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:212` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:212` |
-| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:212` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:218` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:218` |
+| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:218` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findMembersPage → ValueSetsRepository.findMatchingConceptIds | `src/modules/terminology/repositories/value-sets.repository.ts:704` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ConceptDesignationsRepository.findPropertiesForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:235` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findMembersPage | `src/modules/terminology/repositories/value-sets.repository.ts:667` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findVersionById | `src/modules/terminology/repositories/value-sets.repository.ts:619` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:112` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findMembersPage | `src/modules/terminology/repositories/value-sets.repository.ts:679` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findVersionById | `src/modules/terminology/repositories/value-sets.repository.ts:620` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readExpansion → ValueSetsService.readExpansion → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:113` |
 
 ### Parámetros
 
@@ -2055,6 +2750,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `cursor` | query | No | `string` | Cursor opaco devuelto por la página anterior |
 | `limit` | query | No | `number` | Miembros por página (por defecto 50) |
 | `includeProperties` | query | No | `boolean` | Trae también las propiedades de cada concepto. Opt-in: hay catálogos cuyo dato útil vive ahí (el nomenclador guarda especialidad, precio y unidad como propiedades). |
+| `filter` | query | No | `string` | Texto libre (parámetro `filter` de FHIR ValueSet/$expand): deja los miembros cuyo código, rótulo o designación contiene todas sus palabras, sin distinguir tildes ni mayúsculas. Hasta 100 caracteres. |
 
 ### Cuerpo
 
@@ -2109,14 +2805,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 21. GET /terminology/value-sets/$glossary-facets
+## 27. GET /terminology/value-sets/$glossary-facets
 
 - **Origen:** CONTRATO
 - **Nombre:** Facetas del glosario: conteo por categoría y etiqueta
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyValueSetsController.readGlossaryFacets` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:177`
+- **Implementación:** `TerminologyValueSetsController.readGlossaryFacets` — `src/modules/terminology/controllers/terminology-value-sets.controller.ts:183`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2126,24 +2822,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /terminology/value-sets/$glossary-facets` la atiende `TerminologyValueSetsController.readGlossaryFacets` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:177). Es una ruta pública: no exige token. Delega en `ValueSetsService.readGlossaryFacets`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /terminology/value-sets/$glossary-facets` la atiende `TerminologyValueSetsController.readGlossaryFacets` (src/modules/terminology/controllers/terminology-value-sets.controller.ts:183). Es una ruta pública: no exige token. Delega en `ValueSetsService.readGlossaryFacets`. Lee terminology.catalog_concepts, terminology.concept_designations, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:177` |
-| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:177` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:183` |
+| RATE_LIMIT | Límite propio: Throttle(PUBLIC_CATALOG_READ_THROTTLE) | `src/modules/terminology/controllers/terminology-value-sets.controller.ts:183` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:265` |
-| `terminology.concept_designations` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:265` |
-| `terminology.value_set_members` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:265` |
-| `terminology.value_set_versions` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:265` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findByIds | `src/modules/terminology/repositories/value-sets.repository.ts:333` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:266` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:266` |
+| `terminology.value_set_members` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:266` |
+| `terminology.value_set_versions` | LEE | LEE | POR_SQL | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findGlossaryFacets | `src/modules/terminology/repositories/value-sets.repository.ts:266` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyValueSetsController.readGlossaryFacets → ValueSetsService.readGlossaryFacets → ValueSetsRepository.findByIds | `src/modules/terminology/repositories/value-sets.repository.ts:334` |
 
 ### Cuerpo
 
@@ -2192,14 +2888,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. POST /terminology/ValueSet/{id}/$expand
+## 28. POST /terminology/ValueSet/{id}/$expand
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-08: materializa los miembros de la expansión
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyFhirController.expandValueSet` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:66`
+- **Implementación:** `TerminologyFhirController.expandValueSet` — `src/modules/terminology/controllers/terminology-fhir.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2209,19 +2905,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/ValueSet/{id}/$expand` la atiende `TerminologyFhirController.expandValueSet` (src/modules/terminology/controllers/terminology-fhir.controller.ts:66). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExpandValueSetDto` (3 campos, 1 obligatorio). Delega en `ValueSetsService.expandValueSet`. Crea filas en terminology.value_set_members. Actualiza terminology.value_set_versions. Borra de terminology.value_set_members. Lee terminology.catalog_concepts, terminology.code_system_versions, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_rules, terminology.value_set_versions, terminology.value_sets.
+`POST /terminology/ValueSet/{id}/$expand` la atiende `TerminologyFhirController.expandValueSet` (src/modules/terminology/controllers/terminology-fhir.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExpandValueSetDto` (3 campos, 1 obligatorio). Delega en `ValueSetsService.expandValueSet`. Crea filas en terminology.value_set_members. Actualiza terminology.value_set_versions. Borra de terminology.value_set_members. Lee terminology.catalog_concepts, terminology.code_system_versions, terminology.concept_properties, terminology.concept_relationships, terminology.value_set_rules, terminology.value_set_versions, terminology.value_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-fhir.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-fhir.controller.ts:66` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-fhir.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/terminology/controllers/terminology-fhir.controller.ts:71` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2230,13 +2926,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsService.evaluateRules → ValueSetsService.evaluateRule → CatalogConceptsRepository.findByVersion | `src/modules/terminology/repositories/catalog-concepts.repository.ts:151` |
 | `terminology.code_system_versions` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsService.evaluateRules → ValueSetsService.evaluateRule → CodeSystemVersionsRepository.findDefaultActiveVersion | `src/modules/terminology/repositories/code-system-versions.repository.ts:65` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsService.evaluateRules → ValueSetsService.evaluateRule → ValueSetsService.matchProperty → ConceptDesignationsRepository.findPropertyForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:200` |
-| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsService.evaluateRules → ValueSetsService.evaluateRule → ValueSetsService.matchIsA → ConceptRelationshipsRepository.findByTypeForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:84` |
-| `terminology.value_set_members` | BORRA | BORRA | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.deleteMembersByVersion | `src/modules/terminology/repositories/value-sets.repository.ts:546` |
-| `terminology.value_set_members` | ESCRIBE | CREA | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.createMember | `src/modules/terminology/repositories/value-sets.repository.ts:575` |
-| `terminology.value_set_rules` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findRulesByVersion | `src/modules/terminology/repositories/value-sets.repository.ts:534` |
-| `terminology.value_set_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet | `src/modules/terminology/services/value-sets.service.ts:438` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findVersionForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:506` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:112` |
+| `terminology.concept_relationships` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsService.evaluateRules → ValueSetsService.evaluateRule → ValueSetsService.matchIsA → ConceptRelationshipsRepository.findByTypeForSources | `src/modules/terminology/repositories/concept-relationships.repository.ts:106` |
+| `terminology.value_set_members` | BORRA | BORRA | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.deleteMembersByVersion | `src/modules/terminology/repositories/value-sets.repository.ts:547` |
+| `terminology.value_set_members` | ESCRIBE | CREA | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.createMember | `src/modules/terminology/repositories/value-sets.repository.ts:576` |
+| `terminology.value_set_rules` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findRulesByVersion | `src/modules/terminology/repositories/value-sets.repository.ts:535` |
+| `terminology.value_set_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet | `src/modules/terminology/services/value-sets.service.ts:439` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findVersionForUpdate | `src/modules/terminology/repositories/value-sets.repository.ts:507` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TerminologyFhirController.expandValueSet → ValueSetsService.expandValueSet → ValueSetsRepository.findById | `src/modules/terminology/repositories/value-sets.repository.ts:113` |
 
 ### Parámetros
 
@@ -2310,14 +3006,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 23. POST /terminology/versions/{versionId}/import
+## 29. POST /terminology/versions/{versionId}/import
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-03: importa conceptos en una versión en borrador
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyVersionsController.importConcepts` — `src/modules/terminology/controllers/terminology-versions.controller.ts:77`
+- **Implementación:** `TerminologyVersionsController.importConcepts` — `src/modules/terminology/controllers/terminology-versions.controller.ts:78`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2327,19 +3023,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/versions/{versionId}/import` la atiende `TerminologyVersionsController.importConcepts` (src/modules/terminology/controllers/terminology-versions.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ImportConceptsDto` (4 campos, 3 obligatorios). Delega en `CodeSystemVersionsService.importConcepts`. Crea filas en terminology.catalog_concepts. Lee terminology.catalog_concepts, terminology.code_system_versions.
+`POST /terminology/versions/{versionId}/import` la atiende `TerminologyVersionsController.importConcepts` (src/modules/terminology/controllers/terminology-versions.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ImportConceptsDto` (4 campos, 3 obligatorios). Delega en `CodeSystemVersionsService.importConcepts`. Crea filas en terminology.catalog_concepts. Lee terminology.catalog_concepts, terminology.code_system_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:78` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:78` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2428,14 +3124,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 24. POST /terminology/versions/{versionId}/import-file
+## 30. POST /terminology/versions/{versionId}/import-file
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-03: importa filas desde un archivo, o las valida sin escribir
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyVersionsController.importConceptsFile` — `src/modules/terminology/controllers/terminology-versions.controller.ts:112`
+- **Implementación:** `TerminologyVersionsController.importConceptsFile` — `src/modules/terminology/controllers/terminology-versions.controller.ts:118`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2445,19 +3141,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/versions/{versionId}/import-file` la atiende `TerminologyVersionsController.importConceptsFile` (src/modules/terminology/controllers/terminology-versions.controller.ts:112). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ConceptFileImportService.importFromFile`. Crea filas en terminology.catalog_concepts, terminology.catalog_import_batches. Actualiza terminology.catalog_import_batches. Lee terminology.catalog_concepts, terminology.catalog_import_batches, terminology.code_system_versions, terminology.code_systems.
+`POST /terminology/versions/{versionId}/import-file` la atiende `TerminologyVersionsController.importConceptsFile` (src/modules/terminology/controllers/terminology-versions.controller.ts:118). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ConceptFileImportService.importFromFile`. Crea filas en terminology.catalog_concepts, terminology.catalog_import_batches. Actualiza terminology.catalog_import_batches. Lee terminology.catalog_concepts, terminology.catalog_import_batches, terminology.code_system_versions, terminology.code_systems.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:112` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:112` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:118` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:118` |
 | CUERPO | multipart/form-data (obligatorio); el tamaño del archivo lo define la ruta, no el límite global | `contrato (requestBody)` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2553,14 +3249,14 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 ---
 
-## 25. POST /terminology/versions/{versionId}/publish
+## 31. POST /terminology/versions/{versionId}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-03-04: publica una versión (borrador → activa)
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TerminologyVersionsController.publishVersion` — `src/modules/terminology/controllers/terminology-versions.controller.ts:187`
+- **Implementación:** `TerminologyVersionsController.publishVersion` — `src/modules/terminology/controllers/terminology-versions.controller.ts:198`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2570,17 +3266,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /terminology/versions/{versionId}/publish` la atiende `TerminologyVersionsController.publishVersion` (src/modules/terminology/controllers/terminology-versions.controller.ts:187). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemVersionsService.publishVersion`. Actualiza terminology.catalog_concepts, terminology.code_system_versions. Lee terminology.catalog_concepts, terminology.code_system_versions.
+`POST /terminology/versions/{versionId}/publish` la atiende `TerminologyVersionsController.publishVersion` (src/modules/terminology/controllers/terminology-versions.controller.ts:198). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CodeSystemVersionsService.publishVersion`. Actualiza terminology.catalog_concepts, terminology.code_system_versions. Lee terminology.catalog_concepts, terminology.code_system_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:187` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:187` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/terminology/controllers/terminology-versions.controller.ts:198` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/terminology/controllers/terminology-versions.controller.ts:198` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

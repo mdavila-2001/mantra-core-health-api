@@ -129,6 +129,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApplyDiscountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApplyDiscountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApplyDiscountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApplyDiscountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApplyDiscountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -161,9 +162,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CASHIER, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Promoción no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
-| 404 | `NOT_FOUND` | Cupón no encontrado | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
-| 404 | `NOT_FOUND` | Promoción del cupón no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Hay que indicar el cupón o la promoción automática a aplicar | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ninguna regla de la promoción aplica al importe de la orden | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
@@ -277,6 +275,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ValidateCouponResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ValidateCouponResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ValidateCouponResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ValidateCouponResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ValidateCouponResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -406,6 +405,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExpirePointsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpirePointsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpirePointsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpirePointsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpirePointsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -514,6 +514,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyLoyaltyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -648,6 +649,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPointsLedgerPageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -793,6 +795,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PointsLedgerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -829,8 +832,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 409 | `CONFLICT` | La clave de idempotencia pertenece a otro canje | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia pertenece a otro movimiento | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No tiene una membresía de lealtad en este programa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -944,6 +947,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PointsLedgerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -980,8 +984,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
-| 404 | `NOT_FOUND` | Regla de acumulación no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia pertenece a otro movimiento | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La membresía no está activa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | La regla pertenece a otro programa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -1092,6 +1095,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PointsLedgerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1128,7 +1132,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEMBER, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia pertenece a otro movimiento | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El canje debe ser de puntos positivos | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | La membresía no está activa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -1217,6 +1221,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RecomputeBalanceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RecomputeBalanceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RecomputeBalanceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RecomputeBalanceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RecomputeBalanceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1249,7 +1254,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1331,6 +1335,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListActiveLoyaltyProgramsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListActiveLoyaltyProgramsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListActiveLoyaltyProgramsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListActiveLoyaltyProgramsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListActiveLoyaltyProgramsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1528,6 +1533,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LoyaltyProgramResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LoyaltyProgramResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LoyaltyProgramResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LoyaltyProgramResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LoyaltyProgramResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1672,6 +1678,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MembershipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MembershipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MembershipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MembershipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1704,7 +1711,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PROMOTIONS_ADMIN, MEMBER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Programa de lealtad no encontrado | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El programa no está activo | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | El programa no tiene niveles definidos | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -1863,6 +1869,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PromotionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PromotionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PromotionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PromotionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PromotionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2015,6 +2022,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IssueCouponsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IssueCouponsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IssueCouponsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IssueCouponsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IssueCouponsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2045,7 +2053,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PROMOTIONS_ADMIN, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Promoción no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 409 | `CONFLICT` | No se pudieron generar códigos de cupón libres | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un cupón PERSONAL necesita miembro asignado | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
@@ -2130,6 +2137,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPromotionsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2332,6 +2340,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RedemptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RedemptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RedemptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RedemptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RedemptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2362,8 +2371,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CASHIER, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cupón no encontrado | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
-| 404 | `NOT_FOUND` | Promoción del cupón no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | rejection | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ninguna regla aplica al importe de la orden | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
@@ -2472,6 +2479,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReverseRedemptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReverseRedemptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReverseRedemptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReverseRedemptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReverseRedemptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2500,8 +2508,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CASHIER, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Redención no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
-| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 409 | `CONFLICT` | La redención ya no está aplicada | Excepción explícita en src/modules/promotions/services/promotions-discounts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2600,6 +2606,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2628,7 +2635,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEMBER, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Programa de referidos no encontrado | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 409 | `CONFLICT` | No se pudo generar un código de referido libre | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El programa de referidos no está activo | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -2741,6 +2747,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QualifyReferralResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QualifyReferralResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QualifyReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QualifyReferralResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QualifyReferralResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2771,9 +2778,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, PROMOTIONS_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Referido no encontrado | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
-| 404 | `NOT_FOUND` | Programa de referidos no encontrado | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
-| 404 | `NOT_FOUND` | Membresía de la recompensa no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 409 | `CONFLICT` | El referido ya fue calificado | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un usuario no puede referirse a sí mismo | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |

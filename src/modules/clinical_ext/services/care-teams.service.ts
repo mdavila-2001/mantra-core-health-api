@@ -5,9 +5,17 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import { ClinicalReadService } from '../../clinical/services/clinical-read.service';
+import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
+import {
+  assertBodyTenantMatches,
+  assertWriteOrNotFound,
+} from './clinical-ext-access';
 import {
   CareTeamsRepository,
   CareTeamMembersRepository,
@@ -36,12 +44,14 @@ export class CareTeamsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param teamsRepo - Valor de teams repo requerido por la operación.
    * @param membersRepo - Valor de members repo requerido por la operación.
+   * @param clinicalRead - Política de acceso a la historia del paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly teamsRepo: CareTeamsRepository,
     private readonly membersRepo: CareTeamMembersRepository,
+    private readonly clinicalRead: ClinicalReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CareTeamsService.name);
@@ -67,10 +77,15 @@ export class CareTeamsService {
       );
     }
 
+    // El tenant sale del contexto verificado; el del cuerpo sólo se contrasta.
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
+    await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
+
     return this.em.transactional(async (tx) => {
       const team = this.teamsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
-        tenantId: dto.tenantId,
+        tenantId,
         episodeId: dto.episodeId,
         name: dto.name,
         categoryConceptId:
@@ -133,12 +148,27 @@ export class CareTeamsService {
       'Transferring care team leadership',
     );
 
+    const activeTenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const team = await this.teamsRepo.findById(tx, careTeamId);
-      if (!team)
-        throw new ResourceNotFoundException('Equipo de cuidado no encontrado', {
-          careTeamId,
-        });
+      const loaded = await this.teamsRepo.findById(tx, careTeamId);
+      // Un equipo de otro tenant o de un paciente que el actor no atiende
+      // responde igual que uno inexistente: 404, mismo mensaje y `reason`.
+      const notFound = {
+        message: 'Equipo de cuidado no encontrado',
+        reason: ClinicalExtErrorReason.CARE_TEAM_NOT_FOUND,
+      };
+      const team = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        activeTenantId,
+        notFound,
+      );
+      await assertWriteOrNotFound(
+        this.clinicalRead,
+        team.patientProfileId,
+        actor,
+        notFound,
+      );
       if (team.statusConceptId !== CEXT.CARE_TEAM_ACTIVE) {
         throw new PreconditionFailedException('El equipo no está activo', {
           careTeamId,
@@ -180,12 +210,22 @@ export class CareTeamsService {
    * La cara de lectura que faltaba: se escribían y no había forma de verlas, así
    * que el expediente no podía mostrarlas.
    *
+   * Exige base de lectura sobre la historia del paciente y acota al tenant
+   * activo: el filtro por paciente solo no autoriza nada.
+   *
    * @param patientProfileId - Paciente.
+   * @param actor - Quién lista.
    * @param limit - Tope de filas.
    * @returns Los registros, del más reciente al más antiguo.
    */
-  async listByPatient(patientProfileId: string, limit = 50) {
+  async listByPatient(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+    limit = 50,
+  ) {
+    const tenantId = requireTenantId();
+    await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
     const em = this.em.fork();
-    return this.teamsRepo.findByPatient(em, patientProfileId, limit);
+    return this.teamsRepo.findByPatient(em, patientProfileId, tenantId, limit);
   }
 }

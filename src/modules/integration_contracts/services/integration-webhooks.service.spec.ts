@@ -13,9 +13,32 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { IntegrationContractsErrorReason } from '../integration_contracts.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const TENANT = 'tenant-a';
+const OTHER_TENANT = 'tenant-b';
+
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -24,7 +47,17 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const contractsRepo = { findById: mockFn() };
+  // Por defecto el contrato pedido es del tenant activo (el repositorio real
+  // filtra por tenant); las pruebas de aislamiento lo sustituyen.
+  const contractsRepo = {
+    findByIdInTenant: mockFn(
+      async (_tx: any, tenantId: string, id: string) => ({
+        id,
+        tenantId,
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+      }),
+    ),
+  };
   const versionsRepo = { findActiveByContract: mockFn() };
   const subscriptionsRepo = {
     findById: mockFn(),
@@ -55,7 +88,8 @@ function build() {
     logger as any,
   );
   return {
-    service,
+    service: inTenant(service, TENANT),
+    raw: service,
     tx,
     contractsRepo,
     versionsRepo,
@@ -70,8 +104,9 @@ describe('IntegrationWebhooksService', () => {
   describe('subscribe (UC-31-04)', () => {
     it('subscribes a webhook on an ACTIVE contract', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({
+      d.contractsRepo.findByIdInTenant.mockResolvedValue({
         id: 'c1',
+        tenantId: TENANT,
         statusConceptId: ICON.CONTRACT_ACTIVE,
       });
       d.subscriptionsRepo.findDuplicate.mockResolvedValue(null);
@@ -95,8 +130,9 @@ describe('IntegrationWebhooksService', () => {
 
     it('rejects subscribing when the contract is not ACTIVE (422)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({
+      d.contractsRepo.findByIdInTenant.mockResolvedValue({
         id: 'c1',
+        tenantId: TENANT,
         statusConceptId: ICON.CONTRACT_DRAFT,
       });
       await expect(
@@ -110,8 +146,9 @@ describe('IntegrationWebhooksService', () => {
 
     it('rejects a duplicate subscription (409)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({
+      d.contractsRepo.findByIdInTenant.mockResolvedValue({
         id: 'c1',
+        tenantId: TENANT,
         statusConceptId: ICON.CONTRACT_ACTIVE,
       });
       d.subscriptionsRepo.findDuplicate.mockResolvedValue({ id: 'dup' });
@@ -238,6 +275,89 @@ describe('IntegrationWebhooksService', () => {
         d.tx,
         expect.objectContaining({ outcomeConceptId: ICON.DELIVERY_FAILED }),
       );
+    });
+  });
+  describe('aislamiento por tenant (ICON-01)', () => {
+    it('suscribir un webhook sobre el contrato de otro tenant responde 404 uniforme', async () => {
+      const d = build();
+      d.contractsRepo.findByIdInTenant.mockResolvedValue(null);
+      const foreign = await d.service
+        .subscribe('c-b', { callbackUri: 'https://x/cb' } as any, actor)
+        .catch((e: any) => e);
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(
+        IntegrationContractsErrorReason.INTEGRATION_RESOURCE_OUT_OF_SCOPE,
+      );
+      expect(foreign.details).toBeUndefined();
+      expect(d.subscriptionsRepo.create).not.toHaveBeenCalled();
+      expect(d.contractsRepo.findByIdInTenant).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        'c-b',
+      );
+    });
+
+    it('entregar una suscripción de otro tenant no firma, no llama al callback ni deja evidencia', async () => {
+      const d = build();
+      d.subscriptionsRepo.findById.mockResolvedValue({
+        id: 's-b',
+        integrationContractId: 'c-b',
+        callbackUri: 'https://tenant-b.example/cb',
+        statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
+      });
+      // El repositorio acotado por tenant no encuentra el contrato ajeno.
+      d.contractsRepo.findByIdInTenant.mockResolvedValue(null);
+      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v-b' });
+
+      const foreign = await d.service
+        .deliver('s-b', {} as any, actor)
+        .catch((e: any) => e);
+      d.subscriptionsRepo.findById.mockResolvedValue(null);
+      const missing = await d.service
+        .deliver('s-b', {} as any, actor)
+        .catch((e: any) => e);
+
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.reason).toBe(
+        IntegrationContractsErrorReason.INTEGRATION_RESOURCE_OUT_OF_SCOPE,
+      );
+      expect(d.http.post).not.toHaveBeenCalled();
+      expect(d.exchangeRecordsRepo.create).not.toHaveBeenCalled();
+      expect(d.evidenceRepo.create).not.toHaveBeenCalled();
+      expect(d.contractsRepo.findByIdInTenant).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        'c-b',
+      );
+    });
+
+    it('defensa en profundidad: un contrato ajeno devuelto por el repositorio también se rechaza', async () => {
+      const d = build();
+      d.subscriptionsRepo.findById.mockResolvedValue({
+        id: 's-b',
+        integrationContractId: 'c-b',
+        callbackUri: 'https://tenant-b.example/cb',
+        statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
+      });
+      d.contractsRepo.findByIdInTenant.mockResolvedValue({
+        id: 'c-b',
+        tenantId: OTHER_TENANT,
+      });
+      await expect(
+        d.service.deliver('s-b', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.http.post).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo no se entrega nada (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(d.raw.deliver('s1', {} as any, actor)).rejects.toMatchObject(
+        { details: { reason: 'TENANT_REQUIRED' } },
+      );
+      expect(d.http.post).not.toHaveBeenCalled();
     });
   });
 });

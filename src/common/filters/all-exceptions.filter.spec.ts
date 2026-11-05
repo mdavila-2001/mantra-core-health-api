@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './all-exceptions.filter';
 function build(
   requestId?: string | number,
   requestHeaders: Record<string, unknown> = {},
+  url = '/resource',
 ) {
   const logger = {
     setContext: jest.fn(),
@@ -29,7 +30,7 @@ function build(
   response.status.mockReturnValue(response);
   const request = {
     headers: requestHeaders,
-    url: '/resource',
+    url,
     method: 'POST',
     ...(requestId === undefined ? {} : { id: requestId }),
   } as Request;
@@ -96,6 +97,21 @@ describe('AllExceptionsFilter HTTP infrastructure errors', () => {
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'PAYLOAD_TOO_LARGE' }),
     );
+  });
+
+  it('no hace eco del query string en el cuerpo de error', () => {
+    const { filter, host, response } = build(
+      undefined,
+      {},
+      '/resource?email=a%40b.com&token=secreto',
+    );
+
+    filter.catch(new HttpException('Rejected', HttpStatus.BAD_REQUEST), host);
+
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/resource' }),
+    );
+    expect(JSON.stringify(response.json.mock.calls)).not.toContain('secreto');
   });
 
   it('mapea el JSON mal formado de body-parser a 400', () => {

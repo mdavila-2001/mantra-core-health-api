@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 65 · schema surveys
+-- SALUD v4.2.85 · módulo 65 · schema surveys
 -- Generado de diagram_65_surveys.puml — NO editar a mano.
 
 
@@ -28,8 +28,20 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "surveys"."survey_invitations"
+        ADD CONSTRAINT "fk_survey_invitations_extension_survey_version_id" FOREIGN KEY ("extension_survey_version_id")
+        REFERENCES "surveys"."survey_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "surveys"."survey_invitations"
         ADD CONSTRAINT "fk_survey_invitations_survey_assignment_id" FOREIGN KEY ("survey_assignment_id")
         REFERENCES "surveys"."survey_assignments" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "surveys"."survey_invitation_reminders"
+        ADD CONSTRAINT "fk_survey_invitation_reminders_survey_invitation_id" FOREIGN KEY ("survey_invitation_id")
+        REFERENCES "surveys"."survey_invitations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

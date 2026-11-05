@@ -2,6 +2,7 @@ import { ClinicalModule } from './clinical.module';
 import {
   ClinicalEncountersController,
   ClinicalMedicalAspectsController,
+  ClinicalProcedureCentersController,
   ClinicalRecordsController,
 } from './controllers';
 
@@ -24,6 +25,12 @@ describe('ClinicalModule', () => {
   it('publica ClinicalMedicalAspectsController (GET|PUT /clinical/me/medical-aspects, D-B)', () => {
     expect(controllers(ClinicalModule)).toContain(
       ClinicalMedicalAspectsController,
+    );
+  });
+
+  it('publica ClinicalProcedureCentersController (GET /clinical/me/procedure-centers, carril 19)', () => {
+    expect(controllers(ClinicalModule)).toContain(
+      ClinicalProcedureCentersController,
     );
   });
 

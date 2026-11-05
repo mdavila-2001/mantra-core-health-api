@@ -49,8 +49,9 @@ export function assertSafeNext(nextLink, previousUrl) {
   const next = new URL(nextLink);
   if (next.origin !== prev.origin || next.pathname !== prev.pathname)
     throw new Error(`nextLink fuera de la consulta original: ${nextLink}`);
+  // El cursor ($after, $skip…) cambia en cada página por diseño; los filtros no.
   for (const [k, v] of prev.searchParams)
-    if (next.searchParams.get(k) !== v)
+    if (!k.startsWith('$') && next.searchParams.get(k) !== v)
       throw new Error(`nextLink cambió el parámetro ${k}`);
   return next.toString();
 }
@@ -144,7 +145,11 @@ export function normalizeUdiRow(row, ctx) {
   return makeDeviceRecord({
     source: SOURCE,
     sourceRecordId: recordId,
-    sourceUrl: ctx.sourceUrl,
+    // Ficha del equipo en EUDAMED (mismo UUID que usa el portal); la consulta
+    // exacta que devolvió la fila queda en extra.queryUrl.
+    sourceUrl: clean(row.UUID)
+      ? deviceDetailUrl(clean(row.UUID))
+      : ctx.sourceUrl,
     sourceVersion: `eudamed-public-api-${API_VERSION}${hasVersion ? `;record-version=${row.VERSION_NUMBER}` : ''}`,
     retrievedAt: ctx.retrievedAt,
     deviceTypeCode: primary,
@@ -195,8 +200,58 @@ export function normalizeUdiRow(row, ctx) {
           ? 'prefijo-SRN'
           : null,
       manufacturerActorName: clean(actor?.NAME),
+      queryUrl: ctx.sourceUrl,
     },
   });
+}
+
+export const deviceDetailUrl = (uuid) =>
+  `https://ec.europa.eu/tools/eudamed/api/devices/udiDiData/${encodeURIComponent(uuid)}?languageIso2Code=en`;
+
+/**
+ * Fila de GET /actors → actor (no es un equipo). Solo datos de la
+ * organización: el Data Lake publica además correo, teléfono y el nombre de la
+ * persona responsable (PRRC), que NO se copian (minimización de datos
+ * personales).
+ */
+export function normalizeDatalakeActor(row, ctx) {
+  const srn = clean(row.ACTOR_ID);
+  if (!/^[A-Z]{2}-(MF|AR|IM|PR)-\d{9}$/.test(srn ?? '')) return null;
+  const rec = makeDeviceRecord({
+    source: 'eudamed-actors',
+    sourceRecordId: srn,
+    sourceUrl: ctx.sourceUrl,
+    sourceVersion: `eudamed-public-api-${API_VERSION};actor-version=${row.VERSION ?? '?'}`,
+    retrievedAt: ctx.retrievedAt,
+    manufacturerName: row.NAME,
+    manufacturerCountry:
+      clean(row.ACT_COUNTRY_ISO2_CODE)?.toUpperCase() ?? null,
+    manufacturerRegistryId: `srn:${srn}`,
+    extra: {
+      role: clean(row.ACTOR_TYPE),
+      actorStatus: clean(row.STATUS),
+      abbreviatedName: clean(row.ABBREVIATED_NAME),
+      city: clean(row.ACT_ADDR_CITY_NAME),
+      countryName: clean(row.ACT_COUNTRY_NAME),
+      countryType: clean(row.ACT_COUNTRY_TYPE),
+      manufacturerCountrySource: 'eudamed-actors:ACT_COUNTRY_ISO2_CODE',
+    },
+  });
+  return Object.fromEntries(
+    Object.entries(rec).filter(([k]) =>
+      [
+        'source',
+        'sourceRecordId',
+        'sourceUrl',
+        'sourceVersion',
+        'retrievedAt',
+        'manufacturerName',
+        'manufacturerCountry',
+        'manufacturerRegistryId',
+        'extra',
+      ].includes(k),
+    ),
+  );
 }
 
 /** Filas de GET /actors → mapa SRN → actor (para país y nombre registrados). */

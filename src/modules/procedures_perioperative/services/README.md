@@ -4,13 +4,13 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 
 ## Servicios
 
-| Servicio | Casos de uso | Responsabilidad |
-| --- | --- | --- |
-| `PeriopCasesService` | 01, 02, 13, 14 | Programación, diagnósticos y equipo, cancelación y cargos |
-| `PeriopPreopService` | 03 … 07 | Valoración, clearance, checklist y anestesia |
-| `PeriopIntraopService` | 08 … 12 | Intervención, implantes, insumos, reporte y recuperación |
+| Servicio               | Casos de uso   | Responsabilidad                                           |
+| ---------------------- | -------------- | --------------------------------------------------------- |
+| `PeriopCasesService`   | 01, 02, 13, 14 | Programación, diagnósticos y equipo, cancelación y cargos |
+| `PeriopPreopService`   | 03 … 07        | Valoración, clearance, checklist y anestesia              |
+| `PeriopIntraopService` | 08 … 12        | Intervención, implantes, insumos, reporte y recuperación  |
 
-## Reglas de negocio
+## Business rules
 
 - **Programación (01)**: comprueba el solape de quirófano, numera el caso, deja registrada la
   primera transición, crea el hito y el evento de reserva, y sienta al cirujano en el equipo.
@@ -45,12 +45,12 @@ que dos peticiones simultáneas vieran estados distintos del mismo quirófano.
 
 Ese estado se mueve en cuatro puntos, y sólo en cuatro:
 
-| Transición | Quién la provoca |
-| --- | --- |
+| Transición                      | Quién la provoca                    |
+| ------------------------------- | ----------------------------------- |
 | `scheduled → ready-for-surgery` | Verificar la última orden pendiente |
-| `ready → in-progress` | La inducción anestésica |
-| `in-progress → completed` | Firmar el reporte operatorio |
-| `* → cancelled` | Cancelar el caso |
+| `ready → in-progress`           | La inducción anestésica             |
+| `in-progress → completed`       | Firmar el reporte operatorio        |
+| `* → cancelled`                 | Cancelar el caso                    |
 
 Cada una deja fila en `procedure_case_status_history`. No hay forma de mover el estado sin que
 quede registrado quién y por qué.
@@ -91,7 +91,7 @@ cancelado, cargos ya emitidos).
 anestesia grave o crítico, complicación quirúrgica y cancelación. Nunca se loguean datos clínicos
 del paciente más allá del identificador del caso.
 
-## Pruebas
+## Tests
 
 `periop-cases.service.spec.ts` (24), `periop-preop.service.spec.ts` (28) y
 `periop-intraop.service.spec.ts` (27): solape de quirófano, único diagnóstico principal, clearance

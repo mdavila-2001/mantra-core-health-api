@@ -13,7 +13,11 @@ DECLARE
   d date;
   t time;
   dow int;
-  admin uuid := '00000000-0000-4000-8000-000000000001';
+  -- Autor de auditoría: el usuario administrador de plataforma, SI existe en esta base.
+  -- Ningún otro archivo de database/SQL lo siembra, y created_by_user_id /
+  -- updated_by_user_id son FK a iam.users: con el uuid fijo a secas, una base
+  -- nueva (sin ese usuario) cortaba el init acá. Sin él, las filas quedan sin autor.
+  admin uuid := (SELECT id FROM iam.users WHERE id = '00000000-0000-4000-8000-000000000001');
 BEGIN
   FOR u IN
     SELECT du.id, du.name, du.tenant_id

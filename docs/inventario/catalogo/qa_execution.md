@@ -2,7 +2,7 @@
 
 # Catálogo del schema `qa_execution`
 
-- **Tablas:** 4 · **Columnas:** 66 (38 con descripción: 57.6 %) · **Índices:** 6
+- **Tablas:** 4 · **Columnas:** 66 (50 con descripción: 75.8 %) · **Índices:** 6
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -71,37 +71,37 @@ Agrupa objetivos de ejecución en planes de control de calidad del producto de s
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
-| 2 | `run_id` | `uuid` | Clave foránea → qa_lab.test_runs.id; Obligatoria | FK → qa_lab.test_runs creada para este plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:13`)_ | coincide |
-| 3 | `suite_id` | `uuid` | Clave foránea → qa_lab.test_suites.id; Obligatoria | FK → qa_lab.test_suites _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:17`)_ | coincide |
-| 4 | `suite_version` | `integer` | Obligatoria | Versión publicada de la suite al planificar. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:21`)_ | coincide |
-| 5 | `environment_id` | `uuid` | Clave foránea → qa_lab.test_environments.id; Obligatoria | FK → qa_lab.test_environments _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:25`)_ | coincide |
-| 6 | `target_id` | `uuid` | Clave foránea → qa_execution.execution_targets.id; Obligatoria | FK → qa_execution.execution_targets _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:29`)_ | coincide |
-| 7 | `plan_hash` | `varchar` | Obligatoria | Identidad de lo aprobado. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:33`)_ | coincide |
-| 8 | `plan_json` | `jsonb` | Obligatoria | Pasos (caso, método, URL, hash del cuerpo). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:37`)_ | coincide |
-| 9 | `limits_json` | `jsonb` | Obligatoria | Límites efectivos tras recorte. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:41`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_plans.entity.ts:12`)_ | coincide |
+| 2 | `run_id` | `uuid` | Clave foránea → qa_lab.test_runs.id; Obligatoria | FK → qa_lab.test_runs creada para este plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:16`)_ | coincide |
+| 3 | `suite_id` | `uuid` | Clave foránea → qa_lab.test_suites.id; Obligatoria | FK → qa_lab.test_suites _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:20`)_ | coincide |
+| 4 | `suite_version` | `integer` | Obligatoria | Versión publicada de la suite al planificar. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:24`)_ | coincide |
+| 5 | `environment_id` | `uuid` | Clave foránea → qa_lab.test_environments.id; Obligatoria | FK → qa_lab.test_environments _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:28`)_ | coincide |
+| 6 | `target_id` | `uuid` | Clave foránea → qa_execution.execution_targets.id; Obligatoria | FK → qa_execution.execution_targets _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:32`)_ | coincide |
+| 7 | `plan_hash` | `varchar` | Obligatoria | Identidad de lo aprobado. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:36`)_ | coincide |
+| 8 | `plan_json` | `jsonb` | Obligatoria | Pasos (caso, método, URL, hash del cuerpo). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:40`)_ | coincide |
+| 9 | `limits_json` | `jsonb` | Obligatoria | Límites efectivos tras recorte. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:44`)_ | coincide |
 | 10 | `requires_approval` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 11 | `approval_reasons` | `jsonb` | Opcional | _sin dato_ | coincide |
-| 12 | `status` | `varchar` | Obligatoria | PENDING_APPROVAL ¦ QUEUED ¦ RUNNING ¦ PASSED ¦ FAILED ¦ TIMED_OUT ¦ CANCELLED ¦ INFRA_ERROR ¦ REJECTED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:56`)_ | coincide |
-| 13 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:60`)_ | coincide |
+| 12 | `status` | `varchar` | Obligatoria | PENDING_APPROVAL ¦ QUEUED ¦ RUNNING ¦ PASSED ¦ FAILED ¦ TIMED_OUT ¦ CANCELLED ¦ INFRA_ERROR ¦ REJECTED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:65`)_ | coincide |
+| 13 | `requested_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:69`)_ | coincide |
 | 14 | `idempotency_key` | `varchar` | Opcional | _sin dato_ | coincide |
-| 15 | `lease_owner` | `varchar` | Opcional | Fencing del worker. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:71`)_ | coincide |
+| 15 | `lease_owner` | `varchar` | Opcional | Fencing del worker. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:83`)_ | coincide |
 | 16 | `lease_expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 17 | `attempt` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 18 | `cancel_requested_at` | `timestamptz` | Opcional | Intención; la confirma el runner. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:85`)_ | coincide |
+| 18 | `cancel_requested_at` | `timestamptz` | Opcional | Intención; la confirma el runner. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:103`)_ | coincide |
 | 19 | `started_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 20 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 21 | `requests_sent` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 22 | `cases_passed` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 23 | `cases_failed` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 24 | `cases_not_run` | `integer` | Obligatoria | Omitidos o bloqueados: no cuentan como pasados. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:116`)_ | coincide |
+| 24 | `cases_not_run` | `integer` | Obligatoria | Omitidos o bloqueados: no cuentan como pasados. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:149`)_ | coincide |
 | 25 | `error_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 26 | `error_message` | `text` | Opcional | _sin dato_ | coincide |
-| 27 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 28 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 29 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:132`)_ | coincide |
-| 30 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:136`)_ | coincide |
-| 31 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_plans.entity.ts:167`)_ | coincide |
+| 28 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_plans.entity.ts:173`)_ | coincide |
+| 29 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:177`)_ | coincide |
+| 30 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:181`)_ | coincide |
+| 31 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_plans.entity.ts:187`)_ | coincide |
 
 #### Relaciones
 
@@ -176,26 +176,26 @@ Define objetivos verificables para los planes de ejecución de calidad, vinculad
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
-| 2 | `environment_id` | `uuid` | Clave foránea → qa_lab.test_environments.id; Obligatoria | FK → qa_lab.test_environments. Un destino por entorno. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:13`)_ | coincide |
-| 3 | `scheme` | `varchar` | Obligatoria | http ¦ https _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:17`)_ | coincide |
-| 4 | `host` | `varchar` | Obligatoria | Host exacto (sin comodines). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:21`)_ | coincide |
-| 5 | `port` | `integer` | Obligatoria | Puerto exacto. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:25`)_ | coincide |
-| 6 | `allowed_path_prefixes` | `jsonb` | Obligatoria | Prefijos de ruta aprobados. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:29`)_ | coincide |
-| 7 | `allow_private_network` | `boolean` | Obligatoria | Autoriza conectar a red privada/loopback (nunca link-local ni metadata). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:37`)_ | coincide |
-| 8 | `allow_mutations` | `boolean` | Obligatoria | Admite POST/PUT/PATCH/DELETE (nunca en producción). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:41`)_ | coincide |
-| 9 | `auth_secret_ref` | `varchar` | Opcional | Nombre de variable QA_TARGET_*; el valor nunca se guarda. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:45`)_ | coincide |
-| 10 | `auth_header_name` | `varchar` | Opcional | Cabecera donde va el secreto (por defecto Authorization). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:53`)_ | coincide |
-| 11 | `max_requests` | `integer` | Obligatoria | Tope de peticiones por plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:61`)_ | coincide |
-| 12 | `max_duration_seconds` | `integer` | Obligatoria | Tope de duración por plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:65`)_ | coincide |
-| 13 | `request_timeout_ms` | `integer` | Obligatoria | Timeout por petición. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:69`)_ | coincide |
-| 14 | `min_interval_ms` | `integer` | Obligatoria | Separación mínima entre peticiones. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:73`)_ | coincide |
-| 15 | `status` | `varchar` | Obligatoria | ACTIVE ¦ DISABLED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:77`)_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:87`)_ | coincide |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:91`)_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_targets.entity.ts:12`)_ | coincide |
+| 2 | `environment_id` | `uuid` | Clave foránea → qa_lab.test_environments.id; Obligatoria | FK → qa_lab.test_environments. Un destino por entorno. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:16`)_ | coincide |
+| 3 | `scheme` | `varchar` | Obligatoria | http ¦ https _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:20`)_ | coincide |
+| 4 | `host` | `varchar` | Obligatoria | Host exacto (sin comodines). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:24`)_ | coincide |
+| 5 | `port` | `integer` | Obligatoria | Puerto exacto. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:28`)_ | coincide |
+| 6 | `allowed_path_prefixes` | `jsonb` | Obligatoria | Prefijos de ruta aprobados. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:32`)_ | coincide |
+| 7 | `allow_private_network` | `boolean` | Obligatoria | Autoriza conectar a red privada/loopback (nunca link-local ni metadata). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:40`)_ | coincide |
+| 8 | `allow_mutations` | `boolean` | Obligatoria | Admite POST/PUT/PATCH/DELETE (nunca en producción). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:44`)_ | coincide |
+| 9 | `auth_secret_ref` | `varchar` | Opcional | Nombre de variable QA_TARGET_*; el valor nunca se guarda. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:48`)_ | coincide |
+| 10 | `auth_header_name` | `varchar` | Opcional | Cabecera donde va el secreto (por defecto Authorization). _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:56`)_ | coincide |
+| 11 | `max_requests` | `integer` | Obligatoria | Tope de peticiones por plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:64`)_ | coincide |
+| 12 | `max_duration_seconds` | `integer` | Obligatoria | Tope de duración por plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:68`)_ | coincide |
+| 13 | `request_timeout_ms` | `integer` | Obligatoria | Timeout por petición. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:72`)_ | coincide |
+| 14 | `min_interval_ms` | `integer` | Obligatoria | Separación mínima entre peticiones. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:76`)_ | coincide |
+| 15 | `status` | `varchar` | Obligatoria | ACTIVE ¦ DISABLED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:80`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_targets.entity.ts:86`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/execution_targets.entity.ts:92`)_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:96`)_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:100`)_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/execution_targets.entity.ts:106`)_ | coincide |
 
 #### Relaciones
 
@@ -259,14 +259,14 @@ Registra aprobaciones de planes de ejecución de calidad, aportando control de r
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
-| 2 | `plan_id` | `uuid` | Clave foránea → qa_execution.execution_plans.id; Obligatoria | FK → qa_execution.execution_plans _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:13`)_ | coincide |
-| 3 | `plan_hash` | `varchar` | Obligatoria | Hash aprobado; si el plan cambia, deja de valer. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:17`)_ | coincide |
-| 4 | `decision` | `varchar` | Obligatoria | APPROVED ¦ REJECTED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:21`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/plan_approvals.entity.ts:12`)_ | coincide |
+| 2 | `plan_id` | `uuid` | Clave foránea → qa_execution.execution_plans.id; Obligatoria | FK → qa_execution.execution_plans _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:16`)_ | coincide |
+| 3 | `plan_hash` | `varchar` | Obligatoria | Hash aprobado; si el plan cambia, deja de valer. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:20`)_ | coincide |
+| 4 | `decision` | `varchar` | Obligatoria | APPROVED ¦ REJECTED _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:24`)_ | coincide |
 | 5 | `reason` | `text` | Obligatoria | _sin dato_ | coincide |
-| 6 | `approver_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:28`)_ | coincide |
+| 6 | `approver_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | FK → iam.users _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_approvals.entity.ts:34`)_ | coincide |
 | 7 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/plan_approvals.entity.ts:46`)_ | coincide |
 
 #### Relaciones
 
@@ -321,13 +321,13 @@ Deja una secuencia de eventos de los planes de calidad para auditar cambios y re
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
-| 2 | `plan_id` | `uuid` | Clave foránea → qa_execution.execution_plans.id; Obligatoria | FK → qa_execution.execution_plans _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:13`)_ | coincide |
-| 3 | `seq` | `integer` | Obligatoria | Orden dentro del plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:17`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/plan_events.entity.ts:12`)_ | coincide |
+| 2 | `plan_id` | `uuid` | Clave foránea → qa_execution.execution_plans.id; Obligatoria | FK → qa_execution.execution_plans _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:16`)_ | coincide |
+| 3 | `seq` | `integer` | Obligatoria | Orden dentro del plan. _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:20`)_ | coincide |
 | 4 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 5 | `case_id` | `uuid` | Clave foránea → qa_lab.test_cases.id; Opcional | FK → qa_lab.test_cases _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:24`)_ | coincide |
+| 5 | `case_id` | `uuid` | Clave foránea → qa_lab.test_cases.id; Opcional | FK → qa_lab.test_cases _(JSDOC_ENTIDAD, `src/modules/qa_execution/entities/plan_events.entity.ts:30`)_ | coincide |
 | 6 | `detail_json` | `jsonb` | Opcional | _sin dato_ | coincide |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/qa_execution/entities/plan_events.entity.ts:47`)_ | coincide |
 
 #### Relaciones
 

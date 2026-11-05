@@ -43,6 +43,16 @@ import { TELEMETRY_SMOKE } from './modules/telemetry.smoke';
 
 // --- registro de módulos (el orquestador cablea con tools/wire-module.mjs) ---
 
+/**
+ * Marca los casos de admin de un módulo con `tenantScoped`: el admin del smoke es `SUPERADMIN`, su
+ * tenant sale del encabezado `X-Tenant-Id`, y las rutas con datos de tenant responden 422
+ * `TENANT_REQUIRED` sin él. Los casos sin autenticación o con el token de otro actor quedan igual.
+ */
+const enTenantSemilla = (casos: SmokeCase[]): SmokeCase[] =>
+  casos.map((c) =>
+    c.auth === false || c.token ? c : { ...c, tenantScoped: true },
+  );
+
 export const ALL_SMOKE: SmokeCase[] = [
   ...DIRECTORY_SMOKE,
   ...PROFILES_SMOKE,
@@ -50,31 +60,31 @@ export const ALL_SMOKE: SmokeCase[] = [
   // Clinical antes que Consent: el caso de consentimiento informado de tratamiento
   // consume un encounter real (`ctx.vars.clinEncounterId`) que produce clinical.
   ...CLINICAL_SMOKE,
-  ...CONSENT_SMOKE,
+  ...enTenantSemilla(CONSENT_SMOKE),
   ...FORMS_SMOKE,
   ...AUDIT_SMOKE,
   ...SYSTEM_OPS_SMOKE,
-  ...GEO_SMOKE,
-  ...PRACTICE_SMOKE,
+  ...enTenantSemilla(GEO_SMOKE),
+  ...enTenantSemilla(PRACTICE_SMOKE),
   // Scheduling después de Profiles: consume el paciente y el profesional reales
   // que aquél publica en `ctx.vars`.
-  ...SCHEDULING_SMOKE,
+  ...enTenantSemilla(SCHEDULING_SMOKE),
   ...CHART_SMOKE,
-  ...INTEGRATIONS_SMOKE,
-  ...ACCOUNTING_SMOKE,
-  ...BILLING_SMOKE,
-  ...CLINICAL_EXT_SMOKE,
+  ...enTenantSemilla(INTEGRATIONS_SMOKE),
+  ...enTenantSemilla(ACCOUNTING_SMOKE),
+  ...enTenantSemilla(BILLING_SMOKE),
+  ...enTenantSemilla(CLINICAL_EXT_SMOKE),
   ...COMMUNITY_SMOKE,
-  ...ORGANIZATION_EXTENSIONS_SMOKE,
-  ...DIAGNOSTIC_UNITS_SMOKE,
-  ...PHARMACY_SMOKE,
-  ...DIAGNOSTICS_SMOKE,
-  ...IDENTITY_ASSURANCE_SMOKE,
-  ...DELEGATED_ACCESS_SMOKE,
+  ...enTenantSemilla(ORGANIZATION_EXTENSIONS_SMOKE),
+  ...enTenantSemilla(DIAGNOSTIC_UNITS_SMOKE),
+  ...enTenantSemilla(PHARMACY_SMOKE),
+  ...enTenantSemilla(DIAGNOSTICS_SMOKE),
+  ...enTenantSemilla(IDENTITY_ASSURANCE_SMOKE),
+  ...enTenantSemilla(DELEGATED_ACCESS_SMOKE),
   ...READ_MODELS_SMOKE,
-  ...INTEGRATION_CONTRACTS_SMOKE,
-  ...PHARMACY_INVENTORY_SMOKE,
-  ...INSURANCE_SMOKE,
+  ...enTenantSemilla(INTEGRATION_CONTRACTS_SMOKE),
+  ...enTenantSemilla(PHARMACY_INVENTORY_SMOKE),
+  ...enTenantSemilla(INSURANCE_SMOKE),
   ...TELEMETRY_SMOKE,
   // Va al final: cierra sesión del paciente y su recorrido no debe alterar el estado que
   // esperan los casos por módulo.

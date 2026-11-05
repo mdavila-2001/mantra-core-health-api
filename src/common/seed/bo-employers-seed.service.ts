@@ -55,7 +55,9 @@ const STRING_DATA_TYPE = 'string';
  * Por el mismo mecanismo que el resto de la cadena: todo id es determinista
  * (UUIDv5 sobre una clave estable), así que una corrida repetida compara por id
  * e inserta sólo lo que falta. Arrancar dos veces no duplica nada, y **ampliar
- * la lista siembra sólo las entradas nuevas**.
+ * la lista siembra sólo las entradas nuevas**; lo único que se actualiza de lo
+ * ya sembrado es el `ordinal` de las membresías, para que las nuevas queden en
+ * su lugar alfabético y las salidas sigan al final.
  *
  * Corre **después** de `TerminologySeedService`, por lo mismo que las
  * ocupaciones: los conceptos cuelgan de `SEED.codeSystemVersionId` y las
@@ -310,22 +312,51 @@ export class BoEmployersSeedService {
     return created;
   }
 
-  /** La expansión: un miembro por empresa, con el ordinal del orden declarado. */
+  /**
+   * La expansión: un miembro por empresa, con el ordinal del orden declarado.
+   *
+   * Las membresías que ya existen no se recrean, pero sí se **realinean**: al
+   * ampliar el catálogo las empresas nuevas caen entre medio de las viejas
+   * (cada sector va en orden alfabético), y si las ya sembradas conservaran su
+   * posición original el buscador quedaría desordenado — dos filas con el mismo
+   * ordinal y «Otra empresa» a mitad de la lista. Mismo arreglo que
+   * `BoOccupationsSeedService.seedMemberships`.
+   */
   private async seedMemberships(
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const existing = await this.existingIds(
-      em,
+    // Se leen con su `ordinal` para poder corregirlo en las ya sembradas.
+    const rows = await em.find(
       ValueSetMembers,
-      BO_EMPLOYERS.map((employer) => boEmployerMemberId(employer.code)),
+      {
+        id: {
+          $in: BO_EMPLOYERS.map((employer) =>
+            boEmployerMemberId(employer.code),
+          ),
+        },
+      },
+      { fields: ['id', 'ordinal'] as never },
+    );
+    const existing = new Map(
+      rows.map((row) => [
+        (row as { id: string }).id,
+        row as { ordinal?: number },
+      ]),
     );
 
     let created = 0;
     const versionIdentifier = boEmployerVersionId();
     BO_EMPLOYERS.forEach((employer, ordinal) => {
       const id = boEmployerMemberId(employer.code);
-      if (existing.has(id)) return;
+      const current = existing.get(id);
+      if (current !== undefined) {
+        if (current.ordinal !== ordinal) {
+          current.ordinal = ordinal;
+          (current as { updatedAt?: Date }).updatedAt = now;
+        }
+        return;
+      }
       em.create(
         ValueSetMembers,
         {

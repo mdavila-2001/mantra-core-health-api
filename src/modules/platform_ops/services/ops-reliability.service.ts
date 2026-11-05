@@ -4,12 +4,12 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { OpsReliabilityRepository } from '../repositories';
 import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import {
   RecordSloMeasurementDto,
   SloMeasurementResponseDto,
@@ -53,11 +53,13 @@ export class OpsReliabilityService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param reliabilityRepo - Valor de reliability repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly reliabilityRepo: OpsReliabilityRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsReliabilityService.name);
@@ -117,16 +119,12 @@ export class OpsReliabilityService {
     }
 
     return this.em.transactional(async (tx) => {
-      const slo = await this.reliabilityRepo.findSloById(tx, sloId);
-      if (!slo) {
-        throw new ResourceNotFoundException(
-          'Objetivo de nivel de servicio no encontrado',
-          {
-            sloId,
-          },
-          PlatformOpsErrorReason.SLO_NOT_FOUND,
-        );
-      }
+      // El SLO no lleva tenant: lo hereda de su indicador y éste de su componente.
+      const slo = await this.scope.viaSlo(
+        tx,
+        await this.reliabilityRepo.findSloById(tx, sloId),
+        sloId,
+      );
       if (slo.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El objetivo no está activo',
@@ -231,17 +229,26 @@ export class OpsReliabilityService {
       'Recording error budget burn event',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const policy = await this.reliabilityRepo.findPolicyForUpdate(
+      const foundPolicy = await this.reliabilityRepo.findPolicyForUpdate(
         tx,
         policyId,
       );
-      if (!policy) {
-        throw new ResourceNotFoundException(
-          'Política de error budget no encontrada',
-          { policyId },
-          PlatformOpsErrorReason.ERROR_BUDGET_POLICY_NOT_FOUND,
+      // La política hereda el tenant de su SLO (SLO → indicador → componente).
+      const policy = await this.scope.viaSlo(
+        tx,
+        foundPolicy,
+        foundPolicy?.serviceLevelObjectiveId ?? policyId,
+      );
+      // El incidente que la quema cita debe ser del mismo tenant.
+      if (dto.healthIncidentId) {
+        const incident = await this.reliabilityRepo.findIncidentInTenant(
+          tx,
+          dto.healthIncidentId,
+          tenantId,
         );
+        this.scope.require(incident, incident?.tenantId);
       }
       if (policy.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
@@ -345,19 +352,16 @@ export class OpsReliabilityService {
     const measuredAt = dto.measuredAt ? new Date(dto.measuredAt) : new Date();
 
     return this.em.transactional(async (tx) => {
-      const plan = await this.reliabilityRepo.findCapacityPlanForUpdate(
+      const foundPlan = await this.reliabilityRepo.findCapacityPlanForUpdate(
         tx,
         planId,
       );
-      if (!plan) {
-        throw new ResourceNotFoundException(
-          'Plan de capacidad no encontrado',
-          {
-            planId,
-          },
-          PlatformOpsErrorReason.CAPACITY_PLAN_NOT_FOUND,
-        );
-      }
+      // El plan hereda el tenant de su componente.
+      const plan = await this.scope.viaComponent(
+        tx,
+        foundPlan,
+        foundPlan?.serviceComponentId ?? planId,
+      );
       if (plan.statusConceptId !== CONCEPTS.CAPACITY_PLAN_ACTIVE) {
         throw new PreconditionFailedException(
           'El plan de capacidad no está activo',

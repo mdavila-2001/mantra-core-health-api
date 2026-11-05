@@ -1,9 +1,6 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { badRequestWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Valida un query param con un instante ISO 8601 (`?from=2026-08-07T00:00:00Z`)
@@ -26,7 +23,7 @@ export class ParseOptionalDatePipe implements PipeTransform<
    * @param value - Valor crudo del query param.
    * @param metadata - Metadatos del argumento; se usa el nombre en el mensaje.
    * @returns El instante, o `undefined` si el parámetro no vino.
-   * @throws BadRequestException si el valor no es una fecha ISO 8601 válida.
+   * @throws BadRequestException (`INVALID_DATE`) si el valor no es una fecha ISO 8601 válida.
    */
   transform(
     value: string | undefined,
@@ -36,8 +33,10 @@ export class ParseOptionalDatePipe implements PipeTransform<
 
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) {
-      throw new BadRequestException(
+      throw badRequestWithReason(
         `${metadata.data ?? 'el parámetro'} debe ser una fecha ISO 8601 (p. ej. 2026-08-07T00:00:00Z)`,
+        SystemErrorReason.INVALID_DATE,
+        { parameter: metadata.data ?? null },
       );
     }
     return parsed;

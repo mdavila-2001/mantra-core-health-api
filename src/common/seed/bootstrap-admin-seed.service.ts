@@ -4,13 +4,13 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   AuthenticationCredentials,
   UserGlobalRoles,
-  Users,
 } from '../../modules/iam/entities';
 import { TenantMemberships } from '../../modules/directory/entities';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { IamUsersService } from '../../modules/iam/application/services';
-import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
+import { CONCEPTS, SEED } from '../constants/concepts';
 import { createdBy } from '../persistence/audit-fields';
+import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 
 /**
  * Actor determinista al que apuntan las columnas `created_by_user_id` del alta.
@@ -19,7 +19,7 @@ import { createdBy } from '../persistence/audit-fields';
  * actor tiene que existir **antes** que el administrador que crea. Se
  * autorreferencia, igual que el admin del harness de integración.
  */
-const BOOTSTRAP_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
+const BOOTSTRAP_ACTOR_ID = SEED_ACTOR_ID;
 
 /** Configuración de arranque leída del entorno. */
 export interface BootstrapAdminEnv {
@@ -119,7 +119,7 @@ export class BootstrapAdminSeedService {
     if (gate) return { provisioned: false, skipped: gate };
 
     const em = this.orm.em.fork();
-    await this.ensureActor(em);
+    await ensureSeedActor(em);
 
     const userId = await this.ensureAdmin(
       em,
@@ -167,26 +167,6 @@ export class BootstrapAdminSeedService {
     }
 
     return undefined;
-  }
-
-  /** Materializa el actor autorreferenciado que firma el alta del administrador. */
-  private async ensureActor(em: EntityManager): Promise<void> {
-    if (await em.findOne(Users, { id: BOOTSTRAP_ACTOR_ID })) return;
-
-    em.create(
-      Users,
-      {
-        id: BOOTSTRAP_ACTOR_ID,
-        displayName: 'Bootstrap',
-        statusConceptId: CONCEPTS.USER_ACTIVE,
-        mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
-        emailVerified: true,
-        phoneVerified: false,
-        ...createdBy(BOOTSTRAP_ACTOR_ID),
-      },
-      { partial: true },
-    );
-    await em.flush();
   }
 
   /**

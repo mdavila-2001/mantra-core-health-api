@@ -19,10 +19,15 @@ export function escribir(archivo, contenido, { verificar, diferencias }) {
   fs.writeFileSync(archivo, contenido, 'utf8');
 }
 
-export function modeloRoot(root) {
-  const ruta = process.env.MODEL_ROOT
+/** Ruta del repo del modelo: `MODEL_ROOT` si está definida; si no, el hermano de `root`. */
+export function rutaDelModelo(root) {
+  return process.env.MODEL_ROOT
     ? path.resolve(process.env.MODEL_ROOT)
     : path.resolve(root, '..', 'mantra-core-health-model');
+}
+
+export function modeloRoot(root) {
+  const ruta = rutaDelModelo(root);
   if (!fs.existsSync(path.join(ruta, 'Mantra Core Health Context')))
     throw new Error(
       `No se encuentra el repo del modelo en ${ruta}. Definí MODEL_ROOT con su ruta: sin él el inventario no puede citar el propósito ni el dominio de cada módulo.`,

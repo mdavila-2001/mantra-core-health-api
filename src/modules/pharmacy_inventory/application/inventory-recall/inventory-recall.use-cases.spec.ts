@@ -1,6 +1,10 @@
 import { jest } from '@jest/globals';
 import { PreconditionFailedException } from '../../../../common';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import {
+  allowAllScope,
+  SCOPE_PHARMACY_ID,
+} from '../scope/pharmacy-inventory-scope.testing';
 import { CreateRecallHoldUseCase } from './create-recall-hold.use-case';
 import { ReleaseRecallHoldUseCase } from './release-recall-hold.use-case';
 
@@ -31,6 +35,7 @@ describe('Inventory recall use cases', () => {
       lots as any,
       stock as any,
       ledger as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -78,9 +83,10 @@ describe('Inventory recall use cases', () => {
     const hold: any = {
       id: 'hold-1',
       holdStatusConceptId: PINV.HOLD_ACTIVE,
+      pharmacyProductId: 'product-1',
       inventoryLotId: 'lot-1',
     };
-    const lot: any = { id: 'lot-1' };
+    const lot: any = { id: 'lot-1', pharmacyProductId: 'product-1' };
     const positions: any[] = [
       {
         inventoryLocationId: 'location-1',
@@ -104,6 +110,7 @@ describe('Inventory recall use cases', () => {
       lots as any,
       stock as any,
       ledger as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -121,9 +128,15 @@ describe('Inventory recall use cases', () => {
       quarantineQuantity: '0',
       availableQuantity: '8',
     });
+    // PINV-02: farmacia y sede verdaderas, y secuencia de la farmacia; no el
+    // id de la ubicación en su lugar.
+    expect(ledger.nextSequence).toHaveBeenCalledWith(tx, SCOPE_PHARMACY_ID);
     expect(ledger.append).toHaveBeenCalledWith(
       tx,
       expect.objectContaining({
+        pharmacyId: SCOPE_PHARMACY_ID,
+        pharmacySiteId: 'site-1',
+        inventoryLocationId: 'location-1',
         movementTypeConceptId: PINV.MV_QUARANTINE_RELEASE,
         quantityDelta: '0',
         quarantineDelta: '-4',
@@ -154,12 +167,19 @@ describe('Inventory recall use cases', () => {
         findById: jest.fn(async () => ({
           id: 'hold-1',
           holdStatusConceptId: PINV.HOLD_ACTIVE,
+          pharmacyProductId: 'product-1',
           inventoryLotId: 'lot-1',
         })),
       } as any,
-      { findById: jest.fn(async () => ({ id: 'lot-1' })) } as any,
+      {
+        findById: jest.fn(async () => ({
+          id: 'lot-1',
+          pharmacyProductId: 'product-1',
+        })),
+      } as any,
       { findByLot: jest.fn(async () => [position]) } as any,
       ledger as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -199,6 +219,7 @@ describe('Inventory recall use cases', () => {
       {} as any,
       {} as any,
       {} as any,
+      allowAllScope(),
       logger as any,
     );
 

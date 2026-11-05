@@ -81,8 +81,24 @@ describe('runTick', () => {
       failures: 1,
       consecutiveFailures: 1,
       lastOutcome: 'failed',
-      lastError: 'boom',
+      lastErrorCode: 'TICK_FAILED',
     });
+  });
+
+  it('el mensaje del error va al log y nunca al snapshot que sirve /status', async () => {
+    const { logger, error } = buildLogger();
+    const sensitive = 'paciente 4455667 DNI 12345678 alergia penicilina';
+
+    await runTick(logger, 'worker.demo.tick', () =>
+      Promise.reject(new Error(sensitive)),
+    );
+
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      'Worker tick failed',
+    );
+    expect(JSON.stringify(workerHealth.snapshot())).not.toContain(sensitive);
+    expect(JSON.stringify(workerHealth.snapshot())).not.toContain('4455667');
   });
 
   it('descarta el tick solapado en vez de correr dos copias sobre las mismas filas', async () => {

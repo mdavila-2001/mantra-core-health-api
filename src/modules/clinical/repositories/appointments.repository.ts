@@ -48,6 +48,8 @@ export interface CreateAppointmentData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** F5d: consultorio de la cita (el EXCLUDE ex_appointments_care_space_time). */
+  careSpaceId?: string;
 }
 
 /**
@@ -87,12 +89,41 @@ export class AppointmentsRepository {
         reasonText: data.reasonText,
         channelConceptId: data.channelConceptId,
         typeConceptId: data.typeConceptId,
+        ...(data.careSpaceId ? { careSpaceId: data.careSpaceId } : {}),
         createdAt: now,
         updatedAt: now,
         createdByUserId: data.actorUserId,
         updatedByUserId: data.actorUserId,
       },
       { partial: true },
+    );
+  }
+
+  /**
+   * F5d: consultorio de cada cita (`appointmentId → {id, code, name}`).
+   *
+   * @param em - Contexto.
+   * @param appointmentIds - Citas.
+   */
+  async findCareSpaces(
+    em: EntityManager,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>> {
+    if (appointmentIds.length === 0) return new Map();
+    const rows = await em.execute<
+      { appointment_id: string; id: string; code: string; name: string }[]
+    >(
+      `SELECT a.id AS appointment_id, c.id, c.code, c.name
+         FROM clinical.appointments a JOIN practice.care_spaces c ON c.id = a.care_space_id
+        WHERE a.id = ANY(?::uuid[])`,
+      [`{${[...new Set(appointmentIds)].join(',')}}`],
+      'all',
+    );
+    return new Map(
+      rows.map((r) => [
+        r.appointment_id,
+        { id: r.id, code: r.code, name: r.name },
+      ]),
     );
   }
 

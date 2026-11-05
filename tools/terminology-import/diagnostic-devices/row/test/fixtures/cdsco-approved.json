@@ -1,0 +1,116 @@
+[
+ {
+  "category": "md",
+  "records": [
+   {
+    "rownum": 1,
+    "licencetype": "import",
+    "address": "Chitrarath\n5, Darshana Bhawan, HR/62A, Sohan Lal Marg, Pul Pahladpur  South Delhi, Delhi Pincode: 110044 email:  Contact Number: 011-26361598",
+    "premises_add": "Actual Manufacturing Site : M / s Facet Technologies,LLC, \nToyo Kagaku Co. Ltd, 10008 Terajiri, Hino-Cho Gamo-Gum Shiga-Ken 529-1606 Japan  , \rCountry: Japan\rTelephone No.: 770-288-4223 FAX: 770-898-1535 E-Mail : howard_baker@facettechnologies.com\nLegal Manufacturing Site : M / s Facet Technologies,LLC, \n3900 North Commerce Drive Atlanta GA 30344, \rCountry: United States\rTelephone No.: 770-288-4223 FAX: 770-898-1535 E-Mail : howard_baker@facettechnologies.com",
+    "str_licence_no": "Licence no: IMP/MD/2018/000001\nIssued on: 16-MAR-2018",
+    "devicename": "Pressure Bandage",
+    "classname": "Class B",
+    "str_intended_use": "Used after completion of Dialysis for the cessation of bleeding .",
+    "brandname": "Sureseal Pressure Bandage",
+    "modelname": "85200 - (Sureseal XL Pressure Bandage) ",
+    "instname": "CLA - CDSCO",
+    "formno": 12,
+    "formid": 646,
+    "permissionid": "Mjc0Nzk="
+   }
+  ]
+ },
+ {
+  "category": "md",
+  "records": [
+   {
+    "rownum": 1,
+    "licencetype": "Manufacturing",
+    "address": "GPC Medical Limited\nPlot No C-3, Sec B-1, UPSIDC, Trans Delhi Signature City, Loni, Ghaziabad, Uttar Pradesh Pincode: 201102 email:  Contact Number: 11-45545172",
+    "str_licence_no": "Licence No: 02/SCof2018\nIssed On: 09-JAN-2018",
+    "devicename": "Ryle's Tube / Nasogastric Tube",
+    "classname": "Class B",
+    "str_intended_use": "It is used for nutritional feeding purpose or aspiration of intestinal  secretion",
+    "brandname": "GPC Ryle's Tube / Nasogastric Tube",
+    "modelname": "DIS137 - (GPC Ryle’s Tube / Nasogastric Tube) ",
+    "instname": "SLA - Uttar Pradesh",
+    "formno": 2,
+    "formid": 1139,
+    "permissionid": "NDEwNDg5"
+   }
+  ]
+ },
+ {
+  "category": "ivd",
+  "records": [
+   {
+    "rownum": 1,
+    "licencetype": "import",
+    "address": "Siemens Healthcare Private Limited\nSY. No.121/1, 121/2, Ground Floor, Kasaba Hobli, Hosakote Taluk, Dandupalya Village, Tal. Hosakote Bengaluru (Bangalore) Rural, Karnataka Pincode: 562114 email:  Contact Number: 8655737106",
+    "premises_add": "Legal Manufacturing Site : M / s Siemens Healthcare Diagnostics Inc., \n511 Benedict Avenue, Tarrytown, NY 10591, \rCountry: United States\rTelephone No.: 1-914-631-8000 FAX: 1-914-631-8000 E-Mail : sparks-tilman@siemens-healthineers.com\nActual Manufacturing Site : M / s Randox Laboratories Ltd., \n55, Diamond Road, Crumlin, County Antrim, BT29 4QY, \rCountry: United Kingdom\rTelephone No.: 4402894422413 FAX: 4402894422413 E-Mail : technical.services@randox.com",
+    "str_licence_no": "Licence no: IMP/IVD/2018/000001\nIssued on: 08-DEC-2023",
+    "devicename": "Atellica® CH Calcium_2 (CA_2)",
+    "classname": "Class B",
+    "str_intended_use": "The Atellica® CH Calcium_2 (CA_2) assay is for in vitro diagnostic use in the quantitative determination of calcium in human serum, plasma (lithium heparin), and urine on the Atellica® CH Analyzer. Such measurements are used in the diagnosis and treatment of parathyroid disease, a variety of bone diseases, chronic renal failure, and tetany.",
+    "brandname": "Atellica® CH Calcium_2 (CA_2)",
+    "modelname": "NIL",
+    "instname": "CLA - CDSCO",
+    "formno": 12,
+    "formid": 102496,
+    "permissionid": "MA=="
+   },
+   {
+    "rownum": 2429,
+    "licencetype": "import",
+    "address": "Roche Diagnostics India Pvt. Ltd.\nCabin No. 1, 601-B, 6TH FR, Silver Utopia, Cardinal Gracious Road, Chakala, Andheri(E), Andheri East Mumbai City, Maharashtra Pincode: 400069 email:  Contact Number: Mumbai City Maharashtra",
+    "premises_add": "Actual Manufacturing Site : M / s Roche Diagnostics GmbH, \nSandhofer Strasse 116, 68305, Mannheim, \rCountry: Germany\rTelephone No.: 49 621 759 8946 FAX: 49 621 759 8946 E-Mail : global.cps-regulatory-affairs@roche.com\nLegal Manufacturing Site : M / s Roche Diagnostics GmbH, \nSandhofer Strasse 116, 68305, Mannheim, \rCountry: Germany\rTelephone No.: 49 621 759 8946 FAX: 49 621 759 8946 E-Mail : global.cps-regulatory-affairs@roche.com",
+    "str_licence_no": "Licence no: IMP/IVD/2018/000038\nIssued on: 01-FEB-2024",
+    "devicename": "B2MG",
+    "classname": "Class C",
+    "str_intended_use": "Immunoturbidimetric assay for the quantitative in vitro determination of beta 2‑microglobulin (B2MG) in human serum and plasma on Roche/Hitachi\ncobas c systems.",
+    "brandname": "B2MG",
+    "modelname": "NIL",
+    "instname": "CLA - CDSCO",
+    "formno": 12,
+    "formid": 93512,
+    "permissionid": "MA=="
+   },
+   {
+    "rownum": 2430,
+    "licencetype": "import",
+    "address": "Roche Diagnostics India Pvt. Ltd.\nCabin No. 1, 601-B, 6TH FR, Silver Utopia, Cardinal Gracious Road, Chakala, Andheri(E), Andheri East Mumbai City, Maharashtra Pincode: 400069 email:  Contact Number: Mumbai City Maharashtra",
+    "premises_add": "Actual Manufacturing Site : M / s Roche Diagnostics GmbH, \nSandhofer Strasse 116, 68305, Mannheim, \rCountry: Germany\rTelephone No.: 49 621 759 8946 FAX: 49 621 759 8946 E-Mail : global.cps-regulatory-affairs@roche.com\nLegal Manufacturing Site : M / s Roche Diagnostics GmbH, \nSandhofer Strasse 116, 68305, Mannheim, \rCountry: Germany\rTelephone No.: 49 621 759 8946 FAX: 49 621 759 8946 E-Mail : global.cps-regulatory-affairs@roche.com",
+    "str_licence_no": "Licence no: IMP/IVD/2018/000038\nIssued on: 01-FEB-2024",
+    "devicename": "B2MG",
+    "classname": "Class C",
+    "str_intended_use": "Immunoturbidimetric assay for the quantitative in vitro determination of beta 2‑microglobulin (B2MG) in human urine on Roche/Hitachi cobas c systems.",
+    "brandname": "B2MG",
+    "modelname": "NIL",
+    "instname": "CLA - CDSCO",
+    "formno": 12,
+    "formid": 93512,
+    "permissionid": "MA=="
+   }
+  ]
+ },
+ {
+  "category": "ivd",
+  "records": [
+   {
+    "rownum": 1,
+    "licencetype": "Manufacturing",
+    "address": "SD Biosensor Healthcare Pvt. Ltd\nPlot no. 38, Sector 4, IMT Manesar, , Gurgaon, Haryana Pincode: 122052 email:  Contact Number: 01246943201",
+    "str_licence_no": "Licence No: 776-B(H)\nIssed On: 28-MAR-2017",
+    "devicename": "ULTRA Tsutsugamushi IgM/IgG",
+    "classname": "Class B",
+    "str_intended_use": "One step rapid test kit for the detection of IgM/IgG antibodies to O.tsutsugamushi in human serum, plasma or whole blood.",
+    "brandname": "NA",
+    "modelname": "NIL",
+    "instname": "SLA - Haryana",
+    "formno": 2,
+    "formid": 9982,
+    "permissionid": "NTAwMzU3"
+   }
+  ]
+ }
+]

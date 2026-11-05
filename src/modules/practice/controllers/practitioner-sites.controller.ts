@@ -27,10 +27,12 @@ import {
   CreateOwnSiteDto,
   SetSiteBankQrDto,
   SetSiteContactPhoneDto,
+  SetSiteLogoDto,
   UpdateOwnSiteDto,
   PractitionerSiteDto,
   PractitionerSitesResponseDto,
   MyRoleAssignmentResponseDto,
+  JoinablePracticeResponseDto,
 } from '../dto';
 
 /**
@@ -82,6 +84,25 @@ export class PractitionerSitesController {
     return this.workforceService.listMyAssignments(actor);
   }
 
+  /**
+   * Las organizaciones a las que se puede pedir vincularse: el selector de
+   * «Pedir una vinculación». Cruza tenants a propósito (ver
+   * `PracticeWorkforceService.listJoinablePractices`); por eso no usa
+   * `GET /practices`, que sólo ve la organización activa de la sesión.
+   */
+  @Get('me/joinable-practices')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Organizaciones a las que puedo pedir vincularme',
+    description:
+      'Organizaciones activas de cualquier tenant, sin consultorios propios ni aquellas donde ya hay una vinculación pendiente, activa o suspendida.',
+  })
+  listJoinablePractices(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JoinablePracticeResponseDto[]> {
+    return this.workforceService.listJoinablePractices(actor);
+  }
+
   /** UC-14-15. */
   @Get(':profileId/sites')
   @Roles(
@@ -111,6 +132,11 @@ export class PractitionerSitesController {
    * ALV-005/006 — autoservicio: el profesional da de alta su propio
    * consultorio, sin depender de que una organización lo afilie primero.
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_CREATED',
+    entity: 'practice_site',
+    entityId: 'result.id',
+  })
   @Post('me/sites')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)
@@ -133,6 +159,11 @@ export class PractitionerSitesController {
    * Sólo alcanza al consultorio propio: una sede de otra organización es de
    * ella, y lo que el profesional tiene con ella es una vinculación.
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_UPDATED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Patch('me/sites/:siteId')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({
@@ -155,6 +186,11 @@ export class PractitionerSitesController {
    * donde tiene vinculación vigente: lo que se guarda no es la sede, es con
    * qué cobra él ahí. El archivo ya entró por `POST /common/files/upload`.
    */
+  @Audited({
+    action: 'PRACTICE_SITE_BANK_QR_SET',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Put('me/sites/:siteId/bank-qr')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({
@@ -168,6 +204,33 @@ export class PractitionerSitesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerSiteDto> {
     return this.sitesService.setSiteBankQr(actor, siteId, dto.fileId);
+  }
+
+  /**
+   * El logo del consultorio propio, el que sale en el membrete de sus PDF.
+   *
+   * A diferencia del QR, sólo alcanza al consultorio **propio**: una sede de
+   * otra organización responde 404. El archivo ya entró por
+   * `POST /common/files/upload` y se valida como el logo de una organización.
+   */
+  @Audited({
+    action: 'PRACTICE_SITE_LOGO_SET',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
+  @Put('me/sites/:siteId/logo')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({
+    summary: 'Fijar o quitar el logo del consultorio propio',
+    description:
+      'Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.',
+  })
+  setSiteLogo(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetSiteLogoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.setSiteLogo(actor, siteId, dto.fileId);
   }
 
   /** El contacto del profesional en una sede con vinculación activa. */
@@ -195,6 +258,11 @@ export class PractitionerSitesController {
    * ALV-005 — retira un consultorio propio (no lo borra: cierra la
    * vinculación vigente con esa sede).
    */
+  @Audited({
+    action: 'PRACTITIONER_OWN_SITE_DELETED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Delete('me/sites/:siteId')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.NO_CONTENT)

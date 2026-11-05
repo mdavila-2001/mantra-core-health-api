@@ -15,6 +15,8 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { EducationScopeService } from './education-scope.service';
+import { T1, T2, expectOutOfScope, inTenant } from './education.testing';
 
 const actor = { id: 'user-1', roles: ['EDUCATION_ADMIN'] };
 const COURSE = '11111111-1111-1111-1111-111111111111';
@@ -46,6 +48,7 @@ function build() {
     findCourseInstructors: mockFn(),
     createCohort: mockFn(),
     findCohortByCode: mockFn(),
+    findCohortById: mockFn(),
     findCohortForUpdate: mockFn(),
     createAssessment: mockFn(),
     findAssessmentById: mockFn(),
@@ -56,12 +59,14 @@ function build() {
     findReviewByReviewer: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new EducationCatalogService(
+  const scope = new EducationScopeService(catalogRepo as any, {} as any);
+  const raw = new EducationCatalogService(
     em as any,
     catalogRepo,
+    scope,
     logger as any,
   );
-  return { service, tx, catalogRepo };
+  return { raw, service: inTenant(raw), tx, catalogRepo };
 }
 
 /**
@@ -184,9 +189,11 @@ describe('EducationCatalogService', () => {
       const d = build();
       const course: any = {
         id: COURSE,
+        tenantId: T1,
         currentVersion: 3,
         statusConceptId: CONCEPTS.COURSE_PUBLISHED,
       };
+      d.catalogRepo.findCourseById.mockResolvedValue(course);
       d.catalogRepo.findCourseForUpdate.mockResolvedValue(course);
       d.catalogRepo.findVersion.mockResolvedValue(null);
       d.catalogRepo.createVersion.mockReturnValue({ id: 'ver-4' });
@@ -199,11 +206,14 @@ describe('EducationCatalogService', () => {
 
     it('rejects a version number that already exists', async () => {
       const d = build();
-      d.catalogRepo.findCourseForUpdate.mockResolvedValue({
+      const course = {
         id: COURSE,
+        tenantId: T1,
         currentVersion: 1,
         statusConceptId: CONCEPTS.COURSE_PUBLISHED,
-      });
+      };
+      d.catalogRepo.findCourseById.mockResolvedValue(course);
+      d.catalogRepo.findCourseForUpdate.mockResolvedValue(course);
       d.catalogRepo.findVersion.mockResolvedValue({ id: 'ver-2' });
 
       await expect(
@@ -213,11 +223,14 @@ describe('EducationCatalogService', () => {
 
     it('refuses to version an archived course', async () => {
       const d = build();
-      d.catalogRepo.findCourseForUpdate.mockResolvedValue({
+      const course = {
         id: COURSE,
+        tenantId: T1,
         currentVersion: 1,
         statusConceptId: CONCEPTS.COURSE_ARCHIVED,
-      });
+      };
+      d.catalogRepo.findCourseById.mockResolvedValue(course);
+      d.catalogRepo.findCourseForUpdate.mockResolvedValue(course);
 
       await expect(
         d.service.publishVersion(COURSE, {}, actor as any),
@@ -226,7 +239,7 @@ describe('EducationCatalogService', () => {
 
     it('fails when the course does not exist', async () => {
       const d = build();
-      d.catalogRepo.findCourseForUpdate.mockResolvedValue(null);
+      d.catalogRepo.findCourseById.mockResolvedValue(null);
 
       await expect(
         d.service.publishVersion(COURSE, {}, actor as any),
@@ -243,7 +256,10 @@ describe('EducationCatalogService', () => {
 
     it('creates the instructor record and assigns it', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findInstructorByProfile.mockResolvedValue(null);
       d.catalogRepo.createInstructor.mockReturnValue({ id: 'inst-1' });
       d.catalogRepo.findCourseInstructors.mockResolvedValue([]);
@@ -261,7 +277,10 @@ describe('EducationCatalogService', () => {
 
     it('reuses the instructor record of a profile that already teaches', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findInstructorByProfile.mockResolvedValue({
         id: 'inst-existing',
       });
@@ -276,7 +295,10 @@ describe('EducationCatalogService', () => {
 
     it('rejects assigning the same instructor twice', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findInstructorByProfile.mockResolvedValue({ id: 'inst-1' });
       d.catalogRepo.findCourseInstructors.mockResolvedValue([
         { instructorId: 'inst-1' },
@@ -289,7 +311,10 @@ describe('EducationCatalogService', () => {
 
     it('rejects a second lead instructor', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findInstructorByProfile.mockResolvedValue(null);
       d.catalogRepo.createInstructor.mockReturnValue({ id: 'inst-2' });
       d.catalogRepo.findCourseInstructors.mockResolvedValue([
@@ -303,7 +328,10 @@ describe('EducationCatalogService', () => {
 
     it('accepts a co-instructor alongside the lead', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findInstructorByProfile.mockResolvedValue(null);
       d.catalogRepo.createInstructor.mockReturnValue({ id: 'inst-2' });
       d.catalogRepo.findCourseInstructors.mockResolvedValue([
@@ -332,6 +360,7 @@ describe('EducationCatalogService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue({
         id: COURSE,
+        tenantId: T1,
         statusConceptId: CONCEPTS.COURSE_PUBLISHED,
       });
       d.catalogRepo.findCohortByCode.mockResolvedValue(null);
@@ -350,6 +379,7 @@ describe('EducationCatalogService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue({
         id: COURSE,
+        tenantId: T1,
         statusConceptId: CONCEPTS.COURSE_PUBLISHED,
       });
       d.catalogRepo.findCohortByCode.mockResolvedValue({
@@ -365,6 +395,7 @@ describe('EducationCatalogService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue({
         id: COURSE,
+        tenantId: T1,
         statusConceptId: CONCEPTS.COURSE_DRAFT,
       });
 
@@ -417,7 +448,10 @@ describe('EducationCatalogService', () => {
 
     it('creates the assessment and sums the question points', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.createAssessment.mockReturnValue({ id: 'assess-1' });
       let n = 0;
       d.catalogRepo.createQuestion.mockImplementation(() => ({
@@ -454,7 +488,10 @@ describe('EducationCatalogService', () => {
 
     it('accepts an ungraded survey with no correct answers', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.createAssessment.mockReturnValue({ id: 'assess-1' });
       d.catalogRepo.createQuestion.mockReturnValue({ id: 'q-1' });
 
@@ -478,7 +515,10 @@ describe('EducationCatalogService', () => {
 
     it('refuses a module that belongs to another course', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findModulesByCourse.mockResolvedValue([
         { id: 'other-module' },
       ]);
@@ -498,7 +538,10 @@ describe('EducationCatalogService', () => {
 
     it('publishes the review attributed to the authenticated user', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findReviewByReviewer.mockResolvedValue(null);
       d.catalogRepo.createReview.mockReturnValue({ id: 'review-1' });
 
@@ -513,7 +556,10 @@ describe('EducationCatalogService', () => {
 
     it('rejects a second review from the same author', async () => {
       const d = build();
-      d.catalogRepo.findCourseById.mockResolvedValue({ id: COURSE });
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        id: COURSE,
+        tenantId: T1,
+      });
       d.catalogRepo.findReviewByReviewer.mockResolvedValue({
         id: 'review-prev',
       });
@@ -530,6 +576,169 @@ describe('EducationCatalogService', () => {
       await expect(
         d.service.createReview(COURSE, dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (EDU-01)', () => {
+    const foreignCourse = {
+      id: COURSE,
+      tenantId: T2,
+      currentVersion: 1,
+      statusConceptId: CONCEPTS.COURSE_PUBLISHED,
+    };
+
+    it('correcto: el admin de T1 publica el curso en T1 aunque el cuerpo omita el tenant', async () => {
+      const d = build();
+      d.catalogRepo.findCourseByCode.mockResolvedValue(null);
+      d.catalogRepo.createCourse.mockReturnValue({ id: COURSE });
+      d.catalogRepo.createModule.mockReturnValue({ id: MODULE });
+      await d.service.publishCourse(courseDto(), actor);
+      expect(d.catalogRepo.createCourse).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: T1 }),
+      );
+    });
+
+    it('rechaza un tenantId del cuerpo distinto del activo y no crea nada', async () => {
+      const d = build();
+      await expectOutOfScope(
+        d.service.publishCourse(courseDto({ tenantId: T2 }), actor),
+      );
+      expect(d.catalogRepo.createCourse).not.toHaveBeenCalled();
+    });
+
+    it('publicar una versión de un curso de T2 responde 404 y no lo bloquea ni lo cambia', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      await expectOutOfScope(d.service.publishVersion(COURSE, {}, actor));
+      expect(d.catalogRepo.findCourseForUpdate).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createVersion).not.toHaveBeenCalled();
+    });
+
+    it('un curso ajeno responde igual que uno inexistente', async () => {
+      const ajeno = build();
+      ajeno.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      const inexistente = build();
+      inexistente.catalogRepo.findCourseById.mockResolvedValue(null);
+      const a = await expectOutOfScope(
+        ajeno.service.publishVersion(COURSE, {}, actor),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.publishVersion(COURSE, {}, actor),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('un curso sin tenant tampoco se muta desde un tenant', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        ...foreignCourse,
+        tenantId: undefined,
+      });
+      await expectOutOfScope(d.service.publishVersion(COURSE, {}, actor));
+      expect(d.catalogRepo.createVersion).not.toHaveBeenCalled();
+    });
+
+    it('asignar instructor a un curso de T2 no crea ficha ni asignación', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      await expectOutOfScope(
+        d.service.assignInstructor(
+          COURSE,
+          { practitionerProfileId: PROFILE, role: 'LEAD' } as any,
+          actor,
+        ),
+      );
+      expect(d.catalogRepo.createInstructor).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createCourseInstructor).not.toHaveBeenCalled();
+    });
+
+    it('la ficha de instructor se busca dentro del tenant del curso', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({
+        ...foreignCourse,
+        tenantId: T1,
+      });
+      d.catalogRepo.findInstructorByProfile.mockResolvedValue(null);
+      d.catalogRepo.createInstructor.mockReturnValue({ id: 'inst-1' });
+      d.catalogRepo.findCourseInstructors.mockResolvedValue([]);
+      d.catalogRepo.createCourseInstructor.mockReturnValue({ id: 'ci-1' });
+      await d.service.assignInstructor(
+        COURSE,
+        { practitionerProfileId: PROFILE, role: 'LEAD' } as any,
+        actor,
+      );
+      expect(d.catalogRepo.findInstructorByProfile).toHaveBeenCalledWith(
+        d.tx,
+        PROFILE,
+        T1,
+      );
+    });
+
+    it('abrir una cohorte en un curso de T2 no escribe', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      await expectOutOfScope(
+        d.service.openCohort(
+          COURSE,
+          { code: 'C', deliveryMode: 'ONLINE', capacity: 5 } as any,
+          actor,
+        ),
+      );
+      expect(d.catalogRepo.createCohort).not.toHaveBeenCalled();
+    });
+
+    it('crear una evaluación en un curso de T2 no crea preguntas', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      await expectOutOfScope(
+        d.service.createAssessment(
+          COURSE,
+          {
+            title: 'Examen',
+            assessmentType: 'EXAM',
+            passingScore: '70',
+            questions: [
+              {
+                questionType: 'TRUE_FALSE',
+                promptText: '¿?',
+                correctAnswerJson: { value: true },
+              },
+            ],
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.catalogRepo.createAssessment).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createQuestion).not.toHaveBeenCalled();
+    });
+
+    it('reseñar un curso de T2 no crea la reseña', async () => {
+      const d = build();
+      d.catalogRepo.findCourseById.mockResolvedValue({ ...foreignCourse });
+      await expectOutOfScope(
+        d.service.createReview(COURSE, { rating: 5 } as any, actor),
+      );
+      expect(d.catalogRepo.createReview).not.toHaveBeenCalled();
+    });
+
+    it('el admin de T2 sí opera su propio curso', async () => {
+      const d = build();
+      const course = { ...foreignCourse };
+      d.catalogRepo.findCourseById.mockResolvedValue(course);
+      d.catalogRepo.findCourseForUpdate.mockResolvedValue(course);
+      d.catalogRepo.findVersion.mockResolvedValue(null);
+      d.catalogRepo.createVersion.mockReturnValue({ id: 'ver-2' });
+      const res = await inTenant(d.raw, T2).publishVersion(COURSE, {}, actor);
+      expect(res.version).toBe(2);
+    });
+
+    it('sin tenant en el contexto no se lee ni se escribe nada', async () => {
+      const d = build();
+      await expect(
+        d.raw.publishVersion(COURSE, {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findCourseById).not.toHaveBeenCalled();
     });
   });
 });

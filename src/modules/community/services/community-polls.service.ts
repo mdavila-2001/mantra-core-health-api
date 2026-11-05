@@ -11,6 +11,7 @@ import {
 import { PollsRepository, PostsRepository } from '../repositories';
 import { COMM } from '../community.concepts';
 import { CommunityErrorReason } from '../community.error-reasons';
+import { CommunityVisibilityService } from './community-visibility.service';
 import {
   CreatePollDto,
   CreateVoteDto,
@@ -22,6 +23,11 @@ import {
  * Encuestas: creación sobre un post (bootstrap) y voto (UC-19-12). Valida poll
  * abierta, opción perteneciente al poll y regla de opción única cuando el poll no
  * admite selección múltiple.
+ *
+ * Las dos rutas no llevan `@Roles`: la autorización es de titularidad. Una encuesta la cuelga
+ * sólo quien firma la publicación (`assertActsAsProfile` sobre su autor) y un voto lo emite sólo
+ * quien actúa como el perfil votante, sobre una encuesta cuya publicación puede ver. El perfil
+ * votante llega en el cuerpo, así que sin esa prueba cualquier sesión votaría por cualquiera.
  */
 @Injectable()
 export class CommunityPollsService {
@@ -31,12 +37,14 @@ export class CommunityPollsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param pollsRepo - Valor de polls repo requerido por la operación.
    * @param postsRepo - Valor de posts repo requerido por la operación.
+   * @param visibility - Titularidad de perfiles y visibilidad de publicaciones.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly pollsRepo: PollsRepository,
     private readonly postsRepo: PostsRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPollsService.name);
@@ -56,6 +64,12 @@ export class CommunityPollsService {
           { postId },
           CommunityErrorReason.POLL_POST_NOT_FOUND,
         );
+      // Sólo el autor de la publicación le cuelga una encuesta.
+      await this.visibility.assertActsAsProfile(
+        tx,
+        post.authorPublicProfileId,
+        actor,
+      );
 
       const poll = this.pollsRepo.createPoll(tx, {
         postId,
@@ -95,6 +109,8 @@ export class CommunityPollsService {
       'Casting poll vote',
     );
     return this.em.transactional(async (tx) => {
+      // El votante llega en el cuerpo: se vota sólo con un perfil propio.
+      await this.visibility.assertActsAsProfile(tx, dto.voterProfileId, actor);
       const poll = await this.pollsRepo.findPollById(tx, pollId);
       if (!poll)
         throw new ResourceNotFoundException(
@@ -103,6 +119,17 @@ export class CommunityPollsService {
             pollId,
           },
           CommunityErrorReason.POLL_NOT_FOUND,
+        );
+      // Una encuesta hereda la visibilidad de su publicación: quien no la ve, no vota.
+      const post = await this.postsRepo.findById(tx, poll.postId);
+      if (
+        !post ||
+        !(await this.visibility.canViewPost(tx, post, dto.voterProfileId))
+      )
+        throw new ResourceNotFoundException(
+          'Encuesta no encontrada',
+          { pollId },
+          CommunityErrorReason.POLL_POST_NOT_VISIBLE,
         );
       if (
         poll.statusConceptId !== COMM.POLL_OPEN ||

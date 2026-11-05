@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   MarketingCampaignsService,
   MarketingJourneysService,
@@ -35,6 +40,8 @@ import {
   ExitEnrollmentDto,
   ExitEnrollmentResponseDto,
   CreateTrackedLinkDto,
+  IssueTrackedLinkTokenDto,
+  TrackedLinkTokenResponseDto,
   TrackedLinkResponseDto,
   RecordTouchpointDto,
   TouchpointResponseDto,
@@ -59,6 +66,11 @@ export class MarketingController {
   ) {}
 
   /** UC-50-01. */
+  @Audited({
+    action: 'MARKETING_SEGMENT_CREATED',
+    entity: 'segment',
+    entityId: 'result.id',
+  })
   @Post('segments')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -71,6 +83,11 @@ export class MarketingController {
   }
 
   /** UC-50-02. */
+  @Audited({
+    action: 'MARKETING_SEGMENT_REFRESHED',
+    entity: 'segment',
+    entityId: 'param:id',
+  })
   @Post('segments/:id/refresh')
   @Roles('MARKETING_MANAGER', 'SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -88,6 +105,11 @@ export class MarketingController {
   }
 
   /** UC-50-03. */
+  @Audited({
+    action: 'MARKETING_CAMPAIGN_CREATED',
+    entity: 'marketing_campaign',
+    entityId: 'result.id',
+  })
   @Post('campaigns')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +122,11 @@ export class MarketingController {
   }
 
   /** UC-50-04. */
+  @Audited({
+    action: 'MARKETING_CAMPAIGN_MEMBERS_MATERIALIZED',
+    entity: 'marketing_campaign',
+    entityId: 'param:id',
+  })
   @Post('campaigns/:id/members/materialize')
   @Roles('MARKETING_MANAGER', 'SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -116,6 +143,11 @@ export class MarketingController {
   }
 
   /** UC-50-05. */
+  @Audited({
+    action: 'CONTENT_TEMPLATE_VERSION_PUBLISHED',
+    entity: 'content_template',
+    entityId: 'result.id',
+  })
   @Post('content-templates/:code/versions')
   @Roles('CONTENT_EDITOR', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -132,6 +164,11 @@ export class MarketingController {
   }
 
   /** UC-50-06. */
+  @Audited({
+    action: 'JOURNEY_CREATED',
+    entity: 'journey',
+    entityId: 'result.id',
+  })
   @Post('journeys')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -144,6 +181,11 @@ export class MarketingController {
   }
 
   /** UC-50-06. */
+  @Audited({
+    action: 'JOURNEY_STEPS_ADDED',
+    entity: 'journey',
+    entityId: 'param:id',
+  })
   @Post('journeys/:id/steps')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -160,6 +202,11 @@ export class MarketingController {
   }
 
   /** UC-50-07. */
+  @Audited({
+    action: 'JOURNEY_ACTIVATED',
+    entity: 'journey',
+    entityId: 'param:id',
+  })
   @Post('journeys/:id/activate')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.OK)
@@ -175,6 +222,11 @@ export class MarketingController {
   }
 
   /** UC-50-08. */
+  @Audited({
+    action: 'JOURNEY_ENROLLMENT_ADVANCED',
+    entity: 'journey_enrollment',
+    entityId: 'param:id',
+  })
   @Post('enrollments/:id/advance')
   @Roles('SYSTEM', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.OK)
@@ -192,6 +244,11 @@ export class MarketingController {
   }
 
   /** UC-50-09. */
+  @Audited({
+    action: 'JOURNEY_ENROLLMENT_EXITED',
+    entity: 'journey_enrollment',
+    entityId: 'param:id',
+  })
   @Post('enrollments/:id/exit')
   @Roles('SYSTEM', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.OK)
@@ -205,6 +262,11 @@ export class MarketingController {
   }
 
   /** UC-50-10. */
+  @Audited({
+    action: 'TRACKED_LINK_CREATED',
+    entity: 'tracked_link',
+    entityId: 'result.id',
+  })
   @Post('tracked-links')
   @Roles('MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -216,7 +278,33 @@ export class MarketingController {
     return this.journeysService.createTrackedLink(dto, actor);
   }
 
+  /** MKT-03: token que identifica al destinatario en el enlace público. */
+  @Post('tracked-links/:id/recipient-tokens')
+  @Audited({
+    action: 'TRACKED_LINK_RECIPIENT_TOKEN_ISSUED',
+    entity: 'tracked_link',
+    entityId: 'param:id',
+  })
+  @Roles('SYSTEM', 'MARKETING_MANAGER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Emitir el token de destinatario de un enlace rastreable',
+    description:
+      'El token es opaco, firmado, con vencimiento y ligado al enlace y al destinatario, que debe ser miembro de la campaña del enlace. El click público lo presenta como `?t=`.',
+  })
+  issueTrackedLinkToken(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: IssueTrackedLinkTokenDto,
+  ): Promise<TrackedLinkTokenResponseDto> {
+    return this.journeysService.issueTrackedLinkToken(id, dto);
+  }
+
   /** UC-50-11. */
+  @Audited({
+    action: 'MARKETING_TOUCHPOINT_RECORDED',
+    entity: 'marketing_touchpoint',
+    entityId: 'result.id',
+  })
   @Post('touchpoints')
   @Roles('SYSTEM', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -233,6 +321,10 @@ export class MarketingController {
   }
 
   /** UC-50-12. */
+  @Audited({
+    action: 'MARKETING_ATTRIBUTION_COMPUTED',
+    entity: 'attribution_touch',
+  })
   @Post('attribution/compute')
   @Roles('SYSTEM', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.OK)

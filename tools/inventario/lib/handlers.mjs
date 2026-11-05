@@ -17,6 +17,21 @@ export const DELEGACION = {
   NO_RESUELTA: 'NO_RESUELTA',
 };
 
+/**
+ * Clave `Controlador_método` del handler que sirve una operación del contrato.
+ *
+ * El `operationId` puede traer dos sufijos que no son parte del nombre del handler: `__…`
+ * (variantes) y `[N]`, que NestJS añade cuando el controlador declara varias rutas base
+ * (`@Controller(['insurance/campaigns', 'insurance-campaigns'])` publica
+ * `InsuranceCampaignsController_list[0]` y `…_list[1]`). Sin quitar `[N]` la operación no
+ * encuentra su handler, y el handler queda como «contrato ausente».
+ *
+ * @param {string} operationId - `operationId` de la operación del contrato.
+ */
+export function claveDeHandler(operationId) {
+  return operationId.split('__')[0].replace(/\[\d+\]$/, '');
+}
+
 function delegacionDe(calls) {
   if (!calls.length) return DELEGACION.SIN_LLAMADAS;
   return calls.some((call) => call.targetClass)
@@ -39,7 +54,7 @@ export function buildHandlerTable({ root = process.cwd(), modulos } = {}) {
   const filas = [];
   const usados = new Set();
   for (const { route, method, operation } of operations()) {
-    const clave = operation.operationId.split('__')[0];
+    const clave = claveDeHandler(operation.operationId);
     const handler = controllerMethods.get(clave);
     const modulo =
       handler?.moduleName ?? operation.tags?.[0] ?? 'sin-clasificar';

@@ -35,6 +35,13 @@ export const seedBootEnvSchema = Joi.object({
     .falsy('false')
     .empty('')
     .default(true),
+  // SEED-01: fuera de producción, vuelve fatal el fallo de un seed núcleo. En
+  // producción lo es siempre y este valor no lo apaga.
+  SEED_CORE_FAILURE_FATAL: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty('')
+    .default(false),
 }).unknown(true);
 
 /** Contrato estructural del entorno de siembra al arranque. */
@@ -69,4 +76,23 @@ export function loadSeedBootEnv(
     enabled: source.SEED_ON_BOOT !== 'false',
     contentEnabled: source.SEED_CONTENT_ON_BOOT !== 'false',
   };
+}
+
+/**
+ * SEED-01 · si el fallo de un seed `core` debe abortar el arranque.
+ *
+ * Siempre en producción (no hay opt-out: servir HTTP sin roles ni catálogos es
+ * el estado que este control existe para impedir); fuera de ella, sólo con
+ * `SEED_CORE_FAILURE_FATAL=true`, para no romper el desarrollo local ni las
+ * suites que arrancan con una base parcial.
+ *
+ * @param source - Entorno a evaluar; parametrizado para probarlo sin tocar `process.env`.
+ */
+export function isCoreSeedFailureFatal(
+  source: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return (
+    source.NODE_ENV === 'production' ||
+    source.SEED_CORE_FAILURE_FATAL === 'true'
+  );
 }

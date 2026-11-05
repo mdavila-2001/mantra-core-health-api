@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CommunityModerationService,
   CommunityModerationReadService,
@@ -36,7 +41,12 @@ import {
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
 
-/** Endpoints de confianza y seguridad: reportes, decisiones y apelaciones. */
+/** Endpoints de confianza y seguridad: reportes, decisiones y apelaciones. *
+ * Reportar y apelar llevan `@Roles()` vacío (O3-3): reportar es de cualquier
+ * cuenta y el denunciante sale de la sesión; apelar exige actuar como el perfil
+ * sancionado (`assertActsAsProfile`). Decidir y leer la cola siguen siendo de
+ * `SECURITY_ADMIN`.
+ */
 @ApiTags('community-moderation')
 @ApiBearerAuth()
 @Controller('community')
@@ -53,7 +63,13 @@ export class CommunityModerationController {
   ) {}
 
   /** UC-19-08 (cualquier miembro puede reportar). */
+  @Audited({
+    action: 'CONTENT_REPORTED',
+    entity: 'content_report',
+    entityId: 'result.id',
+  })
   @Post('reports')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Reportar contenido y encolar moderación' })
   report(
@@ -64,6 +80,11 @@ export class CommunityModerationController {
   }
 
   /** UC-19-09 (moderador / admin de confianza y seguridad). */
+  @Audited({
+    action: 'COMMUNITY_MODERATION_DECIDED',
+    entity: 'moderation_decision',
+    entityId: 'result.id',
+  })
   @Post('moderation/queue/:queueId/decision')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -77,7 +98,13 @@ export class CommunityModerationController {
   }
 
   /** UC-19-10. */
+  @Audited({
+    action: 'MODERATION_DECISION_APPEALED',
+    entity: 'moderation_appeal',
+    entityId: 'result.id',
+  })
   @Post('moderation/decisions/:decisionId/appeal')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Apelar una decisión de moderación' })
   appeal(
@@ -89,6 +116,11 @@ export class CommunityModerationController {
   }
 
   /** UC-19-10, cierre: resuelve una apelación abierta. */
+  @Audited({
+    action: 'MODERATION_APPEAL_RESOLVED',
+    entity: 'moderation_appeal',
+    entityId: 'param:appealId',
+  })
   @Post('moderation/appeals/:appealId/resolve')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

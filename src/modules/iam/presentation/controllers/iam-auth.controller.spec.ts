@@ -34,6 +34,7 @@ function build() {
     requestReset: mockFn(),
     resetPassword: mockFn(),
   };
+  const supportStaffRegistrationService = { register: mockFn() };
   const controller = new IamAuthController(
     authService as any,
     assistedRegistrationService as any,
@@ -43,9 +44,11 @@ function build() {
     practitionerRegistrationService as any,
     passwordResetService as any,
     emailVerificationService as any,
+    supportStaffRegistrationService as any,
   );
   return {
     controller,
+    supportStaffRegistrationService,
     authService,
     assistedRegistrationService,
     selfRegistrationService,
@@ -67,16 +70,78 @@ function reqStub() {
 }
 
 describe('IamAuthController', () => {
+  it('delega el alta de la secretaria con la ip de origen', async () => {
+    const d = build();
+    const dto = { nationalId: '1234567' };
+    d.supportStaffRegistrationService.register.mockResolvedValue({
+      userId: 'u-1',
+      role: 'SUPPORT_STAFF',
+    });
+    await expect(
+      d.controller.registerSupportStaff(dto as any, '1.2.3.4'),
+    ).resolves.toEqual({ userId: 'u-1', role: 'SUPPORT_STAFF' });
+    expect(d.supportStaffRegistrationService.register).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+    );
+  });
+
   it('delegates login with the client ip (UC-01-04)', async () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
     await expect(
-      d.controller.login(dto as any, '1.2.3.4', resStub() as any),
+      d.controller.login(
+        dto as any,
+        '1.2.3.4',
+        resStub() as any,
+        {
+          headers: { 'x-device-id': 'device-key-1' },
+        } as any,
+      ),
     ).resolves.toEqual({
       accessToken: 'at',
     });
-    expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
+    expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4', {
+      'x-device-id': 'device-key-1',
+    });
+  });
+
+  it('login emite el refresh en cookie segura si está habilitada', async () => {
+    const previousEnabled = process.env.AUTH_REFRESH_COOKIE_ENABLED;
+    process.env.AUTH_REFRESH_COOKIE_ENABLED = 'true';
+    try {
+      const d = build();
+      const res = resStub();
+      d.authService.login.mockResolvedValue({
+        accessToken: 'at',
+        refreshToken: 'rt',
+      });
+
+      await expect(
+        d.controller.login(
+          { email: 'a@x.io', password: 'pw' } as any,
+          'ip',
+          res as any,
+          { headers: {} } as any,
+        ),
+      ).resolves.toEqual({ accessToken: 'at', refreshToken: '' });
+      expect(res.cookie).toHaveBeenCalledWith(
+        'redesa_refresh',
+        'rt',
+        expect.objectContaining({
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+        }),
+      );
+    } finally {
+      if (previousEnabled === undefined) {
+        delete process.env.AUTH_REFRESH_COOKIE_ENABLED;
+      } else {
+        process.env.AUTH_REFRESH_COOKIE_ENABLED = previousEnabled;
+      }
+    }
   });
 
   it('delegates refresh (UC-01-06)', async () => {
@@ -87,6 +152,40 @@ describe('IamAuthController', () => {
     // Con la cookie apagada -el default- el token sale del cuerpo y llega al
     // dominio en crudo.
     expect(d.authService.refresh).toHaveBeenCalledWith('r');
+  });
+
+  it('refresh lee la cookie y rota el token en cookie cuando está habilitada', async () => {
+    const previousEnabled = process.env.AUTH_REFRESH_COOKIE_ENABLED;
+    process.env.AUTH_REFRESH_COOKIE_ENABLED = 'true';
+    try {
+      const d = build();
+      const req = { headers: { cookie: 'redesa_refresh=from-cookie' } };
+      const res = resStub();
+      d.authService.refresh.mockResolvedValue({
+        accessToken: 'new-at',
+        refreshToken: 'new-rt',
+      });
+
+      await expect(
+        d.controller.refresh({} as any, req as any, res as any),
+      ).resolves.toEqual({ accessToken: 'new-at', refreshToken: '' });
+      expect(d.authService.refresh).toHaveBeenCalledWith('from-cookie');
+      expect(res.cookie).toHaveBeenCalledWith(
+        'redesa_refresh',
+        'new-rt',
+        expect.objectContaining({
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+        }),
+      );
+    } finally {
+      if (previousEnabled === undefined) {
+        delete process.env.AUTH_REFRESH_COOKIE_ENABLED;
+      } else {
+        process.env.AUTH_REFRESH_COOKIE_ENABLED = previousEnabled;
+      }
+    }
   });
 
   it('delegates logoutAll for the current user (UC-01-08)', async () => {

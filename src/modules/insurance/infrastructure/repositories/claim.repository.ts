@@ -260,6 +260,9 @@ export class ClaimRepository {
    * @param claimId - Reclamo sobre el que se reclama.
    * @param adjudicationVersionId - Versión disputada, si se declaró.
    * @param openStatusConceptId - Concepto de «disputa abierta».
+   * @param disputeTypeConceptId - Si se indica, sólo cuenta una disputa de ese
+   *   tipo: una objeción del paciente (sin versión disputada) no debe devolverse
+   *   como «la disputa existente» de una apelación del prestador, ni al revés.
    * @returns La disputa vigente equivalente, o `null`.
    */
   findOpenDispute(
@@ -267,11 +270,13 @@ export class ClaimRepository {
     claimId: string,
     adjudicationVersionId: string | undefined,
     openStatusConceptId: string,
+    disputeTypeConceptId?: string,
   ): Promise<ClaimDisputes | null> {
     return em.findOne(ClaimDisputes, {
       insuranceClaimId: claimId,
       claimAdjudicationVersionId: adjudicationVersionId ?? null,
       statusConceptId: openStatusConceptId,
+      ...(disputeTypeConceptId ? { disputeTypeConceptId } : {}),
     });
   }
 

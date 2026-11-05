@@ -136,6 +136,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExportJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExportJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExportJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExportJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExportJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -168,7 +169,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida de de-identificación no encontrada | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La exportación necesita un paciente o una cohorte | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
 | 422 | `PRECONDITION_FAILED` | La corrida de de-identificación no está completada | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
@@ -212,7 +213,7 @@ NestJS resuelve `GET /fhir/r5/Patient/{id}/$everything` en `FhirR5Controller_ser
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `custodian` | query | No | `string` | formato `uuid` | Custodio por el que se acota la búsqueda | `00000000-0000-4000-8000-000000000001` |
+| `custodian` | query | No | `string` | formato `uuid` | Obsoleto: el custodio sale de la sesión (X-Tenant-Id). Si llega y difiere del tenant activo, el paciente no está disponible (404). | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -255,6 +256,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<EverythingBundleResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<EverythingBundleResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<EverythingBundleResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<EverythingBundleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EverythingBundleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -411,6 +413,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceBindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceBindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceBindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceBindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceBindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -555,6 +558,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdentifierResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -696,6 +700,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RelationshipResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -832,6 +837,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetireResourceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetireResourceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetireResourceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetireResourceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetireResourceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -936,7 +942,7 @@ Content-Type: application/json
 | `healthIngestionRecordId` | Sí | `string` | formato `uuid` | Registro crudo del que sale la proyección | `00000000-0000-4000-8000-000000000001` |
 | `logicalIdentifier` | Sí | `string` | longitud máxima 300 | Identificador lógico del recurso en el custodio | `valor-ejemplo` |
 | `normalizedPayloadJson` | Sí | `object` | Sin restricción adicional declarada | Payload normalizado del recurso | `{}` |
-| `custodianTenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `custodianTenantId` | No | `string` | formato `uuid` | Obsoleto: el custodio se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Paciente al que pertenece el recurso | `00000000-0000-4000-8000-000000000001` |
 | `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sourceSystemId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -983,6 +989,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CanonicalResourceVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CanonicalResourceVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CanonicalResourceVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CanonicalResourceVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CanonicalResourceVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1019,10 +1026,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Registro de ingesta no encontrado | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El registro no está en cola de proyección | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 422 | `PRECONDITION_FAILED` | El recurso está retirado | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
+| 422 | `PRECONDITION_FAILED` | El sistema de origen no corresponde a la conexión del lote | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1143,6 +1150,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeidRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeidRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeidRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeidRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeidRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1173,7 +1181,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil de de-identificación no encontrado | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
+| 404 | `NOT_FOUND` | Versión de origen no encontrada | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El perfil de de-identificación no está activo | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
 | 422 | `PRECONDITION_FAILED` | Una corrida completada debe declarar su manifiesto de salida | Excepción explícita en src/modules/health_data/services/data-release.service.ts |
@@ -1282,6 +1291,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MatchDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MatchDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MatchDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MatchDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MatchDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1389,7 +1399,7 @@ Content-Type: application/json
 | `healthSourceConnectionId` | Sí | `string` | formato `uuid` | Conexión de origen que trae el lote | `00000000-0000-4000-8000-000000000001` |
 | `batchIdentifier` | Sí | `string` | longitud máxima 200 | Identificador del lote en el origen | `valor-ejemplo` |
 | `ingestionModeConceptId` | Sí | `string` | formato `uuid` | Modo de ingesta (catálogo abierto) | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `sourcePeriodStart` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `sourcePeriodEnd` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `payloadManifestFileId` | No | `string` | formato `uuid` | Manifiesto del payload en almacenamiento | `00000000-0000-4000-8000-000000000001` |
@@ -1428,6 +1438,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IngestionBatchResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IngestionBatchResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IngestionBatchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IngestionBatchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IngestionBatchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1458,7 +1469,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Conexión de origen no encontrada | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La conexión de origen no está activa | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1559,6 +1569,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CloseBatchResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CloseBatchResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CloseBatchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CloseBatchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CloseBatchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1591,7 +1602,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lote no encontrado | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 409 | `CONFLICT` | El lote ya está cerrado | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1704,6 +1714,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IngestionRecordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IngestionRecordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IngestionRecordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IngestionRecordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IngestionRecordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1732,7 +1743,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lote no encontrado | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El lote ya no está recibiendo registros | Excepción explícita en src/modules/health_data/services/health-ingestion.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1856,6 +1866,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QualityRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1946,7 +1957,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "sourceSystemCode": "CODIGO_EJEMPLO",
   "sourceSystemName": "Nombre de ejemplo",
   "sourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1966,7 +1976,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario del origen | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `sourceSystemCode` | Sí | `string` | longitud máxima 100 | Código del sistema de origen; se crea si no existe | `CODIGO_EJEMPLO` |
 | `sourceSystemName` | Sí | `string` | longitud máxima 200 | Nombre del sistema de origen | `Nombre de ejemplo` |
 | `sourceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de sistema de origen | `00000000-0000-4000-8000-000000000001` |
@@ -2008,6 +2018,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SourceConnectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2159,6 +2170,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TimelineEntryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TimelineEntryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TimelineEntryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TimelineEntryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TimelineEntryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2307,6 +2319,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ValidationRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ValidationRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ValidationRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ValidationRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ValidationRunResponseDto`. Ejemplo completo derivado de ese DTO:
 

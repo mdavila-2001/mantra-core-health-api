@@ -26,7 +26,9 @@ function build(opts: { hasProfile?: boolean; found?: any } = {}) {
   const patientProfilesRepo = {
     findById: mockFn().mockResolvedValue({ profileId: PATIENT }),
   };
-  const consents = { withdraw: mockFn().mockResolvedValue({ ok: true }) };
+  const consents = {
+    withdrawAsOwner: mockFn().mockResolvedValue({ ok: true }),
+  };
   const logger = { setContext: mockFn(), warn: mockFn(), info: mockFn() };
   const service = new ConsentMeService(
     em,
@@ -93,17 +95,22 @@ describe('ConsentMeService (BR-20)', () => {
     await expect(
       d.service.withdrawOwn(ACTOR, 'ajeno', {}),
     ).rejects.toMatchObject({ status: 404 });
-    expect(d.consents.withdraw).not.toHaveBeenCalled();
+    expect(d.consents.withdrawAsOwner).not.toHaveBeenCalled();
   });
 
-  it('retirar lo propio delega en UC-07-02 con el actor', async () => {
+  it('retirar lo propio delega en UC-07-02 con el actor y el paciente resuelto por la sesión', async () => {
     const d = build({
       found: { id: 'c1', categoryConceptId: CONS.CATEGORY_PRIVACY },
     });
     await expect(d.service.withdrawOwn(ACTOR, 'c1', {})).resolves.toEqual({
       ok: true,
     });
-    expect(d.consents.withdraw).toHaveBeenCalledWith('c1', {}, ACTOR);
+    expect(d.consents.withdrawAsOwner).toHaveBeenCalledWith(
+      'c1',
+      PATIENT,
+      {},
+      ACTOR,
+    );
     expect(d.em.findOne.mock.calls[0][1]).toEqual({
       id: 'c1',
       patientProfileId: PATIENT,

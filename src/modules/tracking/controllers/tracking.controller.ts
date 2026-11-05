@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
   CurrentUser,
   NotAudited,
   Public,
@@ -16,6 +23,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TrackingService } from '../services';
+import {
+  CARRIER_SIGNATURE_HEADER,
+  CARRIER_TIMESTAMP_HEADER,
+} from '../tracking-webhook-auth';
 import {
   OpenSubjectDto,
   SubjectResponseDto,
@@ -54,6 +65,11 @@ export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
 
   /** UC-37-01. */
+  @Audited({
+    action: 'TRACKABLE_SUBJECT_OPENED',
+    entity: 'trackable_subject',
+    entityId: 'result.id',
+  })
   @Post('trackable-subjects')
   @Roles('TRACKING_ADMIN', 'LOGISTICS_OPERATOR')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +86,10 @@ export class TrackingController {
   }
 
   /** UC-37-02. */
+  @Audited({
+    action: 'TRACKING_MILESTONES_DEFINED',
+    entity: 'milestone_definition',
+  })
   @Post('milestone-definitions')
   @Roles('TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +105,11 @@ export class TrackingController {
   }
 
   /** UC-37-03. */
+  @Audited({
+    action: 'SHIPMENT_DISPATCHED',
+    entity: 'shipment',
+    entityId: 'param:id',
+  })
   @Post('shipments/:id/dispatch')
   @Roles('LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -101,6 +126,11 @@ export class TrackingController {
   }
 
   /** UC-37-04. */
+  @Audited({
+    action: 'TRACKING_EVENT_RECORDED',
+    entity: 'tracking_event',
+    entityId: 'result.id',
+  })
   @Post('trackable-subjects/:id/events')
   @Roles('LOGISTICS_OPERATOR', 'COURIER', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -126,16 +156,38 @@ export class TrackingController {
   @ApiOperation({
     summary: 'Ingerir el webhook del transportista',
     description:
-      'Ruta pública: el transportista no presenta sesión. Idempotente por identificador del evento externo.',
+      'Ruta pública: el transportista no presenta sesión, se autentica con una firma HMAC-SHA256 ' +
+      'sobre `[timestamp, carrierCode, trackingNumber, externalStatusCode, externalEventId, occurredAt, locationText]` ' +
+      '(arreglo JSON; los opcionales ausentes van como `null`) con su secreto propio, dentro de una ventana de 5 minutos. ' +
+      'Idempotente por identificador del evento externo.',
+  })
+  @ApiHeader({
+    name: CARRIER_SIGNATURE_HEADER,
+    description: 'HMAC-SHA256 en hexadecimal (prefijo `sha256=` opcional)',
+  })
+  @ApiHeader({
+    name: CARRIER_TIMESTAMP_HEADER,
+    description:
+      'Segundos desde la época o ISO-8601 con zona; es parte de lo firmado',
   })
   ingestCarrierWebhook(
     @Param('carrierCode') carrierCode: string,
     @Body() dto: CarrierWebhookDto,
+    @Headers(CARRIER_SIGNATURE_HEADER) signature?: string,
+    @Headers(CARRIER_TIMESTAMP_HEADER) timestamp?: string,
   ): Promise<WebhookResponseDto> {
-    return this.trackingService.ingestCarrierWebhook(carrierCode, dto);
+    return this.trackingService.ingestCarrierWebhook(carrierCode, dto, {
+      signature,
+      timestamp,
+    });
   }
 
   /** UC-37-06. */
+  @Audited({
+    action: 'SHIPMENT_HANDOFF_RECORDED',
+    entity: 'shipment_handoff',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/handoffs')
   @Roles('LOGISTICS_OPERATOR', 'COURIER', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -152,6 +204,11 @@ export class TrackingController {
   }
 
   /** UC-37-07. */
+  @Audited({
+    action: 'SHIPMENT_ETA_RECOMPUTED',
+    entity: 'eta_estimate',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/eta/recompute')
   @Roles('SYSTEM', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -168,6 +225,11 @@ export class TrackingController {
   }
 
   /** UC-37-08. */
+  @Audited({
+    action: 'SHIPMENT_DELIVERY_PROOF_RECORDED',
+    entity: 'delivery_proof',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/delivery-proof')
   @Roles('COURIER', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -184,6 +246,11 @@ export class TrackingController {
   }
 
   /** UC-37-09. */
+  @Audited({
+    action: 'SHIPMENT_EXCEPTION_RECORDED',
+    entity: 'tracking_event',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/exception')
   @Roles('COURIER', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -201,6 +268,11 @@ export class TrackingController {
   }
 
   /** UC-37-10. */
+  @Audited({
+    action: 'SHIPMENT_CANCELLED',
+    entity: 'shipment',
+    entityId: 'param:id',
+  })
   @Post('shipments/:id/cancel')
   @Roles('LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -217,6 +289,10 @@ export class TrackingController {
   }
 
   /** UC-37-11. */
+  @Audited({
+    action: 'TRACKING_SLA_SCANNED',
+    entity: 'shipment',
+  })
   @Post('sla/scan')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)

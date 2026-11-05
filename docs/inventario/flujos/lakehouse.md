@@ -59,14 +59,14 @@ _Fuente: `src/modules/lakehouse/README.md:72`_
 | `UC-63-01` | Zona del data lake | POST /lakehouse/zones | DATA_PLATFORM_ENGINEER · PLATFORM_ADMIN | MEDIO | 5 |
 | `UC-63-02` | Catálogo / metastore | POST /lakehouse/catalogs | DATA_PLATFORM_ENGINEER · PLATFORM_ADMIN | MEDIO | 5 |
 | `UC-63-03` | Producto y versión con contrato y SLO | POST /lakehouse/data-products/{id}/versions | DATA_PRODUCT_OWNER · PLATFORM_ADMIN | MEDIO | 10 |
-| `UC-63-04` | Dataset y versión de esquema | POST /lakehouse/datasets | DATA_PLATFORM_ENGINEER · PLATFORM_ADMIN | MEDIO | 9 |
+| `UC-63-04` | Dataset y versión de esquema | POST /lakehouse/datasets | DATA_PLATFORM_ENGINEER · PLATFORM_ADMIN | MEDIO | 10 |
 | `UC-63-05` | Corrida: particiones y archivos | POST /lakehouse/transformations/{defId}/runs | SYSTEM · TRANSFORMATION_WORKER · PLATFORM_ADMIN | MEDIO | 13 |
 | `UC-63-07` | Ingesta de salud de-identificada | POST /lakehouse/ingestion/curated-runs | SYSTEM · DEIDENTIFICATION_WORKER · PLATFORM_ADMIN | MEDIO | 12 |
-| `UC-63-08` | Calidad y hallazgos | POST /lakehouse/datasets/{id}/quality-runs | DATA_STEWARD · SYSTEM · PLATFORM_ADMIN | MEDIO | 9 |
-| `UC-63-09` | Proyecto y cohorte | POST /research/projects/{id}/cohorts | PRINCIPAL_INVESTIGATOR · RESEARCH_GOVERNANCE · PLATFORM_ADMIN | MEDIO | 8 |
+| `UC-63-08` | Calidad y hallazgos | POST /lakehouse/datasets/{id}/quality-runs | DATA_STEWARD · SYSTEM · PLATFORM_ADMIN | MEDIO | 10 |
+| `UC-63-09` | Proyecto y cohorte | POST /research/projects/{id}/cohorts | PRINCIPAL_INVESTIGATOR · RESEARCH_GOVERNANCE · PLATFORM_ADMIN | MEDIO | 9 |
 | `UC-63-10` | Solicitar release | POST /research/dataset-releases | PRINCIPAL_INVESTIGATOR · PLATFORM_ADMIN | MEDIO | 8 |
-| `UC-63-11` | Aprobar y materializar | POST /research/dataset-releases/{id}/approve | RESEARCH_GOVERNANCE · DPO · PLATFORM_ADMIN | MEDIO | 10 |
-| `UC-63-12` | Expirar o revocar | POST /research/dataset-releases/{id}/revoke | RESEARCH_GOVERNANCE · DPO · SYSTEM · PLATFORM_ADMIN | MEDIO | 7 |
+| `UC-63-11` | Aprobar y materializar | POST /research/dataset-releases/{id}/approve | RESEARCH_GOVERNANCE · DPO · PLATFORM_ADMIN | MEDIO | 9 |
+| `UC-63-12` | Expirar o revocar | POST /research/dataset-releases/{id}/revoke | RESEARCH_GOVERNANCE · DPO · SYSTEM · PLATFORM_ADMIN | MEDIO | 6 |
 | `ctrl:ResearchController` | Operaciones de ResearchController que el README no asigna a un caso de uso | GET /research/dataset-releases/expired | RESEARCH_GOVERNANCE · DPO · SYSTEM · PLATFORM_ADMIN | BAJO | 2 |
 |  |  | POST /research/deidentification-profiles | RESEARCH_GOVERNANCE · DPO · PRINCIPAL_INVESTIGATOR · PLATFORM_ADMIN | MEDIO | 1 |
 
@@ -76,14 +76,14 @@ _Fuente: `src/modules/lakehouse/README.md:72`_
 flowchart LR
   a2(["DATA_PLATFORM_ENGINEER · PLATFORM_ADMIN"]):::actor
   a11(["DATA_PRODUCT_OWNER · PLATFORM_ADMIN"]):::actor
-  a22(["SYSTEM · TRANSFORMATION_WORKER · PLATFORM_ADMIN"]):::actor
-  a30(["SYSTEM · DEIDENTIFICATION_WORKER · PLATFORM_ADMIN"]):::actor
-  a36(["DATA_STEWARD · SYSTEM · PLATFORM_ADMIN"]):::actor
-  a43(["PRINCIPAL_INVESTIGATOR · RESEARCH_GOVERNANCE · PLATFORM_ADM…"]):::actor
-  a49(["PRINCIPAL_INVESTIGATOR · PLATFORM_ADMIN"]):::actor
-  a54(["RESEARCH_GOVERNANCE · DPO · PLATFORM_ADMIN"]):::actor
-  a59(["RESEARCH_GOVERNANCE · DPO · SYSTEM · PLATFORM_ADMIN"]):::actor
-  a64(["RESEARCH_GOVERNANCE · DPO · PRINCIPAL_INVESTIGATOR · PLATFO…"]):::actor
+  a21(["SYSTEM · TRANSFORMATION_WORKER · PLATFORM_ADMIN"]):::actor
+  a29(["SYSTEM · DEIDENTIFICATION_WORKER · PLATFORM_ADMIN"]):::actor
+  a35(["DATA_STEWARD · SYSTEM · PLATFORM_ADMIN"]):::actor
+  a42(["PRINCIPAL_INVESTIGATOR · RESEARCH_GOVERNANCE · PLATFORM_ADM…"]):::actor
+  a48(["PRINCIPAL_INVESTIGATOR · PLATFORM_ADMIN"]):::actor
+  a53(["RESEARCH_GOVERNANCE · DPO · PLATFORM_ADMIN"]):::actor
+  a58(["RESEARCH_GOVERNANCE · DPO · SYSTEM · PLATFORM_ADMIN"]):::actor
+  a62(["RESEARCH_GOVERNANCE · DPO · PRINCIPAL_INVESTIGATOR · PLATFO…"]):::actor
   t3[("lakehouse.data_lake_zones")]:::tabla
   t4[("messaging.domain_events")]:::tabla
   t5[("messaging.outbox_messages")]:::tabla
@@ -94,28 +94,27 @@ flowchart LR
   t13[("lakehouse.data_products")]:::tabla
   e15>"DataProductVersionPublished"]:::evento
   t17[("lakehouse.lakehouse_datasets")]:::tabla
-  t18[("lakehouse.lakehouse_schema_versions")]:::tabla
-  e20>"LakehouseDatasetRegistered"]:::evento
-  t23[("lakehouse.lakehouse_files")]:::tabla
-  t24[("lakehouse.lakehouse_lineage_edges")]:::tabla
-  t25[("lakehouse.lakehouse_partitions")]:::tabla
-  e27>"TransformationRunCompleted"]:::evento
-  e28>"LineageRecorded"]:::evento
-  t31[("health_data.health_deidentification_profiles")]:::tabla
-  t32[("health_data.health_deidentification_runs")]:::tabla
-  e34>"HealthBatchDeidentified"]:::evento
-  t37[("lakehouse.lakehouse_quality_issues")]:::tabla
-  t38[("lakehouse.lakehouse_quality_rules")]:::tabla
-  t39[("lakehouse.lakehouse_quality_runs")]:::tabla
-  e41>"QualityRunEvaluated"]:::evento
-  t44[("lakehouse.cohort_definitions")]:::tabla
-  t45[("lakehouse.research_projects")]:::tabla
-  e47>"CohortDefined"]:::evento
-  t50[("lakehouse.dataset_release_requests")]:::tabla
-  e52>"DatasetReleaseRequested"]:::evento
-  t55[("lakehouse.dataset_release_manifests")]:::tabla
-  e57>"DatasetReleaseMaterialized"]:::evento
-  e61>"DatasetReleaseRevoked"]:::evento
+  e19>"LakehouseDatasetRegistered"]:::evento
+  t22[("lakehouse.lakehouse_files")]:::tabla
+  t23[("lakehouse.lakehouse_lineage_edges")]:::tabla
+  t24[("lakehouse.lakehouse_partitions")]:::tabla
+  e26>"TransformationRunCompleted"]:::evento
+  e27>"LineageRecorded"]:::evento
+  t30[("health_data.health_deidentification_profiles")]:::tabla
+  t31[("health_data.health_deidentification_runs")]:::tabla
+  e33>"HealthBatchDeidentified"]:::evento
+  t36[("lakehouse.lakehouse_quality_issues")]:::tabla
+  t37[("lakehouse.lakehouse_quality_rules")]:::tabla
+  t38[("lakehouse.lakehouse_quality_runs")]:::tabla
+  e40>"QualityRunEvaluated"]:::evento
+  t43[("lakehouse.cohort_definitions")]:::tabla
+  t44[("lakehouse.research_projects")]:::tabla
+  e46>"CohortDefined"]:::evento
+  t49[("lakehouse.dataset_release_requests")]:::tabla
+  e51>"DatasetReleaseRequested"]:::evento
+  t54[("lakehouse.dataset_release_manifests")]:::tabla
+  e56>"DatasetReleaseMaterialized"]:::evento
+  e59>"DatasetReleaseRevoked"]:::evento
   subgraph s0["UC-63-01 · Zona del data lake"]
     o1["POST /lakehouse/zones"]:::op
   end
@@ -126,41 +125,40 @@ flowchart LR
   subgraph s2["UC-63-03 · Producto y versión con contrato y SLO"]
     o10["POST /lakehouse/data-products/{id}/versions"]:::op
   end
-  t19[("+3 tablas más")]
+  t18[("+4 tablas más")]
   subgraph s3["UC-63-04 · Dataset y versión de esquema"]
     o16["POST /lakehouse/datasets"]:::op
   end
-  t26[("+7 tablas más")]
+  t25[("+7 tablas más")]
   subgraph s4["UC-63-05 · Corrida: particiones y archivos"]
-    o21["POST /lakehouse/transformations/{defId}/runs"]:::op
+    o20["POST /lakehouse/transformations/{defId}/runs"]:::op
   end
-  t33[("+6 tablas más")]
+  t32[("+6 tablas más")]
   subgraph s5["UC-63-07 · Ingesta de salud de-identificada"]
-    o29["POST /lakehouse/ingestion/curated-runs"]:::op
+    o28["POST /lakehouse/ingestion/curated-runs"]:::op
   end
-  t40[("+3 tablas más")]
+  t39[("+4 tablas más")]
   subgraph s6["UC-63-08 · Calidad y hallazgos"]
-    o35["POST /lakehouse/datasets/{id}/quality-runs"]:::op
+    o34["POST /lakehouse/datasets/{id}/quality-runs"]:::op
   end
-  t46[("+2 tablas más")]
+  t45[("+3 tablas más")]
   subgraph s7["UC-63-09 · Proyecto y cohorte"]
-    o42["POST /research/projects/{id}/cohorts"]:::op
+    o41["POST /research/projects/{id}/cohorts"]:::op
   end
-  t51[("+2 tablas más")]
+  t50[("+2 tablas más")]
   subgraph s8["UC-63-10 · Solicitar release"]
-    o48["POST /research/dataset-releases"]:::op
+    o47["POST /research/dataset-releases"]:::op
   end
-  t56[("+4 tablas más")]
+  t55[("+3 tablas más")]
   subgraph s9["UC-63-11 · Aprobar y materializar"]
-    o53["POST /research/dataset-releases/{id}/approve"]:::op
+    o52["POST /research/dataset-releases/{id}/approve"]:::op
   end
-  t60[("+1 tablas más")]
   subgraph s10["UC-63-12 · Expirar o revocar"]
-    o58["POST /research/dataset-releases/{id}/revoke"]:::op
+    o57["POST /research/dataset-releases/{id}/revoke"]:::op
   end
   subgraph s11["ctrl:ResearchController · Operaciones de ResearchController que el README no as…"]
-    o62["GET /research/dataset-releases/expired"]:::op
-    o63["POST /research/deidentification-profiles"]:::op
+    o60["GET /research/dataset-releases/expired"]:::op
+    o61["POST /research/deidentification-profiles"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -188,81 +186,80 @@ flowchart LR
   a2 --> o16
   o16 -->|"LEE"| t3
   o16 -->|"LEE"| t12
+  o16 -->|"LEE"| t13
   o16 -->|"LEE"| t8
   o16 -->|"CREA"| t17
   o16 -->|"LEE"| t17
-  o16 -->|"CREA"| t18
-  o16 -.-> t19
-  o16 -->|"evento"| e20
-  a22 --> o21
-  o21 -->|"LEE"| t17
-  o21 -->|"CREA"| t23
-  o21 -->|"LEE"| t23
-  o21 -->|"CREA"| t24
-  o21 -->|"CREA"| t25
-  o21 -->|"LEE"| t25
-  o21 -.-> t26
-  o21 -->|"evento"| e27
-  o21 -->|"evento"| e28
-  a30 --> o29
-  o29 -->|"LEE"| t31
-  o29 -->|"CREA"| t32
-  o29 -->|"LEE"| t3
-  o29 -->|"LEE"| t17
-  o29 -->|"CREA"| t23
-  o29 -->|"LEE"| t23
-  o29 -.-> t33
-  o29 -->|"evento"| e34
-  a36 --> o35
-  o35 -->|"ACTUALIZA"| t17
-  o35 -->|"LEE"| t17
-  o35 -->|"CREA"| t37
-  o35 -->|"LEE"| t38
-  o35 -->|"ACTUALIZA"| t39
-  o35 -->|"CREA"| t39
-  o35 -.-> t40
-  o35 -->|"evento"| e41
-  a43 --> o42
-  o42 -->|"CREA"| t44
-  o42 -->|"LEE"| t44
-  o42 -->|"ACTUALIZA"| t45
-  o42 -->|"CREA"| t45
-  o42 -->|"LEE"| t45
-  o42 -->|"CREA"| t4
-  o42 -.-> t46
-  o42 -->|"evento"| e47
-  a49 --> o48
-  o48 -->|"LEE"| t44
-  o48 -->|"LEE"| t12
-  o48 -->|"LEE"| t13
-  o48 -->|"CREA"| t50
-  o48 -->|"LEE"| t45
-  o48 -->|"CREA"| t4
-  o48 -.-> t51
-  o48 -->|"evento"| e52
-  a54 --> o53
-  o53 -->|"CREA"| t32
-  o53 -->|"LEE"| t44
-  o53 -->|"CREA"| t55
-  o53 -->|"LEE"| t55
-  o53 -->|"ACTUALIZA"| t50
-  o53 -->|"LEE"| t50
-  o53 -.-> t56
-  o53 -->|"evento"| e57
-  a59 --> o58
-  o58 -->|"ACTUALIZA"| t55
-  o58 -->|"LEE"| t55
-  o58 -->|"ACTUALIZA"| t50
-  o58 -->|"LEE"| t50
-  o58 -->|"CREA"| t4
-  o58 -->|"CREA"| t5
-  o58 -.-> t60
-  o58 -->|"evento"| e61
-  a59 --> o62
-  o62 -->|"LEE"| t55
-  o62 -->|"LEE"| t50
-  a64 --> o63
-  o63 -->|"CREA"| t31
+  o16 -.-> t18
+  o16 -->|"evento"| e19
+  a21 --> o20
+  o20 -->|"LEE"| t17
+  o20 -->|"CREA"| t22
+  o20 -->|"LEE"| t22
+  o20 -->|"CREA"| t23
+  o20 -->|"CREA"| t24
+  o20 -->|"LEE"| t24
+  o20 -.-> t25
+  o20 -->|"evento"| e26
+  o20 -->|"evento"| e27
+  a29 --> o28
+  o28 -->|"LEE"| t30
+  o28 -->|"CREA"| t31
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t17
+  o28 -->|"CREA"| t22
+  o28 -->|"LEE"| t22
+  o28 -.-> t32
+  o28 -->|"evento"| e33
+  a35 --> o34
+  o34 -->|"LEE"| t17
+  o34 -->|"LEE"| t24
+  o34 -->|"CREA"| t36
+  o34 -->|"LEE"| t37
+  o34 -->|"ACTUALIZA"| t38
+  o34 -->|"CREA"| t38
+  o34 -.-> t39
+  o34 -->|"evento"| e40
+  a42 --> o41
+  o41 -->|"LEE"| t30
+  o41 -->|"CREA"| t43
+  o41 -->|"LEE"| t43
+  o41 -->|"ACTUALIZA"| t44
+  o41 -->|"CREA"| t44
+  o41 -->|"LEE"| t44
+  o41 -.-> t45
+  o41 -->|"evento"| e46
+  a48 --> o47
+  o47 -->|"LEE"| t43
+  o47 -->|"LEE"| t12
+  o47 -->|"LEE"| t13
+  o47 -->|"CREA"| t49
+  o47 -->|"LEE"| t44
+  o47 -->|"CREA"| t4
+  o47 -.-> t50
+  o47 -->|"evento"| e51
+  a53 --> o52
+  o52 -->|"CREA"| t31
+  o52 -->|"LEE"| t43
+  o52 -->|"CREA"| t54
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t49
+  o52 -->|"LEE"| t44
+  o52 -.-> t55
+  o52 -->|"evento"| e56
+  a58 --> o57
+  o57 -->|"ACTUALIZA"| t54
+  o57 -->|"LEE"| t54
+  o57 -->|"LEE"| t49
+  o57 -->|"CREA"| t4
+  o57 -->|"CREA"| t5
+  o57 -->|"LEE"| t5
+  o57 -->|"evento"| e59
+  a58 --> o60
+  o60 -->|"LEE"| t54
+  o60 -->|"LEE"| t49
+  a62 --> o61
+  o61 -->|"CREA"| t30
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -355,7 +352,7 @@ Publicar el producto de datos y su versión
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código para el tenant, con otro identificador.; ConflictException: El producto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión del producto ya está publicada.; ConflictException: Dos reglas de calidad comparten el mismo código. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código para el tenant, con otro identificador.; ConflictException: El producto existente tiene otro código.; ConflictException: Esa versión del producto ya está publicada.; ConflictException: Dos reglas de calidad comparten el mismo código. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -367,110 +364,118 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a LakehouseCatalogRepository.findProductForUpdate"]:::llamada
+  n5["Llama a LakehouseCatalogRepository.findProductById"]:::llamada
   n4 --> n5
   n6[("LEE lakehouse.data_products")]:::efecto
   n5 --> n6
-  n7{"!product"}:::decision
+  n7{"occupied && occupied.tenantId !== tenantId"}:::decision
   n6 --> n7
-  n8["Llama a LakehouseCatalogRepository.findProductByCode"]:::llamada
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9[("LEE lakehouse.data_products")]:::efecto
-  n8 --> n9
-  n10{"byCode"}:::decision
+  n9["Llama a LakehouseCatalogRepository.findProductForUpdate"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE lakehouse.data_products")]:::efecto
   n9 --> n10
-  n11(["409 CONFLICT Ya existe un producto con ese código para el tenant, con otro identificador."]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a LakehouseCatalogRepository.createProduct"]:::llamada
-  n10 -->|"no"| n12
-  n13[("CREA lakehouse.data_products")]:::efecto
+  n11{"!product"}:::decision
+  n10 --> n11
+  n12["Llama a LakehouseCatalogRepository.findProductByCode"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE lakehouse.data_products")]:::efecto
   n12 --> n13
-  n14{"product.code !== dto.code || product.tenantId !== dto.tenantId"}:::decision
-  n7 -->|"no"| n14
-  n15(["409 CONFLICT El producto existente tiene otro código o pertenece a otro tenant."]):::error
+  n14{"byCode"}:::decision
+  n13 --> n14
+  n15(["409 CONFLICT Ya existe un producto con ese código para el tenant, con otro identificador."]):::error
   n14 -->|"sí"| n15
-  n16[("ACTUALIZA lakehouse.data_products · ACTUALIZA lakehouse.data_products")]:::efecto
+  n16["Llama a LakehouseCatalogRepository.createProduct"]:::llamada
   n14 -->|"no"| n16
-  n17{"dto.ownerTeamId"}:::decision
+  n17[("CREA lakehouse.data_products")]:::efecto
   n16 --> n17
-  n18[("ACTUALIZA lakehouse.data_products")]:::efecto
-  n17 -->|"sí"| n18
-  n19[("ACTUALIZA lakehouse.data_products")]:::efecto
-  n18 --> n19
-  n17 -->|"no"| n19
-  n20{"dto.businessPurpose"}:::decision
-  n19 --> n20
-  n21[("ACTUALIZA lakehouse.data_products")]:::efecto
-  n20 -->|"sí"| n21
-  n22{"dto.classificationCode"}:::decision
-  n21 --> n22
-  n20 -->|"no"| n22
+  n18{"product.code !== dto.code"}:::decision
+  n11 -->|"no"| n18
+  n19(["409 CONFLICT El producto existente tiene otro código."]):::error
+  n18 -->|"sí"| n19
+  n20[("ACTUALIZA lakehouse.data_products · ACTUALIZA lakehouse.data_products")]:::efecto
+  n18 -->|"no"| n20
+  n21{"dto.ownerTeamId"}:::decision
+  n20 --> n21
+  n22[("ACTUALIZA lakehouse.data_products")]:::efecto
+  n21 -->|"sí"| n22
   n23[("ACTUALIZA lakehouse.data_products")]:::efecto
-  n22 -->|"sí"| n23
-  n24[("ACTUALIZA lakehouse.data_products · ACTUALIZA lakehouse.data_products")]:::efecto
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24{"dto.businessPurpose"}:::decision
   n23 --> n24
-  n22 -->|"no"| n24
-  n25["Llama a LakehouseCatalogRepository.findProductVersion"]:::llamada
-  n13 --> n25
-  n24 --> n25
-  n26[("LEE lakehouse.data_product_versions")]:::efecto
+  n25[("ACTUALIZA lakehouse.data_products")]:::efecto
+  n24 -->|"sí"| n25
+  n26{"dto.classificationCode"}:::decision
   n25 --> n26
-  n27{"duplicateVersion"}:::decision
-  n26 --> n27
-  n28(["409 CONFLICT Esa versión del producto ya está publicada."]):::error
-  n27 -->|"sí"| n28
-  n29["Llama a LakehouseCatalogRepository.findActiveProductVersionForUpdate"]:::llamada
-  n27 -->|"no"| n29
+  n24 -->|"no"| n26
+  n27[("ACTUALIZA lakehouse.data_products")]:::efecto
+  n26 -->|"sí"| n27
+  n28[("ACTUALIZA lakehouse.data_products · ACTUALIZA lakehouse.data_products")]:::efecto
+  n27 --> n28
+  n26 -->|"no"| n28
+  n29["Llama a LakehouseCatalogRepository.findProductVersion"]:::llamada
+  n17 --> n29
+  n28 --> n29
   n30[("LEE lakehouse.data_product_versions")]:::efecto
   n29 --> n30
-  n31{"previous"}:::decision
+  n31{"duplicateVersion"}:::decision
   n30 --> n31
-  n32[("ACTUALIZA lakehouse.data_product_versions · ACTUALIZA lakehouse.data_product_versions")]:::efecto
+  n32(["409 CONFLICT Esa versión del producto ya está publicada."]):::error
   n31 -->|"sí"| n32
-  n33["Llama a LakehouseCatalogRepository.createProductVersion"]:::llamada
-  n32 --> n33
+  n33["Llama a LakehouseCatalogRepository.findActiveProductVersionForUpdate"]:::llamada
   n31 -->|"no"| n33
-  n34[("CREA lakehouse.data_product_versions")]:::efecto
+  n34[("LEE lakehouse.data_product_versions")]:::efecto
   n33 --> n34
-  n35["Repite: por cada const rule de dto.qualityRules ?? []"]:::bucle
+  n35{"previous"}:::decision
   n34 --> n35
-  n36{"seenRuleCodes.has(rule.ruleCode)"}:::decision
-  n35 -->|"cada elemento"| n36
-  n37(["409 CONFLICT Dos reglas de calidad comparten el mismo código."]):::error
-  n36 -->|"sí"| n37
-  n38["Llama a LakehouseCatalogRepository.createQualityRule"]:::llamada
-  n36 -->|"no"| n38
-  n39[("CREA lakehouse.lakehouse_quality_rules")]:::efecto
+  n36[("ACTUALIZA lakehouse.data_product_versions · ACTUALIZA lakehouse.data_product_versions")]:::efecto
+  n35 -->|"sí"| n36
+  n37["Llama a LakehouseCatalogRepository.createProductVersion"]:::llamada
+  n36 --> n37
+  n35 -->|"no"| n37
+  n38[("CREA lakehouse.data_product_versions")]:::efecto
+  n37 --> n38
+  n39["Repite: por cada const rule de dto.qualityRules ?? []"]:::bucle
   n38 --> n39
-  n40["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n39 --> n40
-  n35 -->|"al terminar"| n40
-  n41["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n40 --> n41
-  n42["Transacción: startActiveSpan(…)"]:::transaccion
-  n41 --> n42
-  n43["Intenta"]:::intento
+  n40{"seenRuleCodes.has(rule.ruleCode)"}:::decision
+  n39 -->|"cada elemento"| n40
+  n41(["409 CONFLICT Dos reglas de calidad comparten el mismo código."]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a LakehouseCatalogRepository.createQualityRule"]:::llamada
+  n40 -->|"no"| n42
+  n43[("CREA lakehouse.lakehouse_quality_rules")]:::efecto
   n42 --> n43
-  n44(["↩ (relanza el error capturado)"]):::error
-  n43 -->|"si falla"| n44
-  n45["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n43 --> n45
-  n46["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n44["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n43 --> n44
+  n39 -->|"al terminar"| n44
+  n45["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n44 --> n45
+  n46["Transacción: startActiveSpan(…)"]:::transaccion
   n45 --> n46
-  n47[("LEE messaging.outbox_messages")]:::efecto
+  n47["Intenta"]:::intento
   n46 --> n47
-  n48["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n47 --> n48
-  n49[("CREA messaging.domain_events")]:::efecto
-  n48 --> n49
-  n50["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n48(["↩ (relanza el error capturado)"]):::error
+  n47 -->|"si falla"| n48
+  n49["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n47 --> n49
+  n50["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n49 --> n50
-  n51[("CREA messaging.outbox_messages")]:::efecto
+  n51[("LEE messaging.outbox_messages")]:::efecto
   n50 --> n51
-  n52>"Evento DataProductVersionPublished"]:::evento
+  n52["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n51 --> n52
-  n53(("201 Responde con éxito")):::ok
+  n53[("CREA messaging.domain_events")]:::efecto
   n52 --> n53
+  n54["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n53 --> n54
+  n55[("CREA messaging.outbox_messages")]:::efecto
+  n54 --> n55
+  n56>"Evento DataProductVersionPublished"]:::evento
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -489,7 +494,7 @@ Registrar el dataset y su esquema inicial
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de producto no encontrada.; ResourceNotFoundException: Zona no encontrada.; ResourceNotFoundException: Catálogo no encontrado. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Zona no encontrada.; ResourceNotFoundException: Catálogo no encontrado. |
 | 409 | `CONFLICT` | ConflictException: Ya hay un dataset registrado para esa tabla. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión del producto ya no es la vigente.; PreconditionFailedException: La zona no está activa.; PreconditionFailedException: El catálogo no está activo. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -503,86 +508,82 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a LakehouseCatalogRepository.findProductVersionById"]:::llamada
+  n5["Llama a LakehouseCatalogRepository.findProductVersionInTenant"]:::llamada
   n4 --> n5
-  n6[("LEE lakehouse.data_product_versions")]:::efecto
+  n6[("LEE lakehouse.data_product_versions · LEE lakehouse.data_products")]:::efecto
   n5 --> n6
-  n7{"!productVersion"}:::decision
+  n7{"productVersion.state !== 'active'"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Versión de producto no encontrada."]):::error
+  n8(["422 PRECONDITION_FAILED La versión del producto ya no es la vigente."]):::error
   n7 -->|"sí"| n8
-  n9{"productVersion.state !== 'active'"}:::decision
+  n9["Llama a LakehouseCatalogRepository.findZoneById"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La versión del producto ya no es la vigente."]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a LakehouseCatalogRepository.findZoneById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE lakehouse.data_lake_zones")]:::efecto
-  n11 --> n12
-  n13{"!zone"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Zona no encontrada."]):::error
+  n10[("LEE lakehouse.data_lake_zones")]:::efecto
+  n9 --> n10
+  n11{"!zone"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Zona no encontrada."]):::error
+  n11 -->|"sí"| n12
+  n13{"zone.state !== 'active'"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED La zona no está activa."]):::error
   n13 -->|"sí"| n14
-  n15{"zone.state !== 'active'"}:::decision
+  n15["Llama a LakehouseCatalogRepository.findCatalogById"]:::llamada
   n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED La zona no está activa."]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a LakehouseCatalogRepository.findCatalogById"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE lakehouse.lakehouse_catalogs")]:::efecto
-  n17 --> n18
-  n19{"!catalog"}:::decision
-  n18 --> n19
-  n20(["404 NOT_FOUND Catálogo no encontrado."]):::error
+  n16[("LEE lakehouse.lakehouse_catalogs")]:::efecto
+  n15 --> n16
+  n17{"!catalog"}:::decision
+  n16 --> n17
+  n18(["404 NOT_FOUND Catálogo no encontrado."]):::error
+  n17 -->|"sí"| n18
+  n19{"catalog.state !== 'active'"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED El catálogo no está activo."]):::error
   n19 -->|"sí"| n20
-  n21{"catalog.state !== 'active'"}:::decision
+  n21["Llama a LakehouseCatalogRepository.findDatasetByTable"]:::llamada
   n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED El catálogo no está activo."]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a LakehouseCatalogRepository.findDatasetByTable"]:::llamada
-  n21 -->|"no"| n23
-  n24[("LEE lakehouse.lakehouse_datasets")]:::efecto
-  n23 --> n24
-  n25{"duplicate"}:::decision
-  n24 --> n25
-  n26(["409 CONFLICT Ya hay un dataset registrado para esa tabla."]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a LakehouseCatalogRepository.createDataset"]:::llamada
-  n25 -->|"no"| n27
-  n28[("CREA lakehouse.lakehouse_datasets")]:::efecto
+  n22[("LEE lakehouse.lakehouse_datasets")]:::efecto
+  n21 --> n22
+  n23{"duplicate"}:::decision
+  n22 --> n23
+  n24(["409 CONFLICT Ya hay un dataset registrado para esa tabla."]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a LakehouseCatalogRepository.createDataset"]:::llamada
+  n23 -->|"no"| n25
+  n26[("CREA lakehouse.lakehouse_datasets")]:::efecto
+  n25 --> n26
+  n27["Llama a LakehouseCatalogRepository.createSchemaVersion"]:::llamada
+  n26 --> n27
+  n28[("CREA lakehouse.lakehouse_schema_versions")]:::efecto
   n27 --> n28
-  n29["Llama a LakehouseCatalogRepository.createSchemaVersion"]:::llamada
+  n29["Llama a OutboxService.publishDomainEvent"]:::llamada
   n28 --> n29
-  n30[("CREA lakehouse.lakehouse_schema_versions")]:::efecto
+  n30["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n29 --> n30
-  n31["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n31["Transacción: startActiveSpan(…)"]:::transaccion
   n30 --> n31
-  n32["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n32["Intenta"]:::intento
   n31 --> n32
-  n33["Transacción: startActiveSpan(…)"]:::transaccion
-  n32 --> n33
-  n34["Intenta"]:::intento
-  n33 --> n34
-  n35(["↩ (relanza el error capturado)"]):::error
-  n34 -->|"si falla"| n35
-  n36["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n34 --> n36
-  n37["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"si falla"| n33
+  n34["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n32 --> n34
+  n35["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n34 --> n35
+  n36[("LEE messaging.outbox_messages")]:::efecto
+  n35 --> n36
+  n37["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n36 --> n37
-  n38[("LEE messaging.outbox_messages")]:::efecto
+  n38[("CREA messaging.domain_events")]:::efecto
   n37 --> n38
-  n39["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n39["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n38 --> n39
-  n40[("CREA messaging.domain_events")]:::efecto
+  n40[("CREA messaging.outbox_messages")]:::efecto
   n39 --> n40
-  n41["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n41>"Evento LakehouseDatasetRegistered"]:::evento
   n40 --> n41
-  n42[("CREA messaging.outbox_messages")]:::efecto
+  n42(("201 Responde con éxito")):::ok
   n41 --> n42
-  n43>"Evento LakehouseDatasetRegistered"]:::evento
-  n42 --> n43
-  n44(("201 Responde con éxito")):::ok
-  n43 --> n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -601,7 +602,6 @@ Evaluar la calidad del dataset y abrir hallazgos
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hallazgo cita una regla que no está activa para la versión del producto. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -618,64 +618,70 @@ flowchart TD
   n4 --> n5
   n6[("LEE lakehouse.lakehouse_datasets")]:::efecto
   n5 --> n6
-  n7{"!dataset"}:::decision
+  n7["Llama a LakehouseRuntimeRepository.findRunById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Dataset no encontrado."]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a LakehouseCatalogRepository.findActiveQualityRules"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE lakehouse.lakehouse_quality_rules")]:::efecto
-  n9 --> n10
-  n11["Llama a LakehouseRuntimeRepository.createQualityRun"]:::llamada
+  n8[("LEE lakehouse.transformation_runs")]:::efecto
+  n7 --> n8
+  n9["Repite: por cada const finding de dto.findings ?? []"]:::bucle
+  n8 --> n9
+  n10["Llama a LakehouseRuntimeRepository.findPartitionById"]:::llamada
+  n9 -->|"cada elemento"| n10
+  n11[("LEE lakehouse.lakehouse_partitions")]:::efecto
   n10 --> n11
-  n12[("CREA lakehouse.lakehouse_quality_runs")]:::efecto
+  n12{"!partition || partition.lakehouseDatasetId !== dataset.id"}:::decision
   n11 --> n12
-  n13["Repite: por cada const finding de dto.findings ?? []"]:::bucle
-  n12 --> n13
-  n14{"!rule"}:::decision
-  n13 -->|"cada elemento"| n14
-  n15(["422 PRECONDITION_FAILED El hallazgo cita una regla que no está activa para la versión del producto."]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a LakehouseRuntimeRepository.createQualityIssue"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA lakehouse.lakehouse_quality_issues")]:::efecto
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a LakehouseCatalogRepository.findActiveQualityRules"]:::llamada
+  n12 -->|"no"| n14
+  n9 -->|"al terminar"| n14
+  n15[("LEE lakehouse.lakehouse_quality_rules")]:::efecto
+  n14 --> n15
+  n16["Llama a LakehouseRuntimeRepository.createQualityRun"]:::llamada
+  n15 --> n16
+  n17[("CREA lakehouse.lakehouse_quality_runs")]:::efecto
   n16 --> n17
-  n18[("ACTUALIZA lakehouse.lakehouse_quality_runs · ACTUALIZA lakehouse.lakehouse_quality_runs · ACTUALIZA lakehouse…")]:::efecto
+  n18["Repite: por cada const finding de dto.findings ?? []"]:::bucle
   n17 --> n18
-  n13 -->|"al terminar"| n18
-  n19{"quarantine && dataset.lifecycleState !== 'quarantined'"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA lakehouse.lakehouse_datasets")]:::efecto
+  n19{"!rule"}:::decision
+  n18 -->|"cada elemento"| n19
+  n20(["422 PRECONDITION_FAILED El hallazgo cita una regla que no está activa para la versión del producto."]):::error
   n19 -->|"sí"| n20
-  n21["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n20 --> n21
+  n21["Llama a LakehouseRuntimeRepository.createQualityIssue"]:::llamada
   n19 -->|"no"| n21
-  n22["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n22[("CREA lakehouse.lakehouse_quality_issues")]:::efecto
   n21 --> n22
-  n23["Transacción: startActiveSpan(…)"]:::transaccion
+  n23[("ACTUALIZA lakehouse.lakehouse_quality_runs · ACTUALIZA lakehouse.lakehouse_quality_runs · ACTUALIZA lakehouse…")]:::efecto
   n22 --> n23
-  n24["Intenta"]:::intento
+  n18 -->|"al terminar"| n23
+  n24["Llama a OutboxService.publishDomainEvent"]:::llamada
   n23 --> n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n24 -->|"si falla"| n25
-  n26["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n24 --> n26
-  n27["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n25["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n24 --> n25
+  n26["Transacción: startActiveSpan(…)"]:::transaccion
+  n25 --> n26
+  n27["Intenta"]:::intento
   n26 --> n27
-  n28[("LEE messaging.outbox_messages")]:::efecto
-  n27 --> n28
-  n29["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n28 --> n29
-  n30[("CREA messaging.domain_events")]:::efecto
+  n28(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"si falla"| n28
+  n29["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n27 --> n29
+  n30["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n29 --> n30
-  n31["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n31[("LEE messaging.outbox_messages")]:::efecto
   n30 --> n31
-  n32[("CREA messaging.outbox_messages")]:::efecto
+  n32["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n31 --> n32
-  n33>"Evento QualityRunEvaluated"]:::evento
+  n33[("CREA messaging.domain_events")]:::efecto
   n32 --> n33
-  n34(("201 Responde con éxito")):::ok
+  n34["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n33 --> n34
+  n35[("CREA messaging.outbox_messages")]:::efecto
+  n34 --> n35
+  n36>"Evento QualityRunEvaluated"]:::evento
+  n35 --> n36
+  n37(("201 Responde con éxito")):::ok
+  n36 --> n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -694,7 +700,6 @@ Ingerir dato de salud de-identificado en la zona curada
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset objetivo no encontrado.; ResourceNotFoundException: Perfil de de-identificación no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras.; PreconditionFailedException: La ingesta de-identificada sólo puede escribir en la zona curated. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -713,106 +718,99 @@ flowchart TD
   n5 --> n6
   n7[("LEE lakehouse.lakehouse_datasets")]:::efecto
   n6 --> n7
-  n8{"!dataset"}:::decision
+  n8{"dataset.lifecycleState !== 'active'"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Dataset objetivo no encontrado."]):::error
+  n9(["422 PRECONDITION_FAILED El dataset objetivo no está activo; no admite escrituras."]):::error
   n8 -->|"sí"| n9
-  n10{"dataset.lifecycleState !== 'active'"}:::decision
+  n10["Llama a LakehouseCatalogRepository.findZoneById"]:::llamada
   n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El dataset objetivo no está activo; no admite escrituras."]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a LakehouseCatalogRepository.findZoneById"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE lakehouse.data_lake_zones")]:::efecto
-  n12 --> n13
-  n14{"!zone || zone.zoneType !== 'curated'"}:::decision
-  n13 --> n14
-  n15(["422 PRECONDITION_FAILED La ingesta de-identificada sólo puede escribir en la zona curated."]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a DataReleaseRepository.findDeidProfileById"]:::llamada
-  n14 -->|"no"| n16
-  n17[("LEE health_data.health_deidentification_profiles")]:::efecto
+  n11[("LEE lakehouse.data_lake_zones")]:::efecto
+  n10 --> n11
+  n12{"!zone || zone.zoneType !== 'curated'"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED La ingesta de-identificada sólo puede escribir en la zona curated."]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a DataReleaseRepository.findDeidProfileById"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE health_data.health_deidentification_profiles")]:::efecto
+  n14 --> n15
+  n16["Llama a DataReleaseRepository.createDeidRun"]:::llamada
+  n15 --> n16
+  n17[("CREA health_data.health_deidentification_runs")]:::efecto
   n16 --> n17
-  n18{"!profile"}:::decision
+  n18["Llama a TransformationService.materialize"]:::llamada
   n17 --> n18
-  n19(["404 NOT_FOUND Perfil de de-identificación no encontrado."]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a DataReleaseRepository.createDeidRun"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA health_data.health_deidentification_runs")]:::efecto
+  n19["Repite: por cada const input$ de input.partitions"]:::bucle
+  n18 --> n19
+  n20["Llama a LakehouseRuntimeRepository.findPartitionByHash"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21[("LEE lakehouse.lakehouse_partitions")]:::efecto
   n20 --> n21
-  n22["Llama a TransformationService.materialize"]:::llamada
+  n22["Llama a LakehouseRuntimeRepository.createPartition"]:::llamada
   n21 --> n22
-  n23["Repite: por cada const input$ de input.partitions"]:::bucle
+  n23[("CREA lakehouse.lakehouse_partitions")]:::efecto
   n22 --> n23
-  n24["Llama a LakehouseRuntimeRepository.findPartitionByHash"]:::llamada
-  n23 -->|"cada elemento"| n24
-  n25[("LEE lakehouse.lakehouse_partitions")]:::efecto
-  n24 --> n25
-  n26["Llama a LakehouseRuntimeRepository.createPartition"]:::llamada
+  n24["Repite: por cada const file de input$.files"]:::bucle
+  n23 --> n24
+  n25["Llama a LakehouseRuntimeRepository.findFileByHash"]:::llamada
+  n24 -->|"cada elemento"| n25
+  n26[("LEE lakehouse.lakehouse_files")]:::efecto
   n25 --> n26
-  n27[("CREA lakehouse.lakehouse_partitions")]:::efecto
+  n27["Llama a LakehouseRuntimeRepository.createFile"]:::llamada
   n26 --> n27
-  n28["Repite: por cada const file de input$.files"]:::bucle
+  n28[("CREA lakehouse.lakehouse_files")]:::efecto
   n27 --> n28
-  n29["Llama a LakehouseRuntimeRepository.findFileByHash"]:::llamada
-  n28 -->|"cada elemento"| n29
-  n30[("LEE lakehouse.lakehouse_files")]:::efecto
-  n29 --> n30
-  n31["Llama a LakehouseRuntimeRepository.createFile"]:::llamada
-  n30 --> n31
-  n32[("CREA lakehouse.lakehouse_files")]:::efecto
-  n31 --> n32
-  n33{"input.runId"}:::decision
+  n29{"input.runId && input.sourceDatasetIds.length › 0"}:::decision
+  n28 --> n29
+  n24 -->|"al terminar"| n29
+  n30["Repite: por cada const sourcePartitionId de input$.sourcePartitionIds ?? []"]:::bucle
+  n29 -->|"sí"| n30
+  n31{"ownerDatasetId === undefined"}:::decision
+  n30 -->|"cada elemento"| n31
+  n32["Llama a LakehouseRuntimeRepository.findPartitionById"]:::llamada
+  n31 -->|"sí"| n32
+  n33[("LEE lakehouse.lakehouse_partitions")]:::efecto
   n32 --> n33
-  n28 -->|"al terminar"| n33
-  n34["Repite: por cada const sourceDatasetId de input.sourceDatasetIds"]:::bucle
-  n33 -->|"sí"| n34
-  n35{"sourcePartitionIds.length === 0"}:::decision
-  n34 -->|"cada elemento"| n35
+  n34{"!sourcePartition || !input.sourceDatasetIds.includes( sourcePartition.lakehouseDatasetId, )"}:::decision
+  n33 --> n34
+  n35(["↩ (relanza el error capturado)"]):::error
+  n34 -->|"sí"| n35
   n36["Llama a LakehouseRuntimeRepository.createLineageEdge"]:::llamada
-  n35 -->|"sí"| n36
+  n34 -->|"no"| n36
+  n31 -->|"no"| n36
   n37[("CREA lakehouse.lakehouse_lineage_edges")]:::efecto
   n36 --> n37
-  n38["Repite: por cada const sourcePartitionId de sourcePartitionIds"]:::bucle
+  n38["Llama a OutboxService.publishDomainEvent"]:::llamada
   n37 --> n38
-  n35 -->|"no"| n38
-  n39["Llama a LakehouseRuntimeRepository.createLineageEdge"]:::llamada
-  n38 -->|"cada elemento"| n39
-  n40[("CREA lakehouse.lakehouse_lineage_edges")]:::efecto
+  n30 -->|"al terminar"| n38
+  n29 -->|"no"| n38
+  n19 -->|"al terminar"| n38
+  n39["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n38 --> n39
+  n40["Transacción: startActiveSpan(…)"]:::transaccion
   n39 --> n40
-  n41["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n41["Intenta"]:::intento
   n40 --> n41
-  n38 -->|"al terminar"| n41
-  n34 -->|"al terminar"| n41
-  n33 -->|"no"| n41
-  n23 -->|"al terminar"| n41
-  n42["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n41 --> n42
-  n43["Transacción: startActiveSpan(…)"]:::transaccion
-  n42 --> n43
-  n44["Intenta"]:::intento
+  n42(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"si falla"| n42
+  n43["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n41 --> n43
+  n44["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n43 --> n44
-  n45(["↩ (relanza el error capturado)"]):::error
-  n44 -->|"si falla"| n45
-  n46["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n44 --> n46
-  n47["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n45[("LEE messaging.outbox_messages")]:::efecto
+  n44 --> n45
+  n46["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n45 --> n46
+  n47[("CREA messaging.domain_events")]:::efecto
   n46 --> n47
-  n48[("LEE messaging.outbox_messages")]:::efecto
+  n48["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n47 --> n48
-  n49["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n49[("CREA messaging.outbox_messages")]:::efecto
   n48 --> n49
-  n50[("CREA messaging.domain_events")]:::efecto
+  n50>"Evento HealthBatchDeidentified"]:::evento
   n49 --> n50
-  n51["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n51(("201 Responde con éxito")):::ok
   n50 --> n51
-  n52[("CREA messaging.outbox_messages")]:::efecto
-  n51 --> n52
-  n53>"Evento HealthBatchDeidentified"]:::evento
-  n52 --> n53
-  n54(("201 Responde con éxito")):::ok
-  n53 --> n54
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -831,7 +829,6 @@ Registrar la corrida con sus particiones, archivos y linaje
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de transformación no encontrada.; ResourceNotFoundException: Dataset objetivo no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de transformación no está activa.; PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -848,82 +845,82 @@ flowchart TD
   n4 --> n5
   n6[("LEE lakehouse.transformation_definitions")]:::efecto
   n5 --> n6
-  n7{"!definition"}:::decision
+  n7{"definition.state !== 'active'"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Definición de transformación no encontrada."]):::error
+  n8(["422 PRECONDITION_FAILED La definición de transformación no está activa."]):::error
   n7 -->|"sí"| n8
-  n9{"definition.state !== 'active'"}:::decision
+  n9["Llama a LakehouseRuntimeRepository.findLiveRunByTargetForUpdate"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La definición de transformación no está activa."]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a LakehouseRuntimeRepository.findLiveRunByTargetForUpdate"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE lakehouse.transformation_runs")]:::efecto
+  n10[("LEE lakehouse.transformation_runs")]:::efecto
+  n9 --> n10
+  n11["Llama a TransformationService.requireWritableDataset"]:::llamada
+  n10 --> n11
+  n12["Llama a LakehouseCatalogRepository.findDatasetById"]:::llamada
   n11 --> n12
-  n13["Llama a TransformationService.requireWritableDataset"]:::llamada
+  n13[("LEE lakehouse.lakehouse_datasets")]:::efecto
   n12 --> n13
-  n14["Llama a LakehouseCatalogRepository.findDatasetById"]:::llamada
+  n14{"dataset.lifecycleState !== 'active'"}:::decision
   n13 --> n14
-  n15[("LEE lakehouse.lakehouse_datasets")]:::efecto
-  n14 --> n15
-  n16{"!dataset"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Dataset objetivo no encontrado."]):::error
-  n16 -->|"sí"| n17
-  n18{"dataset.lifecycleState !== 'active'"}:::decision
-  n16 -->|"no"| n18
-  n19(["422 PRECONDITION_FAILED El dataset objetivo no está activo; no admite escrituras."]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a LakehouseRuntimeRepository.createRun"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA lakehouse.transformation_runs")]:::efecto
+  n15(["422 PRECONDITION_FAILED El dataset objetivo no está activo; no admite escrituras."]):::error
+  n14 -->|"sí"| n15
+  n16["Repite: por cada const sourceDatasetId de sourceDatasetIds"]:::bucle
+  n14 -->|"no"| n16
+  n17["Llama a LakehouseCatalogRepository.findDatasetById"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18[("LEE lakehouse.lakehouse_datasets")]:::efecto
+  n17 --> n18
+  n19["Llama a LakehouseRuntimeRepository.createRun"]:::llamada
+  n18 --> n19
+  n16 -->|"al terminar"| n19
+  n20[("CREA lakehouse.transformation_runs")]:::efecto
+  n19 --> n20
+  n21["Llama a TransformationService.materialize"]:::llamada
   n20 --> n21
-  n22["Llama a TransformationService.materialize"]:::llamada
+  n22["Repite: por cada const input$ de input.partitions"]:::bucle
   n21 --> n22
-  n23["Repite: por cada const input$ de input.partitions"]:::bucle
-  n22 --> n23
-  n24["Llama a LakehouseRuntimeRepository.findPartitionByHash"]:::llamada
-  n23 -->|"cada elemento"| n24
-  n25[("LEE lakehouse.lakehouse_partitions")]:::efecto
+  n23["Llama a LakehouseRuntimeRepository.findPartitionByHash"]:::llamada
+  n22 -->|"cada elemento"| n23
+  n24[("LEE lakehouse.lakehouse_partitions")]:::efecto
+  n23 --> n24
+  n25["Llama a LakehouseRuntimeRepository.createPartition"]:::llamada
   n24 --> n25
-  n26["Llama a LakehouseRuntimeRepository.createPartition"]:::llamada
+  n26[("CREA lakehouse.lakehouse_partitions")]:::efecto
   n25 --> n26
-  n27[("CREA lakehouse.lakehouse_partitions")]:::efecto
+  n27["Repite: por cada const file de input$.files"]:::bucle
   n26 --> n27
-  n28["Repite: por cada const file de input$.files"]:::bucle
-  n27 --> n28
-  n29["Llama a LakehouseRuntimeRepository.findFileByHash"]:::llamada
-  n28 -->|"cada elemento"| n29
-  n30[("LEE lakehouse.lakehouse_files")]:::efecto
+  n28["Llama a LakehouseRuntimeRepository.findFileByHash"]:::llamada
+  n27 -->|"cada elemento"| n28
+  n29[("LEE lakehouse.lakehouse_files")]:::efecto
+  n28 --> n29
+  n30["Llama a LakehouseRuntimeRepository.createFile"]:::llamada
   n29 --> n30
-  n31["Llama a LakehouseRuntimeRepository.createFile"]:::llamada
+  n31[("CREA lakehouse.lakehouse_files")]:::efecto
   n30 --> n31
-  n32[("CREA lakehouse.lakehouse_files")]:::efecto
+  n32{"input.runId && input.sourceDatasetIds.length › 0"}:::decision
   n31 --> n32
-  n33{"input.runId"}:::decision
-  n32 --> n33
-  n28 -->|"al terminar"| n33
-  n34["Repite: por cada const sourceDatasetId de input.sourceDatasetIds"]:::bucle
-  n33 -->|"sí"| n34
-  n35{"sourcePartitionIds.length === 0"}:::decision
-  n34 -->|"cada elemento"| n35
-  n36["Llama a LakehouseRuntimeRepository.createLineageEdge"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("CREA lakehouse.lakehouse_lineage_edges")]:::efecto
+  n27 -->|"al terminar"| n32
+  n33["Repite: por cada const sourcePartitionId de input$.sourcePartitionIds ?? []"]:::bucle
+  n32 -->|"sí"| n33
+  n34{"ownerDatasetId === undefined"}:::decision
+  n33 -->|"cada elemento"| n34
+  n35["Llama a LakehouseRuntimeRepository.findPartitionById"]:::llamada
+  n34 -->|"sí"| n35
+  n36[("LEE lakehouse.lakehouse_partitions")]:::efecto
+  n35 --> n36
+  n37{"!sourcePartition || !input.sourceDatasetIds.includes( sourcePartition.lakehouseDatasetId, )"}:::decision
   n36 --> n37
-  n38["Repite: por cada const sourcePartitionId de sourcePartitionIds"]:::bucle
-  n37 --> n38
-  n35 -->|"no"| n38
+  n38(["↩ (relanza el error capturado)"]):::error
+  n37 -->|"sí"| n38
   n39["Llama a LakehouseRuntimeRepository.createLineageEdge"]:::llamada
-  n38 -->|"cada elemento"| n39
+  n37 -->|"no"| n39
+  n34 -->|"no"| n39
   n40[("CREA lakehouse.lakehouse_lineage_edges")]:::efecto
   n39 --> n40
   n41[("ACTUALIZA lakehouse.transformation_runs · ACTUALIZA lakehouse.transformation_runs · ACTUALIZA lakehouse.trans…")]:::efecto
   n40 --> n41
-  n38 -->|"al terminar"| n41
-  n34 -->|"al terminar"| n41
-  n33 -->|"no"| n41
-  n23 -->|"al terminar"| n41
+  n33 -->|"al terminar"| n41
+  n32 -->|"no"| n41
+  n22 -->|"al terminar"| n41
   n42["Llama a OutboxService.publishDomainEvent"]:::llamada
   n41 --> n42
   n43["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
@@ -1069,7 +1066,6 @@ Solicitar el release de un dataset para investigación
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Proyecto de investigación no encontrado.; ResourceNotFoundException: La cohorte no pertenece a ese proyecto.; ResourceNotFoundException: Versión de producto no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proyecto no está aprobado.; PreconditionFailedException: La ventana de aprobación ética del proyecto no está vigente.; PreconditionFailedException: La cohorte no está activa.; PreconditionFailedException: El producto contiene datos de paciente y la cohorte no declara perfil de de-identificación. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1086,78 +1082,70 @@ flowchart TD
   n4 --> n5
   n6[("LEE lakehouse.research_projects")]:::efecto
   n5 --> n6
-  n7{"!project"}:::decision
+  n7{"project.state !== 'approved'"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Proyecto de investigación no encontrado."]):::error
+  n8(["422 PRECONDITION_FAILED El proyecto no está aprobado."]):::error
   n7 -->|"sí"| n8
-  n9{"project.state !== 'approved'"}:::decision
+  n9{"project.approvedTo ‹= now || project.approvedFrom › now"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El proyecto no está aprobado."]):::error
+  n10(["422 PRECONDITION_FAILED La ventana de aprobación ética del proyecto no está vigente."]):::error
   n9 -->|"sí"| n10
-  n11{"project.approvedTo ‹= now || project.approvedFrom › now"}:::decision
+  n11["Llama a ResearchRepository.findCohortById"]:::llamada
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La ventana de aprobación ética del proyecto no está vigente."]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a ResearchRepository.findCohortById"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE lakehouse.cohort_definitions")]:::efecto
-  n13 --> n14
-  n15{"!cohort || cohort.researchProjectId !== project.id"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND La cohorte no pertenece a ese proyecto."]):::error
+  n12[("LEE lakehouse.cohort_definitions")]:::efecto
+  n11 --> n12
+  n13{"!cohort || cohort.researchProjectId !== project.id"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"cohort.state !== 'active'"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La cohorte no está activa."]):::error
   n15 -->|"sí"| n16
-  n17{"cohort.state !== 'active'"}:::decision
+  n17["Llama a LakehouseCatalogRepository.findProductVersionInTenant"]:::llamada
   n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED La cohorte no está activa."]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a LakehouseCatalogRepository.findProductVersionById"]:::llamada
-  n17 -->|"no"| n19
-  n20[("LEE lakehouse.data_product_versions")]:::efecto
+  n18[("LEE lakehouse.data_product_versions · LEE lakehouse.data_products")]:::efecto
+  n17 --> n18
+  n19["Llama a LakehouseCatalogRepository.findProductForUpdate"]:::llamada
+  n18 --> n19
+  n20[("LEE lakehouse.data_products")]:::efecto
   n19 --> n20
-  n21{"!productVersion"}:::decision
+  n21{"product?.containsPhi && !cohort.deidentificationProfileId"}:::decision
   n20 --> n21
-  n22(["404 NOT_FOUND Versión de producto no encontrada."]):::error
+  n22(["422 PRECONDITION_FAILED El producto contiene datos de paciente y la cohorte no declara perfil de de-identific…"]):::error
   n21 -->|"sí"| n22
-  n23["Llama a LakehouseCatalogRepository.findProductForUpdate"]:::llamada
+  n23["Llama a ResearchRepository.createReleaseRequest"]:::llamada
   n21 -->|"no"| n23
-  n24[("LEE lakehouse.data_products")]:::efecto
+  n24[("CREA lakehouse.dataset_release_requests")]:::efecto
   n23 --> n24
-  n25{"product?.containsPhi && !cohort.deidentificationProfileId"}:::decision
+  n25["Llama a OutboxService.publishDomainEvent"]:::llamada
   n24 --> n25
-  n26(["422 PRECONDITION_FAILED El producto contiene datos de paciente y la cohorte no declara perfil de de-identific…"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a ResearchRepository.createReleaseRequest"]:::llamada
-  n25 -->|"no"| n27
-  n28[("CREA lakehouse.dataset_release_requests")]:::efecto
+  n26["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n25 --> n26
+  n27["Transacción: startActiveSpan(…)"]:::transaccion
+  n26 --> n27
+  n28["Intenta"]:::intento
   n27 --> n28
-  n29["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n28 --> n29
-  n30["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n29 --> n30
-  n31["Transacción: startActiveSpan(…)"]:::transaccion
+  n29(["↩ (relanza el error capturado)"]):::error
+  n28 -->|"si falla"| n29
+  n30["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n28 --> n30
+  n31["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n30 --> n31
-  n32["Intenta"]:::intento
+  n32[("LEE messaging.outbox_messages")]:::efecto
   n31 --> n32
-  n33(["↩ (relanza el error capturado)"]):::error
-  n32 -->|"si falla"| n33
-  n34["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n32 --> n34
-  n35["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n33["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n32 --> n33
+  n34[("CREA messaging.domain_events")]:::efecto
+  n33 --> n34
+  n35["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n34 --> n35
-  n36[("LEE messaging.outbox_messages")]:::efecto
+  n36[("CREA messaging.outbox_messages")]:::efecto
   n35 --> n36
-  n37["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n37>"Evento DatasetReleaseRequested"]:::evento
   n36 --> n37
-  n38[("CREA messaging.domain_events")]:::efecto
+  n38(("201 Responde con éxito")):::ok
   n37 --> n38
-  n39["Llama a OutboxRepository.createOutboxMessage"]:::llamada
-  n38 --> n39
-  n40[("CREA messaging.outbox_messages")]:::efecto
-  n39 --> n40
-  n41>"Evento DatasetReleaseRequested"]:::evento
-  n40 --> n41
-  n42(("201 Responde con éxito")):::ok
-  n41 --> n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1176,7 +1164,6 @@ Aprobar y materializar el manifiesto de-identificado
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada.; ResourceNotFoundException: Proyecto de investigación no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no está en un estado que admita aprobación.; PreconditionFailedException: La aprobación ética del proyecto caducó; el release no puede materializarse.; PreconditionFailedException: La cohorte no declara perfil de de-identificación. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1193,76 +1180,66 @@ flowchart TD
   n4 --> n5
   n6[("LEE lakehouse.dataset_release_requests")]:::efecto
   n5 --> n6
-  n7{"!request"}:::decision
+  n7["Llama a ResearchRepository.findManifestByRequestForUpdate"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Solicitud de release no encontrada."]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a ResearchRepository.findManifestByRequestForUpdate"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE lakehouse.dataset_release_manifests")]:::efecto
-  n9 --> n10
-  n11{"!(APPROVABLE_RELEASE_STATUSES as readonly string[]).includes( request.status, )"}:::decision
-  n10 --> n11
-  n12(["422 PRECONDITION_FAILED La solicitud no está en un estado que admita aprobación."]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a ResearchRepository.findProjectById"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE lakehouse.research_projects")]:::efecto
-  n13 --> n14
-  n15{"!project"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Proyecto de investigación no encontrado."]):::error
-  n15 -->|"sí"| n16
-  n17{"project.approvedTo ‹= now"}:::decision
-  n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED La aprobación ética del proyecto caducó; el release no puede materializarse."]):::error
+  n8[("LEE lakehouse.dataset_release_manifests")]:::efecto
+  n7 --> n8
+  n9{"!(APPROVABLE_RELEASE_STATUSES as readonly string[]).includes( request.status, )"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La solicitud no está en un estado que admita aprobación."]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a ResearchRepository.findProjectById"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE lakehouse.research_projects")]:::efecto
+  n11 --> n12
+  n13{"project.approvedTo ‹= now"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La aprobación ética del proyecto caducó; el release no puede materializarse."]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a ResearchRepository.findCohortById"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE lakehouse.cohort_definitions")]:::efecto
+  n15 --> n16
+  n17{"!cohort?.deidentificationProfileId"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED La cohorte no declara perfil de de-identificación."]):::error
   n17 -->|"sí"| n18
-  n19["Llama a ResearchRepository.findCohortById"]:::llamada
+  n19["Llama a DataReleaseRepository.createDeidRun"]:::llamada
   n17 -->|"no"| n19
-  n20[("LEE lakehouse.cohort_definitions")]:::efecto
+  n20[("CREA health_data.health_deidentification_runs")]:::efecto
   n19 --> n20
-  n21{"!cohort?.deidentificationProfileId"}:::decision
+  n21["Llama a ResearchRepository.createManifest"]:::llamada
   n20 --> n21
-  n22(["422 PRECONDITION_FAILED La cohorte no declara perfil de de-identificación."]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a DataReleaseRepository.createDeidRun"]:::llamada
-  n21 -->|"no"| n23
-  n24[("CREA health_data.health_deidentification_runs")]:::efecto
+  n22[("CREA lakehouse.dataset_release_manifests")]:::efecto
+  n21 --> n22
+  n23["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n22 --> n23
+  n24["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n23 --> n24
-  n25["Llama a ResearchRepository.createManifest"]:::llamada
+  n25["Transacción: startActiveSpan(…)"]:::transaccion
   n24 --> n25
-  n26[("CREA lakehouse.dataset_release_manifests")]:::efecto
+  n26["Intenta"]:::intento
   n25 --> n26
-  n27[("ACTUALIZA lakehouse.dataset_release_requests")]:::efecto
-  n26 --> n27
-  n28["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n27 --> n28
-  n29["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"si falla"| n27
+  n28["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n26 --> n28
+  n29["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n28 --> n29
-  n30["Transacción: startActiveSpan(…)"]:::transaccion
+  n30[("LEE messaging.outbox_messages")]:::efecto
   n29 --> n30
-  n31["Intenta"]:::intento
+  n31["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n30 --> n31
-  n32(["↩ (relanza el error capturado)"]):::error
-  n31 -->|"si falla"| n32
-  n33["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n31 --> n33
-  n34["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n32[("CREA messaging.domain_events")]:::efecto
+  n31 --> n32
+  n33["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n32 --> n33
+  n34[("CREA messaging.outbox_messages")]:::efecto
   n33 --> n34
-  n35[("LEE messaging.outbox_messages")]:::efecto
+  n35>"Evento DatasetReleaseMaterialized"]:::evento
   n34 --> n35
-  n36["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n36(("201 Responde con éxito")):::ok
   n35 --> n36
-  n37[("CREA messaging.domain_events")]:::efecto
-  n36 --> n37
-  n38["Llama a OutboxRepository.createOutboxMessage"]:::llamada
-  n37 --> n38
-  n39[("CREA messaging.outbox_messages")]:::efecto
-  n38 --> n39
-  n40>"Evento DatasetReleaseMaterialized"]:::evento
-  n39 --> n40
-  n41(("201 Responde con éxito")):::ok
-  n40 --> n41
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1281,7 +1258,6 @@ Expirar o revocar el release
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1297,49 +1273,43 @@ flowchart TD
   n4 --> n5
   n6[("LEE lakehouse.dataset_release_requests")]:::efecto
   n5 --> n6
-  n7{"!request"}:::decision
+  n7["Llama a ResearchRepository.findManifestByRequestForUpdate"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Solicitud de release no encontrada."]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a ResearchRepository.findManifestByRequestForUpdate"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE lakehouse.dataset_release_manifests")]:::efecto
-  n9 --> n10
-  n11[("ACTUALIZA lakehouse.dataset_release_requests")]:::efecto
+  n8[("LEE lakehouse.dataset_release_manifests")]:::efecto
+  n7 --> n8
+  n9{"manifest"}:::decision
+  n8 --> n9
+  n10[("ACTUALIZA lakehouse.dataset_release_manifests")]:::efecto
+  n9 -->|"sí"| n10
+  n11["Llama a OutboxService.publishDomainEvent"]:::llamada
   n10 --> n11
-  n12{"manifest"}:::decision
+  n9 -->|"no"| n11
+  n12["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n11 --> n12
-  n13[("ACTUALIZA lakehouse.dataset_release_manifests")]:::efecto
-  n12 -->|"sí"| n13
-  n14["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n13["Transacción: startActiveSpan(…)"]:::transaccion
+  n12 --> n13
+  n14["Intenta"]:::intento
   n13 --> n14
-  n12 -->|"no"| n14
-  n15["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n14 --> n15
-  n16["Transacción: startActiveSpan(…)"]:::transaccion
-  n15 --> n16
-  n17["Intenta"]:::intento
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"si falla"| n15
+  n16["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n14 --> n16
+  n17["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n16 --> n17
-  n18(["↩ (relanza el error capturado)"]):::error
-  n17 -->|"si falla"| n18
-  n19["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n17 --> n19
-  n20["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n18[("LEE messaging.outbox_messages")]:::efecto
+  n17 --> n18
+  n19["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n18 --> n19
+  n20[("CREA messaging.domain_events")]:::efecto
   n19 --> n20
-  n21[("LEE messaging.outbox_messages")]:::efecto
+  n21["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n20 --> n21
-  n22["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n22[("CREA messaging.outbox_messages")]:::efecto
   n21 --> n22
-  n23[("CREA messaging.domain_events")]:::efecto
+  n23>"Evento DatasetReleaseRevoked"]:::evento
   n22 --> n23
-  n24["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n24(("200 Responde con éxito")):::ok
   n23 --> n24
-  n25[("CREA messaging.outbox_messages")]:::efecto
-  n24 --> n25
-  n26>"Evento DatasetReleaseRevoked"]:::evento
-  n25 --> n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1355,7 +1325,6 @@ Listar releases con manifiesto vencido sin cerrar
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1363,23 +1332,27 @@ Listar releases con manifiesto vencido sin cerrar
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a ResearchReleaseService.listExpiredReleases"]:::llamada
   n2 --> n3
-  n4["Llama a ResearchRepository.findExpiredManifests"]:::llamada
+  n4["Llama a ResearchRepository.findOpenRequestIds"]:::llamada
   n3 --> n4
-  n5[("LEE lakehouse.dataset_release_manifests")]:::efecto
+  n5[("LEE lakehouse.dataset_release_requests")]:::efecto
   n4 --> n5
-  n6["Repite: por cada const manifest de manifests"]:::bucle
+  n6["Llama a ResearchRepository.findExpiredManifests"]:::llamada
   n5 --> n6
-  n7["Llama a ResearchRepository.findReleaseRequestById"]:::llamada
-  n6 -->|"cada elemento"| n7
-  n8[("LEE lakehouse.dataset_release_requests")]:::efecto
+  n7[("LEE lakehouse.dataset_release_manifests")]:::efecto
+  n6 --> n7
+  n8["Repite: por cada const manifest de manifests"]:::bucle
   n7 --> n8
-  n9(("200 Responde con éxito")):::ok
-  n8 --> n9
-  n6 -->|"al terminar"| n9
+  n9["Llama a ResearchRepository.findReleaseRequestById"]:::llamada
+  n8 -->|"cada elemento"| n9
+  n10[("LEE lakehouse.dataset_release_requests")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  n8 -->|"al terminar"| n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1398,7 +1371,7 @@ Definir el proyecto de investigación y su cohorte
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un proyecto con ese código para el tenant, con otro identificador.; ConflictException: El proyecto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión de la cohorte ya está definida. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un proyecto con ese código para el tenant, con otro identificador.; ConflictException: El proyecto existente tiene otro código.; ConflictException: Esa versión de la cohorte ya está definida. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de aprobación ética tiene que empezar antes de terminar.; PreconditionFailedException: La aprobación ética ya está caducada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1419,78 +1392,90 @@ flowchart TD
   n5 -->|"no"| n7
   n8(["422 PRECONDITION_FAILED La aprobación ética ya está caducada."]):::error
   n7 -->|"sí"| n8
-  n9["Llama a ResearchRepository.findProjectForUpdate"]:::llamada
+  n9["Llama a DataReleaseRepository.findDeidProfileById"]:::llamada
   n7 -->|"no"| n9
-  n10[("LEE lakehouse.research_projects")]:::efecto
+  n10[("LEE health_data.health_deidentification_profiles")]:::efecto
   n9 --> n10
-  n11{"!project"}:::decision
+  n11["Llama a ResearchRepository.findProjectByIdAnyTenant"]:::llamada
   n10 --> n11
-  n12["Llama a ResearchRepository.findProjectByCode"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE lakehouse.research_projects")]:::efecto
+  n12[("LEE lakehouse.research_projects")]:::efecto
+  n11 --> n12
+  n13{"occupied && occupied.tenantId !== tenantId"}:::decision
   n12 --> n13
-  n14{"byCode"}:::decision
-  n13 --> n14
-  n15(["409 CONFLICT Ya existe un proyecto con ese código para el tenant, con otro identificador."]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a ResearchRepository.createProject"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA lakehouse.research_projects")]:::efecto
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a ResearchRepository.findProjectForUpdate"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE lakehouse.research_projects")]:::efecto
+  n15 --> n16
+  n17{"!project"}:::decision
   n16 --> n17
-  n18{"project.code !== dto.projectCode || project.tenantId !== dto.tenantId"}:::decision
-  n11 -->|"no"| n18
-  n19(["409 CONFLICT El proyecto existente tiene otro código o pertenece a otro tenant."]):::error
-  n18 -->|"sí"| n19
-  n20[("ACTUALIZA lakehouse.research_projects")]:::efecto
-  n18 -->|"no"| n20
-  n21{"dto.protocolReference"}:::decision
-  n20 --> n21
-  n22[("ACTUALIZA lakehouse.research_projects")]:::efecto
-  n21 -->|"sí"| n22
-  n23[("ACTUALIZA lakehouse.research_projects · ACTUALIZA lakehouse.research_projects · ACTUALIZA lakehouse.research_…")]:::efecto
+  n18["Llama a ResearchRepository.findProjectByCode"]:::llamada
+  n17 -->|"sí"| n18
+  n19[("LEE lakehouse.research_projects")]:::efecto
+  n18 --> n19
+  n20{"byCode"}:::decision
+  n19 --> n20
+  n21(["409 CONFLICT Ya existe un proyecto con ese código para el tenant, con otro identificador."]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a ResearchRepository.createProject"]:::llamada
+  n20 -->|"no"| n22
+  n23[("CREA lakehouse.research_projects")]:::efecto
   n22 --> n23
-  n21 -->|"no"| n23
-  n24["Llama a ResearchRepository.findCohortByVersion"]:::llamada
-  n17 --> n24
-  n23 --> n24
-  n25[("LEE lakehouse.cohort_definitions")]:::efecto
-  n24 --> n25
-  n26{"duplicate"}:::decision
-  n25 --> n26
-  n27(["409 CONFLICT Esa versión de la cohorte ya está definida."]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a ResearchRepository.createCohort"]:::llamada
-  n26 -->|"no"| n28
-  n29[("CREA lakehouse.cohort_definitions")]:::efecto
+  n24{"project.code !== dto.projectCode"}:::decision
+  n17 -->|"no"| n24
+  n25(["409 CONFLICT El proyecto existente tiene otro código."]):::error
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA lakehouse.research_projects")]:::efecto
+  n24 -->|"no"| n26
+  n27{"dto.protocolReference"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA lakehouse.research_projects")]:::efecto
+  n27 -->|"sí"| n28
+  n29[("ACTUALIZA lakehouse.research_projects · ACTUALIZA lakehouse.research_projects · ACTUALIZA lakehouse.research_…")]:::efecto
   n28 --> n29
-  n30["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n27 -->|"no"| n29
+  n30["Llama a ResearchRepository.findCohortByVersion"]:::llamada
+  n23 --> n30
   n29 --> n30
-  n31["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n31[("LEE lakehouse.cohort_definitions")]:::efecto
   n30 --> n31
-  n32["Transacción: startActiveSpan(…)"]:::transaccion
+  n32{"duplicate"}:::decision
   n31 --> n32
-  n33["Intenta"]:::intento
-  n32 --> n33
-  n34(["↩ (relanza el error capturado)"]):::error
-  n33 -->|"si falla"| n34
-  n35["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n33 --> n35
-  n36["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n33(["409 CONFLICT Esa versión de la cohorte ya está definida."]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a ResearchRepository.createCohort"]:::llamada
+  n32 -->|"no"| n34
+  n35[("CREA lakehouse.cohort_definitions")]:::efecto
+  n34 --> n35
+  n36["Llama a OutboxService.publishDomainEvent"]:::llamada
   n35 --> n36
-  n37[("LEE messaging.outbox_messages")]:::efecto
+  n37["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n36 --> n37
-  n38["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n38["Transacción: startActiveSpan(…)"]:::transaccion
   n37 --> n38
-  n39[("CREA messaging.domain_events")]:::efecto
+  n39["Intenta"]:::intento
   n38 --> n39
-  n40["Llama a OutboxRepository.createOutboxMessage"]:::llamada
-  n39 --> n40
-  n41[("CREA messaging.outbox_messages")]:::efecto
-  n40 --> n41
-  n42>"Evento CohortDefined"]:::evento
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"si falla"| n40
+  n41["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n39 --> n41
+  n42["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n41 --> n42
-  n43(("201 Responde con éxito")):::ok
+  n43[("LEE messaging.outbox_messages")]:::efecto
   n42 --> n43
+  n44["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n43 --> n44
+  n45[("CREA messaging.domain_events")]:::efecto
+  n44 --> n45
+  n46["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n45 --> n46
+  n47[("CREA messaging.outbox_messages")]:::efecto
+  n46 --> n47
+  n48>"Evento CohortDefined"]:::evento
+  n47 --> n48
+  n49(("201 Responde con éxito")):::ok
+  n48 --> n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

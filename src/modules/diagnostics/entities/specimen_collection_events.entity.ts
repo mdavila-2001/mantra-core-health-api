@@ -86,4 +86,14 @@ export class SpecimenCollectionEvents {
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
+
+  /**
+   * Identificador asociado a collection care space.
+   */
+  @Property({
+    fieldName: 'collection_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  collectionCareSpaceId?: string;
 }

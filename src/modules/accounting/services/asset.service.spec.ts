@@ -14,6 +14,13 @@ import {
   ConflictException,
   PreconditionFailedException,
 } from '../../../common';
+import { AccountingErrorReason } from '../accounting.error-reasons';
+import {
+  TENANT_B,
+  buildScope,
+  expectScopeNotFound,
+  inTenant,
+} from './accounting-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -47,13 +54,17 @@ function build() {
     generateNumber: mockFn(() => 'ASSET-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new AssetService(
-    em as any,
-    assetRepo as any,
-    posting as any,
-    logger as any,
+  const { scope, doubles } = buildScope();
+  const service = inTenant(
+    new AssetService(
+      em as any,
+      assetRepo as any,
+      posting as any,
+      scope,
+      logger as any,
+    ),
   );
-  return { service, tx, assetRepo, posting };
+  return { service, tx, assetRepo, posting, doubles };
 }
 
 const capDto = {
@@ -266,6 +277,156 @@ describe('AssetService', () => {
       await expect(
         d.service.runDepreciation(runDto as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+  describe('alcance de tenant (ACC-01)', () => {
+    /** Ni el activo ni su asiento se escriben. */
+    function expectNothingWritten(d: ReturnType<typeof build>) {
+      expect(d.assetRepo.createAsset).not.toHaveBeenCalled();
+      expect(d.assetRepo.createValuation).not.toHaveBeenCalled();
+      expect(d.assetRepo.createAssignment).not.toHaveBeenCalled();
+      expect(d.posting.post).not.toHaveBeenCalled();
+    }
+
+    describe('capitalize', () => {
+      it('una práctica de otra organización responde como inexistente', async () => {
+        const foreign = build();
+        const absent = build();
+
+        const a = await expectScopeNotFound(
+          foreign.service.capitalize({ ...capDto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          absent.service.capitalize(
+            { ...capDto, practiceId: 'no-existe' },
+            actor,
+          ),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+
+        expect(a.getResponse()).toEqual(b.getResponse());
+        expect(foreign.assetRepo.findByCode).not.toHaveBeenCalled();
+        expectNothingWritten(foreign);
+      });
+
+      it.each([
+        ['acquisitionAccountId', 'acc-acq'],
+        ['offsetAccountId', 'acc-bank'],
+      ])(
+        'la cuenta %s de otra práctica responde como inexistente',
+        async (_field, accountId) => {
+          const d = build();
+          d.doubles.accountsRepo.findByIds.mockImplementation(
+            async (_em: any, ids: string[]) =>
+              ids.map((id) => ({
+                id,
+                practiceId: id === accountId ? 'p2' : 'p1',
+              })),
+          );
+
+          await expectScopeNotFound(
+            d.service.capitalize(capDto, actor),
+            AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
+          );
+          expectNothingWritten(d);
+        },
+      );
+
+      it('un periodo de otra práctica responde como inexistente', async () => {
+        const d = build();
+        d.doubles.fiscalRepo.findYearById.mockResolvedValue({
+          id: 'fy1',
+          practiceId: 'p2',
+        });
+
+        await expectScopeNotFound(
+          d.service.capitalize({ ...capDto, fiscalPeriodId: 'fp1' }, actor),
+          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('un área de depreciación de otra organización responde como inexistente', async () => {
+        const d = build();
+        d.doubles.assetRepo.findDepreciationAreaById.mockResolvedValue({
+          id: 'da1',
+          tenantId: TENANT_B,
+        });
+
+        await expectScopeNotFound(
+          d.service.capitalize({ ...capDto, depreciationAreaId: 'da1' }, actor),
+          AccountingErrorReason.DEPRECIATION_AREA_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('un centro de costo de otra práctica responde como inexistente', async () => {
+        const d = build();
+        d.doubles.controllingRepo.findCostCentersByIds.mockResolvedValue([
+          { id: 'cc1', practiceId: 'p2' },
+        ]);
+
+        await expectScopeNotFound(
+          d.service.capitalize({ ...capDto, costCenterId: 'cc1' }, actor),
+          AccountingErrorReason.COST_CENTER_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('con todo propio capitaliza y consulta cuentas y práctica en el alcance', async () => {
+        const d = build();
+        await d.service.capitalize(
+          {
+            ...capDto,
+            fiscalPeriodId: 'fp1',
+            depreciationAreaId: 'da1',
+            costCenterId: 'cc1',
+          },
+          actor,
+        );
+        expect(d.doubles.accountsRepo.findByIds).toHaveBeenCalledWith(d.tx, [
+          'acc-acq',
+          'acc-bank',
+        ]);
+        expect(d.assetRepo.createAsset).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('runDepreciation', () => {
+      const runDto = {
+        practiceId: 'p1',
+        fiscalPeriodId: 'fp1',
+        depreciationExpenseAccountId: 'exp',
+        accumulatedDepreciationAccountId: 'acc',
+        postingDate: '2026-01-31',
+      };
+
+      it('una práctica de otra organización responde como inexistente y no lee activos', async () => {
+        const d = build();
+
+        await expectScopeNotFound(
+          d.service.runDepreciation({ ...runDto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        expect(d.assetRepo.activeAssets).not.toHaveBeenCalled();
+        expect(d.posting.post).not.toHaveBeenCalled();
+      });
+
+      it('un periodo de otra práctica responde como inexistente y no lee activos', async () => {
+        const d = build();
+        d.doubles.fiscalRepo.findYearById.mockResolvedValue({
+          id: 'fy1',
+          practiceId: 'p-b',
+        });
+
+        await expectScopeNotFound(
+          d.service.runDepreciation(runDto, actor),
+          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+        );
+        expect(d.assetRepo.activeAssets).not.toHaveBeenCalled();
+        expect(d.posting.post).not.toHaveBeenCalled();
+      });
     });
   });
 });

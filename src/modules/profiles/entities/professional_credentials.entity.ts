@@ -87,7 +87,7 @@ export class ProfessionalCredentials {
     fieldName: 'profession_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   professionConceptId?: string;
 
   /**
@@ -145,6 +145,16 @@ export class ProfessionalCredentials {
     nullable: true,
   })
   verifiedAt?: Date;
+
+  /**
+   * Por qué se rechazó el título.
+   */
+  @Property({
+    fieldName: 'rejection_reason_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  rejectionReasonText?: string;
 
   /**
    * Fecha y hora en que se creó el registro.

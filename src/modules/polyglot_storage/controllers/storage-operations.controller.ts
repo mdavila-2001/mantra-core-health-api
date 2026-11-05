@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Audited, Roles } from '../../../common';
 import { StorageOperationsService } from '../services';
 import {
   RecordHealthCheckDto,
@@ -35,6 +35,11 @@ export class StorageOperationsController {
   constructor(private readonly operationsService: StorageOperationsService) {}
 
   /** UC-54-11. */
+  @Audited({
+    action: 'STORE_HEALTH_CHECK_RECORDED',
+    entity: 'store_health_check',
+    entityId: 'result.id',
+  })
   @Post('store-health-checks')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -50,6 +55,11 @@ export class StorageOperationsController {
   }
 
   /** UC-54-13. */
+  @Audited({
+    action: 'STORAGE_INTEGRITY_POLICY_DEFINED',
+    entity: 'storage_integrity_policy',
+    entityId: 'result.id',
+  })
   @Post('integrity-policies')
   @Roles('GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -64,6 +74,11 @@ export class StorageOperationsController {
   }
 
   /** UC-54-13. */
+  @Audited({
+    action: 'STORAGE_INTEGRITY_VERIFIED',
+    entity: 'dataset_definition',
+    entityId: 'param:datasetId',
+  })
   @Post('integrity/:datasetId/verify')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

@@ -9,7 +9,7 @@
 # Módulo `pharmacy_inventory`
 
 **Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
-· 6 controllers · 11 services · 16 repositories · 21 entidades · 17 DTO
+· 9 controllers · 12 services · 21 repositories · 21 entidades · 22 DTO
 
 ---
 
@@ -43,6 +43,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
 | `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
 | `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
+| `GET /pharmacy-inventory/availability/medications` | sesión | `pharmacy-inventory-read` |
 | `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
@@ -89,6 +90,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | --- | --- |
 | `GET /pharmacy-inventory/sites/{siteId}/stock?product=` | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas |
 | `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=` | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio |
+| `GET /pharmacy-inventory/availability/medications?medications=a,b&lat=&lng=&limit=` | Lo mismo por medicamento de una receta, en toda la red: un producto propio por medicamento en cada sede y los medicamentos que le faltan |
 
 La visibilidad es la del directorio de farmacias (módulo 24) y se **reutiliza**
 —`PharmacyReadRepository` viene exportado por `PharmacyModule`— en vez de
@@ -101,6 +103,111 @@ Haversine sobre las coordenadas de `common.addresses` (vía
 se inventa: `distanceKm` va `null` y la sede ordena al final. El total de una
 sede sólo existe si **todos** sus disponibles tienen precio publicado en la
 misma moneda.
+
+## Sistema propio de cada farmacia (FAR-C9 · C9-3)
+
+Cada conexión de la pestaña Integración puede hablar con el sistema **de esa
+farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07).
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `PUT /pharmacies/:pharmacyId/integration-connections/:connectionId/external-system` | Guarda formato, dirección, código y clave. **Prueba antes de guardar**: si el sistema no responde con esa clave, 502 y no se escribe nada |
+| `POST …/external-system/test` | Prueba el sistema que usa hoy la conexión; dice si es el de la farmacia o el del servidor |
+| `DELETE …/external-system` | Pausa la conexión de integraciones, retira la clave y deja `connection_id` en nulo |
+
+- **Dónde queda.** En el módulo de integraciones: un proveedor por formato
+  (`external_providers`, `PHARMACY_ALOVIDA_STANDARD` y `PHARMACY_SIMULATED_CHAIN`),
+  una `provider_connections` por conexión de farmacia (dirección y código en
+  `config_json`) y la clave en su `provider_credentials` activa, cifrada con
+  `encryptSecret` (`MFA_ENCRYPTION_KEY`). `pharmacy_integration_connections.connection_id`
+  apunta a esa conexión (v4.2.83). Guardar otra vez retira la clave anterior.
+- **Formatos.** `ALOVIDA_STANDARD` es el contrato que publica la plataforma
+  (`docs/integrations/pharmacy-standard.openapi.yaml`).
+  `SIMULATED_CHAIN` es la cadena de `mock-provider-server/`, a propósito distinta
+  (Bearer, paginada, otros nombres). Cada uno tiene su cliente en
+  `infrastructure/adapters/external-system-clients.ts`; la sincronización no sabe
+  con cuál habla.
+- **La clave no sale nunca**: ni en respuestas (`apiKeyConfigured` dice si hay
+  una), ni en logs, ni en los mensajes de error, y solo viaja en el cuerpo del `PUT`.
+- **Hosts.** La dirección la escribe la farmacia y la llama el servidor. Solo
+  `http`/`https` sin usuario ni consulta, y solo los hosts de
+  `PHARMACY_EXTERNAL_ALLOWED_HOSTS`: **sin lista no se llama a nadie**, en
+  cualquier entorno (422 `PHARMACY_INTEGRATION_HOST_NOT_ALLOWED`). Solo fuera
+  de producción, `PHARMACY_EXTERNAL_ALLOW_ANY_HOST=true` lo abre a propósito
+  (una máquina local con el simulador). En producción solo vale `https` y el
+  cliente rechaza **al conectar** las IP internas (loopback, privadas,
+  link-local y metadatos de la nube, CGNAT), así un nombre permitido que
+  resuelve adentro no pasa. La regla se vuelve a aplicar en cada llamada, no
+  solo al guardar, y antes de llamar se comprueba que la conexión sea del actor.
+- **Topes.** Cada respuesta, 10 MB como máximo; un listado paginado, 200
+  páginas y 20.000 filas en total. Pasado eso cuenta como sistema caído.
+- **Sin sistema propio** la conexión usa el del servidor, como en FAR-07; si
+  tampoco hay, 422 `PHARMACY_INTEGRATION_NOT_CONFIGURED`.
+- **Reglas de inventario (H-05).**
+  - **Qué es `quantity`.** La cantidad *disponible* del libro de existencias
+    (`available_quantity`), no la física: la sincronización escribe
+    `availableQuantity` con `MV_SYNC_ADJUSTMENT`.
+  - **Precedencia entre conexiones (regla de Itzan, C9-5).** Dentro de una
+    conexión, su sistema propio gana y, si no tiene, se usa el del servidor.
+    Entre conexiones:
+    - Una general (de toda la farmacia) y una de sucursal **coexisten**, y
+      **gana la sucursal** en su sede; la general sigue mandando en las demás.
+    - Dos conexiones activas de stock del **mismo nivel y alcance** (dos
+      generales, o dos de la misma sucursal) **se rechazan al configurar**:
+      409 `INTEGRATION_CONNECTION_SCOPE_TAKEN`.
+    - La **sincronización general excluye** las sucursales con conexión propia
+      y no pisa lo que ésta escribe.
+    - Si por datos anteriores a la regla ya hay duplicados del mismo nivel y
+      alcance, nunca se elige «la más nueva» o «la primera»: la sincronización
+      responde 409 `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids y no
+      llama ni escribe nada, y el pedido usa el stock manual
+      (`CONNECTION_PRECEDENCE`).
+  - **Lotes.** Un producto que la sede lleva por lotes no se pisa con una
+    existencia agregada (`SITE_PRODUCT_KEPT_BY_LOTS`) hasta que haya una
+    política (por ejemplo FEFO).
+  - **Sin `MFA_ENCRYPTION_KEY`** (en blanco, ausente, o la de desarrollo en
+    producción) guardar el sistema falla en cerrado, antes de probar nada:
+    503 `PHARMACY_INTEGRATION_ENCRYPTION_NOT_CONFIGURED`. La clave nunca se
+    guarda en claro ni cifrada con la clave pública de desarrollo.
+- `GET …/integration-connections` agrega `system` (formato, dirección, código,
+  `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
+  conexión: el sistema propio o, si no tiene, el del servidor.
+
+## Pedidos entre organizaciones (FAR-C9 · H-01)
+
+Un paciente de la organización A puede pedir a una farmacia de la organización B.
+Con `RLS_ENFORCE=true` el pedido respondía 404: la sesión del paciente corre con
+`app.current_tenant_id = A` y `pharmacy.pharmacies` —la única tabla del contexto
+de farmacia con `tenant_id`— le ocultaba la farmacia.
+
+- **Acceso acotado.** `database/SQL/patches/2026-11-03_v4286_farmacias_mercado_lectura_paciente.sql`
+  agrega la política `pharmacies_marketplace_read` en `pharmacy.pharmacies`:
+  solo `SELECT`, solo farmacias **activas y verificadas**, y solo si la
+  transacción declara `app.marketplace_viewer = 'true'`. `TenantContextInterceptor`
+  lo declara únicamente para un sujeto con rol PATIENT y sin rol de farmacia ni
+  de plataforma (el mismo criterio de `marketplaceTenantScope()`); el cliente no
+  puede enviarlo. UPDATE, DELETE e INSERT siguen bajo `tenant_isolation`, y no se
+  abre ninguna otra tabla: sedes, productos, precios, reservas y libro no tienen
+  `tenant_id`; integraciones y mensajería siguen cerradas. No hay bypass global
+  ni `app.system_context`.
+- **Evento del pedido.** El outbox está bajo RLS y se escribe con el tenant de la
+  sesión. `PharmacyOrderSubmitted` se registra en el tenant del paciente cuando
+  la farmacia es de otra organización, y el de la farmacia viaja en
+  `payload.pharmacyTenantId`. Hoy el evento no tiene consumidores en el código;
+  quien lo consuma para avisar al personal de la farmacia debe leerlo en contexto
+  de sistema y enrutar por `pharmacyTenantId`.
+- **Lo que no cambia.** Si la farmacia deja de estar publicada, un pedido anterior
+  del paciente conserva sus líneas pero su cabecera deja de resolver el nombre de
+  la farmacia (la política solo muestra publicadas). Con la farmacia de otra
+  organización, la configuración del sistema externo en vivo (`integrations.*`,
+  con RLS) no es visible para el paciente; por lectura del código
+  (`ExternalOrderStock`) el pedido cae al stock manual del libro. Esto último no
+  se ejercitó de punta a punta.
+- **Pruebas.** `test/integration/rls-farmacias-mercado.int-spec.ts` (opt-in,
+  `RLS_TEST=1`, base real con el modelo aplicado) cubre: sin el GUC no cambia
+  nada; con el GUC se ven las publicadas de otras organizaciones y no borradores
+  ni sin verificar; solo lectura; INSERT ajeno rechazado; el outbox de otro tenant
+  sigue invisible.
 
 ## Criterios de mantenimiento
 
@@ -124,3 +231,36 @@ Los comandos administrativos aceptan relaciones de inventario sin alcance de
 tenant, y los asientos de conteo/recall usan IDs de sede o ubicación como
 farmacia: el movimiento de stock no está validado sobre PostgreSQL con FK
 activas.
+
+## Lectura de gestión del inventario propio
+
+Cuatro `GET` de solo lectura para que el personal de la farmacia vea su propio
+inventario (`PharmacyInventoryManagementController`,
+`@Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')`). A diferencia del directorio del
+paciente (`/pharmacy-inventory/*`), ven también las sedes no publicadas.
+
+| Ruta | Devuelve | Filtros |
+| --- | --- | --- |
+| `GET /pharmacy/:pharmacyId/inventory/locations` | Ubicaciones activas con el nombre de su sede | `siteId` |
+| `GET /pharmacy/:pharmacyId/inventory/positions` | Posiciones de stock: producto, sede, ubicación, lote (número y `expiresAt`), `onHand`, `reserved`, `quarantine`, `available` | `siteId`, `locationId`, `productId`, `lotId`, `onlyWithStock` |
+| `GET /pharmacy/:pharmacyId/inventory/ledger` | Asientos del libro por secuencia de registro (`ledger_sequence`), la más reciente primero: fecha, secuencia, tipo de movimiento (`id`, `code`, `display`), producto, sede, ubicación, lote, `quantityDelta` con signo, origen (`sourceType`, `sourceId`) y costo unitario con su moneda si hay | `siteId`, `productId`, `lotId`, `movementType` (código del concepto tal como lo devuelve `movementType.code`, p. ej. `pharmacy_inventory:MV_RECEIPT`; solo se aceptan los tipos de movimiento del módulo), `from`, `to` |
+| `GET /pharmacy/:pharmacyId/inventory/lots` | Lotes por `expiresAt` ascendente (sin vencimiento al final): producto, número, estados de cuarentena y retiro, `onHandTotal` y `bySite` | `siteId`, `productId`, `expiringBefore` (`YYYY-MM-DD`, estricto), `includeExpired` |
+
+- **Paginación.** `positions`, `ledger` y `lots` usan `PaginationQueryDto`
+  (`page`, `pageSize`; 20 por defecto, 100 como máximo) y responden
+  `{ data, meta }` con `PageResponseDto`, como el resto de los listados de la
+  API. `sortBy` y `order` no aplican: el orden de cada ruta es fijo.
+- **Ámbito.** Cada ruta resuelve la farmacia contra el tenant de la sesión con
+  `PharmacyInventoryScopePolicy`, y cada `siteId`, `locationId`, `productId` o
+  `lotId` de la consulta dentro de esa farmacia. Una farmacia ajena o
+  inexistente, o un id de otra farmacia, responde el mismo 404 uniforme.
+  Las tablas de inventario no tienen RLS: el aislamiento es esa política.
+- **Existencias de un lote.** `bySite` suma `on_hand` de las posiciones del lote
+  por sede; con `siteId` solo salen los lotes con posiciones en esa sede y el
+  total cuenta esa sede. Los vencidos (`expires_at` anterior a hoy) solo salen
+  con `includeExpired=true`.
+- **Booleanos de consulta.** `onlyWithStock` e `includeExpired` se envían como
+  `true` o `false`. `onlyWithStock` deja las posiciones con existencia física o
+  en cuarentena.
+- **Rótulos.** El tipo de movimiento y los estados del lote salen como
+  `{ code, display }` del concepto; el `display` es el del catálogo.

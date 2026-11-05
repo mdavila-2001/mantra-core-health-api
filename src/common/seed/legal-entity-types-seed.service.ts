@@ -30,6 +30,14 @@ function categoryPropertyId(code: string): string {
  * propiedades sobre su concepto ya sembrado: el país de constitución y la
  * categoría canónica internacional (subtarea 1.1).
  *
+ * El diccionario se amplió el 26/10/2026 de 21 a 40 formas: además de las
+ * sociedades comerciales, las bolivianas no societarias y del sector público
+ * (cooperativa, mutual, fundación, ONG, entidad religiosa, IFD, entidad y
+ * empresas públicas de la Ley 466, organismo internacional, profesional
+ * independiente…). Las nuevas son sólo filas nuevas: este seed no reordena ni
+ * pisa nada, así que las propiedades ya sembradas quedan intactas y en una base
+ * viva sólo se agregan las de las formas nuevas.
+ *
  * ## Por qué son propiedades y no una columna
  *
  * Ver el JSDoc de `legal-entity-types.ts`: la categoría es una función
@@ -43,8 +51,8 @@ function categoryPropertyId(code: string): string {
  * deterministas (UUIDv5 sobre una clave estable), así que una corrida repetida
  * compara por id e inserta sólo lo que falta. Lo que ya existe **no se pisa**.
  *
- * Corre **después** de `TerminologySeedService` (los 21 conceptos deben
- * existir) y **después** de `DynamicEnumSeedService` no hace falta, pero el
+ * Corre **después** de `TerminologySeedService` (los conceptos de
+ * `LEGAL_ENTITY_TYPES` deben existir) y **después** de `DynamicEnumSeedService` no hace falta, pero el
  * orquestador lo ubica ahí igual por agrupar los seeds de terminología
  * derivada. Un concepto declarado en `LEGAL_ENTITY_TYPES` que todavía no esté
  * sembrado se omite con un aviso, nunca revienta el arranque.

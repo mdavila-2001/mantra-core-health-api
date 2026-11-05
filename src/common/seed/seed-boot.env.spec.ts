@@ -1,4 +1,8 @@
-import { loadSeedBootEnv, seedBootEnvSchema } from './seed-boot.env';
+import {
+  isCoreSeedFailureFatal,
+  loadSeedBootEnv,
+  seedBootEnvSchema,
+} from './seed-boot.env';
 
 describe('loadSeedBootEnv', () => {
   it('siembra por defecto cuando la variable no está declarada', () => {
@@ -96,5 +100,28 @@ describe('seedBootEnvSchema', () => {
       SEED_ON_BOOT: 'false',
     });
     expect(error).toBeUndefined();
+  });
+});
+
+describe('isCoreSeedFailureFatal (SEED-01)', () => {
+  it('es fatal en producción sin importar la variable', () => {
+    expect(isCoreSeedFailureFatal({ NODE_ENV: 'production' })).toBe(true);
+    expect(
+      isCoreSeedFailureFatal({
+        NODE_ENV: 'production',
+        SEED_CORE_FAILURE_FATAL: 'false',
+      }),
+    ).toBe(true);
+  });
+
+  it('fuera de producción sólo con opt-in explícito', () => {
+    expect(isCoreSeedFailureFatal({ NODE_ENV: 'development' })).toBe(false);
+    expect(isCoreSeedFailureFatal({})).toBe(false);
+    expect(
+      isCoreSeedFailureFatal({
+        NODE_ENV: 'development',
+        SEED_CORE_FAILURE_FATAL: 'true',
+      }),
+    ).toBe(true);
   });
 });

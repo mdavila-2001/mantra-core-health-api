@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.",
+    "terms": "https://open.fda.gov/terms/",
+    "license": "https://open.fda.gov/license/",
+    "last_updated": "2026-10-21",
+    "results": {
+      "skip": 0,
+      "limit": 7096,
+      "total": 7096
+    }
+  },
+  "results": [
+    {
+      "third_party_flag": "N",
+      "life_sustain_support_flag": "N",
+      "gmp_exempt_flag": "N",
+      "summary_malfunction_reporting": "Eligible",
+      "product_code": "EJY",
+      "review_panel": "DE",
+      "medical_specialty": "DE",
+      "device_name": "Pliers, Operative",
+      "review_code": "",
+      "unclassified_reason": "",
+      "medical_specialty_description": "Dental",
+      "device_class": "1",
+      "definition": "",
+      "regulation_number": "872.4565",
+      "implant_flag": "N",
+      "submission_type_id": "4"
+    },
+    {
+      "third_party_flag": "N",
+      "life_sustain_support_flag": "N",
+      "gmp_exempt_flag": "N",
+      "summary_malfunction_reporting": "Eligible",
+      "product_code": "JJX",
+      "review_panel": "CH",
+      "medical_specialty": "CH",
+      "device_name": "Single (Specified) Analyte Controls (Assayed And Unassayed)",
+      "review_code": "",
+      "unclassified_reason": "",
+      "medical_specialty_description": "Clinical Chemistry",
+      "device_class": "1",
+      "definition": "",
+      "regulation_number": "862.1660",
+      "implant_flag": "N",
+      "submission_type_id": "4"
+    },
+    {
+      "third_party_flag": "N",
+      "life_sustain_support_flag": "N",
+      "gmp_exempt_flag": "N",
+      "summary_malfunction_reporting": "Ineligible",
+      "product_code": "PNK",
+      "review_panel": "MG",
+      "medical_specialty": "PA",
+      "device_name": "Fluorescence In Situ Hybridization, Chromosome 17p Deletion (Tp53)",
+      "review_code": "",
+      "unclassified_reason": "",
+      "medical_specialty_description": "Pathology",
+      "device_class": "2",
+      "definition": "A chromosome 17p deletion (TP53) fluorescence in situ hybridization (FISH) kit is a test to detect deletion of the TP53 gene in peripheral blood specimens from patients with B-cell chronic lymphocytic leukemia (CLL).",
+      "regulation_number": "864.1890",
+      "implant_flag": "N",
+      "submission_type_id": "1"
+    },
+    {
+      "third_party_flag": "Y",
+      "life_sustain_support_flag": "N",
+      "gmp_exempt_flag": "N",
+      "summary_malfunction_reporting": "Ineligible",
+      "product_code": "CGA",
+      "review_panel": "CH",
+      "medical_specialty": "CH",
+      "device_name": "Glucose Oxidase, Glucose",
+      "review_code": "",
+      "unclassified_reason": "",
+      "medical_specialty_description": "Clinical Chemistry",
+      "device_class": "2",
+      "definition": "",
+      "regulation_number": "862.1345",
+      "implant_flag": "N",
+      "submission_type_id": "1"
+    }
+  ]
+}

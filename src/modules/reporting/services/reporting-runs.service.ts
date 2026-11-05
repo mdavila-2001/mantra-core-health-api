@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -14,6 +13,10 @@ import {
   ReportingRunsRepository,
 } from '../repositories';
 import { OUTPUT_FORMAT_CONCEPT } from './reporting-definitions.service';
+import {
+  assertReportingResource,
+  resolveReportingScope,
+} from './reporting-scope';
 import {
   CreateExecutionDto,
   ExecutionResponseDto,
@@ -67,21 +70,18 @@ export class ReportingRunsService {
     dto: CreateExecutionDto,
     actor: AuthenticatedUser,
   ): Promise<ExecutionResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.execution.create', definitionId },
       'Queueing report execution',
     );
 
     return this.em.transactional(async (tx) => {
-      const definition = await this.definitionsRepo.findDefinitionById(
-        tx,
-        definitionId,
+      const definition = assertReportingResource(
+        await this.definitionsRepo.findDefinitionById(tx, definitionId),
+        scope,
+        'Definición no encontrada',
       );
-      if (!definition) {
-        throw new ResourceNotFoundException('Definición no encontrada', {
-          definitionId,
-        });
-      }
       if (definition.stateConceptId !== CONCEPTS.REPORT_STATE_ACTIVE) {
         throw new PreconditionFailedException('La definición no está activa', {
           definitionId,
@@ -120,7 +120,8 @@ export class ReportingRunsService {
       const execution = this.runsRepo.createExecution(tx, {
         reportDefinitionId: definitionId,
         reportVersionId: version.id,
-        tenantId: dto.tenantId ?? definition.tenantId,
+        // El tenant de la ejecución es el de la definición ya acotada, no el del cuerpo.
+        tenantId: definition.tenantId,
         triggerConceptId: CONCEPTS.TRIGGER_ON_DEMAND,
         requestedByUserId: actor.id,
         parametersJson: values,
@@ -148,21 +149,18 @@ export class ReportingRunsService {
     dto: MaterializeSnapshotDto,
     actor: AuthenticatedUser,
   ): Promise<SnapshotResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.snapshot.materialize', executionId },
       'Materializing report snapshot',
     );
 
     return this.em.transactional(async (tx) => {
-      const execution = await this.runsRepo.findExecutionForUpdate(
-        tx,
-        executionId,
+      const execution = assertReportingResource(
+        await this.runsRepo.findExecutionForUpdate(tx, executionId, scope),
+        scope,
+        'Ejecución no encontrada',
       );
-      if (!execution) {
-        throw new ResourceNotFoundException('Ejecución no encontrada', {
-          executionId,
-        });
-      }
       if (execution.statusConceptId === CONCEPTS.EXECUTION_SUCCEEDED) {
         throw new ConflictException('La ejecución ya está materializada', {
           executionId,
@@ -243,18 +241,15 @@ export class ReportingRunsService {
       'Creating report schedule',
     );
 
+    const scope = resolveReportingScope(actor);
     const nextRunAt = new Date(dto.firstRunAt);
 
     return this.em.transactional(async (tx) => {
-      const definition = await this.definitionsRepo.findDefinitionById(
-        tx,
-        definitionId,
+      const definition = assertReportingResource(
+        await this.definitionsRepo.findDefinitionById(tx, definitionId),
+        scope,
+        'Definición no encontrada',
       );
-      if (!definition) {
-        throw new ResourceNotFoundException('Definición no encontrada', {
-          definitionId,
-        });
-      }
       // Programar un reporte que aún no tiene versión publicada dejaría un
       // disparo que fallaría en cada ventana.
       if (definition.stateConceptId !== CONCEPTS.REPORT_STATE_ACTIVE) {
@@ -276,7 +271,8 @@ export class ReportingRunsService {
 
       const schedule = this.runsRepo.createSchedule(tx, {
         reportDefinitionId: definitionId,
-        tenantId: dto.tenantId ?? definition.tenantId,
+        // El tenant de la programación es el de la definición ya acotada, no el del cuerpo.
+        tenantId: definition.tenantId,
         name: dto.name,
         cronExpression: dto.cronExpression,
         timeZone: dto.timeZone ?? 'UTC',
@@ -309,6 +305,9 @@ export class ReportingRunsService {
       'Running scheduler tick',
     );
 
+    // Sin tenant en contexto es el barrido global del worker SYSTEM; con él,
+    // sólo las programaciones de ese tenant.
+    const scope = resolveReportingScope(actor);
     const now = new Date();
     const intervalMinutes = dto.intervalMinutes ?? DEFAULT_INTERVAL_MINUTES;
 
@@ -318,6 +317,7 @@ export class ReportingRunsService {
         now,
         CONCEPTS.SCHEDULE_STATE_ACTIVE,
         dto.batchSize ?? DEFAULT_TICK_BATCH,
+        scope,
       );
 
       const executionIds: string[] = [];
@@ -383,18 +383,18 @@ export class ReportingRunsService {
     dto: DispatchDistributionDto,
     actor: AuthenticatedUser,
   ): Promise<DispatchResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.distribution.dispatch', executionId },
       'Dispatching report distributions',
     );
 
     return this.em.transactional(async (tx) => {
-      const execution = await this.runsRepo.findExecutionById(tx, executionId);
-      if (!execution) {
-        throw new ResourceNotFoundException('Ejecución no encontrada', {
-          executionId,
-        });
-      }
+      const execution = assertReportingResource(
+        await this.runsRepo.findExecutionById(tx, executionId),
+        scope,
+        'Ejecución no encontrada',
+      );
       // Distribuir algo que no terminó bien enviaría un reporte vacío o a medias.
       if (execution.statusConceptId !== CONCEPTS.EXECUTION_SUCCEEDED) {
         throw new PreconditionFailedException(
@@ -515,18 +515,18 @@ export class ReportingRunsService {
     dto: SubscribeDto,
     actor: AuthenticatedUser,
   ): Promise<SubscriptionResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.subscription.create', scheduleId },
       'Subscribing to report schedule',
     );
 
     return this.em.transactional(async (tx) => {
-      const schedule = await this.runsRepo.findScheduleById(tx, scheduleId);
-      if (!schedule) {
-        throw new ResourceNotFoundException('Programación no encontrada', {
-          scheduleId,
-        });
-      }
+      const schedule = assertReportingResource(
+        await this.runsRepo.findScheduleById(tx, scheduleId),
+        scope,
+        'Programación no encontrada',
+      );
       if (schedule.stateConceptId !== CONCEPTS.SCHEDULE_STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La programación no está activa',
@@ -578,21 +578,18 @@ export class ReportingRunsService {
     dto: RetryExecutionDto,
     actor: AuthenticatedUser,
   ): Promise<RetryExecutionResponseDto> {
+    const scope = resolveReportingScope(actor);
     this.logger.info(
       { operation: 'reporting.execution.retry', executionId },
       'Retrying failed execution',
     );
 
     return this.em.transactional(async (tx) => {
-      const execution = await this.runsRepo.findExecutionForUpdate(
-        tx,
-        executionId,
+      const execution = assertReportingResource(
+        await this.runsRepo.findExecutionForUpdate(tx, executionId, scope),
+        scope,
+        'Ejecución no encontrada',
       );
-      if (!execution) {
-        throw new ResourceNotFoundException('Ejecución no encontrada', {
-          executionId,
-        });
-      }
       if (execution.statusConceptId !== CONCEPTS.EXECUTION_FAILED) {
         throw new PreconditionFailedException(
           'Sólo se reintenta una ejecución fallida',

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -72,38 +73,49 @@ export class CountryContextService {
       'Creating country health context',
     );
 
-    return this.em.transactional(async (tx) => {
-      const duplicate = await this.contextRepo.findContextByKey(
-        tx,
-        dto.countryConceptId,
-        dto.contextDomainConceptId,
-        dto.contextKey,
+    const duplicated = (): ConflictException =>
+      new ConflictException(
+        'Ya existe ese contexto para el país y el dominio',
+        {
+          contextKey: dto.contextKey,
+        },
       );
-      if (duplicate) {
-        throw new ConflictException(
-          'Ya existe ese contexto para el país y el dominio',
-          {
-            contextKey: dto.contextKey,
-          },
+    try {
+      return await this.em.transactional(async (tx) => {
+        const duplicate = await this.contextRepo.findContextByKey(
+          tx,
+          dto.countryConceptId,
+          dto.contextDomainConceptId,
+          dto.contextKey,
         );
-      }
+        if (duplicate) {
+          throw duplicated();
+        }
 
-      const context = this.contextRepo.createContext(tx, {
-        countryConceptId: dto.countryConceptId,
-        contextDomainConceptId: dto.contextDomainConceptId,
-        contextKey: dto.contextKey,
-        title: dto.title,
-        description: dto.description,
-        statusConceptId: CONCEPTS.HCTX_CONTEXT_DRAFT,
-        actorUserId: actor.id,
+        const context = this.contextRepo.createContext(tx, {
+          countryConceptId: dto.countryConceptId,
+          contextDomainConceptId: dto.contextDomainConceptId,
+          contextKey: dto.contextKey,
+          title: dto.title,
+          description: dto.description,
+          statusConceptId: CONCEPTS.HCTX_CONTEXT_DRAFT,
+          actorUserId: actor.id,
+        });
+
+        return {
+          id: context.id,
+          contextKey: dto.contextKey,
+          statusConceptId: CONCEPTS.HCTX_CONTEXT_DRAFT,
+        };
       });
-
-      return {
-        id: context.id,
-        contextKey: dto.contextKey,
-        statusConceptId: CONCEPTS.HCTX_CONTEXT_DRAFT,
-      };
-    });
+    } catch (error) {
+      // Dos altas simultáneas pasan el chequeo previo: la que pierde el único
+      // recibe el mismo conflicto de negocio que el chequeo, no un 409 opaco.
+      if (error instanceof UniqueConstraintViolationException) {
+        throw duplicated();
+      }
+      throw error;
+    }
   }
 
   /**

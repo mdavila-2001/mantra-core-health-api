@@ -7,6 +7,7 @@ import {
   IsUUID,
   Matches,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 
 /**
@@ -40,7 +41,7 @@ export class CreateServiceCatalogItemDto {
   })
   @IsOptional()
   @IsString()
-  @MaxLength(60)
+  @MaxLength(120)
   code?: string;
 
   /**
@@ -196,6 +197,22 @@ export class UpdateServiceCatalogItemDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  /**
+   * Términos y condiciones propios del servicio (carril 22). `null` vuelve a
+   * los términos por defecto; ausente, no los toca.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Términos propios del servicio. null vuelve a los términos por defecto',
+    type: String,
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  @MaxLength(20000)
+  termsText?: string | null;
 }
 
 /** Un servicio del catálogo maestro. */
@@ -229,6 +246,13 @@ export class ServiceCatalogItemDto {
    */
   @ApiPropertyOptional()
   descriptionText?: string;
+
+  /**
+   * Términos propios del servicio (carril 22). Ausente = usa los términos por
+   * defecto, cuyo texto legal provee el propietario.
+   */
+  @ApiPropertyOptional()
+  termsText?: string;
 
   /**
    * Identificador asociado a image file.

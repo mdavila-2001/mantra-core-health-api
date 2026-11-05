@@ -297,10 +297,17 @@ function nota(ficha, campos) {
   return mejora === undefined ? propia : `${propia} ${mejora.nota}`;
 }
 
+/**
+ * Fichas que nacieron después de la v2, ya con secciones y listas cerradas: su
+ * nota es la del `.json`, sin el agregado que cuenta la reorganización v2.
+ */
+const POSTERIORES_A_V2 = new Set(['TRANSV_CITA_MEDICA']);
+
 function notaBase(ficha, campos) {
   // Las específicas nacen en v2: su nota es la propia, sin el agregado.
   const especifica = ESPECIFICAS.find((e) => e.code === ficha.code);
   if (especifica !== undefined) return especifica.nota;
+  if (POSTERIORES_A_V2.has(ficha.code)) return ficha.provenance.note ?? '';
   const previa = (ficha.provenance.note ?? '').split(` ${MARCA_V2}:`)[0].trim();
   const texto = campos
     .map(
@@ -320,7 +327,13 @@ function notaBase(ficha, campos) {
   return previa === '' ? agregado : `${previa} ${agregado}`;
 }
 
-const VERSION_V2 = { ODONTO_ODONTOGRAMA_OMS: 3 };
+const VERSION_V2 = {
+  ODONTO_ODONTOGRAMA_OMS: 3,
+  // 2026-10-28: consentimiento DIRIGIDO; sin subir la versión el seed no lo propaga.
+  TRANSV_CONSENTIMIENTO_INFORMADO: 3,
+  // 2026-10-29: nace en versión 1, ya con el formato v2.
+  TRANSV_CITA_MEDICA: 1,
+};
 
 /**
  * Fichas escritas a mano (v4.2.0), fuera del generador: el script las lee y

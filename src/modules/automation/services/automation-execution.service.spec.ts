@@ -8,7 +8,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import type { AgentRuns, AutomationApprovals } from '../entities';
 import {
   AutomationExecutionService,
@@ -23,6 +24,27 @@ const AGENT_ID = '44444444-4444-4444-4444-444444444444';
 const VERSION_ID = '55555555-5555-5555-5555-555555555555';
 const TOOL_ID = '66666666-6666-6666-6666-666666666666';
 const SERVICE_USER_ID = '77777777-7777-7777-7777-777777777777';
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -36,7 +58,11 @@ function build() {
       id: RUN_ID,
       ...data,
     })),
-    findWorkflowRunById: mockFn(async () => null),
+    findWorkflowRunById: mockFn(async () => ({
+      id: RUN_ID,
+      tenantId: TENANT_A,
+      statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
+    })),
     findWorkflowRunForUpdate: mockFn(async () => null),
     findLiveRunByContext: mockFn(async () => null),
     countRunsByWorkflow: mockFn(async () => 0),
@@ -62,6 +88,7 @@ function build() {
   const agentsRepo = {
     findAgentById: mockFn(async () => ({
       id: AGENT_ID,
+      tenantId: TENANT_A,
       stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
       currentVersion: 1,
       actsAsUserId: SERVICE_USER_ID,
@@ -78,6 +105,7 @@ function build() {
   const governanceRepo = {
     findWorkflowById: mockFn(async () => ({
       id: WORKFLOW_ID,
+      tenantId: TENANT_A,
       code: 'triage',
       stateConceptId: CONCEPTS.AUTO_WORKFLOW_ACTIVE,
     })),
@@ -91,7 +119,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new AutomationExecutionService(
+  const raw = new AutomationExecutionService(
     em as any,
     runsRepo as any,
     agentsRepo as any,
@@ -99,8 +127,11 @@ function build() {
     outbox as any,
     logger as any,
   );
+  const service = inTenant(raw, TENANT_A);
   return {
     service,
+    raw,
+    asTenantB: inTenant(raw, TENANT_B),
     em,
     tx,
     runsRepo,
@@ -175,6 +206,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.governanceRepo.findTriggerById.mockResolvedValue({
         id: 'trigger-1',
+        tenantId: TENANT_A,
         isEnabled: false,
         workflowId: WORKFLOW_ID,
       });
@@ -192,6 +224,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.governanceRepo.findTriggerById.mockResolvedValue({
         id: 'trigger-1',
+        tenantId: TENANT_A,
         isEnabled: true,
         workflowId: 'otro-workflow',
       });
@@ -209,6 +242,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.governanceRepo.findWorkflowById.mockResolvedValue({
         id: WORKFLOW_ID,
+        tenantId: TENANT_A,
         code: 'triage',
         stateConceptId: CONCEPTS.AUTO_WORKFLOW_ARCHIVED,
       });
@@ -231,6 +265,7 @@ describe('AutomationExecutionService', () => {
     function withRunningRun(d: ReturnType<typeof build>) {
       d.runsRepo.findWorkflowRunById.mockResolvedValue({
         id: RUN_ID,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
       });
     }
@@ -265,6 +300,7 @@ describe('AutomationExecutionService', () => {
       withRunningRun(d);
       d.agentsRepo.findAgentById.mockResolvedValue({
         id: AGENT_ID,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.AUTO_AGENT_DRAFT,
         currentVersion: 1,
       });
@@ -278,6 +314,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.runsRepo.findWorkflowRunById.mockResolvedValue({
         id: RUN_ID,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.AUTO_RUN_WAITING,
       });
 
@@ -641,6 +678,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.runsRepo.findAgentRunForUpdate.mockResolvedValue({
         id: AGENT_RUN_ID,
+        agentId: AGENT_ID,
         statusConceptId: CONCEPTS.AUTO_AGENT_RUN_PAUSED,
         updatedAt: new Date(),
       });
@@ -762,7 +800,14 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.runsRepo.findApprovalForUpdate.mockResolvedValue({
         id: 'approval-1',
+        agentRunId: AGENT_RUN_ID,
         statusConceptId: CONCEPTS.AUTO_APPROVAL_APPROVED,
+      });
+      d.runsRepo.findAgentRunForUpdate.mockResolvedValue({
+        id: AGENT_RUN_ID,
+        agentId: AGENT_ID,
+        workflowRunId: RUN_ID,
+        statusConceptId: CONCEPTS.AUTO_AGENT_RUN_PAUSED,
       });
 
       await expect(
@@ -808,6 +853,7 @@ describe('AutomationExecutionService', () => {
     function withRun(d: ReturnType<typeof build>, agentRuns: any[]) {
       const run = {
         id: RUN_ID,
+        tenantId: TENANT_A,
         runNumber: 'triage-1',
         statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
         updatedAt: new Date(),
@@ -883,6 +929,7 @@ describe('AutomationExecutionService', () => {
       const d = build();
       d.runsRepo.findWorkflowRunForUpdate.mockResolvedValue({
         id: RUN_ID,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.AUTO_RUN_COMPLETED,
         totalCostAmount: '12.50',
       });
@@ -919,14 +966,14 @@ describe('AutomationExecutionService', () => {
       const twoMinutesAgo = new Date(Date.now() - 2 * 60_000);
       const trigger = {
         id: 'trigger-1',
-        tenantId: undefined,
+        tenantId: TENANT_A,
         workflowId: WORKFLOW_ID,
         scheduleCron: EVERY_MINUTE_CRON,
         updatedAt: twoMinutesAgo,
       };
       d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
 
-      const result = await d.service.evaluateCalendarTriggers({}, actor);
+      const result = await d.raw.evaluateCalendarTriggers({}, actor);
 
       expect(result.scanned).toBe(1);
       expect(result.fired).toBe(1);
@@ -949,13 +996,14 @@ describe('AutomationExecutionService', () => {
       const d = build();
       const trigger = {
         id: 'trigger-2',
+        tenantId: TENANT_A,
         workflowId: WORKFLOW_ID,
         scheduleCron: YEARLY_CRON,
         updatedAt: new Date(),
       };
       d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
 
-      const result = await d.service.evaluateCalendarTriggers({}, actor);
+      const result = await d.raw.evaluateCalendarTriggers({}, actor);
 
       expect(result.fired).toBe(0);
       expect(result.skipped).toBe(1);
@@ -967,6 +1015,7 @@ describe('AutomationExecutionService', () => {
       const twoMinutesAgo = new Date(Date.now() - 2 * 60_000);
       const trigger = {
         id: 'trigger-3',
+        tenantId: TENANT_A,
         workflowId: WORKFLOW_ID,
         scheduleCron: EVERY_MINUTE_CRON,
         updatedAt: twoMinutesAgo,
@@ -974,11 +1023,12 @@ describe('AutomationExecutionService', () => {
       d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
       d.governanceRepo.findWorkflowById.mockResolvedValue({
         id: WORKFLOW_ID,
+        tenantId: TENANT_A,
         code: 'triage',
         stateConceptId: CONCEPTS.AUTO_WORKFLOW_ARCHIVED,
       });
 
-      const result = await d.service.evaluateCalendarTriggers({}, actor);
+      const result = await d.raw.evaluateCalendarTriggers({}, actor);
 
       expect(result.fired).toBe(0);
       expect(result.skipped).toBe(1);
@@ -993,13 +1043,14 @@ describe('AutomationExecutionService', () => {
       const reference = new Date(Date.now() - 2 * 60_000);
       const trigger = {
         id: 'trigger-4',
+        tenantId: TENANT_A,
         workflowId: WORKFLOW_ID,
         scheduleCron: 'not a cron',
         updatedAt: reference,
       };
       d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
 
-      const result = await d.service.evaluateCalendarTriggers({}, actor);
+      const result = await d.raw.evaluateCalendarTriggers({}, actor);
 
       expect(result.fired).toBe(0);
       expect(result.skipped).toBe(1);
@@ -1010,7 +1061,7 @@ describe('AutomationExecutionService', () => {
     it('respeta el batchSize pedido al consultar el repositorio', async () => {
       const d = build();
 
-      await d.service.evaluateCalendarTriggers({ batchSize: 10 }, actor);
+      await d.raw.evaluateCalendarTriggers({ batchSize: 10 }, actor);
 
       expect(d.governanceRepo.findEnabledCalendarTriggers).toHaveBeenCalledWith(
         d.tx,
@@ -1018,6 +1069,449 @@ describe('AutomationExecutionService', () => {
         CONCEPTS.AUTO_TRIGGER_ACTIVE,
         10,
       );
+    });
+  });
+  describe('alcance de tenant (AUTO-01)', () => {
+    /**
+     * Captura el rechazo para inspeccionar status, reason y details.
+     *
+     * @param promise - Operación que debe fallar.
+     * @returns La excepción lanzada.
+     */
+    async function rejection(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Se esperaba un rechazo');
+    }
+
+    /**
+     * Verifica que el ajeno responde idéntico al inexistente y no deja rastro.
+     *
+     * @param foreign - Rechazo del recurso del otro tenant.
+     * @param absent - Rechazo del recurso inexistente.
+     * @param reason - `reason` catalogado de "no existe".
+     */
+    function expectIndistinguishable(
+      foreign: any,
+      absent: any,
+      reason: AutomationErrorReason,
+    ) {
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(reason);
+      expect(foreign.details).toBeUndefined();
+      expect(foreign.getResponse()).toEqual(absent.getResponse());
+    }
+
+    const FOREIGN_AGENT = {
+      id: AGENT_ID,
+      tenantId: TENANT_B,
+      stateConceptId: CONCEPTS.AUTO_AGENT_ACTIVE,
+      currentVersion: 1,
+      actsAsUserId: SERVICE_USER_ID,
+    };
+
+    /**
+     * Run de agente en marcha que pertenece (por agente y workflow run) a A.
+     *
+     * @returns El run de agente.
+     */
+    function agentRunOfA() {
+      return {
+        id: AGENT_RUN_ID,
+        agentId: AGENT_ID,
+        agentVersionId: VERSION_ID,
+        workflowRunId: RUN_ID,
+        statusConceptId: CONCEPTS.AUTO_AGENT_RUN_RUNNING,
+        updatedAt: new Date(),
+      };
+    }
+
+    describe('startWorkflowRun', () => {
+      it('correcto: el run nace en el tenant del contexto, no en el del cuerpo', async () => {
+        const d = build();
+
+        await d.service.startWorkflowRun(
+          WORKFLOW_ID,
+          { ...START_DTO, tenantId: TENANT_B },
+          actor,
+        );
+
+        expect(d.runsRepo.createWorkflowRun.mock.calls[0][1].tenantId).toBe(
+          TENANT_A,
+        );
+        expect(d.outbox.publishDomainEvent.mock.calls[0][1].tenantId).toBe(
+          TENANT_A,
+        );
+      });
+
+      it('el workflow de A iniciado desde B responde como inexistente y no escribe nada', async () => {
+        const d = build();
+        const absent = build();
+        absent.governanceRepo.findWorkflowById.mockResolvedValue(null);
+
+        const foreign = await rejection(
+          d.asTenantB.startWorkflowRun(WORKFLOW_ID, START_DTO, actor),
+        );
+        const missing = await rejection(
+          absent.service.startWorkflowRun(WORKFLOW_ID, START_DTO, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.WORKFLOW_NOT_FOUND,
+        );
+        expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      });
+
+      it('el disparador de B no se puede usar en un workflow de A', async () => {
+        const d = build();
+        d.governanceRepo.findTriggerById.mockResolvedValue({
+          id: 'trigger-1',
+          tenantId: TENANT_B,
+          isEnabled: true,
+          workflowId: WORKFLOW_ID,
+        });
+        const absent = build();
+        absent.governanceRepo.findTriggerById.mockResolvedValue(null);
+        const dto = { ...START_DTO, triggerId: 'trigger-1' };
+
+        const foreign = await rejection(
+          d.service.startWorkflowRun(WORKFLOW_ID, dto, actor),
+        );
+        const missing = await rejection(
+          absent.service.startWorkflowRun(WORKFLOW_ID, dto, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.TRIGGER_NOT_FOUND,
+        );
+        expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+      });
+
+      it('sin tenant en el contexto no arranca nada (denegar por defecto)', async () => {
+        const d = build();
+
+        const error = await rejection(
+          d.raw.startWorkflowRun(WORKFLOW_ID, START_DTO, actor),
+        );
+
+        expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+        expect(d.governanceRepo.findWorkflowById).not.toHaveBeenCalled();
+        expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('startAgentRun', () => {
+      const DTO = { agentId: AGENT_ID, taskTypeConceptId: 'task-type' } as any;
+
+      it('el workflow run de B no admite agentes iniciados desde A', async () => {
+        const d = build();
+        d.runsRepo.findWorkflowRunById.mockResolvedValue({
+          id: RUN_ID,
+          tenantId: TENANT_B,
+          statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
+        });
+        const absent = build();
+        absent.runsRepo.findWorkflowRunById.mockResolvedValue(null);
+
+        const foreign = await rejection(
+          d.service.startAgentRun(RUN_ID, DTO, actor),
+        );
+        const missing = await rejection(
+          absent.service.startAgentRun(RUN_ID, DTO, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.WORKFLOW_RUN_NOT_FOUND,
+        );
+        expect(d.runsRepo.createAgentRun).not.toHaveBeenCalled();
+      });
+
+      it('el agente de B no se puede ejecutar dentro de un run de A', async () => {
+        const d = build();
+        d.agentsRepo.findAgentById.mockResolvedValue(FOREIGN_AGENT);
+        const absent = build();
+        absent.agentsRepo.findAgentById.mockResolvedValue(null);
+
+        const foreign = await rejection(
+          d.service.startAgentRun(RUN_ID, DTO, actor),
+        );
+        const missing = await rejection(
+          absent.service.startAgentRun(RUN_ID, DTO, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.AGENT_NOT_FOUND,
+        );
+        expect(d.runsRepo.createAgentRun).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('recordAgentStep y requestApproval', () => {
+      const STEP = { stepKindConceptId: CONCEPTS.AUTO_STEP_THOUGHT } as any;
+      const APPROVAL = {
+        approvalTypeConceptId: CONCEPTS.AUTO_APPROVAL_TYPE_TOOL_WRITE,
+      } as any;
+
+      it('un run de agente de B no admite pasos desde A y no deja traza ni evento', async () => {
+        const d = build();
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(agentRunOfA());
+        d.agentsRepo.findAgentById.mockResolvedValue(FOREIGN_AGENT);
+        const absent = build();
+        absent.runsRepo.findAgentRunForUpdate.mockResolvedValue(null);
+
+        const foreign = await rejection(
+          d.service.recordAgentStep(AGENT_RUN_ID, STEP, actor),
+        );
+        const missing = await rejection(
+          absent.service.recordAgentStep(AGENT_RUN_ID, STEP, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
+        );
+        expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      });
+
+      it('si el agente es de A pero el workflow run es de B, el run entero es ajeno', async () => {
+        const d = build();
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(agentRunOfA());
+        d.runsRepo.findWorkflowRunById.mockResolvedValue({
+          id: RUN_ID,
+          tenantId: TENANT_B,
+          statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
+        });
+
+        await expect(
+          d.service.recordAgentStep(AGENT_RUN_ID, STEP, actor),
+        ).rejects.toMatchObject({
+          reason: AutomationErrorReason.AGENT_RUN_NOT_FOUND,
+        });
+        expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+      });
+
+      it('un run de agente de B no admite aprobaciones solicitadas desde A', async () => {
+        const d = build();
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(agentRunOfA());
+        d.agentsRepo.findAgentById.mockResolvedValue(FOREIGN_AGENT);
+
+        await expect(
+          d.service.requestApproval(AGENT_RUN_ID, APPROVAL, actor),
+        ).rejects.toMatchObject({
+          reason: AutomationErrorReason.AGENT_RUN_NOT_FOUND,
+        });
+        expect(d.runsRepo.createApproval).not.toHaveBeenCalled();
+      });
+
+      it('el run de agente propio se sigue pudiendo operar (límite)', async () => {
+        const d = build();
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(agentRunOfA());
+
+        await expect(
+          d.service.recordAgentStep(AGENT_RUN_ID, STEP, actor),
+        ).resolves.toMatchObject({ paused: false });
+      });
+    });
+
+    describe('decideApproval', () => {
+      /**
+       * Aprobación pendiente de un run de agente de B, decidida desde A.
+       *
+       * @param d - Doble del servicio.
+       * @param status - Estado de la aprobación ajena.
+       * @returns Los objetos para verificar que no se alteraron.
+       */
+      function foreignApproval(
+        d: ReturnType<typeof build>,
+        status = CONCEPTS.AUTO_APPROVAL_PENDING,
+      ) {
+        const approval = {
+          id: 'approval-1',
+          agentRunId: AGENT_RUN_ID,
+          statusConceptId: status,
+          updatedAt: new Date(),
+        };
+        const agentRun = {
+          id: AGENT_RUN_ID,
+          agentId: AGENT_ID,
+          workflowRunId: RUN_ID,
+          statusConceptId: CONCEPTS.AUTO_AGENT_RUN_PAUSED,
+          updatedAt: new Date(),
+        };
+        d.runsRepo.findApprovalForUpdate.mockResolvedValue(approval);
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(agentRun);
+        d.agentsRepo.findAgentById.mockResolvedValue(FOREIGN_AGENT);
+        return { approval, agentRun };
+      }
+
+      it('el aprobador de A que decide la aprobación de B recibe 404 y no altera el run', async () => {
+        const d = build();
+        const { approval, agentRun } = foreignApproval(d);
+        const absent = build();
+        absent.runsRepo.findApprovalForUpdate.mockResolvedValue(null);
+        const dto = { decision: 'approved' } as any;
+
+        const foreign = await rejection(
+          d.service.decideApproval('approval-1', dto, actor),
+        );
+        const missing = await rejection(
+          absent.service.decideApproval('approval-1', dto, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.APPROVAL_NOT_FOUND,
+        );
+        expect(approval.statusConceptId).toBe(CONCEPTS.AUTO_APPROVAL_PENDING);
+        expect(agentRun.statusConceptId).toBe(CONCEPTS.AUTO_AGENT_RUN_PAUSED);
+        expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      });
+
+      it('una aprobación ajena ya decidida no delata su estado (no responde 409)', async () => {
+        const d = build();
+        foreignApproval(d, CONCEPTS.AUTO_APPROVAL_APPROVED);
+
+        await expect(
+          d.service.decideApproval(
+            'approval-1',
+            { decision: 'rejected' } as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({
+          reason: AutomationErrorReason.APPROVAL_NOT_FOUND,
+        });
+      });
+
+      it('una aprobación huérfana (sin run) responde como inexistente', async () => {
+        const d = build();
+        d.runsRepo.findApprovalForUpdate.mockResolvedValue({
+          id: 'approval-1',
+          agentRunId: AGENT_RUN_ID,
+          statusConceptId: CONCEPTS.AUTO_APPROVAL_PENDING,
+        });
+        d.runsRepo.findAgentRunForUpdate.mockResolvedValue(null);
+
+        await expect(
+          d.service.decideApproval(
+            'approval-1',
+            { decision: 'approved' } as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({
+          reason: AutomationErrorReason.APPROVAL_NOT_FOUND,
+        });
+      });
+    });
+
+    describe('finalizeWorkflowRun', () => {
+      it('el run de B no se cierra desde A y queda intacto', async () => {
+        const d = build();
+        const run = {
+          id: RUN_ID,
+          tenantId: TENANT_B,
+          runNumber: 'triage-1',
+          statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
+        };
+        d.runsRepo.findWorkflowRunForUpdate.mockResolvedValue(run);
+        const absent = build();
+        absent.runsRepo.findWorkflowRunForUpdate.mockResolvedValue(null);
+
+        const foreign = await rejection(
+          d.service.finalizeWorkflowRun(RUN_ID, {}, actor),
+        );
+        const missing = await rejection(
+          absent.service.finalizeWorkflowRun(RUN_ID, {}, actor),
+        );
+
+        expectIndistinguishable(
+          foreign,
+          missing,
+          AutomationErrorReason.WORKFLOW_RUN_NOT_FOUND,
+        );
+        expect(run.statusConceptId).toBe(CONCEPTS.AUTO_RUN_RUNNING);
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('evaluateCalendarTriggers', () => {
+      const dueTrigger = (overrides: Record<string, unknown> = {}) => ({
+        id: 'trigger-1',
+        tenantId: TENANT_A,
+        workflowId: WORKFLOW_ID,
+        scheduleCron: '* * * * *',
+        updatedAt: new Date(Date.now() - 2 * 60_000),
+        ...overrides,
+      });
+
+      it('el run del barrido nace en el tenant del disparador', async () => {
+        const d = build();
+        d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([
+          dueTrigger(),
+        ]);
+
+        await d.raw.evaluateCalendarTriggers({}, actor);
+
+        expect(d.runsRepo.createWorkflowRun.mock.calls[0][1].tenantId).toBe(
+          TENANT_A,
+        );
+      });
+
+      it('un disparador de A con el workflow de B no arranca nada y consume la marca', async () => {
+        const d = build();
+        const trigger = dueTrigger();
+        const reference = trigger.updatedAt;
+        d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([
+          trigger,
+        ]);
+        d.governanceRepo.findWorkflowById.mockResolvedValue({
+          id: WORKFLOW_ID,
+          tenantId: TENANT_B,
+          code: 'triage',
+          stateConceptId: CONCEPTS.AUTO_WORKFLOW_ACTIVE,
+        });
+
+        const result = await d.raw.evaluateCalendarTriggers({}, actor);
+
+        expect(result.fired).toBe(0);
+        expect(result.skipped).toBe(1);
+        expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+        expect(trigger.updatedAt.getTime()).toBeGreaterThan(
+          reference.getTime(),
+        );
+      });
+
+      it('si el barrido declara tenant, sólo evalúa los disparadores de ese tenant', async () => {
+        const d = build();
+        const trigger = dueTrigger({ tenantId: TENANT_B });
+        const reference = trigger.updatedAt;
+        d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([
+          trigger,
+        ]);
+
+        const result = await d.service.evaluateCalendarTriggers({}, actor);
+
+        expect(result.fired).toBe(0);
+        expect(result.skipped).toBe(1);
+        expect(d.governanceRepo.findWorkflowById).not.toHaveBeenCalled();
+        expect(trigger.updatedAt).toBe(reference);
+      });
     });
   });
 });

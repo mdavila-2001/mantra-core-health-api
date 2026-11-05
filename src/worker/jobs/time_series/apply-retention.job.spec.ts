@@ -4,6 +4,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ApplyRetentionJob } from './apply-retention.job';
 
+const PLATFORM_TENANT = '22222222-2222-4222-8222-222222222222';
+
 function build(env: any = {}) {
   const api = { get: mockFn(), post: mockFn(), workerId: mockFn() };
   const logger = {
@@ -12,7 +14,11 @@ function build(env: any = {}) {
     warn: mockFn(),
     error: mockFn(),
   };
-  const workerEnv = { tsRetentionPolicies: {}, ...env };
+  const workerEnv = {
+    tsRetentionPolicies: {},
+    tsAdminTenantId: PLATFORM_TENANT,
+    ...env,
+  };
   const job = new ApplyRetentionJob(api as any, logger as any, workerEnv);
   return { job, api, logger, workerEnv };
 }
@@ -44,6 +50,7 @@ describe('ApplyRetentionJob', () => {
       expect.objectContaining({
         table: 'location_ping_series',
         olderThan: '30 days',
+        tenantId: PLATFORM_TENANT,
       }),
     );
     expect(d.logger.warn).toHaveBeenCalledWith(

@@ -69,15 +69,21 @@ export class DiagnosticsImagingController {
     resourceType: 'IMAGING_STUDIES',
     patient: 'param:patientProfileId',
   })
-  @ApiOperation({ summary: 'Listar los estudios de imagen del paciente' })
+  @ApiOperation({
+    summary: 'Listar los estudios de imagen del paciente',
+    description:
+      'Exige un vínculo asistencial vigente entre el profesional y el paciente: sin él responde 404, igual que un paciente inexistente.',
+  })
   listStudies(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ImagingStudySummaryDto[]> {
     return this.imaging.listStudiesByPatient(
       requireTenantId(),
       patientProfileId,
+      actor,
       limit,
       offset,
     );

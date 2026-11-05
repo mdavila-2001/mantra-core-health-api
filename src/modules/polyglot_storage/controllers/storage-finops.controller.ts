@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Audited, Roles } from '../../../common';
 import { StorageOperationsService } from '../services';
 import { ConsolidateCostSnapshotDto, CostSnapshotResponseDto } from '../dto';
 
@@ -21,6 +21,11 @@ export class StorageFinOpsController {
   constructor(private readonly operationsService: StorageOperationsService) {}
 
   /** UC-54-12. */
+  @Audited({
+    action: 'STORAGE_COST_SNAPSHOT_CONSOLIDATED',
+    entity: 'storage_cost_snapshot',
+    entityId: 'result.id',
+  })
   @Post('storage-cost-snapshots')
   @Roles('SYSTEM', 'FINOPS_ANALYST', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

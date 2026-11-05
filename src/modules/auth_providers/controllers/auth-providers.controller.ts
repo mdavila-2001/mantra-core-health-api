@@ -9,7 +9,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthProvidersConfigService, FederatedLoginService } from '../services';
 import {
   CreateProviderDto,
@@ -62,6 +67,11 @@ export class AuthProvidersController {
   ) {}
 
   /** UC-40-01. */
+  @Audited({
+    action: 'IDENTITY_PROVIDER_CREATED',
+    entity: 'identity_provider',
+    entityId: 'result.id',
+  })
   @Post('identity-providers')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -78,6 +88,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-02. */
+  @Audited({
+    action: 'IDENTITY_PROVIDER_PROTOCOL_CONFIGURED',
+    entity: 'provider_protocol_config',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/:id/protocol-configs')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -95,6 +110,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-03. */
+  @Audited({
+    action: 'SIGNING_KEY_PUBLISHED',
+    entity: 'provider_signing_key',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/:id/signing-keys')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -108,6 +128,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-11. */
+  @Audited({
+    action: 'SIGNING_KEY_ROTATED',
+    entity: 'provider_signing_key',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/:id/signing-keys/rotate')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -125,6 +150,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-04. */
+  @Audited({
+    action: 'IDENTITY_PROVIDER_ATTRIBUTE_MAPPINGS_SET',
+    entity: 'identity_provider',
+    entityId: 'param:id',
+  })
   @Put('identity-providers/:id/attribute-mappings')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -142,6 +172,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-05. */
+  @Audited({
+    action: 'IDENTITY_PROVIDER_TENANT_BOUND',
+    entity: 'provider_tenant_binding',
+    entityId: 'result.id',
+  })
   @Post('tenant-bindings')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -158,6 +193,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-06. */
+  @Audited({
+    action: 'PROVISIONING_RULE_CREATED',
+    entity: 'provisioning_rule',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/:id/provisioning-rules')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -174,6 +214,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-07. */
+  @Audited({
+    action: 'FEDERATED_LOGIN_STARTED',
+    entity: 'federated_login_attempt',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/by-code/:code/authorize')
   @Roles('IDENTITY_ADMIN', 'AUTH_SERVICE')
   @HttpCode(HttpStatus.OK)
@@ -191,6 +236,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-08. */
+  @Audited({
+    action: 'FEDERATED_LOGIN_CALLBACK_PROCESSED',
+    entity: 'federated_login_attempt',
+    entityId: 'result.id',
+  })
   @Post('identity-providers/by-code/:code/callback')
   @Roles('IDENTITY_ADMIN', 'AUTH_SERVICE')
   @HttpCode(HttpStatus.OK)
@@ -208,6 +258,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-09. */
+  @Audited({
+    action: 'ACCOUNT_LINK_REQUESTED',
+    entity: 'account_link_request',
+    entityId: 'result.id',
+  })
   @Post('account-link-requests')
   @Roles('IDENTITY_ADMIN', 'AUTH_SERVICE')
   @HttpCode(HttpStatus.CREATED)
@@ -224,6 +279,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-10. */
+  @Audited({
+    action: 'ACCOUNT_LINK_COMPLETED',
+    entity: 'account_link_request',
+    entityId: 'result.id',
+  })
   @Post('account-link-requests/complete')
   @Roles('IDENTITY_ADMIN', 'AUTH_SERVICE')
   @HttpCode(HttpStatus.OK)
@@ -236,6 +296,11 @@ export class AuthProvidersController {
   }
 
   /** UC-40-12. */
+  @Audited({
+    action: 'FEDERATED_IDENTITY_UNLINKED',
+    entity: 'federated_identity',
+    entityId: 'param:id',
+  })
   @Post('federated-identities/:id/unlink')
   @Roles('IDENTITY_ADMIN')
   @HttpCode(HttpStatus.OK)

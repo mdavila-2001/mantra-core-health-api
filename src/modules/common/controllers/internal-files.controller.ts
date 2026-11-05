@@ -17,7 +17,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Audited, Roles } from '../../../common';
 import { FilesService } from '../services';
 import {
   FileVersionResponseDto,
@@ -78,6 +78,11 @@ export class InternalFilesController {
   }
 
   /** UC-02-09: callback del antivirus con el resultado del escaneo. */
+  @Audited({
+    action: 'FILE_SCAN_RESULT_RECORDED',
+    entity: 'file_version',
+    entityId: 'param:vid',
+  })
   @Post('versions/:vid/scan-result')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

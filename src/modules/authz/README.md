@@ -44,6 +44,10 @@ Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `access_policies`, `br
 | `GET /authz/me/access` | PATIENT | `authz-me` |
 | `POST /authz/me/care-relationships/:id/revoke` | PATIENT | `authz-me` |
 | `POST /authz/me/clinical-access-grants/:grantId/revoke` | PATIENT | `authz-me` |
+| `GET /authz/me/access-requests` | PATIENT | `authz-me` |
+| `POST /authz/me/primary-practitioner-requests` | PATIENT | `authz-me` |
+| `GET /authz/practitioners/me/access-requests` | CLINICIAN, PRACTITIONER | `authz-practitioner-requests` |
+| `POST /authz/practitioners/me/care-relationships/:id/respond` | CLINICIAN, PRACTITIONER | `authz-practitioner-requests` |
 | `POST /authz/pdp/cache/invalidate` | SECURITY_ADMIN | `authz-pdp` |
 | `POST /authz/decisions/evaluate` | SECURITY_ADMIN | `authz-pdp` |
 | `POST /authz/tenants/:tenantId/access-policies` | SECURITY_ADMIN | `authz-policies` |
@@ -86,7 +90,7 @@ ambigüedad de parseo del path).
 `resource_scope_grants` (esquema `authz`). Todas con `row_version` optimista y
 FKs como columnas `uuid` planas.
 
-## Reglas de negocio
+## Business rules
 
 - **Deny-overrides**: en la evaluación del PDP y en `role_permissions`, `deny`
   prevalece sobre `allow`; las excepciones de usuario `deny` prevalecen sobre el
@@ -98,6 +102,52 @@ FKs como columnas `uuid` planas.
   activo único (409).
 - **Propósito de uso**: acceso clínico exige consentimiento salvo `TREATMENT`
   directo; break-the-glass usa `EMERGENCY`, sin consentimiento y ventana corta.
+- **Alcance de tenant de las bases de acceso** (`AuthzClinicalScopeService`): acceso
+  clínico, break-the-glass, relación asistencial y representación legal toman el
+  tenant de `requireTenantId()`; el `tenantId` del cuerpo sólo se contrasta (403
+  `AUTHZ_TENANT_SCOPE_REQUIRED`). El paciente tiene que existir y tener una huella
+  propia en el tenant, y el encuentro y el consentimiento citados, ser del tenant y
+  del mismo paciente. El modelo no guarda el tenant del paciente, así que la huella
+  se prueba a través de la cuenta vinculada al paciente y **sólo con actos que el
+  propio paciente realiza**: una reserva del tenant hecha por esa cuenta
+  (`booked_by_user_id`), o su membresía activa en el tenant cuando la creó el
+  autorregistro o la cuenta misma (`invited_by_user_id` nulo o igual a la cuenta; la
+  que un administrador da de alta con `POST /directory/tenants/:id/memberships` no
+  cuenta). **No son huella** los encuentros, turnos, reservas del personal ni
+  episodios de atención aunque sean del tenant y del paciente: el personal los crea
+  para cualquier paciente existente sin autorización previa
+  (`POST /clinical/encounters/check-in`, `POST /clinical/care-episodes`,
+  `POST /scheduling/appointments/direct`, confirmación de retenciones) y en cualquier
+  estado, incluidos «confirmada» y «atendida»; contarlos dejaría que otro tenant
+  fabricara el vínculo y concediera accesos sobre una historia ajena. Tampoco cuentan
+  las relaciones, accesos ni representaciones, que son lo que esta comprobación
+  protege. Un paciente sin cuenta, o sin huella propia, entra por la solicitud de
+  relación (abajo), que el paciente acepta. Los duplicados de acceso clínico,
+  relación asistencial (activa o pendiente) y representación legal se buscan sólo en
+  el tenant activo (`findActiveInTenant`/`findPendingInTenant`) y su 409 no lleva
+  `details`: una fila de otra organización ni bloquea ni se delata. Todo lo
+  ajeno responde igual que lo inexistente (404, mismo mensaje y `reason`, sin
+  `details`): `AUTHZ_PATIENT_OUT_OF_SCOPE`, `AUTHZ_ENCOUNTER_PATIENT_MISMATCH`,
+  `AUTHZ_CONSENT_PATIENT_MISMATCH`. La solicitud de relación del profesional
+  (`POST /authz/care-relationships/request`) sólo exige que el paciente exista: nace
+  `PENDING` y no concede nada hasta que el paciente la acepte. Revocar por id queda
+  acotado al tenant activo; el paciente titular revoca lo suyo en cualquier
+  organización y un actor de plataforma (`SUPERADMIN`/`SYSTEM`) sin tenant revoca por id.
+- **Cabecera (médico de cabecera)**: es una relación asistencial de tipo `PRIMARY`
+  (`CARE_REL_PRIMARY`). La pide el profesional con `POST /authz/care-relationships/request`
+  (`relationshipType: PRIMARY`) o el paciente con `POST /authz/me/primary-practitioner-requests`
+  (tenant en `X-Tenant-Id`; mismas validaciones que elegirlo directo). La acepta la otra parte:
+  quien la inició no la puede aceptar. Al aceptarla, en una sola transacción, se revoca la
+  `PRIMARY` activa anterior del paciente en el tenant, se activa la nueva, se cierra el médico
+  de cabecera vigente de `profiles` y, tras un `flush` (su índice único no es diferible), se abre
+  el nuevo. Revocar una `PRIMARY` cierra además el vigente si era ese profesional. Rechazar deja
+  el estado `CARE_REL_STATUS_DECLINED`, que no figura en «quién ve mi historia». El alta directa
+  (`POST /authz/care-relationships`) no admite `PRIMARY`.
+- **Buzón de solicitudes** (`GET /authz/me/access-requests` y
+  `GET /authz/practitioners/me/access-requests`): une las relaciones asistenciales y las
+  solicitudes granulares de `consent` bajo una sola forma (`kind` `CABECERA`/`GRANULAR`/`ATENCION`,
+  `direction`, `status`). Muestra sólo el tenant activo; las relaciones acotadas a un propósito
+  distinto de tratamiento no se muestran.
 - **Masking**: `field_permissions` con check `canWrite ⇒ canRead` (412 si no).
 - **Vigencia**: `valid_from < valid_to`; la revocación distingue `revoked` de
   `expired` según `valid_to`.

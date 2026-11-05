@@ -8,6 +8,7 @@ import {
   ErrorBudgetBurnEvents,
   CapacityPlans,
   CapacityMeasurements,
+  HealthIncidents,
 } from '../entities';
 
 /**
@@ -17,6 +18,15 @@ import {
  */
 @Injectable()
 export class OpsReliabilityRepository {
+  /** Incidente del tenant que una quema cita; `null` si no existe o es de otro tenant. */
+  findIncidentInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<HealthIncidents | null> {
+    return em.findOne(HealthIncidents, { id, tenantId });
+  }
+
   // --- SLO (UC-46-09) ---
 
   /**

@@ -2,9 +2,8 @@
 // =============================================================================
 // ETL de síntomas, etapa 3 (load de RELACIONES enfermedad → síntoma/fenotipo).
 //
-// BLOQUEADO POR EL MODELO: necesita `terminology.concept_relationship_evidence`
-// (propuesta en proposal/concept_relationship_evidence.sql) para guardar fuente,
-// frecuencia y evidencia de cada relación. Si la tabla no existe, aborta sin
+// Usa `terminology.concept_relationship_evidence` del modelo canónico y el
+// cargador masivo compartido. Si la tabla no existe, aborta sin
 // escribir nada: cargar las aristas sin su evidencia perdería exactamente lo
 // que la fuente publica (frecuencia, evidencia, negación).
 //
@@ -24,7 +23,10 @@ import pg from 'pg';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
-import { DB_CONFIG, conceptIdsByCode, insertMany } from './lib/db.mjs';
+import { DB_CONFIG, conceptIdsByCode, ensureCodeSystem } from './lib/db.mjs';
+import { bulkLoadRelationships } from '../lib/bulk-copy.mjs';
+import { CONCEPT } from '../lib/glossary-es/load-plan.mjs';
+import { canonicalEvidenceBatches, EVIDENCE_COLUMNS } from './lib/evidence-contract.mjs';
 import { CODE_SYSTEMS, md5uuid, versionId } from './lib/load-plan.mjs';
 import { DEFAULT_DISEASE_SYSTEMS, REL, RELATION_SOURCES, diseaseSystemsFromJson, phenotypeResolver, relationsPlan } from './lib/relations-plan.mjs';
 import { OUT_DIR, SOURCE_FILES } from './lib/sources.mjs';
@@ -35,10 +37,10 @@ const APPLY = args.includes('--apply');
 const CHECK = args.includes('--check');
 const SOURCES = (opt('--sources') ?? Object.keys(RELATION_SOURCES).join(',')).split(',');
 const DISEASE_SYSTEMS = opt('--disease-systems') ? diseaseSystemsFromJson(JSON.parse(readFileSync(opt('--disease-systems'), 'utf8'))) : DEFAULT_DISEASE_SYSTEMS;
+const SOURCE_RELEASE_DATES = opt('--source-release-dates') ? JSON.parse(readFileSync(opt('--source-release-dates'), 'utf8')) : {};
 
 export const EVIDENCE_TABLE = 'concept_relationship_evidence';
-export const EVIDENCE_COLUMNS = ['id', 'relationship_id', 'source_id', 'source_record_key', 'source_version', 'source_uri', 'retrieved_at', 'negated', 'frequency_text', 'frequency_concept_id', 'frequency_numerator', 'frequency_denominator', 'frequency_percent', 'evidence_code', 'onset_concept_id', 'sex', 'source_references', 'qualifiers'];
-const EVIDENCE_CASTS = ['uuid', 'uuid', 'uuid', null, null, null, 'timestamptz', null, null, 'uuid', null, null, null, null, 'uuid', null, 'jsonb', 'jsonb'];
+export { EVIDENCE_COLUMNS } from './lib/evidence-contract.mjs';
 
 const nd = (name) => join(OUT_DIR, 'ndjson', `${name}.ndjson`);
 
@@ -137,7 +139,7 @@ async function main() {
     const missing = await missingEvidenceColumns(client);
     if (missing.length) {
       console.error(`BLOQUEADO POR EL MODELO: falta terminology.${EVIDENCE_TABLE} (columnas ausentes: ${missing.join(', ')}).`);
-      console.error('Propuesta: tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql — ver docs/seed-research/symptoms.md § Modelo.');
+      console.error('Aplicá el DDL canónico del modelo (SQL/03_terminology) y sus parches; ver docs/seed-research/symptoms.md § Modelo.');
       process.exitCode = 2;
       return;
     }
@@ -179,23 +181,26 @@ async function main() {
       return viaMondo ? { conceptId: viaMondo, via: `MONDO:equivalentTo ${m}` } : null;
     };
 
-    const sourceIds = {};
-    for (const s of SOURCES) sourceIds[s] = await ensureSource(client, s);
-    const plan = relationsPlan(rows, { resolveDisease, resolvePhenotype: phenotypeResolver(codesBySystem, idMap), sourceIdOf: (s) => sourceIds[s], excludedTypeAvailable });
+    const plan = relationsPlan(rows, { resolveDisease, resolvePhenotype: phenotypeResolver(codesBySystem, idMap), sourceIdOf: (s) => s, excludedTypeAvailable });
+    const batches = canonicalEvidenceBatches(plan, { validFromBySource: SOURCE_RELEASE_DATES });
     console.log(JSON.stringify({ loadedDiseaseSystems: loadedSystems, stats: plan.stats, unresolvedDiseasesByPrefix: plan.unresolvedDiseases, negatedNeeds: excludedTypeAvailable ? null : 'REL_SYMPTOM_EXCLUDED no sembrado: las negaciones se omiten' }, null, 2));
     if (CHECK) return;
 
-    const startedAt = new Date();
-    const inserted = {
-      relationships: await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], plan.relationships, ['uuid', 'uuid', 'uuid', 'uuid', null]),
-      evidence: await insertMany(client, EVIDENCE_TABLE, EVIDENCE_COLUMNS, plan.evidence, EVIDENCE_CASTS),
-    };
-    for (const s of SOURCES) {
-      await client.query(
-        `INSERT INTO terminology.catalog_import_batches (id, source_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
-         VALUES ($1::uuid, $2::uuid, $3, now(), $4, $5, $6, $7, now())`,
-        [md5uuid(`mantra:symptoms:relations-batch:${s}:${startedAt.toISOString()}`), sourceIds[s], startedAt, rows.filter((r) => r.source === s).length, inserted.relationships + inserted.evidence, plan.stats.diseaseUnresolved + plan.stats.phenotypeUnresolved, s],
-      );
+    const inserted = { relationships: 0, evidence: 0 };
+    const { rows: active } = await client.query('SELECT id FROM terminology.catalog_concepts WHERE id = $1::uuid', [CONCEPT.TERM_ACTIVE]);
+    if (!active.length) throw new Error('Falta el concepto de estado activo de terminología');
+    for (const batch of batches) {
+      const sourceId = await ensureSource(client, batch.source);
+      const key = `symptoms-annotations-${batch.source}`;
+      const def = RELATION_SOURCES[batch.source];
+      const context = await ensureCodeSystem(client, {
+        source: { id: sourceId, code: def.code, name: def.name ?? CODE_SYSTEMS.hpo.sourceName },
+        codeSystem: { id: md5uuid(`mantra:symptoms:annotation-system:${key}`), internalCode: key, name: key, canonicalUrl: `urn:mantra:${key}`, caseSensitive: true },
+        version: { id: md5uuid(`mantra:symptoms:annotation-version:${key}:${batch.version}`), version: batch.version },
+      }, active[0].id);
+      const loaded = await bulkLoadRelationships(client, { terminologySourceId: context.sourceId, codeSystemVersionId: context.versionId, rows: batch.rows });
+      inserted.relationships += loaded.relationships.inserted;
+      inserted.evidence += loaded.evidence.inserted;
     }
     console.log('\n=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===');
     console.log(JSON.stringify({ inserted, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));

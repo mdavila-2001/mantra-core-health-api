@@ -70,6 +70,7 @@ describe('DiagnosticEquipmentController', () => {
     const equipmentService = { updateEquipment: mockFn() };
     const controller = new DiagnosticEquipmentController(
       equipmentService as any,
+      {} as any,
     );
     const dto = { operationalStatusConceptId: 'os1' };
     await controller.updateEquipment('e1', dto, actor);

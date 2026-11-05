@@ -240,6 +240,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ViewContractResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ViewContractResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ViewContractResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ViewContractResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ViewContractResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -322,13 +323,15 @@ NestJS resuelve `GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/a
 | `portalCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
 | `routeCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
 | `viewCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
+| `purposeOfUse` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `patientProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/actions HTTP/1.1
+GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/actions?purposeOfUse=valor-ejemplo&patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -346,7 +349,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/actions HTTP/1.1
+GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/actions?purposeOfUse=valor-ejemplo&patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -362,6 +365,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<AvailableActionDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AvailableActionDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AvailableActionDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AvailableActionDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AvailableActionDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -389,9 +393,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Portal no encontrado | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
-| 404 | `NOT_FOUND` | Ruta no encontrada | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
-| 404 | `NOT_FOUND` | Vista no encontrada | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -420,7 +421,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Servir el read model al frontend (consent-aware, masking heredado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Exige cumplir el contrato de acceso de la vista (audiencia, permiso, propósito, feature flag y contextos de tenant/paciente); si no, responde el mismo 404 que una vista inexistente. Los parámetros distintos de los reservados son filtros declarados en el contrato de la vista.
 
 
 ### Descripción del sistema
@@ -434,6 +435,11 @@ NestJS resuelve `GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/d
 | `portalCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
 | `routeCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
 | `viewCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
+| `patientProfileId` | query | No | `desconocido` | Sin restricción adicional declarada | Paciente de las vistas con contexto de paciente | `00000000-0000-4000-8000-000000000001` |
+| `purposeOfUse` | query | No | `desconocido` | Sin restricción adicional declarada | Propósito de uso (concepto) que la ruta exige | `valor-ejemplo` |
+| `sort` | query | No | `desconocido` | Sin restricción adicional declarada | Código de orden | `valor-ejemplo` |
+| `limit` | query | No | `desconocido` | Sin restricción adicional declarada | Se recorta al máximo de página de la definición | `valor-ejemplo` |
+| `cursor` | query | No | `desconocido` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -458,7 +464,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/data HTTP/1.1
+GET /portals/CODIGO_EJEMPLO/routes/CODIGO_EJEMPLO/views/CODIGO_EJEMPLO/data?patientProfileId=00000000-0000-4000-8000-000000000001&purposeOfUse=valor-ejemplo&sort=valor-ejemplo&limit=valor-ejemplo&cursor=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -474,6 +480,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ServeViewDataResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ServeViewDataResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ServeViewDataResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServeViewDataResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServeViewDataResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -540,9 +547,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Portal no encontrado | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
-| 404 | `NOT_FOUND` | Ruta no encontrada | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
-| 404 | `NOT_FOUND` | Vista no encontrada | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
+| 422 | `PRECONDITION_FAILED` | La proyección no está disponible | Excepción explícita en src/modules/read_models/services/frontend-views.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -620,6 +625,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProjectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -726,6 +732,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicProjectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProjectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -841,6 +848,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -967,6 +975,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1094,6 +1103,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1220,6 +1230,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1412,6 +1423,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadModelDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1536,6 +1548,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1648,6 +1661,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1808,6 +1822,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReadModelDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadModelDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1928,6 +1943,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ReadModelHealthResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ReadModelHealthResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ReadModelHealthResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReadModelHealthResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadModelHealthResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2079,6 +2095,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ViewPreferencesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ViewPreferencesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ViewPreferencesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ViewPreferencesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ViewPreferencesResponseDto`. Ejemplo completo derivado de ese DTO:
 

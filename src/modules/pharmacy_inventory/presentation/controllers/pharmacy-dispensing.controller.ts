@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { MedicationDispensationsService } from '../../services';
 import {
   CreateDispensationDto,
@@ -30,6 +35,11 @@ export class PharmacyDispensingController {
   constructor(private readonly dispensations: MedicationDispensationsService) {}
 
   /** UC-25-03: dispensar prescripción a paciente. */
+  @Audited({
+    action: 'MEDICATION_DISPENSED',
+    entity: 'medication_dispensation',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/dispensations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -45,6 +55,11 @@ export class PharmacyDispensingController {
   }
 
   /** UC-25-11: reversar dispensación (devolución). */
+  @Audited({
+    action: 'MEDICATION_DISPENSATION_REVERSED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post('dispensations/:id/reverse')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

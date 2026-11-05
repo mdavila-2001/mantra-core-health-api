@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CareRelationships } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import { AUTHZ } from '../authz.concepts';
 
 /** Datos para establecer una relación asistencial. */
 export interface CreateCareRelationshipData {
@@ -72,6 +73,25 @@ export class CareRelationshipsRepository {
     });
   }
 
+  /**
+   * Relación asistencial ACTIVA concreta (paciente, practicante) dentro de un
+   * tenant: evita duplicados sin sondear otras organizaciones. Una relación de
+   * otro tenant no es duplicado de ésta ni debe poder delatarse con un 409.
+   */
+  findActiveInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /** Relaciones ACTIVAS de un practicante sobre un paciente (para el PDP). */
   findActiveForPractitionerPatient(
     em: EntityManager,
@@ -83,6 +103,52 @@ export class CareRelationshipsRepository {
       patientProfileId,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     });
+  }
+
+  /**
+   * ¿Tiene el paciente una relación asistencial vigente en el tenant, con
+   * cualquier profesional?
+   *
+   * Vigente es lo mismo que exige el PDP (`AuthzPdpService`, caso 6c) y las
+   * lecturas que ya reusan la tabla: estado `ACTIVE`, `valid_from` no posterior
+   * a `at` y `valid_to` nulo o posterior a `at` (el límite superior es
+   * exclusivo). Una relación acotada a un propósito sólo vale para ese mismo
+   * propósito: sin `purposeConceptId` se aceptan únicamente las relaciones sin
+   * acotar; con él, las sin acotar y las acotadas a él.
+   *
+   * Sólo cuenta el `tenant_id` de la propia fila: una relación que el paciente
+   * tiene con un profesional de otra organización no vale para ésta. Las
+   * solicitudes `PENDING` (el paciente aún no aceptó), las revocadas y las
+   * vencidas no cuentan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param query - Paciente, tenant, instante de vigencia y propósito pedido.
+   * @returns `true` si hay al menos una relación vigente.
+   */
+  async hasActiveInTenantAt(
+    em: EntityManager,
+    query: {
+      patientProfileId: string;
+      tenantId: string;
+      at: Date;
+      purposeConceptId?: string;
+    },
+  ): Promise<boolean> {
+    const purposes: (string | null)[] = [null];
+    if (query.purposeConceptId) purposes.push(query.purposeConceptId);
+    const count = await em.count(CareRelationships, {
+      patientProfileId: query.patientProfileId,
+      tenantId: query.tenantId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      validFrom: { $lte: query.at },
+      $and: [
+        { $or: [{ validTo: null }, { validTo: { $gt: query.at } }] },
+        {
+          $or: purposes.map((purposeConceptId) => ({ purposeConceptId })),
+        },
+      ],
+    });
+    return count > 0;
   }
 
   /** Solicitud PENDIENTE concreta (paciente, practicante), evita duplicados. */
@@ -98,11 +164,25 @@ export class CareRelationshipsRepository {
     });
   }
 
-  /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
+  /** Solicitud PENDIENTE concreta (paciente, practicante) dentro de un tenant. */
+  findPendingInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      statusConceptId: CONCEPTS.STATE_PENDING,
+    });
+  }
+
   /**
    * Todas las relaciones del paciente, de cualquier organización y estado salvo
-   * las solicitudes pendientes (que tienen su propia bandeja): «quién ve mi
-   * historia».
+   * las solicitudes pendientes (que tienen su propia bandeja) y las rechazadas
+   * (nunca concedieron nada): «quién ve mi historia».
    */
   findAllByPatient(
     em: EntityManager,
@@ -110,11 +190,17 @@ export class CareRelationshipsRepository {
   ): Promise<CareRelationships[]> {
     return em.find(
       CareRelationships,
-      { patientProfileId, statusConceptId: { $ne: CONCEPTS.STATE_PENDING } },
+      {
+        patientProfileId,
+        statusConceptId: {
+          $nin: [CONCEPTS.STATE_PENDING, AUTHZ.CARE_REL_STATUS_DECLINED],
+        },
+      },
       { orderBy: { validFrom: 'DESC' }, limit: 200 },
     );
   }
 
+  /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
   findPendingByPatient(
     em: EntityManager,
     patientProfileId: string,
@@ -124,6 +210,36 @@ export class CareRelationshipsRepository {
       { patientProfileId, statusConceptId: CONCEPTS.STATE_PENDING },
       { orderBy: { createdAt: 'DESC' } },
     );
+  }
+
+  /** Cabeceras (PRIMARY) ACTIVAS del paciente en un tenant, de cualquier profesional. */
+  findActivePrimaryInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships[]> {
+    return em.find(CareRelationships, {
+      patientProfileId,
+      tenantId,
+      relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /** Cabecera (PRIMARY) ACTIVA o PENDIENTE del par (paciente, profesional) en un tenant. */
+  findOpenPrimaryOfPair(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+      statusConceptId: { $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING] },
+    });
   }
 
   /** Todas las relaciones de un paciente (scoping por tenant). */

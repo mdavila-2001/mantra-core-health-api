@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  ResourceNotFoundException,
+  PreconditionFailedException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,7 +15,15 @@ import {
 } from '../repositories';
 import { LinkReimbursementDto, ReimbursementResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
+import { exactCents, fromCents, toCents } from '../money.util';
+import { PracticeTenantLookupService } from '../../practice/services';
+import { activeTenantId, assertDocumentInTenant } from '../billing-scope';
+
+/** "No existe" de la factura del reembolso; la ajena responde idéntico. */
+const INVOICE_NOT_FOUND = {
+  message: 'Factura no encontrada',
+  reason: BillingErrorReason.REIMBURSEMENT_INVOICE_NOT_FOUND,
+};
 
 /**
  * UC-17-08: vincula el reembolso de un reclamo de seguro a la factura del paciente.
@@ -39,6 +47,7 @@ export class ReimbursementsService {
     private readonly reimbursementsRepo: ReimbursementsRepository,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReimbursementsService.name);
@@ -65,7 +74,26 @@ export class ReimbursementsService {
       },
       'Linking claim reimbursement',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
+      // La factura se acota al tenant antes que el conflicto del reclamo: si no,
+      // el 409 delataría a un tercero que ese reclamo ya está vinculado.
+      const invoice = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.invoicesRepo.findById(tx, dto.invoiceId),
+        tenantId,
+        INVOICE_NOT_FOUND,
+      );
+
+      const amountCents = exactCents(dto.amount);
+      if (amountCents === null || amountCents <= 0) {
+        throw new PreconditionFailedException(
+          'El monto del reembolso debe ser positivo',
+          undefined,
+          BillingErrorReason.REIMBURSEMENT_AMOUNT_NOT_POSITIVE,
+        );
+      }
+
       const existing = await this.reimbursementsRepo.findByClaim(
         tx,
         dto.claimId,
@@ -78,16 +106,6 @@ export class ReimbursementsService {
         );
       }
 
-      const invoice = await this.invoicesRepo.findById(tx, dto.invoiceId);
-      if (!invoice)
-        throw new ResourceNotFoundException(
-          'Factura no encontrada',
-          {
-            invoiceId: dto.invoiceId,
-          },
-          BillingErrorReason.REIMBURSEMENT_INVOICE_NOT_FOUND,
-        );
-
       const reimbursement = this.reimbursementsRepo.create(tx, {
         claimId: dto.claimId,
         amount: dto.amount,
@@ -98,7 +116,6 @@ export class ReimbursementsService {
       await tx.flush();
 
       const balanceCents = toCents(invoice.balance ?? '0');
-      const amountCents = toCents(dto.amount);
       const newPaidCents = toCents(invoice.paidTotal ?? '0') + amountCents;
       const newBalanceCents = Math.max(0, balanceCents - amountCents);
       invoice.paidTotal = fromCents(newPaidCents);
@@ -107,15 +124,13 @@ export class ReimbursementsService {
         newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_PARTIALLY_PAID;
       touch(invoice, actor.id);
 
-      if (dto.tenantId) {
-        this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
-          relationTypeConceptId: BILL.REL_REIMBURSEMENT_OF,
-          invoiceId: invoice.id,
-          claimId: dto.claimId,
-          actorUserId: actor.id,
-        });
-      }
+      this.linksRepo.create(tx, {
+        tenantId,
+        relationTypeConceptId: BILL.REL_REIMBURSEMENT_OF,
+        invoiceId: invoice.id,
+        claimId: dto.claimId,
+        actorUserId: actor.id,
+      });
 
       this.logger.info(
         {

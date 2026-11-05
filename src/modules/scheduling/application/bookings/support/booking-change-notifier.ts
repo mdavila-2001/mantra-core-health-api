@@ -11,6 +11,8 @@ import {
 import type { BookingActorKind } from '../../../domain/booking/booking-transition';
 import {
   bookingChangeNotice,
+  receiptReviewedNotice,
+  receiptUploadedNotice,
   requestNoticeForPatient,
   requestNoticeForPractitioner,
   type BookingChange,
@@ -21,8 +23,10 @@ import { PinoLogger } from 'nestjs-pino';
 import { SchedulingNoticeRepository } from '../../../infrastructure/repositories';
 
 /**
- * Los avisos que siguen a un cambio de la cita (P8). Corren **después** de que
- * la transacción cerró y no lanzan: un canal caído no deshace una reserva.
+ * Notices that follow a booking change (P8). They run after the use case's own
+ * transaction (a savepoint under the request transaction when RLS is enforced,
+ * so the request transaction is still open) and do not throw: a down channel
+ * does not undo a booking.
  */
 
 @Injectable()
@@ -68,13 +72,15 @@ export class BookingChangeNotifier {
    *
    * ## Por qué no lanza
    *
-   * Igual que {@link notifyChange}: corre después de que la transacción cerró.
-   * Un fallo del canal se registra y se descarta; la reserva ya existe.
+   * Igual que {@link notifyChange}: corre después de la transacción del caso de
+   * uso, dentro de la de la petición (el fork la conserva para leer la cita
+   * recién escrita bajo RLS). Un fallo del canal se registra y se descarta; la
+   * reserva ya existe.
    *
    * @param bookingId - La cita recién solicitada.
    */
   async notifyRequest(bookingId: string): Promise<void> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
@@ -123,8 +129,9 @@ export class BookingChangeNotifier {
    *
    * ## Por qué no lanza
    *
-   * Porque se invoca **después** de que la transacción cerró y el estado ya es
-   * el nuevo. Un fallo del canal se registra y se descarta: la regla del README
+   * Porque se invoca **después** de la transacción del caso de uso, con el
+   * estado ya nuevo y la transacción de la petición todavía abierta (el fork la
+   * conserva, por RLS). Un fallo del canal se registra y se descarta: la regla del README
    * es que emitir jamás rompa una reserva. Ver `ports/agenda-notice.port.ts`.
    */
   async notifyChange(
@@ -133,7 +140,7 @@ export class BookingChangeNotifier {
     reason: string | undefined,
     actorKind: BookingActorKind,
   ): Promise<void> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
@@ -162,5 +169,106 @@ export class BookingChangeNotifier {
           : { patientProfileId: booking.patientProfileId },
       ),
     );
+  }
+
+  /**
+   * Avisa al médico de la agenda que el paciente subió un comprobante.
+   *
+   * Corre después de la transacción y no lanza: un canal caído no deshace la
+   * subida. Un recurso sin profesional —una sala— no tiene a quién avisarle.
+   *
+   * @param bookingId - La cita del comprobante.
+   * @param receiptId - El comprobante subido.
+   */
+  async notifyReceiptUploaded(
+    bookingId: string,
+    receiptId: string,
+  ): Promise<void> {
+    await this.safely(
+      'scheduling.notice.payment-receipt-uploaded',
+      bookingId,
+      () =>
+        this.inSavepoint(async (em) => {
+          const booking = await this.noticeRepo.describeBooking(em, bookingId);
+          if (!booking) return;
+          const practitioner = await this.noticeRepo.findResourceAccount(
+            em,
+            booking.resourceId,
+          );
+          if (practitioner === null) return;
+          const patient = await this.noticeRepo.findDisplayNameForProfile(
+            em,
+            booking.patientProfileId,
+          );
+          await this.notices.emit(
+            receiptUploadedNotice(
+              booking,
+              patient ?? undefined,
+              practitioner,
+              receiptId,
+            ),
+          );
+        }),
+    );
+  }
+
+  /**
+   * Avisa al paciente que su comprobante se confirmó o se rechazó, con el
+   * motivo si se rechazó. Corre después de la transacción y no lanza.
+   *
+   * @param bookingId - La cita del comprobante.
+   * @param receiptId - El comprobante revisado.
+   * @param confirmed - `true` si se confirmó.
+   * @param reason - El motivo del rechazo.
+   */
+  async notifyReceiptReviewed(
+    bookingId: string,
+    receiptId: string,
+    confirmed: boolean,
+    reason?: string,
+  ): Promise<void> {
+    await this.safely(
+      'scheduling.notice.payment-receipt-reviewed',
+      bookingId,
+      () =>
+        this.inSavepoint(async (em) => {
+          const booking = await this.noticeRepo.describeBooking(em, bookingId);
+          if (!booking) return;
+          await this.notices.emit(
+            receiptReviewedNotice(booking, receiptId, confirmed, reason),
+          );
+        }),
+    );
+  }
+
+  /**
+   * Runs the reads of a notice inside a savepoint of the request transaction
+   * (or a transaction of its own when there is none). If the notice fails, the
+   * savepoint rolls back and the request transaction stays healthy; the caller
+   * (`safely`) swallows the error outside it.
+   */
+  private inSavepoint(work: (em: EntityManager) => Promise<void>) {
+    return this.em
+      .fork({ keepTransactionContext: true })
+      .transactional((tx) => work(tx));
+  }
+
+  /**
+   * Corre un aviso sin dejar que su fallo suba: la operación que lo originó ya
+   * se confirmó, y un aviso que no sale no puede volverla un error.
+   */
+  private async safely(
+    operation: string,
+    bookingId: string,
+    send: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await send();
+    } catch (error: unknown) {
+      this.logger.warn(
+        { operation, bookingId, err: error },
+        'No se pudo emitir el aviso del comprobante',
+      );
+    }
   }
 }

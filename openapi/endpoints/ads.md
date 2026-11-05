@@ -203,6 +203,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LaunchCampaignResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LaunchCampaignResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LaunchCampaignResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LaunchCampaignResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LaunchCampaignResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -394,6 +395,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExperimentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExperimentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExperimentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExperimentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExperimentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -540,6 +542,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AdInvoiceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AdInvoiceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AdInvoiceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdInvoiceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdInvoiceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -705,6 +708,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TargetingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TargetingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TargetingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TargetingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TargetingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -852,6 +856,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BudgetScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BudgetScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BudgetScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BudgetScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BudgetScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -990,6 +995,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssignIdentityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssignIdentityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssignIdentityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssignIdentityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignIdentityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1137,6 +1143,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReviewEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReviewEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReviewEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1276,6 +1283,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluateRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluateRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1433,6 +1441,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AdAccountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AdAccountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AdAccountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdAccountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdAccountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1583,6 +1592,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PartnerLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PartnerLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PartnerLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PartnerLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartnerLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1748,6 +1758,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FeedRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FeedRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FeedRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FeedRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1931,6 +1942,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SendConversionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SendConversionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SendConversionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SendConversionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SendConversionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2104,6 +2116,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EventPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EventPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EventPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EventPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EventPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2280,6 +2293,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IngestInsightsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IngestInsightsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IngestInsightsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IngestInsightsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IngestInsightsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2445,6 +2459,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LeadSubmissionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LeadSubmissionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LeadSubmissionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LeadSubmissionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LeadSubmissionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2610,6 +2625,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OfflineUploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OfflineUploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OfflineUploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OfflineUploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OfflineUploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2778,6 +2794,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PlatformConnectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PlatformConnectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PlatformConnectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PlatformConnectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PlatformConnectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2913,6 +2930,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AppealResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AppealResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AppealResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AppealResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AppealResponseDto`. Ejemplo completo derivado de ese DTO:
 

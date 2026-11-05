@@ -41,7 +41,36 @@ export const IVD_RISK_CLASS = /^(eu-ivdr|eu-ivdd):|^au:.*\bIVD\b/;
 export const DIAGNOSTIC_SCOPE_SOURCES = Object.freeze({
   'cdc-livd-sars-cov-2':
     'https://www.cdc.gov/locs/2020/new_livd_test_code_mappings_for_sars-cov-2_test_results.html',
+  // OMS: lista de IVD precalificados («Prequalified in vitro diagnostics»).
+  'who-pq-ivd':
+    'https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics',
+  // SAHPRA: listas de kits de prueba de COVID-19 autorizados.
+  'sahpra-covid-ivd':
+    'https://www.sahpra.org.za/medical-devices/medical-devices-and-in-vitro-diagnostics-test-kits/',
 });
+
+/**
+ * Campos del registro con que el regulador separa IVD de los demás
+ * dispositivos (verbatim en `extra`, ver el SOURCES.md de `row/`):
+ *  - CDSCO publica dos listas, «Medical Device» e «In Vitro Diagnostic»
+ *    (`categval` 1/2 de List of Approved Devices) → `extra.cdscoCategory`.
+ *  - NMPA, base UDI: `qxlb` (器械类别) = 体外诊断试剂, el término del
+ *    体外诊断试剂注册与备案管理办法.
+ */
+export const IVD_RECORD_FLAGS = Object.freeze([
+  {
+    sources: ['cdsco-approved-devices'],
+    field: 'cdscoCategory',
+    values: ['ivd'],
+    url: 'https://cdscomdonline.gov.in/NewMedDev/ListOfApprovedDevices',
+  },
+  {
+    sources: ['nmpa-udi'],
+    field: 'qxlb',
+    values: ['体外诊断试剂'],
+    url: 'https://udi.nmpa.gov.cn/download.html',
+  },
+]);
 
 /**
  * Tipos de licencia de un registro que el regulador define solo para IVD.
@@ -53,6 +82,57 @@ export const IVD_LICENCE_TYPES = Object.freeze({
   'hc-mdall': {
     values: ['Test Kit'],
     url: 'https://www.canada.ca/en/health-canada/services/drugs-health-products/medical-devices/application-information/guidance-documents/guidance-determining-medical-device-application-type/application-type-ivdd.html',
+  },
+});
+
+/**
+ * Áreas de interés con que ANVISA tramita un registro (`DESC_AREA_INTERESSE`
+ * de los archivos `CICLO_ANALISE_PETICOES_*` de https://dados.anvisa.gov.br/dados/,
+ * unidas por número de proceso en `extra.anvisaPetitions.areas`). Solo cuando
+ * todas las áreas del proceso son de diagnóstico in vitro; si se mezcla con
+ * «Dispositivos Médicos» o «Correlatos» queda sin decisión.
+ */
+export const IVD_INTEREST_AREAS = Object.freeze({
+  sources: ['anvisa-produtos', 'anvisa-produtos-modelos'],
+  values: [
+    'Dispositivos Médicos para Diagnóstico in Vitro',
+    'Produtos para diagnóstico de uso in vitro',
+  ],
+  url: 'https://dados.anvisa.gov.br/dados/',
+});
+
+/**
+ * Sistemas que son niveles o versiones de una misma clasificación del mismo
+ * regulador: que una fila declare los dos no es un mapeo entre nomenclaturas.
+ * TFDA: la categoría (A–P, o el código de 4 dígitos) y el código de
+ * clasificación (`A.1345`) son de la misma clasificación del 醫療器材分類分級管理辦法.
+ */
+export const NOMENCLATURE_FAMILY = Object.freeze({
+  'tw:tfda-category': 'tw:tfda',
+  'tw:tfda-classification': 'tw:tfda',
+});
+const familyOf = (system) => NOMENCLATURE_FAMILY[system] ?? system;
+
+/**
+ * Nomenclaturas nacionales con una categoría publicada como IVD. CND italiana
+ * (Ministero della Salute, dataset «Classificazione nazionale dei dispositivi
+ * medici (CND)», IODL 2.0): la categoría W se titula «DISPOSITIVI
+ * MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», la transposición de la
+ * directiva IVD 98/79/CE.
+ */
+export const IVD_CATEGORY = Object.freeze({
+  // INVIMA: el grupo del registro sanitario (sin código publicado) separa los
+  // reactivos de diagnóstico in vitro de los médico-quirúrgicos y odontológicos.
+  'co:invima-grupo': {
+    names: ['REACTIVO DIAGNOSTICO', 'REACTIVOS  IN VITRO'],
+    basis: 'invima-grupo-ivd',
+    url: 'https://www.datos.gov.co/d/y4qt-w6tk',
+  },
+  cnd: {
+    prefix: 'W',
+    basis: 'cnd-category-w',
+    title: 'DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)',
+    url: 'https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/',
   },
 });
 
@@ -154,15 +234,22 @@ export class Taxonomy {
       } else if (t.system === 'emdn' && t.code) {
         this.addEmdn(t.code, t.name, prov);
       } else if (!existing) {
+        const cat = IVD_CATEGORY[t.system];
+        const ivd =
+          cat &&
+          ((cat.prefix && t.code?.startsWith(cat.prefix)) ||
+            (cat.names && cat.names.includes(t.name?.trim())))
+            ? cat
+            : null;
         this.addNode({
           system: t.system,
           code: t.code,
           name: t.name,
           definition: t.definition,
           parent: null,
-          diagnostic: null,
-          branch: null,
-          basis: null,
+          diagnostic: ivd ? true : null,
+          branch: ivd ? 'ivd' : null,
+          basis: ivd ? ivd.basis : null,
           attributes: {},
           provenance: prov,
         });
@@ -180,7 +267,8 @@ export class Taxonomy {
     // Mapeo publicado: la misma fila declara varios tipos.
     for (let i = 0; i < keys.length; i++) {
       for (let j = 0; j < keys.length; j++) {
-        if (i === j || types[i].system === types[j].system) continue;
+        if (i === j || familyOf(types[i].system) === familyOf(types[j].system))
+          continue;
         const k = `${keys[i]}→${keys[j]}`;
         const cw = this.crosswalks.get(k) ?? {
           from: keys[i],
@@ -310,6 +398,30 @@ export class Taxonomy {
         types: [
           ...nodes.map((n) => n.key),
           `ivd-licence-type|${row.source}:${row.extra.licenceType}`,
+        ],
+      };
+    const areas = row.extra?.anvisaPetitions?.areas;
+    if (
+      IVD_INTEREST_AREAS.sources.includes(row.source) &&
+      Array.isArray(areas) &&
+      areas.length &&
+      areas.every((a) => IVD_INTEREST_AREAS.values.includes(a))
+    )
+      return {
+        diagnostic: true,
+        types: [...nodes.map((n) => n.key), `ivd-interest-area|${row.source}`],
+      };
+    const flag = IVD_RECORD_FLAGS.find(
+      (f) =>
+        f.sources.includes(row.source) &&
+        f.values.includes(row.extra?.[f.field]),
+    );
+    if (flag)
+      return {
+        diagnostic: true,
+        types: [
+          ...nodes.map((n) => n.key),
+          `ivd-record-flag|${row.source}:${flag.field}`,
         ],
       };
     if (DIAGNOSTIC_SCOPE_SOURCES[row.source])

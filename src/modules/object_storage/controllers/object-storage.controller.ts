@@ -13,7 +13,12 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   ObjectStorageService,
   DicomCatalogService,
@@ -70,6 +75,11 @@ export class ObjectStorageController {
   ) {}
 
   /** UC-60-01. */
+  @Audited({
+    action: 'MULTIPART_UPLOAD_INITIATED',
+    entity: 'multipart_upload',
+    entityId: 'result.id',
+  })
   @Post('namespaces/:code/uploads/initiate')
   @Roles('STORAGE_CLIENT', 'SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -86,6 +96,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-02. */
+  @Audited({
+    action: 'MULTIPART_UPLOAD_COMPLETED',
+    entity: 'multipart_upload',
+    entityId: 'param:id',
+  })
   @Post('uploads/:id/complete')
   @Roles('STORAGE_CLIENT', 'SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -101,6 +116,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-03. */
+  @Audited({
+    action: 'OBJECT_VERSION_CREATED',
+    entity: 'object_version',
+    entityId: 'result.id',
+  })
   @Post('objects/:manifestId/versions')
   @Roles('SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -116,6 +136,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-04. */
+  @Audited({
+    action: 'DICOM_STUDY_CATALOGUED',
+    entity: 'dicom_study_manifest',
+    entityId: 'result.id',
+  })
   @Post('dicom/studies/catalog')
   @Roles('PACS_GATEWAY', 'SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -131,6 +156,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-06. */
+  @Audited({
+    action: 'LARGE_PAYLOAD_REGISTERED',
+    entity: 'large_payload_manifest',
+    entityId: 'result.id',
+  })
   @Post('large-payloads')
   @Roles('SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -145,6 +175,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-07. */
+  @Audited({
+    action: 'OBJECT_RETENTION_LOCK_APPLIED',
+    entity: 'object_retention_lock',
+    entityId: 'result.id',
+  })
   @Post('versions/:versionId/retention-lock')
   @Roles('COMPLIANCE_OFFICER', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -161,6 +196,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-08. */
+  @Audited({
+    action: 'OBJECT_LEGAL_HOLD_PLACED',
+    entity: 'object_legal_hold',
+    entityId: 'result.id',
+  })
   @Post('versions/:versionId/legal-holds')
   @Roles('LEGAL_COUNSEL', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -177,6 +217,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-08. */
+  @Audited({
+    action: 'OBJECT_LEGAL_HOLD_RELEASED',
+    entity: 'object_legal_hold',
+    entityId: 'param:holdId',
+  })
   @Delete('versions/:versionId/legal-holds/:holdId')
   @Roles('LEGAL_COUNSEL', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -194,6 +239,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-09. */
+  @Audited({
+    action: 'OBJECT_ACCESS_ISSUED',
+    entity: 'object_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/signed-url')
   @Roles('DICOM_VIEWER', 'CLINICIAN', 'SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -246,6 +296,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-10. */
+  @Audited({
+    action: 'OBJECT_INTEGRITY_CHECK_RECORDED',
+    entity: 'object_integrity_check',
+    entityId: 'result.id',
+  })
   @Post('versions/:versionId/integrity-checks')
   @Roles('SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -262,6 +317,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-11. */
+  @Audited({
+    action: 'ARCHIVE_MANIFEST_BUILT',
+    entity: 'archive_manifest',
+    entityId: 'result.id',
+  })
   @Post('archive-jobs/build')
   @Roles('SYSTEM', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -276,6 +336,11 @@ export class ObjectStorageController {
   }
 
   /** UC-60-12. */
+  @Audited({
+    action: 'OBJECT_DELETION_REQUESTED',
+    entity: 'object_deletion_marker',
+    entityId: 'result.id',
+  })
   @Post('objects/:manifestId/request-deletion')
   @Roles('COMPLIANCE_OFFICER', 'STORAGE_ADMIN')
   @HttpCode(HttpStatus.CREATED)

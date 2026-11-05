@@ -4,7 +4,9 @@ import { PinoLogger } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
 import {
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -36,6 +38,7 @@ import {
   type IdentityAuthorityEndpoints,
   type IdentityVerificationCases,
 } from '../entities';
+import { IdentityCaseScope } from './identity-case-scope.service';
 import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
 
 const MS_PER_HOUR = 3_600_000;
@@ -65,6 +68,8 @@ const APPROVABLE_CASE_STATES = [
 
 /** Tamaño del lote que el worker atiende por tick. */
 const DEFAULT_DISPATCH_BATCH = 50;
+/** Páginas de la cola que `listDispatchable` recorre buscando checks del tenant. */
+const MAX_DISPATCH_SCAN_PAGES = 20;
 
 /**
  * Qué necesita el worker para despachar cada tipo de check: el código que
@@ -123,6 +128,7 @@ export class IdentityChecksService {
    * @param assertionsRepo - Valor de assertions repo requerido por la operación.
    * @param authorityEndpointsRepo - Resuelve qué autoridad completó el check.
    * @param effects - Valor de effects requerido por la operación.
+   * @param scope - Alcance por tenant de los casos a los que pertenecen los checks.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -134,6 +140,7 @@ export class IdentityChecksService {
     private readonly assertionsRepo: IdentityAssertionsRepository,
     private readonly authorityEndpointsRepo: IdentityAuthorityEndpointsRepository,
     private readonly effects: IdentityVerificationEffectsService,
+    private readonly scope: IdentityCaseScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityChecksService.name);
@@ -147,18 +154,46 @@ export class IdentityChecksService {
    * autoridad que le toca, para que el worker no tenga que conocer el catálogo
    * de conceptos ni la tabla de autoridades.
    *
+   * El rol `SYSTEM` (el worker) ve los de todos los tenants; cualquier otro
+   * actor sólo los checks de casos de su tenant activo.
+   *
+   * @param actor - Quién consulta.
    * @param limit - Tamaño máximo del lote.
    * @returns Los checks a atender en este tick.
    */
   async listDispatchable(
+    actor: AuthenticatedUser,
     limit?: number,
   ): Promise<DispatchableChecksResponseDto> {
+    const tenantId = this.activeTenantFor(actor);
     const em = this.em.fork();
-    const checks = await this.checksRepo.findDispatchable(
-      em,
-      [IDA.CHECK_PENDING, IDA.CHECK_IN_PROGRESS],
-      limit ?? DEFAULT_DISPATCH_BATCH,
-    );
+    const batch = limit ?? DEFAULT_DISPATCH_BATCH;
+    const statuses = [IDA.CHECK_PENDING, IDA.CHECK_IN_PROGRESS];
+    let checks: IdentityChecks[];
+    if (!tenantId) {
+      checks = await this.checksRepo.findDispatchable(em, statuses, batch);
+    } else {
+      // `identity_checks` no tiene `tenant_id`: el filtro por tenant va después
+      // de leer. Si se leyera sólo el primer lote, los checks de otros tenants
+      // más antiguos lo llenarían y el actor recibiría menos de los que tiene.
+      // Se recorre la cola por páginas hasta reunir un lote propio o agotarla.
+      checks = [];
+      for (
+        let page = 0;
+        page < MAX_DISPATCH_SCAN_PAGES && checks.length < batch;
+        page += 1
+      ) {
+        const rows = await this.checksRepo.findDispatchable(
+          em,
+          statuses,
+          batch,
+          page * batch,
+        );
+        checks.push(...(await this.filterChecksToTenant(em, rows, tenantId)));
+        if (rows.length < batch) break;
+      }
+      checks = checks.slice(0, batch);
+    }
 
     const dispatchable: DispatchableCheckDto[] = [];
     for (const check of checks) {
@@ -199,7 +234,7 @@ export class IdentityChecksService {
       'Recording attempt',
     );
     return this.em.transactional(async (tx) => {
-      const check = await this.loadCheck(tx, checkId);
+      const check = await this.loadCheck(tx, checkId, actor);
 
       const outcome: AttemptOutcome = dto.outcome ?? 'SUCCESS';
       const now = new Date();
@@ -247,7 +282,7 @@ export class IdentityChecksService {
       'Recording result',
     );
     return this.em.transactional(async (tx) => {
-      const check = await this.loadCheck(tx, checkId);
+      const check = await this.loadCheck(tx, checkId, actor);
       // El veredicto es lo que cierra la conversación con la autoridad: el
       // intento que quedó esperándolo se completa acá, antes de exigirlo.
       await this.completeInFlightAttempt(tx, check.identityVerificationCaseId);
@@ -564,19 +599,75 @@ export class IdentityChecksService {
   }
 
   /**
-   * Obtiene load check.
+   * Tenant al que se acota la operación: ninguno para el rol `SYSTEM` (el
+   * worker opera entre tenants), el activo del request para cualquier otro.
+   *
+   * @param actor - Quién opera.
+   * @returns El tenant activo, o `undefined` para `SYSTEM`.
+   * @throws PreconditionFailedException si un actor no `SYSTEM` no tiene tenant.
+   */
+  private activeTenantFor(actor: AuthenticatedUser): string | undefined {
+    return roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
+      ? undefined
+      : requireTenantId();
+  }
+
+  /**
+   * Deja sólo los checks cuyo caso pertenece al tenant, en el mismo orden.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param checks - Checks candidatos.
+   * @param tenantId - Tenant activo.
+   * @returns Los checks de casos del tenant.
+   */
+  private async filterChecksToTenant(
+    tx: EntityManager,
+    checks: readonly IdentityChecks[],
+    tenantId: string,
+  ): Promise<IdentityChecks[]> {
+    const cases: IdentityVerificationCases[] = [];
+    for (const caseId of new Set(
+      checks.map((check) => check.identityVerificationCaseId),
+    )) {
+      const kase = await this.casesRepo.findById(tx, caseId);
+      if (kase) cases.push(kase);
+    }
+    const owned = new Set(
+      (await this.scope.filterToTenant(tx, cases, tenantId)).map((k) => k.id),
+    );
+    return checks.filter((check) =>
+      owned.has(check.identityVerificationCaseId),
+    );
+  }
+
+  /**
+   * Carga un check por UUID. `identity_checks` no tiene `tenant_id`: su tenant
+   * es el de su caso, así que para todo actor que no sea `SYSTEM` el caso tiene
+   * que pertenecer al tenant activo. Un check ajeno responde igual que uno
+   * inexistente.
    *
    * @param tx - Contexto de persistencia o transacción activa.
    * @param checkId - Identificador de check.
-   * @returns Resultado de load check conforme al contrato `Promise<IdentityChecks>`.
-   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   * @param actor - Quién opera.
+   * @returns El check, acotado al tenant del actor.
+   * @throws ResourceNotFoundException si no existe o es de otro tenant.
    */
   private async loadCheck(
     tx: EntityManager,
     checkId: string,
+    actor: AuthenticatedUser,
   ): Promise<IdentityChecks> {
+    const tenantId = this.activeTenantFor(actor);
     const check = await this.checksRepo.findById(tx, checkId);
-    if (!check)
+    const owned =
+      check &&
+      (!tenantId ||
+        (await this.scope.findAuthorizedCase(
+          tx,
+          check.identityVerificationCaseId,
+          tenantId,
+        )));
+    if (!check || !owned)
       throw new ResourceNotFoundException('Check de identidad no encontrado', {
         checkId,
       });

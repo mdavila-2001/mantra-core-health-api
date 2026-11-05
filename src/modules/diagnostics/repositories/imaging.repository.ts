@@ -142,6 +142,15 @@ export class ImagingRepository {
     return em.findOne(ImagingStudies, { id });
   }
 
+  /** Serie de un estudio, o `null` si no existe o es de otro estudio. */
+  findSeriesInStudy(
+    em: EntityManager,
+    imagingStudyId: string,
+    id: string,
+  ): Promise<ImagingSeries | null> {
+    return em.findOne(ImagingSeries, { id, imagingStudyId });
+  }
+
   /**
    * Obtiene find study by uid.
    *

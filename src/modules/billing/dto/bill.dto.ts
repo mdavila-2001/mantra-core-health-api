@@ -4,13 +4,19 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
-  IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { MONEY_PATTERN, QUANTITY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
+const QUANTITY_MESSAGE =
+  'debe ser una cantidad decimal no negativa con hasta 4 decimales';
 
 /** Línea de factura de proveedor con evidencia de three-way match (UC-17-04). */
 export class BillLineInputDto {
@@ -27,14 +33,14 @@ export class BillLineInputDto {
    * Valor de quantity mantenido por la instancia.
    */
   @ApiProperty({ description: 'Cantidad', example: '1' })
-  @IsNumberString()
+  @Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })
   quantity!: string;
 
   /**
    * Valor de unit price mantenido por la instancia.
    */
   @ApiProperty({ description: 'Precio unitario', example: '100.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   unitPrice!: string;
 
   /**
@@ -45,7 +51,7 @@ export class BillLineInputDto {
     example: '0.00',
   })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   taxAmount?: string;
 
   /**

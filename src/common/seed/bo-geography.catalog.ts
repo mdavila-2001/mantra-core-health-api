@@ -176,6 +176,37 @@ export const BO_DEPARTMENT_BY_INE_PREFIX: ReadonlyMap<string, string> = new Map(
   ]),
 );
 
+/** Prefijo del código de concepto de un municipio por INE (`geo:bo:municipality:070101`). */
+const MUNICIPALITY_INE_CODE_PREFIX = 'geo:bo:municipality:';
+
+/**
+ * La sigla del departamento del que cuelga un municipio, a partir de su código.
+ *
+ * Hay **dos** formas de código de municipio sembradas, según quién sembró la base:
+ *
+ * - `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`), la del generador del
+ *   modelo;
+ * - `geo:bo:municipality:<INE>` (`geo:bo:municipality:070101`), la del catálogo
+ *   estático de este archivo, que siembra la propia API
+ *   (`BoGeographySeedService`); sus dos primeros dígitos son el departamento.
+ *
+ * Se aceptan las dos porque aceptar una sola deja sin departamento (en silencio)
+ * a toda dirección escrita sobre una base sembrada por la otra.
+ *
+ * @param code - `catalog_concepts.code` del municipio.
+ * @returns La sigla (`SC`), o `undefined` si el código no sigue ninguna de las dos formas.
+ */
+export function departmentSiglaOfMunicipalityCode(
+  code: string,
+): string | undefined {
+  const sigla = code.match(/^([A-Z]{2})-/)?.[1];
+  if (sigla) return sigla;
+  const ine = code.startsWith(MUNICIPALITY_INE_CODE_PREFIX)
+    ? code.slice(MUNICIPALITY_INE_CODE_PREFIX.length).match(/^(\d{2})\d{4}$/)
+    : null;
+  return ine ? BO_DEPARTMENT_BY_INE_PREFIX.get(ine[1]) : undefined;
+}
+
 /**
  * Los 340 municipios del país, en el orden del INE — que agrupa por
  * departamento y, dentro de cada uno, por provincia.

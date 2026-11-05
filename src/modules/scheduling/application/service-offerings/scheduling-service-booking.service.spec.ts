@@ -323,6 +323,32 @@ describe('SchedulingServiceBookingService', () => {
         inactiveCatalog.service.availability(query, patient),
       ).rejects.toThrow(/Servicio no encontrado/);
     });
+
+    // `SUPERADMIN` acotado a un tenant (`scopedRoles`, MCH-001) no ve sedes de
+    // otra organización; sí las de la suya; el global, todas (#1241).
+    it('SUPERADMIN acotado a A no ve la sede de B; acotado a B, sí', async () => {
+      const scopedTo = (tenantId: string) =>
+        ({
+          id: 'admin-a',
+          roles: ['SUPERADMIN'],
+          scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+          tenantIds: [],
+        }) as any;
+
+      const d = build();
+      d.offeringsRepo.findResourcesOfProfessional.mockResolvedValue([
+        site({ tenantId: 'other-tenant' }),
+      ]);
+      await d.service.availability(query, scopedTo(TENANT));
+      expect(d.agenda.bandsOfServices.mock.calls[0][2]).toEqual([]);
+
+      const d2 = build();
+      d2.offeringsRepo.findResourcesOfProfessional.mockResolvedValue([
+        site({ tenantId: 'other-tenant' }),
+      ]);
+      await d2.service.availability(query, scopedTo('other-tenant'));
+      expect(d2.agenda.bandsOfServices.mock.calls[0][2]).toHaveLength(1);
+    });
   });
 
   describe('placeHold', () => {
@@ -565,6 +591,21 @@ describe('SchedulingServiceBookingService', () => {
           d.service.placeHold(OFFERING, dto, patient),
         ),
       ).resolves.toMatchObject({ bookableSlotId: 'slot-nuevo' });
+    });
+
+    it('403 si la sede es de otra organización y el SUPERADMIN está acotado a la suya', async () => {
+      const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue(
+        site({ tenantId: 'otro-tenant' }),
+      );
+
+      await expect(
+        d.service.placeHold(OFFERING, dto, {
+          ...patient,
+          roles: ['PATIENT', 'SUPERADMIN'],
+          scopedRoles: { [TENANT]: ['SUPERADMIN'] },
+        } as any),
+      ).rejects.toThrow(/otra organización/);
     });
   });
 });

@@ -9,7 +9,7 @@
 # Módulo `iam`
 
 **Fuente:** [`src/modules/iam/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/iam/README.md)
-· 3 controllers · 15 services · 13 repositories · 14 entidades · 24 DTO
+· 4 controllers · 16 services · 13 repositories · 14 entidades · 24 DTO
 
 ---
 
@@ -54,7 +54,8 @@ Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, 
 | `POST /iam/auth/logout` | sesión | `iam-auth` |
 | `POST /iam/auth/logout-all` | sesión | `iam-auth` |
 | `POST /iam/auth/sessions/purge` | SECURITY_ADMIN | `iam-auth` |
-| `GET /iam/users` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users` (obsoleto: usar `POST /iam/users/search`) | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/search` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/credentials` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/devices` | SECURITY_ADMIN | `iam-users` |
@@ -144,6 +145,30 @@ credentials (`method = FEDERATED`) keyed by `(user, identityProvider, externalSu
 - **Anonymization (UC-01-12)**: set `USER_ANONYMIZED`, blank the display name,
   revoke credentials, sessions, refresh tokens and roles.
 - Every mutating operation records a `security_events` row.
+
+### Borradores de alta (`/iam/onboarding-drafts`)
+
+Rutas públicas (el alta ocurre antes de tener cuenta) que guardan el avance del
+formulario en la memoria del proceso (`IamOnboardingDraftsService`).
+
+- **Acceso por secreto.** El primer `PUT` crea el borrador y devuelve una sola vez
+  `draftSecret` (256 bits aleatorios; el servidor guarda su SHA-256). `GET`, `PUT` y
+  `DELETE` lo exigen en la cabecera `X-Onboarding-Draft-Secret`, comparado en tiempo
+  constante. Secreto ausente o erróneo, borrador inexistente, vencido o id mal formado
+  responden el mismo 404.
+- **Vigencia.** Un borrador nuevo vive 1 hora. Sólo una segunda escritura con el
+  secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a
+  30 días. Un barrido cada 10 minutos libera los vencidos.
+- **Topes.** 64 KiB por borrador; 2000 borradores en el proceso; 25 por origen (IPv4
+  por dirección, IPv6 por prefijo /64) y 100 por prefijo agregado (/48 en IPv6).
+  Con el almacén lleno, un origen sólo desaloja su propio borrador no confirmado más
+  antiguo; nunca el de otro origen. Si no tiene ninguno, 503 con `Retry-After`.
+- **Límite que no cubre el código.** El almacén es por proceso (con más de una
+  instancia, el borrador sólo existe en la que lo recibió) y un atacante con muchos
+  prefijos distintos (botnet) todavía puede agotar el cupo global y dejar sin alta a
+  quien llegue después. La mitigación de fondo es limitar la tasa en el borde
+  (gateway o WAF) y mover el almacén a Redis cuando haya más de una instancia
+  (ver #875).
 
 ## Permissions
 

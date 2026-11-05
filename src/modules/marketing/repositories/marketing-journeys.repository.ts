@@ -8,6 +8,7 @@ import {
   TrackedLinks,
   MarketingTouchpoints,
   AttributionTouches,
+  MarketingCampaigns,
 } from '../entities';
 import { createdBy } from '../../../common';
 
@@ -293,30 +294,37 @@ export class MarketingJourneysRepository {
   }
 
   /**
-   * Obtiene find journey by id.
+   * Obtiene un journey del tenant activo; uno ajeno cuenta como inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
    * @param id - Identificador de id.
    * @returns Resultado de find journey by id conforme al contrato `Promise<Journeys | null>`.
    */
-  findJourneyById(em: EntityManager, id: string): Promise<Journeys | null> {
-    return em.findOne(Journeys, { id });
+  findJourneyById(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<Journeys | null> {
+    return em.findOne(Journeys, { id, tenantId });
   }
 
   /**
-   * Obtiene find journey for update.
+   * Obtiene el journey del tenant activo, bloqueado para actualizar.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
    * @param id - Identificador de id.
    * @returns Resultado de find journey for update conforme al contrato `Promise<Journeys | null>`.
    */
   findJourneyForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<Journeys | null> {
     return em.findOne(
       Journeys,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -562,6 +570,79 @@ export class MarketingJourneysRepository {
         recordedByUserId: data.recordedByUserId,
       },
       { partial: true },
+    );
+  }
+
+  /** Enlace rastreable por id (sin tenant propio: el tenant sale de su campaña). */
+  findTrackedLinkById(
+    em: EntityManager,
+    id: string,
+  ): Promise<TrackedLinks | null> {
+    return em.findOne(TrackedLinks, { id });
+  }
+
+  /** Touchpoints por id, para resolver a qué tenant pertenecen. */
+  findTouchpointsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<MarketingTouchpoints[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(MarketingTouchpoints, { id: { $in: ids } });
+  }
+
+  /**
+   * Conserva sólo los touchpoints que pertenecen al tenant: los que cuelgan de
+   * una campaña o de un journey del tenant. La tabla no tiene `tenant_id`, y un
+   * touchpoint sin campaña ni journey no tiene dueño, así que queda fuera.
+   */
+  async keepTouchpointsOfTenant(
+    em: EntityManager,
+    tenantId: string,
+    touchpoints: MarketingTouchpoints[],
+  ): Promise<MarketingTouchpoints[]> {
+    const campaignIds = [
+      ...new Set(
+        touchpoints.flatMap((t) => (t.campaignId ? [t.campaignId] : [])),
+      ),
+    ];
+    const journeyIds = [
+      ...new Set(
+        touchpoints.flatMap((t) => (t.journeyId ? [t.journeyId] : [])),
+      ),
+    ];
+    // `campaign_id` de touchpoints y enlaces apunta a `ads.campaigns`; una
+    // campaña de marketing la referencia por `ad_campaign_ref_id`. Ambas
+    // identidades cuentan como propias si la campaña de marketing es del tenant.
+    const ownCampaigns = new Set<string>();
+    if (campaignIds.length > 0) {
+      const own = await em.find(MarketingCampaigns, {
+        tenantId,
+        $or: [
+          { id: { $in: campaignIds } },
+          { adCampaignRefId: { $in: campaignIds } },
+        ],
+      });
+      for (const campaign of own) {
+        ownCampaigns.add(campaign.id);
+        if (campaign.adCampaignRefId)
+          ownCampaigns.add(campaign.adCampaignRefId);
+      }
+    }
+    const ownJourneys = new Set(
+      journeyIds.length === 0
+        ? []
+        : (await em.find(Journeys, { id: { $in: journeyIds }, tenantId })).map(
+            (j) => j.id,
+          ),
+    );
+    return touchpoints.filter(
+      (t) =>
+        (t.campaignId !== undefined &&
+          t.campaignId !== null &&
+          ownCampaigns.has(t.campaignId)) ||
+        (t.journeyId !== undefined &&
+          t.journeyId !== null &&
+          ownJourneys.has(t.journeyId)),
     );
   }
 

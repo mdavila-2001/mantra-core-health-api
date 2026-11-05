@@ -20,25 +20,25 @@ export class PharmacovigilanceActions {
   /**
    * Reporte al que pertenece.
    */
-  @Property({ fieldName: 'pharmacovigilance_report_id', type: 'uuid' }) // FK → pharma_lab.pharmacovigilance_reports
+  @Property({ fieldName: 'pharmacovigilance_report_id', type: 'uuid' }) // FK → pharma_lab.pharmacovigilance_reports (inferida)
   pharmacovigilanceReportId!: string;
 
   /**
    * Naturaleza de la acción.
    */
-  @Property({ fieldName: 'action_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'action_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   actionConceptId!: string;
 
   /**
    * Estado del reporte antes de la acción.
    */
-  @Property({ fieldName: 'previous_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'previous_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   previousStatusConceptId!: string;
 
   /**
    * Estado del reporte después de la acción.
    */
-  @Property({ fieldName: 'new_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'new_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   newStatusConceptId!: string;
 
   /**
@@ -70,7 +70,7 @@ export class PharmacovigilanceActions {
   /**
    * Quién la ejecutó.
    */
-  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   actorUserId!: string;
 
   /**
@@ -88,6 +88,6 @@ export class PharmacovigilanceActions {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

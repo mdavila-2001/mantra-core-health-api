@@ -22,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  Audited,
   CurrentUser,
   type AuthenticatedUser,
   AccessLogged,
@@ -54,6 +55,10 @@ export class InsurancePortabilityController {
   constructor(private readonly service: InsurancePortabilityService) {}
 
   /** Arma, sella y persiste el certificado del titular. */
+  @Audited({
+    action: 'INSURANCE_PORTABILITY_EXPORTED',
+    entity: 'patient_coverage',
+  })
   @Post('export')
   @HttpCode(HttpStatus.CREATED)
   @Throttle(EXPORT_RATE_LIMIT)

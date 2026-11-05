@@ -17,4 +17,7 @@ graphify-out/
 
 # Artículos del glosario serializados por el front (scripts/glossary-articulos-alovida.mjs):
 # una cadena JSON por término, que Prettier no puede ni debe repartir.
-src/common/seed/glossary-articles.generated.ts
+src/common/seed/data/glossary/glossary-articles.json
+
+# Catálogos de estudios versionados con SHA-256 (SHA256SUMS): reformatearlos cambia el hash.
+src/modules/study_catalog/data/

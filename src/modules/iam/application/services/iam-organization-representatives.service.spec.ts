@@ -3,6 +3,10 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
+import {
+  directoryRegistration,
+  profilesRegistration,
+} from './iam-registration.testing';
 
 function build() {
   const order: string[] = [];
@@ -49,10 +53,12 @@ function build() {
   };
 
   const service = new IamOrganizationRepresentativesService(
-    personsRepo as never,
-    identifiersRepo as never,
-    contactPointsRepo as never,
-    representatives as never,
+    profilesRegistration({
+      persons: personsRepo,
+      identifiers: identifiersRepo,
+      contactPoints: contactPointsRepo,
+    }),
+    directoryRegistration({ representatives }),
   );
   return {
     service,

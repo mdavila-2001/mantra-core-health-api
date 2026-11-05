@@ -1,8 +1,23 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID, IsDateString } from 'class-validator';
 
-const ROLES = ['STAFF', 'SECRETARY', 'ASSISTANT', 'NURSE', 'BILLING'] as const;
-const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT'] as const;
+// F2–F5 §0.3: roles de infraestructura hospitalaria y alcance de espacio.
+const ROLES = [
+  'STAFF',
+  'SECRETARY',
+  'ASSISTANT',
+  'NURSE',
+  'BILLING',
+  'NURSE_SUPERVISOR',
+  'ADMISSION',
+  'HOUSEKEEPING',
+  'HOUSEKEEPING_SUPERVISOR',
+  'MAINTENANCE',
+  'OR_MANAGER',
+  'INFECTION_CONTROL',
+  'UNIT_HEAD',
+] as const;
+const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT', 'SPACE'] as const;
 
 /** Cuerpo de `POST /org/{tenant_membership_id}/user-assignments` (UC-29-01). */
 export class CreateOrgUserAssignmentDto {

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `diagnostic_units`
 
-- **Tablas:** 10 · **Columnas:** 152 (35 con descripción: 23.0 %) · **Índices:** 77
+- **Tablas:** 15 · **Columnas:** 254 (54 con descripción: 21.3 %) · **Índices:** 120
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,22 +10,27 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [diagnostic_equipment](#diagnostic_equipment) | Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar recursos tecnológicos de prestación. | 15 | 6 | 9 | COINCIDE |
-| [diagnostic_price_schedules](#diagnostic_price_schedules) | Define esquemas temporales de precios para los servicios de unidades diagnósticas. | 17 | 11 | 6 | COINCIDE |
+| [diagnostic_equipment](#diagnostic_equipment) | Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar recursos tecnológicos de prestación. | 19 | 9 | 15 | COINCIDE |
+| [diagnostic_price_schedules](#diagnostic_price_schedules) | Define esquemas temporales de precios para los servicios de unidades diagnósticas. | 17 | 11 | 7 | COINCIDE |
 | [diagnostic_study_components](#diagnostic_study_components) | Detalla componentes de estudios diagnósticos para representar pruebas o partes que integran una prestación. | 8 | 4 | 1 | COINCIDE |
-| [diagnostic_study_offerings](#diagnostic_study_offerings) | Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicitudes clínicas con capacidad disponible. | 22 | 10 | 26 | COINCIDE |
+| [diagnostic_study_offerings](#diagnostic_study_offerings) | Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicitudes clínicas con capacidad disponible. | 22 | 10 | 27 | COINCIDE |
 | [diagnostic_study_prices](#diagnostic_study_prices) | Asocia precios a estudios concretos para disponer de valores económicos aplicables a prestaciones diagnósticas. | 15 | 5 | 8 | COINCIDE |
 | [diagnostic_unit_accreditations](#diagnostic_unit_accreditations) | Conserva acreditaciones de unidades diagnósticas para documentar certificaciones y alcance reconocido de sus servicios. | 15 | 8 | 8 | COINCIDE |
 | [diagnostic_unit_practitioner_assignments](#diagnostic_unit_practitioner_assignments) | Vincula profesionales con unidades diagnósticas para documentar asignación y responsabilidad de prestación. | 16 | 9 | 3 | COINCIDE |
-| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 15 | COINCIDE |
+| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 25 | COINCIDE |
 | [diagnostic_unit_specialties](#diagnostic_unit_specialties) | Asocia especialidades con unidades diagnósticas para describir las áreas clínicas que pueden atender. | 12 | 5 | 6 | COINCIDE |
-| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 36 | COINCIDE |
+| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 54 | COINCIDE |
+| [unit_medical_visitors](#unit_medical_visitors) | sin propósito | 26 | 10 | 0 | COINCIDE |
+| [unit_visit_ratings](#unit_visit_ratings) | sin propósito | 16 | 5 | 0 | COINCIDE |
+| [unit_visit_records](#unit_visit_records) | sin propósito | 22 | 10 | 0 | COINCIDE |
+| [unit_visit_request_events](#unit_visit_request_events) | sin propósito | 11 | 6 | 0 | COINCIDE |
+| [unit_visit_requests](#unit_visit_requests) | sin propósito | 23 | 9 | 0 | COINCIDE |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 10 tablas
+### Familia 1 de 1 — 15 tablas
 
 ```mermaid
 erDiagram
@@ -37,6 +42,7 @@ erDiagram
     uuid operational_status_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+    uuid care_space_id FK
   }
   diagnostic_units_diagnostic_unit_sites["diagnostic_units.diagnostic_unit_sites"] {
     uuid id PK
@@ -119,6 +125,53 @@ erDiagram
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
+  diagnostic_units_unit_medical_visitors["diagnostic_units.unit_medical_visitors"] {
+    uuid id PK
+    uuid diagnostic_unit_id FK
+    uuid user_id FK
+    uuid supervisor_user_id FK
+    uuid branch_id FK
+    uuid identity_verification_concept_id FK
+    uuid contract_verification_concept_id FK
+    uuid credential_verification_concept_id FK
+  }
+  diagnostic_units_unit_visit_records["diagnostic_units.unit_visit_records"] {
+    uuid id PK
+    uuid unit_visit_request_id FK
+    uuid doctor_user_id FK
+    uuid unit_medical_visitor_id FK
+    uuid diagnostic_unit_id FK
+    uuid modality_concept_id FK
+    uuid visitor_attendance_concept_id FK
+    uuid doctor_attendance_concept_id FK
+  }
+  diagnostic_units_unit_visit_requests["diagnostic_units.unit_visit_requests"] {
+    uuid id PK
+    uuid unit_medical_visitor_id FK
+    uuid diagnostic_unit_id FK
+    uuid doctor_user_id FK
+    uuid doctor_tenant_id FK
+    uuid modality_concept_id FK
+    uuid status_concept_id FK
+    uuid rescheduled_from_id FK
+  }
+  diagnostic_units_unit_visit_ratings["diagnostic_units.unit_visit_ratings"] {
+    uuid id PK
+    uuid unit_visit_record_id FK
+    uuid doctor_user_id FK
+    uuid kind_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  diagnostic_units_unit_visit_request_events["diagnostic_units.unit_visit_request_events"] {
+    uuid id PK
+    uuid unit_visit_request_id FK
+    uuid action_concept_id FK
+    uuid previous_status_concept_id FK
+    uuid new_status_concept_id FK
+    uuid actor_user_id FK
+    uuid created_by_user_id FK
+  }
   diagnostic_units_diagnostic_equipment }o--|| diagnostic_units_diagnostic_unit_sites : "diagnostic_unit_site_id"
   diagnostic_units_diagnostic_unit_sites }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
   diagnostic_units_diagnostic_price_schedules }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
@@ -134,6 +187,14 @@ erDiagram
   diagnostic_units_diagnostic_study_components }o--|| diagnostic_units_diagnostic_study_offerings : "parent_offering_id"
   diagnostic_units_diagnostic_study_components }o--|| diagnostic_units_diagnostic_study_offerings : "component_offering_id"
   diagnostic_units_diagnostic_unit_specialties }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
+  diagnostic_units_unit_medical_visitors }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
+  diagnostic_units_unit_visit_records }o--|| diagnostic_units_unit_visit_requests : "unit_visit_request_id"
+  diagnostic_units_unit_visit_records }o--|| diagnostic_units_unit_medical_visitors : "unit_medical_visitor_id"
+  diagnostic_units_unit_visit_records }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
+  diagnostic_units_unit_visit_requests }o--|| diagnostic_units_unit_medical_visitors : "unit_medical_visitor_id"
+  diagnostic_units_unit_visit_requests }o--|| diagnostic_units_diagnostic_units : "diagnostic_unit_id"
+  diagnostic_units_unit_visit_ratings }o--|| diagnostic_units_unit_visit_records : "unit_visit_record_id"
+  diagnostic_units_unit_visit_request_events }o--|| diagnostic_units_unit_visit_requests : "unit_visit_request_id"
 ```
 
 ## Fichas
@@ -147,7 +208,7 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_equipment`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticEquipment` — `src/modules/diagnostic_units/entities/diagnostic_equipment.entity.ts`
-- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -168,6 +229,10 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/diagnostic_equipment.entity.ts:108`)_ | coincide |
+| 16 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | + infraestructura hospitalaria F5a (2026-10-29): el equipo vive en una SALA del árbol físico (practice.care_spaces, mismo tenant que la unidad diagnóstica: lo garantiza el trigger del patch …_f5_operaciones) y se identifica en DICOM por su AE Title y su Station Name (≤ 16 caracteres, Modality Worklist 0040,0001 / 0040,0010). El recurso agendable RES_EQUIPMENT del equipo es opcional (lo crea la API bajo demanda). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:195`)_ | coincide |
+| 17 | `ae_title` | `varchar(16)` | Opcional | _sin dato_ | coincide |
+| 18 | `station_name` | `varchar(16)` | Opcional | _sin dato_ | coincide |
+| 19 | `schedulable_resource_id` | `uuid` | Clave foránea → scheduling.schedulable_resources.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -179,6 +244,9 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | hacia | operational_status_concept_id | terminology.catalog_concepts (id) | fk_diagnostic_equipment_operational_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_diagnostic_equipment_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_diagnostic_equipment_updated_by_user_id |
+| hacia | care_space_id | practice.care_spaces (id) | fk_diagnostic_equipment_care_space_id |
+| hacia | schedulable_resource_id | scheduling.schedulable_resources (id) | fk_diagnostic_equipment_schedulable_resource_id |
+| desde | id | diagnostics.imaging_procedure_steps (scheduled_equipment_id) | fk_imaging_procedure_steps_scheduled_equipment_id |
 
 #### Índices
 
@@ -190,13 +258,25 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | `ix_diagnostic_equipment_operational_status_concept_id` | no | operational_status_concept_id | Soporta la clave foránea fk_diagnostic_equipment_operational_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_equipment_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_diagnostic_equipment_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_equipment_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_diagnostic_equipment_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_diagnostic_equipment_care_space_id` | no | care_space_id | Soporta la clave foránea fk_diagnostic_equipment_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_diagnostic_equipment_schedulable_resource_id` | no | schedulable_resource_id | Soporta la clave foránea fk_diagnostic_equipment_schedulable_resource_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_diagnostic_equipment_site_ae_title` | sí | diagnostic_unit_site_id, ae_title donde WHERE ae_title IS NOT NULL | Garantiza que no se repita la combinación (diagnostic_unit_site_id, ae_title) _(DOCUMENTO)_; Soporta la clave foránea fk_diagnostic_equipment_diagnostic_unit_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE ae_title IS NOT NULL _(ESTRUCTURAL)_; 3 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_site_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_diagnostic_equipment_site_ae_title` | UNIQUE INDEX | UNIQUE INDEX ("diagnostic_unit_site_id", "ae_title") WHERE ae_title IS NOT NULL |
+| `ck_diagnostic_equipment_ae_title` | CHECK | CHECK ("ae_title" IS NULL OR ("ae_title" ~ '^[\x20-\x7E]{1,16}$' AND btrim("ae_title") <> '' AND "ae_title" !~ '\\')) |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| PATCH /diagnostic-equipment/{id} | ACTUALIZA | POR_TIPO |
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | CREA | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | LEE | DIRECTA |
 | GET /diagnostic-units | LEE | DIRECTA |
@@ -204,6 +284,10 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| POST /care-spaces/{id}/lifecycle | LEE | POR_SQL |
+| GET /care-spaces/{id}/retire-check | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -228,7 +312,7 @@ Define esquemas temporales de precios para los servicios de unidades diagnóstic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_price_schedules`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticPriceSchedules` — `src/modules/diagnostic_units/entities/diagnostic_price_schedules.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 1 entrantes · 6 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 1 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -293,6 +377,7 @@ Define esquemas temporales de precios para los servicios de unidades diagnóstic
 | POST /diagnostic-units/{id}/price-schedules | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /price-schedules/{scheduleId}/study-prices | LEE | DIRECTA |
+| POST /study-prices/{priceId}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -379,7 +464,7 @@ Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicit
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_study_offerings`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticStudyOfferings` — `src/modules/diagnostic_units/entities/diagnostic_study_offerings.entity.ts`
-- **Resumen:** 22 columnas · 10 índices · 9 FK salientes · 5 entrantes · 26 operaciones
+- **Resumen:** 22 columnas · 10 índices · 9 FK salientes · 5 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -433,11 +518,11 @@ Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicit
 |---|---|---|---|
 | `ix_diagnostic_study_offerings_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_diagnostic_study_offerings_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_diagnostic_unit_site_id` | no | diagnostic_unit_site_id | Soporta la clave foránea fk_diagnostic_study_offerings_diagnostic_unit_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_study_offerings_study_concept_id` | no | study_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_study_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «study_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_study_offerings_study_concept_id` | no | study_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_study_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «study_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_modality_concept_id` | no | modality_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_modality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_body_site_concept_id` | no | body_site_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_body_site_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_specimen_type_concept_id` | no | specimen_type_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_specimen_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_study_offerings_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_study_offerings_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_diagnostic_study_offerings_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_diagnostic_study_offerings_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_diagnostic_study_offerings_search` | no | (to_tsvector('simple', (coalesce(display_name, '') ¦¦ ' ' ¦¦ coalesce(description, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
@@ -446,6 +531,7 @@ Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicit
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /patient-spending/me | LEE | POR_SQL |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | DELETE /diagnostic-study-offerings/{id} | ACTUALIZA | POR_TIPO |
 | DELETE /diagnostic-study-offerings/{id} | LEE | DIRECTA |
@@ -745,7 +831,7 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_unit_sites`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnitSites` — `src/modules/diagnostic_units/entities/diagnostic_unit_sites.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 15 operaciones
+- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -797,6 +883,10 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | PATCH /diagnostic-unit-sites/{siteId} | ACTUALIZA | POR_TIPO |
 | PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | ACTUALIZA | POR_TIPO |
@@ -804,14 +894,20 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 | GET /diagnostic-units | LEE | DIRECTA |
 | POST /diagnostic-units | CREA | DIRECTA |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/accreditations | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/practitioner-assignments | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/price-schedules | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/sites | CREA | DIRECTA |
+| POST /diagnostic-units/{id}/study-offerings | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -909,7 +1005,7 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_units`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnits` — `src/modules/diagnostic_units/entities/diagnostic_units.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 10 entrantes · 36 operaciones
+- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 13 entrantes · 54 operaciones
 
 #### Columnas
 
@@ -955,6 +1051,9 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 | desde | id | diagnostic_units.diagnostic_study_offerings (diagnostic_unit_id) | fk_diagnostic_study_offerings_diagnostic_unit_id |
 | desde | id | diagnostic_units.diagnostic_price_schedules (diagnostic_unit_id) | fk_diagnostic_price_schedules_diagnostic_unit_id |
 | desde | id | diagnostic_units.diagnostic_unit_accreditations (diagnostic_unit_id) | fk_diagnostic_unit_accreditations_diagnostic_unit_id |
+| desde | id | diagnostic_units.unit_medical_visitors (diagnostic_unit_id) | fk_unit_medical_visitors_diagnostic_unit_id |
+| desde | id | diagnostic_units.unit_visit_requests (diagnostic_unit_id) | fk_unit_visit_requests_diagnostic_unit_id |
+| desde | id | diagnostic_units.unit_visit_records (diagnostic_unit_id) | fk_unit_visit_records_diagnostic_unit_id |
 | desde | id | diagnostics.laboratory_accessions (laboratory_unit_id) | fk_laboratory_accessions_laboratory_unit_id |
 | desde | id | diagnostics.laboratory_work_orders (assigned_laboratory_unit_id) | fk_laboratory_work_orders_assigned_laboratory_unit_id |
 | desde | id | insurance.network_provider_memberships (diagnostic_unit_id) | fk_network_provider_memberships_diagnostic_unit_id |
@@ -964,11 +1063,11 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_diagnostic_units_tenant_id_code` | sí | tenant_id, code | Garantiza que no se repita la combinación (tenant_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_diagnostic_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_diagnostic_units_tenant_id` | no | tenant_id | Soporta la clave foránea fk_diagnostic_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_diagnostic_units_tenant_id_code` | sí | tenant_id, code | Garantiza que no se repita la combinación (tenant_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_diagnostic_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_units_tenant_id` | no | tenant_id | Soporta la clave foránea fk_diagnostic_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_units_practice_id` | no | practice_id | Soporta la clave foránea fk_diagnostic_units_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_units_primary_practice_site_id` | no | primary_practice_site_id | Soporta la clave foránea fk_diagnostic_units_primary_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_units_diagnostic_unit_type_concept_id` | no | diagnostic_unit_type_concept_id | Soporta la clave foránea fk_diagnostic_units_diagnostic_unit_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_units_diagnostic_unit_type_concept_id` | no | diagnostic_unit_type_concept_id | Soporta la clave foránea fk_diagnostic_units_diagnostic_unit_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_units_ownership_type_concept_id` | no | ownership_type_concept_id | Soporta la clave foránea fk_diagnostic_units_ownership_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_units_public_profile_id` | no | public_profile_id | Soporta la clave foránea fk_diagnostic_units_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_units_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_diagnostic_units_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «verification_status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -988,6 +1087,14 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
+| DELETE /diagnostic-study-offerings/{id} | LEE | DIRECTA |
+| POST /diagnostic-unit-accreditations/{id}/renew | LEE | DIRECTA |
+| PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
+| POST /diagnostic-unit-sites/{siteId}/equipment | LEE | DIRECTA |
 | GET /diagnostic-units | LEE | DIRECTA |
 | POST /diagnostic-units | CREA | DIRECTA |
 | POST /diagnostic-units | LEE | DIRECTA |
@@ -1004,10 +1111,18 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| POST /price-schedules/{scheduleId}/study-prices | LEE | DIRECTA |
+| POST /study-prices/{priceId}/close | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
+| POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
+| GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
+| GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
@@ -1024,6 +1139,424 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### unit_medical_visitors
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
+- **Entidad del ORM:** `UnitMedicalVisitors` — `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts`
+- **Resumen:** 26 columnas · 10 índices · 10 FK salientes · 2 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:12`)_ | coincide |
+| 2 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `full_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `photo_url` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `internal_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `position` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | coincide |
+| 10 | `region` | `varchar` | Opcional | _sin dato_ | coincide |
+| 11 | `commercial_area` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | coincide |
+| 13 | `started_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 14 | `ended_on` | `date` | Opcional | _sin dato_ | coincide |
+| 15 | `identity_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `contract_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 17 | `credential_verification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 18 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 19 | `publicly_listed` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 20 | `unlinked_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 21 | `unlink_reason` | `text` | Opcional | _sin dato_ | coincide |
+| 22 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:150`)_ | coincide |
+| 23 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:156`)_ | coincide |
+| 24 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 25 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 26 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_medical_visitors.entity.ts:174`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | diagnostic_unit_id | diagnostic_units.diagnostic_units (id) | fk_unit_medical_visitors_diagnostic_unit_id |
+| hacia | user_id | iam.users (id) | fk_unit_medical_visitors_user_id |
+| hacia | supervisor_user_id | iam.users (id) | fk_unit_medical_visitors_supervisor_user_id |
+| hacia | branch_id | directory.branches (id) | fk_unit_medical_visitors_branch_id |
+| hacia | identity_verification_concept_id | terminology.catalog_concepts (id) | fk_unit_medical_visitors_identity_verification_concept_id |
+| hacia | contract_verification_concept_id | terminology.catalog_concepts (id) | fk_unit_medical_visitors_contract_verification_concept_id |
+| hacia | credential_verification_concept_id | terminology.catalog_concepts (id) | fk_unit_medical_visitors_credential_verification_concept_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_unit_medical_visitors_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_unit_medical_visitors_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_unit_medical_visitors_updated_by_user_id |
+| desde | id | diagnostic_units.unit_visit_requests (unit_medical_visitor_id) | fk_unit_visit_requests_unit_medical_visitor_id |
+| desde | id | diagnostic_units.unit_visit_records (unit_medical_visitor_id) | fk_unit_visit_records_unit_medical_visitor_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_unit_medical_visitors_user_id` | sí | user_id | Garantiza que no se repita la combinación (user_id) _(DOCUMENTO)_; Soporta la clave foránea fk_unit_medical_visitors_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_unit_medical_visitors_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_supervisor_user_id` | no | supervisor_user_id | Soporta la clave foránea fk_unit_medical_visitors_supervisor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_branch_id` | no | branch_id | Soporta la clave foránea fk_unit_medical_visitors_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_identity_verification_concept_id` | no | identity_verification_concept_id | Soporta la clave foránea fk_unit_medical_visitors_identity_verification_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_contract_verification_concept_id` | no | contract_verification_concept_id | Soporta la clave foránea fk_unit_medical_visitors_contract_verification_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_credential_verification_concept_id` | no | credential_verification_concept_id | Soporta la clave foránea fk_unit_medical_visitors_credential_verification_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_unit_medical_visitors_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_unit_medical_visitors_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_medical_visitors_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_unit_medical_visitors_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_unit_medical_visitors_user_id` | UNIQUE INDEX | UNIQUE INDEX ("user_id") |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### unit_visit_ratings
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
+- **Entidad del ORM:** `UnitVisitRatings` — `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts`
+- **Resumen:** 16 columnas · 5 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_record_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_records.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `punctuality` | `integer` | Opcional | _sin dato_ | coincide |
+| 6 | `information_quality` | `integer` | Opcional | _sin dato_ | coincide |
+| 7 | `clarity` | `integer` | Opcional | _sin dato_ | coincide |
+| 8 | `relevance` | `integer` | Opcional | _sin dato_ | coincide |
+| 9 | `professional_conduct` | `integer` | Opcional | _sin dato_ | coincide |
+| 10 | `overall_satisfaction` | `integer` | Opcional | _sin dato_ | coincide |
+| 11 | `comment` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:90`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:96`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_ratings.entity.ts:114`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | unit_visit_record_id | diagnostic_units.unit_visit_records (id) | fk_unit_visit_ratings_unit_visit_record_id |
+| hacia | doctor_user_id | iam.users (id) | fk_unit_visit_ratings_doctor_user_id |
+| hacia | kind_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_ratings_kind_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_unit_visit_ratings_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_unit_visit_ratings_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_unit_visit_ratings_unit_visit_record_id` | no | unit_visit_record_id | Soporta la clave foránea fk_unit_visit_ratings_unit_visit_record_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_ratings_doctor_user_id` | no | doctor_user_id | Soporta la clave foránea fk_unit_visit_ratings_doctor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_ratings_kind_concept_id` | no | kind_concept_id | Soporta la clave foránea fk_unit_visit_ratings_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_ratings_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_unit_visit_ratings_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_ratings_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_unit_visit_ratings_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### unit_visit_records
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
+- **Entidad del ORM:** `UnitVisitRecords` — `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts`
+- **Resumen:** 22 columnas · 10 índices · 10 FK salientes · 1 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `location` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `topics_discussed` | `text` | Opcional | _sin dato_ | coincide |
+| 10 | `questions` | `text` | Opcional | _sin dato_ | coincide |
+| 11 | `commitments` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `next_action` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `observations` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `visitor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `doctor_attendance_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `confirmation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 17 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:122`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:128`)_ | coincide |
+| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_records.entity.ts:146`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | unit_visit_request_id | diagnostic_units.unit_visit_requests (id) | fk_unit_visit_records_unit_visit_request_id |
+| hacia | unit_medical_visitor_id | diagnostic_units.unit_medical_visitors (id) | fk_unit_visit_records_unit_medical_visitor_id |
+| hacia | diagnostic_unit_id | diagnostic_units.diagnostic_units (id) | fk_unit_visit_records_diagnostic_unit_id |
+| hacia | doctor_user_id | iam.users (id) | fk_unit_visit_records_doctor_user_id |
+| hacia | modality_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_records_modality_concept_id |
+| hacia | visitor_attendance_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_records_visitor_attendance_concept_id |
+| hacia | doctor_attendance_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_records_doctor_attendance_concept_id |
+| hacia | confirmation_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_records_confirmation_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_unit_visit_records_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_unit_visit_records_updated_by_user_id |
+| desde | id | diagnostic_units.unit_visit_ratings (unit_visit_record_id) | fk_unit_visit_ratings_unit_visit_record_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_unit_visit_records_unit_visit_request_id` | sí | unit_visit_request_id | Garantiza que no se repita la combinación (unit_visit_request_id) _(DOCUMENTO)_; Soporta la clave foránea fk_unit_visit_records_unit_visit_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_doctor_user_id` | no | doctor_user_id | Soporta la clave foránea fk_unit_visit_records_doctor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_unit_medical_visitor_id` | no | unit_medical_visitor_id | Soporta la clave foránea fk_unit_visit_records_unit_medical_visitor_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_unit_visit_records_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_modality_concept_id` | no | modality_concept_id | Soporta la clave foránea fk_unit_visit_records_modality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_visitor_attendance_concept_id` | no | visitor_attendance_concept_id | Soporta la clave foránea fk_unit_visit_records_visitor_attendance_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_doctor_attendance_concept_id` | no | doctor_attendance_concept_id | Soporta la clave foránea fk_unit_visit_records_doctor_attendance_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_confirmation_concept_id` | no | confirmation_concept_id | Soporta la clave foránea fk_unit_visit_records_confirmation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_unit_visit_records_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_records_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_unit_visit_records_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_unit_visit_records_unit_visit_request_id` | UNIQUE INDEX | UNIQUE INDEX ("unit_visit_request_id") |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### unit_visit_request_events
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
+- **Entidad del ORM:** `UnitVisitRequestEvents` — `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 6 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts:12`)_ | coincide |
+| 2 | `unit_visit_request_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `previous_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `new_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `note` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 9 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_request_events.entity.ts:70`)_ | coincide |
+| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | unit_visit_request_id | diagnostic_units.unit_visit_requests (id) | fk_unit_visit_request_events_unit_visit_request_id |
+| hacia | action_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_request_events_action_concept_id |
+| hacia | previous_status_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_request_events_previous_status_concept_id |
+| hacia | new_status_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_request_events_new_status_concept_id |
+| hacia | actor_user_id | iam.users (id) | fk_unit_visit_request_events_actor_user_id |
+| hacia | created_by_user_id | iam.users (id) | fk_unit_visit_request_events_created_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_unit_visit_request_events_unit_visit_request_id` | no | unit_visit_request_id | Soporta la clave foránea fk_unit_visit_request_events_unit_visit_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_request_events_action_concept_id` | no | action_concept_id | Soporta la clave foránea fk_unit_visit_request_events_action_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_request_events_previous_status_concept_id` | no | previous_status_concept_id | Soporta la clave foránea fk_unit_visit_request_events_previous_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_request_events_new_status_concept_id` | no | new_status_concept_id | Soporta la clave foránea fk_unit_visit_request_events_new_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_request_events_actor_user_id` | no | actor_user_id | Soporta la clave foránea fk_unit_visit_request_events_actor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_request_events_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_unit_visit_request_events_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### unit_visit_requests
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
+- **Entidad del ORM:** `UnitVisitRequests` — `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts`
+- **Resumen:** 23 columnas · 9 índices · 9 FK salientes · 3 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:12`)_ | coincide |
+| 2 | `unit_medical_visitor_id` | `uuid` | Clave foránea → diagnostic_units.unit_medical_visitors.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `diagnostic_unit_id` | `uuid` | Clave foránea → diagnostic_units.diagnostic_units.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `doctor_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `doctor_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
+| 6 | `reason` | `text` | Obligatoria | _sin dato_ | coincide |
+| 7 | `requested_start_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `duration_minutes` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 9 | `time_zone` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 10 | `modality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `location` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `attachments` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 13 | `observations` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `proposed_start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 16 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 17 | `closed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 18 | `rescheduled_from_id` | `uuid` | Clave foránea → diagnostic_units.unit_visit_requests.id; Opcional | _sin dato_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:132`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:138`)_ | coincide |
+| 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/unit_visit_requests.entity.ts:156`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | unit_medical_visitor_id | diagnostic_units.unit_medical_visitors (id) | fk_unit_visit_requests_unit_medical_visitor_id |
+| hacia | diagnostic_unit_id | diagnostic_units.diagnostic_units (id) | fk_unit_visit_requests_diagnostic_unit_id |
+| hacia | rescheduled_from_id | diagnostic_units.unit_visit_requests (id) | fk_unit_visit_requests_rescheduled_from_id |
+| hacia | doctor_user_id | iam.users (id) | fk_unit_visit_requests_doctor_user_id |
+| hacia | doctor_tenant_id | directory.tenants (id) | fk_unit_visit_requests_doctor_tenant_id |
+| hacia | modality_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_requests_modality_concept_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_unit_visit_requests_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_unit_visit_requests_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_unit_visit_requests_updated_by_user_id |
+| desde | id | diagnostic_units.unit_visit_requests (rescheduled_from_id) | fk_unit_visit_requests_rescheduled_from_id |
+| desde | id | diagnostic_units.unit_visit_request_events (unit_visit_request_id) | fk_unit_visit_request_events_unit_visit_request_id |
+| desde | id | diagnostic_units.unit_visit_records (unit_visit_request_id) | fk_unit_visit_records_unit_visit_request_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_unit_visit_requests_unit_medical_visitor_id` | no | unit_medical_visitor_id | Soporta la clave foránea fk_unit_visit_requests_unit_medical_visitor_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_unit_visit_requests_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_doctor_user_id` | no | doctor_user_id | Soporta la clave foránea fk_unit_visit_requests_doctor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_doctor_tenant_id` | no | doctor_tenant_id | Soporta la clave foránea fk_unit_visit_requests_doctor_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_modality_concept_id` | no | modality_concept_id | Soporta la clave foránea fk_unit_visit_requests_modality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_unit_visit_requests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_rescheduled_from_id` | no | rescheduled_from_id | Soporta la clave foránea fk_unit_visit_requests_rescheduled_from_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_unit_visit_requests_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_unit_visit_requests_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_unit_visit_requests_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
 
 #### Gobierno
 

@@ -100,9 +100,10 @@ export class IdentityWorkerController {
     summary: 'Listar los checks que el worker debe atender en este tick',
   })
   listDispatchable(
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<DispatchableChecksResponseDto> {
-    return this.checksService.listDispatchable(limit);
+    return this.checksService.listDispatchable(actor, limit);
   }
 
   /** Asienta el intento de despacho contra la autoridad externa. */

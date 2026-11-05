@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
@@ -18,6 +17,7 @@ import {
   StatusResultDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
@@ -37,6 +37,7 @@ export class ReverseMedicationDispensationUseCase {
     private readonly reservationsRepo: ReservationsRepository,
     private readonly stockRepo: StockPositionsRepository,
     private readonly ledgerRepo: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -55,10 +56,21 @@ export class ReverseMedicationDispensationUseCase {
     );
     return this.em.transactional(async (tx) => {
       const dispensation = await this.dispensationsRepo.findById(tx, id);
-      if (!dispensation) {
-        throw new ResourceNotFoundException('Dispensación no encontrada', {
-          dispensationId: id,
-        });
+      if (!dispensation) throw this.scope.notAvailable();
+      // La dispensación guarda la farmacia y la sede: deben ser del actor, y la
+      // ubicación que recibe la devolución, de esa sede.
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        dispensation.pharmacyId,
+        actor,
+      );
+      if (dto.inventoryLocationId) {
+        const site = await this.scope.requireSite(
+          tx,
+          pharmacy,
+          dispensation.pharmacySiteId,
+        );
+        await this.scope.requireLocation(tx, site, dto.inventoryLocationId);
       }
       if (
         dispensation.dispensationStatusConceptId !== PINV.DISPENSE_DISPENSED

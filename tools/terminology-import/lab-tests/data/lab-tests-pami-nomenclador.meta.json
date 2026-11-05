@@ -1,26 +1,25 @@
 {
   "layer": "pami-nomenclador",
-  "builtAt": "2026-10-24T01:16:09.499Z",
+  "builtAt": "2026-10-24T17:56:50.220Z",
   "records": 3034,
   "source": {
-    "name": "nomenclador-salud-js",
-    "version": "1.0.2"
+    "direct": true
   },
   "packageMetadata": null,
   "codeSystems": [
     {
       "internalCode": "pami-nomenclador",
-      "name": "PAMI — Nomenclador de prácticas médicas (Argentina)",
+      "name": "PAMI — Nomenclador Común de prácticas médicas (Argentina)",
       "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/pami-nomenclador",
-      "version": "2022-08-03",
+      "version": "Nomenclador Común, estructura de unidades febrero 2019 (datos.pami.org.ar)",
       "sourceKey": "pami-nomenclador",
       "records": 3034
     }
   ],
   "files": {
-    "estudios.json": {
-      "file": "lab-tests-sources/nomenclador-salud-js/package/dist/assets/estudios.json",
-      "sha256": "3f4138c3a81a291fd585c9f9adb2c81848baeec548e5ab8d79c9c48823943678"
+    "nomenclador-comun.csv": {
+      "file": "lab-tests-sources/pami/nomenclador-comun.csv",
+      "sha256": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4"
     }
   },
   "rules": [
@@ -329,17 +328,17 @@
     "excludedExplicitly": [
       {
         "code": "187143",
-        "name": "Drenajes Y/O Procedimientos Similares Bajo Eco",
+        "name": "DRENAJES Y/O PROCEDIMIENTOS SIMILARES BAJO ECO",
         "reason": "drenajes y/o procedimientos similares bajo eco"
       },
       {
         "code": "341330",
-        "name": "Drenajes Y/O Procedimientos Similares Bajo Tac (Hasta 32 Pistas)",
+        "name": "DRENAJES Y/O PROCEDIMIENTOS SIMILARES BAJO TAC (HASTA 32 PISTAS)",
         "reason": "drenajes y/o procedimientos similares bajo TAC"
       },
       {
         "code": "180152",
-        "name": "Drenajes Y/O Procedimientos Similares Bajo Eco",
+        "name": "DRENAJES Y/O PROCEDIMIENTOS SIMILARES BAJO ECO",
         "reason": "drenajes y/o procedimientos similares bajo eco"
       }
     ]

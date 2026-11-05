@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book-part-wrapper PUBLIC "-//NLM//DTD BITS Book Interchange DTD v2.0 20151225//EN" "http://jats.nlm.nih.gov/extensions/bits/2.0/BITS-book2.dtd">
+<book-part-wrapper content-type="chapter" id="Salicylates" from-where="body" dtd-version="2.0">
+  <book-meta>
+    <book-id book-id-type="pmcid">livertox</book-id>
+    <book-title-group>
+      <book-title>LiverTox</book-title>
+      <subtitle>Clinical and Research Information on Drug-Induced Liver Injury</subtitle>
+    </book-title-group>
+    <pub-date date-type="pubr" publication-format="electronic">
+      <year>2012</year>
+    </pub-date>
+    <publisher>
+      <publisher-name>National Institute of Diabetes and Digestive and Kidney Diseases</publisher-name>
+      <publisher-loc>Bethesda (MD)</publisher-loc>
+    </publisher>
+    <abstract>
+      <p>LiverTox<sup>&#x000ae;</sup> provides up-to-date, unbiased and easily accessed information on the diagnosis, cause, frequency, clinical patterns and management of liver injury attributable to prescription and nonprescription medications and selected herbal and dietary supplements. The LiverTox site is meant as a resource for both physicians and patients as well as for clinical academicians and researchers who specialize in idiosyncratic drug induced hepatotoxicity.</p>
+      <p>Information on a specific medication or supplement can be found by entering its name in the &#x0201c;Search this book&#x0201d; box shown above or by browsing the list of agents by its first letter using the alphabetic list shown below.</p>
+      <p>LiverTox is produced by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK) and is copyright free. It is requested that use of LiverTox data in publications be given appropriate acknowledgment.</p>
+      <p>The LiverTox team welcomes user comments and enquiries. <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/books/n/livertox/Contactus/">Contact Us</ext-link></p>
+    </abstract>
+    <custom-meta-group>
+      <custom-meta>
+        <meta-name>books-source-type</meta-name>
+        <meta-value>Database</meta-value>
+      </custom-meta>
+    </custom-meta-group>
+    <notes notes-type="disclaimer">
+      <title>Disclaimer:</title>
+      <p>Information presented in the LiverTox database is derived from the scientific literature and public databases and reflects professional expertise of the authors. Such information does not represent official policy of the U.S. Government or any agency thereof. The information in LiverTox is not meant as a substitute for FDA approved product labeling and professional judgment in the diagnosis and treatment of drug induced liver injury. The U.S. Government and its individual agencies, including the NIDDK, NLM and NIH, does not warrant or assume any legal responsibility for the accuracy, completeness, or usefulness of the information contained on this Site.</p>
+      <p>NIH does not provide patient-specific medical advice concerning the potential of a drug or herbal supplement to cause hepatotoxicity; please consult with a physician for guidance.</p>
+      <p>As of September&#x0202f;2026, initial drafts of new and updated LiverTox chapters will be generated using Artificial Intelligence. Each draft will then undergo careful review, verification, and editing by the LiverTox editorial team. New chapters will also undergo independent peer review from an external expert in drug&#x02011;induced liver injury</p>
+    </notes>
+  </book-meta>
+  <book-part book-part-type="chapter">
+    <book-part-meta>
+      <book-part-id book-part-id-type="pmcid">Salicylates</book-part-id>
+      <title-group>
+        <title>Salicylates</title>
+      </title-group>
+      <pub-history>
+        <date date-type="updated">
+          <day>15</day>
+          <month>8</month>
+          <year>2020</year>
+        </date>
+      </pub-history>
+    </book-part-meta>
+    <body>
+      <sec id="Salicylates.OVERVIEW">
+        <title>OVERVIEW</title>
+        <p content-type="pubmed-excerpt">The following links are to individual drug records.</p>
+        <list list-type="order">
+          <list-item>
+            <label>1</label>
+            <p>
+<related-object link-type="booklink" source-id="livertox" document-id="Aspirin" document-type="chapter">Aspirin</related-object>
+</p>
+          </list-item>
+          <list-item>
+            <label>2</label>
+            <p>
+<related-object link-type="booklink" source-id="livertox" document-id="Diflunisal" document-type="chapter">Diflunisal</related-object>
+</p>
+          </list-item>
+          <list-item>
+            <label>3</label>
+            <p>
+<related-object link-type="booklink" source-id="livertox" document-id="Salsalate" document-type="chapter">Salsalate</related-object>
+</p>
+          </list-item>
+          <list-item>
+            <label>4</label>
+            <p>
+<related-object link-type="booklink" source-id="livertox" document-id="Trisalicylate" document-type="chapter">Trisalicylate</related-object>
+</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="link-group" id="Salicylates.OTHER_REFERENCE_LINKS">
+        <title>OTHER REFERENCE LINKS</title>
+        <list list-type="order">
+          <list-item>
+            <label>1</label>
+            <p>
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/sites/entrez?cmd=search&#x00026;db=pubmed&#x00026;pubmedfilters=true&#x00026;term=salicylates/AE+AND+Human%5BMH%5D+AND+(%20drug-induced+liver+injury+OR+jaundice/CI+OR+bile+duct+diseases/CI+OR+liver/DE+OR+liver+diseases/CI)+AND+(%221900/1/1%22%5BEDat%5D:%222999/12/31%22%5BEDat%5D)">Recent References on Salicylates: from PubMed.gov</ext-link>
+</p>
+          </list-item>
+          <list-item>
+            <label>2</label>
+            <p>
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://clinicaltrials.gov/ct2/results?term=salicylates">Trials on Salicylates: from ClinicalTrials.gov</ext-link>
+</p>
+          </list-item>
+        </list>
+      </sec>
+    </body>
+  </book-part>
+</book-part-wrapper>

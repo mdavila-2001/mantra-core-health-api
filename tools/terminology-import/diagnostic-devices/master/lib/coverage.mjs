@@ -23,15 +23,19 @@ export function coverageReport({
   resolution,
   industry = null,
   emdnCheck = null,
+  emdnVersions = null,
+  fdaCheck = null,
   actorStats = [],
   sourceStats,
   regionStatus,
   panelParts,
   ivdPanels,
   mirrors,
+  official = {},
 }) {
   const nodes = taxonomy.nodes;
   const dxNodes = nodes.filter((n) => n.diagnostic === true);
+  const dxKeys = new Set(dxNodes.map((n) => n.key));
   const usedTypes = new Set(catalog.models.flatMap((m) => m.deviceTypes));
   const brands = new Set(
     catalog.models
@@ -61,7 +65,11 @@ export function coverageReport({
         taxonomy.crosswalks,
         (c) => `${c.from.split('|')[0]}→${c.to.split('|')[0]}`,
       ),
-      diagnosticTypesWithModels: usedTypes.size,
+      // Tipos con decisión de diagnóstico propia; `typesWithModels` cuenta
+      // también los sin decisión de filas que entraron por otro criterio.
+      diagnosticTypesWithModels: [...usedTypes].filter((k) => dxKeys.has(k))
+        .length,
+      typesWithModels: usedTypes.size,
       ivdPanelsMeasured: ivdPanels,
       panelParts,
     },
@@ -100,7 +108,22 @@ export function coverageReport({
     },
     industry,
     emdnCopies: emdnCheck,
+    emdnVersions,
+    fdaCopies: fdaCheck,
     actors: actorStats,
+    official: Object.fromEntries(
+      Object.entries(official).map(([k, o]) => [
+        k,
+        {
+          url: o.url,
+          exportDate: o.exportDate,
+          downloadSha256: o.downloadSha256,
+          path: o.path,
+          sha256: o.sha256,
+          license: o.license,
+        },
+      ]),
+    ),
     mirrors: Object.fromEntries(
       Object.entries(mirrors).map(([k, m]) => [
         k,
@@ -156,11 +179,25 @@ export function coverageReport({
         'Mapeos publicados': json.taxonomy.crosswalks,
         'Tipos de diagnóstico con al menos un modelo':
           json.taxonomy.diagnosticTypesWithModels,
+        'Tipos (con o sin decisión) en modelos del catálogo':
+          json.taxonomy.typesWithModels,
       },
       'Medida',
       'Valor',
     ),
     '',
+    ...(fdaCheck
+      ? [
+          `Product codes de la FDA: ${fdaCheck.a} (${fdaCheck.countA}) contra ${fdaCheck.b} (${fdaCheck.countB}); solo en la oficial ${fdaCheck.onlyA.length}, solo en la copia ${fdaCheck.onlyB.length}; difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}.`,
+          '',
+        ]
+      : []),
+    ...(emdnVersions
+      ? [
+          `EMDN ${emdnVersions.latest} oficial (${emdnVersions.rowsLatest} términos) contra la ${emdnVersions.previous} (${emdnVersions.rowsPrevious}): nuevos ${emdnVersions.onlyLatest.length}, solo en la ${emdnVersions.previous} ${emdnVersions.onlyPrevious.length} (quedan marcados \`notInVersion\`), término cambiado ${emdnVersions.termChanged.length}, decisión de diagnóstico cambiada ${emdnVersions.decisionChanged.length}.`,
+          '',
+        ]
+      : []),
     table(json.taxonomy.bySystem, 'Nomenclatura', 'Nodos'),
     '',
     table(

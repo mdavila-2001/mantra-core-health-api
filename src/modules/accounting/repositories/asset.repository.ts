@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { LockMode } from '@mikro-orm/core';
 import {
+  DepreciationAreas,
   Assets,
   AssetComponents,
   AssetValuations,
@@ -39,6 +40,20 @@ export class AssetRepository {
     code: string,
   ): Promise<Assets | null> {
     return em.findOne(Assets, { practiceId, code });
+  }
+
+  /**
+   * Un área de depreciación por id, sin acotar: quien la usa contrasta su tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del área.
+   * @returns El área, o `null` si no existe.
+   */
+  findDepreciationAreaById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DepreciationAreas | null> {
+    return em.findOne(DepreciationAreas, { id });
   }
 
   /**
@@ -443,6 +458,25 @@ export class AssetRepository {
     fiscalPeriodId: string,
   ): Promise<AssetDepreciations | null> {
     return em.findOne(AssetDepreciations, { assetId, fiscalPeriodId });
+  }
+
+  /**
+   * El histórico de depreciación de un activo (T26 · criterio 6), de la más
+   * antigua a la más reciente: una fila por período fiscal depreciado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param assetId - Identificador del activo.
+   * @returns Las depreciaciones registradas del activo.
+   */
+  listDepreciations(
+    em: EntityManager,
+    assetId: string,
+  ): Promise<AssetDepreciations[]> {
+    return em.find(
+      AssetDepreciations,
+      { assetId },
+      { orderBy: { createdAt: 'ASC' } },
+    );
   }
 
   /**

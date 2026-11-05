@@ -63,12 +63,30 @@ export const TARIFF_RULES = {
   ],
   // ICD-10-PCS: secciones y tipos por posición (`pattern`), con sus nombres oficiales de `pcs_axes`.
   'icd10pcs-cms': [
-    { prefix: 'B', domain: 'imaging', evidence: 'sección B «Imaging»: 2978 códigos (fluoroscopía 883, TC 767, radiografía 632, RM 422, ecografía 242, otras 32)' },
-    { pattern: '^C.[123]', domain: 'imaging', evidence: 'sección C «Nuclear Medicine», tipos 1–3: imagen planar (208), tomográfica (155) y PET (15)' },
-    { pattern: '^C.[456]', domain: null, evidence: 'sección C, tipos 4–6: captación, sonda y ensayo de medicina nuclear sin imagen (73); el tipo 7 es terapia y queda fuera' },
-    { prefix: '4A', domain: 'functional', evidence: 'sección 4 «Measurement and Monitoring», sistemas fisiológicos (415)' },
-    { prefix: '4B', domain: null, evidence: 'sección 4, 4B: medición de dispositivos (marcapasos, estimuladores) (7)' },
-    { pattern: '^F.[0-5]', domain: 'functional', evidence: 'sección F, tipos 0–5: las 546 son «… Assessment» (habla, función motora, AVD, audición, audífono, vestibular); 6–F son tratamiento y quedan fuera' },
+    { prefix: 'B', domain: 'imaging', evidence: 'sección B «Imaging» (tipos oficiales: Plain Radiography, Fluoroscopy, CT, MRI, Ultrasonography, Other Imaging)' },
+    { pattern: '^C.[123]', domain: 'imaging', evidence: 'sección C «Nuclear Medicine», tipos 1–3: Planar, Tomographic y PET Imaging' },
+    { pattern: '^C.[456]', domain: null, evidence: 'sección C, tipos 4–6: Nonimaging Uptake, Probe y Assay; el tipo 7 (Systemic Nuclear Medicine Therapy) queda fuera' },
+    { prefix: '4A', domain: 'functional', evidence: 'sección 4 «Measurement and Monitoring», sistemas fisiológicos' },
+    { prefix: '4B', domain: null, evidence: 'sección 4, 4B: medición de dispositivos (marcapasos, estimuladores)' },
+    { pattern: '^F.[0-5]', domain: 'functional', evidence: 'sección F, tipos 0–5 (oficiales: Speech, Motor and/or Nerve Function, Activities of Daily Living, Hearing, Hearing Aid y Vestibular Assessment); 6–F son tratamiento, ajuste o entrenamiento y quedan fuera' },
+  ],
+  // CUPS (MinSalud Colombia, conjuntos POS Pópuli). Sólo códigos de 6 dígitos (ver cupsItems).
+  'cups-co': [
+    { prefix: '90', domain: 'laboratory', evidence: 'POSPOPULI-LABORATORIO: los 1 339 códigos son 90xxxx (laboratorio clínico)' },
+    { prefix: '911', domain: 'laboratory', evidence: 'PBS 911: anticuerpos irregulares y pruebas inmunohematológicas (64)' },
+    ...['870', '871', '872', '873'].map((prefix) => ({ prefix, domain: 'imaging', evidence: `PBS ${prefix}: radiografías` })),
+    ...['874', '875', '876', '877'].map((prefix) => ({ prefix, domain: 'imaging', evidence: `PBS ${prefix}: arteriografías, angiografías y estudios contrastados diagnósticos` })),
+    { prefix: '879', domain: 'imaging', evidence: 'PBS 879: tomografías computadas (39)' },
+    { prefix: '881', domain: 'imaging', evidence: 'PBS 881: ecografías (74)' },
+    { prefix: '882', domain: 'imaging', evidence: 'PBS 882: ecografías doppler (43)' },
+    { prefix: '883', domain: 'imaging', evidence: 'PBS 883: resonancias magnéticas (59)' },
+    { prefix: '886', domain: 'imaging', evidence: 'PBS 886: osteodensitometrías, morfometría vertebral, elastografía (5)' },
+    { prefix: '920', domain: 'imaging', evidence: 'PBS 920: gamagrafías (82)' },
+    { prefix: '921', domain: 'imaging', evidence: 'PBS 921: gamagrafías con galio, tumorales, de viabilidad (8)' },
+    { prefix: '898', domain: 'pathology', evidence: 'PBS 898: estudios de coloración, inmunohistoquímica y citometría en especímenes (68)' },
+    ...['891', '892', '894', '895', '897'].map((prefix) => ({ prefix, domain: 'functional', evidence: `PBS ${prefix}: pruebas funcionales y monitoreos diagnósticos (rinomanometría, urodinamia, pruebas de esfuerzo, Holter, monitoría fetal…)` })),
+    ...['950', '951', '952'].map((prefix) => ({ prefix, domain: 'functional', evidence: `PBS ${prefix}: pruebas diagnósticas oftalmológicas (campo visual, OCT, electrorretinograma…)` })),
+    { prefix: '954', domain: 'functional', evidence: 'PBS 954: audiometrías, impedanciometría y potenciales evocados auditivos (45)' },
   ],
   'pami-nomenclador': [
     { prefix: '66', domain: 'laboratory', evidence: 'capítulo 66: 338 análisis clínicos' },
@@ -99,6 +117,12 @@ export const TARIFF_EXCLUSIONS = {
     { prefix: '40813', reason: '4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)' },
     { prefix: '40814', reason: '4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos' },
     { prefix: '40502210', reason: 'terapia de reposición enzimática por infusión (tratamiento)' },
+  ],
+  'cups-co': [
+    { prefix: '911101', reason: 'procesamiento de la unidad de autotransfusión (no es un análisis)' },
+    { prefix: '954610', reason: 'liberación y reposicionamiento canalicular: terapia de rehabilitación vestibular' },
+    { prefix: '954903', reason: 'revisión y ajuste de dispositivo auditivo implantable (no es una prueba)' },
+    { prefix: '954904', reason: 'revisión y ajuste de dispositivo auditivo no implantable (no es una prueba)' },
   ],
   'pami-nomenclador': [
     { prefix: '187143', reason: 'drenajes y/o procedimientos similares bajo eco' },
@@ -148,7 +172,7 @@ export function tariffRecords(source, items, prov) {
       codeSystem: source,
       code: it.code,
       display: it.display ?? it.name,
-      definition: null,
+      definition: it.definition ?? null,
       lang: it.lang,
       selectable: it.selectable ?? true,
       status: it.status ?? 'active',
@@ -169,6 +193,7 @@ export function tariffRecords(source, items, prov) {
         sourceSha256: prov.sourceSha256,
         retrievedAt: prov.retrievedAt,
         license: prov.license,
+        ...(it.provenance ?? {}),
       },
     });
   }
@@ -233,6 +258,39 @@ export function tussItems(procedures) {
     }));
 }
 
+/**
+ * Nomenclador Común de PAMI, CSV oficial (datos.pami.org.ar, ISO-8859-1, `;`):
+ * título en la primera fila, cabecera «Módulo;Código de práctica;Descripción de
+ * práctica;Valor resultante unidades». Nombre verbatim en mayúsculas; `display`
+ * sólo normaliza la caja. El valor viene como texto en pesos («$ 115,32»).
+ */
+export function pamiOfficialItems(csvRows) {
+  const hi = csvRows.findIndex((r) => r.some((c) => c.trim() === 'Código de práctica'));
+  if (hi < 0) throw new Error('PAMI: no se encontró la cabecera «Código de práctica»');
+  const h = csvRows[hi].map((c) => c.trim());
+  const col = (name) => h.indexOf(name);
+  const [cMod, cCode, cDesc, cVal] = ['Módulo', 'Código de práctica', 'Descripción de práctica', 'Valor resultante unidades'].map(col);
+  const title = csvRows.slice(0, hi).flat().find((c) => c.trim())?.trim() ?? null;
+  return csvRows
+    .slice(hi + 1)
+    .filter((r) => /^\d{5,6}$/.test((r[cCode] ?? '').trim()))
+    .map((r) => {
+      const name = r[cDesc].replace(/\s+/g, ' ').trim();
+      const amount = (r[cVal] ?? '').trim().match(/^\$\s*([\d.]+,\d{2})$/);
+      return {
+        code: r[cCode].trim().padStart(6, '0'),
+        name,
+        display: displayCase(name),
+        lang: 'es',
+        properties: compact({
+          pami_module: (r[cMod] ?? '').trim() || null,
+          pami_code_as_published: r[cCode].trim(),
+          reference_price: amount ? { currency: 'ARS', schedule: title, amount: amount[1].replace(/\./g, '').replace(',', '.'), priceText: r[cVal].trim() } : null,
+        }),
+      };
+    });
+}
+
 /** Nomenclador PAMI: `[{ name, code:number }]`; el código se rellena a 6 dígitos (el JSON perdió el cero inicial). */
 export function pamiItems(rows) {
   return rows.map((r) => ({ code: String(r.code).padStart(6, '0'), name: r.name.replace(/\s+/g, ' ').trim(), lang: 'es', properties: { pami_code_as_published: r.code } }));
@@ -240,23 +298,23 @@ export function pamiItems(rows) {
 
 /**
  * ICD-10-PCS (filas `codes` del índice SQLite, sólo códigos válidos) → ítems.
- * La categoría es sección (posición 1, nombre de `pcs_axes`) + tipo (posición
- * 3). El nombre del tipo se toma del texto oficial (lo que precede a « of ») SÓLO
- * si es idéntico en todos los códigos de esa categoría —así es en B, C y 4—; si
- * no (sección F, donde ese texto es el calificador), queda «tipo <carácter>».
+ * La categoría es sección (posición 1) + tipo (posición 3), con los nombres
+ * oficiales de las code tables de CMS (`typeNames`, de pcsAxisNames). Sin esas
+ * tablas, el tipo se toma del texto de la descripción (lo que precede a « of »)
+ * SÓLO si es idéntico en toda la categoría; si no, queda «tipo <carácter>».
  */
-export function pcsItems(codes, sectionNames) {
+export function pcsItems(codes, sectionNames, typeNames = new Map()) {
   const catOf = (code) => `${code[0]}${code[2]}`;
-  const typeNames = new Map();
+  const descPrefixes = new Map();
   for (const r of codes) {
     const k = catOf(r.code);
-    if (!typeNames.has(k)) typeNames.set(k, new Set());
-    typeNames.get(k).add(r.long_desc.split(' of ')[0]);
+    if (!descPrefixes.has(k)) descPrefixes.set(k, new Set());
+    descPrefixes.get(k).add(r.long_desc.split(' of ')[0]);
   }
   return codes.map((r) => {
     const k = catOf(r.code);
-    const names = typeNames.get(k);
-    const type = names.size === 1 ? [...names][0] : `tipo ${r.code[2]}`;
+    const names = descPrefixes.get(k);
+    const type = typeNames.get(k) ?? (names.size === 1 ? [...names][0] : `tipo ${r.code[2]}`);
     return {
       code: r.code,
       name: r.long_desc,
@@ -265,4 +323,82 @@ export function pcsItems(codes, sectionNames) {
       properties: compact({ pcs_section: { value: r.code[0], meaning: sectionNames.get(r.code[0]) ?? null }, pcs_short_description: r.short_desc && r.short_desc !== r.long_desc ? r.short_desc : null }),
     };
   });
+}
+
+/**
+ * Designación oficial en castellano para ICD-10-PCS desde CIE-10-ES
+ * Procedimientos (Ministerio de Sanidad), que es su traducción oficial y usa
+ * los mismos códigos de siete caracteres. Se asigna SÓLO por igualdad exacta de
+ * código; lo que no está en CIE-10-ES queda sin designación y se cuenta.
+ * @param {Array} records registros de `icd10pcs-cms`
+ * @param {Map<string,string>} esByCode código → descripción CIE-10-ES (verbatim)
+ * @param {object} prov { edition, url, file, sha256 }
+ */
+export function addCie10esDesignations(records, esByCode, prov) {
+  let added = 0;
+  for (const r of records) {
+    const es = esByCode.get(r.code);
+    if (!es) continue;
+    added += 1;
+    r.designations = [{ lang: 'es', type: 'preferred', value: es }];
+    r.properties.designation_es_source = { source: `CIE-10-ES Procedimientos ${prov.edition} (Ministerio de Sanidad de España)`, rule: 'mismo código ICD-10-PCS', url: prov.url, file: prov.file, sha256: prov.sha256 };
+  }
+  return { added, missing: records.length - added };
+}
+
+/**
+ * CUPS de MinSalud Colombia (POS Pópuli): `POSPOPULI-LABORATORIO` + `Procedimiento del PBS`.
+ * Sólo códigos CUPS de 6 dígitos: el PBS trae además 811 códigos de 5 dígitos
+ * (p. ej. «10101») de otra codificación, que un prefijo podría confundir.
+ * `QueEs` es la explicación oficial en lenguaje llano y va como `definition`.
+ */
+export function cupsItems(labRows, pbsRows, provByDataset = {}) {
+  const clean = (v) => (v && v.trim() && v.trim() !== 'Sin dato' ? v.trim() : null);
+  const item = (r, dataset) => ({
+    ...(provByDataset[dataset] ? { provenance: provByDataset[dataset] } : {}),
+    code: r.CodigoCUPS.trim(),
+    name: r.Descripcion.trim(),
+    display: displayCase(r.Descripcion.replace(/\s+/g, ' ').trim()),
+    definition: clean(r.QueEs),
+    lang: 'es',
+    properties: compact({
+      cups_dataset: dataset,
+      cups_coverage_pbs: clean(r.CoberturaPlanBeneficiosUPC),
+      cups_coverage_detail: clean(r.DetallePlanBeneficiosUPC),
+      cups_exclusions_pbs: clean(r.ExclusionesPlanBeneficiosUPC),
+      cups_source_row_id: clean(r.CodigoLaboratorio ?? r.CodigoProcedimiento),
+    }),
+  });
+  const sixDigits = (r) => /^\d{6}$/.test((r.CodigoCUPS ?? '').trim());
+  return [...labRows.filter(sixDigits).map((r) => item(r, 'POSPOPULI-LABORATORIO')), ...pbsRows.filter(sixDigits).map((r) => item(r, 'Procedimiento del PBS'))];
+}
+
+/**
+ * Order file oficial de CMS (`icd10pcs_order_<año>.txt`, ancho fijo): orden (5),
+ * código (7), válido (1), título abreviado (60), título largo. Sólo `válido = 1`
+ * (códigos facturables; los encabezados de tabla son 0).
+ */
+export function pcsOrderFile(text) {
+  const out = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (line.length < 78) continue;
+    const code = line.slice(6, 13).trim();
+    if (line[14] !== '1' || !/^[0-9A-HJ-NP-Z]{7}$/.test(code)) continue;
+    out.push({ code, short_desc: line.slice(16, 76).trim(), long_desc: line.slice(77).trim() });
+  }
+  return out;
+}
+
+/** `icd10pcs_tables_<año>.xml` → nombres oficiales de sección (posición 1) y de tipo (posición 3, por sección). */
+export function pcsAxisNames(xml) {
+  const sections = new Map();
+  const types = new Map();
+  for (const m of xml.matchAll(/<pcsTable>([\s\S]*?)<\/pcsTable>/g)) {
+    const s = m[1].match(/<axis pos="1"[^>]*>\s*<title>[^<]*<\/title>\s*<label code="(.)">([^<]*)<\/label>/);
+    const t = m[1].match(/<axis pos="3"[^>]*>\s*<title>[^<]*<\/title>\s*<label code="(.)">([^<]*)<\/label>/);
+    if (!s || !t) continue;
+    sections.set(s[1], s[2]);
+    types.set(`${s[1]}${t[1]}`, t[2]);
+  }
+  return { sections, types };
 }

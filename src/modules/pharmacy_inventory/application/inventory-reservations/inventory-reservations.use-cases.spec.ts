@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { PreconditionFailedException } from '../../../../common';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';
 import { ExpireInventoryReservationsUseCase } from './expire-inventory-reservations.use-case';
 import { ReleaseConfirmedReservationLinesUseCase } from './release-confirmed-reservation-lines.use-case';
 import { ReserveInventoryUseCase } from './reserve-inventory.use-case';
@@ -33,6 +34,7 @@ describe('Inventory reservation use cases', () => {
       reservations as any,
       stock as any,
       ledger as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -92,6 +94,7 @@ describe('Inventory reservation use cases', () => {
         findByKeyForUpdate: jest.fn(async () => ({ availableQuantity: '1' })),
       } as any,
       {} as any,
+      allowAllScope(),
       logger as any,
     );
 

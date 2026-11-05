@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import {
   InventoryLocationsService,
   InventoryReservationsService,
@@ -18,6 +23,7 @@ import {
 } from '../../services';
 import {
   CreateLocationDto,
+  RelocateLocationDto,
   CreateReservationDto,
   CreateTransferDto,
   CreateCountSessionDto,
@@ -58,6 +64,11 @@ export class PharmacyInventoryController {
   ) {}
 
   /** Bootstrap: alta de ubicación de inventario. */
+  @Audited({
+    action: 'INVENTORY_LOCATION_CREATED',
+    entity: 'inventory_location',
+    entityId: 'result.id',
+  })
   @Post(':siteId/inventory-locations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -70,7 +81,30 @@ export class PharmacyInventoryController {
     return this.locations.create(siteId, dto, actor);
   }
 
+  /** F5c: reubicar una ubicación en otro espacio (el stock la sigue). */
+  @Audited({
+    action: 'INVENTORY_LOCATION_RELOCATED',
+    entity: 'inventory_location',
+    entityId: 'param:id',
+  })
+  @Post('inventory-locations/:id/relocate')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reubicar una ubicación de inventario (F5c)' })
+  relocateLocation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RelocateLocationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.locations.relocate(id, dto, actor);
+  }
+
   /** UC-25-04: reservar stock. */
+  @Audited({
+    action: 'INVENTORY_RESERVED',
+    entity: 'inventory_reservation',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/reservations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -84,6 +118,10 @@ export class PharmacyInventoryController {
   }
 
   /** UC-25-10: transferir stock entre ubicaciones. */
+  @Audited({
+    action: 'INVENTORY_TRANSFERRED',
+    entity: 'inventory_ledger_entry',
+  })
   @Post(':pharmacyId/transfers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -97,6 +135,11 @@ export class PharmacyInventoryController {
   }
 
   /** UC-25-06: abrir sesión de conteo cíclico. */
+  @Audited({
+    action: 'INVENTORY_COUNT_SESSION_OPENED',
+    entity: 'inventory_count_session',
+    entityId: 'result.id',
+  })
   @Post(':siteId/count-sessions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -112,6 +155,11 @@ export class PharmacyInventoryController {
   }
 
   /** UC-25-07: aprobar conteo y ajustar por varianza. */
+  @Audited({
+    action: 'INVENTORY_COUNT_SESSION_APPROVED',
+    entity: 'inventory_count_session',
+    entityId: 'param:id',
+  })
   @Post('count-sessions/:id/approve')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -127,6 +175,11 @@ export class PharmacyInventoryController {
   }
 
   /** UC-25-08: aplicar recall/hold sobre un lote. */
+  @Audited({
+    action: 'INVENTORY_RECALL_HOLD_CREATED',
+    entity: 'inventory_recall_hold',
+    entityId: 'result.id',
+  })
   @Post('recall-holds')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -139,6 +192,11 @@ export class PharmacyInventoryController {
   }
 
   /** UC-25-09: liberar recall y reactivar lote. */
+  @Audited({
+    action: 'INVENTORY_RECALL_HOLD_RELEASED',
+    entity: 'inventory_recall_hold',
+    entityId: 'param:id',
+  })
   @Post('recall-holds/:id/release')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  type AuthenticatedUser,
+  Roles,
+} from '../../../common';
 import { CommunityPollsService, CommunityPollsReadService } from '../services';
 import {
   CreatePollDto,
@@ -20,7 +25,11 @@ import {
   PollDetailDto,
 } from '../dto';
 
-/** Endpoints de encuestas: creación sobre un post y voto. */
+/** Endpoints de encuestas: creación sobre un post y voto. *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global. Crear y votar exigen
+ * actuar con un perfil propio (`assertActsAsProfile`); leer una encuesta exige
+ * poder ver la publicación (`canViewPost`).
+ */
 @ApiTags('community-polls')
 @ApiBearerAuth()
 @Controller('community')
@@ -37,7 +46,13 @@ export class CommunityPollsController {
   ) {}
 
   /** Bootstrap: crea una encuesta con sus opciones sobre un post. */
+  @Audited({
+    action: 'POLL_CREATED',
+    entity: 'poll',
+    entityId: 'result.id',
+  })
   @Post('posts/:postId/polls')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una encuesta con opciones sobre un post' })
   createPoll(
@@ -49,7 +64,13 @@ export class CommunityPollsController {
   }
 
   /** UC-19-12. */
+  @Audited({
+    action: 'POLL_VOTED',
+    entity: 'poll_vote',
+    entityId: 'result.id',
+  })
   @Post('polls/:pollId/votes')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Votar en una encuesta' })
   vote(
@@ -62,6 +83,7 @@ export class CommunityPollsController {
 
   /** UC-19-17 (cara de lectura). Encuesta con recuentos y el voto del actor. */
   @Get('polls/:pollId')
+  @Roles()
   @ApiOperation({ summary: 'Encuesta con opciones, recuentos y voto propio' })
   getPoll(
     @Param('pollId', ParseUUIDPipe) pollId: string,

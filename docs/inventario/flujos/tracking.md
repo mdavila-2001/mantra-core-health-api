@@ -47,7 +47,7 @@ _Fuente: `src/modules/tracking/README.md:59`_
 | `UC-37-01` | Abrir sujeto y crear envío | POST /tracking/trackable-subjects | TRACKING_ADMIN · LOGISTICS_OPERATOR | MEDIO | 5 |
 | `UC-37-02` | Catálogo de hitos esperados | POST /tracking/milestone-definitions | TRACKING_ADMIN | MEDIO | 2 |
 | `UC-37-03` | Despachar envío | POST /tracking/shipments/{id}/dispatch | LOGISTICS_OPERATOR · TRACKING_ADMIN | MEDIO | 5 |
-| `UC-37-04` | Evento y avance de hito | POST /tracking/trackable-subjects/{id}/events | LOGISTICS_OPERATOR · COURIER · TRACKING_ADMIN | MEDIO | 4 |
+| `UC-37-04` | Evento y avance de hito | POST /tracking/trackable-subjects/{id}/events | LOGISTICS_OPERATOR · COURIER · TRACKING_ADMIN | MEDIO | 5 |
 | `UC-37-05` | Webhook del transportista | POST /tracking/webhooks/carriers/{carrierCode} | Público (sin sesión) | ALTO | 7 |
 | `UC-37-06` | Traspaso entre responsables | POST /tracking/shipments/{id}/handoffs | LOGISTICS_OPERATOR · COURIER · TRACKING_ADMIN | MEDIO | 5 |
 | `UC-37-07` | Estimación de llegada | POST /tracking/shipments/{id}/eta/recompute | SYSTEM · LOGISTICS_OPERATOR · TRACKING_ADMIN | MEDIO | 5 |
@@ -128,6 +128,7 @@ flowchart LR
   o9 -->|"CREA"| t11
   a13 --> o12
   o12 -->|"LEE"| t8
+  o12 -->|"LEE"| t3
   o12 -->|"ACTUALIZA"| t4
   o12 -->|"LEE"| t4
   o12 -->|"CREA"| t11
@@ -250,8 +251,7 @@ Cancelar el envío y cerrar el sujeto
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
 | 409 | `CONFLICT` | ConflictException: El envío ya está cancelado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un envío entregado no se cancela |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -271,32 +271,35 @@ flowchart TD
   n5 --> n6
   n7{"!shipment"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Envío no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"shipment.statusConceptId === CONCEPTS.TRACK_CANCELLED"}:::decision
+  n9["Llama a TrackingService.assertMayOperate"]:::llamada
   n7 -->|"no"| n9
-  n10(["409 CONFLICT El envío ya está cancelado"]):::error
-  n9 -->|"sí"| n10
-  n11{"shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Un envío entregado no se cancela"]):::error
+  n10(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n9 --> n10
+  n11{"shipment.statusConceptId === CONCEPTS.TRACK_CANCELLED"}:::decision
+  n12(["409 CONFLICT El envío ya está cancelado"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n13{"shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED"}:::decision
   n11 -->|"no"| n13
-  n14[("LEE tracking.trackable_subjects")]:::efecto
-  n13 --> n14
-  n15{"!subject"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
-  n15 -->|"sí"| n16
-  n17[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects…")]:::efecto
-  n15 -->|"no"| n17
-  n18["Llama a TrackingRepository.createEvent"]:::llamada
-  n17 --> n18
-  n19[("CREA tracking.tracking_events")]:::efecto
-  n18 --> n19
-  n20(("200 Responde con éxito")):::ok
+  n14(["422 PRECONDITION_FAILED Un envío entregado no se cancela"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE tracking.trackable_subjects")]:::efecto
+  n15 --> n16
+  n17{"!subject"}:::decision
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects…")]:::efecto
+  n17 -->|"no"| n19
+  n20["Llama a TrackingRepository.createEvent"]:::llamada
   n19 --> n20
+  n21[("CREA tracking.tracking_events")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -314,8 +317,7 @@ Registrar la prueba de entrega y cerrar
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
 | 409 | `CONFLICT` | ConflictException: El envío ya está entregado; ConflictException: El envío ya tiene prueba de entrega verificada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una prueba por firma necesita el archivo de firma; PreconditionFailedException: Una prueba por foto necesita la foto; PreconditionFailedException: El envío no admite entrega en su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -343,57 +345,60 @@ flowchart TD
   n9 --> n10
   n11{"!shipment"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Envío no encontrado"]):::error
+  n12(["↩ (relanza el error capturado)"]):::error
   n11 -->|"sí"| n12
-  n13{"shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED"}:::decision
+  n13["Llama a TrackingService.assertMayOperate"]:::llamada
   n11 -->|"no"| n13
-  n14(["409 CONFLICT El envío ya está entregado"]):::error
-  n13 -->|"sí"| n14
-  n15{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED El envío no admite entrega en su estado actual"]):::error
+  n14(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n13 --> n14
+  n15{"shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED"}:::decision
+  n16(["409 CONFLICT El envío ya está entregado"]):::error
   n15 -->|"sí"| n16
-  n17["Llama a TrackingRepository.findVerifiedProof"]:::llamada
+  n17{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
   n15 -->|"no"| n17
-  n18[("LEE tracking.delivery_proofs")]:::efecto
-  n17 --> n18
-  n19{"existing"}:::decision
-  n18 --> n19
-  n20(["409 CONFLICT El envío ya tiene prueba de entrega verificada"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
-  n19 -->|"no"| n21
-  n22[("LEE tracking.trackable_subjects")]:::efecto
-  n21 --> n22
-  n23{"!subject"}:::decision
-  n22 --> n23
-  n24(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a TrackingRepository.createDeliveryProof"]:::llamada
-  n23 -->|"no"| n25
-  n26[("CREA tracking.delivery_proofs")]:::efecto
-  n25 --> n26
-  n27[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
-  n26 --> n27
-  n28["Llama a TrackingRepository.findMilestonesBySubjectType"]:::llamada
+  n18(["422 PRECONDITION_FAILED El envío no admite entrega en su estado actual"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a TrackingRepository.findVerifiedProof"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE tracking.delivery_proofs")]:::efecto
+  n19 --> n20
+  n21{"existing"}:::decision
+  n20 --> n21
+  n22(["409 CONFLICT El envío ya tiene prueba de entrega verificada"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE tracking.trackable_subjects")]:::efecto
+  n23 --> n24
+  n25{"!subject"}:::decision
+  n24 --> n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a TrackingRepository.createDeliveryProof"]:::llamada
+  n25 -->|"no"| n27
+  n28[("CREA tracking.delivery_proofs")]:::efecto
   n27 --> n28
-  n29[("LEE tracking.milestone_definitions")]:::efecto
+  n29[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
   n28 --> n29
-  n30[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n30["Llama a TrackingRepository.findMilestonesBySubjectType"]:::llamada
   n29 --> n30
-  n31{"terminal"}:::decision
+  n31[("LEE tracking.milestone_definitions")]:::efecto
   n30 --> n31
-  n32[("ACTUALIZA tracking.trackable_subjects")]:::efecto
-  n31 -->|"sí"| n32
-  n33[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n32[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n31 --> n32
+  n33{"terminal"}:::decision
   n32 --> n33
-  n31 -->|"no"| n33
-  n34["Llama a TrackingRepository.createEvent"]:::llamada
-  n33 --> n34
-  n35[("CREA tracking.tracking_events")]:::efecto
+  n34[("ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n33 -->|"sí"| n34
+  n35[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
   n34 --> n35
-  n36(("201 Responde con éxito")):::ok
+  n33 -->|"no"| n35
+  n36["Llama a TrackingRepository.createEvent"]:::llamada
   n35 --> n36
+  n37[("CREA tracking.tracking_events")]:::efecto
+  n36 --> n37
+  n38(("201 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -411,8 +416,7 @@ Despachar el envío
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío no está en preparación; PreconditionFailedException: El despacho necesita transportista o mensajero asignado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -431,39 +435,42 @@ flowchart TD
   n5 --> n6
   n7{"!shipment"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Envío no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"shipment.statusConceptId !== CONCEPTS.TRACK_PREPARING"}:::decision
+  n9["Llama a TrackingService.assertMayOperate"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El envío no está en preparación"]):::error
-  n9 -->|"sí"| n10
-  n11{"!shipment.carrierId && !dto.assignedCourierUserId && !shipment.assignedCourierUserId"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El despacho necesita transportista o mensajero asignado"]):::error
+  n10(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n9 --> n10
+  n11{"shipment.statusConceptId !== CONCEPTS.TRACK_PREPARING"}:::decision
+  n12(["422 PRECONDITION_FAILED El envío no está en preparación"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n13{"!shipment.carrierId && !dto.assignedCourierUserId && !shipment.assignedCourierUserId"}:::decision
   n11 -->|"no"| n13
-  n14[("LEE tracking.trackable_subjects")]:::efecto
-  n13 --> n14
-  n15{"!subject"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
-  n15 -->|"sí"| n16
-  n17[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
-  n15 -->|"no"| n17
-  n18{"dto.assignedCourierUserId"}:::decision
-  n17 --> n18
-  n19[("ACTUALIZA tracking.shipments")]:::efecto
-  n18 -->|"sí"| n19
-  n20[("ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n14(["422 PRECONDITION_FAILED El despacho necesita transportista o mensajero asignado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE tracking.trackable_subjects")]:::efecto
+  n15 --> n16
+  n17{"!subject"}:::decision
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
+  n17 -->|"no"| n19
+  n20{"dto.assignedCourierUserId"}:::decision
   n19 --> n20
-  n18 -->|"no"| n20
-  n21["Llama a TrackingRepository.createEvent"]:::llamada
-  n20 --> n21
-  n22[("CREA tracking.tracking_events")]:::efecto
+  n21[("ACTUALIZA tracking.shipments")]:::efecto
+  n20 -->|"sí"| n21
+  n22[("ACTUALIZA tracking.trackable_subjects")]:::efecto
   n21 --> n22
-  n23(("200 Responde con éxito")):::ok
+  n20 -->|"no"| n22
+  n23["Llama a TrackingRepository.createEvent"]:::llamada
   n22 --> n23
+  n24[("CREA tracking.tracking_events")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -481,8 +488,7 @@ Registrar una estimación de llegada
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite estimaciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -501,36 +507,39 @@ flowchart TD
   n5 --> n6
   n7{"!shipment"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Envío no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n9["Llama a TrackingService.assertMayOperate"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El envío ya no admite estimaciones"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a TrackingRepository.findLatestEstimate"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE tracking.eta_estimates")]:::efecto
-  n11 --> n12
-  n13["Llama a TrackingRepository.createEtaEstimate"]:::llamada
-  n12 --> n13
-  n14[("CREA tracking.eta_estimates")]:::efecto
+  n10(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n9 --> n10
+  n11{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n12(["422 PRECONDITION_FAILED El envío ya no admite estimaciones"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a TrackingRepository.findLatestEstimate"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE tracking.eta_estimates")]:::efecto
   n13 --> n14
-  n15{"applied"}:::decision
+  n15["Llama a TrackingRepository.createEtaEstimate"]:::llamada
   n14 --> n15
-  n16[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
-  n15 -->|"sí"| n16
-  n17{"dto.distanceM"}:::decision
+  n16[("CREA tracking.eta_estimates")]:::efecto
+  n15 --> n16
+  n17{"applied"}:::decision
   n16 --> n17
-  n18[("ACTUALIZA tracking.shipments")]:::efecto
+  n18[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.shipments")]:::efecto
   n17 -->|"sí"| n18
-  n19["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n19{"dto.distanceM"}:::decision
   n18 --> n19
-  n17 -->|"no"| n19
-  n15 -->|"no"| n19
-  n20[("LEE tracking.trackable_subjects")]:::efecto
-  n19 --> n20
-  n21(("201 Responde con éxito")):::ok
+  n20[("ACTUALIZA tracking.shipments")]:::efecto
+  n19 -->|"sí"| n20
+  n21["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
   n20 --> n21
+  n19 -->|"no"| n21
+  n17 -->|"no"| n21
+  n22[("LEE tracking.trackable_subjects")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -548,8 +557,7 @@ Marcar una excepción o reintento de entrega
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite excepciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -568,35 +576,38 @@ flowchart TD
   n5 --> n6
   n7{"!shipment"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Envío no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n9["Llama a TrackingService.assertMayOperate"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El envío ya no admite excepciones"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE tracking.trackable_subjects")]:::efecto
-  n11 --> n12
-  n13{"!subject"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
-  n13 -->|"sí"| n14
-  n15[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
-  n13 -->|"no"| n15
-  n16["Llama a TrackingRepository.createEvent"]:::llamada
-  n15 --> n16
-  n17[("CREA tracking.tracking_events")]:::efecto
-  n16 --> n17
-  n18{"dto.photoFileId"}:::decision
+  n10(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n9 --> n10
+  n11{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n12(["422 PRECONDITION_FAILED El envío ya no admite excepciones"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE tracking.trackable_subjects")]:::efecto
+  n13 --> n14
+  n15{"!subject"}:::decision
+  n14 --> n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA tracking.shipments · ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n15 -->|"no"| n17
+  n18["Llama a TrackingRepository.createEvent"]:::llamada
   n17 --> n18
-  n19["Llama a TrackingRepository.createDeliveryProof"]:::llamada
-  n18 -->|"sí"| n19
-  n20[("CREA tracking.delivery_proofs")]:::efecto
+  n19[("CREA tracking.tracking_events")]:::efecto
+  n18 --> n19
+  n20{"dto.photoFileId"}:::decision
   n19 --> n20
-  n21(("201 Responde con éxito")):::ok
-  n20 --> n21
-  n18 -->|"no"| n21
+  n21["Llama a TrackingRepository.createDeliveryProof"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("CREA tracking.delivery_proofs")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
+  n20 -->|"no"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -614,8 +625,8 @@ Registrar el traspaso entre responsables
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Transportista no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transportista no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite traspasos; PreconditionFailedException: El transportista no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -634,49 +645,52 @@ flowchart TD
   n5 --> n6
   n7{"!shipment"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Envío no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n9["Llama a TrackingService.assertMayOperate"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El envío ya no admite traspasos"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.newCarrierId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a TrackingRepository.findCarrierById"]:::llamada
+  n10(["403 FORBIDDEN No tiene acceso a este envío"]):::error
+  n9 --> n10
+  n11{"!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n12(["422 PRECONDITION_FAILED El envío ya no admite traspasos"]):::error
   n11 -->|"sí"| n12
-  n13[("LEE tracking.tracking_carriers")]:::efecto
-  n12 --> n13
-  n14{"!carrier"}:::decision
-  n13 --> n14
-  n15(["404 NOT_FOUND Transportista no encontrado"]):::error
-  n14 -->|"sí"| n15
-  n16{"carrier.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED El transportista no está activo"]):::error
+  n13{"dto.newCarrierId"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a TrackingRepository.findCarrierById"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("LEE tracking.tracking_carriers")]:::efecto
+  n14 --> n15
+  n16{"!carrier"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Transportista no encontrado"]):::error
   n16 -->|"sí"| n17
-  n18["Llama a TrackingRepository.createHandoff"]:::llamada
+  n18{"carrier.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n16 -->|"no"| n18
-  n11 -->|"no"| n18
-  n19[("CREA tracking.shipment_handoffs")]:::efecto
-  n18 --> n19
-  n20[("ACTUALIZA tracking.shipments")]:::efecto
-  n19 --> n20
-  n21{"dto.newCarrierId"}:::decision
+  n19(["422 PRECONDITION_FAILED El transportista no está activo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a TrackingRepository.createHandoff"]:::llamada
+  n18 -->|"no"| n20
+  n13 -->|"no"| n20
+  n21[("CREA tracking.shipment_handoffs")]:::efecto
   n20 --> n21
   n22[("ACTUALIZA tracking.shipments")]:::efecto
-  n21 -->|"sí"| n22
-  n23{"dto.newCourierUserId"}:::decision
+  n21 --> n22
+  n23{"dto.newCarrierId"}:::decision
   n22 --> n23
-  n21 -->|"no"| n23
   n24[("ACTUALIZA tracking.shipments")]:::efecto
   n23 -->|"sí"| n24
-  n25["Llama a TrackingRepository.createEvent"]:::llamada
+  n25{"dto.newCourierUserId"}:::decision
   n24 --> n25
   n23 -->|"no"| n25
-  n26[("CREA tracking.tracking_events")]:::efecto
-  n25 --> n26
-  n27(("201 Responde con éxito")):::ok
+  n26[("ACTUALIZA tracking.shipments")]:::efecto
+  n25 -->|"sí"| n26
+  n27["Llama a TrackingRepository.createEvent"]:::llamada
   n26 --> n27
+  n25 -->|"no"| n27
+  n28[("CREA tracking.tracking_events")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -834,8 +848,8 @@ Registrar un evento y avanzar el hito
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreable no encontrado; ResourceNotFoundException: Hito no encontrado para el tipo de sujeto |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene acceso a este envío |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hito no encontrado para el tipo de sujeto |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El seguimiento del sujeto está cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -854,38 +868,48 @@ flowchart TD
   n5 --> n6
   n7{"!subject"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
-  n9{"subject.stateConceptId === CONCEPTS.SUBJECT_CLOSED"}:::decision
+  n9{"!this.isShipmentManager(actor, tenantId)"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El seguimiento del sujeto está cerrado"]):::error
+  n10["Llama a TrackingRepository.findShipmentBySubject"]:::llamada
   n9 -->|"sí"| n10
-  n11["Llama a TrackingRepository.findMilestoneByCode"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE tracking.milestone_definitions")]:::efecto
+  n11[("LEE tracking.shipments")]:::efecto
+  n10 --> n11
+  n12["Llama a TrackingService.assertMayOperate"]:::llamada
   n11 --> n12
-  n13{"dto.milestoneCode && !milestone"}:::decision
+  n13(["403 FORBIDDEN No tiene acceso a este envío"]):::error
   n12 --> n13
-  n14(["404 NOT_FOUND Hito no encontrado para el tipo de sujeto"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a TrackingRepository.createEvent"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA tracking.tracking_events")]:::efecto
-  n15 --> n16
-  n17[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n14{"subject.stateConceptId === CONCEPTS.SUBJECT_CLOSED"}:::decision
+  n9 -->|"no"| n14
+  n15(["422 PRECONDITION_FAILED El seguimiento del sujeto está cerrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a TrackingRepository.findMilestoneByCode"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE tracking.milestone_definitions")]:::efecto
   n16 --> n17
-  n18{"milestone"}:::decision
+  n18{"dto.milestoneCode && !milestone"}:::decision
   n17 --> n18
-  n19[("ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n19(["404 NOT_FOUND Hito no encontrado para el tipo de sujeto"]):::error
   n18 -->|"sí"| n19
-  n20{"milestone?.isTerminal"}:::decision
-  n19 --> n20
+  n20["Llama a TrackingRepository.createEvent"]:::llamada
   n18 -->|"no"| n20
-  n21[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
-  n20 -->|"sí"| n21
-  n22(("201 Responde con éxito")):::ok
+  n21[("CREA tracking.tracking_events")]:::efecto
+  n20 --> n21
+  n22[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
   n21 --> n22
-  n20 -->|"no"| n22
+  n23{"milestone"}:::decision
+  n22 --> n23
+  n24[("ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n23 -->|"sí"| n24
+  n25{"milestone?.isTerminal"}:::decision
+  n24 --> n25
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA tracking.trackable_subjects · ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n25 -->|"sí"| n26
+  n27(("201 Responde con éxito")):::ok
+  n26 --> n27
+  n25 -->|"no"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -903,7 +927,7 @@ Ingerir el webhook del transportista
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Transportista no encontrado; ResourceNotFoundException: Número de seguimiento desconocido; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreable no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -919,41 +943,41 @@ flowchart TD
   n4 --> n5
   n6[("LEE tracking.tracking_carriers")]:::efecto
   n5 --> n6
-  n7{"!carrier"}:::decision
+  n7["Llama a TrackingRepository.findSubjectByTrackingNumber"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Transportista no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a TrackingRepository.findSubjectByTrackingNumber"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE tracking.trackable_subjects")]:::efecto
-  n9 --> n10
-  n11{"!subject"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Número de seguimiento desconocido"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a TrackingRepository.findEventByExternalReference"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE tracking.tracking_events")]:::efecto
-  n13 --> n14
-  n15["Llama a TrackingRepository.findSubjectForUpdate"]:::llamada
-  n14 --> n15
-  n16[("LEE tracking.trackable_subjects")]:::efecto
+  n8[("LEE tracking.trackable_subjects")]:::efecto
+  n7 --> n8
+  n9{"!subject"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a TrackingRepository.lockSubjectById"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE tracking.trackable_subjects")]:::efecto
+  n11 --> n12
+  n13{"!locked"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a TrackingRepository.findShipmentBySubjectForUpdate"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE tracking.shipments")]:::efecto
   n15 --> n16
-  n17{"!locked"}:::decision
+  n17{"!shipment || shipment.carrierId !== carrier.id || (carrier.tenantId && locked.tenantId !== carrier.tenantId)"}:::decision
   n16 --> n17
-  n18(["404 NOT_FOUND Sujeto rastreable no encontrado"]):::error
+  n18(["↩ (relanza el error capturado)"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a TrackingRepository.createEvent"]:::llamada
+  n19["Llama a TrackingRepository.findEventByExternalReference"]:::llamada
   n17 -->|"no"| n19
-  n20[("CREA tracking.tracking_events")]:::efecto
+  n20[("LEE tracking.tracking_events")]:::efecto
   n19 --> n20
-  n21[("ACTUALIZA tracking.trackable_subjects")]:::efecto
+  n21["Llama a TrackingRepository.createEvent"]:::llamada
   n20 --> n21
-  n22["Llama a TrackingRepository.findShipmentBySubjectForUpdate"]:::llamada
+  n22[("CREA tracking.tracking_events")]:::efecto
   n21 --> n22
-  n23[("LEE tracking.shipments")]:::efecto
+  n23[("ACTUALIZA tracking.trackable_subjects")]:::efecto
   n22 --> n23
-  n24{"shipment && LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
+  n24{"LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)"}:::decision
   n23 --> n24
   n25[("ACTUALIZA tracking.shipments")]:::efecto
   n24 -->|"sí"| n25

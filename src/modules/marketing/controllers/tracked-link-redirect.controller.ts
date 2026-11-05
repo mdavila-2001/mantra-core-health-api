@@ -39,19 +39,18 @@ export class TrackedLinkRedirectController {
   @ApiOperation({
     summary: 'Resolver un enlace rastreable y registrar el click',
     description:
-      'El contador se incrementa de forma atómica; el touchpoint sólo se registra si se identifica al miembro.',
+      'El contador se incrementa de forma atómica. El touchpoint sólo se registra si el click trae un token de destinatario firmado y vigente; el destinatario nunca se declara en parámetros públicos.',
   })
   @ApiQuery({
-    name: 'memberType',
+    name: 't',
     required: false,
-    enum: ['CONTACT', 'PATIENT'],
+    description:
+      'Token opaco emitido por POST /marketing/tracked-links/:id/recipient-tokens',
   })
-  @ApiQuery({ name: 'memberRefId', required: false, format: 'uuid' })
   resolve(
     @Param('code') code: string,
-    @Query('memberType') memberType?: string,
-    @Query('memberRefId') memberRefId?: string,
+    @Query('t') token?: string,
   ): Promise<TrackedLinkClickResponseDto> {
-    return this.journeysService.registerClick(code, memberType, memberRefId);
+    return this.journeysService.registerClick(code, token);
   }
 }

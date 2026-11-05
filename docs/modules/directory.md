@@ -9,7 +9,7 @@
 # Módulo `directory`
 
 **Fuente:** [`src/modules/directory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/directory/README.md)
-· 3 controllers · 10 services · 5 repositories · 7 entidades · 20 DTO
+· 3 controllers · 12 services · 6 repositories · 9 entidades · 21 DTO
 
 ---
 
@@ -28,13 +28,13 @@ membresías de usuarios a tenant y a branch.
   find src/modules/directory -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 22 rutas HTTP, 7 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 22 rutas HTTP, 9 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`CommunityModule`, `InsuranceModule`, `TerminologyModule`, `DiagnosticUnitsModule`, `CommonModule`, `DirectoryAuthorizationModule`).
 
-Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `branch_memberships`, `branches`, `tenant_affiliation_documents`, `tenant_legal_representatives`, `tenant_memberships`, `tenant_web_configs`, `tenants`.
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `branch_memberships`, `branches`, `tenant_affiliation_documents`, `tenant_legal_representatives`, `tenant_medical_facilities`, `tenant_medical_facility_sites`, `tenant_memberships`, `tenant_web_configs`, `tenants`.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -81,6 +81,31 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `branch_memberships`, `b
 `directory.tenants`, `directory.branches`, `directory.tenant_memberships`,
 `directory.branch_memberships` (más `tenant_affiliation_documents`,
 `tenant_legal_representatives`, `tenant_web_configs`, no expuestas por estos UCs).
+
+### Establecimiento médico declarado en el alta
+
+`directory.tenant_medical_facilities` (una fila por tenant) y
+`directory.tenant_medical_facility_sites` (casa central con ordinal 0 y hasta 50
+sucursales con ordinal 1..50) guardan lo que el alta pública
+`POST /iam/auth/register-organization` declara en `organization.medicalFacility`
+para `HOSPITAL`, `CLINIC`, `MEDICAL_OFFICE`, `NURSING` y `HEALTH_OTHER`:
+
+- el NIT como número (`^[0-9][0-9-]{3,19}$`) y el número de registro del
+  establecimiento ante la autoridad sanitaria (SEDES en Bolivia,
+  `^[A-Za-z0-9./-]{3,50}$`);
+- el director médico (nombre en partes, matrícula profesional, correo, teléfono),
+  como columnas de la misma fila: no es una cuenta ni una fila de
+  `profiles.persons`;
+- la casa central y las sucursales como sedes **declaradas**, no
+  `directory.branches` ni `practice.practice_sites`: la práctica y la sede
+  operativas nacen en `medical-center-setup` tras la verificación.
+
+Son datos declarados y sin verificar: ni el NIT ni el número de registro son
+únicos (un `UNIQUE` dejaría que quien lo tipee primero, aunque sea falso, bloquee
+al titular real). `TenantTypeProfileService.materializeProfile` los persiste en la
+transacción del alta, con el owner como autor. El bloque con cualquier otro
+`tenantType` responde 422, y la latitud y la longitud de cada sede van juntas o no
+van (400 en el DTO, 422 si llega a `TenantTypeProfileService`).
 
 ## Reglas de negocio
 

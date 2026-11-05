@@ -169,6 +169,16 @@ export class AppointmentBookings {
   serviceSnapshot?: unknown;
 
   /**
+   * Valor de pre visit instructions snapshot mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'pre_visit_instructions_snapshot',
+    columnType: 'text',
+    nullable: true,
+  })
+  preVisitInstructionsSnapshot?: string;
+
+  /**
    * P42: la consulta de la que sale esta reconsulta. El vínculo va en UN solo
    * lado —la reconsulta apunta a su origen—; el sentido inverso
    * (`followUpBookingId`) se deriva al leer.
@@ -177,13 +187,35 @@ export class AppointmentBookings {
     fieldName: 'follow_up_of_booking_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → scheduling.appointment_bookings
+  }) // FK (destino no resuelto)
   followUpOfBookingId?: string;
 
   /**
    * P43: instancia (cerrada) del formulario médico de la consulta de origen de
    * la que sale la reconsulta. Sólo tiene sentido con `followUpOfBookingId`.
    */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances (inferida)
   formInstanceId?: string;
+
+  /**
+   * Identificador asociado a care space.
+   */
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
+  /**
+   * Identificador asociado a healthcare service.
+   */
+  @Property({
+    fieldName: 'healthcare_service_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → practice.healthcare_services (inferida)
+  healthcareServiceId?: string;
+
+  /**
+   * Identificador asociado a booked via grant.
+   */
+  @Property({ fieldName: 'booked_via_grant_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  bookedViaGrantId?: string;
 }

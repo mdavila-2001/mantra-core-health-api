@@ -10,6 +10,7 @@ import {
   VitalNormalizationService,
   TimescaleAdminService,
   SeriesQueryService,
+  LocationConsentPolicy,
 } from './services';
 import { SeriesIngestRepository, TimescaleRepository } from './repositories';
 
@@ -45,6 +46,7 @@ import { SeriesIngestRepository, TimescaleRepository } from './repositories';
     VitalNormalizationService,
     TimescaleAdminService,
     SeriesQueryService,
+    LocationConsentPolicy,
   ],
 })
 export class TimeSeriesModule {}

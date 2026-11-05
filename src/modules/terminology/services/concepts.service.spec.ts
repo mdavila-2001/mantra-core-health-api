@@ -53,6 +53,7 @@ function build() {
     findByTypesForSources: jest.fn(() => Promise.resolve([])),
     findByTypesForTargets: jest.fn(() => Promise.resolve([])),
     countNeighborsByType: jest.fn(() => Promise.resolve([])),
+    findEvidenceSummaries: jest.fn(() => Promise.resolve([])),
   } as any;
   const valueSetsRepo = {
     findMembersByConceptForUpdate: jest.fn(() => Promise.resolve([])),
@@ -508,6 +509,181 @@ describe('ConceptsService', () => {
       await expect(
         service.lookupConcept('http://x', 'ZZZ'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  /**
+   * Farmacología clínica (issue 824): las secciones se cargan con
+   * `audience: 'professional'`, la posología incluida, y solo las ve un rol
+   * clínico. Las que CIMA publica sin fecha llevan `versionUnpublished` y la
+   * lectura las expone como antigüedad desconocida (estado S7).
+   */
+  describe('farmacología clínica: audiencia y antigüedad', () => {
+    const section = (key: string, document: Record<string, unknown>) => ({
+      key,
+      audience: 'professional',
+      language: 'es',
+      text: `texto de ${key}`,
+      retrievedAt: '2026-10-24T17:00:00.000Z',
+      document: { type: 'ficha-tecnica', id: '15419', ...document },
+    });
+    const posology = section('posology', {
+      version: '2026-04-16T10:00:00.000Z',
+    });
+    const undated = section('indications', {
+      version: null,
+      revisionDateInText: null,
+      versionUnpublished: true,
+    });
+    const properties = [
+      {
+        propertyCode: 'pharmacology_atc_level',
+        dataType: 'integer',
+        valueJson: 5,
+      },
+      {
+        propertyCode: 'pharmacology_section_posology',
+        dataType: 'json',
+        valueJson: posology,
+      },
+      {
+        propertyCode: 'pharmacology_section_indications',
+        dataType: 'json',
+        valueJson: undated,
+      },
+    ];
+
+    const buildLookup = () => {
+      const built = build();
+      built.codeSystemsRepo.findByCanonicalUrl.mockResolvedValue({
+        id: 'cs-1',
+      });
+      built.versionsRepo.findDefaultActiveVersion.mockResolvedValue({
+        id: 'v-1',
+      });
+      built.conceptsRepo.findByVersionAndCode.mockResolvedValue({
+        id: 'concept-1',
+        code: 'J01CE09',
+        display: 'Penicilina procaina',
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+      });
+      built.designationsRepo.findByConcept.mockResolvedValue([]);
+      built.designationsRepo.findPropertiesByConcept.mockResolvedValue(
+        properties,
+      );
+      return built;
+    };
+
+    it.each([
+      ['CLINICIAN', ['CLINICIAN']],
+      ['PRACTITIONER', ['USER', 'PRACTITIONER']],
+      ['SURGEON', ['SURGEON']],
+      ['SUPERADMIN (comodín del guard)', ['SUPERADMIN']],
+    ])(
+      '$lookup: %s ve la posología y las demás secciones professional',
+      async (_name, roles) => {
+        const { service } = buildLookup();
+
+        const result = await service.lookupConcept('http://x', 'J01CE09', {
+          roles,
+        });
+
+        expect(result.properties.map((p) => p.propertyCode)).toEqual([
+          'pharmacology_atc_level',
+          'pharmacology_section_posology',
+          'pharmacology_section_indications',
+        ]);
+      },
+    );
+
+    it.each([
+      ['PATIENT', ['PATIENT']],
+      ['USER', ['USER']],
+      ['SECURITY_ADMIN (administra, no es clínico)', ['SECURITY_ADMIN']],
+      ['sin roles', []],
+    ])(
+      '$lookup: %s NO recibe ninguna sección professional, y el dato de catálogo sí',
+      async (_name, roles) => {
+        const { service } = buildLookup();
+
+        const result = await service.lookupConcept('http://x', 'J01CE09', {
+          roles,
+        });
+
+        expect(result.properties.map((p) => p.propertyCode)).toEqual([
+          'pharmacology_atc_level',
+        ]);
+        expect(JSON.stringify(result)).not.toContain('texto de posology');
+      },
+    );
+
+    it('$lookup: sin sujeto falla cerrado (no entrega secciones professional)', async () => {
+      const { service } = buildLookup();
+
+      const result = await service.lookupConcept('http://x', 'J01CE09');
+
+      expect(result.properties.map((p) => p.propertyCode)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+    });
+
+    it('$lookup: cada sección lleva su antigüedad; la ficha sin fecha es «desconocida» con la fecha de consulta', async () => {
+      const { service } = buildLookup();
+
+      const result = await service.lookupConcept('http://x', 'J01CE09', {
+        roles: ['CLINICIAN'],
+      });
+      const byCode = Object.fromEntries(
+        result.properties.map((p) => [p.propertyCode, p]),
+      );
+
+      expect(byCode['pharmacology_atc_level'].sourceAge).toBeUndefined();
+      expect(byCode['pharmacology_section_posology'].sourceAge).toEqual({
+        known: true,
+        sourceDate: '2026-04-16T10:00:00.000Z',
+        retrievedAt: '2026-10-24T17:00:00.000Z',
+      });
+      expect(byCode['pharmacology_section_indications'].sourceAge).toEqual({
+        known: false,
+        retrievedAt: '2026-10-24T17:00:00.000Z',
+      });
+      // La sección sin fecha no se descarta: llega entera.
+      expect(byCode['pharmacology_section_indications'].valueJson).toBe(
+        undated,
+      );
+    });
+
+    it('la ficha por id omite las secciones professional para quien no es clínico', async () => {
+      const { service, conceptsRepo, designationsRepo } = build();
+      conceptsRepo.findById.mockResolvedValue({
+        id: 'concept-1',
+        code: 'J01CE09',
+        display: 'Penicilina procaina',
+        selectable: true,
+        codeSystemVersionId: 'version-1',
+      });
+      designationsRepo.findByConcept.mockResolvedValue([]);
+      designationsRepo.findPropertiesByConcept.mockResolvedValue(properties);
+
+      const patient = await service.readConcept('concept-1', undefined, {
+        roles: ['PATIENT'],
+      });
+      const anonymous = await service.readConcept('concept-1');
+      const clinician = await service.readConcept('concept-1', undefined, {
+        roles: ['CLINICIAN'],
+      });
+
+      expect(Object.keys(patient.properties)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+      expect(Object.keys(anonymous.properties)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+      expect(Object.keys(clinician.properties)).toEqual([
+        'pharmacology_atc_level',
+        'pharmacology_section_posology',
+        'pharmacology_section_indications',
+      ]);
     });
   });
 
@@ -1742,6 +1918,192 @@ describe('ConceptsService', () => {
             ],
           },
         ]);
+      });
+
+      describe('fuerza y evidencia (TAREA-41 F1.5)', () => {
+        const TIER_T2 = 'tier-curated';
+        const FREQ_EXCLUDED = 'freq-excluded';
+        const FREQ_FREQUENT = 'freq-frequent';
+        const codeConcepts = new Map([
+          [TIER_T2, { id: TIER_T2, code: 'CURATED_REFERENCE' }],
+          [FREQ_EXCLUDED, { id: FREQ_EXCLUDED, code: 'EXCLUDED' }],
+          [FREQ_FREQUENT, { id: FREQ_FREQUENT, code: 'FREQUENT' }],
+        ]);
+        const strongEdge = (
+          id: string,
+          sourceConceptId: string,
+          facts: {
+            strengthScore?: string;
+            evidenceCount?: number;
+            frequencyConceptId?: string;
+            bestEvidenceTierConceptId?: string;
+          },
+        ) => ({
+          ...edge(sourceConceptId, FOCUS, CONCEPTS.REL_SYMPTOM),
+          id,
+          ...facts,
+        });
+
+        function setUpRanked() {
+          const built = setUpNeighborhood(diseases);
+          const termsById =
+            built.conceptsRepo.findByIds.getMockImplementation();
+          built.conceptsRepo.findByIds.mockImplementation(
+            async (em: unknown, ids: string[]) => {
+              const found = await termsById(em, ids);
+              for (const id of ids) {
+                const code = codeConcepts.get(id);
+                if (code) found.set(id, code);
+              }
+              return found;
+            },
+          );
+          built.relationshipsRepo.countNeighborsByType.mockResolvedValue([
+            {
+              relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+              direction: 'incoming',
+              total: 3,
+            },
+          ]);
+          return built;
+        }
+
+        it('ordena por strength_score DESC NULLS LAST y después alfabético', async () => {
+          const { service, relationshipsRepo } = setUpRanked();
+          relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+            strongEdge('r-dengue', 'c-dengue', {}),
+            strongEdge('r-gripe', 'c-gripe', { strengthScore: '0.400' }),
+            strongEdge('r-neumonia', 'c-neumonia', { strengthScore: '0.900' }),
+          ]);
+
+          const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+            perGroup: 8,
+          });
+
+          const items = result.groups[0].items;
+          expect(items.map((item) => item.conceptId)).toEqual([
+            'c-neumonia',
+            'c-gripe',
+            'c-dengue',
+          ]);
+          expect(items[0].strength).toBe(0.9);
+          expect(items[1].strength).toBe(0.4);
+          // Sin evidencia, el vecino sale exactamente como antes de F1.
+          expect(Object.keys(items[2]).sort()).toEqual([
+            'category',
+            'conceptId',
+            'display',
+            'slug',
+          ]);
+          // Ninguna arista tiene evidencia: no se consulta su detalle.
+          expect(relationshipsRepo.findEvidenceSummaries).toHaveBeenCalledWith(
+            expect.anything(),
+            [],
+          );
+          // El total no cambia de semántica.
+          expect(result.groups[0].total).toBe(3);
+        });
+
+        it('a igual fuerza, desempata por nombre en castellano', async () => {
+          const { service, relationshipsRepo } = setUpRanked();
+          relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+            strongEdge('r-neumonia', 'c-neumonia', { strengthScore: '0.7' }),
+            strongEdge('r-gripe', 'c-gripe', { strengthScore: '0.7' }),
+            strongEdge('r-dengue', 'c-dengue', { strengthScore: '0.7' }),
+          ]);
+
+          const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+            perGroup: 8,
+          });
+
+          expect(result.groups[0].items.map((item) => item.display)).toEqual([
+            'Dengue',
+            'Gripe',
+            'Neumonía',
+          ]);
+        });
+
+        it('publica frecuencia, nivel, códigos de fuente y calificadores; EXCLUDED no se esconde', async () => {
+          const { service, relationshipsRepo } = setUpRanked();
+          relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+            strongEdge('r-neumonia', 'c-neumonia', {
+              strengthScore: '0.750',
+              evidenceCount: 2,
+              frequencyConceptId: FREQ_FREQUENT,
+              bestEvidenceTierConceptId: TIER_T2,
+            }),
+            strongEdge('r-gripe', 'c-gripe', {
+              evidenceCount: 1,
+              frequencyConceptId: FREQ_EXCLUDED,
+              bestEvidenceTierConceptId: TIER_T2,
+            }),
+          ]);
+          relationshipsRepo.findEvidenceSummaries.mockResolvedValue([
+            {
+              relationshipId: 'r-neumonia',
+              sourceReference: 'SYNTHETIC_F15:2',
+              sexCode: 'FEMALE',
+              ageMinDays: 365,
+              ageMaxDays: 3650,
+              pregnancyCode: null,
+              careLevelCode: 'FIRST_LEVEL',
+              lineOfTherapyCode: null,
+            },
+            {
+              relationshipId: 'r-neumonia',
+              sourceReference: 'SYNTHETIC_F15:1',
+              sexCode: 'FEMALE',
+              ageMinDays: 30,
+              ageMaxDays: null,
+              pregnancyCode: null,
+              careLevelCode: 'SECOND_LEVEL',
+              lineOfTherapyCode: null,
+            },
+            {
+              relationshipId: 'r-gripe',
+              sourceReference: 'SYNTHETIC_F15:3',
+              sexCode: null,
+              ageMinDays: null,
+              ageMaxDays: null,
+              pregnancyCode: null,
+              careLevelCode: null,
+              lineOfTherapyCode: null,
+            },
+          ]);
+
+          const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+            perGroup: 8,
+          });
+
+          expect(relationshipsRepo.findEvidenceSummaries).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.arrayContaining(['r-neumonia', 'r-gripe']),
+          );
+          const [neumonia, gripe] = result.groups[0].items;
+          expect(neumonia).toEqual(
+            expect.objectContaining({
+              conceptId: 'c-neumonia',
+              strength: 0.75,
+              frequency: 'FREQUENT',
+              evidenceTier: 'CURATED_REFERENCE',
+              sourceCodes: ['SYNTHETIC_F15:1', 'SYNTHETIC_F15:2'],
+              // Sexo compartido; edad mínima = la menor; sin edad máxima porque
+              // una evidencia no la acota; nivel distinto entre fuentes: se omite.
+              qualifiers: { sex: 'FEMALE', ageMinDays: 30 },
+            }),
+          );
+          // Gripe no tiene fuerza (la fuente la descarta): va después.
+          expect(gripe).toEqual(
+            expect.objectContaining({
+              conceptId: 'c-gripe',
+              frequency: 'EXCLUDED',
+              evidenceTier: 'CURATED_REFERENCE',
+              sourceCodes: ['SYNTHETIC_F15:3'],
+            }),
+          );
+          expect(gripe).not.toHaveProperty('strength');
+          expect(gripe).not.toHaveProperty('qualifiers');
+        });
       });
 
       it('lee las relaciones salientes con el término como origen', async () => {

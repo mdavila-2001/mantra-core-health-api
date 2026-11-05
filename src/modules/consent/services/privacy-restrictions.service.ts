@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { SEED, type AuthenticatedUser } from '../../../common';
+import { type AuthenticatedUser } from '../../../common';
 import {
   PrivacyRestrictionsRepository,
   ConsentEventsRepository,
 } from '../repositories';
+import { ConsentScopeService } from './consent-scope.service';
 import { CONS } from '../consent.concepts';
 import {
   CreatePrivacyRestrictionDto,
@@ -25,12 +26,14 @@ export class PrivacyRestrictionsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param restrictionsRepo - Valor de restrictions repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param scope - Política común de tenant y referencias de la decisión.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly restrictionsRepo: PrivacyRestrictionsRepository,
     private readonly eventsRepo: ConsentEventsRepository,
+    private readonly scope: ConsentScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PrivacyRestrictionsService.name);
@@ -48,11 +51,14 @@ export class PrivacyRestrictionsService {
       },
       'Applying privacy restriction',
     );
+    // El tenant sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.resolveTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
+      await this.scope.assertPatientExists(tx, dto.patientProfileId);
       const now = new Date();
       const restriction = this.restrictionsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
-        tenantId: dto.tenantId ?? SEED.tenantId,
+        tenantId,
         restrictionTypeConceptId:
           dto.restrictionTypeConceptId ?? CONS.RESTRICTION_TYPE_BLOCK,
         dataClassConceptId: dto.dataClassConceptId,

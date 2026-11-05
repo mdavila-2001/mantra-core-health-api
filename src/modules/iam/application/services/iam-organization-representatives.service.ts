@@ -1,21 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import {
-  ContactPointsRepository,
-  IdentifiersRepository,
-} from '../../../common/repositories';
-import {
   EXECUTIVE_DTO_KEYS,
   EXECUTIVE_ROLE_BY_DTO_KEY,
-} from '../../../directory/legal-representatives';
+} from '../../../../common/constants/legal-representatives';
+import type { DeclaredPersonName } from '../../../../common/text/person-name';
 import {
-  TenantLegalRepresentativesService,
-  type RegistrationExecutive,
-} from '../../../directory/services';
-import { PersonsRepository } from '../../../profiles/infrastructure/repositories';
-import type { DeclaredPersonName } from '../../../profiles/domain/person-name';
-import { createContactPerson } from '../../../profiles/application/services';
+  DIRECTORY_REGISTRATION_PORT,
+  type DirectoryRegistrationPort,
+  type RegistrationExecutiveInput,
+} from '../ports/directory-registration.port';
+import {
+  PROFILE_REGISTRATION_PORT,
+  type ProfileRegistrationPort,
+} from '../ports/profile-registration.port';
 import type {
   RegisterOrganizationExecutivesDto,
   RegisterOrganizationLegalRepresentativeDto,
@@ -56,10 +55,10 @@ export interface OrganizationRepresentativesInput {
 @Injectable()
 export class IamOrganizationRepresentativesService {
   constructor(
-    private readonly personsRepo: PersonsRepository,
-    private readonly identifiersRepo: IdentifiersRepository,
-    private readonly contactPointsRepo: ContactPointsRepository,
-    private readonly representatives: TenantLegalRepresentativesService,
+    @Inject(PROFILE_REGISTRATION_PORT)
+    private readonly profiles: ProfileRegistrationPort,
+    @Inject(DIRECTORY_REGISTRATION_PORT)
+    private readonly directory: DirectoryRegistrationPort,
   ) {}
 
   /**
@@ -108,14 +107,8 @@ export class IamOrganizationRepresentativesService {
       return { representativesRegistered: 0 };
     }
 
-    const repos = {
-      persons: this.personsRepo,
-      identifiers: this.identifiersRepo,
-      contactPoints: this.contactPointsRepo,
-    };
-
     const createdRepresentative = legalRepresentative
-      ? createContactPerson(repos, tx, {
+      ? this.profiles.createContactPerson(tx, {
           ...this.name(legalRepresentative),
           email: legalRepresentative.email,
           phone: legalRepresentative.phone,
@@ -124,11 +117,11 @@ export class IamOrganizationRepresentativesService {
         })
       : undefined;
 
-    const createdManagements: RegistrationExecutive[] = [];
+    const createdManagements: RegistrationExecutiveInput[] = [];
     if (executives) {
       for (const key of EXECUTIVE_DTO_KEYS) {
         const contact = executives[key];
-        const { personId } = createContactPerson(repos, tx, {
+        const { personId } = this.profiles.createContactPerson(tx, {
           ...this.name(contact),
           email: contact.email,
           mobile: contact.phone,
@@ -145,8 +138,9 @@ export class IamOrganizationRepresentativesService {
     // MikroORM no ordena inserts entre columnas uuid planas.
     await tx.flush();
 
-    const { count } =
-      await this.representatives.attachRegistrationRepresentatives(tx, {
+    const { count } = await this.directory.attachRegistrationRepresentatives(
+      tx,
+      {
         tenantId: input.tenantId,
         ownerUserId: input.ownerUserId,
         legalEntityType: input.legalEntityType,
@@ -162,7 +156,8 @@ export class IamOrganizationRepresentativesService {
             : undefined,
         executives:
           createdManagements.length > 0 ? createdManagements : undefined,
-      });
+      },
+    );
 
     return { representativesRegistered: count };
   }

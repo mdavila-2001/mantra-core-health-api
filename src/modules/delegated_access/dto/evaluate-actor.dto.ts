@@ -18,6 +18,18 @@ export class EvaluateActorDto {
   practitionerDelegateAssignmentId!: string;
 
   /**
+   * Usuario cuyo acceso se evalúa.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Usuario que ejercería el acceso. Si se omite se evalúa al usuario autenticado. Tiene que ser el titular de la asignación del delegado; si no, el acceso no se permite',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  effectiveUserId?: string;
+
+  /**
    * Valor de purpose mantenido por la instancia.
    */
   @ApiProperty({ description: 'Propósito de uso del acceso', enum: PURPOSES })

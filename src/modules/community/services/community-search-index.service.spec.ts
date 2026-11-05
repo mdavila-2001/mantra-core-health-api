@@ -76,6 +76,7 @@ function build(options?: {
     specialtiesByPractitioner: mockFn().mockResolvedValue(
       new Map([['sujeto-interno', options?.specialties ?? ['Cardiología']]]),
     ),
+    practitionersInReview: mockFn().mockResolvedValue(new Set<string>()),
     badgesByProfiles: mockFn().mockResolvedValue(
       new Map([['perfil-1', options?.badges ?? []]]),
     ),
@@ -155,7 +156,7 @@ describe('CommunitySearchIndexService', () => {
     it('todo campo que el buscador público sirve existe en el documento', async () => {
       const document = await indexedDocument(build());
 
-      // `verifiedBadge` es lo único que no viaja con su nombre: el sello va al
+      // `verifiedBadge` (y `verification`, su forma común) es lo único que no viaja con su nombre: el sello va al
       // índice descompuesto en campos planos (OpenSearch no gana nada indexando
       // un objeto que nadie filtra por dentro) y `hitToResult` lo recompone.
       // El resto tiene que estar tal cual: si al índice le faltara un campo del
@@ -170,6 +171,8 @@ describe('CommunitySearchIndexService', () => {
           'verifiedAt',
           'validUntil',
         ],
+        // `verification` es el mismo sello en la forma común {status, verifiedAt, validUntil}.
+        verification: ['verifiedBadgeStatus', 'verifiedAt', 'validUntil'],
       };
 
       for (const key of PUBLIC_RESULT_KEYS) {

@@ -19,7 +19,7 @@ Esta skill no autoriza a agrandar el alcance: terminar lo pedido no es hacer lo 
 1. ¿Queda una comprobación **barata** que podría invalidar mi conclusión?
 2. ¿Queda un fix claramente pedido, ya diagnosticado y reversible?
 3. ¿Queda re-ejecutar el test o comando que falló, después de mi corrección?
-4. ¿Queda persistir evidencia, notas o estado de avance?
+4. ¿Queda persistir evidencia, notas o estado de avance en el PR, o abrir el issue de lo que no se hizo?
 5. ¿Quedó basura mía: archivos temporales, logs de debug, procesos en background, código comentado?
 6. ¿Estoy pidiendo permiso para algo que ya me pidieron?
 
@@ -40,9 +40,9 @@ Un solo SÍ sin bloqueo externo = el turno no terminó.
 
 ## 3. TODO no es implementación
 
-- Un `TODO` en el código entregado es aceptable solo si marca algo **fuera de alcance** o **bloqueado**, y dice cuál de las dos y por qué.
+- **Prohibidos los comentarios `TODO` y `FIXME`** en el código entregado. Una limitación intencional se describe en presente, con su porqué («no reintenta porque…»). Lo que queda **fuera de alcance** o **bloqueado** es un issue; el comentario puede apuntarlo: `// ver #123`.
 - Prohibido como sustituto: stubs que devuelven datos fijos, ramas `throw new Error('not implemented')`, handlers vacíos, tests con `skip`, validaciones "para después".
-- Un requisito ambiguo no se resuelve con un TODO silencioso: se intenta resolver con evidencia del repo y, si no se puede, se registra como ambigüedad en el reporte (`anti-hallucination-guard`).
+- Un requisito ambiguo no se resuelve con un TODO silencioso: se intenta resolver con evidencia del repo y, si no se puede, se registra como ambigüedad en el PR y se abre el issue para confirmarla (`anti-hallucination-guard`).
 
 ## 4. Chequeos baratos obligatorios antes de devolver
 
@@ -60,10 +60,11 @@ completa, cross-browser) se corre si el alcance lo exige; si no, se declara como
 
 ## 5. Reporte final honesto
 
-> [!warning] Este resumen NO reemplaza al `REPORTE.md`
-> Lo que sigue es el resumen **de la respuesta**, para quien está leyendo el turno. El artefacto
-> obligatorio en disco lo exige la regla 40 y se escribe igual, aunque el trabajo haya quedado
-> a medias. Un turno que solo reporta acá incumple esa regla. Ver `work-report-md`.
+> [!warning] Este resumen NO reemplaza al reporte del PR
+> Lo que sigue es el resumen **de la respuesta**, para quien está leyendo el turno. El reporte
+> obligatorio va en la descripción del PR y lo que quedó sin hacer, en issues (regla 40); se
+> escribe igual aunque el trabajo haya quedado a medias. Un turno que solo reporta acá incumple
+> esa regla. Ver `work-report-md`.
 
 Cuatro secciones, siempre. Una sección vacía se escribe vacía ("ninguno"), no se omite.
 
@@ -116,7 +117,7 @@ Para poder cerrar el turno, el reporte contiene:
 - [ ] Salida literal (recortada) de cada chequeo de §4 que aplicaba, o el motivo por el que no aplicaba.
 - [ ] El test/comando que fallaba originalmente, re-ejecutado después del fix, con su salida.
 - [ ] `git status` limpio de artefactos ajenos al cambio.
-- [ ] Cero TODO/stub/skip usados como sustituto de implementación en alcance.
+- [ ] Cero `TODO`/`FIXME` en el código, y cero stub/skip usados como sustituto de implementación en alcance.
 - [ ] Si hay bloqueo: motivo de la tabla de §6 + evidencia + qué lo desbloquea.
 
 ## Checklist

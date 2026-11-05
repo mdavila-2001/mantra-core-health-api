@@ -18,7 +18,7 @@ poco más. Quedan fuera del código dos piezas grandes del modelo físico:
 Este catálogo las declara aparte. Se genera desde la bóveda con `yarn orm:catalog` y lo
 aplican las capas 05 y 06 del arranque.
 
-## Contenido
+## Contents
 
 | Archivo o carpeta | Qué declara | Origen | Volumen |
 |---|---|---|---|

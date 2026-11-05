@@ -1,6 +1,7 @@
 export * from './activity_event_schema_definitions.entity';
 export * from './analytics_subjects.entity';
 export * from './client_contexts.entity';
+export * from './client_error_events.entity';
 export * from './conversion_events.entity';
 export * from './funnel_definitions.entity';
 export * from './funnel_steps.entity';

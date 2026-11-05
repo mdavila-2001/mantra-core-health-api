@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -32,6 +32,8 @@ import {
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type { DiagnosticUnits } from '../entities';
+import { Tenants } from '../../directory/entities';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
 import { PublicProfileProjectionService } from '../../community/services';
 
 /**
@@ -56,6 +58,7 @@ export class DiagnosticUnitsService {
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param accreditationsRepo - Valor de accreditations repo requerido por la operación.
    * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param publicProfiles - Proyección pública encapsulada por Community.
    * @param logger - Valor de logger requerido por la operación.
    */
@@ -66,6 +69,7 @@ export class DiagnosticUnitsService {
     private readonly specialtiesRepo: DiagnosticUnitSpecialtiesRepository,
     private readonly accreditationsRepo: DiagnosticUnitAccreditationsRepository,
     private readonly assignmentsRepo: DiagnosticUnitPractitionerAssignmentsRepository,
+    private readonly scope: DiagnosticUnitScopeService,
     private readonly publicProfiles: PublicProfileProjectionService,
     private readonly logger: PinoLogger,
   ) {
@@ -77,16 +81,18 @@ export class DiagnosticUnitsService {
     dto: CreateDiagnosticUnitDto,
     actor: AuthenticatedUser,
   ): Promise<DiagnosticUnitResponseDto> {
+    // El propietario sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     this.logger.info(
       {
         operation: 'diagnostic_units.unit.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating diagnostic unit',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.unitsRepo.findByCode(tx, dto.tenantId, dto.code);
+      const clash = await this.unitsRepo.findByCode(tx, tenantId, dto.code);
       if (clash) {
         this.logger.warn(
           { operation: 'diagnostic_units.unit.create', reason: 'code-in-use' },
@@ -98,7 +104,7 @@ export class DiagnosticUnitsService {
       }
 
       const unit = this.unitsRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         diagnosticUnitTypeConceptId:
@@ -189,9 +195,7 @@ export class DiagnosticUnitsService {
       'Updating site',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      const site = await this.scope.site(tx, siteId);
 
       if (dto.siteRoleConceptId !== undefined)
         site.siteRoleConceptId = dto.siteRoleConceptId;
@@ -238,6 +242,8 @@ export class DiagnosticUnitsService {
           { unitId },
         );
       }
+
+      await this.assertLaboratoryMayOperate(tx, unit);
 
       unit.verificationStatusConceptId = DUNIT.VERIFICATION_VERIFIED;
       if (!unit.publicProfileId) {
@@ -338,6 +344,9 @@ export class DiagnosticUnitsService {
     );
     return this.em.transactional(async (tx) => {
       const unit = await this.loadActiveUnit(tx, unitId);
+      if (dto.diagnosticUnitSiteId) {
+        await this.scope.siteOfUnit(tx, dto.diagnosticUnitSiteId, unit.id);
+      }
 
       const overlap = await this.assignmentsRepo.findActiveOverlap(
         tx,
@@ -398,6 +407,9 @@ export class DiagnosticUnitsService {
     );
     return this.em.transactional(async (tx) => {
       const unit = await this.loadActiveUnit(tx, unitId);
+      if (dto.diagnosticUnitSiteId) {
+        await this.scope.siteOfUnit(tx, dto.diagnosticUnitSiteId, unit.id);
+      }
 
       const acc = this.accreditationsRepo.create(tx, {
         diagnosticUnitId: unit.id,
@@ -429,15 +441,7 @@ export class DiagnosticUnitsService {
       'Renewing accreditation',
     );
     return this.em.transactional(async (tx) => {
-      const previous = await this.accreditationsRepo.findById(
-        tx,
-        accreditationId,
-      );
-      if (!previous) {
-        throw new ResourceNotFoundException('Acreditación no encontrada', {
-          accreditationId,
-        });
-      }
+      const previous = await this.scope.accreditation(tx, accreditationId);
 
       previous.validTo = dto.validFrom ?? new Date();
       touch(previous, actor.id);
@@ -477,9 +481,7 @@ export class DiagnosticUnitsService {
       'Reprojecting public profile',
     );
     const em = this.em.fork();
-    const unit = await this.unitsRepo.findById(em, unitId);
-    if (!unit)
-      throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+    const unit = await this.scope.unit(em, unitId);
 
     const projected =
       unit.verificationStatusConceptId === DUNIT.VERIFICATION_VERIFIED &&
@@ -489,13 +491,54 @@ export class DiagnosticUnitsService {
   }
 
   /** Carga una unidad y valida que exista y esté ACTIVA (precondición común). */
+  /**
+   * P51, punto 6: un laboratorio clínico de una organización `DIAGNOSTIC_CENTER`
+   * no se publica (ni recibe órdenes como unidad verificada) mientras su
+   * organización no esté verificada por la plataforma. Esa verificación es la
+   * que exige la matrícula del SEPREC, la licencia de funcionamiento y el
+   * certificado del SEDES (`PharmacyOperatingRequirementsService`), así que
+   * publicar la unidad antes saltaría los papeles. Una unidad de imágenes o de
+   * otro tipo de organización sigue como antes.
+   *
+   * @param tx - Transacción de la verificación.
+   * @param unit - Unidad a publicar.
+   * @throws PreconditionFailedException (422) si la organización no está verificada.
+   */
+  private async assertLaboratoryMayOperate(
+    tx: EntityManager,
+    unit: DiagnosticUnits,
+  ): Promise<void> {
+    if (unit.diagnosticUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY) return;
+    const tenant = await tx.findOne(Tenants, { id: unit.tenantId });
+    if (
+      tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER ||
+      tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED
+    ) {
+      return;
+    }
+    this.logger.warn(
+      {
+        operation: 'diagnostic_units.unit.verify',
+        unitId: unit.id,
+        reason: 'laboratory-tenant-not-verified',
+      },
+      'Rejected: laboratory organization is not verified',
+    );
+    throw new PreconditionFailedException(
+      'El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES',
+      {
+        unitId: unit.id,
+        tenantId: unit.tenantId,
+        reason: 'TENANT_NOT_VERIFIED',
+      },
+    );
+  }
+
   private async loadActiveUnit(
     tx: EntityManager,
     unitId: string,
   ): Promise<DiagnosticUnits> {
-    const unit = await this.unitsRepo.findById(tx, unitId);
-    if (!unit)
-      throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+    const unit = await this.scope.unit(tx, unitId);
     if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
       throw new PreconditionFailedException('La unidad no está activa', {
         unitId,

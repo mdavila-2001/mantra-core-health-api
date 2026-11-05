@@ -4,8 +4,10 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
   type AuthenticatedUser,
 } from '../../../common';
+import { TerminologyErrorReason } from '../terminology.error-reasons';
 
 const actor: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 const TENANT = 'tenant-1';
@@ -40,13 +42,29 @@ function build() {
     conceptsRepo,
     logger,
   );
+  // El tenant activo sale del contexto de la petición: estas pruebas actúan
+  // como un administrador de TENANT en su propio contexto.
+  const upsertPolicy = service.upsertPolicy.bind(service);
+  service.upsertPolicy = ((...args: Parameters<typeof upsertPolicy>) =>
+    runWithTenant(TENANT, () =>
+      upsertPolicy(...args),
+    )) as typeof service.upsertPolicy;
   return {
     service,
+    em,
     tx,
     tenantCatalogRepo,
     valueSetsRepo,
     conceptsRepo,
     logger,
+    /** Misma operación con otro tenant activo, sin el atajo anterior. */
+    upsertAs: (
+      activeTenantId: string,
+      ...args: Parameters<typeof upsertPolicy>
+    ) => runWithTenant(activeTenantId, () => upsertPolicy(...args)),
+    /** Misma operación sin tenant activo. */
+    upsertWithoutTenant: (...args: Parameters<typeof upsertPolicy>) =>
+      upsertPolicy(...args),
   };
 }
 
@@ -232,5 +250,79 @@ describe('TenantCatalogService', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  describe('alcance de tenant (TERM-01)', () => {
+    const dtoWithConcept = {
+      valueSetId: 'vs-1',
+      concepts: [{ conceptId: 'c-1', enabled: false, isDefault: true }],
+    };
+
+    it('Correcto: el administrador escribe la política de su propio tenant', async () => {
+      const d = build();
+      d.valueSetsRepo.findById.mockResolvedValue({ id: 'vs-1' });
+      d.tenantCatalogRepo.findPolicyForUpdate.mockResolvedValue(null);
+      d.tenantCatalogRepo.createPolicy.mockReturnValue({ id: 'p-1' });
+      d.conceptsRepo.findById.mockResolvedValue({ id: 'c-1' });
+      d.tenantCatalogRepo.findConfig.mockResolvedValue(null);
+
+      const result = await d.upsertAs(TENANT, TENANT, dtoWithConcept, actor);
+
+      expect(result).toMatchObject({ id: 'p-1', tenantId: TENANT });
+      expect(d.tenantCatalogRepo.createConfig).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tenantId: TENANT, conceptId: 'c-1' }),
+      );
+    });
+
+    it('Error: la política de otro tenant responde 404 y no lee ni escribe nada', async () => {
+      const d = build();
+
+      const error = await d
+        .upsertAs(TENANT, 'tenant-2', dtoWithConcept, actor)
+        .catch((e: ResourceNotFoundException) => e);
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect((error as ResourceNotFoundException).getStatus()).toBe(404);
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.valueSetsRepo.findById).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.findPolicyForUpdate).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.findDefaultsForUpdate).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.findConfig).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.createPolicy).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.createConfig).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('Falla catalogada: 404 con TERMINOLOGY_TENANT_NOT_AVAILABLE, mismo cuerpo para ajeno e inexistente y sin details', async () => {
+      const d = build();
+
+      const failure = async (routeTenant: string) => {
+        try {
+          await d.upsertAs(TENANT, routeTenant, dtoWithConcept, actor);
+        } catch (error) {
+          return error as ResourceNotFoundException;
+        }
+        throw new Error('debía rechazar');
+      };
+      const ajeno = await failure('tenant-2');
+      const inexistente = await failure('00000000-0000-4000-8000-00000000dead');
+
+      expect(ajeno.reason).toBe(TerminologyErrorReason.TENANT_NOT_AVAILABLE);
+      expect(ajeno.details).toBeUndefined();
+      expect(ajeno.getResponse()).toEqual(inexistente.getResponse());
+    });
+
+    it('sin tenant activo falla cerrado (412) y no escribe', async () => {
+      const d = build();
+
+      const error = await d
+        .upsertWithoutTenant(TENANT, dtoWithConcept, actor)
+        .catch((e: PreconditionFailedException) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.tenantCatalogRepo.createPolicy).not.toHaveBeenCalled();
+    });
   });
 });

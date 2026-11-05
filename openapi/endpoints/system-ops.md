@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `system_ops`
 
-Referencia exhaustiva de 24 operación(es) del módulo `system_ops`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 35 operación(es) del módulo `system_ops`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention`
-- **Controladores:** `AssessmentController`, `BackupController`, `DraftController`, `GovernanceCatalogController`, `LegalHoldController`, `ResidencyController`, `RestoreTestController`, `RetentionExecutionController`
+- **Controladores:** `AssessmentController`, `BackupController`, `DraftController`, `GovernanceCatalogController`, `GovernanceOperationsReadController`, `GovernanceReadController`, `LegalHoldController`, `MutabilityController`, `ResidencyController`, `RestoreTestController`, `RetentionExecutionController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,27 +14,38 @@ Referencia exhaustiva de 24 operación(es) del módulo `system_ops`, derivada de
 1. [POST /admin/governance/anonymization-rules](#1-post-admin-governance-anonymization-rules) — Definir una regla de anonimización
 2. [POST /admin/governance/assessments/{id}/findings](#2-post-admin-governance-assessments-id-findings) — Abrir un hallazgo sobre una evaluación
 3. [POST /admin/governance/assessments/{id}/remediation-plans](#3-post-admin-governance-assessments-id-remediation-plans) — Crear un plan de remediación con sus acciones
-4. [POST /admin/governance/cross-border-transfers](#4-post-admin-governance-cross-border-transfers) — Registrar una transferencia transfronteriza (append-only)
-5. [POST /admin/governance/drafts](#5-post-admin-governance-drafts) — Guardar un draft record genérico
-6. [POST /admin/governance/drafts/{id}/publish](#6-post-admin-governance-drafts-id-publish) — Publicar un draft record y materializarlo
-7. [POST /admin/governance/entity-registry](#7-post-admin-governance-entity-registry) — Registrar dominio, clasificación y catalogar entidad + campos
-8. [PATCH /admin/governance/entity-registry/{id}/retention](#8-patch-admin-governance-entity-registry-id-retention) — Aplicar una política de retención a una entidad
-9. [PATCH /admin/governance/entity-registry/{id}/write-policy](#9-patch-admin-governance-entity-registry-id-write-policy) — Vincular una política de escritura a una entidad
-10. [PATCH /admin/governance/field-registry/{id}](#10-patch-admin-governance-field-registry-id) — Asignar regla de anonimización / masking a un campo
-11. [PATCH /admin/governance/findings/{id}](#11-patch-admin-governance-findings-id) — Actualizar un hallazgo (estado / owner)
-12. [POST /admin/governance/legal-holds](#12-post-admin-governance-legal-holds) — Colocar un legal hold sobre un objetivo
-13. [POST /admin/governance/legal-holds/{id}/release](#13-post-admin-governance-legal-holds-id-release) — Levantar un legal hold ACTIVE
-14. [POST /admin/governance/operational-frameworks](#14-post-admin-governance-operational-frameworks) — Publicar un framework operativo con sus controles
-15. [POST /admin/governance/remediation-actions/{id}/verify](#15-post-admin-governance-remediation-actions-id-verify) — Verificar y cerrar una acción de remediación
-16. [POST /admin/governance/residency-policies](#16-post-admin-governance-residency-policies) — Definir una política de residencia de datos
-17. [POST /admin/governance/retention-policies](#17-post-admin-governance-retention-policies) — Definir una política de retención con base legal
-18. [POST /admin/governance/tenant-residency-bindings](#18-post-admin-governance-tenant-residency-bindings) — Vincular un tenant a una política de residencia
-19. [POST /admin/governance/workload-assessments](#19-post-admin-governance-workload-assessments) — Iniciar una evaluación de workload
-20. [PUT /admin/governance/workload-assessments/{id}/control-results](#20-put-admin-governance-workload-assessments-id-control-results) — Registrar (UPSERT) resultados de control de una evaluación
-21. [POST /admin/governance/write-policies](#21-post-admin-governance-write-policies) — Definir una política de escritura
-22. [POST /admin/ops/backup-policies](#22-post-admin-ops-backup-policies) — Definir una política de backup (RPO/RTO/inmutabilidad)
-23. [POST /internal/governance/retention-executions/run](#23-post-internal-governance-retention-executions-run) — Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
-24. [POST /internal/ops/restore-test-runs](#24-post-internal-ops-restore-test-runs) — Registrar una prueba de restauración con evidencia
+4. [GET /admin/governance/change-log](#4-get-admin-governance-change-log) — Cambios de gobierno de datos: quién cambió qué y cuándo
+5. [POST /admin/governance/cross-border-transfers](#5-post-admin-governance-cross-border-transfers) — Registrar una transferencia transfronteriza (append-only)
+6. [GET /admin/governance/domains](#6-get-admin-governance-domains) — Dominios de datos y cuántas entidades declara cada uno
+7. [POST /admin/governance/drafts](#7-post-admin-governance-drafts) — Guardar un draft record genérico
+8. [POST /admin/governance/drafts/{id}/publish](#8-post-admin-governance-drafts-id-publish) — Publicar un draft record y materializarlo
+9. [GET /admin/governance/entity-registry](#9-get-admin-governance-entity-registry) — Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI)
+10. [POST /admin/governance/entity-registry](#10-post-admin-governance-entity-registry) — Registrar dominio, clasificación y catalogar entidad + campos
+11. [GET /admin/governance/entity-registry/{id}/fields](#11-get-admin-governance-entity-registry-id-fields) — Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento
+12. [PATCH /admin/governance/entity-registry/{id}/retention](#12-patch-admin-governance-entity-registry-id-retention) — Aplicar una política de retención a una entidad
+13. [PATCH /admin/governance/entity-registry/{id}/write-policy](#13-patch-admin-governance-entity-registry-id-write-policy) — Vincular una política de escritura a una entidad
+14. [PATCH /admin/governance/field-registry/{id}](#14-patch-admin-governance-field-registry-id) — Asignar regla de anonimización / masking a un campo
+15. [PATCH /admin/governance/findings/{id}](#15-patch-admin-governance-findings-id) — Actualizar un hallazgo (estado / owner)
+16. [GET /admin/governance/legal-holds](#16-get-admin-governance-legal-holds) — Retenciones legales (legal holds), sin la referencia de la autoridad
+17. [POST /admin/governance/legal-holds](#17-post-admin-governance-legal-holds) — Colocar un legal hold sobre un objetivo
+18. [POST /admin/governance/legal-holds/{id}/release](#18-post-admin-governance-legal-holds-id-release) — Levantar un legal hold ACTIVE
+19. [GET /admin/governance/mutability](#19-get-admin-governance-mutability) — Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)
+20. [GET /admin/governance/mutability/{schema}/{table}](#20-get-admin-governance-mutability-schema-table) — Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver
+21. [GET /admin/governance/mutability/summary](#21-get-admin-governance-mutability-summary) — Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos
+22. [POST /admin/governance/operational-frameworks](#22-post-admin-governance-operational-frameworks) — Publicar un framework operativo con sus controles
+23. [GET /admin/governance/policies](#23-get-admin-governance-policies) — Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada
+24. [GET /admin/governance/policies/{policyType}/{id}](#24-get-admin-governance-policies-policytype-id) — Una política: ajustes, estado y a qué tablas o columnas se aplica
+25. [POST /admin/governance/remediation-actions/{id}/verify](#25-post-admin-governance-remediation-actions-id-verify) — Verificar y cerrar una acción de remediación
+26. [POST /admin/governance/residency-policies](#26-post-admin-governance-residency-policies) — Definir una política de residencia de datos
+27. [GET /admin/governance/retention-executions](#27-get-admin-governance-retention-executions) — Ejecuciones de políticas de retención: estado, tiempos y conteos
+28. [POST /admin/governance/retention-policies](#28-post-admin-governance-retention-policies) — Definir una política de retención con base legal
+29. [POST /admin/governance/tenant-residency-bindings](#29-post-admin-governance-tenant-residency-bindings) — Vincular un tenant a una política de residencia
+30. [POST /admin/governance/workload-assessments](#30-post-admin-governance-workload-assessments) — Iniciar una evaluación de workload
+31. [PUT /admin/governance/workload-assessments/{id}/control-results](#31-put-admin-governance-workload-assessments-id-control-results) — Registrar (UPSERT) resultados de control de una evaluación
+32. [POST /admin/governance/write-policies](#32-post-admin-governance-write-policies) — Definir una política de escritura
+33. [POST /admin/ops/backup-policies](#33-post-admin-ops-backup-policies) — Definir una política de backup (RPO/RTO/inmutabilidad)
+34. [POST /internal/governance/retention-executions/run](#34-post-internal-governance-retention-executions-run) — Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
+35. [POST /internal/ops/restore-test-runs](#35-post-internal-ops-restore-test-runs) — Registrar una prueba de restauración con evidencia
 
 ---
 
@@ -122,6 +133,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -260,6 +272,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -418,6 +431,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RemediationPlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -467,7 +481,107 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /admin/governance/cross-border-transfers
+## 4. GET /admin/governance/change-log
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Cambios de gobierno de datos: quién cambió qué y cuándo
+- **Operation ID:** `GovernanceReadController_changeLog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReadController.changeLog](../../src/modules/system_ops/controllers/governance-read.controller.ts)
+
+### Descripción de negocio
+
+Filtra por tipo de objeto, objeto, actor y fecha. Sin rango, los últimos 30 días (la tabla no tiene índice por fecha).
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/change-log` en `GovernanceReadController_changeLog`. El controlador delega en `GovernanceReadService.changeLog`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `targetType` | query | No | `string` | longitud máxima 100 | Tipo de objeto cambiado (`entity_registry`, `write_policies`…) | `valor-ejemplo` |
+| `targetId` | query | No | `string` | formato `uuid` | Objeto cambiado | `00000000-0000-4000-8000-000000000001` |
+| `changedBy` | query | No | `string` | formato `uuid` | Actor del cambio | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días | `valor-ejemplo` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Hasta (ISO 8601, excluido) | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/change-log HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/change-log?limit=50&cursor=valor-ejemplo&targetType=valor-ejemplo&targetId=00000000-0000-4000-8000-000000000001&changedBy=00000000-0000-4000-8000-000000000001&from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | «to» debe ser posterior a «from» | Excepción explícita en src/modules/system_ops/services/governance-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/change-log"
+}
+```
+
+---
+
+## 5. POST /admin/governance/cross-border-transfers
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -561,6 +675,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -604,7 +719,102 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /admin/governance/drafts
+## 6. GET /admin/governance/domains
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Dominios de datos y cuántas entidades declara cada uno
+- **Operation ID:** `GovernanceOperationsReadController_domains`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceOperationsReadController.domains](../../src/modules/system_ops/controllers/governance-operations-read.controller.ts)
+
+### Descripción de negocio
+
+Dominios de datos y cuántas entidades declara cada uno. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/domains` en `GovernanceOperationsReadController_domains`. El controlador delega en `GovernanceOperationsReadService.domains`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `q` | query | No | `string` | longitud máxima 120 | Busca en código y nombre, sin mayúsculas | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/domains HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/domains?limit=50&cursor=valor-ejemplo&q=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Página de dominios | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/domains"
+}
+```
+
+---
+
+## 7. POST /admin/governance/drafts
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-drafts`
@@ -695,6 +905,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DraftResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -741,7 +952,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /admin/governance/drafts/{id}/publish
+## 8. POST /admin/governance/drafts/{id}/publish
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-drafts`
@@ -822,6 +1033,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DraftResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -871,7 +1083,107 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /admin/governance/entity-registry
+## 9. GET /admin/governance/entity-registry
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI)
+- **Operation ID:** `GovernanceReadController_entityRegistry`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReadController.entityRegistry](../../src/modules/system_ops/controllers/governance-read.controller.ts)
+
+### Descripción de negocio
+
+Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/entity-registry` en `GovernanceReadController_entityRegistry`. El controlador delega en `GovernanceReadService.entityRegistry`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `schema` | query | No | `string` | Sin restricción adicional declarada | Schema de PostgreSQL | `valor-ejemplo` |
+| `q` | query | No | `string` | longitud máxima 120 | Busca en `schema.tabla`, sin mayúsculas | `valor-ejemplo` |
+| `domain` | query | No | `string` | Sin restricción adicional declarada | Código del dominio de datos | `valor-ejemplo` |
+| `classification` | query | No | `string` | Sin restricción adicional declarada | Código de la clasificación | `valor-ejemplo` |
+| `containsPii` | query | No | `boolean` | Sin restricción adicional declarada | Sólo las entidades marcadas (o no) como PII | `true` |
+| `containsPhi` | query | No | `boolean` | Sin restricción adicional declarada | Sólo las entidades marcadas (o no) como PHI | `true` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/entity-registry HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/entity-registry?limit=50&cursor=valor-ejemplo&schema=valor-ejemplo&q=valor-ejemplo&domain=valor-ejemplo&classification=valor-ejemplo&containsPii=true&containsPhi=true HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/entity-registry"
+}
+```
+
+---
+
+## 10. POST /admin/governance/entity-registry
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1020,6 +1332,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EntityRegistryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1074,7 +1387,104 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PATCH /admin/governance/entity-registry/{id}/retention
+## 11. GET /admin/governance/entity-registry/{id}/fields
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento
+- **Operation ID:** `GovernanceReadController_fields`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReadController.fields](../../src/modules/system_ops/controllers/governance-read.controller.ts)
+
+### Descripción de negocio
+
+Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/entity-registry/{id}/fields` en `GovernanceReadController_fields`. El controlador delega en `GovernanceReadService.fieldRegistry`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/entity-registry/00000000-0000-4000-8000-000000000001/fields HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/entity-registry/00000000-0000-4000-8000-000000000001/fields?limit=50&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | La entidad no está en el registro | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Entidad del registro no encontrada | Excepción explícita en src/modules/system_ops/services/governance-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/entity-registry/{id}/fields"
+}
+```
+
+---
+
+## 12. PATCH /admin/governance/entity-registry/{id}/retention
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1158,6 +1568,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1202,7 +1613,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /admin/governance/entity-registry/{id}/write-policy
+## 13. PATCH /admin/governance/entity-registry/{id}/write-policy
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1285,6 +1696,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1329,7 +1741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /admin/governance/field-registry/{id}
+## 14. PATCH /admin/governance/field-registry/{id}
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1414,6 +1826,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1457,7 +1870,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /admin/governance/findings/{id}
+## 15. PATCH /admin/governance/findings/{id}
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -1538,6 +1951,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1581,7 +1995,105 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /admin/governance/legal-holds
+## 16. GET /admin/governance/legal-holds
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Retenciones legales (legal holds), sin la referencia de la autoridad
+- **Operation ID:** `GovernanceOperationsReadController_legalHolds`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceOperationsReadController.legalHolds](../../src/modules/system_ops/controllers/governance-operations-read.controller.ts)
+
+### Descripción de negocio
+
+Retenciones legales (legal holds), sin la referencia de la autoridad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/legal-holds` en `GovernanceOperationsReadController_legalHolds`. El controlador delega en `GovernanceOperationsReadService.legalHolds`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `status` | query | No | `string` | Sin restricción adicional declarada | Código del estado (concepto), p. ej. `ACTIVE` o `RELEASED` | `ok` |
+| `targetType` | query | No | `string` | Sin restricción adicional declarada | Código del tipo de objetivo (concepto) | `valor-ejemplo` |
+| `tenantId` | query | No | `string` | formato `uuid` | Organización del hold | `00000000-0000-4000-8000-000000000001` |
+| `targetId` | query | No | `string` | formato `uuid` | Objetivo retenido | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/legal-holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DPO`, `AUDITOR`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/legal-holds?limit=50&cursor=valor-ejemplo&status=ok&targetType=valor-ejemplo&tenantId=00000000-0000-4000-8000-000000000001&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Página de retenciones legales | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/legal-holds"
+}
+```
+
+---
+
+## 17. POST /admin/governance/legal-holds
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-legal-holds`
@@ -1671,6 +2183,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1714,7 +2227,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /admin/governance/legal-holds/{id}/release
+## 18. POST /admin/governance/legal-holds/{id}/release
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-legal-holds`
@@ -1793,6 +2306,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1837,7 +2351,514 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /admin/governance/operational-frameworks
+## 19. GET /admin/governance/mutability
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)
+- **Operation ID:** `MutabilityController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MutabilityController.list](../../src/modules/system_ops/mutability/controllers/mutability.controller.ts)
+
+### Descripción de negocio
+
+Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/mutability` en `MutabilityController_list`. El controlador delega en `MutabilityCatalogService.list`. No recibe body. El tipo de retorno estático es `Promise<MutabilityPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `schema` | query | No | `string` | longitud máxima 63 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `writeMode` | query | No | `string` | valores: `APPEND_ONLY`, `APPEND_ONLY_PURGEABLE`, `LIFECYCLE_ONLY`, `UPDATABLE`, `UPDATABLE_DELETABLE`, `SOFT_DELETE`, `UNKNOWN` | Sin descripción específica en OpenAPI. | `APPEND_ONLY` |
+| `evidence` | query | No | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en OpenAPI. | `ENFORCED_DB` |
+| `finding` | query | No | `string` | valores: `ANY`, `NONE`, `CONTRADICTION`, `GAP` | Sin descripción específica en OpenAPI. | `ANY` |
+| `disposition` | query | No | `string` | valores: `KEEP`, `PURGE_BY_RETENTION`, `ANONYMIZE`, `ARCHIVE`, `UNKNOWN` | Sin descripción específica en OpenAPI. | `KEEP` |
+| `legalHold` | query | No | `string` | valores: `HOLD_AWARE`, `HOLD_CAPABLE_NOT_ENFORCED`, `UNKNOWN` | Sin descripción específica en OpenAPI. | `HOLD_AWARE` |
+| `database` | query | No | `string` | valores: `main`, `pay` | Sin descripción específica en OpenAPI. | `main` |
+| `q` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/mutability HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/mutability?limit=50&cursor=valor-ejemplo&schema=valor-ejemplo&writeMode=APPEND_ONLY&evidence=ENFORCED_DB&finding=ANY&disposition=KEEP&legalHold=HOLD_AWARE&database=main&q=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MutabilityPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MutabilityPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MutabilityPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "schema": "valor-ejemplo",
+      "table": "valor-ejemplo",
+      "database": "main",
+      "writeMode": "APPEND_ONLY",
+      "writeModeLevel": "ENFORCED_DB",
+      "disposition": "KEEP",
+      "dispositionLevel": "ENFORCED_DB",
+      "retention": {
+        "days": 1,
+        "source": "valor-ejemplo",
+        "status": "PENDIENTE_DE_CUMPLIMIENTO"
+      },
+      "legalHold": "HOLD_AWARE",
+      "legalHoldLevel": "ENFORCED_DB",
+      "contradictions": 1,
+      "gaps": 1,
+      "registered": true
+    }
+  ],
+  "nextCursor": "valor-ejemplo",
+  "limit": 1,
+  "total": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MutabilityItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"schema":"valor-ejemplo","table":"valor-ejemplo","database":"main","writeMode":"APPEND_ONLY","writeModeLevel":"ENFORCED_DB","disposition":"KEEP","dispositionLevel":"ENFORCED_DB","retention":{"days":1,"source":"valor-ejemplo","status":"PENDIENTE_DE_CUMPLIMIENTO"},"legalHold":"HOLD_AWARE","legalHoldLevel":"ENFORCED_DB","contradictions":1,"gaps":1,"registered":true}]` |
+| `items[].schema` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].table` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].database` | Sí | `string` | valores: `main`, `pay` | Sin descripción específica en el contrato OpenAPI. | `main` |
+| `items[].writeMode` | Sí | `string` | valores: `APPEND_ONLY`, `APPEND_ONLY_PURGEABLE`, `LIFECYCLE_ONLY`, `UPDATABLE`, `UPDATABLE_DELETABLE`, `SOFT_DELETE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `APPEND_ONLY` |
+| `items[].writeModeLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `items[].disposition` | Sí | `string` | valores: `KEEP`, `PURGE_BY_RETENTION`, `ANONYMIZE`, `ARCHIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `KEEP` |
+| `items[].dispositionLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `items[].retention` | Sí | `MutabilityRetentionDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"days":1,"source":"valor-ejemplo","status":"PENDIENTE_DE_CUMPLIMIENTO"}` |
+| `items[].retention.days` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].retention.source` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].retention.status` | Sí | `string` | valores: `PENDIENTE_DE_CUMPLIMIENTO` | Sin descripción específica en el contrato OpenAPI. | `PENDIENTE_DE_CUMPLIMIENTO` |
+| `items[].legalHold` | Sí | `string` | valores: `HOLD_AWARE`, `HOLD_CAPABLE_NOT_ENFORCED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `HOLD_AWARE` |
+| `items[].legalHoldLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `items[].contradictions` | Sí | `number` | Sin restricción adicional declarada | Contradicciones registradas (no resueltas) | `1` |
+| `items[].gaps` | Sí | `number` | Sin restricción adicional declarada | Brechas: declarado sin imponer | `1` |
+| `items[].registered` | Sí | `boolean` | admite null | ¿Está en system_ops.entity_registry? `null` si no se pudo consultar | `true` |
+| `nextCursor` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/mutability"
+}
+```
+
+---
+
+## 20. GET /admin/governance/mutability/{schema}/{table}
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver
+- **Operation ID:** `MutabilityController_detail`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MutabilityController.detail](../../src/modules/system_ops/mutability/controllers/mutability.controller.ts)
+
+### Descripción de negocio
+
+Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/mutability/{schema}/{table}` en `MutabilityController_detail`. El controlador delega en `MutabilityCatalogService.detail`. No recibe body. El tipo de retorno estático es `Promise<MutabilityDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `schema` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `table` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/mutability/valor-ejemplo/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/mutability/valor-ejemplo/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MutabilityDetailDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+| 404 | La tabla no está en el catálogo | `Promise<MutabilityDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MutabilityDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MutabilityDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "schema": "valor-ejemplo",
+  "table": "valor-ejemplo",
+  "database": "main",
+  "writeMode": "APPEND_ONLY",
+  "writeModeLevel": "ENFORCED_DB",
+  "disposition": "KEEP",
+  "dispositionLevel": "ENFORCED_DB",
+  "retention": {
+    "days": 1,
+    "source": "valor-ejemplo",
+    "status": "PENDIENTE_DE_CUMPLIMIENTO"
+  },
+  "legalHold": "HOLD_AWARE",
+  "legalHoldLevel": "ENFORCED_DB",
+  "contradictions": 1,
+  "gaps": 1,
+  "registered": true,
+  "evidence": [
+    "valor-ejemplo"
+  ],
+  "findings": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `schema` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `table` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `database` | Sí | `string` | valores: `main`, `pay` | Sin descripción específica en el contrato OpenAPI. | `main` |
+| `writeMode` | Sí | `string` | valores: `APPEND_ONLY`, `APPEND_ONLY_PURGEABLE`, `LIFECYCLE_ONLY`, `UPDATABLE`, `UPDATABLE_DELETABLE`, `SOFT_DELETE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `APPEND_ONLY` |
+| `writeModeLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `disposition` | Sí | `string` | valores: `KEEP`, `PURGE_BY_RETENTION`, `ANONYMIZE`, `ARCHIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `KEEP` |
+| `dispositionLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `retention` | Sí | `MutabilityRetentionDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"days":1,"source":"valor-ejemplo","status":"PENDIENTE_DE_CUMPLIMIENTO"}` |
+| `retention.days` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `retention.source` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `retention.status` | Sí | `string` | valores: `PENDIENTE_DE_CUMPLIMIENTO` | Sin descripción específica en el contrato OpenAPI. | `PENDIENTE_DE_CUMPLIMIENTO` |
+| `legalHold` | Sí | `string` | valores: `HOLD_AWARE`, `HOLD_CAPABLE_NOT_ENFORCED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `HOLD_AWARE` |
+| `legalHoldLevel` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `contradictions` | Sí | `number` | Sin restricción adicional declarada | Contradicciones registradas (no resueltas) | `1` |
+| `gaps` | Sí | `number` | Sin restricción adicional declarada | Brechas: declarado sin imponer | `1` |
+| `registered` | Sí | `boolean` | admite null | ¿Está en system_ops.entity_registry? `null` si no se pudo consultar | `true` |
+| `evidence` | Sí | `array<string>` | Sin restricción adicional declarada | Toda la evidencia, con su fuente exacta | `["valor-ejemplo"]` |
+| `findings` | Sí | `array<string>` | Sin restricción adicional declarada | Contradicciones (no resueltas) y brechas | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La tabla no está en el catálogo de mutabilidad | Excepción explícita en src/modules/system_ops/mutability/services/mutability-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/mutability/{schema}/{table}"
+}
+```
+
+---
+
+## 21. GET /admin/governance/mutability/summary
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos
+- **Operation ID:** `MutabilityController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MutabilityController.summary](../../src/modules/system_ops/mutability/controllers/mutability.controller.ts)
+
+### Descripción de negocio
+
+Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/mutability/summary` en `MutabilityController_summary`. El controlador delega en `MutabilityCatalogService.summary`. No recibe body. El tipo de retorno estático es `Promise<MutabilitySummaryDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/mutability/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/mutability/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MutabilitySummaryDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MutabilitySummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MutabilitySummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "totalTables": 1,
+  "byWriteMode": [
+    {
+      "numerator": 1,
+      "denominator": 1,
+      "writeMode": "APPEND_ONLY",
+      "byEvidence": {
+        "clave": "valor"
+      }
+    }
+  ],
+  "byEvidence": [
+    {
+      "numerator": 1,
+      "denominator": 1,
+      "level": "ENFORCED_DB"
+    }
+  ],
+  "decided": {
+    "numerator": 1,
+    "denominator": 1
+  },
+  "enforcedByDatabase": {
+    "numerator": 1,
+    "denominator": 1
+  },
+  "withContradictions": {
+    "numerator": 1,
+    "denominator": 1
+  },
+  "withGaps": {
+    "numerator": 1,
+    "denominator": 1
+  },
+  "findingCodes": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "kind": "CONTRADICTION",
+      "findings": 1,
+      "tables": 1
+    }
+  ],
+  "disposition": [
+    {
+      "numerator": 1,
+      "denominator": 1
+    }
+  ],
+  "legalHold": [
+    {
+      "numerator": 1,
+      "denominator": 1
+    }
+  ],
+  "withDeclaredPeriod": 1,
+  "pendingCompliance": 1,
+  "registered": {
+    "numerator": 1,
+    "denominator": 1
+  },
+  "sources": {
+    "clave": "valor"
+  },
+  "generatedFrom": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `totalTables` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byWriteMode` | Sí | `array<MutabilityModeCountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"numerator":1,"denominator":1,"writeMode":"APPEND_ONLY","byEvidence":{"clave":"valor"}}]` |
+| `byWriteMode[].numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byWriteMode[].denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byWriteMode[].writeMode` | Sí | `string` | valores: `APPEND_ONLY`, `APPEND_ONLY_PURGEABLE`, `LIFECYCLE_ONLY`, `UPDATABLE`, `UPDATABLE_DELETABLE`, `SOFT_DELETE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `APPEND_ONLY` |
+| `byWriteMode[].byEvidence` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `byEvidence` | Sí | `array<MutabilityLevelCountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"numerator":1,"denominator":1,"level":"ENFORCED_DB"}]` |
+| `byEvidence[].numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byEvidence[].denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byEvidence[].level` | Sí | `string` | valores: `ENFORCED_DB`, `ENFORCED_CODE`, `DECLARED_MODEL`, `DECLARED_DOC`, `INFERRED`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `ENFORCED_DB` |
+| `decided` | Sí | `MutabilityRatioDto` | Sin restricción adicional declarada | Tablas con modo distinto de UNKNOWN | `{"numerator":1,"denominator":1}` |
+| `decided.numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `decided.denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `enforcedByDatabase` | Sí | `MutabilityRatioDto` | Sin restricción adicional declarada | Tablas con el modo impuesto por la base de datos | `{"numerator":1,"denominator":1}` |
+| `enforcedByDatabase.numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `enforcedByDatabase.denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withContradictions` | Sí | `MutabilityRatioDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"numerator":1,"denominator":1}` |
+| `withContradictions.numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withContradictions.denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withGaps` | Sí | `MutabilityRatioDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"numerator":1,"denominator":1}` |
+| `withGaps.numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withGaps.denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `findingCodes` | Sí | `array<MutabilityFindingCodeDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","kind":"CONTRADICTION","findings":1,"tables":1}]` |
+| `findingCodes[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `findingCodes[].kind` | Sí | `string` | valores: `CONTRADICTION`, `GAP` | Sin descripción específica en el contrato OpenAPI. | `CONTRADICTION` |
+| `findingCodes[].findings` | Sí | `number` | Sin restricción adicional declarada | Hallazgos con ese código | `1` |
+| `findingCodes[].tables` | Sí | `number` | Sin restricción adicional declarada | Tablas afectadas | `1` |
+| `disposition` | Sí | `array<MutabilityRatioDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"numerator":1,"denominator":1}]` |
+| `disposition[].numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `disposition[].denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `legalHold` | Sí | `array<MutabilityRatioDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"numerator":1,"denominator":1}]` |
+| `legalHold[].numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `legalHold[].denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withDeclaredPeriod` | Sí | `number` | Sin restricción adicional declarada | Tablas con plazo declarado por una fuente | `1` |
+| `pendingCompliance` | Sí | `number` | Sin restricción adicional declarada | Tablas con retención aún PENDIENTE_DE_CUMPLIMIENTO | `1` |
+| `registered` | Sí | `MutabilityRatioDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"numerator":1,"denominator":1}` |
+| `registered.numerator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `registered.denominator` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `sources` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `generatedFrom` | Sí | `object` | Sin restricción adicional declarada | Desde qué fuentes se generó el catálogo | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/mutability/summary"
+}
+```
+
+---
+
+## 22. POST /admin/governance/operational-frameworks
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -1950,6 +2971,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FrameworkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2002,7 +3024,202 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /admin/governance/remediation-actions/{id}/verify
+## 23. GET /admin/governance/policies
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada
+- **Operation ID:** `GovernanceReadController_policies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReadController.policies](../../src/modules/system_ops/controllers/governance-read.controller.ts)
+
+### Descripción de negocio
+
+Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/policies` en `GovernanceReadController_policies`. El controlador delega en `GovernanceReadService.policies`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `type` | query | No | `string` | valores: `WRITE`, `RETENTION`, `ANONYMIZATION`, `RESIDENCY` | Sin descripción específica en OpenAPI. | `WRITE` |
+| `state` | query | No | `string` | Sin restricción adicional declarada | Código del estado (concepto), p. ej. `ACTIVE` | `valor-ejemplo` |
+| `q` | query | No | `string` | longitud máxima 120 | Busca en código y nombre, sin mayúsculas | `valor-ejemplo` |
+| `sort` | query | No | `string` | valores: `code`, `updatedAt` | Sin descripción específica en OpenAPI. | `code` |
+| `order` | query | No | `string` | valores: `asc`, `desc` | Sin descripción específica en OpenAPI. | `asc` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/policies?limit=50&cursor=valor-ejemplo&type=WRITE&state=valor-ejemplo&q=valor-ejemplo&sort=code&order=asc HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/policies"
+}
+```
+
+---
+
+## 24. GET /admin/governance/policies/{policyType}/{id}
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Una política: ajustes, estado y a qué tablas o columnas se aplica
+- **Operation ID:** `GovernanceReadController_policy`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReadController.policy](../../src/modules/system_ops/controllers/governance-read.controller.ts)
+
+### Descripción de negocio
+
+Una política: ajustes, estado y a qué tablas o columnas se aplica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/policies/{policyType}/{id}` en `GovernanceReadController_policy`. El controlador delega en `GovernanceReadService.policy`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `policyType` | path | Sí | `string` | valores: `WRITE`, `RETENTION`, `ANONYMIZATION`, `RESIDENCY` | Sin descripción específica en OpenAPI. | `WRITE` |
+| `id` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/policies/WRITE/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/policies/WRITE/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | La política no existe | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Política no encontrada | Excepción explícita en src/modules/system_ops/services/governance-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/policies/{policyType}/{id}"
+}
+```
+
+---
+
+## 25. POST /admin/governance/remediation-actions/{id}/verify
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2083,6 +3300,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2128,7 +3346,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /admin/governance/residency-policies
+## 26. POST /admin/governance/residency-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -2226,6 +3444,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2269,7 +3488,107 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /admin/governance/retention-policies
+## 27. GET /admin/governance/retention-executions
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-governance`
+- **Nombre:** Ejecuciones de políticas de retención: estado, tiempos y conteos
+- **Operation ID:** `GovernanceOperationsReadController_retentionExecutions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceOperationsReadController.retentionExecutions](../../src/modules/system_ops/controllers/governance-operations-read.controller.ts)
+
+### Descripción de negocio
+
+Ejecuciones de políticas de retención: estado, tiempos y conteos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/retention-executions` en `GovernanceOperationsReadController_retentionExecutions`. El controlador delega en `GovernanceOperationsReadService.retentionExecutions`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 600 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `policyId` | query | No | `string` | formato `uuid` | Política de retención | `00000000-0000-4000-8000-000000000001` |
+| `entityRegistryId` | query | No | `string` | formato `uuid` | Entidad del registro | `00000000-0000-4000-8000-000000000001` |
+| `status` | query | No | `string` | valores: `RUNNING`, `SUCCEEDED`, `FAILED` | Sin descripción específica en OpenAPI. | `RUNNING` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Registrada desde (ISO 8601, incluido) | `valor-ejemplo` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Registrada hasta (ISO 8601, excluido) | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/retention-executions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/retention-executions?limit=50&cursor=valor-ejemplo&policyId=00000000-0000-4000-8000-000000000001&entityRegistryId=00000000-0000-4000-8000-000000000001&status=RUNNING&from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Página de ejecuciones | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | «to» debe ser posterior a «from» | Excepción explícita en src/modules/system_ops/services/governance-operations-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/retention-executions"
+}
+```
+
+---
+
+## 28. POST /admin/governance/retention-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -2357,6 +3676,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2400,7 +3720,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /admin/governance/tenant-residency-bindings
+## 29. POST /admin/governance/tenant-residency-bindings
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -2487,6 +3807,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2511,7 +3832,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El tenant o la política de residencia no existen | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
+| 404 | `NOT_FOUND` | Una de las regiones indicadas no existe | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La política de residencia no está activa | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una de las regiones queda fuera de las que la política permite | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2529,7 +3854,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /admin/governance/workload-assessments
+## 30. POST /admin/governance/workload-assessments
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2624,6 +3949,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2668,7 +3994,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PUT /admin/governance/workload-assessments/{id}/control-results
+## 31. PUT /admin/governance/workload-assessments/{id}/control-results
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2767,6 +4093,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2810,7 +4137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /admin/governance/write-policies
+## 32. POST /admin/governance/write-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -2907,6 +4234,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2950,7 +4278,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /admin/ops/backup-policies
+## 33. POST /admin/ops/backup-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-backup`
@@ -3047,6 +4375,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3090,7 +4419,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /internal/governance/retention-executions/run
+## 34. POST /internal/governance/retention-executions/run
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-retention`
@@ -3141,6 +4470,7 @@ Content-Type: application/json
 | `retentionPolicyId` | Sí | `string` | formato `uuid` | Política de retención ACTIVE a ejecutar | `00000000-0000-4000-8000-000000000001` |
 | `entityRegistryId` | Sí | `string` | formato `uuid` | Entidad objetivo del registro (entity_registry.id) | `00000000-0000-4000-8000-000000000001` |
 | `maxBatchSize` | No | `number` | mínimo 1 | Tamaño máximo de lote a barrer | `1` |
+| `cursor` | No | `string` | formato `uuid` | Cursor devuelto por la corrida anterior (`nextCursor`); continúa tras esa fila | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3155,7 +4485,8 @@ Content-Type: application/json
 {
   "retentionPolicyId": "00000000-0000-4000-8000-000000000001",
   "entityRegistryId": "00000000-0000-4000-8000-000000000001",
-  "maxBatchSize": 1
+  "maxBatchSize": 1,
+  "cursor": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3172,6 +4503,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionExecutionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3183,7 +4515,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "totalDeleted": 1,
   "totalAnonymized": 1,
   "totalArchived": 1,
-  "blockedByLegalHold": true
+  "blockedByLegalHold": true,
+  "totalHeld": 1,
+  "hasMore": true,
+  "nextCursor": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3198,6 +4533,9 @@ Campos de la respuesta:
 | `totalAnonymized` | Sí | `number` | Sin restricción adicional declarada | Valor de total anonymized mantenido por la instancia. | `1` |
 | `totalArchived` | Sí | `number` | Sin restricción adicional declarada | Valor de total archived mantenido por la instancia. | `1` |
 | `blockedByLegalHold` | No | `boolean` | Sin restricción adicional declarada | true si se detuvo por legal hold activo | `true` |
+| `totalHeld` | No | `number` | Sin restricción adicional declarada | Filas vencidas conservadas por legal hold activo | `1` |
+| `hasMore` | No | `boolean` | Sin restricción adicional declarada | true si el lote se llenó y quedan filas vencidas sin examinar; repetir con `cursor` | `true` |
+| `nextCursor` | No | `string` | formato `uuid` | Cursor para continuar el barrido cuando `hasMore` es true | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3212,6 +4550,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Entidad objetivo no encontrada | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La política de retención no está ACTIVE | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
+| 422 | `PRECONDITION_FAILED` | La entidad no tiene un ejecutor de retención registrado | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
+| 422 | `PRECONDITION_FAILED` | La política de retención no declara plazo y disposición ejecutables | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3229,7 +4569,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /internal/ops/restore-test-runs
+## 35. POST /internal/ops/restore-test-runs
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-restore`
@@ -3321,6 +4661,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RestoreTestRunResponseDto`. Ejemplo completo derivado de ese DTO:
 

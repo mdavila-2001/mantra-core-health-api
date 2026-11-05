@@ -1,5 +1,11 @@
 {
   "_nota": "Las 14 especialidades odontológicas del padrón del stakeholder, por profesión de origen. Origen: LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md — el único de los doce markdown que no tenía extractor (H1 del carril M6, 2026-09-26).",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown_convertidos/LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md": "9f199c089d55816996a024557f1b9d7e34d2b1b49f6217cb1d6872322249e271"
+    }
+  },
   "datos": [
     {
       "code": "BO_ESP_ODO_ENDODONCIA",

@@ -548,6 +548,18 @@ export class TriggerTransitionDto {
   machineCode!: string;
 
   /**
+   * Identificador asociado a purpose of use concept.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Propósito de uso con el que se dispara el comando. Debe coincidir con el que exige la transición; si ésta lo exige y falta o difiere, 403 WORKFLOW_PURPOSE_NOT_ALLOWED',
+  })
+  @IsOptional()
+  @IsUUID()
+  purposeOfUseConceptId?: string;
+
+  /**
    * Identificador asociado a actor tenant.
    */
   @ApiPropertyOptional({

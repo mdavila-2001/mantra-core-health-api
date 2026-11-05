@@ -1,77 +1,77 @@
 {
-  "probedAt": "2026-10-24T05:25:55.039Z",
+  "probedAt": "2026-10-24T16:49:06.892Z",
   "hosts": {
     "clinicaltrials.gov": {
       "source": "clinicaltrials-gov",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "www.cms.gov": {
       "source": "icd10pcs-cms",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "icd.who.int": {
       "source": "ichi-who",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "302"
     },
     "icdcdn.who.int": {
       "source": "ichi-who",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "400"
     },
     "id.who.int": {
       "source": "icd11-who",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "404"
     },
     "icdaccessmanagement.who.int": {
       "source": "icd11-who",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "301"
     },
     "www.minsalud.gov.co": {
       "source": "cups-minsalud",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "web.sispro.gov.co": {
       "source": "cups-minsalud",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "error: curl: (35) Recv failure: Connection reset by peer"
     },
     "nlmpubs.nlm.nih.gov": {
       "source": "mesh-nlm",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "id.nlm.nih.gov": {
       "source": "mesh-nlm",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "301"
     },
     "evs.nci.nih.gov": {
       "source": "ncit-evs",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "eutils.ncbi.nlm.nih.gov": {
       "source": "pubmed-europepmc",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "301"
     },
     "www.ebi.ac.uk": {
       "source": "pubmed-europepmc",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "query.wikidata.org": {
       "source": "wikidata",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "www.nice.org.uk": {
       "source": "nice-ipg",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     },
     "www.cochranelibrary.com": {
       "source": "cochrane",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "403"
     },
     "www.minsalud.gob.bo": {
       "source": "nnac-bolivia",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "error: curl: (52) Empty reply from server"
     },
     "www.sanidad.gob.es": {
       "source": "cie10es-sanidad",
-      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+      "status": "200"
     }
   }
 }

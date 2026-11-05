@@ -92,7 +92,7 @@ archivos, directorios o convenciones de nombres, y a vos solo te sirve la conclu
 Lo que costó descubrir no debe vivir solo en el contexto de la sesión: se pierde al
 resumirse o al cambiar de sesión.
 
-1. Hallazgos de discovery, decisiones y sus motivos, comandos que funcionaron y los que no: a un archivo de notas del carril o de la tarea.
+1. Hallazgos de discovery, decisiones y sus motivos, comandos que funcionaron y los que no: al issue o al PR del carril o de la tarea, nunca a un archivo de notas versionado en el repo.
 2. Forma de cada nota: hecho + fuente + fecha. Sin narrativa.
 3. Al retomar, leé la nota, no rehagas el discovery. Pero una nota es una foto: si nombra un archivo, símbolo o flag, verificá que sigue existiendo antes de apoyarte en él.
 4. El estado de avance reanudable es de `progress-reporting`; acá van los **hechos** descubiertos.

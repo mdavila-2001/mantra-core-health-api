@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GeoTrackingSessionsService } from '../services';
 import { StartTrackingSessionDto, TrackingSessionResponseDto } from '../dto';
 
@@ -27,6 +32,11 @@ export class GeoTrackingSessionsController {
   constructor(private readonly service: GeoTrackingSessionsService) {}
 
   /** UC-13-02. */
+  @Audited({
+    action: 'TRACKING_SESSION_STARTED',
+    entity: 'tracking_session',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -39,6 +49,11 @@ export class GeoTrackingSessionsController {
   }
 
   /** UC-13-08. */
+  @Audited({
+    action: 'TRACKING_SESSION_CLOSED',
+    entity: 'tracking_session',
+    entityId: 'param:id',
+  })
   @Post(':id/close')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

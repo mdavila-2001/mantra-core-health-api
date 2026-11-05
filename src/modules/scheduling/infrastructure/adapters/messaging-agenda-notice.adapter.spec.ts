@@ -98,6 +98,8 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       notificationRequestId: 'request-1',
       inAppNotificationId: 'inapp-1',
       emailRequestId: 'request-1',
+      // La demora también va al chat (pedido del cliente, 2026-10-28).
+      chatDelivered: true,
     });
   });
 
@@ -319,10 +321,23 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
     expect(result.chatDelivered).toBe(true);
   });
 
-  it('los avisos que la ficha no pide por chat (demora, recordatorio, cupo) no tocan SupportAdmin', async () => {
+  it('la demora también avisa por el chat: el paciente se entera aunque no mire la campana', async () => {
     const d = build();
 
-    await d.adapter.emit(notice); // PRACTITIONER_DELAY
+    const result = await d.adapter.emit(notice); // PRACTITIONER_DELAY
+
+    expect(d.supportAdmin.notify).toHaveBeenCalledWith(
+      notice,
+      expect.any(String),
+    );
+    expect(result.chatDelivered).toBe(true);
+  });
+
+  it('los avisos que la ficha no pide por chat (recordatorio, cupo) no tocan SupportAdmin', async () => {
+    const d = build();
+
+    await d.adapter.emit({ ...notice, kind: 'APPOINTMENT_REMINDER' });
+    await d.adapter.emit({ ...notice, kind: 'SLOT_RELEASED' });
 
     expect(d.supportAdmin.notify).not.toHaveBeenCalled();
   });

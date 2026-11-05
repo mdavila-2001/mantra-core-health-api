@@ -2,37 +2,37 @@
 
 Casos de uso, reglas de negocio y coordinación transaccional.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `index.ts` | Punto de exportación pública de la carpeta. |
+| `index.ts` | Public export barrel for this folder. |
 | `medical-visitors.service.spec.ts` | Pruebas unitarias del componente. |
-| `medical-visitors.service.ts` | Casos de uso y reglas de negocio. |
-| `pharma-analytics.service.ts` | Casos de uso y reglas de negocio. |
+| `medical-visitors.service.ts` | Use cases and business rules. |
+| `pharma-analytics.service.ts` | Use cases and business rules. |
 | `pharma-catalog.service.spec.ts` | Pruebas unitarias del componente. |
-| `pharma-catalog.service.ts` | Casos de uso y reglas de negocio. |
+| `pharma-catalog.service.ts` | Use cases and business rules. |
 | `pharma-lab-access.service.spec.ts` | Pruebas unitarias del componente. |
-| `pharma-lab-access.service.ts` | Casos de uso y reglas de negocio. |
-| `pharma-lab-notifications.service.ts` | Casos de uso y reglas de negocio. |
-| `pharma-lab-organization.service.ts` | Casos de uso y reglas de negocio. |
-| `pharma-social.service.ts` | Casos de uso y reglas de negocio. |
+| `pharma-lab-access.service.ts` | Use cases and business rules. |
+| `pharma-lab-notifications.service.ts` | Use cases and business rules. |
+| `pharma-lab-organization.service.ts` | Use cases and business rules. |
+| `pharma-social.service.ts` | Use cases and business rules. |
 | `pharmacovigilance.service.spec.ts` | Pruebas unitarias del componente. |
-| `pharmacovigilance.service.ts` | Casos de uso y reglas de negocio. |
+| `pharmacovigilance.service.ts` | Use cases and business rules. |
 | `regulatory-documents.service.spec.ts` | Pruebas unitarias del componente. |
-| `regulatory-documents.service.ts` | Casos de uso y reglas de negocio. |
+| `regulatory-documents.service.ts` | Use cases and business rules. |
 | `visit-agenda.service.spec.ts` | Pruebas unitarias del componente. |
-| `visit-agenda.service.ts` | Casos de uso y reglas de negocio. |
+| `visit-agenda.service.ts` | Use cases and business rules. |
 | `visit-records.service.spec.ts` | Pruebas unitarias del componente. |
-| `visit-records.service.ts` | Casos de uso y reglas de negocio. |
+| `visit-records.service.ts` | Use cases and business rules. |
 | `visit-requests.service.spec.ts` | Pruebas unitarias del componente. |
-| `visit-requests.service.ts` | Casos de uso y reglas de negocio. |
-| `visit-surveys.service.ts` | Casos de uso y reglas de negocio. |
+| `visit-requests.service.ts` | Use cases and business rules. |
+| `visit-surveys.service.ts` | Use cases and business rules. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';
 import { CreateInventoryLocationUseCase } from './create-inventory-location.use-case';
 
 describe('CreateInventoryLocationUseCase', () => {
@@ -15,6 +16,7 @@ describe('CreateInventoryLocationUseCase', () => {
     const useCase = new CreateInventoryLocationUseCase(
       em as any,
       locations as any,
+      allowAllScope(),
       logger as any,
     );
 

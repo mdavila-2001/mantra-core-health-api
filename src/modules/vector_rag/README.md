@@ -109,7 +109,7 @@ MANTENIMIENTO
   .../retire · /lifecycle ────> modelo retirado, colección sellada, bindings congelados
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La dimensión y la métrica salen del modelo, no de la petición.** El vector que produce un modelo
   tiene la dimensión que tiene; declararla distinta no la cambia, sólo hace que el índice no sirva.
@@ -185,7 +185,7 @@ Aceptable con volumen de desarrollo, inaceptable en producción; el arranque lo 
 ejecución. Con una dimensión fijada en el modelo, `columnType: 'vector(N)'` en
 `vector_embeddings.entity.ts` cumple la condición previa del catálogo.
 
-## Permisos
+## Permissions
 
 `AI_GOVERNANCE_OFFICER` y `MLOPS_ENGINEER` aprueban y retiran modelos y ordenan re-embedding.
 `RAG_COLLECTION_ADMIN` crea colecciones y encola trabajo. `PRIVACY_OFFICER` / `DPO` definen y
@@ -198,7 +198,7 @@ nada.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el modelo al validar su aprobación —una colección no puede nacer atada a algo que
 se está retirando en la transacción de al lado—, sobre la colección al reenlazar política, re-embeber
@@ -215,7 +215,7 @@ las demás.
 borrado propagado, deriva detectada y problema de seguridad. No se loguean textos de chunk, consultas
 ni citas.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/vector_rag --runInBand --silent` — 5 suites y 97 pruebas
 aprobadas durante la revisión (21 gobierno + 20 pipeline + 25 retrieval + 13 mantenimiento + 15 de delegación).

@@ -3,53 +3,887 @@
 # Endpoints del módulo `billing`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 34 (34 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 5 · MEDIO 14 · BAJO 15
-- **Tablas distintas que tocan:** 30
+- **Operaciones:** 53 (53 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 9 · MEDIO 16 · BAJO 28
+- **Tablas distintas que tocan:** 55
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/billing/bills` | Registrar factura de proveedor con three-way match | MEDIO | 5 | SECURITY_ADMIN |
-| 2 | POST | `/billing/documents/{id}:post-to-ledger` | Contabilizar documento (posting CxC/CxP) | BAJO | 4 | SECURITY_ADMIN |
-| 3 | POST | `/billing/dunning-runs:execute` | Ejecutar ciclo de morosidad (dunning) | MEDIO | 6 | SECURITY_ADMIN |
-| 4 | POST | `/billing/internal/dunning-runs/run-due` | Evaluar y disparar morosidad automática por tenant | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
-| 5 | GET | `/billing/invoices` | Listar las facturas de la práctica | BAJO | 2 | SECURITY_ADMIN |
-| 6 | POST | `/billing/invoices:issue-from-encounter` | Emitir factura desde los cargos del encuentro | MEDIO | 4 | SECURITY_ADMIN |
-| 7 | GET | `/billing/invoices/{id}` | Detalle de una factura, con sus líneas | BAJO | 3 | SECURITY_ADMIN |
-| 8 | POST | `/billing/invoices/{id}:credit-note` | Emitir nota de crédito / castigo sobre una factura | MEDIO | 5 | SECURITY_ADMIN |
-| 9 | POST | `/billing/kpi-snapshots:compute` | Calcular snapshot de KPI financiero y aging | MEDIO | 2 | SECURITY_ADMIN |
-| 10 | GET | `/billing/patient-statements` | Listar los estados de cuenta de la práctica | BAJO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/billing/patient-statements:generate` | Generar el estado de cuenta del paciente | MEDIO | 4 | SECURITY_ADMIN |
-| 12 | POST | `/billing/payment-plans` | Configurar un plan de pagos del paciente | MEDIO | 4 | SECURITY_ADMIN |
-| 13 | POST | `/billing/payments-made:execute` | Ejecutar pago a proveedor con asignación | MEDIO | 4 | SECURITY_ADMIN |
-| 14 | POST | `/billing/payments-received:apply` | Aplicar un pago recibido con asignación multi-factura | MEDIO | 4 | SECURITY_ADMIN |
-| 15 | POST | `/billing/reconciliation:clear` | Conciliar pagos vía documento de compensación | MEDIO | 4 | SECURITY_ADMIN |
-| 16 | POST | `/billing/reimbursements:link` | Vincular reembolso de reclamo de seguro a la factura | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | GET | `/billing/service-catalog` | Listar el catálogo de servicios de la práctica | BAJO | 1 | sesión (sin roles) |
-| 18 | POST | `/billing/service-catalog` | Dar de alta un servicio en el catálogo maestro | MEDIO | 10 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
-| 19 | PATCH | `/billing/service-catalog/{id}` | Corregir un servicio del catálogo de mi práctica | MEDIO | 4 | PRACTITIONER, CLINICIAN, SECURITY_ADMIN |
-| 20 | GET | `/billing/service-catalog/procedure-specialties` | Listar las especialidades del nomenclador de procedimientos | BAJO | 1 | sesión (sin roles) |
-| 21 | GET | `/billing/service-catalog/procedures` | Listar el nomenclador de procedimientos (arancel de referencia) | BAJO | 2 | sesión (sin roles) |
-| 22 | GET | `/billing/simulated/catalogs` | Catálogos paramétricos del SIAT simulado | BAJO | 0 | sesión (sin roles) |
-| 23 | GET | `/billing/simulated/charges` | Cobros de consultas (opcionalmente de una persona) | BAJO | 11 | sesión (sin roles) |
-| 24 | POST | `/billing/simulated/charges/{chargeId}/instances/{instanceId}/payments` | Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN) | BAJO | 11 | sesión (sin roles) |
-| 25 | POST | `/billing/simulated/charges/{chargeId}/invoices` | Emitir la factura SIAT simulada de un cobro pagado | ALTO | 12 | sesión (sin roles) |
-| 26 | POST | `/billing/simulated/charges/{chargeId}/payment` | Registrar el pago real de un cobro | ALTO | 17 | sesión (sin roles) |
-| 27 | GET | `/billing/simulated/invoices/{invoiceId}` | Una factura simulada, dentro del alcance de quien la pide | BAJO | 11 | sesión (sin roles) |
-| 28 | POST | `/billing/simulated/invoices/{invoiceId}/annulment` | Anular la factura (sólo administración) | ALTO | 12 | sesión (sin roles) |
-| 29 | POST | `/billing/simulated/invoices/{invoiceId}/annulment-reversal` | Revertir la anulación (sólo administración) | ALTO | 12 | sesión (sin roles) |
-| 30 | POST | `/billing/simulated/invoices/{invoiceId}/email` | Encolar el envío (simulado, no se envía) de la factura | ALTO | 13 | sesión (sin roles) |
-| 31 | GET | `/billing/simulated/my-invoices` | Mis facturas: recibidas (paciente) o emitidas (quien factura) | BAJO | 4 | sesión (sin roles) |
-| 32 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
-| 33 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
-| 34 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
+| 1 | GET | `/admin/catalogs/services` | Listar servicios de la organización, filtrable por tipo | BAJO | 2 | SECURITY_ADMIN |
+| 2 | POST | `/admin/catalogs/services` | Crear un servicio (idempotente por práctica y código) | MEDIO | 3 | SECURITY_ADMIN |
+| 3 | GET | `/admin/catalogs/services/{id}` | Ver un servicio con su versión | BAJO | 2 | SECURITY_ADMIN |
+| 4 | PATCH | `/admin/catalogs/services/{id}` | Editar un servicio con precondición de versión | BAJO | 2 | SECURITY_ADMIN |
+| 5 | POST | `/admin/catalogs/services/{id}/deactivate` | Desactivar un servicio (no se borra) | BAJO | 2 | SECURITY_ADMIN |
+| 6 | POST | `/admin/catalogs/services/{id}/reactivate` | Reactivar un servicio desactivado | BAJO | 2 | SECURITY_ADMIN |
+| 7 | GET | `/admin/catalogs/services/scopes` | Tipos de organización, prácticas y monedas del editor de servicios | BAJO | 2 | SECURITY_ADMIN |
+| 8 | GET | `/billing/bed-day/stays` | Estancias de internación de una sede (F5e) | BAJO | 12 | sesión (sin roles) |
+| 9 | POST | `/billing/bills` | Registrar factura de proveedor con three-way match | MEDIO | 7 | SECURITY_ADMIN |
+| 10 | POST | `/billing/charge-captures/{id}/void` | Anular un cargo devengado | ALTO | 13 | sesión (sin roles) |
+| 11 | POST | `/billing/documents/{id}:post-to-ledger` | Contabilizar documento (posting CxC/CxP) | BAJO | 4 | SECURITY_ADMIN |
+| 12 | POST | `/billing/dunning-runs:execute` | Ejecutar ciclo de morosidad (dunning) | MEDIO | 5 | SECURITY_ADMIN |
+| 13 | POST | `/billing/encounters/{encounterId}/bed-day-charges/run` | Devengar los días-cama de un encuentro | ALTO | 17 | sesión (sin roles) |
+| 14 | GET | `/billing/encounters/{encounterId}/pending-charges` | Cargos devengados pendientes | BAJO | 11 | sesión (sin roles) |
+| 15 | POST | `/billing/internal/dunning-runs/run-due` | Evaluar y disparar morosidad automática por tenant | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
+| 16 | GET | `/billing/invoices` | Listar las facturas de la práctica | BAJO | 2 | SECURITY_ADMIN |
+| 17 | POST | `/billing/invoices:issue-from-encounter` | Emitir factura desde los cargos del encuentro | MEDIO | 9 | SECURITY_ADMIN |
+| 18 | GET | `/billing/invoices/{id}` | Detalle de una factura, con sus líneas | BAJO | 3 | SECURITY_ADMIN |
+| 19 | POST | `/billing/invoices/{id}:credit-note` | Emitir nota de crédito / castigo sobre una factura | MEDIO | 4 | SECURITY_ADMIN |
+| 20 | POST | `/billing/kpi-snapshots:compute` | Calcular snapshot de KPI financiero y aging | MEDIO | 2 | SECURITY_ADMIN |
+| 21 | GET | `/billing/patient-statements` | Listar los estados de cuenta de la práctica | BAJO | 2 | SECURITY_ADMIN |
+| 22 | POST | `/billing/patient-statements:generate` | Generar el estado de cuenta del paciente | MEDIO | 4 | SECURITY_ADMIN |
+| 23 | POST | `/billing/payment-plans` | Configurar un plan de pagos del paciente | MEDIO | 3 | SECURITY_ADMIN |
+| 24 | POST | `/billing/payments-made:execute` | Ejecutar pago a proveedor con asignación | MEDIO | 4 | SECURITY_ADMIN |
+| 25 | POST | `/billing/payments-received:apply` | Aplicar un pago recibido con asignación multi-factura | MEDIO | 6 | SECURITY_ADMIN |
+| 26 | POST | `/billing/reconciliation:clear` | Conciliar pagos vía documento de compensación | BAJO | 2 | SECURITY_ADMIN |
+| 27 | POST | `/billing/reimbursements:link` | Vincular reembolso de reclamo de seguro a la factura | MEDIO | 4 | SECURITY_ADMIN |
+| 28 | GET | `/billing/service-catalog` | Listar el catálogo de servicios de la práctica | BAJO | 1 | sesión (sin roles) |
+| 29 | POST | `/billing/service-catalog` | Dar de alta un servicio en el catálogo maestro | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
+| 30 | PATCH | `/billing/service-catalog/{id}` | Corregir un servicio del catálogo de mi práctica | MEDIO | 4 | PRACTITIONER, CLINICIAN, SECURITY_ADMIN |
+| 31 | GET | `/billing/service-catalog/{id}/image` | Descargar la imagen de un servicio que el actor puede ver | BAJO | 4 | sesión (sin roles) |
+| 32 | POST | `/billing/service-catalog/import-procedures` | Importar en lote procedimientos del arancel al catálogo | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
+| 33 | GET | `/billing/service-catalog/procedure-specialties` | Listar las especialidades del nomenclador de procedimientos | BAJO | 1 | sesión (sin roles) |
+| 34 | GET | `/billing/service-catalog/procedure-specialties/mine` | Listar las especialidades del arancel que corresponden al médico | BAJO | 3 | sesión (sin roles) |
+| 35 | GET | `/billing/service-catalog/procedures` | Listar el nomenclador de procedimientos (arancel de referencia) | BAJO | 2 | sesión (sin roles) |
+| 36 | GET | `/billing/simulated/catalogs` | Catálogos paramétricos del SIAT simulado | BAJO | 0 | sesión (sin roles) |
+| 37 | GET | `/billing/simulated/charges` | Cobros de consultas (opcionalmente de una persona) | BAJO | 11 | sesión (sin roles) |
+| 38 | POST | `/billing/simulated/charges/{chargeId}/instances/{instanceId}/payments` | Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN) | BAJO | 11 | sesión (sin roles) |
+| 39 | POST | `/billing/simulated/charges/{chargeId}/invoices` | Emitir la factura SIAT simulada de un cobro pagado | ALTO | 12 | sesión (sin roles) |
+| 40 | POST | `/billing/simulated/charges/{chargeId}/payment` | Registrar el pago real de un cobro | ALTO | 22 | sesión (sin roles) |
+| 41 | GET | `/billing/simulated/invoices/{invoiceId}` | Una factura simulada, dentro del alcance de quien la pide | BAJO | 11 | sesión (sin roles) |
+| 42 | POST | `/billing/simulated/invoices/{invoiceId}/annulment` | Anular la factura (sólo administración) | ALTO | 12 | sesión (sin roles) |
+| 43 | POST | `/billing/simulated/invoices/{invoiceId}/annulment-reversal` | Revertir la anulación (sólo administración) | ALTO | 12 | sesión (sin roles) |
+| 44 | POST | `/billing/simulated/invoices/{invoiceId}/email` | Encolar el envío (simulado, no se envía) de la factura | ALTO | 13 | sesión (sin roles) |
+| 45 | GET | `/billing/simulated/my-invoices` | Mis facturas: recibidas (paciente) o emitidas (quien factura) | BAJO | 4 | sesión (sin roles) |
+| 46 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
+| 47 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
+| 48 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
+| 49 | GET | `/billing/space-tariffs` | Tarifas de espacios | BAJO | 9 | sesión (sin roles) |
+| 50 | POST | `/billing/space-tariffs` | Crear una tarifa de espacio | ALTO | 13 | sesión (sin roles) |
+| 51 | POST | `/billing/space-tariffs/{id}/close` | Cerrar la vigencia de una tarifa | ALTO | 13 | sesión (sin roles) |
+| 52 | POST | `/internal/billing/bed-day-charges/run` | Devengar día-cama y quirófano (worker) | MEDIO | 19 | SYSTEM, SYSTEM_WORKER |
+| 53 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 11 | PATIENT |
 
 ---
 
-## 1. POST /billing/bills
+## 1. GET /admin/catalogs/services
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar servicios de la organización, filtrable por tipo
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.list` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:77`
+
+### Qué es y para qué sirve (negocio)
+
+Listar servicios de la organización, filtrable por tipo. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/catalogs/services` la atiende `AdminServiceCatalogController.list` (src/modules/billing/controllers/admin-service-catalog.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AdminServiceCatalogService.list`. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.list → AdminServiceCatalogService.list → ServiceCatalogRepository.searchAdminPage | `src/modules/billing/repositories/service-catalog.repository.ts:232` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.list → AdminServiceCatalogService.list → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `practiceTypeConceptId` | query | No | `string` | Tipo de organización (concepto PR_TYPE_*): consultorio, laboratorio, farmacia, aseguradora… |
+| `practiceId` | query | No | `string` | — |
+| `isActive` | query | No | `boolean` | — |
+| `q` | query | No | `string` | — |
+| `cursor` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdminServicePageDto>` · DTO `AdminServicePageDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<AdminServiceItemDto>` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:254` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `items[].practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `items[].practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `items[].descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `items[].termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `items[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `items[].defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `items[].currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `items[].currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `items[].isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `items[].rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `items[].updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+| `count` | `number` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:257` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:260` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:263` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /admin/catalogs/services
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear un servicio (idempotente por práctica y código)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.create` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:95`
+
+### Qué es y para qué sirve (negocio)
+
+Crear un servicio (idempotente por práctica y código). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/services` la atiende `AdminServiceCatalogController.create` (src/modules/billing/controllers/admin-service-catalog.controller.ts:95). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdminCreateServiceDto` (8 campos, 4 obligatorios). Delega en `AdminServiceCatalogService.create`. Crea filas en billing.service_catalog. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:95` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | AdminServiceCatalogController.create → AdminServiceCatalogService.create → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:253` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.create → AdminServiceCatalogService.create → ServiceCatalogRepository.findByCode | `src/modules/billing/repositories/service-catalog.repository.ts:132` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.create → AdminServiceCatalogService.create → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Cuerpo — DTO `AdminCreateServiceDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica dueña del servicio | `src/modules/billing/dto/admin-service-catalog.dto.ts:100` |
+| `code` | `string` | Sí | longitud máxima 120 | `@IsString()` `@MaxLength(120)` | Código interno, único en la práctica | `src/modules/billing/dto/admin-service-catalog.dto.ts:108` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:113` |
+| `descriptionText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:119` |
+| `serviceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:124` |
+| `defaultPrice` | `string` | Sí | patrón runtime PRICE_PATTERN | `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:129` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:134` |
+| `isActive` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Por defecto true | `src/modules/billing/dto/admin-service-catalog.dto.ts:139` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "defaultPrice": "100.00"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "descriptionText": "Texto descriptivo de ejemplo",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "defaultPrice": "100.00",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "isActive": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminServiceItemDto>` · DTO `AdminServiceItemDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. GET /admin/catalogs/services/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Ver un servicio con su versión
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.get` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:88`
+
+### Qué es y para qué sirve (negocio)
+
+Ver un servicio con su versión. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/catalogs/services/{id}` la atiende `AdminServiceCatalogController.get` (src/modules/billing/controllers/admin-service-catalog.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AdminServiceCatalogService.get`. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:88` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.get → AdminServiceCatalogService.get → AdminServiceCatalogService.loadInTenant → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.get → AdminServiceCatalogService.get → AdminServiceCatalogService.loadInTenant → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdminServiceItemDto>` · DTO `AdminServiceItemDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. PATCH /admin/catalogs/services/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar un servicio con precondición de versión
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.update` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:114`
+
+### Qué es y para qué sirve (negocio)
+
+Editar un servicio con precondición de versión. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /admin/catalogs/services/{id}` la atiende `AdminServiceCatalogController.update` (src/modules/billing/controllers/admin-service-catalog.controller.ts:114). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdminUpdateServiceDto` (7 campos, 1 obligatorio). Delega en `AdminServiceCatalogService.update`. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:114` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:114` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.update → AdminServiceCatalogService.update → AdminServiceCatalogService.loadInTenant → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.update → AdminServiceCatalogService.update → AdminServiceCatalogService.loadInTenant → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminUpdateServiceDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | row_version leída (bloqueo optimista) | `src/modules/billing/dto/admin-service-catalog.dto.ts:151` |
+| `name` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:157` |
+| `descriptionText` | `string` | No | longitud máxima 2000; admite null | `@IsOptional()` `@ValidateIf((_, value) => value !== null)` `@IsString()` `@MaxLength(2000)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:164` |
+| `termsText` | `string` | No | longitud máxima 20000; admite null | `@IsOptional()` `@ValidateIf((_, value) => value !== null)` `@IsString()` `@MaxLength(20000)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:171` |
+| `serviceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:176` |
+| `defaultPrice` | `string` | No | patrón runtime PRICE_PATTERN | `@IsOptional()` `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:182` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sólo se acepta junto con `defaultPrice` | `src/modules/billing/dto/admin-service-catalog.dto.ts:190` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "name": "Nombre de ejemplo",
+  "descriptionText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "defaultPrice": "150.00",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminServiceItemDto>` · DTO `AdminServiceItemDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /admin/catalogs/services/{id}/deactivate
+
+- **Origen:** CONTRATO
+- **Nombre:** Desactivar un servicio (no se borra)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.deactivate` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:130`
+
+### Qué es y para qué sirve (negocio)
+
+Desactivar un servicio (no se borra). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/services/{id}/deactivate` la atiende `AdminServiceCatalogController.deactivate` (src/modules/billing/controllers/admin-service-catalog.controller.ts:130). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdminServiceStateChangeDto` (1 campo, 1 obligatorio). Delega en `AdminServiceCatalogService.setActive`. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:130` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:130` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.deactivate → AdminServiceCatalogService.setActive → AdminServiceCatalogService.loadInTenant → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.deactivate → AdminServiceCatalogService.setActive → AdminServiceCatalogService.loadInTenant → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminServiceStateChangeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:198` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminServiceItemDto>` · DTO `AdminServiceItemDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. POST /admin/catalogs/services/{id}/reactivate
+
+- **Origen:** CONTRATO
+- **Nombre:** Reactivar un servicio desactivado
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.reactivate` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:146`
+
+### Qué es y para qué sirve (negocio)
+
+Reactivar un servicio desactivado. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/catalogs/services/{id}/reactivate` la atiende `AdminServiceCatalogController.reactivate` (src/modules/billing/controllers/admin-service-catalog.controller.ts:146). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdminServiceStateChangeDto` (1 campo, 1 obligatorio). Delega en `AdminServiceCatalogService.setActive`. Lee billing.service_catalog, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:146` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/admin-service-catalog.controller.ts:146` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | AdminServiceCatalogController.reactivate → AdminServiceCatalogService.setActive → AdminServiceCatalogService.loadInTenant → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.reactivate → AdminServiceCatalogService.setActive → AdminServiceCatalogService.loadInTenant → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `AdminServiceStateChangeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:198` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdminServiceItemDto>` · DTO `AdminServiceItemDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:204` |
+| `practiceId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:207` |
+| `practiceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de la organización dueña (la dimensión «tipo de usuario» disponible hoy). | `src/modules/billing/dto/admin-service-catalog.dto.ts:211` |
+| `code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:214` |
+| `name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:217` |
+| `descriptionText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:220` |
+| `termsText` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:223` |
+| `serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:226` |
+| `defaultPrice` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:229` |
+| `currencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:232` |
+| `currencyCode` | `string` | No | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:235` |
+| `isActive` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:238` |
+| `rowVersion` | `number` | Sí | — | — | Versión actual: es el `expectedRowVersion` de la próxima escritura. | `src/modules/billing/dto/admin-service-catalog.dto.ts:242` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:245` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:248` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /admin/catalogs/services/scopes
+
+- **Origen:** CONTRATO
+- **Nombre:** Tipos de organización, prácticas y monedas del editor de servicios
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminServiceCatalogController.scopes` — `src/modules/billing/controllers/admin-service-catalog.controller.ts:67`
+
+### Qué es y para qué sirve (negocio)
+
+Tipos de organización, prácticas y monedas del editor de servicios. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/catalogs/services/scopes` la atiende `AdminServiceCatalogController.scopes` (src/modules/billing/controllers/admin-service-catalog.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AdminServiceCatalogService.scopes`. Lee practice.practices, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/admin-service-catalog.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `practice.practices` | LEE | LEE | DIRECTA | AdminServiceCatalogController.scopes → AdminServiceCatalogService.scopes → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminServiceCatalogController.scopes → AdminServiceCatalogService.scopes | `src/modules/billing/services/admin-service-catalog.service.ts:103` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdminServiceScopesDto>` · DTO `AdminServiceScopesDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `types` | `array<AdminServiceScopeTypeDto>` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:302` |
+| `types[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:269` |
+| `types[].code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:272` |
+| `types[].display` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:275` |
+| `practices` | `array<AdminServiceScopePracticeDto>` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:305` |
+| `practices[].id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:281` |
+| `practices[].name` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:284` |
+| `practices[].typeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:287` |
+| `currencies` | `array<AdminServiceScopeCurrencyDto>` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:308` |
+| `currencies[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:293` |
+| `currencies[].code` | `string` | Sí | — | — | — | `src/modules/billing/dto/admin-service-catalog.dto.ts:296` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:AdminServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. GET /billing/bed-day/stays
+
+- **Origen:** CONTRATO
+- **Nombre:** Estancias de internación de una sede (F5e)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.stays` — `src/modules/billing/controllers/billing-space-charges.controller.ts:158`
+
+### Qué es y para qué sirve (negocio)
+
+Estancias de internación de una sede (F5e). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/bed-day/stays` la atiende `BillingSpaceChargesController.stays` (src/modules/billing/controllers/billing-space-charges.controller.ts:158). Exige sesión; el controlador no declara roles. Delega en `SpaceChargesService.stays`. Lee billing.charge_captures, clinical.encounter_locations, clinical.encounters, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, practice.care_spaces, practice.clinical_units y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:158` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | siteId (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.charge_captures` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
+| `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → CareSpaceOpsRepository.siteScopeIndex | `src/modules/practice/repositories/care-space-ops.repository.ts:473` |
+| `profiles.person_profiles` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
+| `profiles.persons` | LEE | LEE | POR_SQL | BillingSpaceChargesController.stays → SpaceChargesService.stays | `src/modules/billing/services/space-charges.service.ts:744` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `siteId` | query | Sí | `string` | — |
+| `from` | query | No | `string` | — |
+| `to` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Rango inválido (máximo 366 días) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:230` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. POST /billing/bills
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar factura de proveedor con three-way match
@@ -62,11 +896,11 @@
 
 Registrar factura de proveedor con three-way match. Caso de uso UC-17-04: BillsService.register. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:100`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/bills` la atiende `BillingPayablesController.registerBill` (src/modules/billing/controllers/billing-payables.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RegisterBillDto` (19 campos, 6 obligatorios). Delega en `BillsService.register`. Crea filas en billing.bill_lines, billing.billing_document_links, billing.bills. Lee billing.bills, billing.vendors.
+`POST /billing/bills` la atiende `BillingPayablesController.registerBill` (src/modules/billing/controllers/billing-payables.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RegisterBillDto` (19 campos, 6 obligatorios). Delega en `BillsService.register`. Crea filas en billing.bill_lines, billing.billing_document_links, billing.bills. Lee billing.bills, billing.vendors, erp.contracts, erp.purchase_orders.
 
 ### Requerimientos
 
@@ -74,10 +908,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-payables.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -88,30 +922,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `billing.bills` | ESCRIBE | CREA | DIRECTA | BillingPayablesController.registerBill → BillsService.register → BillsRepository.create | `src/modules/billing/repositories/bills.repository.ts:177` |
 | `billing.bills` | LEE | LEE | DIRECTA | BillingPayablesController.registerBill → BillsService.register → BillsRepository.findByNumber | `src/modules/billing/repositories/bills.repository.ts:155` |
 | `billing.vendors` | LEE | LEE | DIRECTA | BillingPayablesController.registerBill → BillsService.register → BillsRepository.findVendor | `src/modules/billing/repositories/bills.repository.ts:166` |
+| `erp.contracts` | LEE | LEE | DIRECTA | BillingPayablesController.registerBill → BillsService.register → BillingLinkTargetsRepository.findContract | `src/modules/billing/repositories/link-targets.repository.ts:47` |
+| `erp.purchase_orders` | LEE | LEE | DIRECTA | BillingPayablesController.registerBill → BillsService.register → BillingLinkTargetsRepository.findPurchaseOrder | `src/modules/billing/repositories/link-targets.repository.ts:36` |
 
 ### Cuerpo — DTO `RegisterBillDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/bill.dto.ts:114` |
-| `vendorId` | `string` | Sí | formato uuid | `@IsUUID()` | Proveedor (billing.vendors) | `src/modules/billing/dto/bill.dto.ts:121` |
-| `billNumber` | `string` | Sí | longitud máxima 60 | `@IsString()` `@MaxLength(60)` | Número de factura del proveedor | `src/modules/billing/dto/bill.dto.ts:129` |
-| `issueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de emisión (ISO); por defecto hoy | `src/modules/billing/dto/bill.dto.ts:139` |
-| `dueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de vencimiento (ISO) | `src/modules/billing/dto/bill.dto.ts:147` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (concepto) | `src/modules/billing/dto/bill.dto.ts:155` |
-| `purchaseOrderId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Orden de compra (erp.purchase_orders) | `src/modules/billing/dto/bill.dto.ts:166` |
-| `contractId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contrato (erp.contracts) | `src/modules/billing/dto/bill.dto.ts:177` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para el vínculo de documento | `src/modules/billing/dto/bill.dto.ts:189` |
-| `lines` | `array<BillLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => BillLineInputDto)` | Líneas (al menos una) | `src/modules/billing/dto/bill.dto.ts:202` |
-| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción de la línea | `src/modules/billing/dto/bill.dto.ts:24` |
-| `lines[].quantity` | `string` | Sí | — | `@IsNumberString()` | Cantidad | `src/modules/billing/dto/bill.dto.ts:31` |
-| `lines[].unitPrice` | `string` | Sí | — | `@IsNumberString()` | Precio unitario | `src/modules/billing/dto/bill.dto.ts:38` |
-| `lines[].taxAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Monto de impuesto de la línea | `src/modules/billing/dto/bill.dto.ts:49` |
-| `lines[].expenseAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de gasto (accounting.accounts) | `src/modules/billing/dto/bill.dto.ts:60` |
-| `lines[].costCenterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Centro de costo (accounting.cost_centers) | `src/modules/billing/dto/bill.dto.ts:71` |
-| `lines[].purchaseOrderItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de orden de compra (erp.purchase_order_items) | `src/modules/billing/dto/bill.dto.ts:82` |
-| `lines[].goodsReceiptItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de recepción de bienes (erp.goods_receipt_items) | `src/modules/billing/dto/bill.dto.ts:93` |
-| `lines[].serviceEntryItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de hoja de servicio (erp.service_entry_items) | `src/modules/billing/dto/bill.dto.ts:104` |
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/bill.dto.ts:120` |
+| `vendorId` | `string` | Sí | formato uuid | `@IsUUID()` | Proveedor (billing.vendors) | `src/modules/billing/dto/bill.dto.ts:127` |
+| `billNumber` | `string` | Sí | longitud máxima 60 | `@IsString()` `@MaxLength(60)` | Número de factura del proveedor | `src/modules/billing/dto/bill.dto.ts:135` |
+| `issueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de emisión (ISO); por defecto hoy | `src/modules/billing/dto/bill.dto.ts:145` |
+| `dueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de vencimiento (ISO) | `src/modules/billing/dto/bill.dto.ts:153` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (concepto) | `src/modules/billing/dto/bill.dto.ts:161` |
+| `purchaseOrderId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Orden de compra (erp.purchase_orders) | `src/modules/billing/dto/bill.dto.ts:172` |
+| `contractId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contrato (erp.contracts) | `src/modules/billing/dto/bill.dto.ts:183` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para el vínculo de documento | `src/modules/billing/dto/bill.dto.ts:195` |
+| `lines` | `array<BillLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => BillLineInputDto)` | Líneas (al menos una) | `src/modules/billing/dto/bill.dto.ts:208` |
+| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción de la línea | `src/modules/billing/dto/bill.dto.ts:30` |
+| `lines[].quantity` | `string` | Sí | patrón runtime QUANTITY_PATTERN | `@Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })` | Cantidad | `src/modules/billing/dto/bill.dto.ts:37` |
+| `lines[].unitPrice` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Precio unitario | `src/modules/billing/dto/bill.dto.ts:44` |
+| `lines[].taxAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto de impuesto de la línea | `src/modules/billing/dto/bill.dto.ts:55` |
+| `lines[].expenseAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de gasto (accounting.accounts) | `src/modules/billing/dto/bill.dto.ts:66` |
+| `lines[].costCenterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Centro de costo (accounting.cost_centers) | `src/modules/billing/dto/bill.dto.ts:77` |
+| `lines[].purchaseOrderItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de orden de compra (erp.purchase_order_items) | `src/modules/billing/dto/bill.dto.ts:88` |
+| `lines[].goodsReceiptItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de recepción de bienes (erp.goods_receipt_items) | `src/modules/billing/dto/bill.dto.ts:99` |
+| `lines[].serviceEntryItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ítem de hoja de servicio (erp.service_entry_items) | `src/modules/billing/dto/bill.dto.ts:110` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -164,15 +1000,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/bill.dto.ts:211` |
-| `billNumber` | `string` | Sí | — | — | Valor de bill number mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:217` |
-| `vendorId` | `string` | Sí | formato uuid | — | Identificador asociado a vendor. | `src/modules/billing/dto/bill.dto.ts:223` |
-| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:229` |
-| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:235` |
-| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:241` |
-| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:247` |
-| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:253` |
-| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:259` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/bill.dto.ts:217` |
+| `billNumber` | `string` | Sí | — | — | Valor de bill number mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:223` |
+| `vendorId` | `string` | Sí | formato uuid | — | Identificador asociado a vendor. | `src/modules/billing/dto/bill.dto.ts:229` |
+| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:235` |
+| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:241` |
+| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:247` |
+| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:253` |
+| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:259` |
+| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:265` |
 
 ### Respuestas posibles
 
@@ -182,7 +1018,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
 | 409 | `CONFLICT` | ConflictException: La factura del proveedor ya fue capturada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo; PreconditionFailedException: Three-way match: la línea con orden de compra requiere recepción de bienes |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -201,7 +1036,121 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 2. POST /billing/documents/{id}:post-to-ledger
+## 10. POST /billing/charge-captures/{id}/void
+
+- **Origen:** CONTRATO
+- **Nombre:** Anular un cargo devengado
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.void` — `src/modules/billing/controllers/billing-space-charges.controller.ts:194`
+
+### Qué es y para qué sirve (negocio)
+
+Anular un cargo devengado. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/charge-captures/{id}/void` la atiende `BillingSpaceChargesController.void` (src/modules/billing/controllers/billing-space-charges.controller.ts:194). Exige sesión; el controlador no declara roles. Valida el cuerpo como `VoidChargeDto` (1 campo, 1 obligatorio). Delega en `SpaceChargesService.voidCharge`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza billing.charge_captures. Lee billing.charge_captures, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, messaging.outbox_messages, practice.care_spaces, practice.clinical_units, practice.practice_sites y 2 más. Publica un evento calculado (eventType).
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:194` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-space-charges.controller.ts:194` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.charge_captures` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingSpaceChargesController.void → SpaceChargesService.voidCharge | `src/modules/billing/services/space-charges.service.ts:676` |
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge | `src/modules/billing/services/space-charges.service.ts:636` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertPractice | `src/modules/billing/services/space-charges.service.ts:1020` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.void → SpaceChargesService.voidCharge → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → CareSpaceOpsRepository.siteScopeIndex | `src/modules/practice/repositories/care-space-ops.repository.ts:473` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `eventType` | `src/modules/billing/services/space-charges.service.ts:1098` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `VoidChargeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:81` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cargo no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 409 | `CONFLICT` | ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 11. POST /billing/documents/{id}:post-to-ledger
 
 - **Origen:** CONTRATO
 - **Nombre:** Contabilizar documento (posting CxC/CxP)
@@ -214,7 +1163,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Contabilizar documento (posting CxC/CxP). Caso de uso UC-17-06: LedgerService.postToLedger. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:59`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:102`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -226,18 +1175,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-operations.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.bills` | LEE | LEE | DIRECTA | BillingOperationsController.postToLedger → LedgerService.postToLedger → LedgerService.loadDocument → BillsRepository.findById | `src/modules/billing/repositories/bills.repository.ts:137` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.postToLedger → LedgerService.postToLedger → LedgerService.loadDocument → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.postToLedger → LedgerService.postToLedger → LedgerService.loadDocument → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 | `billing.payments_made` | LEE | LEE | DIRECTA | BillingOperationsController.postToLedger → LedgerService.postToLedger → LedgerService.loadDocument → PaymentsMadeRepository.findById | `src/modules/billing/repositories/payments-made.repository.ts:93` |
 | `billing.payments_received` | LEE | LEE | DIRECTA | BillingOperationsController.postToLedger → LedgerService.postToLedger → LedgerService.loadDocument → PaymentsReceivedRepository.findById | `src/modules/billing/repositories/payments-received.repository.ts:97` |
 
@@ -291,7 +1240,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
 | 409 | `CONFLICT` | ConflictException: El documento ya fue contabilizado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -309,7 +1257,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 3. POST /billing/dunning-runs:execute
+## 12. POST /billing/dunning-runs:execute
 
 - **Origen:** CONTRATO
 - **Nombre:** Ejecutar ciclo de morosidad (dunning)
@@ -322,11 +1270,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Ejecutar ciclo de morosidad (dunning). Caso de uso UC-17-10: DunningService.execute. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:63`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:106`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/dunning-runs:execute` la atiende `BillingOperationsController.executeDunning` (src/modules/billing/controllers/billing-operations.controller.ts:95). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecuteDunningRunDto` (10 campos, 4 obligatorios). Delega en `DunningService.execute`. Crea filas en billing.dunning_items, billing.dunning_runs. Actualiza billing.dunning_runs, billing.invoices. Lee billing.dunning_runs, billing.invoices.
+`POST /billing/dunning-runs:execute` la atiende `BillingOperationsController.executeDunning` (src/modules/billing/controllers/billing-operations.controller.ts:95). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecuteDunningRunDto` (10 campos, 4 obligatorios). Delega en `DunningService.execute`. Crea filas en billing.dunning_items, billing.dunning_runs. Actualiza billing.dunning_runs. Lee billing.dunning_runs, billing.invoices.
 
 ### Requerimientos
 
@@ -334,21 +1282,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.dunning_items` | ESCRIBE | CREA | DIRECTA | BillingOperationsController.executeDunning → DunningService.execute → DunningRepository.createItem | `src/modules/billing/repositories/dunning.repository.ts:135` |
-| `billing.dunning_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.executeDunning → DunningService.execute | `src/modules/billing/services/dunning.service.ts:124` |
+| `billing.dunning_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.executeDunning → DunningService.execute | `src/modules/billing/services/dunning.service.ts:150` |
 | `billing.dunning_runs` | ESCRIBE | CREA | DIRECTA | BillingOperationsController.executeDunning → DunningService.execute → DunningRepository.createRun | `src/modules/billing/repositories/dunning.repository.ts:111` |
 | `billing.dunning_runs` | LEE | LEE | DIRECTA | BillingOperationsController.executeDunning → DunningService.execute → DunningRepository.findRunByNumber | `src/modules/billing/repositories/dunning.repository.ts:100` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.executeDunning → DunningService.execute | `src/modules/billing/services/dunning.service.ts:118` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.executeDunning → DunningService.execute → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.executeDunning → DunningService.execute → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 
 ### Cuerpo — DTO `ExecuteDunningRunDto` · `application/json`
 
@@ -435,7 +1382,189 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 4. POST /billing/internal/dunning-runs/run-due
+## 13. POST /billing/encounters/{encounterId}/bed-day-charges/run
+
+- **Origen:** CONTRATO
+- **Nombre:** Devengar los días-cama de un encuentro
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.run` — `src/modules/billing/controllers/billing-space-charges.controller.ts:175`
+
+### Qué es y para qué sirve (negocio)
+
+Devengar los días-cama de un encuentro. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/encounters/{encounterId}/bed-day-charges/run` la atiende `BillingSpaceChargesController.run` (src/modules/billing/controllers/billing-space-charges.controller.ts:175). Exige sesión; el controlador no declara roles. Delega en `SpaceChargesService.runBedDays`. Crea filas en billing.charge_captures, messaging.domain_events, messaging.outbox_messages. Lee accounting.cost_centers, billing.charge_captures, billing.space_tariffs, clinical.encounter_locations, clinical.encounters, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships y 6 más. Publica un evento calculado (eventType).
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/billing/controllers/billing-space-charges.controller.ts:175` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.cost_centers` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture | `src/modules/billing/services/space-charges.service.ts:958` |
+| `billing.charge_captures` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture | `src/modules/billing/services/space-charges.service.ts:964` |
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:396` |
+| `billing.space_tariffs` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.tariffFor | `src/modules/billing/services/space-charges.service.ts:913` |
+| `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:357` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_space_category_periods` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:404` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.run → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → CareSpaceOpsRepository.siteScopeIndex | `src/modules/practice/repositories/care-space-ops.repository.ts:473` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `eventType` | `src/modules/billing/services/space-charges.service.ts:1098` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `encounterId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:147` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. GET /billing/encounters/{encounterId}/pending-charges
+
+- **Origen:** CONTRATO
+- **Nombre:** Cargos devengados pendientes
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.pending` — `src/modules/billing/controllers/billing-space-charges.controller.ts:165`
+
+### Qué es y para qué sirve (negocio)
+
+Cargos devengados pendientes. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/encounters/{encounterId}/pending-charges` la atiende `BillingSpaceChargesController.pending` (src/modules/billing/controllers/billing-space-charges.controller.ts:165). Exige sesión; el controlador no declara roles. Delega en `SpaceChargesService.pending`. Lee billing.charge_captures, clinical.encounter_locations, clinical.encounters, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, practice.care_spaces, practice.clinical_units y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:165` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/billing/controllers/billing-space-charges.controller.ts:165` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending | `src/modules/billing/services/space-charges.service.ts:613` |
+| `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending | `src/modules/billing/services/space-charges.service.ts:580` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertPractice | `src/modules/billing/services/space-charges.service.ts:1020` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.pending → SpaceChargesService.pending → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → CareSpaceOpsRepository.siteScopeIndex | `src/modules/practice/repositories/care-space-ops.repository.ts:473` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `encounterId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:188` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. POST /billing/internal/dunning-runs/run-due
 
 - **Origen:** CONTRATO
 - **Nombre:** Evaluar y disparar morosidad automática por tenant
@@ -460,21 +1589,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.dunning_items` | ESCRIBE | CREA | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → DunningRepository.createItem | `src/modules/billing/repositories/dunning.repository.ts:135` |
-| `billing.dunning_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.runDueDunning → DunningService.runDueDunning | `src/modules/billing/services/dunning.service.ts:248` |
+| `billing.dunning_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.runDueDunning → DunningService.runDueDunning | `src/modules/billing/services/dunning.service.ts:280` |
 | `billing.dunning_runs` | ESCRIBE | CREA | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → DunningRepository.createRun | `src/modules/billing/repositories/dunning.repository.ts:111` |
 | `billing.dunning_runs` | LEE | LEE | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → DunningRepository.findRunByNumber | `src/modules/billing/repositories/dunning.repository.ts:100` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.runDueDunning → DunningService.runDueDunning | `src/modules/billing/services/dunning.service.ts:244` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → InvoicesRepository.findOverdueByPractices | `src/modules/billing/repositories/invoices.repository.ts:186` |
+| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.runDueDunning → DunningService.runDueDunning | `src/modules/billing/services/dunning.service.ts:276` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → InvoicesRepository.findOverdueByPractices | `src/modules/billing/repositories/invoices.repository.ts:234` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingOperationsController.runDueDunning → DunningService.runDueDunning → PracticeTenantLookupService.findActive → PracticesRepository.findActive | `src/modules/practice/repositories/practices.repository.ts:81` |
 
 ### Cuerpo — DTO `RunDueDunningDto` · `application/json`
@@ -534,7 +1663,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 5. GET /billing/invoices
+## 16. GET /billing/invoices
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las facturas de la práctica
@@ -559,15 +1688,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.listInvoices → InvoicesService.listByPractice → InvoicesRepository.findByPracticePage | `src/modules/billing/repositories/invoices.repository.ts:216` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.listInvoices → InvoicesService.listByPractice → InvoicesRepository.findByPracticePage | `src/modules/billing/repositories/invoices.repository.ts:264` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingReceivablesController.listInvoices → InvoicesService.listByPractice → InvoicesService.assertPracticeInTenant → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
@@ -586,19 +1715,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<InvoiceSummaryDto>` | Sí | — | — | Facturas de esta página, ordenadas por `id`. | `src/modules/billing/dto/invoice.dto.ts:414` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:375` |
-| `items[].invoiceNumber` | `string` | Sí | — | — | Número de factura. | `src/modules/billing/dto/invoice.dto.ts:379` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente facturado. | `src/modules/billing/dto/invoice.dto.ts:383` |
-| `items[].status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/billing/dto/invoice.dto.ts:387` |
-| `items[].issueDate` | `string` | Sí | formato date | — | Fecha de emisión. | `src/modules/billing/dto/invoice.dto.ts:391` |
-| `items[].dueDate` | `string` | No | formato date | — | Fecha de vencimiento, si tiene. | `src/modules/billing/dto/invoice.dto.ts:395` |
-| `items[].total` | `string` | No | — | — | Importe total. | `src/modules/billing/dto/invoice.dto.ts:399` |
-| `items[].balance` | `string` | No | — | — | Saldo pendiente. | `src/modules/billing/dto/invoice.dto.ts:403` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha de alta. | `src/modules/billing/dto/invoice.dto.ts:407` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/billing/dto/invoice.dto.ts:417` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/billing/dto/invoice.dto.ts:420` |
-| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/billing/dto/invoice.dto.ts:424` |
+| `items` | `array<InvoiceSummaryDto>` | Sí | — | — | Facturas de esta página, ordenadas por `id`. | `src/modules/billing/dto/invoice.dto.ts:454` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:415` |
+| `items[].invoiceNumber` | `string` | Sí | — | — | Número de factura. | `src/modules/billing/dto/invoice.dto.ts:419` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente facturado. | `src/modules/billing/dto/invoice.dto.ts:423` |
+| `items[].status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/billing/dto/invoice.dto.ts:427` |
+| `items[].issueDate` | `string` | Sí | formato date | — | Fecha de emisión. | `src/modules/billing/dto/invoice.dto.ts:431` |
+| `items[].dueDate` | `string` | No | formato date | — | Fecha de vencimiento, si tiene. | `src/modules/billing/dto/invoice.dto.ts:435` |
+| `items[].total` | `string` | No | — | — | Importe total. | `src/modules/billing/dto/invoice.dto.ts:439` |
+| `items[].balance` | `string` | No | — | — | Saldo pendiente. | `src/modules/billing/dto/invoice.dto.ts:443` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha de alta. | `src/modules/billing/dto/invoice.dto.ts:447` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/billing/dto/invoice.dto.ts:457` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/billing/dto/invoice.dto.ts:460` |
+| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/billing/dto/invoice.dto.ts:464` |
 
 ### Respuestas posibles
 
@@ -626,7 +1755,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 6. POST /billing/invoices:issue-from-encounter
+## 17. POST /billing/invoices:issue-from-encounter
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir factura desde los cargos del encuentro
@@ -639,11 +1768,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Emitir factura desde los cargos del encuentro. Caso de uso UC-17-01: InvoicesService.issueFromEncounter. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:97`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/invoices:issue-from-encounter` la atiende `BillingReceivablesController.issueFromEncounter` (src/modules/billing/controllers/billing-receivables.controller.ts:154). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IssueInvoiceFromEncounterDto` (19 campos, 5 obligatorios). Delega en `InvoicesService.issueFromEncounter`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices. Lee billing.invoices.
+`POST /billing/invoices:issue-from-encounter` la atiende `BillingReceivablesController.issueFromEncounter` (src/modules/billing/controllers/billing-receivables.controller.ts:154). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IssueInvoiceFromEncounterDto` (20 campos, 5 obligatorios). Delega en `InvoicesService.issueFromEncounter`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices, messaging.domain_events, messaging.outbox_messages. Lee billing.charge_captures, billing.invoices, clinical.encounters, messaging.outbox_messages. Publica billing.charge_capture.invoiced.
 
 ### Requerimientos
 
@@ -651,43 +1780,55 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:154` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:270` |
-| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:239` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.findByNumber | `src/modules/billing/repositories/invoices.repository.ts:153` |
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesService.loadCharges | `src/modules/billing/services/invoices.service.ts:294` |
+| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:318` |
+| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:287` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → InvoicesRepository.findByNumber | `src/modules/billing/repositories/invoices.repository.ts:201` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → BillingLinkTargetsRepository.findEncounter | `src/modules/billing/repositories/link-targets.repository.ts:22` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingReceivablesController.issueFromEncounter → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `billing.charge_capture.invoiced` | `src/modules/billing/services/invoices.service.ts:248` |
 
 ### Cuerpo — DTO `IssueInvoiceFromEncounterDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica emisora (practice.practices) | `src/modules/billing/dto/invoice.dto.ts:115` |
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente facturado (profiles.patient_profiles) | `src/modules/billing/dto/invoice.dto.ts:125` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro origen (clinical.encounters) | `src/modules/billing/dto/invoice.dto.ts:136` |
-| `invoiceNumber` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Número de folio; si se omite se genera | `src/modules/billing/dto/invoice.dto.ts:147` |
-| `issueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de emisión (ISO); por defecto hoy | `src/modules/billing/dto/invoice.dto.ts:157` |
-| `dueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de vencimiento (ISO) | `src/modules/billing/dto/invoice.dto.ts:165` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (terminology.catalog_concepts) | `src/modules/billing/dto/invoice.dto.ts:176` |
-| `claimId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Reclamo de seguro asociado (para el vínculo de documento) | `src/modules/billing/dto/invoice.dto.ts:187` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo de documento | `src/modules/billing/dto/invoice.dto.ts:199` |
-| `lines` | `array<InvoiceLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => InvoiceLineInputDto)` | Líneas de cargo (al menos una) | `src/modules/billing/dto/invoice.dto.ts:212` |
-| `lines[].serviceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio del catálogo (billing.service_catalog) | `src/modules/billing/dto/invoice.dto.ts:27` |
-| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción libre de la línea | `src/modules/billing/dto/invoice.dto.ts:36` |
-| `lines[].quantity` | `string` | Sí | — | `@IsNumberString()` | Cantidad | `src/modules/billing/dto/invoice.dto.ts:43` |
-| `lines[].unitPrice` | `string` | Sí | — | `@IsNumberString()` | Precio unitario | `src/modules/billing/dto/invoice.dto.ts:50` |
-| `lines[].discount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Descuento de línea | `src/modules/billing/dto/invoice.dto.ts:58` |
-| `lines[].taxCodeId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de impuesto (billing.tax_codes) | `src/modules/billing/dto/invoice.dto.ts:69` |
-| `lines[].taxAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Monto de impuesto de la línea | `src/modules/billing/dto/invoice.dto.ts:80` |
-| `lines[].incomeAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de ingreso (accounting.accounts) | `src/modules/billing/dto/invoice.dto.ts:91` |
-| `lines[].costCenterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Centro de costo (accounting.cost_centers) | `src/modules/billing/dto/invoice.dto.ts:102` |
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica emisora (practice.practices) | `src/modules/billing/dto/invoice.dto.ts:124` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente facturado (profiles.patient_profiles) | `src/modules/billing/dto/invoice.dto.ts:134` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro origen (clinical.encounters) | `src/modules/billing/dto/invoice.dto.ts:145` |
+| `invoiceNumber` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Número de folio; si se omite se genera | `src/modules/billing/dto/invoice.dto.ts:156` |
+| `issueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de emisión (ISO); por defecto hoy | `src/modules/billing/dto/invoice.dto.ts:166` |
+| `dueDate` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de vencimiento (ISO) | `src/modules/billing/dto/invoice.dto.ts:174` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (terminology.catalog_concepts) | `src/modules/billing/dto/invoice.dto.ts:185` |
+| `claimId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Reclamo de seguro asociado (para el vínculo de documento) | `src/modules/billing/dto/invoice.dto.ts:196` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo de documento | `src/modules/billing/dto/invoice.dto.ts:208` |
+| `lines` | `array<InvoiceLineInputDto>` | Sí | — | `@IsArray()` `@ValidateBy({ name: 'linesOrCharges', validator: { validate: (value: unknown, args): boolean => (Array.isArray(value) && value.length > 0) \|\| (Array.isArray( (args?.object as { chargeCaptureIds?: unknown }).chargeCaptureIds, ) && ((args?.object as { chargeCaptureIds: unknown[] }).chargeCaptureIds .length ?? 0) > 0), defaultMessage: () => 'lines must contain at least 1 elements (o enviar chargeCaptureIds)', }, })` `@ValidateNested({ each: true })` `@Type(() => InvoiceLineInputDto)` | Líneas de cargo (al menos una, salvo que se facturen cargos devengados con chargeCaptureIds) | `src/modules/billing/dto/invoice.dto.ts:235` |
+| `lines[].serviceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio del catálogo (billing.service_catalog) | `src/modules/billing/dto/invoice.dto.ts:36` |
+| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción libre de la línea | `src/modules/billing/dto/invoice.dto.ts:45` |
+| `lines[].quantity` | `string` | Sí | patrón runtime QUANTITY_PATTERN | `@Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })` | Cantidad | `src/modules/billing/dto/invoice.dto.ts:52` |
+| `lines[].unitPrice` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Precio unitario | `src/modules/billing/dto/invoice.dto.ts:59` |
+| `lines[].discount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Descuento de línea | `src/modules/billing/dto/invoice.dto.ts:67` |
+| `lines[].taxCodeId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de impuesto (billing.tax_codes) | `src/modules/billing/dto/invoice.dto.ts:78` |
+| `lines[].taxAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto de impuesto de la línea | `src/modules/billing/dto/invoice.dto.ts:89` |
+| `lines[].incomeAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de ingreso (accounting.accounts) | `src/modules/billing/dto/invoice.dto.ts:100` |
+| `lines[].costCenterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Centro de costo (accounting.cost_centers) | `src/modules/billing/dto/invoice.dto.ts:111` |
+| `chargeCaptureIds` | `array<string>` | No | formato uuid; máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ArrayUnique()` `@IsUUID('all', { each: true })` | Cargos devengados a facturar (F5e), hasta 200, sin repetir | `src/modules/billing/dto/invoice.dto.ts:252` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -729,6 +1870,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
       "incomeAccountId": "00000000-0000-4000-8000-000000000001",
       "costCenterId": "00000000-0000-4000-8000-000000000001"
     }
+  ],
+  "chargeCaptureIds": [
+    "00000000-0000-4000-8000-000000000001"
   ]
 }
 ```
@@ -739,17 +1883,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:304` |
-| `invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:310` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/billing/dto/invoice.dto.ts:316` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado | `src/modules/billing/dto/invoice.dto.ts:322` |
-| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:328` |
-| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:334` |
-| `discountTotal` | `string` | No | — | — | Valor de discount total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:340` |
-| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:346` |
-| `paidTotal` | `string` | No | — | — | Valor de paid total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:352` |
-| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:358` |
-| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:364` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:344` |
+| `invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:350` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/billing/dto/invoice.dto.ts:356` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado | `src/modules/billing/dto/invoice.dto.ts:362` |
+| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:368` |
+| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:374` |
+| `discountTotal` | `string` | No | — | — | Valor de discount total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:380` |
+| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:386` |
+| `paidTotal` | `string` | No | — | — | Valor de paid total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:392` |
+| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:398` |
+| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:404` |
 
 ### Respuestas posibles
 
@@ -759,7 +1903,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message}; ResourceNotFoundException: Cargo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica; ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El cargo no tiene precio (sin tarifa vigente) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -768,6 +1914,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:261` |
 | CONTROLADOR | `src/modules/billing/controllers/billing-receivables.controller.spec.ts:51` |
 
 ### Flujos
@@ -776,7 +1923,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 7. GET /billing/invoices/{id}
+## 18. GET /billing/invoices/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Detalle de una factura, con sus líneas
@@ -801,17 +1948,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-receivables.controller.ts:107` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoice_lines` | LEE | LEE | DIRECTA | BillingReceivablesController.getInvoice → InvoicesService.getDetail → InvoicesRepository.findLinesByInvoice | `src/modules/billing/repositories/invoices.repository.ts:224` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.getInvoice → InvoicesService.getDetail → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoice_lines` | LEE | LEE | DIRECTA | BillingReceivablesController.getInvoice → InvoicesService.getDetail → InvoicesRepository.findLinesByInvoice | `src/modules/billing/repositories/invoices.repository.ts:272` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.getInvoice → InvoicesService.getDetail → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingReceivablesController.getInvoice → InvoicesService.getDetail → InvoicesService.assertPracticeInTenant → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
@@ -829,14 +1976,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `lines` | `array<InvoiceLineDto>` | Sí | — | — | Líneas de la factura. | `src/modules/billing/dto/invoice.dto.ts:462` |
-| `lines[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:431` |
-| `lines[].description` | `string` | No | — | — | Descripción de la línea. | `src/modules/billing/dto/invoice.dto.ts:435` |
-| `lines[].quantity` | `string` | Sí | — | — | Cantidad facturada. | `src/modules/billing/dto/invoice.dto.ts:439` |
-| `lines[].unitPrice` | `string` | Sí | — | — | Precio unitario. | `src/modules/billing/dto/invoice.dto.ts:443` |
-| `lines[].discount` | `string` | No | — | — | Descuento de la línea, si tiene. | `src/modules/billing/dto/invoice.dto.ts:447` |
-| `lines[].taxAmount` | `string` | No | — | — | Impuesto de la línea, si tiene. | `src/modules/billing/dto/invoice.dto.ts:451` |
-| `lines[].lineTotal` | `string` | No | — | — | Importe total de la línea. | `src/modules/billing/dto/invoice.dto.ts:455` |
+| `lines` | `array<InvoiceLineDto>` | Sí | — | — | Líneas de la factura. | `src/modules/billing/dto/invoice.dto.ts:502` |
+| `lines[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:471` |
+| `lines[].description` | `string` | No | — | — | Descripción de la línea. | `src/modules/billing/dto/invoice.dto.ts:475` |
+| `lines[].quantity` | `string` | Sí | — | — | Cantidad facturada. | `src/modules/billing/dto/invoice.dto.ts:479` |
+| `lines[].unitPrice` | `string` | Sí | — | — | Precio unitario. | `src/modules/billing/dto/invoice.dto.ts:483` |
+| `lines[].discount` | `string` | No | — | — | Descuento de la línea, si tiene. | `src/modules/billing/dto/invoice.dto.ts:487` |
+| `lines[].taxAmount` | `string` | No | — | — | Impuesto de la línea, si tiene. | `src/modules/billing/dto/invoice.dto.ts:491` |
+| `lines[].lineTotal` | `string` | No | — | — | Importe total de la línea. | `src/modules/billing/dto/invoice.dto.ts:495` |
 
 ### Respuestas posibles
 
@@ -864,7 +2011,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 8. POST /billing/invoices/{id}:credit-note
+## 19. POST /billing/invoices/{id}:credit-note
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir nota de crédito / castigo sobre una factura
@@ -877,11 +2024,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Emitir nota de crédito / castigo sobre una factura. Caso de uso UC-17-03: InvoicesService.creditNote. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:56`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:99`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/invoices/{id}:credit-note` la atiende `BillingReceivablesController.creditNote` (src/modules/billing/controllers/billing-receivables.controller.ts:190). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreditNoteDto` (8 campos, 4 obligatorios). Delega en `InvoicesService.creditNote`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices. Actualiza billing.invoices. Lee billing.invoices.
+`POST /billing/invoices/{id}:credit-note` la atiende `BillingReceivablesController.creditNote` (src/modules/billing/controllers/billing-receivables.controller.ts:190). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreditNoteDto` (8 campos, 4 obligatorios). Delega en `InvoicesService.creditNote`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices. Lee billing.invoices.
 
 ### Requerimientos
 
@@ -889,21 +2036,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-receivables.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:270` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingReceivablesController.creditNote → InvoicesService.creditNote | `src/modules/billing/services/invoices.service.ts:241` |
-| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:239` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:318` |
+| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:287` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.creditNote → InvoicesService.creditNote → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 
 ### Parámetros
 
@@ -915,14 +2061,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del ajuste / nota de crédito | `src/modules/billing/dto/invoice.dto.ts:260` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo CREDIT_OF | `src/modules/billing/dto/invoice.dto.ts:272` |
-| `writeOff` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es un castigo de saldo incobrable (write-off) | `src/modules/billing/dto/invoice.dto.ts:282` |
-| `lines` | `array<CreditNoteLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => CreditNoteLineInputDto)` | Líneas a revertir | `src/modules/billing/dto/invoice.dto.ts:295` |
-| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción del reverso | `src/modules/billing/dto/invoice.dto.ts:224` |
-| `lines[].quantity` | `string` | Sí | — | `@IsNumberString()` | Cantidad (positiva; se invierte el signo del total) | `src/modules/billing/dto/invoice.dto.ts:234` |
-| `lines[].unitPrice` | `string` | Sí | — | `@IsNumberString()` | Precio unitario a revertir | `src/modules/billing/dto/invoice.dto.ts:241` |
-| `lines[].taxAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Impuesto a revertir | `src/modules/billing/dto/invoice.dto.ts:249` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del ajuste / nota de crédito | `src/modules/billing/dto/invoice.dto.ts:300` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo CREDIT_OF | `src/modules/billing/dto/invoice.dto.ts:312` |
+| `writeOff` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es un castigo de saldo incobrable (write-off) | `src/modules/billing/dto/invoice.dto.ts:322` |
+| `lines` | `array<CreditNoteLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => CreditNoteLineInputDto)` | Líneas a revertir | `src/modules/billing/dto/invoice.dto.ts:335` |
+| `lines[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Descripción del reverso | `src/modules/billing/dto/invoice.dto.ts:264` |
+| `lines[].quantity` | `string` | Sí | patrón runtime QUANTITY_PATTERN | `@Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })` | Cantidad (positiva; se invierte el signo del total) | `src/modules/billing/dto/invoice.dto.ts:274` |
+| `lines[].unitPrice` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Precio unitario a revertir | `src/modules/billing/dto/invoice.dto.ts:281` |
+| `lines[].taxAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Impuesto a revertir | `src/modules/billing/dto/invoice.dto.ts:289` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -962,17 +2108,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:304` |
-| `invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:310` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/billing/dto/invoice.dto.ts:316` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado | `src/modules/billing/dto/invoice.dto.ts:322` |
-| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:328` |
-| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:334` |
-| `discountTotal` | `string` | No | — | — | Valor de discount total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:340` |
-| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:346` |
-| `paidTotal` | `string` | No | — | — | Valor de paid total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:352` |
-| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:358` |
-| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:364` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/invoice.dto.ts:344` |
+| `invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:350` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/billing/dto/invoice.dto.ts:356` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado | `src/modules/billing/dto/invoice.dto.ts:362` |
+| `subtotal` | `string` | No | — | — | Valor de subtotal mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:368` |
+| `taxTotal` | `string` | No | — | — | Valor de tax total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:374` |
+| `discountTotal` | `string` | No | — | — | Valor de discount total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:380` |
+| `total` | `string` | No | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:386` |
+| `paidTotal` | `string` | No | — | — | Valor de paid total mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:392` |
+| `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:398` |
+| `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:404` |
 
 ### Respuestas posibles
 
@@ -982,8 +2128,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto de la nota de crédito excede el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La nota de crédito debe revertir un importe positivo; PreconditionFailedException: El monto de la nota de crédito excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -1000,7 +2145,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 9. POST /billing/kpi-snapshots:compute
+## 20. POST /billing/kpi-snapshots:compute
 
 - **Origen:** CONTRATO
 - **Nombre:** Calcular snapshot de KPI financiero y aging
@@ -1013,7 +2158,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Calcular snapshot de KPI financiero y aging. Caso de uso UC-17-12: KpiSnapshotsService.compute. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:65`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:108`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1025,10 +2170,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1107,7 +2252,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 10. GET /billing/patient-statements
+## 21. GET /billing/patient-statements
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los estados de cuenta de la práctica
@@ -1132,9 +2277,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1197,7 +2342,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 11. POST /billing/patient-statements:generate
+## 22. POST /billing/patient-statements:generate
 
 - **Origen:** CONTRATO
 - **Nombre:** Generar el estado de cuenta del paciente
@@ -1210,7 +2355,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Generar el estado de cuenta del paciente. Caso de uso UC-17-09: PatientStatementsService.generate. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:62`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:105`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1222,17 +2367,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:229` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.generateStatement → PatientStatementsService.generate → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.generateStatement → PatientStatementsService.generate → InvoicesRepository.findByPatientInRange | `src/modules/billing/repositories/invoices.repository.ts:164` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.generateStatement → PatientStatementsService.generate → InvoicesRepository.findByPatientInRange | `src/modules/billing/repositories/invoices.repository.ts:212` |
 | `billing.patient_statements` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.generateStatement → PatientStatementsService.generate → PatientStatementsRepository.create | `src/modules/billing/repositories/patient-statements.repository.ts:112` |
 | `billing.patient_statements` | LEE | LEE | DIRECTA | BillingReceivablesController.generateStatement → PatientStatementsService.generate → PatientStatementsRepository.findByPeriod | `src/modules/billing/repositories/patient-statements.repository.ts:70` |
 
@@ -1311,7 +2456,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 12. POST /billing/payment-plans
+## 23. POST /billing/payment-plans
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar un plan de pagos del paciente
@@ -1324,11 +2469,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Configurar un plan de pagos del paciente. Caso de uso UC-17-11: InvoicesService.createPaymentPlan. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:64`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:107`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/payment-plans` la atiende `BillingReceivablesController.createPaymentPlan` (src/modules/billing/controllers/billing-receivables.controller.ts:246). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePaymentPlanDto` (5 campos, 4 obligatorios). Delega en `InvoicesService.createPaymentPlan`. Crea filas en billing.billing_document_links, billing.invoices. Actualiza billing.invoices. Lee billing.invoices.
+`POST /billing/payment-plans` la atiende `BillingReceivablesController.createPaymentPlan` (src/modules/billing/controllers/billing-receivables.controller.ts:246). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePaymentPlanDto` (5 campos, 4 obligatorios). Delega en `InvoicesService.createPaymentPlan`. Crea filas en billing.billing_document_links, billing.invoices. Lee billing.invoices.
 
 ### Requerimientos
 
@@ -1336,29 +2481,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:246` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan | `src/modules/billing/services/invoices.service.ts:343` |
-| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:239` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:287` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.createPaymentPlan → InvoicesService.createPaymentPlan → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 
 ### Cuerpo — DTO `CreatePaymentPlanDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `sourceInvoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura origen con saldo (billing.invoices) | `src/modules/billing/dto/payment-plan.dto.ts:40` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para vincular las cuotas | `src/modules/billing/dto/payment-plan.dto.ts:52` |
-| `installments` | `array<InstallmentInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => InstallmentInputDto)` | Cuotas; la suma debe igualar el saldo origen | `src/modules/billing/dto/payment-plan.dto.ts:65` |
-| `installments[].dueDate` | `string` | Sí | formato date-time | `@IsDateString()` | Fecha de vencimiento de la cuota (ISO) | `src/modules/billing/dto/payment-plan.dto.ts:20` |
-| `installments[].amount` | `string` | Sí | — | `@IsNumberString()` | Importe de la cuota | `src/modules/billing/dto/payment-plan.dto.ts:27` |
+| `sourceInvoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura origen con saldo (billing.invoices) | `src/modules/billing/dto/payment-plan.dto.ts:44` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para vincular las cuotas | `src/modules/billing/dto/payment-plan.dto.ts:56` |
+| `installments` | `array<InstallmentInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => InstallmentInputDto)` | Cuotas; la suma debe igualar el saldo origen | `src/modules/billing/dto/payment-plan.dto.ts:69` |
+| `installments[].dueDate` | `string` | Sí | formato date-time | `@IsDateString()` | Fecha de vencimiento de la cuota (ISO) | `src/modules/billing/dto/payment-plan.dto.ts:24` |
+| `installments[].amount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Importe de la cuota | `src/modules/billing/dto/payment-plan.dto.ts:31` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1395,13 +2539,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `sourceInvoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a source invoice. | `src/modules/billing/dto/payment-plan.dto.ts:101` |
-| `installmentCount` | `number` | Sí | — | — | Valor de installment count mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:107` |
-| `installments` | `array<GeneratedInstallmentDto>` | Sí | — | — | Valor de installments mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:113` |
-| `installments[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:74` |
-| `installments[].invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:80` |
-| `installments[].total` | `string` | Sí | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:86` |
-| `installments[].dueDate` | `string` | Sí | — | — | Valor de due date mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:92` |
+| `sourceInvoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a source invoice. | `src/modules/billing/dto/payment-plan.dto.ts:105` |
+| `installmentCount` | `number` | Sí | — | — | Valor de installment count mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:111` |
+| `installments` | `array<GeneratedInstallmentDto>` | Sí | — | — | Valor de installments mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:117` |
+| `installments[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:78` |
+| `installments[].invoiceNumber` | `string` | Sí | — | — | Valor de invoice number mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:84` |
+| `installments[].total` | `string` | Sí | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:90` |
+| `installments[].dueDate` | `string` | Sí | — | — | Valor de due date mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:96` |
 
 ### Respuestas posibles
 
@@ -1411,8 +2555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura origen no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La factura origen no tiene saldo; PreconditionFailedException: La suma de cuotas debe igualar el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La factura origen no tiene saldo; PreconditionFailedException: Cada cuota del plan debe ser un importe positivo; PreconditionFailedException: La suma de cuotas debe igualar el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -1429,7 +2572,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 13. POST /billing/payments-made:execute
+## 24. POST /billing/payments-made:execute
 
 - **Origen:** CONTRATO
 - **Nombre:** Ejecutar pago a proveedor con asignación
@@ -1442,11 +2585,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Ejecutar pago a proveedor con asignación. Caso de uso UC-17-05: PaymentsMadeService.execute. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:58`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:101`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/payments-made:execute` la atiende `BillingPayablesController.executePayment` (src/modules/billing/controllers/billing-payables.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecutePaymentMadeDto` (12 campos, 5 obligatorios). Delega en `PaymentsMadeService.execute`. Crea filas en billing.payable_payment_allocations, billing.payments_made. Actualiza billing.bills. Lee billing.bills.
+`POST /billing/payments-made:execute` la atiende `BillingPayablesController.executePayment` (src/modules/billing/controllers/billing-payables.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecutePaymentMadeDto` (12 campos, 5 obligatorios). Delega en `PaymentsMadeService.execute`. Crea filas en billing.payable_payment_allocations, billing.payments_made. Lee billing.bills, billing.vendors.
 
 ### Requerimientos
 
@@ -1454,36 +2597,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-payables.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.bills` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingPayablesController.executePayment → PaymentsMadeService.execute | `src/modules/billing/services/payments-made.service.ts:145` |
 | `billing.bills` | LEE | LEE | DIRECTA | BillingPayablesController.executePayment → PaymentsMadeService.execute → BillsRepository.findById | `src/modules/billing/repositories/bills.repository.ts:137` |
 | `billing.payable_payment_allocations` | ESCRIBE | CREA | DIRECTA | BillingPayablesController.executePayment → PaymentsMadeService.execute → PaymentsMadeRepository.createAllocation | `src/modules/billing/repositories/payments-made.repository.ts:132` |
 | `billing.payments_made` | ESCRIBE | CREA | DIRECTA | BillingPayablesController.executePayment → PaymentsMadeService.execute → PaymentsMadeRepository.create | `src/modules/billing/repositories/payments-made.repository.ts:104` |
+| `billing.vendors` | LEE | LEE | DIRECTA | BillingPayablesController.executePayment → PaymentsMadeService.execute → BillsRepository.findVendor | `src/modules/billing/repositories/bills.repository.ts:166` |
 
 ### Cuerpo — DTO `ExecutePaymentMadeDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/payment-made.dto.ts:70` |
-| `vendorId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Proveedor (billing.vendors) | `src/modules/billing/dto/payment-made.dto.ts:81` |
-| `amount` | `string` | Sí | — | `@IsNumberString()` | Monto total del pago | `src/modules/billing/dto/payment-made.dto.ts:88` |
-| `methodConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Método de pago (concepto); por defecto transferencia | `src/modules/billing/dto/payment-made.dto.ts:99` |
-| `paidAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de pago (ISO) | `src/modules/billing/dto/payment-made.dto.ts:107` |
-| `companyBankAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta bancaria origen (accounting.company_bank_accounts) | `src/modules/billing/dto/payment-made.dto.ts:118` |
-| `allocations` | `array<PayableAllocationInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PayableAllocationInputDto)` | Asignaciones por factura (al menos una) | `src/modules/billing/dto/payment-made.dto.ts:131` |
-| `allocations[].billId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura de proveedor destino (billing.bills) | `src/modules/billing/dto/payment-made.dto.ts:23` |
-| `allocations[].allocatedAmount` | `string` | Sí | — | `@IsNumberString()` | Monto asignado | `src/modules/billing/dto/payment-made.dto.ts:30` |
-| `allocations[].discountAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Descuento | `src/modules/billing/dto/payment-made.dto.ts:38` |
-| `allocations[].withholdingAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Retención (withholding) | `src/modules/billing/dto/payment-made.dto.ts:49` |
-| `allocations[].openItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Partida abierta del subledger (accounting.open_items) | `src/modules/billing/dto/payment-made.dto.ts:60` |
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/payment-made.dto.ts:74` |
+| `vendorId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Proveedor (billing.vendors) | `src/modules/billing/dto/payment-made.dto.ts:85` |
+| `amount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto total del pago | `src/modules/billing/dto/payment-made.dto.ts:92` |
+| `methodConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Método de pago (concepto); por defecto transferencia | `src/modules/billing/dto/payment-made.dto.ts:103` |
+| `paidAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de pago (ISO) | `src/modules/billing/dto/payment-made.dto.ts:111` |
+| `companyBankAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta bancaria origen (accounting.company_bank_accounts) | `src/modules/billing/dto/payment-made.dto.ts:122` |
+| `allocations` | `array<PayableAllocationInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PayableAllocationInputDto)` | Asignaciones por factura (al menos una) | `src/modules/billing/dto/payment-made.dto.ts:135` |
+| `allocations[].billId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura de proveedor destino (billing.bills) | `src/modules/billing/dto/payment-made.dto.ts:27` |
+| `allocations[].allocatedAmount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto asignado | `src/modules/billing/dto/payment-made.dto.ts:34` |
+| `allocations[].discountAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Descuento | `src/modules/billing/dto/payment-made.dto.ts:42` |
+| `allocations[].withholdingAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Retención (withholding) | `src/modules/billing/dto/payment-made.dto.ts:53` |
+| `allocations[].openItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Partida abierta del subledger (accounting.open_items) | `src/modules/billing/dto/payment-made.dto.ts:64` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1528,14 +2671,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-made.dto.ts:167` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:173` |
-| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:179` |
-| `allocations` | `array<AllocatedBillDto>` | Sí | — | — | Valor de allocations mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:185` |
-| `allocations[].billId` | `string` | Sí | formato uuid | — | Identificador asociado a bill. | `src/modules/billing/dto/payment-made.dto.ts:140` |
-| `allocations[].allocatedAmount` | `string` | Sí | — | — | Valor de allocated amount mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:146` |
-| `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:152` |
-| `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:158` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-made.dto.ts:171` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:177` |
+| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:183` |
+| `allocations` | `array<AllocatedBillDto>` | Sí | — | — | Valor de allocations mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:189` |
+| `allocations[].billId` | `string` | Sí | formato uuid | — | Identificador asociado a bill. | `src/modules/billing/dto/payment-made.dto.ts:144` |
+| `allocations[].allocatedAmount` | `string` | Sí | — | — | Valor de allocated amount mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:150` |
+| `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:156` |
+| `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:162` |
 
 ### Respuestas posibles
 
@@ -1545,8 +2688,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura de proveedor no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada más retención excede el monto del pago; PreconditionFailedException: La factura de proveedor no tiene saldo; PreconditionFailedException: La asignación excede el saldo de la factura de proveedor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La retención debe ser un importe no negativo; PreconditionFailedException: La suma asignada más retención excede el monto del pago; PreconditionFailedException: La factura de proveedor no tiene saldo; PreconditionFailedException: La asignación excede el saldo de la factura de proveedor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -1563,7 +2705,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 14. POST /billing/payments-received:apply
+## 25. POST /billing/payments-received:apply
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar un pago recibido con asignación multi-factura
@@ -1576,11 +2718,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Aplicar un pago recibido con asignación multi-factura. Caso de uso UC-17-02: PaymentsReceivedService.apply. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:55`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:98`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/payments-received:apply` la atiende `BillingReceivablesController.applyPayment` (src/modules/billing/controllers/billing-receivables.controller.ts:171). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyPaymentReceivedDto` (12 campos, 5 obligatorios). Delega en `PaymentsReceivedService.apply`. Crea filas en billing.payments_received, billing.receivable_payment_allocations. Actualiza billing.invoices. Lee billing.invoices.
+`POST /billing/payments-received:apply` la atiende `BillingReceivablesController.applyPayment` (src/modules/billing/controllers/billing-receivables.controller.ts:171). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyPaymentReceivedDto` (12 campos, 5 obligatorios). Delega en `PaymentsReceivedService.apply`. Crea filas en billing.payments_received, billing.receivable_payment_allocations. Lee billing.invoice_lines, billing.invoices, insurance.claim_disputes, insurance.insurance_claim_lines.
 
 ### Requerimientos
 
@@ -1588,36 +2730,38 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:171` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply | `src/modules/billing/services/payments-received.service.ts:149` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoice_lines` | LEE | LEE | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:168` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 | `billing.payments_received` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → PaymentsReceivedRepository.create | `src/modules/billing/repositories/payments-received.repository.ts:108` |
 | `billing.receivable_payment_allocations` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → PaymentsReceivedRepository.createAllocation | `src/modules/billing/repositories/payments-received.repository.ts:137` |
+| `insurance.claim_disputes` | LEE | LEE | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:180` |
+| `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | BillingReceivablesController.applyPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:173` |
 
 ### Cuerpo — DTO `ApplyPaymentReceivedDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/payment-received.dto.ts:64` |
-| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente pagador (profiles.patient_profiles) | `src/modules/billing/dto/payment-received.dto.ts:75` |
-| `amount` | `string` | Sí | — | `@IsNumberString()` | Monto total recibido | `src/modules/billing/dto/payment-received.dto.ts:82` |
-| `methodConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Método de pago (concepto); por defecto efectivo | `src/modules/billing/dto/payment-received.dto.ts:93` |
-| `receivedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de recepción (ISO) | `src/modules/billing/dto/payment-received.dto.ts:101` |
-| `reference` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Referencia externa (voucher, txn) | `src/modules/billing/dto/payment-received.dto.ts:110` |
-| `companyBankAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta bancaria receptora (accounting.company_bank_accounts) | `src/modules/billing/dto/payment-received.dto.ts:121` |
-| `allocations` | `array<ReceivableAllocationInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ReceivableAllocationInputDto)` | Asignaciones por factura (al menos una) | `src/modules/billing/dto/payment-received.dto.ts:134` |
-| `allocations[].invoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura destino (billing.invoices) | `src/modules/billing/dto/payment-received.dto.ts:25` |
-| `allocations[].allocatedAmount` | `string` | Sí | — | `@IsNumberString()` | Monto asignado a la factura | `src/modules/billing/dto/payment-received.dto.ts:32` |
-| `allocations[].discountAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Descuento por pronto pago | `src/modules/billing/dto/payment-received.dto.ts:43` |
-| `allocations[].openItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Partida abierta del subledger (accounting.open_items) | `src/modules/billing/dto/payment-received.dto.ts:54` |
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/payment-received.dto.ts:68` |
+| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente pagador (profiles.patient_profiles) | `src/modules/billing/dto/payment-received.dto.ts:79` |
+| `amount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto total recibido | `src/modules/billing/dto/payment-received.dto.ts:86` |
+| `methodConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Método de pago (concepto); por defecto efectivo | `src/modules/billing/dto/payment-received.dto.ts:97` |
+| `receivedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de recepción (ISO) | `src/modules/billing/dto/payment-received.dto.ts:105` |
+| `reference` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Referencia externa (voucher, txn) | `src/modules/billing/dto/payment-received.dto.ts:114` |
+| `companyBankAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta bancaria receptora (accounting.company_bank_accounts) | `src/modules/billing/dto/payment-received.dto.ts:125` |
+| `allocations` | `array<ReceivableAllocationInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ReceivableAllocationInputDto)` | Asignaciones por factura (al menos una) | `src/modules/billing/dto/payment-received.dto.ts:138` |
+| `allocations[].invoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura destino (billing.invoices) | `src/modules/billing/dto/payment-received.dto.ts:29` |
+| `allocations[].allocatedAmount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto asignado a la factura | `src/modules/billing/dto/payment-received.dto.ts:36` |
+| `allocations[].discountAmount` | `string` | No | patrón runtime MONEY_PATTERN | `@IsOptional()` `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Descuento por pronto pago | `src/modules/billing/dto/payment-received.dto.ts:47` |
+| `allocations[].openItemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Partida abierta del subledger (accounting.open_items) | `src/modules/billing/dto/payment-received.dto.ts:58` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1662,14 +2806,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-received.dto.ts:170` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:176` |
-| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:182` |
-| `allocations` | `array<AllocatedInvoiceDto>` | Sí | — | — | Valor de allocations mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:188` |
-| `allocations[].invoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a invoice. | `src/modules/billing/dto/payment-received.dto.ts:143` |
-| `allocations[].allocatedAmount` | `string` | Sí | — | — | Valor de allocated amount mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:149` |
-| `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:155` |
-| `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:161` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/payment-received.dto.ts:174` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:180` |
+| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:186` |
+| `allocations` | `array<AllocatedInvoiceDto>` | Sí | — | — | Valor de allocations mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:192` |
+| `allocations[].invoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a invoice. | `src/modules/billing/dto/payment-received.dto.ts:147` |
+| `allocations[].allocatedAmount` | `string` | Sí | — | — | Valor de allocated amount mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:153` |
+| `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:159` |
+| `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:165` |
 
 ### Respuestas posibles
 
@@ -1679,8 +2823,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -1697,12 +2840,12 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 15. POST /billing/reconciliation:clear
+## 26. POST /billing/reconciliation:clear
 
 - **Origen:** CONTRATO
 - **Nombre:** Conciliar pagos vía documento de compensación
 - **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `BillingOperationsController.reconcile` — `src/modules/billing/controllers/billing-operations.controller.ts:78`
 
@@ -1710,11 +2853,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Conciliar pagos vía documento de compensación. Caso de uso UC-17-07: ReconciliationService.clear. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:60`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:103`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/reconciliation:clear` la atiende `BillingOperationsController.reconcile` (src/modules/billing/controllers/billing-operations.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReconciliationClearDto` (3 campos, 1 obligatorio). Delega en `ReconciliationService.clear`. Actualiza billing.payments_made, billing.payments_received. Lee billing.payments_made, billing.payments_received.
+`POST /billing/reconciliation:clear` la atiende `BillingOperationsController.reconcile` (src/modules/billing/controllers/billing-operations.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReconciliationClearDto` (3 campos, 1 obligatorio). Delega en `ReconciliationService.clear`. Lee billing.payments_made, billing.payments_received.
 
 ### Requerimientos
 
@@ -1722,18 +2865,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-operations.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.payments_made` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.reconcile → ReconciliationService.clear | `src/modules/billing/services/reconciliation.service.ts:103` |
 | `billing.payments_made` | LEE | LEE | DIRECTA | BillingOperationsController.reconcile → ReconciliationService.clear → PaymentsMadeRepository.findById | `src/modules/billing/repositories/payments-made.repository.ts:93` |
-| `billing.payments_received` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingOperationsController.reconcile → ReconciliationService.clear | `src/modules/billing/services/reconciliation.service.ts:84` |
 | `billing.payments_received` | LEE | LEE | DIRECTA | BillingOperationsController.reconcile → ReconciliationService.clear → PaymentsReceivedRepository.findById | `src/modules/billing/repositories/payments-received.repository.ts:97` |
 
 ### Cuerpo — DTO `ReconciliationClearDto` · `application/json`
@@ -1784,7 +2925,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Pago recibido no encontrado; ResourceNotFoundException: Pago emitido no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Debe indicar al menos un pago a conciliar; PreconditionFailedException: El pago recibido ya está conciliado; PreconditionFailedException: El pago emitido ya está conciliado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1802,7 +2942,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 16. POST /billing/reimbursements:link
+## 27. POST /billing/reimbursements:link
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular reembolso de reclamo de seguro a la factura
@@ -1815,11 +2955,11 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 Vincular reembolso de reclamo de seguro a la factura. Caso de uso UC-17-08: ReimbursementsService.link. Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:61`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing/README.md:104`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/reimbursements:link` la atiende `BillingReceivablesController.linkReimbursement` (src/modules/billing/controllers/billing-receivables.controller.ts:210). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkReimbursementDto` (5 campos, 3 obligatorios). Delega en `ReimbursementsService.link`. Crea filas en billing.billing_document_links, billing.reimbursements. Actualiza billing.invoices. Lee billing.invoices, billing.reimbursements.
+`POST /billing/reimbursements:link` la atiende `BillingReceivablesController.linkReimbursement` (src/modules/billing/controllers/billing-receivables.controller.ts:210). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LinkReimbursementDto` (5 campos, 3 obligatorios). Delega en `ReimbursementsService.link`. Crea filas en billing.billing_document_links, billing.reimbursements. Lee billing.invoices, billing.reimbursements.
 
 ### Requerimientos
 
@@ -1827,18 +2967,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/billing/controllers/billing-receivables.controller.ts:210` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.linkReimbursement → ReimbursementsService.link → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingReceivablesController.linkReimbursement → ReimbursementsService.link | `src/modules/billing/services/reimbursements.service.ts:98` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.linkReimbursement → ReimbursementsService.link → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:137` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingReceivablesController.linkReimbursement → ReimbursementsService.link → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 | `billing.reimbursements` | ESCRIBE | CREA | DIRECTA | BillingReceivablesController.linkReimbursement → ReimbursementsService.link → ReimbursementsRepository.create | `src/modules/billing/repositories/reimbursements.repository.ts:55` |
 | `billing.reimbursements` | LEE | LEE | DIRECTA | BillingReceivablesController.linkReimbursement → ReimbursementsService.link → ReimbursementsRepository.findByClaim | `src/modules/billing/repositories/reimbursements.repository.ts:44` |
 
@@ -1846,11 +2985,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `claimId` | `string` | Sí | formato uuid | `@IsUUID()` | Reclamo de seguro (insurance.insurance_claims) | `src/modules/billing/dto/reimbursement.dto.ts:19` |
-| `invoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura del paciente a acreditar (billing.invoices) | `src/modules/billing/dto/reimbursement.dto.ts:29` |
-| `amount` | `string` | Sí | — | `@IsNumberString()` | Monto reembolsado por la aseguradora | `src/modules/billing/dto/reimbursement.dto.ts:39` |
-| `receivedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de recepción del reembolso (ISO) | `src/modules/billing/dto/reimbursement.dto.ts:49` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo REIMBURSEMENT_OF | `src/modules/billing/dto/reimbursement.dto.ts:61` |
+| `claimId` | `string` | Sí | formato uuid | `@IsUUID()` | Reclamo de seguro (insurance.insurance_claims) | `src/modules/billing/dto/reimbursement.dto.ts:18` |
+| `invoiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Factura del paciente a acreditar (billing.invoices) | `src/modules/billing/dto/reimbursement.dto.ts:28` |
+| `amount` | `string` | Sí | patrón runtime MONEY_PATTERN | `@Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })` | Monto reembolsado por la aseguradora | `src/modules/billing/dto/reimbursement.dto.ts:38` |
+| `receivedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fecha de recepción del reembolso (ISO) | `src/modules/billing/dto/reimbursement.dto.ts:48` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant (directory.tenants); requerido para registrar el vínculo REIMBURSEMENT_OF | `src/modules/billing/dto/reimbursement.dto.ts:60` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1880,13 +3019,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:70` |
-| `claimId` | `string` | Sí | formato uuid | — | Identificador asociado a claim. | `src/modules/billing/dto/reimbursement.dto.ts:76` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:82` |
-| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:88` |
-| `invoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a invoice. | `src/modules/billing/dto/reimbursement.dto.ts:94` |
-| `invoiceBalance` | `string` | No | — | — | Valor de invoice balance mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:100` |
-| `invoiceStatus` | `string` | Sí | formato uuid | — | Valor de invoice status mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:106` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:69` |
+| `claimId` | `string` | Sí | formato uuid | — | Identificador asociado a claim. | `src/modules/billing/dto/reimbursement.dto.ts:75` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:81` |
+| `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:87` |
+| `invoiceId` | `string` | Sí | formato uuid | — | Identificador asociado a invoice. | `src/modules/billing/dto/reimbursement.dto.ts:93` |
+| `invoiceBalance` | `string` | No | — | — | Valor de invoice balance mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:99` |
+| `invoiceStatus` | `string` | Sí | formato uuid | — | Valor de invoice status mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:105` |
 
 ### Respuestas posibles
 
@@ -1896,8 +3035,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
 | 409 | `CONFLICT` | ConflictException: El reclamo ya tiene un reembolso registrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del reembolso debe ser positivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -1914,14 +3053,14 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 17. GET /billing/service-catalog
+## 28. GET /billing/service-catalog
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar el catálogo de servicios de la práctica
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.search` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:73`
+- **Implementación:** `BillingServiceCatalogController.search` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1931,23 +3070,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog` la atiende `BillingServiceCatalogController.search` (src/modules/billing/controllers/billing-service-catalog.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.search`. Lee billing.service_catalog.
+`GET /billing/service-catalog` la atiende `BillingServiceCatalogController.search` (src/modules/billing/controllers/billing-service-catalog.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.search`. Lee billing.service_catalog.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.search → BillingServiceCatalogService.search → ServiceCatalogRepository.searchPage | `src/modules/billing/repositories/service-catalog.repository.ts:137` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.search → BillingServiceCatalogService.search → ServiceCatalogRepository.searchPage | `src/modules/billing/repositories/service-catalog.repository.ts:190` |
 
 ### Parámetros
 
@@ -1967,23 +3106,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ServiceCatalogItemDto>` | Sí | — | — | Servicios de esta página, ordenados por código. | `src/modules/billing/dto/service-catalog.dto.ts:285` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:192` |
-| `items[].practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:198` |
-| `items[].code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:204` |
-| `items[].name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:210` |
-| `items[].descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:216` |
-| `items[].imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
-| `items[].serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
-| `items[].defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
-| `items[].currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:244` |
-| `items[].currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:258` |
-| `items[].taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:264` |
-| `items[].incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:270` |
-| `items[].isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:276` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/billing/dto/service-catalog.dto.ts:291` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/billing/dto/service-catalog.dto.ts:297` |
-| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/billing/dto/service-catalog.dto.ts:303` |
+| `items` | `array<ServiceCatalogItemDto>` | Sí | — | — | Servicios de esta página, ordenados por código. | `src/modules/billing/dto/service-catalog.dto.ts:314` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:214` |
+| `items[].practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:220` |
+| `items[].code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
+| `items[].name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
+| `items[].descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
+| `items[].termsText` | `string` | No | — | — | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `src/modules/billing/dto/service-catalog.dto.ts:245` |
+| `items[].imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:255` |
+| `items[].serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:261` |
+| `items[].defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:267` |
+| `items[].currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:273` |
+| `items[].currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:287` |
+| `items[].taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:293` |
+| `items[].incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:299` |
+| `items[].isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:305` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/billing/dto/service-catalog.dto.ts:320` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/billing/dto/service-catalog.dto.ts:326` |
+| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/billing/dto/service-catalog.dto.ts:332` |
 
 ### Respuestas posibles
 
@@ -2001,7 +3141,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:38` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:47` |
 
 ### Flujos
 
@@ -2009,14 +3149,14 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 18. POST /billing/service-catalog
+## 29. POST /billing/service-catalog
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de alta un servicio en el catálogo maestro
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.create` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:126`
+- **Implementación:** `BillingServiceCatalogController.create` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:160`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2026,49 +3166,44 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:126). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog, surveys.survey_assignments, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza surveys.survey_templates, surveys.survey_versions. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
+`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:160). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:160` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:154` |
-| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.findByCode | `src/modules/billing/repositories/service-catalog.repository.ts:105` |
-| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.isOwnOffice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → BillingServiceCatalogService.findDefaultSurveyOwner | `src/modules/billing/services/billing-service-catalog.service.ts:324` |
-| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:119` |
-| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:282` |
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey | `src/modules/billing/services/billing-service-catalog.service.ts:302` |
-| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:144` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey | `src/modules/billing/services/billing-service-catalog.service.ts:298` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:208` |
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:253` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.findByCode | `src/modules/billing/repositories/service-catalog.repository.ts:132` |
+| `common.file_versions` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
+| `common.files` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateServiceCatalogItemDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/service-catalog.dto.ts:31` |
-| `code` | `string` | Sí | longitud máxima 60 | `@IsString()` `@MaxLength(60)` | Código interno del servicio | `src/modules/billing/dto/service-catalog.dto.ts:39` |
-| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre del servicio | `src/modules/billing/dto/service-catalog.dto.ts:47` |
-| `descriptionText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Descripción larga del servicio, para la tarjeta | `src/modules/billing/dto/service-catalog.dto.ts:58` |
-| `imageFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Imagen del servicio (`common.files`) | `src/modules/billing/dto/service-catalog.dto.ts:69` |
-| `serviceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de clasificación del servicio | `src/modules/billing/dto/service-catalog.dto.ts:80` |
-| `defaultPrice` | `string` | Sí | patrón runtime PRICE_PATTERN | `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | Precio de referencia; cada doctor puede cotizar otro precio | `src/modules/billing/dto/service-catalog.dto.ts:91` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (concepto) | `src/modules/billing/dto/service-catalog.dto.ts:99` |
-| `taxCodeId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de impuesto (billing.tax_codes) | `src/modules/billing/dto/service-catalog.dto.ts:110` |
-| `incomeAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de ingreso (accounting.accounts) | `src/modules/billing/dto/service-catalog.dto.ts:121` |
-| `isActive` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si queda disponible para cotizar; por defecto true | `src/modules/billing/dto/service-catalog.dto.ts:131` |
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) | `src/modules/billing/dto/service-catalog.dto.ts:32` |
+| `code` | `string` | Sí | longitud máxima 120 | `@IsString()` `@MaxLength(120)` | Código interno del servicio | `src/modules/billing/dto/service-catalog.dto.ts:45` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre del servicio | `src/modules/billing/dto/service-catalog.dto.ts:53` |
+| `descriptionText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Descripción larga del servicio, para la tarjeta | `src/modules/billing/dto/service-catalog.dto.ts:64` |
+| `imageFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Imagen del servicio (`common.files`) | `src/modules/billing/dto/service-catalog.dto.ts:75` |
+| `serviceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de clasificación del servicio | `src/modules/billing/dto/service-catalog.dto.ts:86` |
+| `defaultPrice` | `string` | Sí | patrón runtime PRICE_PATTERN | `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | Precio de referencia; cada doctor puede cotizar otro precio | `src/modules/billing/dto/service-catalog.dto.ts:97` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda (concepto) | `src/modules/billing/dto/service-catalog.dto.ts:105` |
+| `taxCodeId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de impuesto (billing.tax_codes) | `src/modules/billing/dto/service-catalog.dto.ts:116` |
+| `incomeAccountId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cuenta de ingreso (accounting.accounts) | `src/modules/billing/dto/service-catalog.dto.ts:127` |
+| `isActive` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si queda disponible para cotizar; por defecto true | `src/modules/billing/dto/service-catalog.dto.ts:137` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2105,19 +3240,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:192` |
-| `practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:198` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:204` |
-| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:210` |
-| `descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:216` |
-| `imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
-| `serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
-| `defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
-| `currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:244` |
-| `currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:258` |
-| `taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:264` |
-| `incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:270` |
-| `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:276` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:214` |
+| `practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:220` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
+| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
+| `descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
+| `termsText` | `string` | No | — | — | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `src/modules/billing/dto/service-catalog.dto.ts:245` |
+| `imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:255` |
+| `serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:261` |
+| `defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:267` |
+| `currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:273` |
+| `currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:287` |
+| `taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:293` |
+| `incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:299` |
+| `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:305` |
 
 ### Respuestas posibles
 
@@ -2126,9 +3262,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Imagen no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -2137,7 +3274,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:75` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:107` |
 
 ### Flujos
 
@@ -2145,14 +3282,14 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 19. PATCH /billing/service-catalog/{id}
+## 30. PATCH /billing/service-catalog/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir un servicio del catálogo de mi práctica
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.update` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:163`
+- **Implementación:** `BillingServiceCatalogController.update` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:229`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2162,26 +3299,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /billing/service-catalog/{id}` la atiende `BillingServiceCatalogController.update` (src/modules/billing/controllers/billing-service-catalog.controller.ts:163). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `UpdateServiceCatalogItemDto` (4 campos, 0 obligatorios). Delega en `BillingServiceCatalogService.update`. Actualiza billing.service_catalog. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
+`PATCH /billing/service-catalog/{id}` la atiende `BillingServiceCatalogController.update` (src/modules/billing/controllers/billing-service-catalog.controller.ts:229). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `UpdateServiceCatalogItemDto` (5 campos, 0 obligatorios). Delega en `BillingServiceCatalogService.update`. Actualiza billing.service_catalog. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:369` |
-| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
+| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:418` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -2195,10 +3332,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `name` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del servicio | `src/modules/billing/dto/service-catalog.dto.ts:149` |
-| `defaultPrice` | `string` | No | patrón runtime PRICE_PATTERN | `@IsOptional()` `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | Precio de referencia del servicio | `src/modules/billing/dto/service-catalog.dto.ts:161` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda del precio (concepto). Sólo se acepta junto con `defaultPrice` | `src/modules/billing/dto/service-catalog.dto.ts:173` |
-| `isActive` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si el servicio sigue disponible para cotizar | `src/modules/billing/dto/service-catalog.dto.ts:183` |
+| `name` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del servicio | `src/modules/billing/dto/service-catalog.dto.ts:155` |
+| `defaultPrice` | `string` | No | patrón runtime PRICE_PATTERN | `@IsOptional()` `@IsNumberString()` `@Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })` | Precio de referencia del servicio | `src/modules/billing/dto/service-catalog.dto.ts:167` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Moneda del precio (concepto). Sólo se acepta junto con `defaultPrice` | `src/modules/billing/dto/service-catalog.dto.ts:179` |
+| `isActive` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si el servicio sigue disponible para cotizar | `src/modules/billing/dto/service-catalog.dto.ts:189` |
+| `termsText` | `string` | No | longitud máxima 20000; admite null | `@IsOptional()` `@ValidateIf((_, value) => value !== null)` `@IsString()` `@MaxLength(20000)` | Términos propios del servicio. null vuelve a los términos por defecto | `src/modules/billing/dto/service-catalog.dto.ts:205` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2213,7 +3351,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "name": "Nombre de ejemplo",
   "defaultPrice": "150.00",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
-  "isActive": true
+  "isActive": true,
+  "termsText": "valor-ejemplo"
 }
 ```
 
@@ -2223,19 +3362,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:192` |
-| `practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:198` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:204` |
-| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:210` |
-| `descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:216` |
-| `imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
-| `serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
-| `defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
-| `currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:244` |
-| `currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:258` |
-| `taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:264` |
-| `incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:270` |
-| `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:276` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:214` |
+| `practiceId` | `string` | Sí | formato uuid | — | Identificador asociado a practice. | `src/modules/billing/dto/service-catalog.dto.ts:220` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:226` |
+| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:232` |
+| `descriptionText` | `string` | No | — | — | Valor de description text mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:238` |
+| `termsText` | `string` | No | — | — | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `src/modules/billing/dto/service-catalog.dto.ts:245` |
+| `imageFileId` | `string` | No | formato uuid | — | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `src/modules/billing/dto/service-catalog.dto.ts:255` |
+| `serviceConceptId` | `string` | No | formato uuid | — | Identificador asociado a service concept. | `src/modules/billing/dto/service-catalog.dto.ts:261` |
+| `defaultPrice` | `string` | Sí | — | — | Valor de default price mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:267` |
+| `currencyConceptId` | `string` | No | formato uuid | — | Identificador asociado a currency concept. | `src/modules/billing/dto/service-catalog.dto.ts:273` |
+| `currencyCode` | `string` | No | — | — | Sigla de la moneda | `src/modules/billing/dto/service-catalog.dto.ts:287` |
+| `taxCodeId` | `string` | No | formato uuid | — | Identificador asociado a tax code. | `src/modules/billing/dto/service-catalog.dto.ts:293` |
+| `incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:299` |
+| `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:305` |
 
 ### Respuestas posibles
 
@@ -2260,14 +3400,200 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. GET /billing/service-catalog/procedure-specialties
+## 31. GET /billing/service-catalog/{id}/image
+
+- **Origen:** CONTRATO
+- **Nombre:** Descargar la imagen de un servicio que el actor puede ver
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingServiceCatalogController.getImage` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:136`
+
+### Qué es y para qué sirve (negocio)
+
+Descargar la imagen de un servicio que el actor puede ver. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/service-catalog/{id}/image` la atiende `BillingServiceCatalogController.getImage` (src/modules/billing/controllers/billing-service-catalog.controller.ts:136). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.getImageContent`. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.getImage → BillingServiceCatalogService.getImageContent → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `common.file_versions` | LEE | LEE | DIRECTA | BillingServiceCatalogController.getImage → BillingServiceCatalogService.getImageContent → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
+| `common.files` | LEE | LEE | DIRECTA | BillingServiceCatalogController.getImage → BillingServiceCatalogService.getImageContent → AttachableFileService.assertUsableForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.getImage → BillingServiceCatalogService.getImageContent → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notVisible.message}; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: S3 object body is empty |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:146` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 32. POST /billing/service-catalog/import-procedures
+
+- **Origen:** CONTRATO
+- **Nombre:** Importar en lote procedimientos del arancel al catálogo
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingServiceCatalogController.importProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:195`
+
+### Qué es y para qué sirve (negocio)
+
+Importar en lote procedimientos del arancel al catálogo. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/service-catalog/import-procedures` la atiende `BillingServiceCatalogController.importProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:195). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `ImportProceduresDto` (4 campos, 1 obligatorio). Delega en `ProcedureImportService.importProcedures`. Crea filas en billing.service_catalog. Lee billing.service_catalog, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:195` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:253` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.findExistingCodes | `src/modules/billing/repositories/service-catalog.repository.ts:153` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:421` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:391` |
+
+### Cuerpo — DTO `ImportProceduresDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) cuyo catálogo recibe los servicios | `src/modules/billing/dto/procedure-import.dto.ts:29` |
+| `specialties` | `array<string>` | No | longitud máxima 200; máximo 100 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(100)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Nombres exactos de especialidad del arancel (`GET procedure-specialties`) | `src/modules/billing/dto/procedure-import.dto.ts:43` |
+| `codes` | `array<string>` | No | longitud máxima 300; máximo PROCEDURE_IMPORT_MAX elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(PROCEDURE_IMPORT_MAX)` `@IsString({ each: true })` `@MaxLength(300, { each: true })` | Códigos del arancel (`procedure:...`) a importar | `src/modules/billing/dto/procedure-import.dto.ts:56` |
+| `q` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Texto a buscar en el nombre del procedimiento; sin tildes ni mayúsculas, todas las palabras | `src/modules/billing/dto/procedure-import.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "specialties": [
+    "Cardiología"
+  ],
+  "codes": [
+    "procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL"
+  ],
+  "q": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ImportProceduresResponseDto>` · DTO `ImportProceduresResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `created` | `number` | Sí | — | — | Servicios creados | `src/modules/billing/dto/procedure-import.dto.ts:73` |
+| `skipped` | `number` | Sí | — | — | Coincidencias que ya existían en la práctica y se saltaron | `src/modules/billing/dto/procedure-import.dto.ts:80` |
+| `total` | `number` | Sí | — | — | Procedimientos del arancel que cumplen el filtro | `src/modules/billing/dto/procedure-import.dto.ts:87` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad o texto |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:81` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 33. GET /billing/service-catalog/procedure-specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las especialidades del nomenclador de procedimientos
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.listProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:194`
+- **Implementación:** `BillingServiceCatalogController.listProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:260`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2277,22 +3603,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog/procedure-specialties` la atiende `BillingServiceCatalogController.listProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:194). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.listSpecialties`. Lee terminology.concept_properties.
+`GET /billing/service-catalog/procedure-specialties` la atiende `BillingServiceCatalogController.listProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:260). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.listSpecialties`. Lee terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:260` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listProcedureSpecialties → ProcedureNomenclatureService.listSpecialties | `src/modules/billing/services/procedure-nomenclature.service.ts:80` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listProcedureSpecialties → ProcedureNomenclatureService.listSpecialties | `src/modules/billing/services/procedure-nomenclature.service.ts:127` |
 
 ### Cuerpo
 
@@ -2321,7 +3647,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:102` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:134` |
 
 ### Flujos
 
@@ -2329,14 +3655,85 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 21. GET /billing/service-catalog/procedures
+## 34. GET /billing/service-catalog/procedure-specialties/mine
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar las especialidades del arancel que corresponden al médico
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingServiceCatalogController.listMyProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:279`
+
+### Qué es y para qué sirve (negocio)
+
+Listar las especialidades del arancel que corresponden al médico. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/service-catalog/procedure-specialties/mine` la atiende `BillingServiceCatalogController.listMyProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:279). Exige sesión; el controlador no declara roles. Delega en `ProcedureImportService.listMySpecialties`. Lee profiles.practitioner_specialties, terminology.catalog_concepts, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:279` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:253` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:253` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:265` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyProcedureSpecialtiesResponseDto>` · DTO `MyProcedureSpecialtiesResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<MyProcedureSpecialtyDto>` | Sí | — | — | Especialidades del arancel que corresponden al médico autenticado. | `src/modules/billing/dto/procedure-import.dto.ts:105` |
+| `items[].specialty` | `string` | Sí | — | — | Nombre exacto de la especialidad, tal cual lo publica el arancel. | `src/modules/billing/dto/procedure-import.dto.ts:94` |
+| `items[].count` | `number` | Sí | — | — | Procedimientos que el arancel agrupa bajo esa especialidad. | `src/modules/billing/dto/procedure-import.dto.ts:98` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:91` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 35. GET /billing/service-catalog/procedures
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar el nomenclador de procedimientos (arancel de referencia)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.searchProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:212`
+- **Implementación:** `BillingServiceCatalogController.searchProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:299`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2346,30 +3743,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog/procedures` la atiende `BillingServiceCatalogController.searchProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:212). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.search`. Lee terminology.catalog_concepts, terminology.concept_properties.
+`GET /billing/service-catalog/procedures` la atiende `BillingServiceCatalogController.searchProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:299). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.search`. Lee terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:212` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:299` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:156` |
-| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:131` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:223` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:185` |
 
 ### Parámetros
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `specialty` | query | No | `string` | Especialidad exacta, tal cual la publica el arancel |
-| `q` | query | No | `string` | Texto a buscar en el nombre del procedimiento |
+| `q` | query | No | `string` | Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad |
 | `cursor` | query | No | `string` | Cursor opaco devuelto por la página anterior |
 | `limit` | query | No | `number` | Entradas por página |
 
@@ -2407,7 +3804,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:86` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -2415,7 +3812,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 22. GET /billing/simulated/catalogs
+## 36. GET /billing/simulated/catalogs
 
 - **Origen:** CONTRATO
 - **Nombre:** Catálogos paramétricos del SIAT simulado
@@ -2432,7 +3829,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/simulated/catalogs` la atiende `BillingSimulatedController.catalogs` (src/modules/billing/controllers/billing-simulated.controller.ts:44). Exige sesión; el controlador no declara roles. Delega en `BillingSimulatedService.catalogs`. No se determinaron tablas para esta operación.
+`GET /billing/simulated/catalogs` la atiende `BillingSimulatedController.catalogs` (src/modules/billing/controllers/billing-simulated.controller.ts:44). Exige sesión; el controlador no declara roles. Delega en `BillingSimulatedService.catalogs`. No toca tablas relacionales: Devuelve los catálogos paramétricos del SIAT simulado, que viven en constantes del código (`SIMULATED_CATALOGS` y los mensajes del SIAT); no consulta la base de datos..
 
 ### Requerimientos
 
@@ -2440,12 +3837,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: Devuelve los catálogos paramétricos del SIAT simulado, que viven en constantes del código (`SIMULATED_CATALOGS` y los mensajes del SIAT); no consulta la base de datos.. _(manual, 2026-10-25; fuente: `src/modules/billing/services/billing-simulated.service.ts:226`)_
 
 ### Cuerpo
 
@@ -2477,7 +3874,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. GET /billing/simulated/charges
+## 37. GET /billing/simulated/charges
 
 - **Origen:** CONTRATO
 - **Nombre:** Cobros de consultas (opcionalmente de una persona)
@@ -2502,9 +3899,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2515,7 +3912,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.charges → BillingSimulatedService.listCharges → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -2559,7 +3956,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 38. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Origen:** CONTRATO
 - **Nombre:** Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
@@ -2584,10 +3981,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2598,7 +3995,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.instancePayment → BillingSimulatedService.registerInstancePayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -2667,7 +4064,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /billing/simulated/charges/{chargeId}/invoices
+## 39. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir la factura SIAT simulada de un cobro pagado
@@ -2692,10 +4089,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2706,8 +4103,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice | `src/modules/billing/services/billing-simulated.service.ts:809` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice | `src/modules/billing/services/billing-simulated.service.ts:722` |
+| `billing.siat_simulated_invoices` | ESCRIBE | CREA | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice | `src/modules/billing/services/billing-simulated.service.ts:809` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice | `src/modules/billing/services/billing-simulated.service.ts:722` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.issue → BillingSimulatedService.issueInvoice → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -2795,7 +4192,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /billing/simulated/charges/{chargeId}/payment
+## 40. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el pago real de un cobro
@@ -2812,7 +4209,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/simulated/charges/{chargeId}/payment` la atiende `BillingSimulatedController.payment` (src/modules/billing/controllers/billing-simulated.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SimulatedRegisterPaymentDto` (1 campo, 1 obligatorio). Delega en `BillingSimulatedService.registerPayment`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations. Actualiza billing.invoices. Lee billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, billing.service_catalog, billing.siat_simulated_invoices, clinical.encounters, common.identifiers y 3 más.
+`POST /billing/simulated/charges/{chargeId}/payment` la atiende `BillingSimulatedController.payment` (src/modules/billing/controllers/billing-simulated.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SimulatedRegisterPaymentDto` (1 campo, 1 obligatorio). Delega en `BillingSimulatedService.registerPayment`. Crea filas en billing.billing_document_links, billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, messaging.domain_events, messaging.outbox_messages. Lee billing.charge_captures, billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, billing.service_catalog, billing.siat_simulated_invoices, clinical.encounters y 7 más. Publica billing.charge_capture.invoiced.
 
 ### Requerimientos
 
@@ -2820,32 +4217,43 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.billing_document_links` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → BillingDocumentLinksRepository.create | `src/modules/billing/repositories/document-links.repository.ts:66` |
-| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:270` |
-| `billing.invoice_lines` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:239` |
-| `billing.invoices` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply | `src/modules/billing/services/payments-received.service.ts:149` |
-| `billing.invoices` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.findByNumber | `src/modules/billing/repositories/invoices.repository.ts:153` |
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesService.loadCharges | `src/modules/billing/services/invoices.service.ts:294` |
+| `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:318` |
+| `billing.invoice_lines` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:168` |
+| `billing.invoices` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:287` |
+| `billing.invoices` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → InvoicesRepository.findByNumber | `src/modules/billing/repositories/invoices.repository.ts:201` |
 | `billing.payments_received` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply → PaymentsReceivedRepository.create | `src/modules/billing/repositories/payments-received.repository.ts:108` |
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply → PaymentsReceivedRepository.createAllocation | `src/modules/billing/repositories/payments-received.repository.ts:137` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:411` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → BillingLinkTargetsRepository.findEncounter | `src/modules/billing/repositories/link-targets.repository.ts:22` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
+| `insurance.claim_disputes` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:180` |
+| `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → PaymentsReceivedService.apply → InvoicesRepository.hasOpenPatientObjection | `src/modules/billing/repositories/invoices.repository.ts:173` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → InvoicesService.issueFromEncounter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `profiles.patient_profiles` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:423` |
 | `profiles.persons` | LEE | LEE | POR_SQL | BillingSimulatedController.payment → BillingSimulatedService.registerPayment → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:423` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `billing.charge_capture.invoiced` | `src/modules/billing/services/invoices.service.ts:248` |
 
 ### Parámetros
 
@@ -2889,9 +4297,9 @@ _No se identificó un DTO de respuesta con campos._
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Su rol no permite operar la facturación |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: Factura no encontrada |
-| 409 | `CONFLICT` | ConflictException: El cobro ya está pagado; ConflictException: El número de factura ya existe en la práctica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message}; ResourceNotFoundException: Cargo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El cobro ya está pagado; ConflictException: El número de factura ya existe en la práctica; ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El cargo no tiene precio (sin tarifa vigente); PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/billing.md).
@@ -2906,7 +4314,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. GET /billing/simulated/invoices/{invoiceId}
+## 41. GET /billing/simulated/invoices/{invoiceId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Una factura simulada, dentro del alcance de quien la pide
@@ -2931,8 +4339,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2943,7 +4351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:854` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:855` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.invoice → BillingSimulatedService.invoice → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -2986,7 +4394,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 42. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Origen:** CONTRATO
 - **Nombre:** Anular la factura (sólo administración)
@@ -3011,10 +4419,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3025,8 +4433,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.operate | `src/modules/billing/services/billing-simulated.service.ts:973` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:854` |
+| `billing.siat_simulated_invoices` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.operate | `src/modules/billing/services/billing-simulated.service.ts:974` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:855` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.annul → BillingSimulatedService.annul → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -3090,7 +4498,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 43. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Origen:** CONTRATO
 - **Nombre:** Revertir la anulación (sólo administración)
@@ -3115,8 +4523,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:146` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3127,8 +4535,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.operate | `src/modules/billing/services/billing-simulated.service.ts:973` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:854` |
+| `billing.siat_simulated_invoices` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.operate | `src/modules/billing/services/billing-simulated.service.ts:974` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:855` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.revert → BillingSimulatedService.revertAnnulment → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -3171,7 +4579,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /billing/simulated/invoices/{invoiceId}/email
+## 44. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Origen:** CONTRATO
 - **Nombre:** Encolar el envío (simulado, no se envía) de la factura
@@ -3196,10 +4604,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3210,9 +4618,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.payments_received` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.receivable_payment_allocations` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:386` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email | `src/modules/billing/services/billing-simulated.service.ts:1027` |
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:854` |
-| `billing.siat_simulated_outbox (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email | `src/modules/billing/services/billing-simulated.service.ts:1012` |
+| `billing.siat_simulated_invoices` | ESCRIBE | ACTUALIZA | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email | `src/modules/billing/services/billing-simulated.service.ts:1028` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.siatOrThrow | `src/modules/billing/services/billing-simulated.service.ts:855` |
+| `billing.siat_simulated_outbox` | ESCRIBE | CREA | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email | `src/modules/billing/services/billing-simulated.service.ts:1013` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
 | `common.identifiers` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:443` |
 | `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.email → BillingSimulatedService.email → BillingSimulatedService.scopedSiat → BillingSimulatedService.chargeOrThrow → BillingSimulatedService.loadCharges | `src/modules/billing/services/billing-simulated.service.ts:344` |
@@ -3276,7 +4684,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. GET /billing/simulated/my-invoices
+## 45. GET /billing/simulated/my-invoices
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis facturas: recibidas (paciente) o emitidas (quien factura)
@@ -3301,17 +4709,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `profiles.persons` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `profiles.persons` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoices → BillingSimulatedService.myInvoices → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
 
 ### Cuerpo
 
@@ -3343,7 +4751,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 32. GET /billing/simulated/my-invoices/{invoiceId}
+## 46. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Una de mis facturas
@@ -3368,17 +4776,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
-| `profiles.persons` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1128` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
+| `profiles.persons` | LEE | LEE | POR_SQL | BillingSimulatedController.myInvoice → BillingSimulatedService.myInvoice → BillingSimulatedService.myInvoiceRows | `src/modules/billing/services/billing-simulated.service.ts:1129` |
 
 ### Parámetros
 
@@ -3416,7 +4824,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 33. GET /billing/simulated/outbox
+## 47. GET /billing/simulated/outbox
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de correo simulada (sólo administración)
@@ -3441,16 +4849,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.siat_simulated_invoices (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1047` |
-| `billing.siat_simulated_outbox (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1047` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1047` |
+| `billing.siat_simulated_invoices` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1048` |
+| `billing.siat_simulated_outbox` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1048` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSimulatedController.outbox → BillingSimulatedService.outbox | `src/modules/billing/services/billing-simulated.service.ts:1048` |
 
 ### Cuerpo
 
@@ -3482,7 +4890,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 34. GET /billing/simulated/status
+## 48. GET /billing/simulated/status
 
 - **Origen:** CONTRATO
 - **Nombre:** Estado fiscal simulado: emisores y credenciales sintéticas
@@ -3507,8 +4915,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-simulated.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3544,6 +4952,550 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo Billing (17) — etapa `ctrl:BillingSimulatedController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 49. GET /billing/space-tariffs
+
+- **Origen:** CONTRATO
+- **Nombre:** Tarifas de espacios
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.list` — `src/modules/billing/controllers/billing-space-charges.controller.ts:116`
+
+### Qué es y para qué sirve (negocio)
+
+Tarifas de espacios. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/space-tariffs` la atiende `BillingSpaceChargesController.list` (src/modules/billing/controllers/billing-space-charges.controller.ts:116). Exige sesión; el controlador no declara roles. Delega en `SpaceChargesService.listTariffs`. Lee billing.service_catalog, billing.space_tariffs, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, practice.care_spaces, practice.clinical_units, practice.practices y 1 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:116` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:833` |
+| `billing.space_tariffs` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs | `src/modules/billing/services/space-charges.service.ts:154` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:828` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.assertPractice | `src/modules/billing/services/space-charges.service.ts:1020` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingSpaceChargesController.list → SpaceChargesService.listTariffs → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:816` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `practiceId` | query | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:215` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 50. POST /billing/space-tariffs
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una tarifa de espacio
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.create` — `src/modules/billing/controllers/billing-space-charges.controller.ts:126`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una tarifa de espacio. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/space-tariffs` la atiende `BillingSpaceChargesController.create` (src/modules/billing/controllers/billing-space-charges.controller.ts:126). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateSpaceTariffDto` (11 campos, 5 obligatorios). Delega en `SpaceChargesService.createTariff`. Crea filas en billing.space_tariffs, messaging.domain_events, messaging.outbox_messages. Lee billing.service_catalog, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, messaging.outbox_messages, practice.care_spaces, practice.clinical_units, practice.practice_sites y 2 más. Publica un evento calculado (eventType).
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:126` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:200` |
+| `billing.space_tariffs` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:237` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:213` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff | `src/modules/billing/services/space-charges.service.ts:213` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.assertPractice | `src/modules/billing/services/space-charges.service.ts:1020` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingSpaceChargesController.create → SpaceChargesService.createTariff → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:816` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `eventType` | `src/modules/billing/services/space-charges.service.ts:1098` |
+
+### Cuerpo — DTO `CreateSpaceTariffDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:43` |
+| `tariffKind` | `string` | Sí | valores: BED_DAY, OR_TIME | `@IsIn(['BED_DAY', 'OR_TIME'])` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:46` |
+| `bedCategoryCode` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | BED_CAT_* | `src/modules/billing/controllers/billing-space-charges.controller.ts:51` |
+| `careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:55` |
+| `serviceCatalogId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:56` |
+| `unitMinutes` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:57` |
+| `minimumUnits` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:58` |
+| `unitPrice` | `string` | Sí | longitud máxima 24 | `@IsNumberString()` `@MaxLength(24)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:62` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:66` |
+| `validFrom` | `string` | Sí | patrón runtime DATE | `@Matches(DATE)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:67` |
+| `validTo` | `string` | No | patrón runtime DATE | `@IsOptional()` `@Matches(DATE)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:71` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "tariffKind": "BED_DAY",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "unitPrice": "350.00",
+  "validFrom": "2026-11-01"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "tariffKind": "BED_DAY",
+  "bedCategoryCode": "CODIGO_EJEMPLO",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "unitMinutes": 1,
+  "minimumUnits": 1,
+  "unitPrice": "350.00",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "validFrom": "2026-11-01",
+  "validTo": "2027-01-01"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: Espacio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Vigencia inválida; PreconditionFailedException: La tarifa de quirófano necesita minutos por unidad; PreconditionFailedException: El servicio no es de la práctica; PreconditionFailedException: Categoría de cama desconocida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:89` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 51. POST /billing/space-tariffs/{id}/close
+
+- **Origen:** CONTRATO
+- **Nombre:** Cerrar la vigencia de una tarifa
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.close` — `src/modules/billing/controllers/billing-space-charges.controller.ts:141`
+
+### Qué es y para qué sirve (negocio)
+
+Cerrar la vigencia de una tarifa. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/space-tariffs/{id}/close` la atiende `BillingSpaceChargesController.close` (src/modules/billing/controllers/billing-space-charges.controller.ts:141). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CloseSpaceTariffDto` (1 campo, 1 obligatorio). Delega en `SpaceChargesService.closeTariff`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza billing.space_tariffs. Lee billing.service_catalog, billing.space_tariffs, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships, messaging.outbox_messages, practice.care_spaces, practice.clinical_units y 2 más. Publica un evento calculado (eventType).
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-space-charges.controller.ts:141` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-space-charges.controller.ts:141` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:833` |
+| `billing.space_tariffs` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingSpaceChargesController.close → SpaceChargesService.closeTariff | `src/modules/billing/services/space-charges.service.ts:315` |
+| `billing.space_tariffs` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff | `src/modules/billing/services/space-charges.service.ts:292` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:828` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `practice.practices` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.assertPractice | `src/modules/billing/services/space-charges.service.ts:1020` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingSpaceChargesController.close → SpaceChargesService.closeTariff → SpaceChargesService.tariffViews | `src/modules/billing/services/space-charges.service.ts:816` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `eventType` | `src/modules/billing/services/space-charges.service.ts:1098` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CloseSpaceTariffDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `validTo` | `string` | Sí | patrón runtime DATE | `@Matches(DATE)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:76` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "validTo": "2026-12-01"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "validTo": "2026-12-01"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tarifa no encontrada; ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El fin debe ser posterior al inicio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 52. POST /internal/billing/bed-day-charges/run
+
+- **Origen:** CONTRATO
+- **Nombre:** Devengar día-cama y quirófano (worker)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingSpaceChargesController.runInternal` — `src/modules/billing/controllers/billing-space-charges.controller.ts:211`
+
+### Qué es y para qué sirve (negocio)
+
+Devengar día-cama y quirófano (worker). Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /internal/billing/bed-day-charges/run` la atiende `BillingSpaceChargesController.runInternal` (src/modules/billing/controllers/billing-space-charges.controller.ts:211). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `RunBedDayDto` (1 campo, 0 obligatorios). Delega en `SpaceChargesService.runInternal`. Crea filas en billing.charge_captures, messaging.domain_events, messaging.outbox_messages. Lee accounting.cost_centers, billing.charge_captures, billing.space_tariffs, clinical.encounter_locations, clinical.encounters, delegated_access.organization_user_assignments, directory.branch_memberships, directory.tenant_memberships y 8 más. Publica un evento calculado (eventType).
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/billing/controllers/billing-space-charges.controller.ts:211` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `accounting.cost_centers` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture | `src/modules/billing/services/space-charges.service.ts:958` |
+| `billing.charge_captures` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture | `src/modules/billing/services/space-charges.service.ts:964` |
+| `billing.charge_captures` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:396` |
+| `billing.space_tariffs` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.tariffFor | `src/modules/billing/services/space-charges.service.ts:913` |
+| `clinical.encounter_locations` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal | `src/modules/billing/services/space-charges.service.ts:539` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.encounter | `src/modules/billing/services/space-charges.service.ts:883` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.capture → SpaceChargesService.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_space_category_periods` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays | `src/modules/billing/services/space-charges.service.ts:404` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runBedDays → SpaceChargesService.assertSites → InfrastructureAccessService.scopeFilter → CareSpaceOpsRepository.siteScopeIndex | `src/modules/practice/repositories/care-space-ops.repository.ts:473` |
+| `procedures_perioperative.operating_room_utilization_events` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runOrTime | `src/modules/billing/services/space-charges.service.ts:464` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | POR_SQL | BillingSpaceChargesController.runInternal → SpaceChargesService.runInternal → SpaceChargesService.runOrTime | `src/modules/billing/services/space-charges.service.ts:464` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `eventType` | `src/modules/billing/services/space-charges.service.ts:1098` |
+
+### Cuerpo — DTO `RunBedDayDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `date` | `string` | No | patrón runtime DATE | `@IsOptional()` `@Matches(DATE)` | — | `src/modules/billing/controllers/billing-space-charges.controller.ts:89` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "date": "2026-10-31"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingSpaceChargesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 53. GET /patient-spending/me
+
+- **Origen:** CONTRATO
+- **Nombre:** Mis gastos de salud
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientSpendingController.listMine` — `src/modules/billing/controllers/patient-spending.controller.ts:52`
+
+### Qué es y para qué sirve (negocio)
+
+Mis gastos de salud. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /patient-spending/me` la atiende `PatientSpendingController.listMine` (src/modules/billing/controllers/patient-spending.controller.ts:52). Exige sesión con alguno de los roles PATIENT. Delega en `PatientSpendingService.listMine`. Lee billing.invoice_lines, billing.invoices, diagnostic_units.diagnostic_study_offerings, directory.tenants, insurance.insurance_claim_lines, insurance.insurance_claims, practice.practice_sites, practice.practices y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/billing/controllers/patient-spending.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.invoice_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `billing.invoices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `insurance.insurance_claim_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `insurance.insurance_claims` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `practice.practices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `procedures_perioperative.procedure_charge_items` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `scheduling.appointment_payment_states` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | Sí | `string` | Desde (inclusive) |
+| `to` | query | Sí | `string` | Hasta (inclusive) |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientSpendingResponseDto>` · DTO `PatientSpendingResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `currency` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:111` |
+| `from` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:115` |
+| `to` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:118` |
+| `items` | `array<PatientSpendingMovementDto>` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:122` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/patient-spending.dto.ts:71` |
+| `items[].occurredAt` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:75` |
+| `items[].description` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:79` |
+| `items[].category` | `PatientSpendingConceptDto` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:83` |
+| `items[].category.code` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:54` |
+| `items[].category.display` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:58` |
+| `items[].providerName` | `string` | Sí | admite null | — | — | `src/modules/billing/dto/patient-spending.dto.ts:87` |
+| `items[].grossAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:91` |
+| `items[].coveredAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:95` |
+| `items[].discountAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:99` |
+| `items[].paidAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:103` |
+| `truncated` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:129` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:122` |
+| CONTROLADOR | `src/modules/billing/controllers/patient-spending.controller.spec.ts:30` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:PatientSpendingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

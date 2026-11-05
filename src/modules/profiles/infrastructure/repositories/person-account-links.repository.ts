@@ -104,6 +104,134 @@ export class PersonAccountLinksRepository {
     });
   }
 
+  /**
+   * Cuentas con vínculo ACTIVO a cualquiera de estas personas, en una lectura.
+   *
+   * Lo usa el filtro de la historia por especialidad para pasar de «perfil
+   * profesional» a las columnas `*_by_user_id` de los registros.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personIds - Personas (perfiles profesionales) a resolver.
+   * @returns Ids de cuenta, sin duplicados.
+   */
+  async findActiveUserIdsByPersons(
+    em: EntityManager,
+    personIds: readonly string[],
+  ): Promise<string[]> {
+    if (personIds.length === 0) return [];
+    const rows = await em.find(
+      PersonAccountLinks,
+      {
+        personId: { $in: [...personIds] },
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      },
+      { fields: ['userId'] },
+    );
+    return [...new Set(rows.map((row) => row.userId))];
+  }
+
+  /**
+   * ¿Esta cuenta tiene algún vínculo ACTIVO con esa persona?
+   *
+   * Es la pregunta exacta de «nadie toca su propia admisión», y por eso mira los
+   * dos lados a la vez en vez de traer «el» vínculo de uno: una persona puede
+   * tener varios vínculos activos (titular, delegado, familiar, segunda cuenta)
+   * y una cuenta puede tener vínculos con varias personas, porque el índice
+   * único `uq_person_account_links_active_user` que el modelo declara no está
+   * materializado en la base (su predicado usa una función sin definir). Con
+   * `findOne` el resultado dependía del orden de las filas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personId - Persona (el perfil profesional comparte su id).
+   * @param userId - Cuenta que consulta.
+   */
+  async hasActiveLink(
+    em: EntityManager,
+    personId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const count = await em.count(PersonAccountLinks, {
+      personId,
+      userId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    return count > 0;
+  }
+
+  /**
+   * Los vínculos ACTIVOS **propios** (`SELF`) de una cuenta, del más reciente al
+   * más antiguo.
+   *
+   * Es lo que «mi perfil» necesita y `findActiveByUser` no da: éste devuelve
+   * una fila arbitraria entre todos los vínculos activos (delegado, familiar,
+   * segunda cuenta…) porque el índice único `uq_person_account_links_active_user`
+   * no está materializado. Acá sólo entran los del tipo propio y el orden es
+   * total y estable: `valid_from` descendente, luego `created_at` y por último
+   * el id, de modo que dos vínculos iguales nunca se desempatan al azar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Cuenta autenticada.
+   */
+  findSelfActiveByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<PersonAccountLinks[]> {
+    return em.find(
+      PersonAccountLinks,
+      {
+        userId,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+      },
+      { orderBy: { validFrom: 'desc', createdAt: 'desc', id: 'desc' } },
+    );
+  }
+
+  /** Whether a person has an ACTIVE own (SELF) account link. */
+  async hasSelfActiveLink(
+    em: EntityManager,
+    personId: string,
+  ): Promise<boolean> {
+    const count = await em.count(PersonAccountLinks, {
+      personId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+    });
+    return count > 0;
+  }
+
+  /**
+   * The ACTIVE own (SELF) account link of a person, newest first, so a notice
+   * reaches the person's own account and never a delegate's or relative's.
+   */
+  findSelfActiveByPerson(
+    em: EntityManager,
+    personId: string,
+  ): Promise<PersonAccountLinks | null> {
+    return em.findOne(
+      PersonAccountLinks,
+      {
+        personId,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+      },
+      { orderBy: { validFrom: 'desc', createdAt: 'desc', id: 'desc' } },
+    );
+  }
+
+  /** Todas las personas con las que la cuenta tiene un vínculo ACTIVO (no sólo «la» primera). */
+  async findActivePersonIdsByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string[]> {
+    const links = await em.find(
+      PersonAccountLinks,
+      { userId, statusConceptId: PROF.ACCOUNT_LINK_ACTIVE },
+      { fields: ['personId'] },
+    );
+    return [...new Set(links.map((link) => link.personId))];
+  }
+
   /** Marca SUPERSEDED el vínculo activo previo del mismo usuario (uq active_user). */
   supersedeActiveForUser(
     em: EntityManager,

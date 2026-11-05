@@ -251,6 +251,7 @@ export class ConsentMeService {
       ? await em.findOne(Consents, { id: consentId, patientProfileId })
       : null;
     if (
+      !patientProfileId ||
       !consent ||
       consent.categoryConceptId === CONS.CATEGORY_PRACTITIONER_ACCESS
     ) {
@@ -264,7 +265,12 @@ export class ConsentMeService {
         consentId,
       });
     }
-    return this.consents.withdraw(consent.id, dto, actor);
+    return this.consents.withdrawAsOwner(
+      consent.id,
+      patientProfileId,
+      dto,
+      actor,
+    );
   }
 
   /**

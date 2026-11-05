@@ -19,14 +19,49 @@ export const CIMA_LICENSE =
 export const CIMA_IMAGE_LICENSE = 'AEMPS/CIMA — reproducción autorizada citando la fuente';
 export const CIMA_IMAGE_LICENSE_URL = 'https://www.aemps.gob.es/aviso-legal/';
 
-/** Secciones de la ficha técnica (tipo de documento 1) que se copian verbatim. */
-export const FICHA_SECTIONS = ['4.1', '4.2', '4.3', '4.4', '4.8', '5.1'];
+/**
+ * Secciones de la ficha técnica (tipo de documento 1) que se piden, leen y
+ * copian verbatim. Es una LISTA BLANCA comparada por igualdad exacta: la 4.2
+ * (posología) no está y no puede entrar (TAREA-41 F4.5, «Dosis: nunca»).
+ * 4.3, 4.5, 4.6 y 4.8 alimentan la seguridad del fármaco (F4.1/F4.2,
+ * `cima-safety.mjs`). El mismo conjunto figura en `sources.json`; un test
+ * exige que coincidan.
+ */
+export const FICHA_SECTIONS = Object.freeze(['4.1', '4.3', '4.4', '4.5', '4.6', '4.8', '5.1']);
+
+/** Secciones de seguridad que se extraen como relaciones o interacciones (F4.2). */
+export const SAFETY_SECTIONS = Object.freeze(['4.3', '4.5', '4.6', '4.8']);
+
+export class ForbiddenSectionError extends Error {
+  constructor(code) {
+    super(`Sección «${code}» fuera de la lista blanca de CIMA: la posología (4.2) y cualquier otra no autorizada nunca se piden ni se leen.`);
+    this.name = 'ForbiddenSectionError';
+  }
+}
+
+/** Lanza si la sección no está en la lista blanca. Único punto de paso para URLs y lectura. */
+export function assertAllowedSection(code) {
+  if (typeof code !== 'string' || !FICHA_SECTIONS.includes(code)) throw new ForbiddenSectionError(String(code));
+  return code;
+}
+
+/** Pedidos de ficha técnica de un producto: uno por sección de la lista blanca, nunca sin `seccion`. */
+export function sectionRequests(nregistro) {
+  return FICHA_SECTIONS.map((section) => ({ section, url: sectionUrl(nregistro, section) }));
+}
+
+/** Enlace público a una sección de la ficha (HTML), el que se cita al lector. */
+export function sectionPublicUrl(nregistro, section) {
+  assertAllowedSection(section);
+  return `https://cima.aemps.es/cima/dochtml/ft/${encodeURIComponent(nregistro)}/${encodeURIComponent(section)}/FichaTecnica.html`;
+}
 
 export function cimaDetailPageUrl(nregistro) {
   return `https://cima.aemps.es/cima/publico/detalle.html?nregistro=${encodeURIComponent(nregistro)}`;
 }
 
 export function sectionUrl(nregistro, section) {
+  assertAllowedSection(section);
   return `${CIMA_REST}/docSegmentado/contenido/1?nregistro=${encodeURIComponent(nregistro)}&seccion=${encodeURIComponent(section)}`;
 }
 
@@ -103,6 +138,7 @@ export function pickReferenceProduct(products) {
 
 /** Respuesta de `docSegmentado/contenido/1` → sección normalizada (o null si vino vacía). */
 export function toSection(sectionCode, response, ref, retrievedAt) {
+  assertAllowedSection(sectionCode);
   const item = Array.isArray(response) ? response.find((s) => s.seccion === sectionCode) ?? response[0] : null;
   if (!item || !item.contenido) return null;
   const text = htmlToText(item.contenido);

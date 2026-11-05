@@ -2,7 +2,7 @@
 
 # Catálogo del schema `authz`
 
-- **Tablas:** 15 · **Columnas:** 214 (57 con descripción: 26.6 %) · **Índices:** 90
+- **Tablas:** 15 · **Columnas:** 222 (58 con descripción: 26.1 %) · **Índices:** 95
 - **Dominio:** Identidad y Seguridad
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,21 +10,21 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [access_policies](#access_policies) | Define políticas de acceso que combinan identidad, recurso y contexto para autorizar operaciones. | 13 | 6 | 40 | COINCIDE |
+| [access_policies](#access_policies) | Define políticas de acceso que combinan identidad, recurso y contexto para autorizar operaciones. | 13 | 6 | 74 | COINCIDE |
 | [break_glass_sessions](#break_glass_sessions) | Documenta sesiones de acceso de emergencia que pueden superar restricciones ordinarias bajo controles reforzados. | 20 | 5 | 1 | COINCIDE |
-| [care_relationships](#care_relationships) | Vincula profesionales con pacientes bajo una relación de cuidado que sirve como contexto de autorización clínica. | 15 | 3 | 52 | COINCIDE |
-| [clinical_access_grants](#clinical_access_grants) | Registra concesiones de acceso clínico a pacientes o expedientes bajo un propósito y alcance determinados. | 17 | 13 | 52 | COINCIDE |
-| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 41 | COINCIDE |
+| [care_relationships](#care_relationships) | Vincula profesionales con pacientes bajo una relación de cuidado que sirve como contexto de autorización clínica. | 15 | 3 | 90 | COINCIDE |
+| [clinical_access_grants](#clinical_access_grants) | Registra concesiones de acceso clínico a pacientes o expedientes bajo un propósito y alcance determinados. | 17 | 13 | 86 | COINCIDE |
+| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 78 | COINCIDE |
 | [ip_access_rules](#ip_access_rules) | Aplica reglas de acceso por dirección de red para limitar orígenes de conexión permitidos. | 17 | 3 | 0 | COINCIDE |
-| [patient_legal_representations](#patient_legal_representations) | Registra representación legal de pacientes para determinar quién puede actuar en su nombre dentro de ámbitos permitidos. | 14 | 2 | 43 | COINCIDE |
+| [patient_legal_representations](#patient_legal_representations) | Registra representación legal de pacientes para determinar quién puede actuar en su nombre dentro de ámbitos permitidos. | 14 | 2 | 76 | COINCIDE |
 | [permission_categories](#permission_categories) | Agrupa permisos por área funcional para organizar la autorización en módulos del sistema médico. | 10 | 3 | 3 | COINCIDE |
-| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 18 | 7 | 43 | COINCIDE |
-| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 46 | DIVERGE |
-| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 40 | COINCIDE |
-| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 53 | COINCIDE |
+| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 26 | 12 | 83 | COINCIDE |
+| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 86 | COINCIDE |
+| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 77 | COINCIDE |
+| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 102 | COINCIDE |
 | [service_principals](#service_principals) | Representa identidades no humanas que ejecutan integraciones y procesos autorizados. | 1 | 0 | 0 | COINCIDE |
-| [user_permission_grants](#user_permission_grants) | Registra permisos otorgados directamente a usuarios cuando una asignación por rol no expresa el acceso requerido. | 16 | 9 | 40 | COINCIDE |
-| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 56 | COINCIDE |
+| [user_permission_grants](#user_permission_grants) | Registra permisos otorgados directamente a usuarios cuando una asignación por rol no expresa el acceso requerido. | 16 | 9 | 77 | COINCIDE |
+| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 104 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -79,6 +79,7 @@ erDiagram
     uuid state_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+    uuid sensitivity_concept_id FK
   }
   authz_permission_categories["authz.permission_categories"] {
     uuid id PK
@@ -154,7 +155,7 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: access_policies`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `AccessPolicies` — `src/modules/authz/entities/access_policies.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 1 entrantes · 40 operaciones
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 1 entrantes · 74 operaciones
 
 #### Columnas
 
@@ -201,8 +202,14 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
 | POST /authz/tenants/{tenantId}/access-policies | CREA | DIRECTA |
 | POST /authz/tenants/{tenantId}/access-policies | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -222,6 +229,7 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -231,15 +239,42 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -345,7 +380,7 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: care_relationships`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `CareRelationships` — `src/modules/authz/entities/care_relationships.entity.ts`
-- **Resumen:** 15 columnas · 3 índices · 9 FK salientes · 0 entrantes · 52 operaciones
+- **Resumen:** 15 columnas · 3 índices · 9 FK salientes · 0 entrantes · 90 operaciones
 
 #### Columnas
 
@@ -385,9 +420,9 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_care_relationships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_relationships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_care_relationships_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_care_relationships_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_care_relationships_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_care_relationships_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_care_relationships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_relationships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_care_relationships_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_care_relationships_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_care_relationships_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_care_relationships_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
@@ -398,15 +433,19 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 | POST /authz/care-relationships | LEE | DIRECTA |
 | POST /authz/care-relationships/{id}/respond | ACTUALIZA | POR_TIPO |
 | POST /authz/care-relationships/{id}/respond | LEE | DIRECTA |
-| POST /authz/care-relationships/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /authz/care-relationships/{id}/revoke | LEE | DIRECTA |
 | POST /authz/care-relationships/request | CREA | DIRECTA |
 | POST /authz/care-relationships/request | LEE | DIRECTA |
 | GET /authz/care-relationships/requests/mine | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/me/access | LEE | DIRECTA |
-| POST /authz/me/care-relationships/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /authz/me/care-relationships/{id}/revoke | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -426,6 +465,9 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
+| POST /clinical/encounters/check-in | CREA | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -435,16 +477,47 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/imaging-studies | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
+| POST /insurance-claims | LEE | DIRECTA |
+| POST /insurance-claims/quote | LEE | DIRECTA |
+| GET /patient-coverages/by-patient/{patientProfileId} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -469,7 +542,7 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: clinical_access_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `ClinicalAccessGrants` — `src/modules/authz/entities/clinical_access_grants.entity.ts`
-- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 0 entrantes · 52 operaciones
+- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 0 entrantes · 86 operaciones
 
 #### Columnas
 
@@ -513,15 +586,15 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_clinical_access_grants_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_access_grants_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_clinical_access_grants_granted_user_id` | no | granted_user_id | Soporta la clave foránea fk_clinical_access_grants_granted_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «granted_user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_clinical_access_grants_tenant_id` | no | tenant_id | Soporta la clave foránea fk_clinical_access_grants_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_clinical_access_grants_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_access_grants_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_clinical_access_grants_granted_user_id` | no | granted_user_id | Soporta la clave foránea fk_clinical_access_grants_granted_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «granted_user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_clinical_access_grants_tenant_id` | no | tenant_id | Soporta la clave foránea fk_clinical_access_grants_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_access_grants_branch_id` | no | branch_id | Soporta la clave foránea fk_clinical_access_grants_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_access_grants_encounter_id` | no | encounter_id | Soporta la clave foránea fk_clinical_access_grants_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_access_grants_consent_id` | no | consent_id | Soporta la clave foránea fk_clinical_access_grants_consent_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «consent_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_access_grants_reason_concept_id` | no | reason_concept_id | Soporta la clave foránea fk_clinical_access_grants_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_access_grants_access_level_concept_id` | no | access_level_concept_id | Soporta la clave foránea fk_clinical_access_grants_access_level_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_clinical_access_grants_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_clinical_access_grants_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_clinical_access_grants_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_clinical_access_grants_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_access_grants_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_clinical_access_grants_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_access_grants_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_clinical_access_grants_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_access_grants_tenant_id_state_concept_id` | no | tenant_id, state_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -531,15 +604,19 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| DELETE /authz/clinical-access-grants/{grantId} | ACTUALIZA | POR_TIPO |
 | DELETE /authz/clinical-access-grants/{grantId} | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/me/access | LEE | DIRECTA |
-| POST /authz/me/clinical-access-grants/{grantId}/revoke | ACTUALIZA | POR_TIPO |
 | POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -559,6 +636,7 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -568,9 +646,23 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | POST /consent/consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
 | POST /consent/consents/{id}/withdraw | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
@@ -579,10 +671,25 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 | POST /consent/me/consents/{id}/withdraw | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
+| POST /fhir/r5/$export | LEE | DIRECTA |
+| GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -607,7 +714,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: field_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `FieldPermissions` — `src/modules/authz/entities/field_permissions.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 41 operaciones
+- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 78 operaciones
 
 #### Columnas
 
@@ -640,7 +747,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_field_permissions_role_id` | no | role_id | Soporta la clave foránea fk_field_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_permissions_role_id` | no | role_id | Soporta la clave foránea fk_field_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_permissions_mask_strategy_concept_id` | no | mask_strategy_concept_id | Soporta la clave foránea fk_field_permissions_mask_strategy_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_field_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_field_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -650,9 +757,18 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | ACTUALIZA | POR_TIPO |
 | PUT /authz/roles/{roleId}/field-permissions | CREA | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /authz/users/{userId}/restricted-fields | LEE | POR_SQL |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -672,6 +788,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -681,15 +798,42 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -786,7 +930,7 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: patient_legal_representations`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `PatientLegalRepresentations` — `src/modules/authz/entities/patient_legal_representations.entity.ts`
-- **Resumen:** 14 columnas · 2 índices · 7 FK salientes · 1 entrantes · 43 operaciones
+- **Resumen:** 14 columnas · 2 índices · 7 FK salientes · 1 entrantes · 76 operaciones
 
 #### Columnas
 
@@ -824,8 +968,8 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_patient_legal_representations_tenant_id` | no | tenant_id | Soporta la clave foránea fk_patient_legal_representations_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_patient_legal_representations_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_patient_legal_representations_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_patient_legal_representations_tenant_id` | no | tenant_id | Soporta la clave foránea fk_patient_legal_representations_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_patient_legal_representations_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_patient_legal_representations_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
@@ -835,8 +979,13 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 | GET /authz/legal-representations | LEE | DIRECTA |
 | POST /authz/legal-representations | CREA | DIRECTA |
 | POST /authz/legal-representations | LEE | DIRECTA |
-| POST /authz/legal-representations/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /authz/legal-representations/{id}/revoke | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -856,6 +1005,7 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -865,15 +1015,42 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -968,7 +1145,7 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Permissions` — `src/modules/authz/entities/permissions.entity.ts`
-- **Resumen:** 18 columnas · 7 índices · 6 FK salientes · 12 entrantes · 43 operaciones
+- **Resumen:** 26 columnas · 12 índices · 10 FK salientes · 13 entrantes · 83 operaciones
 
 #### Columnas
 
@@ -992,6 +1169,14 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | 16 | `is_role_restricted` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 17 | `required_role_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 18 | `allow_direct_user_grant` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 19 | `sensitivity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.78 (gobierno de accesos): metadatos de cada permiso. Un permiso es un ATOMO `modulo.recurso.accion[.campo]`. sensibilidad: authz:SENSITIVITY_LOW¦MEDIUM¦HIGH¦CRITICAL. requires_reason / requires_step_up / approval_mode son las OBLIGACIONES que el motor exige al ejercerlo (motivo, MFA fresco, cuatro ojos). Los 15 codigos antiguos quedan como alias. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_06_authz.puml:53`)_ | coincide |
+| 20 | `requires_reason` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 21 | `requires_step_up` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 22 | `approval_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 23 | `purpose_of_use_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 24 | `legal_basis_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 25 | `touches_clinical_data` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 26 | `support_assignable` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1003,11 +1188,16 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | hacia | state_concept_id | terminology.catalog_concepts (id) | fk_permissions_state_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_permissions_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_permissions_updated_by_user_id |
+| hacia | sensitivity_concept_id | terminology.catalog_concepts (id) | fk_permissions_sensitivity_concept_id |
+| hacia | approval_mode_concept_id | terminology.catalog_concepts (id) | fk_permissions_approval_mode_concept_id |
+| hacia | purpose_of_use_concept_id | terminology.catalog_concepts (id) | fk_permissions_purpose_of_use_concept_id |
+| hacia | legal_basis_concept_id | terminology.catalog_concepts (id) | fk_permissions_legal_basis_concept_id |
 | desde | id | authz.role_permissions (permission_id) | fk_role_permissions_permission_id |
 | desde | id | authz.user_permission_grants (permission_id) | fk_user_permission_grants_permission_id |
 | desde | id | authz.resource_scope_grants (permission_id) | fk_resource_scope_grants_permission_id |
 | desde | id | delegated_access.delegated_permission_set_items (permission_id) | fk_delegated_permission_set_items_permission_id |
 | desde | id | delegated_access.delegated_access_approval_requests (requested_permission_id) | fk_delegated_access_approval_requests_requested_permission_id |
+| desde | id | delegated_access.support_grant_actions (permission_id) | fk_support_grant_actions_permission_id |
 | desde | id | read_models.frontend_routes (required_permission_id) | fk_frontend_routes_required_permission_id |
 | desde | id | read_models.frontend_view_fields (permission_id) | fk_frontend_view_fields_permission_id |
 | desde | id | read_models.frontend_view_actions (required_permission_id) | fk_frontend_view_actions_required_permission_id |
@@ -1020,30 +1210,48 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_permissions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_permissions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_permissions_category_id` | no | category_id | Soporta la clave foránea fk_permissions_category_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_action_concept_id` | no | action_concept_id | Soporta la clave foránea fk_permissions_action_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «action_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_permissions_default_scope_concept_id` | no | default_scope_concept_id | Soporta la clave foránea fk_permissions_default_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_sensitivity_concept_id` | no | sensitivity_concept_id | Soporta la clave foránea fk_permissions_sensitivity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_approval_mode_concept_id` | no | approval_mode_concept_id | Soporta la clave foránea fk_permissions_approval_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_purpose_of_use_concept_id` | no | purpose_of_use_concept_id | Soporta la clave foránea fk_permissions_purpose_of_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_legal_basis_concept_id` | no | legal_basis_concept_id | Soporta la clave foránea fk_permissions_legal_basis_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_support_assignable` | no | support_assignable donde WHERE support_assignable | Índice parcial: sólo indexa las filas donde WHERE support_assignable _(ESTRUCTURAL)_ |
 
 #### Restricciones
 
 | Restricción | Tipo | Definición |
 |---|---|---|
 | `uq_permissions_code` | UNIQUE INDEX | UNIQUE INDEX ("code") |
+| `ck_permissions_approval_needs_sensitivity` | CHECK | CHECK (("approval_mode_concept_id" IS NULL OR "sensitivity_concept_id" IS NOT NULL)) |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/permissions | LEE | POR_SQL |
 | POST /authz/permissions | CREA | DIRECTA |
 | POST /authz/permissions | LEE | DIRECTA |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
 | POST /authz/resource-scope-grants | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/permissions | LEE | POR_SQL |
 | PUT /authz/roles/{roleId}/permissions | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/permission-grants | LEE | POR_SQL |
 | POST /authz/users/{userId}/permission-grants | LEE | DIRECTA |
+| GET /authz/users/{userId}/resource-scope-grants | LEE | POR_SQL |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1063,6 +1271,7 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1072,15 +1281,42 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1105,7 +1341,7 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: resource_scope_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `ResourceScopeGrants` — `src/modules/authz/entities/resource_scope_grants.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 46 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 86 operaciones
 
 #### Columnas
 
@@ -1121,12 +1357,12 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | 8 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
 | 9 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 10 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 11 | `reason_text` | `text` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/authz/entities/resource_scope_grants.entity.ts:80`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/authz/entities/resource_scope_grants.entity.ts:86`)_ | coincide |
+| 11 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/authz/entities/resource_scope_grants.entity.ts:86`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/authz/entities/resource_scope_grants.entity.ts:92`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/authz/entities/resource_scope_grants.entity.ts:104`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/authz/entities/resource_scope_grants.entity.ts:110`)_ | coincide |
 
 #### Relaciones
 
@@ -1158,8 +1394,20 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
+| GET /authz/resource-scope-grants | LEE | DIRECTA |
 | POST /authz/resource-scope-grants | CREA | DIRECTA |
 | POST /authz/resource-scope-grants | LEE | DIRECTA |
+| DELETE /authz/resource-scope-grants/{grantId} | ACTUALIZA | DIRECTA |
+| DELETE /authz/resource-scope-grants/{grantId} | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /authz/users/{userId}/resource-scope-grants | LEE | POR_SQL |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1179,6 +1427,7 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1188,21 +1437,48 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-results/me/{reportId}/shares | CREA | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1227,7 +1503,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: role_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `RolePermissions` — `src/modules/authz/entities/role_permissions.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 40 operaciones
+- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 77 operaciones
 
 #### Columnas
 
@@ -1264,12 +1540,12 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_role_permissions_role_id` | no | role_id | Soporta la clave foránea fk_role_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_role_permissions_permission_id` | no | permission_id | Soporta la clave foránea fk_role_permissions_permission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «permission_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_role_permissions_role_id` | no | role_id | Soporta la clave foránea fk_role_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_role_permissions_permission_id` | no | permission_id | Soporta la clave foránea fk_role_permissions_permission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «permission_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_role_permissions_effect_concept_id` | no | effect_concept_id | Soporta la clave foránea fk_role_permissions_effect_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_role_permissions_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_field_value_set_id` | no | field_value_set_id | Soporta la clave foránea fk_role_permissions_field_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_role_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_role_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_role_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_role_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_role_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_role_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_role_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1277,9 +1553,18 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
+| GET /authz/roles/{roleId}/permissions | LEE | POR_SQL |
 | PUT /authz/roles/{roleId}/permissions | ACTUALIZA | DIRECTA |
 | PUT /authz/roles/{roleId}/permissions | CREA | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1299,6 +1584,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1308,15 +1594,42 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1341,7 +1654,7 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: roles`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Roles` — `src/modules/authz/entities/roles.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 53 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 102 operaciones
 
 #### Columnas
 
@@ -1384,11 +1697,11 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_roles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_roles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_roles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_roles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_roles_parent_role_id` | no | parent_role_id | Soporta la clave foránea fk_roles_parent_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_base_role_concept_id` | no | base_role_concept_id | Soporta la clave foránea fk_roles_base_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_roles_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_roles_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_roles_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_roles_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_tenant_id_state_concept_id` | no | tenant_id, state_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1397,13 +1710,27 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/internal-users | LEE | POR_SQL |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
 | GET /authz/roles | LEE | DIRECTA |
 | POST /authz/roles | CREA | DIRECTA |
 | POST /authz/roles | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/permissions | LEE | POR_SQL |
 | PUT /authz/roles/{roleId}/permissions | LEE | DIRECTA |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /authz/users/{userId}/restricted-fields | LEE | POR_SQL |
+| GET /authz/users/{userId}/role-assignments | LEE | POR_SQL |
 | POST /authz/users/{userId}/role-assignments | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1423,6 +1750,7 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1432,24 +1760,58 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /admin/catalog/permission-drift | LEE | POR_SQL |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/ui-visibility/preview | LEE | DIRECTA |
+| GET /admin/ui-visibility/rules | LEE | DIRECTA |
+| POST /admin/ui-visibility/rules | LEE | DIRECTA |
+| PATCH /admin/ui-visibility/rules/{id} | LEE | DIRECTA |
+| POST /admin/ui-visibility/rules/{id}/end | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1515,7 +1877,7 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: user_permission_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `UserPermissionGrants` — `src/modules/authz/entities/user_permission_grants.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 0 entrantes · 40 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 0 entrantes · 77 operaciones
 
 #### Columnas
 
@@ -1555,12 +1917,12 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_user_permission_grants_user_id` | no | user_id | Soporta la clave foránea fk_user_permission_grants_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_user_permission_grants_permission_id` | no | permission_id | Soporta la clave foránea fk_user_permission_grants_permission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «permission_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_permission_grants_user_id` | no | user_id | Soporta la clave foránea fk_user_permission_grants_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_permission_grants_permission_id` | no | permission_id | Soporta la clave foránea fk_user_permission_grants_permission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «permission_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_permission_grants_effect_concept_id` | no | effect_concept_id | Soporta la clave foránea fk_user_permission_grants_effect_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_permission_grants_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_user_permission_grants_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_permission_grants_tenant_id` | no | tenant_id | Soporta la clave foránea fk_user_permission_grants_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_user_permission_grants_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_user_permission_grants_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_permission_grants_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_user_permission_grants_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_permission_grants_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_user_permission_grants_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_permission_grants_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_user_permission_grants_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_permission_grants_tenant_id_state_concept_id` | no | tenant_id, state_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1570,8 +1932,17 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /authz/users/{userId}/permission-grants | LEE | POR_SQL |
 | POST /authz/users/{userId}/permission-grants | CREA | DIRECTA |
 | POST /authz/users/{userId}/permission-grants | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1591,6 +1962,7 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1600,15 +1972,42 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1633,7 +2032,7 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: user_role_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `UserRoleAssignments` — `src/modules/authz/entities/user_role_assignments.entity.ts`
-- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 56 operaciones
+- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 104 operaciones
 
 #### Columnas
 
@@ -1673,13 +2072,13 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_user_role_assignments_user_id` | no | user_id | Soporta la clave foránea fk_user_role_assignments_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_role_assignments_user_id` | no | user_id | Soporta la clave foránea fk_user_role_assignments_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_role_id` | no | role_id | Soporta la clave foránea fk_user_role_assignments_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_user_role_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_branch_id` | no | branch_id | Soporta la clave foránea fk_user_role_assignments_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «branch_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_practice_id` | no | practice_id | Soporta la clave foránea fk_user_role_assignments_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_assigned_by_user_id` | no | assigned_by_user_id | Soporta la clave foránea fk_user_role_assignments_assigned_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_user_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_user_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_user_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_user_role_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_role_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_user_role_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_role_assignments_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1689,9 +2088,23 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/access-reviews/due | LEE | POR_SQL |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/internal-users | LEE | POR_SQL |
+| GET /authz/permissions/{permissionId}/holders | LEE | POR_SQL |
+| POST /authz/simulations | LEE | DIRECTA |
+| GET /authz/users/{userId}/access-map | LEE | POR_SQL |
+| GET /authz/users/{userId}/restricted-fields | LEE | POR_SQL |
+| GET /authz/users/{userId}/role-assignments | LEE | POR_SQL |
 | POST /authz/users/{userId}/role-assignments | CREA | DIRECTA |
 | POST /authz/users/{userId}/role-assignments | LEE | DIRECTA |
+| DELETE /authz/users/{userId}/role-assignments/{assignmentId} | ACTUALIZA | POR_TIPO |
+| DELETE /authz/users/{userId}/role-assignments/{assignmentId} | LEE | DIRECTA |
+| GET /admin/bulk-imports | LEE | DIRECTA |
+| POST /admin/bulk-imports | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id} | LEE | DIRECTA |
+| POST /admin/bulk-imports/{id}/confirm | LEE | DIRECTA |
+| GET /admin/bulk-imports/{id}/report | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1711,6 +2124,7 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 | GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
@@ -1720,31 +2134,64 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /care-gaps/recompute | LEE | DIRECTA |
+| GET /care-teams | LEE | DIRECTA |
+| POST /care-teams | LEE | DIRECTA |
+| POST /order-sets/{id}/apply | LEE | DIRECTA |
+| POST /patients/{id}/immunization-plan/project | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /forms/instances | LEE | DIRECTA |
+| GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
+| POST /iam/users/{id}/deactivate | ACTUALIZA | DIRECTA |
+| POST /iam/users/{id}/reactivate | ACTUALIZA | DIRECTA |
+| POST /iam/users/{id}/suspend | ACTUALIZA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | CREA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | CREA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| GET /dental-procedures | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| GET /quotations | LEE | DIRECTA |
+| POST /quotations | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/ui-visibility/preview | LEE | DIRECTA |
 
 #### Gobierno
 

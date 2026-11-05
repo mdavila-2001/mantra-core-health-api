@@ -12,13 +12,13 @@ Un único controlador (`ReportingController`, prefijo `reporting`) con 12 endpoi
 
 `JwtAuthGuard` global + `@Roles(...)`:
 
-| Rol | Alcance |
-| --- | --- |
-| `REPORTING_ADMIN` | Todo el módulo |
-| `DATA_STEWARD` | Registrar fuentes de datos |
-| `REPORT_AUTHOR` | Definiciones, versiones, programaciones y tableros |
-| `REPORT_VIEWER` | Ejecutar bajo demanda y suscribirse |
-| `SYSTEM` | Snapshot, tick del planificador, distribuciones y reintentos |
+| Rol               | Alcance                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| `REPORTING_ADMIN` | Todo el módulo                                               |
+| `DATA_STEWARD`    | Registrar fuentes de datos                                   |
+| `REPORT_AUTHOR`   | Definiciones, versiones, programaciones y tableros           |
+| `REPORT_VIEWER`   | Ejecutar bajo demanda y suscribirse                          |
+| `SYSTEM`          | Snapshot, tick del planificador, distribuciones y reintentos |
 
 Es deliberado que `REPORT_AUTHOR` no pueda registrar fuentes: quien diseña reportes no debería poder
 ampliar de dónde se leen los datos. Y que sólo `REPORTING_ADMIN` deprece, porque arrastra la
@@ -49,7 +49,7 @@ Los casos de uso escriben tres rutas con dos puntos (`/versions:publish`, `/exec
 del proyecto: el enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posición
 del segmento.
 
-## Pruebas
+## Tests
 
 `reporting.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta) y propagación de errores.

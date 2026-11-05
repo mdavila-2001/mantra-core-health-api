@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,6 +14,7 @@ import {
   OpsPracticesRepository,
 } from '../repositories';
 import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import {
   CreateChangeRequestDto,
   ChangeRequestResponseDto,
@@ -87,6 +87,7 @@ export class OpsReleasesService {
    * @param releasesRepo - Valor de releases repo requerido por la operación.
    * @param reliabilityRepo - Valor de reliability repo requerido por la operación.
    * @param practicesRepo - Valor de practices repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -94,6 +95,7 @@ export class OpsReleasesService {
     private readonly releasesRepo: OpsReleasesRepository,
     private readonly reliabilityRepo: OpsReliabilityRepository,
     private readonly practicesRepo: OpsPracticesRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsReleasesService.name);
@@ -104,6 +106,8 @@ export class OpsReleasesService {
     dto: CreateChangeRequestDto,
     actor: AuthenticatedUser,
   ): Promise<ChangeRequestResponseDto> {
+    // El tenant sale del contexto; el del cuerpo sólo se admite si lo confirma.
+    const tenantId = this.scope.ownerTenantId(dto.tenantId);
     this.logger.info(
       {
         operation: 'ops.change.create',
@@ -130,19 +134,15 @@ export class OpsReleasesService {
     }
 
     return this.em.transactional(async (tx) => {
-      const component = await this.releasesRepo.findComponentById(
+      const foundComponent = await this.releasesRepo.findComponentById(
         tx,
         dto.serviceComponentId,
+        tenantId,
       );
-      if (!component) {
-        throw new ResourceNotFoundException(
-          'Componente no encontrado',
-          {
-            serviceComponentId: dto.serviceComponentId,
-          },
-          PlatformOpsErrorReason.SERVICE_COMPONENT_NOT_FOUND,
-        );
-      }
+      const component = this.scope.require(
+        foundComponent,
+        foundComponent?.tenantId,
+      );
       if (component.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El componente no está activo',
@@ -154,19 +154,12 @@ export class OpsReleasesService {
       }
 
       if (dto.maintenanceWindowId) {
-        const window = await this.releasesRepo.findWindowForUpdate(
+        const foundWindow = await this.releasesRepo.findWindowForUpdate(
           tx,
           dto.maintenanceWindowId,
+          tenantId,
         );
-        if (!window) {
-          throw new ResourceNotFoundException(
-            'Ventana de mantenimiento no encontrada',
-            {
-              maintenanceWindowId: dto.maintenanceWindowId,
-            },
-            PlatformOpsErrorReason.MAINTENANCE_WINDOW_NOT_FOUND,
-          );
-        }
+        const window = this.scope.require(foundWindow, foundWindow?.tenantId);
         if (window.statusConceptId === CONCEPTS.MAINTENANCE_WINDOW_CLOSED) {
           throw new PreconditionFailedException(
             'La ventana de mantenimiento está cerrada',
@@ -198,9 +191,9 @@ export class OpsReleasesService {
         }
       }
 
-      const changeNumber = await this.nextChangeNumber(tx, dto.tenantId);
+      const changeNumber = await this.nextChangeNumber(tx, tenantId);
       const change = this.releasesRepo.createChangeRequest(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         serviceComponentId: dto.serviceComponentId,
         changeNumber,
         title: dto.title,
@@ -243,20 +236,14 @@ export class OpsReleasesService {
       'Recording change approval',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const change = await this.releasesRepo.findChangeRequestForUpdate(
+      const foundChange = await this.releasesRepo.findChangeRequestForUpdate(
         tx,
         changeRequestId,
+        tenantId,
       );
-      if (!change) {
-        throw new ResourceNotFoundException(
-          'Solicitud de cambio no encontrada',
-          {
-            changeRequestId,
-          },
-          PlatformOpsErrorReason.CHANGE_REQUEST_NOT_FOUND,
-        );
-      }
+      const change = this.scope.require(foundChange, foundChange?.tenantId);
       if (!DECIDABLE_CHANGE_STATES.includes(change.statusConceptId)) {
         throw new PreconditionFailedException(
           'La solicitud ya no admite decisiones',
@@ -372,39 +359,30 @@ export class OpsReleasesService {
     dto: PublishArtifactDto,
     actor: AuthenticatedUser,
   ): Promise<ArtifactResponseDto> {
+    const tenantId = this.scope.ownerTenantId(dto.tenantId);
     this.logger.info(
       { operation: 'ops.artifact.publish', artifactRef: dto.artifactRef },
       'Publishing artifact',
     );
 
     return this.em.transactional(async (tx) => {
-      const component = await this.releasesRepo.findComponentById(
+      const foundComponent = await this.releasesRepo.findComponentById(
         tx,
         dto.serviceComponentId,
+        tenantId,
       );
-      if (!component) {
-        throw new ResourceNotFoundException(
-          'Componente no encontrado',
-          {
-            serviceComponentId: dto.serviceComponentId,
-          },
-          PlatformOpsErrorReason.SERVICE_COMPONENT_NOT_FOUND,
-        );
-      }
+      this.scope.require(foundComponent, foundComponent?.tenantId);
 
       if (dto.producedByToolId) {
+        // El registro de herramientas es un catálogo compartido: una herramienta
+        // sin tenant se admite, la de otro tenant se trata como inexistente.
         const tool = await this.releasesRepo.findToolById(
           tx,
           dto.producedByToolId,
+          tenantId,
         );
-        if (!tool) {
-          throw new ResourceNotFoundException(
-            'Herramienta no encontrada',
-            {
-              producedByToolId: dto.producedByToolId,
-            },
-            PlatformOpsErrorReason.BUILD_TOOL_NOT_FOUND,
-          );
+        if (!tool || (tool.tenantId && tool.tenantId !== tenantId)) {
+          throw this.scope.outOfScope();
         }
         // Un artefacto construido con una herramienta no homologada no puede ir
         // a producción, y no marcarlo aquí lo dejaría pasar sin que nadie lo vea.
@@ -449,7 +427,7 @@ export class OpsReleasesService {
       }
 
       const artifact = this.releasesRepo.createArtifact(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         serviceComponentId: dto.serviceComponentId,
         producedByToolId: dto.producedByToolId,
         artifactRef: dto.artifactRef,
@@ -495,20 +473,14 @@ export class OpsReleasesService {
       'Starting deployment',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const change = await this.releasesRepo.findChangeRequestForUpdate(
+      const foundChange = await this.releasesRepo.findChangeRequestForUpdate(
         tx,
         dto.changeRequestId,
+        tenantId,
       );
-      if (!change) {
-        throw new ResourceNotFoundException(
-          'Solicitud de cambio no encontrada',
-          {
-            changeRequestId: dto.changeRequestId,
-          },
-          PlatformOpsErrorReason.CHANGE_REQUEST_NOT_FOUND,
-        );
-      }
+      const change = this.scope.require(foundChange, foundChange?.tenantId);
       if (change.statusConceptId !== CONCEPTS.CHANGE_APPROVED) {
         throw new PreconditionFailedException(
           'El cambio no está aprobado',
@@ -519,19 +491,15 @@ export class OpsReleasesService {
         );
       }
 
-      const artifact = await this.releasesRepo.findArtifactById(
+      const foundArtifact = await this.releasesRepo.findArtifactById(
         tx,
         dto.artifactId,
+        tenantId,
       );
-      if (!artifact) {
-        throw new ResourceNotFoundException(
-          'Artefacto no encontrado',
-          {
-            artifactId: dto.artifactId,
-          },
-          PlatformOpsErrorReason.ARTIFACT_NOT_FOUND,
-        );
-      }
+      const artifact = this.scope.require(
+        foundArtifact,
+        foundArtifact?.tenantId,
+      );
       if (artifact.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El artefacto no está activo',
@@ -661,20 +629,14 @@ export class OpsReleasesService {
       'Rolling back deployment',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const source = await this.releasesRepo.findDeploymentForUpdate(
+      const foundSource = await this.releasesRepo.findDeploymentForUpdate(
         tx,
         deploymentId,
+        tenantId,
       );
-      if (!source) {
-        throw new ResourceNotFoundException(
-          'Despliegue no encontrado',
-          {
-            deploymentId,
-          },
-          PlatformOpsErrorReason.DEPLOYMENT_NOT_FOUND,
-        );
-      }
+      const source = this.scope.require(foundSource, foundSource?.tenantId);
       if (
         source.statusConceptId !== CONCEPTS.DEPLOY_SUCCEEDED &&
         source.statusConceptId !== CONCEPTS.DEPLOY_FAILED
@@ -697,8 +659,14 @@ export class OpsReleasesService {
         );
       }
 
-      const target = dto.targetDeploymentId
-        ? await this.releasesRepo.findDeploymentById(tx, dto.targetDeploymentId)
+      // El destino explícito se resuelve dentro del tenant: uno de otro tenant
+      // se trata como inexistente, no como «destino de otro componente».
+      const foundTarget = dto.targetDeploymentId
+        ? await this.releasesRepo.findDeploymentById(
+            tx,
+            dto.targetDeploymentId,
+            tenantId,
+          )
         : await this.releasesRepo.findPreviousSucceededDeployment(
             tx,
             source.serviceComponentId,
@@ -706,6 +674,8 @@ export class OpsReleasesService {
             CONCEPTS.DEPLOY_SUCCEEDED,
             source.id,
           );
+      const target =
+        foundTarget && foundTarget.tenantId === tenantId ? foundTarget : null;
       if (!target) {
         throw new PreconditionFailedException(
           'No hay un despliegue estable anterior al que volver',

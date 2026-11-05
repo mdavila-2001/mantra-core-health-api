@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { BackupService } from '../services';
 import { CreateRestoreTestRunDto, RestoreTestRunResponseDto } from '../dto';
 
@@ -20,6 +25,11 @@ export class RestoreTestController {
   constructor(private readonly service: BackupService) {}
 
   /** UC-11-10. */
+  @Audited({
+    action: 'RESTORE_TEST_RECORDED',
+    entity: 'restore_test_run',
+    entityId: 'result.id',
+  })
   @Post('restore-test-runs')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

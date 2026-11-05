@@ -1,6 +1,6 @@
 import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Audited, Roles } from '../../../common';
 import { StorageWorkerPublicationService } from '../../../common/storage/storage-worker-publication.service';
 import { StorageLifecycleCoordinator } from '../../../common/storage/storage-lifecycle-coordinator.service';
 import {
@@ -18,6 +18,11 @@ export class InternalStorageLifecycleController {
     private readonly publication: StorageWorkerPublicationService,
     private readonly coordinator: StorageLifecycleCoordinator,
   ) {}
+  @Audited({
+    action: 'AUDIO_PUBLICATION_BEGUN',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post('audio/:assetId/begin')
   @ApiOperation({
     summary: 'Reservar la publicación de un audio en almacenamiento',
@@ -28,6 +33,11 @@ export class InternalStorageLifecycleController {
   ) {
     return this.publication.beginAudio(assetId, dto);
   }
+  @Audited({
+    action: 'AUDIO_PUBLICATION_DISPATCHED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post('audio/:assetId/dispatch')
   @ApiOperation({ summary: 'Despachar la subida reservada de un audio' })
   dispatch(
@@ -36,6 +46,11 @@ export class InternalStorageLifecycleController {
   ) {
     return this.publication.dispatchAudio(assetId, dto.reservation);
   }
+  @Audited({
+    action: 'AUDIO_PUBLICATION_ABORTED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post('audio/:assetId/abort')
   @ApiOperation({ summary: 'Abortar la publicación reservada de un audio' })
   abort(
@@ -44,6 +59,10 @@ export class InternalStorageLifecycleController {
   ) {
     return this.publication.abortAudio(assetId, dto.reservation);
   }
+  @Audited({
+    action: 'STORAGE_LIFECYCLE_RECOVERED',
+    entity: 'file',
+  })
   @Post('recover')
   @ApiOperation({
     summary: 'Recuperar publicaciones de almacenamiento pendientes',

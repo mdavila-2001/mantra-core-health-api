@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ResidencyService } from '../services';
 import {
   CreateCrossBorderTransferDto,
@@ -25,6 +30,11 @@ export class ResidencyController {
   constructor(private readonly service: ResidencyService) {}
 
   /** UC-11-06. */
+  @Audited({
+    action: 'DATA_RESIDENCY_POLICY_CREATED',
+    entity: 'data_residency_policy',
+    entityId: 'result.id',
+  })
   @Post('residency-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -37,6 +47,11 @@ export class ResidencyController {
   }
 
   /** UC-11-06. */
+  @Audited({
+    action: 'TENANT_RESIDENCY_BOUND',
+    entity: 'tenant_residency_binding',
+    entityId: 'result.id',
+  })
   @Post('tenant-residency-bindings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -49,6 +64,11 @@ export class ResidencyController {
   }
 
   /** UC-11-07. */
+  @Audited({
+    action: 'CROSS_BORDER_TRANSFER_RECORDED',
+    entity: 'cross_border_transfer_event',
+    entityId: 'result.id',
+  })
   @Post('cross-border-transfers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -168,6 +168,74 @@ describe('IamUsersController — lecturas', () => {
     });
   });
 
+  describe('searchUsersByBody (POST /iam/users/search)', () => {
+    /**
+     * El método tal como lo inspecciona Nest, leído por su descriptor para no
+     * separarlo de su objeto.
+     *
+     * @param name - Método del controlador.
+     * @returns La función decorada.
+     */
+    const handler = (name: string): object =>
+      Object.getOwnPropertyDescriptor(IamUsersController.prototype, name)
+        ?.value as object;
+
+    it('traduce las claves del cuerpo a los filtros del servicio y devuelve la página', async () => {
+      const d = build();
+      const page = { items: [], count: 0, limit: 5, nextCursor: null };
+      d.usersReadService.searchUsers.mockResolvedValue(page);
+
+      await expect(
+        d.controller.searchUsersByBody({
+          q: 'ana@',
+          status: 'status-1',
+          cursor: 'c-2',
+          limit: 5,
+        }),
+      ).resolves.toBe(page);
+      expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+        query: 'ana@',
+        statusConceptId: 'status-1',
+        cursor: 'c-2',
+        limit: 5,
+      });
+    });
+
+    it('sin tope pide 50, el mismo valor por omisión del GET', async () => {
+      const d = build();
+      d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+      await d.controller.searchUsersByBody({});
+
+      expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+        query: undefined,
+        statusConceptId: undefined,
+        cursor: undefined,
+        limit: 50,
+      });
+    });
+
+    it('exige el mismo rol que el GET y responde 200, no 201', () => {
+      const roles = (name: string): unknown =>
+        Reflect.getMetadata('requiredRoles', handler(name));
+
+      // Igualdad no vacía: dos `undefined` también serían «iguales».
+      expect(roles('searchUsers')).toEqual(['SECURITY_ADMIN']);
+      expect(roles('searchUsersByBody')).toEqual(roles('searchUsers'));
+      expect(
+        Reflect.getMetadata('__httpCode__', handler('searchUsersByBody')),
+      ).toBe(200);
+    });
+
+    it('el GET queda obsoleto en Swagger y el POST no', () => {
+      const operation = (name: string): { deprecated?: boolean } =>
+        Reflect.getMetadata('swagger/apiOperation', handler(name));
+
+      expect(operation('searchUsers').deprecated).toBe(true);
+      expect(operation('searchUsersByBody').deprecated).toBeUndefined();
+    });
+  });
+
   it.each([
     ['getUser', 'getUserById'],
     ['listCredentials', 'listCredentials'],

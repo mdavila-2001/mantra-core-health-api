@@ -92,7 +92,7 @@ contexto (active) + versión 1 (draft)
    └─ bindings ──> el consumidor recibe el contexto en su ventana de validez
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nada de `ENUM` nativos de PostgreSQL** (`dynamic_postgresql_enums_allowed = false`): el conjunto
   permitido son filas versionadas, y por eso cambiar los valores no exige un despliegue.
@@ -139,7 +139,7 @@ locale, país, tipo de fuente, tipo de consumidor— no se inventan: el cliente 
 `*ConceptId` y el módulo lo persiste tal cual. El caso de uso los declara "validados contra value
 sets cerrados", y esa validación vive en `terminology`, no aquí.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` cubre el módulo. `TERMINOLOGY_ENGINEER` define enumeraciones, redacta y publica
 versiones. `MODULE_OWNER` crea bindings de enum y de contexto. `WRITE_SERVICE` resuelve valores en
@@ -147,7 +147,7 @@ escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco. `GET /dy
 `@Public()` para poblar altas anónimas; `GET /dynamic-enums/bindings` queda autenticado sin rol
 específico.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` protege la definición al redactar, la versión publicada al publicar, los bindings al
 retirar, y el contexto/versiones que cambian `current_version_id`. `row_version` aporta bloqueo
@@ -160,7 +160,7 @@ en el informe de revisión.
 corrida de refresco fallida por entrada obligatoria ausente, retiro de definición y rollback de
 contexto. No se loguea el contenido del contexto.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/system_context --runInBand --silent` — **3 suites y 99 pruebas**
 aprobadas en la revisión de 2026-10-04. Son pruebas unitarias con repositorios simulados; no

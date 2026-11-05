@@ -26,6 +26,8 @@ export interface PharmacyProductSnapshot {
   readonly packageSizeText?: string;
   readonly medicationConceptId?: string;
   readonly requiresPrescription?: boolean;
+  /** Conteo del catálogo de toda la farmacia; sin él, «hay» sin conteo. */
+  readonly stockQuantity?: number | null;
 }
 
 export interface PharmacyPriceListSnapshot {
@@ -85,6 +87,16 @@ export interface PharmacyDirectoryPort {
   findActiveProductsByIds(
     uow: UnitOfWork,
     ids: readonly string[],
+  ): Promise<PharmacyProductSnapshot[]>;
+  /** Publicados y vendibles hoy: sin el «no tengo» del catálogo (P47). */
+  findSellableProductsByIds(
+    uow: UnitOfWork,
+    ids: readonly string[],
+  ): Promise<PharmacyProductSnapshot[]>;
+  /** Vendibles de unos medicamentos del vademécum, de cualquier farmacia. */
+  findSellableProductsByMedicationConcepts(
+    uow: UnitOfWork,
+    conceptIds: readonly string[],
   ): Promise<PharmacyProductSnapshot[]>;
   findCurrentPublicPriceLists(
     uow: UnitOfWork,

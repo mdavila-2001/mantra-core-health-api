@@ -66,7 +66,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "purchaseOrderId": "00000000-0000-4000-8000-000000000001",
   "invoicedAmount": "2500.00"
 }
@@ -83,7 +82,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `purchaseOrderId` | Sí | `string` | formato `uuid` | Orden de compra contra la que se concilia | `00000000-0000-4000-8000-000000000001` |
 | `invoicedAmount` | Sí | `string` | Sin restricción adicional declarada | Importe facturado por el proveedor | `2500.00` |
 | `toleranceAmount` | No | `string` | Sin restricción adicional declarada | Tolerancia admitida antes de marcar desviación | `10.00` |
@@ -120,6 +119,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<InvoiceMatchResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InvoiceMatchResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InvoiceMatchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InvoiceMatchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InvoiceMatchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -150,7 +150,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, ACCOUNTS_PAYABLE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Orden de compra no encontrada | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -202,7 +201,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "partnerNumber": "valor-ejemplo",
   "category": "SUPPLIER",
   "displayName": "Nombre de ejemplo"
@@ -219,7 +217,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `partnerNumber` | Sí | `string` | longitud máxima 100 | Número de socio, único por tenant | `valor-ejemplo` |
 | `category` | Sí | `string` | valores: `SUPPLIER`, `CUSTOMER`, `BOTH` | Sin descripción específica en el contrato OpenAPI. | `SUPPLIER` |
 | `displayName` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -263,6 +261,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PartnerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PartnerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PartnerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PartnerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartnerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -378,6 +377,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<VerifyBankAccountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerifyBankAccountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerifyBankAccountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerifyBankAccountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerifyBankAccountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -404,8 +404,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Socio de negocio no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
-| 404 | `NOT_FOUND` | Cuenta bancaria no encontrada | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 409 | `CONFLICT` | La cuenta ya está verificada | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no pertenece a ese socio | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -458,7 +456,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "contractNumber": "valor-ejemplo",
   "contractType": "SERVICE",
   "title": "valor-ejemplo",
@@ -477,7 +474,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `contractNumber` | Sí | `string` | longitud máxima 100 | Número de contrato, único por tenant | `valor-ejemplo` |
 | `contractType` | Sí | `string` | valores: `SERVICE`, `SUPPLY`, `LEASE` | Sin descripción específica en el contrato OpenAPI. | `SERVICE` |
 | `title` | Sí | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -523,6 +520,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -555,7 +553,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Socio de negocio no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 409 | `CONFLICT` | Ya existe un contrato con ese número | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato debe terminar después de empezar | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
@@ -664,6 +661,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractChangeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -692,7 +690,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato no admite cambios en su estado actual | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -793,6 +790,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApprovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -823,7 +821,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato está terminado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -931,6 +928,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PaymentScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PaymentScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PaymentScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PaymentScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -959,7 +957,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, SYSTEM_WORKER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato no tiene valor total del que derivar las cuotas | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1065,6 +1062,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractChangeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1093,7 +1091,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La renovación debe extender la vigencia más allá del fin actual | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 422 | `PRECONDITION_FAILED` | El contrato no admite cambios en su estado actual | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
@@ -1202,6 +1199,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractChangeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractChangeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1230,7 +1228,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 409 | `CONFLICT` | El contrato ya está terminado | Excepción explícita en src/modules/erp/services/erp-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1339,6 +1336,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TimeOffResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1365,7 +1363,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, HR_ADMIN, EMPLOYEE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Empleado no encontrado | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 409 | `CONFLICT` | El empleado ya tiene una ausencia en esas fechas | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ausencia debe terminar después de empezar | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
@@ -1468,6 +1465,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TimeOffResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TimeOffResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1494,7 +1492,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, HR_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de ausencia no encontrada | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
+| 404 | `NOT_FOUND` | TIME_OFF_NOT_FOUND.message | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 409 | `CONFLICT` | La solicitud ya fue resuelta | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1600,6 +1598,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EmployeeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EmployeeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EmployeeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EmployeeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EmployeeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1737,6 +1736,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LeaseValuationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LeaseValuationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LeaseValuationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LeaseValuationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LeaseValuationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1816,7 +1816,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "purchaseOrderNumber": "valor-ejemplo",
   "supplierBusinessPartnerId": "00000000-0000-4000-8000-000000000001",
   "items": [
@@ -1839,7 +1838,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `purchaseOrderNumber` | Sí | `string` | longitud máxima 100 | Número de orden, único por tenant | `valor-ejemplo` |
 | `supplierBusinessPartnerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `purchaseRequisitionId` | No | `string` | formato `uuid` | Requisición de origen | `00000000-0000-4000-8000-000000000001` |
@@ -1892,6 +1891,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PurchaseOrderResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PurchaseOrderResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PurchaseOrderResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PurchaseOrderResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PurchaseOrderResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1922,7 +1922,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Proveedor no encontrado | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1976,7 +1975,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "receiptNumber": "valor-ejemplo",
   "items": [
     {
@@ -1998,7 +1996,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `receiptNumber` | Sí | `string` | longitud máxima 100 | Número de recepción | `valor-ejemplo` |
 | `supplierDeliveryReference` | No | `string` | Sin restricción adicional declarada | Referencia del albarán del proveedor | `valor-ejemplo` |
 | `items` | Sí | `array<GoodsReceiptItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"purchaseOrderItemId":"00000000-0000-4000-8000-000000000001","receivedQuantity":"10","acceptedQuantity":"9"}]` |
@@ -2044,6 +2042,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GoodsReceiptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GoodsReceiptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GoodsReceiptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GoodsReceiptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GoodsReceiptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2078,9 +2077,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER, WAREHOUSE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Orden de compra no encontrada | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La orden de compra está cerrada | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
+| 422 | `PRECONDITION_FAILED` | Alguna línea de la recepción no pertenece a la orden de compra | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cantidad aceptada no puede superar la recibida | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2134,7 +2133,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "sheetNumber": "valor-ejemplo"
 }
 ```
@@ -2150,7 +2148,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `sheetNumber` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `performedFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `performedTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -2187,6 +2185,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceEntrySheetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceEntrySheetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceEntrySheetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceEntrySheetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceEntrySheetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2215,7 +2214,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Orden de compra no encontrada | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2267,7 +2265,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "salesOrderNumber": "valor-ejemplo",
   "customerBusinessPartnerId": "00000000-0000-4000-8000-000000000001"
 }
@@ -2283,7 +2280,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `salesOrderNumber` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `customerBusinessPartnerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `opportunityId` | No | `string` | formato `uuid` | Oportunidad ganada que la origina | `00000000-0000-4000-8000-000000000001` |
@@ -2321,6 +2318,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SalesOrderResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SalesOrderResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SalesOrderResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SalesOrderResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SalesOrderResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2349,7 +2347,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, SALES. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cliente no encontrado | Excepción explícita en src/modules/erp/services/erp-operations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

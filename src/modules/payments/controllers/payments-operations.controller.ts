@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Ip,
   Param,
   Post,
 } from '@nestjs/common';
@@ -105,8 +106,9 @@ export class PaymentsOperationsController {
   applyCallback(
     @Param('callbackPath') callbackPath: string,
     @Body() dto: GatewayCallbackDto,
+    @Ip() sourceIp: string,
   ): Promise<CallbackResultDto> {
-    return this.transactionsService.applyCallback(callbackPath, dto);
+    return this.transactionsService.applyCallback(callbackPath, dto, sourceIp);
   }
 
   /** UC-42-10. */

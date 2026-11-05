@@ -8,8 +8,32 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, ErrorCode, runWithTenant } from '../../../common';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import { RecordAutomationService } from './record-automation.service';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+const WORKFLOW_RUN_ID = '55555555-5555-5555-5555-555555555555';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] } as any;
 const AGENT_RUN_ID = '11111111-1111-1111-1111-111111111111';
@@ -28,7 +52,12 @@ function build() {
     findAgentRunForUpdate: mockFn(async () => ({
       id: AGENT_RUN_ID,
       agentId: AGENT_ID,
+      workflowRunId: WORKFLOW_RUN_ID,
       statusConceptId: CONCEPTS.AUTO_AGENT_RUN_RUNNING,
+    })),
+    findWorkflowRunById: mockFn(async () => ({
+      id: WORKFLOW_RUN_ID,
+      tenantId: TENANT_A,
     })),
     findMaxSequenceNo: mockFn(async () => 2),
     createAgentRunStep: mockFn((_tx: any, data: any) => ({
@@ -39,6 +68,7 @@ function build() {
   const agentsRepo = {
     findAgentById: mockFn(async () => ({
       id: AGENT_ID,
+      tenantId: TENANT_A,
       actsAsUserId: SERVICE_USER_ID,
     })),
   };
@@ -53,7 +83,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new RecordAutomationService(
+  const raw = new RecordAutomationService(
     em as any,
     runsRepo as any,
     agentsRepo as any,
@@ -62,8 +92,11 @@ function build() {
     outbox as any,
     logger as any,
   );
+  const service = inTenant(raw, TENANT_A);
   return {
     service,
+    raw,
+    asTenantB: inTenant(raw, TENANT_B),
     em,
     tx,
     runsRepo,
@@ -84,7 +117,8 @@ function build() {
 function automation(overrides: any = {}) {
   return {
     id: AUTOMATION_ID,
-    targetResourceType: 'clinical.encounters',
+    tenantId: TENANT_A,
+    targetResourceType: 'crm.leads',
     writeModeConceptId: CONCEPTS.AUTO_WRITE_MODE_DIRECT,
     fieldMappingJson: {
       patient_id: { from: 'patient.id', required: true },
@@ -292,7 +326,10 @@ describe('RecordAutomationService', () => {
 
     it('rechaza escribir si el agente no tiene identidad de servicio', async () => {
       const d = build();
-      d.agentsRepo.findAgentById.mockResolvedValue({ id: AGENT_ID });
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_A,
+      });
 
       await expect(
         d.service.executeRecordAutomation(
@@ -398,6 +435,310 @@ describe('RecordAutomationService', () => {
           ),
         ).resolves.toBeDefined();
       });
+    });
+  });
+  describe('alcance de tenant (AUTO-01)', () => {
+    /**
+     * Captura el rechazo para inspeccionar status, reason y details.
+     *
+     * @param promise - Operación que debe fallar.
+     * @returns La excepción lanzada.
+     */
+    async function rejection(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Se esperaba un rechazo');
+    }
+
+    /**
+     * Verifica que no hubo ninguna escritura ni rastro.
+     *
+     * @param d - Doble del servicio.
+     */
+    function expectNothingWritten(d: ReturnType<typeof build>) {
+      expect(d.targetRepo.writeRecord).not.toHaveBeenCalled();
+      expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    }
+
+    it('correcto: el runtime de A escribe con su automatización y la traza lleva la identidad de servicio de A', async () => {
+      const d = build();
+
+      const result = await d.service.executeRecordAutomation(
+        AGENT_RUN_ID,
+        AUTOMATION_ID,
+        DTO,
+        actor,
+      );
+
+      expect(result.written).toBe(true);
+      expect(d.targetRepo.writeRecord.mock.calls[0][2].created_by_user_id).toBe(
+        SERVICE_USER_ID,
+      );
+      expect(d.outbox.publishDomainEvent.mock.calls[0][1].tenantId).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('el run de agente de A ejecutado desde B responde como inexistente', async () => {
+      const d = build();
+      const absent = build();
+      absent.runsRepo.findAgentRunForUpdate.mockResolvedValue(null);
+
+      const foreign = await rejection(
+        d.asTenantB.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      );
+      const missing = await rejection(
+        absent.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      );
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(AutomationErrorReason.AGENT_RUN_NOT_FOUND);
+      expect(foreign.details).toBeUndefined();
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expectNothingWritten(d);
+    });
+
+    it('el agente de B tras un run de A no escribe (el run entero es ajeno)', async () => {
+      const d = build();
+      d.agentsRepo.findAgentById.mockResolvedValue({
+        id: AGENT_ID,
+        tenantId: TENANT_B,
+        actsAsUserId: SERVICE_USER_ID,
+      });
+
+      await expect(
+        d.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_RUN_NOT_FOUND,
+      });
+      expectNothingWritten(d);
+    });
+
+    it('el workflow run de B colgando de un run de A tampoco se escribe', async () => {
+      const d = build();
+      d.runsRepo.findWorkflowRunById.mockResolvedValue({
+        id: WORKFLOW_RUN_ID,
+        tenantId: TENANT_B,
+      });
+
+      await expect(
+        d.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.AGENT_RUN_NOT_FOUND,
+      });
+      expectNothingWritten(d);
+    });
+
+    it('la automatización de B no la ejecuta el runtime de A: igual que una inexistente', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({ tenantId: TENANT_B }),
+      );
+      const absent = build();
+      absent.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        null,
+      );
+
+      const foreign = await rejection(
+        d.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      );
+      const missing = await rejection(
+        absent.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      );
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(
+        AutomationErrorReason.RECORD_AUTOMATION_NOT_FOUND,
+      );
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expectNothingWritten(d);
+    });
+
+    it('una automatización ajena e inactiva no delata su estado', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({ tenantId: TENANT_B, isActive: false }),
+      );
+
+      await expect(
+        d.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AutomationErrorReason.RECORD_AUTOMATION_NOT_FOUND,
+      });
+    });
+
+    it('sin tenant en el contexto no escribe nada (denegar por defecto)', async () => {
+      const d = build();
+
+      const error = await rejection(
+        d.raw.executeRecordAutomation(AGENT_RUN_ID, AUTOMATION_ID, DTO, actor),
+      );
+
+      expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+      expect(d.runsRepo.findAgentRunForUpdate).not.toHaveBeenCalled();
+      expectNothingWritten(d);
+    });
+
+    it('un mapeo que declara tenant_id no puede escribir en otra organización', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({
+          fieldMappingJson: {
+            patient_id: { from: 'patient.id' },
+            tenant_id: { from: 'tenantAjeno' },
+          },
+        }),
+      );
+
+      await d.service.executeRecordAutomation(
+        AGENT_RUN_ID,
+        AUTOMATION_ID,
+        { payloadJson: { patient: { id: 'p-1' }, tenantAjeno: TENANT_B } },
+        actor,
+      );
+
+      expect(d.targetRepo.writeRecord.mock.calls[0][2].tenant_id).toBe(
+        TENANT_A,
+      );
+    });
+
+    it('un mapeo que no declara tenant_id igualmente escribe la fila en el tenant de la automatización', async () => {
+      const d = build();
+
+      await d.service.executeRecordAutomation(
+        AGENT_RUN_ID,
+        AUTOMATION_ID,
+        { payloadJson: { patient: { id: 'p-1' }, tenantAjeno: TENANT_B } },
+        actor,
+      );
+
+      expect(d.targetRepo.writeRecord.mock.calls[0][2].tenant_id).toBe(
+        TENANT_A,
+      );
+    });
+  });
+
+  describe('configuración del destino (AUTO-02)', () => {
+    it('un destino `clinical` se rechaza antes de ejecutar, incluso en borrador', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({
+          targetResourceType: 'clinical.encounters',
+          writeModeConceptId: CONCEPTS.AUTO_WRITE_MODE_DRAFT,
+        }),
+      );
+
+      await expect(
+        d.service.executeRecordAutomation(
+          AGENT_RUN_ID,
+          AUTOMATION_ID,
+          DTO,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 400,
+        code: ErrorCode.VALIDATION_FAILED,
+        reason: AutomationErrorReason.AUTOMATION_RECORD_TARGET_INVALID,
+      });
+      expect(d.targetRepo.writeRecord).not.toHaveBeenCalled();
+      expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+    });
+
+    it('un destino sin dos segmentos responde 400 con reason catalogado, no 500', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({ targetResourceType: 'leads' }),
+      );
+
+      const error: any = await d.service
+        .executeRecordAutomation(AGENT_RUN_ID, AUTOMATION_ID, DTO, actor)
+        .catch((e: unknown) => e);
+
+      expect(error.getStatus()).toBe(400);
+      expect(error.reason).toBe(
+        AutomationErrorReason.AUTOMATION_RECORD_TARGET_INVALID,
+      );
+      expect(d.targetRepo.writeRecord).not.toHaveBeenCalled();
+    });
+
+    it('un mapeo vacío responde 400 AUTOMATION_RECORD_MAPPING_EMPTY y no escribe', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({ fieldMappingJson: {} }),
+      );
+
+      const error: any = await d.service
+        .executeRecordAutomation(AGENT_RUN_ID, AUTOMATION_ID, DTO, actor)
+        .catch((e: unknown) => e);
+
+      expect(error.getStatus()).toBe(400);
+      expect(error.code).toBe(ErrorCode.VALIDATION_FAILED);
+      expect(error.reason).toBe(
+        AutomationErrorReason.AUTOMATION_RECORD_MAPPING_EMPTY,
+      );
+      expect(d.targetRepo.writeRecord).not.toHaveBeenCalled();
+      expect(d.runsRepo.createAgentRunStep).not.toHaveBeenCalled();
+    });
+
+    it('el destino permitido con dedupe sin columnas actualizables devuelve written=false', async () => {
+      const d = build();
+      d.governanceRepo.findRecordAutomationForUpdate.mockResolvedValue(
+        automation({
+          writeModeConceptId: CONCEPTS.AUTO_WRITE_MODE_UPSERT,
+          fieldMappingJson: { patient_id: { from: 'patient.id' } },
+          dedupeKeyExpr: 'patient_id, created_by_user_id, updated_by_user_id',
+        }),
+      );
+      d.targetRepo.writeRecord.mockResolvedValue({ written: false });
+
+      const result = await d.service.executeRecordAutomation(
+        AGENT_RUN_ID,
+        AUTOMATION_ID,
+        DTO,
+        actor,
+      );
+
+      expect(result.written).toBe(false);
+      expect(d.targetRepo.writeRecord.mock.calls[0][4]).toBe(true);
     });
   });
 });

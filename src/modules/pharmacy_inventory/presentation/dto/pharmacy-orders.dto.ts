@@ -4,13 +4,16 @@ import {
   ArrayMinSize,
   IsArray,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { InventoryConceptDto } from './read-responses.dto';
@@ -200,7 +203,9 @@ export class PharmacyOrderLineDto {
 
   /**
    * Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada,
-   * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada).
+   * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada,
+   * `PINV_RES_LINE_PENDING_CONFIRMATION` por confirmar: la sede lo ofrece por
+   * su catálogo y la farmacia todavía no dijo si lo tiene; no reserva nada).
    */
   @ApiProperty({ type: InventoryConceptDto })
   status!: InventoryConceptDto;
@@ -362,6 +367,24 @@ export class PharmacyOrderDto implements PatientSettlementProjection {
   pickupCode!: string | null;
 
   /**
+   * Vitrina pública de la farmacia, para abrir el chat del pedido.
+   *
+   * **Solo en la lectura del titular** (`GET /pharmacy/orders/me` y
+   * `GET /pharmacy/orders/:id` como dueño): `null` si la farmacia no tiene
+   * vitrina activa de un tenant verificado. Las lecturas del mostrador no lo
+   * traen.
+   */
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  pharmacyPublicProfileId?: string | null;
+
+  /**
+   * Slug de esa vitrina (`organization-<tenantId>`), con la misma regla que
+   * `pharmacyPublicProfileId`.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  pharmacyPublicSlug?: string | null;
+
+  /**
    * Total CONGELADO del pedido con su moneda: suma de los precios congelados
    * por el saldo reservado de cada renglón en pie. `null` si a algún renglón
    * le falta precio publicado o si las listas mezclan monedas — una suma con
@@ -469,10 +492,16 @@ export class PharmacyOrderSubstitutionDto {
  * `PROPONER_GENERICO` exige además `proposedProductId`: un producto activo de
  * la misma farmacia y del MISMO medicamento del vademécum. La propuesta se
  * persiste como bitácora (v4.2.1) y la decide el paciente.
+ *
+ * `CONFIRMAR_STOCK` sólo vale para una línea «por confirmar»
+ * (`PINV_RES_LINE_PENDING_CONFIRMATION`) y exige `quantity`: las unidades que
+ * la sede tiene para vender. Sin ajuste, una línea «por confirmar» se confirma
+ * con lo pedido; con `NO_DISPONIBLE` queda sin stock.
  */
 export const CONFIRM_LINE_DECISIONS = [
   'NO_DISPONIBLE',
   'PROPONER_GENERICO',
+  'CONFIRMAR_STOCK',
 ] as const;
 
 /** Un ajuste de línea que el mostrador declara al confirmar. */
@@ -503,6 +532,23 @@ export class ConfirmOrderAdjustmentDto {
   @IsOptional()
   @IsUUID()
   proposedProductId?: string;
+
+  /**
+   * Unidades que la sede tiene para vender del producto. Obligatoria con
+   * `CONFIRMAR_STOCK` (la regla vive en el servicio para responder 422
+   * tipificado); ignorada con las demás decisiones.
+   */
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: 1_000_000,
+    description:
+      'Unidades que la sede tiene para vender (con CONFIRMAR_STOCK, sobre una línea por confirmar)',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  quantity?: number;
 }
 
 /** Cuerpo de `POST /pharmacy/orders/:id/confirm` (FAR-E2). */
@@ -588,4 +634,18 @@ export class PharmacyOrderListResponseDto {
    */
   @ApiProperty()
   count!: number;
+}
+
+/** El hilo de chat del pedido: `POST /pharmacy/orders/:id/conversation`. */
+export class PharmacyOrderConversationDto {
+  /** La conversación directa paciente ↔ farmacia (nueva o reutilizada). */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /**
+   * La vitrina de la farmacia en ese hilo. El personal la usa como
+   * `profileId`/`senderProfileId` en la mensajería.
+   */
+  @ApiProperty({ format: 'uuid' })
+  pharmacyProfileId!: string;
 }

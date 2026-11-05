@@ -5,11 +5,11 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { EducationCatalogRepository } from '../repositories';
+import { EducationScopeService } from './education-scope.service';
 import {
   PublishCourseDto,
   CourseResponseDto,
@@ -93,11 +93,13 @@ export class EducationCatalogService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: EducationCatalogRepository,
+    private readonly scope: EducationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(EducationCatalogService.name);
@@ -115,6 +117,9 @@ export class EducationCatalogService {
       { operation: 'education.course.publish', code: dto.code },
       'Publishing course',
     );
+
+    // El propietario del curso sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
 
     const duplicate = await this.catalogRepo.findCourseByCode(
       this.em,
@@ -139,7 +144,7 @@ export class EducationCatalogService {
 
     return this.em.transactional(async (tx) => {
       const course = this.catalogRepo.createCourse(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         title: dto.title,
         description: dto.description,
@@ -224,12 +229,7 @@ export class EducationCatalogService {
     return this.em.transactional(async (tx) => {
       // Bloquear el curso es lo que serializa el versionado: dos publicaciones
       // simultáneas pedirían el mismo número.
-      const course = await this.catalogRepo.findCourseForUpdate(tx, courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId,
-        });
-      }
+      const course = await this.scope.course(tx, courseId, { lock: true });
       if (course.statusConceptId === CONCEPTS.COURSE_ARCHIVED) {
         throw new PreconditionFailedException(
           'Un curso archivado no admite versiones',
@@ -282,17 +282,13 @@ export class EducationCatalogService {
     );
 
     return this.em.transactional(async (tx) => {
-      const course = await this.catalogRepo.findCourseById(tx, courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId,
-        });
-      }
+      const course = await this.scope.course(tx, courseId);
 
       let instructor = dto.practitionerProfileId
         ? await this.catalogRepo.findInstructorByProfile(
             tx,
             dto.practitionerProfileId,
+            course.tenantId as string,
           )
         : null;
       const instructorExisted = instructor !== null;
@@ -371,12 +367,7 @@ export class EducationCatalogService {
     }
 
     return this.em.transactional(async (tx) => {
-      const course = await this.catalogRepo.findCourseById(tx, courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId,
-        });
-      }
+      const course = await this.scope.course(tx, courseId);
       if (course.statusConceptId !== CONCEPTS.COURSE_PUBLISHED) {
         throw new PreconditionFailedException('El curso no está publicado', {
           courseId,
@@ -447,12 +438,7 @@ export class EducationCatalogService {
     }
 
     return this.em.transactional(async (tx) => {
-      const course = await this.catalogRepo.findCourseById(tx, courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId,
-        });
-      }
+      await this.scope.course(tx, courseId);
 
       if (dto.courseModuleId) {
         const modules = await this.catalogRepo.findModulesByCourse(
@@ -520,12 +506,7 @@ export class EducationCatalogService {
     );
 
     return this.em.transactional(async (tx) => {
-      const course = await this.catalogRepo.findCourseById(tx, courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId,
-        });
-      }
+      await this.scope.course(tx, courseId);
 
       const previous = await this.catalogRepo.findReviewByReviewer(
         tx,

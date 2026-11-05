@@ -6,7 +6,7 @@ import {
   markAudioAssetReady,
   releaseAudioGenerationBudget,
   reserveAudioGenerationBudget,
-} from '../../src/modules/audio_assets/repositories/audio-assets.repository.queries';
+} from '../../src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.queries';
 
 /**
  * Contabilidad del presupuesto de audio contra la base real.

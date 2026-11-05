@@ -2,24 +2,24 @@
 
 Casos de uso, reglas de negocio y coordinación transaccional.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `appeals.service.ts` | Casos de uso y reglas de negocio. |
-| `broker-commission.service.ts` | Casos de uso y reglas de negocio. |
-| `claims.service.ts` | Casos de uso y reglas de negocio. |
-| `coverage.service.ts` | Casos de uso y reglas de negocio. |
-| `index.ts` | Punto de exportación pública de la carpeta. |
-| `insurance-backbone.service.ts` | Casos de uso y reglas de negocio. |
-| `insurance-read.service.ts` | Casos de uso y reglas de negocio. |
-| `prior-auth.service.ts` | Casos de uso y reglas de negocio. |
-| `reconciliation.service.ts` | Casos de uso y reglas de negocio. |
+| `appeals.service.ts` | Use cases and business rules. |
+| `broker-commission.service.ts` | Use cases and business rules. |
+| `claims.service.ts` | Use cases and business rules. |
+| `coverage.service.ts` | Use cases and business rules. |
+| `index.ts` | Public export barrel for this folder. |
+| `insurance-backbone.service.ts` | Use cases and business rules. |
+| `insurance-read.service.ts` | Use cases and business rules. |
+| `prior-auth.service.ts` | Use cases and business rules. |
+| `reconciliation.service.ts` | Use cases and business rules. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

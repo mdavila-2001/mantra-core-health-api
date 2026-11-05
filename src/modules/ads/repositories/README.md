@@ -60,7 +60,7 @@ Consultas por PK, FK, clave natural o identificador externo, todas indexadas. La
 (`findInsightsInPeriod`, `findBillingEventsInPeriod`) filtran por fecha, que en el modelo lleva BRIN.
 Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos,
 del SKIP LOCKED y de las UNIQUE llega con las pruebas de integración.

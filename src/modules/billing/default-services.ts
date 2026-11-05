@@ -29,3 +29,42 @@ export const DEFAULT_APPOINTMENT_SERVICE = Object.freeze({
   /** Boliviano, la moneda del producto y la que usa el resto del código nuevo. */
   currencyConceptId: CONCEPTS.CURRENCY_BOB,
 });
+
+/**
+ * Asegura que una práctica tenga el servicio «Cita médica» (FT-22-R01).
+ *
+ * Toda práctica nace con este servicio en 0.00. Se invoca tanto al
+ * provisionar la práctica (consultorio propio, organización) como al
+ * consultar su catálogo, garantizando que nunca quede vacía.
+ *
+ * @param em - Contexto de persistencia o transacción activa.
+ * @param serviceCatalogRepo - Repositorio del catálogo.
+ * @param practiceId - Identificador de la práctica.
+ * @param actorUserId - Usuario que realiza la acción (opcional).
+ * @returns true si se insertó el servicio, false si ya existía.
+ */
+export async function ensureDefaultAppointmentService(
+  em: any,
+  serviceCatalogRepo: any,
+  practiceId: string,
+  actorUserId?: string,
+): Promise<boolean> {
+  const existing = await serviceCatalogRepo.findByCode(
+    em,
+    practiceId,
+    DEFAULT_APPOINTMENT_SERVICE.code,
+  );
+  if (existing) return false;
+
+  serviceCatalogRepo.create(em, {
+    practiceId,
+    code: DEFAULT_APPOINTMENT_SERVICE.code,
+    name: DEFAULT_APPOINTMENT_SERVICE.name,
+    defaultPrice: DEFAULT_APPOINTMENT_SERVICE.defaultPrice,
+    currencyConceptId: DEFAULT_APPOINTMENT_SERVICE.currencyConceptId,
+    isActive: true,
+    actorUserId,
+  });
+  await em.flush();
+  return true;
+}

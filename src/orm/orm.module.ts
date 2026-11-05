@@ -1,10 +1,14 @@
 import { Global, Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { EntityManager } from '@mikro-orm/postgresql';
 import { buildOrmConfig } from './config/orm.config';
+import { RuntimeRoleGuardService } from './config/runtime-role.guard';
 import { SchemaBootstrapService } from './bootstrap/schema-bootstrap.service';
 import { SchemaFidelityService } from './fidelity/schema-fidelity.service';
+import { SchemaIntegrityState } from './bootstrap/schema-integrity.state';
 import { QueryMetrics } from './observability/query-metrics';
 import { ormQueryMetrics } from './observability/orm.logger';
+import { ENTITY_MANAGER_ALIAS } from './entity-manager-alias.provider';
 
 /**
  * Raíz de la capa de persistencia relacional.
@@ -31,8 +35,12 @@ import { ormQueryMetrics } from './observability/orm.logger';
     MikroOrmModule.forRoot(buildOrmConfig()),
   ],
   providers: [
+    // Primero: si el rol de conexión ignora RLS en producción, el proceso
+    // aborta antes de tocar el esquema o sembrar nada (HZ-05).
+    RuntimeRoleGuardService,
     SchemaFidelityService,
     SchemaBootstrapService,
+    SchemaIntegrityState,
     {
       // Los contadores se crean fuera del contenedor porque el logger de
       // MikroORM se construye antes que él. Aquí se vuelven a exponer como
@@ -40,12 +48,18 @@ import { ormQueryMetrics } from './observability/orm.logger';
       provide: QueryMetrics,
       useValue: ormQueryMetrics,
     },
+    ENTITY_MANAGER_ALIAS,
   ],
   // No se reexporta `MikroOrmModule`: `forRoot` registra internamente un módulo
   // ya marcado como global, así que el `EntityManager` y los repositorios están
   // disponibles en toda la aplicación sin reexportarlos. Intentar exportarlo
   // desde aquí falla, porque lo que este módulo importa es el módulo dinámico
   // que devuelve `forRoot`, no la clase `MikroOrmModule`.
-  exports: [SchemaFidelityService, QueryMetrics],
+  exports: [
+    SchemaFidelityService,
+    QueryMetrics,
+    SchemaIntegrityState,
+    EntityManager,
+  ],
 })
 export class OrmModule {}

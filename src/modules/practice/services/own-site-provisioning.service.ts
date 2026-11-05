@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS } from '../../../common';
 import { AddressesRepository } from '../../common/repositories';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 import { PRAC } from '../practice.concepts';
 import {
   PracticeSitesRepository,
@@ -12,6 +13,8 @@ import {
 import type { CreateOwnSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
 import { siteCodeBase, uniqueCode } from '../site-code';
+import { ServiceCatalogRepository } from '../../billing/repositories';
+import { ensureDefaultAppointmentService } from '../../billing/default-services';
 
 /**
  * A quién pertenece el consultorio que se va a provisionar: el tenant en el
@@ -64,6 +67,7 @@ export class OwnSiteProvisioningService {
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OwnSiteProvisioningService.name);
@@ -110,6 +114,13 @@ export class OwnSiteProvisioningService {
       await tx.flush();
     }
 
+    await ensureDefaultAppointmentService(
+      tx,
+      this.serviceCatalogRepo,
+      practice.id,
+      actorUserId,
+    );
+
     let addressId: string | undefined;
     if (dto.address) {
       // Una línea en blanco no es «sin dirección»: es una fila vacía en
@@ -125,6 +136,13 @@ export class OwnSiteProvisioningService {
         city: dto.address.city,
         municipalityConceptId: dto.address.municipalityConceptId,
         administrativeAreaConceptId: dto.address.administrativeAreaConceptId,
+        // ADR-0028: la provincia sale del municipio, como en toda dirección; el
+        // distrito viaja aparte de las líneas.
+        administrativeArea2ConceptId: dto.address.municipalityConceptId
+          ? adminDivisionLineage(dto.address.municipalityConceptId)
+              ?.level2ConceptId
+          : undefined,
+        districtText: dto.address.district?.trim() || undefined,
         countryConceptId: CONCEPTS.COUNTRY_BO,
         useConceptId: CONCEPTS.ADDR_USE_WORK,
         typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
@@ -153,8 +171,14 @@ export class OwnSiteProvisioningService {
       addressId,
       managingTenantId: owner.tenantId,
       statusConceptId: PRAC.SITE_ACTIVE,
+      // F1: la sede pertenece al tenant de su práctica (backfill del patch
+      // v4.2.67); `managingTenantId` sigue diciendo quién la opera.
+      tenantId: practice.tenantId,
       actorUserId,
     });
+    // El archivo ya lo validó quien llama: el alta lo reclama como pre-carga
+    // anónima y `POST /practitioners/me/sites` comprueba que es del actor.
+    site.logoFileId = dto.logoFileId;
     await tx.flush();
 
     this.rolesRepo.create(tx, {

@@ -31,7 +31,7 @@ _Fuente: `src/modules/qa_execution/README.md:3`_
 |  |  | POST /admin/qa/plans/{planId}/cancel | QA_ADMIN · QA_ENGINEER | MEDIO | 5 |
 |  |  | POST /admin/qa/plans/preflight | QA_ADMIN · QA_ENGINEER | BAJO | 4 |
 |  |  | GET /admin/qa/targets | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
-| `ctrl:QaExecutionInternalController` | Operaciones de QaExecutionInternalController que el README no asigna a un caso de uso | POST /internal/qa/plans/run-next | SYSTEM | MEDIO | 19 |
+| `ctrl:QaExecutionInternalController` | Operaciones de QaExecutionInternalController que el README no asigna a un caso de uso | POST /internal/qa/plans/run-next | SYSTEM | MEDIO | 18 |
 
 ### Diagrama — etapas `ctrl:QaExecutionController`, `ctrl:QaExecutionInternalController`
 
@@ -60,7 +60,7 @@ flowchart LR
     o17["POST /admin/qa/plans/preflight"]:::op
     o20["GET /admin/qa/targets"]:::op
   end
-  t23[("+13 tablas más")]
+  t23[("+12 tablas más")]
   subgraph s1["ctrl:QaExecutionInternalController · Operaciones de QaExecutionInternalControll…"]
     o21["POST /internal/qa/plans/run-next"]:::op
   end
@@ -260,81 +260,79 @@ flowchart TD
   n32 --> n33
   n34[("LEE qa_lab.test_suites")]:::efecto
   n33 --> n34
-  n35{"!suite"}:::decision
+  n35{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
   n34 --> n35
-  n36(["404 NOT_FOUND Suite no encontrada"]):::error
+  n36(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
   n35 -->|"sí"| n36
-  n37{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
+  n37["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
   n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
-  n37 -->|"sí"| n38
-  n39["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
-  n37 -->|"no"| n39
-  n40[("LEE qa_lab.test_environments")]:::efecto
-  n39 --> n40
-  n41{"!environment"}:::decision
-  n40 --> n41
-  n42(["404 NOT_FOUND Entorno no encontrado"]):::error
+  n38[("LEE qa_lab.test_environments")]:::efecto
+  n37 --> n38
+  n39{"!sameQaOwner(environment, suite)"}:::decision
+  n38 --> n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"sí"| n40
+  n41{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
   n41 -->|"sí"| n42
-  n43{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n43{"policy === 'FORBID'"}:::decision
   n41 -->|"no"| n43
-  n44(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
+  n44["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
   n43 -->|"sí"| n44
-  n45{"policy === 'FORBID'"}:::decision
-  n43 -->|"no"| n45
-  n46["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
-  n45 -->|"sí"| n46
-  n47[("LEE qa_lab.test_runs")]:::efecto
-  n46 --> n47
-  n48{"running.length › 0"}:::decision
-  n47 --> n48
-  n49(["409 CONFLICT La suite ya tiene una corrida en marcha"]):::error
-  n48 -->|"sí"| n49
-  n50["Llama a QaCatalogRepository.countActiveCases"]:::llamada
-  n48 -->|"no"| n50
-  n45 -->|"no"| n50
-  n51[("LEE qa_lab.test_cases")]:::efecto
-  n50 --> n51
-  n52{"totalCases === 0"}:::decision
-  n51 --> n52
-  n53(["422 PRECONDITION_FAILED La suite no tiene casos activos"]):::error
-  n52 -->|"sí"| n53
-  n54["Llama a QaRunsService.nextRunNumber"]:::llamada
-  n52 -->|"no"| n54
-  n55["Llama a QaRunsRepository.findLastRun"]:::llamada
+  n45[("LEE qa_lab.test_runs")]:::efecto
+  n44 --> n45
+  n46{"running.length › 0"}:::decision
+  n45 --> n46
+  n47(["409 CONFLICT La suite ya tiene una corrida en marcha"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a QaCatalogRepository.countActiveCases"]:::llamada
+  n46 -->|"no"| n48
+  n43 -->|"no"| n48
+  n49[("LEE qa_lab.test_cases")]:::efecto
+  n48 --> n49
+  n50{"totalCases === 0"}:::decision
+  n49 --> n50
+  n51(["422 PRECONDITION_FAILED La suite no tiene casos activos"]):::error
+  n50 -->|"sí"| n51
+  n52["Llama a QaRunsService.nextRunNumber"]:::llamada
+  n50 -->|"no"| n52
+  n53["Llama a QaRunsRepository.findLastRun"]:::llamada
+  n52 --> n53
+  n54[("LEE qa_lab.test_runs")]:::efecto
+  n53 --> n54
+  n55["Repite: ciclo for"]:::bucle
   n54 --> n55
-  n56[("LEE qa_lab.test_runs")]:::efecto
-  n55 --> n56
-  n57["Repite: ciclo for"]:::bucle
+  n56["Llama a QaRunsRepository.findRunByNumber"]:::llamada
+  n55 -->|"cada elemento"| n56
+  n57[("LEE qa_lab.test_runs")]:::efecto
   n56 --> n57
-  n58["Llama a QaRunsRepository.findRunByNumber"]:::llamada
-  n57 -->|"cada elemento"| n58
-  n59[("LEE qa_lab.test_runs")]:::efecto
-  n58 --> n59
-  n60(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n58(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n57 --> n58
+  n55 -->|"al terminar"| n58
+  n59["Llama a QaRunsRepository.createRun"]:::llamada
+  n60[("CREA qa_lab.test_runs")]:::efecto
   n59 --> n60
-  n57 -->|"al terminar"| n60
-  n61["Llama a QaRunsRepository.createRun"]:::llamada
-  n62[("CREA qa_lab.test_runs")]:::efecto
+  n61["Transacción: transactional(…)"]:::transaccion
+  n60 --> n61
+  n62[("CREA qa_execution.execution_plans")]:::efecto
   n61 --> n62
-  n63["Transacción: transactional(…)"]:::transaccion
+  n63["Llama a QaExecutionService.appendEvent"]:::llamada
   n62 --> n63
-  n64[("CREA qa_execution.execution_plans")]:::efecto
+  n64[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
   n63 --> n64
-  n65["Llama a QaExecutionService.appendEvent"]:::llamada
+  n65["Llama a QaExecutionService.getPlan"]:::llamada
   n64 --> n65
-  n66[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
+  n66[("LEE qa_execution.execution_plans")]:::efecto
   n65 --> n66
-  n67["Llama a QaExecutionService.getPlan"]:::llamada
+  n67{"!plan"}:::decision
   n66 --> n67
-  n68[("LEE qa_execution.execution_plans")]:::efecto
-  n67 --> n68
-  n69{"!plan"}:::decision
-  n68 --> n69
-  n70(["404 NOT_FOUND Plan no encontrado"]):::error
-  n69 -->|"sí"| n70
-  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
-  n69 -->|"no"| n71
+  n68(["404 NOT_FOUND Plan no encontrado"]):::error
+  n67 -->|"sí"| n68
+  n69[("LEE qa_execution.plan_approvals · LEE qa_execution.plan_events")]:::efecto
+  n67 -->|"no"| n69
+  n70(("202 Responde con éxito")):::ok
+  n69 --> n70
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -595,7 +593,7 @@ Reclamar y ejecutar el siguiente plan (worker)
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado; ResourceNotFoundException: Caso no encontrado; ResourceNotFoundException: Resultado no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
 | 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada; ConflictException: El caso ya se ejecutó en esta corrida; ConflictException: El resultado ya fue evaluado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso pertenece a otra suite; PreconditionFailedException: El caso falló en transporte: no hay respuesta que evaluar; PreconditionFailedException: El caso no tiene aserciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -649,107 +647,107 @@ flowchart TD
   n21 --> n22
   n23[("LEE qa_lab.test_runs")]:::efecto
   n22 --> n23
-  n24{"!run"}:::decision
+  n24{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
   n23 --> n24
-  n25(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n25(["409 CONFLICT La corrida ya está cerrada"]):::error
   n24 -->|"sí"| n25
-  n26{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
+  n26["Llama a QaRunsRepository.findResultsByRun"]:::llamada
   n24 -->|"no"| n26
-  n27(["409 CONFLICT La corrida ya está cerrada"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a QaRunsRepository.findResultsByRun"]:::llamada
-  n26 -->|"no"| n28
-  n29[("LEE qa_lab.test_case_results")]:::efecto
+  n27[("LEE qa_lab.test_case_results")]:::efecto
+  n26 --> n27
+  n28[("LEE qa_execution.execution_plans")]:::efecto
+  n27 --> n28
+  n7 -->|"no"| n28
+  n29["Intenta"]:::intento
   n28 --> n29
-  n30[("ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_…")]:::efecto
+  n30["Llama a QaExecutionService.loadContext"]:::llamada
   n29 --> n30
-  n31[("LEE qa_execution.execution_plans")]:::efecto
+  n31[("LEE qa_lab.test_suites")]:::efecto
   n30 --> n31
-  n7 -->|"no"| n31
-  n32["Intenta"]:::intento
+  n32{"!suite"}:::decision
   n31 --> n32
-  n33["Llama a QaExecutionService.loadContext"]:::llamada
-  n32 --> n33
-  n34[("LEE qa_lab.test_suites")]:::efecto
-  n33 --> n34
-  n35{"!suite"}:::decision
-  n34 --> n35
-  n36(["404 NOT_FOUND Suite no encontrada"]):::error
-  n35 -->|"sí"| n36
-  n37{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
-  n35 -->|"no"| n37
-  n38(["↩ (relanza el error capturado)"]):::error
+  n33(["404 NOT_FOUND Suite no encontrada"]):::error
+  n32 -->|"sí"| n33
+  n34{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
+  n32 -->|"no"| n34
+  n35(["↩ (relanza el error capturado)"]):::error
+  n34 -->|"sí"| n35
+  n36[("LEE qa_lab.test_environments")]:::efecto
+  n34 -->|"no"| n36
+  n37{"!environment"}:::decision
+  n36 --> n37
+  n38(["404 NOT_FOUND Entorno no encontrado"]):::error
   n37 -->|"sí"| n38
-  n39[("LEE qa_lab.test_environments")]:::efecto
+  n39{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n37 -->|"no"| n39
-  n40{"!environment"}:::decision
-  n39 --> n40
-  n41(["404 NOT_FOUND Entorno no encontrado"]):::error
-  n40 -->|"sí"| n41
-  n42{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n40 -->|"no"| n42
-  n43(["↩ (relanza el error capturado)"]):::error
-  n42 -->|"sí"| n43
-  n44{"!environmentKind"}:::decision
-  n42 -->|"no"| n44
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"sí"| n40
+  n41{"!environmentKind"}:::decision
+  n39 -->|"no"| n41
+  n42(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"sí"| n42
+  n43[("LEE qa_execution.execution_targets")]:::efecto
+  n41 -->|"no"| n43
+  n44{"!target || target.status !== 'ACTIVE'"}:::decision
+  n43 --> n44
   n45(["↩ (relanza el error capturado)"]):::error
   n44 -->|"sí"| n45
-  n46[("LEE qa_execution.execution_targets")]:::efecto
+  n46[("LEE qa_lab.test_cases")]:::efecto
   n44 -->|"no"| n46
-  n47{"!target || target.status !== 'ACTIVE'"}:::decision
-  n46 --> n47
-  n48(["↩ (relanza el error capturado)"]):::error
-  n47 -->|"sí"| n48
-  n49[("LEE qa_lab.test_cases")]:::efecto
-  n47 -->|"no"| n49
-  n50["Llama a QaExecutionService.close"]:::llamada
-  n32 -->|"si falla"| n50
-  n51["Transacción: transactional(…)"]:::transaccion
-  n50 --> n51
-  n52[("LEE qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_…")]:::efecto
+  n47["Llama a QaExecutionService.close"]:::llamada
+  n29 -->|"si falla"| n47
+  n48["Transacción: transactional(…)"]:::transaccion
+  n47 --> n48
+  n49[("LEE qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_…")]:::efecto
+  n48 --> n49
+  n50{"error"}:::decision
+  n49 --> n50
+  n51[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans")]:::efecto
+  n50 -->|"sí"| n51
+  n52{"counters"}:::decision
   n51 --> n52
-  n53{"error"}:::decision
-  n52 --> n53
-  n54[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans")]:::efecto
-  n53 -->|"sí"| n54
-  n55{"counters"}:::decision
+  n50 -->|"no"| n52
+  n53[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.exec…")]:::efecto
+  n52 -->|"sí"| n53
+  n54["Llama a QaExecutionService.appendEvent"]:::llamada
+  n53 --> n54
+  n52 -->|"no"| n54
+  n55[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
   n54 --> n55
-  n53 -->|"no"| n55
-  n56[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.exec…")]:::efecto
-  n55 -->|"sí"| n56
-  n57["Llama a QaExecutionService.appendEvent"]:::llamada
-  n56 --> n57
-  n55 -->|"no"| n57
-  n58[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
+  n56{"current.hash !== plan.planHash || current.violations.length › 0"}:::decision
+  n46 --> n56
+  n55 --> n56
+  n57["Llama a QaExecutionService.close"]:::llamada
+  n56 -->|"sí"| n57
+  n58["Transacción: transactional(…)"]:::transaccion
   n57 --> n58
-  n59{"current.hash !== plan.planHash || current.violations.length › 0"}:::decision
-  n49 --> n59
+  n59[("LEE qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_…")]:::efecto
   n58 --> n59
-  n60["Llama a QaExecutionService.close"]:::llamada
-  n59 -->|"sí"| n60
-  n61["Transacción: transactional(…)"]:::transaccion
-  n60 --> n61
-  n62[("LEE qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_…")]:::efecto
+  n60{"error"}:::decision
+  n59 --> n60
+  n61[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans")]:::efecto
+  n60 -->|"sí"| n61
+  n62{"counters"}:::decision
   n61 --> n62
-  n63{"error"}:::decision
-  n62 --> n63
-  n64[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans")]:::efecto
-  n63 -->|"sí"| n64
-  n65{"counters"}:::decision
+  n60 -->|"no"| n62
+  n63[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.exec…")]:::efecto
+  n62 -->|"sí"| n63
+  n64["Llama a QaExecutionService.appendEvent"]:::llamada
+  n63 --> n64
+  n62 -->|"no"| n64
+  n65[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
   n64 --> n65
-  n63 -->|"no"| n65
-  n66[("ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.execution_plans · ACTUALIZA qa_execution.exec…")]:::efecto
-  n65 -->|"sí"| n66
-  n67["Llama a QaExecutionService.appendEvent"]:::llamada
+  n66["Llama a QaExecutionService.finalizeQuietly"]:::llamada
+  n65 --> n66
+  n67[("LEE qa_execution.execution_plans")]:::efecto
   n66 --> n67
-  n65 -->|"no"| n67
-  n68[("LEE qa_execution.plan_events · CREA qa_execution.plan_events")]:::efecto
+  n68["Intenta"]:::intento
   n67 --> n68
-  n69["Llama a QaExecutionService.finalizeQuietly"]:::llamada
+  n69["Llama a QaRunsService.finalizeRun"]:::llamada
   n68 --> n69
-  n70[("LEE qa_execution.execution_plans")]:::efecto
+  n70["Transacción: transactional(…)"]:::transaccion
   n69 --> n70
-  n71["… el resto del árbol (17 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (6 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33

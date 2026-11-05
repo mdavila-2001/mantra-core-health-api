@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
+  LOGO_IMAGE_MIME_TYPES,
   PreconditionFailedException,
   ResourceNotFoundException,
+  assertLogoImage,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -16,7 +18,7 @@ import { TenantAdministrationService } from './tenant-administration.service';
 
 const IMAGE_OPTIONS = {
   allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
-  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+  allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
   operation: 'directory.organization.logo',
 };
 
@@ -50,10 +52,7 @@ export class OrganizationLogoService {
           actor,
           IMAGE_OPTIONS,
         );
-        this.assertNormal(file.sensitivityConceptId);
-        if (Number(version.sizeBytes) > 2 * 1024 * 1024) {
-          throw new PreconditionFailedException('El logo supera los 2 MB');
-        }
+        assertLogoImage(file, version);
       }
       await this.profiles.setOrganizationLogo(em, {
         tenantId,

@@ -11,6 +11,10 @@ import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
 // dónde vive un acceso compartido (`authz`).
 import { ProfilesModule } from '../profiles/profiles.module';
 import { AuthzModule } from '../authz/authz.module';
+// P40: `ClinicalRecordAccessGuard` en la ficha diagnóstica; Nest lo resuelve en
+// este contenedor y necesita `ClinicalReadService`, que `ClinicalModule` exporta
+// (mismo criterio que `chart` y `clinical_ext`).
+import { ClinicalModule } from '../clinical/clinical.module';
 // Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
 // `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
 import { CommonModule } from '../common/common.module';
@@ -18,6 +22,16 @@ import { CommonModule } from '../common/common.module';
 // por su membresía, no por un rol del token.
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { LabStaffGuard } from './guards';
+import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-portal.controller';
+import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
+import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-uploads.controller';
+import { LabPortalSnapshotService } from './services/lab-portal-snapshot.service';
+import { LabPortalOrdersService } from './services/lab-portal-orders.service';
+import { LabPortalResultsService } from './services/lab-portal-results.service';
+import { LabPortalResultWritesService } from './services/lab-portal-result-writes.service';
+import { LabPortalSummaryService } from './services/lab-portal-summary.service';
+import { LabPortalUploadsService } from './services/lab-portal-uploads.service';
+import { DiagnosticReportsRepository } from '../clinical/repositories/diagnostic-reports.repository';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
@@ -36,7 +50,12 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsWorklistService,
+  DiagnosticsScopeService,
+  DiagnosticsPatientAccessService,
 } from './services';
+import { SuggestedSiteNamesReader } from '../clinical/services/suggested-site-names.reader';
+import { ServiceRequestNotesService } from '../clinical/services/service-request-notes.service';
 import {
   SpecimensRepository,
   LabWorkRepository,
@@ -45,6 +64,9 @@ import {
   MediaQualityRepository,
   DiagnosticOrdersRepository,
   LabReceptionRepository,
+  ServiceRequestWorklistRepository,
+  ClinicalRefsRepository,
+  LabPortalRepository,
 } from './repositories';
 
 /**
@@ -63,6 +85,7 @@ import {
     ]),
     ProfilesModule,
     AuthzModule,
+    ClinicalModule,
     CommonModule,
     DirectoryAuthorizationModule,
   ],
@@ -74,6 +97,9 @@ import {
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
+    DiagnosticsLabPortalController,
+    DiagnosticsLabResultsController,
+    DiagnosticsLabUploadsController,
   ],
   providers: [
     // Repositorios
@@ -87,6 +113,12 @@ import {
     // `scheduling` provee `AppointmentsRepository`.
     DiagnosticOrdersRepository,
     LabReceptionRepository,
+    ServiceRequestWorklistRepository,
+    ClinicalRefsRepository,
+    // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
+    SuggestedSiteNamesReader,
+    // P40: las notas que motivan cada orden, en la ficha diagnóstica.
+    ServiceRequestNotesService,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,
@@ -96,8 +128,22 @@ import {
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
+    DiagnosticsWorklistService,
+    // Alcance de tenant de los writes clínicos y política paciente–profesional.
+    DiagnosticsScopeService,
+    DiagnosticsPatientAccessService,
     // Guard del personal de laboratorio (recepción y circuito de especímenes).
     LabStaffGuard,
+    // Laboratory portal (`/diagnostics/lab/*`). The clinical report repository
+    // is stateless (it receives the EntityManager), same criterion as above.
+    LabPortalRepository,
+    DiagnosticReportsRepository,
+    LabPortalSnapshotService,
+    LabPortalOrdersService,
+    LabPortalResultsService,
+    LabPortalResultWritesService,
+    LabPortalSummaryService,
+    LabPortalUploadsService,
   ],
 })
 export class DiagnosticsModule {}

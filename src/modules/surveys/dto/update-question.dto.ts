@@ -49,9 +49,13 @@ export class UpdateQuestionDto {
   answerType?: AnswerTypeCode;
 
   /**
-   * Si responderla es obligatorio para poder enviar.
+   * Se acepta por compatibilidad, pero el servidor lo ignora: las preguntas del
+   * profesional son siempre opcionales.
    */
-  @ApiPropertyOptional({ description: 'Si responderla es obligatorio' })
+  @ApiPropertyOptional({
+    description:
+      'Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false)',
+  })
   @IsOptional()
   @IsBoolean()
   required?: boolean;

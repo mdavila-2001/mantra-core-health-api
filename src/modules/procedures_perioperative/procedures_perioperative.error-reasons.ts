@@ -8,6 +8,12 @@
 export enum ProceduresPerioperativeErrorReason {
   // --- Caso quirúrgico: existencia y estado ---
   CASE_NOT_FOUND = 'CASE_NOT_FOUND',
+  /**
+   * El caso pedido por uuid no existe o es de otro tenant. Los dos casos
+   * responden igual: distinguirlos confirmaría que el uuid existe en otra
+   * organización.
+   */
+  PERIOP_CASE_NOT_FOUND = 'PERIOP_CASE_NOT_FOUND',
   CASE_CANCELLED = 'CASE_CANCELLED',
   CASE_ALREADY_CANCELLED = 'CASE_ALREADY_CANCELLED',
   CASE_NOT_IN_PROGRESS = 'CASE_NOT_IN_PROGRESS',
@@ -42,6 +48,20 @@ export enum ProceduresPerioperativeErrorReason {
   OPERATIVE_STEP_NOT_FOUND = 'OPERATIVE_STEP_NOT_FOUND',
   STEP_NOT_IN_CASE = 'STEP_NOT_IN_CASE',
   PROCEDURE_REFERENCE_REQUIRED = 'PROCEDURE_REFERENCE_REQUIRED',
+  /**
+   * El procedimiento que cita el cliente (`primaryProcedureId` al programar el
+   * caso, `procedureId` al crear pasos, implantes, medicación, muestras o el
+   * informe) no existe, es de otro paciente o es de otro tenant. Los tres casos
+   * responden igual: distinguirlos le confirmaría a un tercero que el uuid
+   * existe en otra historia clínica.
+   */
+  PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT = 'PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT',
+  /**
+   * El paciente que manda el cliente (al programar o corregir el caso, al
+   * registrar o consultar el histórico odontológico) no existe o no tiene
+   * atención en el tenant activo. Los dos casos responden igual.
+   */
+  PATIENT_NOT_FOUND_IN_TENANT = 'PATIENT_NOT_FOUND_IN_TENANT',
   REPORT_NOT_FOUND = 'REPORT_NOT_FOUND',
   REPORT_BELONGS_TO_ANOTHER_CASE = 'REPORT_BELONGS_TO_ANOTHER_CASE',
   REPORT_ALREADY_SIGNED = 'REPORT_ALREADY_SIGNED',
@@ -76,6 +96,27 @@ export enum ProceduresPerioperativeErrorReason {
   ANESTHESIA_PLAN_BELONGS_TO_ANOTHER_CASE = 'ANESTHESIA_PLAN_BELONGS_TO_ANOTHER_CASE',
   ANESTHESIA_PLAN_ALREADY_APPROVED = 'ANESTHESIA_PLAN_ALREADY_APPROVED',
   INDUCTION_REQUIRES_APPROVED_ANESTHESIA_PLAN = 'INDUCTION_REQUIRES_APPROVED_ANESTHESIA_PLAN',
+
+  // --- F4 quirófanos (CONTRATO-F2-F5 §F4.3) ---
+  OPERATING_ROOM_SITE_MISMATCH = 'OPERATING_ROOM_SITE_MISMATCH',
+  OPERATING_ROOM_INVALID_FUNCTION = 'OPERATING_ROOM_INVALID_FUNCTION',
+  OPERATING_ROOM_NOT_AVAILABLE = 'OPERATING_ROOM_NOT_AVAILABLE',
+  OPERATING_ROOM_WITHOUT_RESOURCE = 'OPERATING_ROOM_WITHOUT_RESOURCE',
+  OR_BLOCK_OWNED_BY_OTHER = 'OR_BLOCK_OWNED_BY_OTHER',
+  OR_BLOCK_OVERLAP = 'OR_BLOCK_OVERLAP',
+  OR_BLOCK_OWNER_REQUIRED = 'OR_BLOCK_OWNER_REQUIRED',
+  OR_BLOCK_INVALID_ROOM = 'OR_BLOCK_INVALID_ROOM',
+  OR_BLOCK_IN_PAST = 'OR_BLOCK_IN_PAST',
+  OR_BLOCK_NOT_ACTIVE = 'OR_BLOCK_NOT_ACTIVE',
+  OR_BLOCK_HAS_CASES = 'OR_BLOCK_HAS_CASES',
+  CHECKLIST_SIGN_IN_REQUIRED = 'CHECKLIST_SIGN_IN_REQUIRED',
+  CHECKLIST_TIME_OUT_REQUIRED = 'CHECKLIST_TIME_OUT_REQUIRED',
+  CHECKLIST_SIGN_OUT_REQUIRED = 'CHECKLIST_SIGN_OUT_REQUIRED',
+  ROOM_EVENT_OUT_OF_ORDER = 'ROOM_EVENT_OUT_OF_ORDER',
+  ROOM_EVENT_ALREADY_RECORDED = 'ROOM_EVENT_ALREADY_RECORDED',
+  OCCURRED_AT_IN_FUTURE = 'OCCURRED_AT_IN_FUTURE',
+  ROOM_CHARGE_IS_AUTOMATIC = 'ROOM_CHARGE_IS_AUTOMATIC',
+  INDICATOR_RANGE_TOO_LONG = 'INDICATOR_RANGE_TOO_LONG',
 
   // --- Histórico odontológico ---
   INVALID_DENTAL_SITE = 'INVALID_DENTAL_SITE',

@@ -18,8 +18,8 @@
 // Idempotente: ids deterministas `md5('mantra:dx-us:…')` + `ON CONFLICT DO
 // NOTHING`; la segunda corrida inserta 0 filas. No escribe DDL.
 //
-//   node tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs           # dry-run
-//   node tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs --apply   # .env DB_*
+//   node --max-old-space-size=8192 tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs           # dry-run (lee ~1,1 M filas)
+//   node --max-old-space-size=8192 tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs --apply   # .env DB_*
 // =============================================================================
 
 import 'dotenv/config';
@@ -48,6 +48,17 @@ const DB_CONFIG = {
 export function md5Uuid(key) {
   const h = createHash('md5').update(key, 'utf8').digest('hex');
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+/**
+ * Versión del code system = la de la clasificación que dio los nombres de los
+ * product codes: el export oficial de openFDA si está, si no la del espejo.
+ */
+export function codeSystemVersion(manifest) {
+  const official = (manifest.official ?? []).find((f) => /device\/classification\//.test(f.dest ?? ''));
+  if (official) return `openFDA device/classification export ${official.exportDate ?? 'desconocida'}`;
+  const input = (manifest.inputs ?? []).find((i) => /classification|foiclass/i.test(i.source));
+  return input?.version ?? 'desconocida';
 }
 
 export function buildPlan(productCodes, ndjsonRows, version) {
@@ -111,8 +122,7 @@ async function insert(client, sql, tuples, width) {
 async function main() {
   const productCodes = JSON.parse(readFileSync(join(OUT_DIR, 'fda-product-codes.json'), 'utf8'));
   const manifest = JSON.parse(readFileSync(join(OUT_DIR, 'manifest.json'), 'utf8'));
-  const classification = (manifest.inputs ?? []).find((i) => /classification|foiclass/i.test(i.source));
-  const version = classification?.version ?? (manifest.files ?? []).map((f) => f.sourceVersion).sort()[0] ?? 'desconocida';
+  const version = codeSystemVersion(manifest);
   const plan = buildPlan(productCodes, readNdjson(), version);
   console.log(`Product codes en alcance: ${plan.included} · cargables: ${plan.concepts.length} · sin nombre publicado (no se cargan): ${plan.skippedWithoutName}`);
   console.log(`Propiedades: ${plan.properties.length} · versión: ${version}`);

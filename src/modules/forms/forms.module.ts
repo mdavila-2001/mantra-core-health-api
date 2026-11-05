@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+// Las lecturas clínicas de instancias piden la misma puerta que el resumen
+// clínico (`ClinicalReadService.assertCanReadHistory`). `ClinicalModule` ya la
+// exporta; `clinical` sólo importa de `forms` una clase suelta
+// (`FormInstanceOriginValidator`), no este módulo, así que no hay ciclo.
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   FormsDefinitionSetsController,
   FormsFieldsController,
@@ -41,7 +46,7 @@ const entityClasses = Object.values(entities).filter((value) =>
  * valores, y migración de esquema.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(entityClasses)],
+  imports: [MikroOrmModule.forFeature(entityClasses), ClinicalModule],
   controllers: [
     FormsDefinitionSetsController,
     FormsFieldsController,

@@ -1,0 +1,393 @@
+[
+ {
+  "uuid": "db6acdd3-4289-43bf-a71b-b9ea8ddd1f00",
+  "unii": "4AF302ESOS",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "ONDANSETRON",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "WHO-ATC",
+    "code": "A04AA01",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "RXCUI",
+    "code": "26225",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "4AF302ESOS",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "4AF302ESOS"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "00ad9393-0ca6-4553-a6a3-2832f8f26dea",
+  "unii": "CD35PMG570",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "Oxycodone",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA05",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA55",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "RXCUI",
+    "code": "7804",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA56",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ17",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ19",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ18",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "CD35PMG570",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "CD35PMG570"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "2966d491-86e8-429b-85e9-cd22e4f13278",
+  "unii": "39J1LGJ30J",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "TRAMADOL",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AX02",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AX52",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "RXCUI",
+    "code": "10689",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ14",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ15",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ13",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "39J1LGJ30J",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "39J1LGJ30J"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "405063af-a864-4615-a28d-9aca37b0ec74",
+  "unii": "362O9ITL9D",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "Acetaminophen",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02BE01",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02BE51",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02BE71",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "RXCUI",
+    "code": "161",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ01",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ13",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ17",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ06",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "362O9ITL9D",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "362O9ITL9D"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "480a88c3-64ea-4b80-ae1c-13775627f42c",
+  "unii": "NMH84OZK2B",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "ONDANSETRON HYDROCHLORIDE",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "RXCUI",
+    "code": "203148",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "NMH84OZK2B",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "4AF302ESOS"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "2c0a9c46-b752-432d-adea-44270c01be5a",
+  "unii": "9N7R477WCK",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "TRAMADOL HYDROCHLORIDE",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "RXCUI",
+    "code": "82110",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "9N7R477WCK",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "39J1LGJ30J"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "2bc89bfb-9371-4251-b9d5-e212f3f76657",
+  "unii": "N9I9HDB855",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "DIHYDROCODEINE",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA08",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA58",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "RXCUI",
+    "code": "23088",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ01",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ03",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ02",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "N9I9HDB855",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": [
+   {
+    "type": "ACTIVE MOIETY",
+    "related_substance": {
+     "unii": "N9I9HDB855"
+    }
+   }
+  ]
+ },
+ {
+  "uuid": "1997e95a-d3a3-4d4a-8de6-0f01bc402b0d",
+  "unii": "Q830PW7520",
+  "substance_class": "chemical",
+  "names": [
+   {
+    "name": "CODEINE",
+    "display_name": true
+   }
+  ],
+  "codes": [
+   {
+    "code_system": "RXCUI",
+    "code": "2670",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "R05DA04",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA59",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AA79",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ07",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ06",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "WHO-ATC",
+    "code": "N02AJ08",
+    "type": "PRIMARY"
+   },
+   {
+    "code_system": "FDA UNII",
+    "code": "Q830PW7520",
+    "type": "PRIMARY"
+   }
+  ],
+  "relationships": []
+ }
+]

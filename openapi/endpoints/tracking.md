@@ -79,7 +79,6 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `subjectType` | Sí | `string` | valores: `SPECIMEN`, `ORDER`, `DEVICE` | Sin descripción específica en el contrato OpenAPI. | `SPECIMEN` |
 | `milestones` | Sí | `array<MilestoneDefinitionDto>` | mínimo 1 elemento(s) | Hitos esperados en orden, al menos uno | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","milestoneStatus":"CREATED","isTerminal":false,"slaMinutes":1}]` |
 | `milestones[].code` | Sí | `string` | longitud máxima 100 | Código del hito, único por tipo de sujeto | `CODIGO_EJEMPLO` |
@@ -99,7 +98,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "subjectType": "SPECIMEN",
   "milestones": [
     {
@@ -126,6 +124,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MilestonesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MilestonesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MilestonesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MilestonesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MilestonesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -259,6 +258,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CancelShipmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CancelShipmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CancelShipmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CancelShipmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CancelShipmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -289,8 +289,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 409 | `CONFLICT` | El envío ya está cancelado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un envío entregado no se cancela | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
@@ -404,6 +402,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeliveryProofResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeliveryProofResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeliveryProofResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeliveryProofResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeliveryProofResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -436,8 +435,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 409 | `CONFLICT` | El envío ya está entregado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 409 | `CONFLICT` | El envío ya tiene prueba de entrega verificada | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -542,6 +539,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DispatchResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DispatchResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DispatchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DispatchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DispatchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -572,8 +570,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El envío no está en preparación | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 422 | `PRECONDITION_FAILED` | El despacho necesita transportista o mensajero asignado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
@@ -682,6 +678,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EtaResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EtaResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EtaResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EtaResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EtaResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -712,7 +709,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El envío ya no admite estimaciones | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -819,6 +815,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExceptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -851,8 +848,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El envío ya no admite excepciones | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -969,6 +964,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HandoffResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HandoffResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HandoffResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HandoffResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HandoffResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -999,7 +995,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Envío no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 404 | `NOT_FOUND` | Transportista no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El envío ya no admite traspasos | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
@@ -1096,6 +1091,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ScanSlaResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScanSlaResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScanSlaResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScanSlaResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScanSlaResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1195,7 +1191,6 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `subjectType` | Sí | `string` | valores: `SPECIMEN`, `ORDER`, `DEVICE` | Sin descripción específica en el contrato OpenAPI. | `SPECIMEN` |
 | `subjectRefType` | Sí | `string` | longitud máxima 100 | Tipo de la entidad rastreada | `valor-ejemplo` |
 | `subjectRefId` | Sí | `string` | formato `uuid` | Entidad rastreada | `00000000-0000-4000-8000-000000000001` |
@@ -1216,7 +1211,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "subjectType": "SPECIMEN",
   "subjectRefType": "valor-ejemplo",
   "subjectRefId": "00000000-0000-4000-8000-000000000001",
@@ -1241,6 +1235,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SubjectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SubjectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SubjectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SubjectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SubjectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1395,6 +1390,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1427,7 +1423,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 404 | `NOT_FOUND` | Hito no encontrado para el tipo de sujeto | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El seguimiento del sujeto está cerrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
@@ -1459,7 +1454,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Ruta pública: el transportista no presenta sesión. Idempotente por identificador del evento externo.
+Ruta pública: el transportista no presenta sesión, se autentica con una firma HMAC-SHA256 sobre `[timestamp, carrierCode, trackingNumber, externalStatusCode, externalEventId, occurredAt, locationText]` (arreglo JSON; los opcionales ausentes van como `null`) con su secreto propio, dentro de una ventana de 5 minutos. Idempotente por identificador del evento externo.
 
 
 ### Descripción del sistema
@@ -1471,6 +1466,8 @@ NestJS resuelve `POST /tracking/webhooks/carriers/{carrierCode}` en `TrackingCon
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `carrierCode` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
+| `x-carrier-signature` | header | Sí | `string` | Sin restricción adicional declarada | HMAC-SHA256 en hexadecimal (prefijo `sha256=` opcional) | `valor-ejemplo` |
+| `x-carrier-timestamp` | header | Sí | `string` | Sin restricción adicional declarada | Segundos desde la época o ISO-8601 con zona; es parte de lo firmado | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -1480,6 +1477,8 @@ Incluye únicamente los campos obligatorios del DTO `CarrierWebhookDto`; los cam
 POST /tracking/webhooks/carriers/CODIGO_EJEMPLO HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
+x-carrier-signature: valor-ejemplo
+x-carrier-timestamp: valor-ejemplo
 Content-Type: application/json
 
 {
@@ -1512,6 +1511,8 @@ Incluye todos los campos documentados, tanto obligatorios como opcionales. Los i
 POST /tracking/webhooks/carriers/CODIGO_EJEMPLO HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
+x-carrier-signature: valor-ejemplo
+x-carrier-timestamp: valor-ejemplo
 Content-Type: application/json
 
 {
@@ -1537,6 +1538,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WebhookResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WebhookResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WebhookResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WebhookResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebhookResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1566,9 +1568,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | message | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Transportista no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
-| 404 | `NOT_FOUND` | Número de seguimiento desconocido | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 404 | `NOT_FOUND` | Sujeto rastreable no encontrado | Excepción explícita en src/modules/tracking/services/tracking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

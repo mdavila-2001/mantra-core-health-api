@@ -22,10 +22,10 @@ import 'dotenv/config';
 import pg from 'pg';
 import { existsSync } from 'node:fs';
 
-import { readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
-import { parseArgs } from './lib/cli.mjs';
-import { CODE_SYSTEM, EQUIV_EQUIVALENT, PROPERTY_PREFIX, REL_IS_A, planFor, vademecumMapTuple } from './lib/load-plan.mjs';
+import { parseArgs, readNdjsonLarge } from './lib/cli.mjs';
+import { CODE_SYSTEM, EQUIV_EQUIVALENT, LANG_EN, PROPERTY_PREFIX, REL_IS_A, planFor, vademecumMapTuple } from './lib/load-plan.mjs';
 import { DRY_RUN_PLAN, MONOGRAPHS_NDJSON } from './lib/paths.mjs';
 
 const { has } = parseArgs();
@@ -63,7 +63,7 @@ async function insertMany(client, table, columns, tuples, casts) {
 }
 
 async function assertPrerequisites(client) {
-  const need = { TERM_ACTIVE: CONCEPT.TERM_ACTIVE, LANG_ES: CONCEPT.LANG_ES, DESIG_PREFERRED: CONCEPT.DESIG_PREFERRED, REL_IS_A, EQUIV_EQUIVALENT };
+  const need = { TERM_ACTIVE: CONCEPT.TERM_ACTIVE, LANG_ES: CONCEPT.LANG_ES, LANG_EN, DESIG_PREFERRED: CONCEPT.DESIG_PREFERRED, REL_IS_A, EQUIV_EQUIVALENT };
   const { rows } = await client.query('SELECT id FROM terminology.catalog_concepts WHERE id = ANY($1::uuid[])', [Object.values(need)]);
   const have = new Set(rows.map((r) => r.id));
   const missing = Object.entries(need).filter(([, id]) => !have.has(id)).map(([k]) => k);
@@ -124,7 +124,7 @@ async function prune(client, csvId, planIds) {
 async function main() {
   const t0 = Date.now();
   if (!existsSync(MONOGRAPHS_NDJSON())) throw new Error(`Falta ${MONOGRAPHS_NDJSON()}: corré build-monographs.mjs.`);
-  const monographs = readNdjson(MONOGRAPHS_NDJSON());
+  const monographs = readNdjsonLarge(MONOGRAPHS_NDJSON());
   const plan = planFor(monographs);
   const summary = {
     codeSystem: CODE_SYSTEM,

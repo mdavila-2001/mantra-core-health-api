@@ -9,6 +9,7 @@ import {
   GraphProjectionDefinitions,
   GraphProjectionRuns,
 } from '../entities';
+import { PatientProfiles } from '../../profiles/entities/patient_profiles.entity';
 
 /**
  * Describe el contrato estructural de upsert node data.
@@ -196,6 +197,29 @@ export class GraphProjectionRepository {
   findNodesByIds(em: EntityManager, ids: string[]): Promise<GraphNodes[]> {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(GraphNodes, { nodeId: { $in: ids } });
+  }
+
+  /**
+   * De los ids dados, cuáles son perfiles de paciente.
+   *
+   * `graph_nodes` no tiene columna de paciente: un nodo apunta a su fila
+   * canónica por `source_entity_id`, y `profiles.patient_profiles.profile_id` es
+   * a la vez PK y FK a `profiles.persons.id`. Un nodo cuyo `source_entity_id`
+   * es un `profile_id` representa a ese paciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - `source_entity_id` de los nodos a clasificar.
+   * @returns Los ids que son perfiles de paciente.
+   */
+  async findPatientProfileIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<string[]> {
+    if (ids.length === 0) return [];
+    const patients = await em.find(PatientProfiles, {
+      profileId: { $in: ids },
+    });
+    return patients.map((patient) => patient.profileId);
   }
 
   /**

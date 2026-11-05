@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsIn,
+  IsISO8601,
   IsNumberString,
   IsOptional,
   IsString,
@@ -8,6 +9,11 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
+import {
+  GATEWAY_PAYMENT_METHOD_TYPES,
+  type GatewayPaymentMethodType,
+} from '../gateway/payments-gateway.types';
+import { PaymentIntentGatewayDto } from './payment-intent.dto';
 
 /**
  * Importe monetario positivo con hasta 2 decimales, como cadena. Rechaza
@@ -67,6 +73,18 @@ export class ProcessTransactionDto {
   @IsString()
   @MaxLength(100)
   authorizationCode?: string;
+
+  /**
+   * Medio de pago en la pasarela (sólo con `payments.via_gateway`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora.',
+    enum: GATEWAY_PAYMENT_METHOD_TYPES,
+  })
+  @IsOptional()
+  @IsIn(GATEWAY_PAYMENT_METHOD_TYPES as readonly string[])
+  paymentMethodType?: GatewayPaymentMethodType;
 }
 
 /**
@@ -102,6 +120,14 @@ export class TransactionResponseDto {
    */
   @ApiPropertyOptional()
   gatewayTransactionRef?: string;
+
+  /**
+   * Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay
+   * transacción local: `id` es el de la intención y `gatewayTransactionRef` el
+   * `pi_…` de la pasarela; el resultado llega por webhook.
+   */
+  @ApiPropertyOptional({ type: () => PaymentIntentGatewayDto })
+  gateway?: PaymentIntentGatewayDto;
 }
 
 /** Cuerpo de `POST /payments/callbacks/{callbackPath}` (UC-42-06). */
@@ -143,6 +169,19 @@ export class GatewayCallbackDto {
   @IsString()
   @MaxLength(500)
   signature?: string;
+
+  /**
+   * Instante en que el proveedor emitió el evento. Forma parte de los bytes
+   * firmados cuando viene; un endpoint con ventana de repetición lo exige.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instante de emisión del evento (ISO-8601), firmado junto con el resto',
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsISO8601()
+  timestamp?: string;
 }
 
 /**

@@ -6,6 +6,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { PeopleSeedService } from './people-seed.service';
+import { syntheticNationalId } from './synthetic-person';
+import { AuthenticationCredentials } from '../../modules/iam/entities';
+import {
+  JurisdictionAuthorizations,
+  PatientProfiles,
+  PersonAccountLinks,
+  Persons,
+} from '../../modules/profiles/entities';
 import { ConflictException } from '../errors/domain.exception';
 
 const DOCTORS = `# USUARIO MEDICOS 1
@@ -24,10 +32,19 @@ const PATIENTS = `# USUARIO PACIENTES 1
 `;
 
 function build() {
-  const em = { fork: fn(() => ({ findOne: fn().mockResolvedValue(null) })) };
+  const em = {
+    fork: fn(() => ({
+      findOne: fn().mockResolvedValue(null),
+      find: fn().mockResolvedValue([]),
+    })),
+  };
+  const showcases = { ensure: fn().mockResolvedValue(true) };
   const orm = { em };
   const practitionerRegistration = {
-    registerPractitioner: fn().mockResolvedValue({ userId: 'u-1' }),
+    registerPractitioner: fn().mockResolvedValue({
+      userId: 'u-1',
+      practitionerProfileId: 'p-1',
+    }),
   };
   const patientRegistration = {
     registerPatient: fn().mockResolvedValue({ userId: 'u-2' }),
@@ -38,11 +55,13 @@ function build() {
     practitionerRegistration as never,
     patientRegistration as never,
     logger as never,
+    showcases as never,
   );
   return {
     service,
     orm,
     em,
+    showcases,
     practitionerRegistration,
     patientRegistration,
     logger,
@@ -174,5 +193,272 @@ describe('PeopleSeedService', () => {
 
     expect(result.practitionersCreated).toBe(0);
     expect(result.skipped).toContainEqual(expect.stringContaining('boom'));
+  });
+
+  it('crea la vitrina pública de cada médico dado de alta', async () => {
+    const { service, showcases } = build();
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(result.showcasesCreated).toBe(1);
+    expect(showcases.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'u-1',
+        practitionerProfileId: 'p-1',
+        displayName: 'XIOMARA CUELLAR JUSTINIANO',
+        headline: 'CIRUJANO ODONTOLOGO',
+      }),
+    );
+    // El correo que deriva el enlace público es el sintético, nunca uno real.
+    const [input] = showcases.ensure.mock.calls[0] as [{ email: string }];
+    expect(input.email).toMatch(/@alovida\.test$/);
+  });
+
+  it('una vitrina que ya existía no se cuenta como creada', async () => {
+    const { service, showcases } = build();
+    showcases.ensure.mockResolvedValue(false);
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(result.showcasesCreated).toBe(0);
+  });
+
+  it('si no resuelve el perfil profesional lo informa y no inventa la vitrina', async () => {
+    const { service, showcases, practitionerRegistration } = build();
+    practitionerRegistration.registerPractitioner.mockResolvedValue({
+      userId: 'u-1',
+    });
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(showcases.ensure).not.toHaveBeenCalled();
+    expect(result.skipped).toContainEqual(
+      expect.stringContaining('no se creó la vitrina'),
+    );
+  });
+
+  it('nunca toma del padrón cédula, nacimiento, celular, correo ni domicilio reales', async () => {
+    writeFileSync(
+      join(dir, 'USUARIO_MEDICOS_1.md'),
+      `| NUMERO | NOMBRE | APELLIDO PATERNO | MATRICULA MINISTERIO DE SALUD Y DEPORTES | CEDULA | FECHA NACIMIENTO | CELULAR | CORREO | DOMICILIO | OCUPACION |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | ANA | PEREZ | C-1 | 9988776 | 1970-02-03 | 71122334 | ana.real@gmail.com | CALLE REAL 12 | MEDICO |
+`,
+      'utf-8',
+    );
+    const { service, practitionerRegistration } = build();
+
+    await service.run(true, '12345678', dir);
+
+    const [dto] = practitionerRegistration.registerPractitioner.mock
+      .calls[0] as [Record<string, string>];
+    const serialized = JSON.stringify({ ...dto, password: undefined });
+    for (const real of [
+      '9988776',
+      '1970-02-03',
+      '71122334',
+      'gmail.com',
+      'CALLE REAL',
+    ]) {
+      expect(serialized).not.toContain(real);
+    }
+    expect(dto.email).toMatch(/@alovida\.test$/);
+  });
+
+  describe('adopción de una carga anterior', () => {
+    /** Una base con cuentas de una carga anterior, de otro generador de correos. */
+    function withLegacy(rows: {
+      licenses?: { practitionerProfileId: string }[];
+      persons?: Record<string, string>[];
+      links?: { personId: string; userId: string }[];
+      patients?: { profileId: string }[];
+      credentials?: { userId: string; externalSubject: string }[];
+    }) {
+      const built = build();
+      (built.orm.em.fork as jest.Mock).mockReturnValue({
+        findOne: fn((entity: unknown) =>
+          Promise.resolve(
+            entity === PersonAccountLinks ? (rows.links?.[0] ?? null) : null,
+          ),
+        ),
+        find: fn((entity: unknown) => {
+          if (entity === JurisdictionAuthorizations) {
+            return Promise.resolve(rows.licenses ?? []);
+          }
+          if (entity === Persons) return Promise.resolve(rows.persons ?? []);
+          if (entity === PatientProfiles) {
+            return Promise.resolve(rows.patients ?? []);
+          }
+          if (entity === PersonAccountLinks) {
+            return Promise.resolve(rows.links ?? []);
+          }
+          if (entity === AuthenticationCredentials) {
+            return Promise.resolve(rows.credentials ?? []);
+          }
+          return Promise.resolve([]);
+        }),
+      });
+      return built;
+    }
+    const doctor = {
+      id: 'p-9',
+      name: 'XIOMARA',
+      lastName: 'CUELLAR',
+      motherLastName: 'JUSTINIANO',
+    };
+    const patient = {
+      id: 'pp-1',
+      name: 'LICZY',
+      middleName: 'PAOLA',
+      lastName: 'NUÑEZ',
+      motherLastName: 'CALLEJAS',
+    };
+
+    it('un médico con la misma matrícula y nombre se adopta: no se registra otro y se le completa la vitrina', async () => {
+      const { service, practitionerRegistration, showcases } = withLegacy({
+        licenses: [{ practitionerProfileId: 'p-9' }],
+        persons: [doctor],
+        links: [{ personId: 'p-9', userId: 'u-9' }],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(result.practitionersAdopted).toBe(1);
+      expect(result.practitionersCreated).toBe(0);
+      expect(
+        practitionerRegistration.registerPractitioner,
+      ).not.toHaveBeenCalled();
+      expect(showcases.ensure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'u-9',
+          practitionerProfileId: 'p-9',
+        }),
+      );
+    });
+
+    it('la misma matrícula con otro nombre no se adopta', async () => {
+      const { service, practitionerRegistration } = withLegacy({
+        licenses: [{ practitionerProfileId: 'p-9' }],
+        persons: [{ ...doctor, name: 'OTRA' }],
+        links: [{ personId: 'p-9', userId: 'u-9' }],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(result.practitionersAdopted).toBe(0);
+      expect(
+        practitionerRegistration.registerPractitioner,
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it('matrícula y nombre que coinciden con dos personas no crean otra y se informan', async () => {
+      const { service, practitionerRegistration } = withLegacy({
+        licenses: [
+          { practitionerProfileId: 'p-9' },
+          { practitionerProfileId: 'p-10' },
+        ],
+        persons: [doctor, { ...doctor, id: 'p-10' }],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(
+        practitionerRegistration.registerPractitioner,
+      ).not.toHaveBeenCalled();
+      expect(result.skipped).toContainEqual(
+        expect.stringContaining('más de una persona'),
+      );
+    });
+
+    it('un paciente con el mismo nombre completo y cuenta se adopta, aunque el nombre venga con otras tildes', async () => {
+      const { service, patientRegistration } = withLegacy({
+        patients: [{ profileId: 'pp-1' }],
+        persons: [{ ...patient, lastName: 'Nunez' }],
+        links: [{ personId: 'pp-1', userId: 'u-2' }],
+        credentials: [{ userId: 'u-2', externalSubject: '9999999' }],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(result.patientsAdopted).toBe(1);
+      expect(patientRegistration.registerPatient).not.toHaveBeenCalled();
+    });
+
+    it('una persona que entra con la cédula sintética de una fila es de este paso, no de la carga anterior', async () => {
+      const { service, patientRegistration } = withLegacy({
+        patients: [{ profileId: 'pp-1' }],
+        persons: [patient],
+        links: [{ personId: 'pp-1', userId: 'u-2' }],
+        credentials: [
+          {
+            userId: 'u-2',
+            externalSubject: syntheticNationalId('USUARIO_PACIENTES_1.md#0'),
+          },
+        ],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(result.patientsAdopted).toBe(0);
+      expect(patientRegistration.registerPatient).toHaveBeenCalledTimes(1);
+    });
+
+    it('cada paciente ya cargado responde por una sola fila', async () => {
+      writeFileSync(
+        join(dir, 'USUARIO_PACIENTES_1.md'),
+        `| NUMERO | NOMBRE | NOMBRE 2 | APELLIDO PATERNO | APELLIDO MATERNO | OCUPACION |
+| --- | --- | --- | --- | --- | --- |
+| 1 | LICZY | PAOLA | NUÑEZ | CALLEJAS | ABOGADA |
+| 2 | LICZY | PAOLA | NUÑEZ | CALLEJAS | ABOGADA |
+`,
+        'utf-8',
+      );
+      const { service, patientRegistration } = withLegacy({
+        patients: [{ profileId: 'pp-1' }],
+        persons: [patient],
+        links: [{ personId: 'pp-1', userId: 'u-2' }],
+        credentials: [{ userId: 'u-2', externalSubject: '9999999' }],
+      });
+
+      const result = await service.run(true, '12345678', dir);
+
+      expect(result.patientsAdopted).toBe(1);
+      expect(patientRegistration.registerPatient).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('candado de cuentas de demostración', () => {
+    it('en producción sin permiso explícito no crea cuentas', async () => {
+      const { service, practitionerRegistration, patientRegistration } =
+        build();
+
+      const result = await service.run(
+        true,
+        '12345678',
+        dir,
+        'production',
+        false,
+      );
+
+      expect(result.reason).toBe('production-not-allowed');
+      expect(
+        practitionerRegistration.registerPractitioner,
+      ).not.toHaveBeenCalled();
+      expect(patientRegistration.registerPatient).not.toHaveBeenCalled();
+    });
+
+    it('en producción con el permiso explícito sí las crea', async () => {
+      const { service } = build();
+
+      const result = await service.run(
+        true,
+        '12345678',
+        dir,
+        'production',
+        true,
+      );
+
+      expect(result.practitionersCreated).toBe(1);
+    });
   });
 });

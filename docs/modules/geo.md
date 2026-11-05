@@ -9,7 +9,7 @@
 # Módulo `geo`
 
 **Fuente:** [`src/modules/geo/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/geo/README.md)
-· 4 controllers · 4 services · 6 repositories · 6 entidades · 14 DTO
+· 5 controllers · 5 services · 6 repositories · 6 entidades · 14 DTO
 
 ---
 
@@ -100,7 +100,7 @@ proyecciones/worker fuera del alcance de estos endpoints.
 ## Convenciones (idénticas a IAM/Directory)
 
 - Servicios inyectan `EntityManager` (`@mikro-orm/postgresql`); escrituras en
-  `em.transactional`, lecturas en `em.fork()`.
+  `em.transactional`, lecturas en `em.fork()` (que hereda la transacción de la petición, ADR-0029).
 - Repositorios stateless: reciben el `em` activo como primer parámetro.
 - FK planas uuid → `flush` del padre antes de crear hijos; `em.create(..., { partial: true })`.
 - `row_version` nunca se fija (DEFAULT en BD); `createdBy(actor.id)`/`touch` para auditoría.

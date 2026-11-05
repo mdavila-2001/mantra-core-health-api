@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Public,
   Roles,
@@ -57,6 +58,11 @@ import {
 export class InsuranceCampaignsController {
   constructor(private readonly service: InsuranceCampaignsService) {}
 
+  @Audited({
+    action: 'INSURANCE_CAMPAIGN_CREATED',
+    entity: 'insurance_campaign',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles()
   @ApiOperation({ summary: 'Crear una campaña preventiva de la aseguradora' })
@@ -150,6 +156,11 @@ export class InsuranceCampaignsController {
     return this.service.getById(id, actor);
   }
 
+  @Audited({
+    action: 'INSURANCE_CAMPAIGN_STATUS_CHANGED',
+    entity: 'insurance_campaign',
+    entityId: 'param:id',
+  })
   @Patch(':id/status')
   @Roles()
   @ApiOperation({
@@ -164,6 +175,11 @@ export class InsuranceCampaignsController {
     return this.service.changeStatus(id, dto, actor);
   }
 
+  @Audited({
+    action: 'INSURANCE_CAMPAIGN_UPDATED',
+    entity: 'insurance_campaign',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles()
   @ApiOperation({

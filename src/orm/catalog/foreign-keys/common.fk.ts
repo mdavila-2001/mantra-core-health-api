@@ -2,11 +2,12 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `common`.
- * 48 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['addresses', 'administrative_area_2_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -20,14 +21,6 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['contact_points', 'system_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['contact_points', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['contact_points', 'use_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['files', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['files', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['files', 'current_version_id', 'common', 'file_versions', 'id'],
-  ['files', 'lifecycle_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['files', 'retention_class_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['files', 'sensitivity_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['files', 'tenant_id', 'directory', 'tenants', 'id'],
-  ['files', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['file_derivatives', 'created_by_user_id', 'iam', 'users', 'id'],
   ['file_derivatives', 'derivative_file_version_id', 'common', 'file_versions', 'id'],
   ['file_derivatives', 'derivative_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -46,6 +39,14 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['file_versions', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['file_versions', 'storage_provider_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['file_versions', 'storage_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['files', 'current_version_id', 'common', 'file_versions', 'id'],
+  ['files', 'lifecycle_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'retention_class_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'sensitivity_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['files', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['identifiers', 'assigner_tenant_id', 'directory', 'tenants', 'id'],
   ['identifiers', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identifiers', 'issuer_administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],

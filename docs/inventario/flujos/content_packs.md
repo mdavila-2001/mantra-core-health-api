@@ -24,7 +24,7 @@ _Fuente: `src/modules/content_packs/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:ContentPacksController` | Operaciones de ContentPacksController que el README no asigna a un caso de uso | GET /admin/content-packs | SUPERADMIN | BAJO | 0 |
-|  |  | POST /admin/content-packs/{code}/apply | SUPERADMIN | ALTO | 59 |
+|  |  | POST /admin/content-packs/{code}/apply | SUPERADMIN | ALTO | 63 |
 
 ### Diagrama — etapas `ctrl:ContentPacksController`
 
@@ -34,7 +34,7 @@ flowchart LR
   t4[("authz.roles")]:::tabla
   t5[("authz.user_role_assignments")]:::tabla
   t6[("chart.specialty_chart_templates")]:::tabla
-  t7[("+53 tablas más")]
+  t7[("+57 tablas más")]
   subgraph s0["ctrl:ContentPacksController · Operaciones de ContentPacksController que el READ…"]
     o1["GET /admin/content-packs"]:::op
     o3["POST /admin/content-packs/{code}/apply"]:::op
@@ -177,75 +177,73 @@ flowchart TD
   n42 -->|"sí"| n43
   n44[("CREA terminology.concept_properties")]:::efecto
   n43 -->|"sí"| n44
-  n45{"article !== undefined"}:::decision
+  n45["Llama a GlossarySeedService.seedMemberships"]:::llamada
   n44 --> n45
   n43 -->|"no"| n45
   n42 -->|"no"| n45
-  n46{"!existing.has(articleId)"}:::decision
-  n45 -->|"sí"| n46
-  n47[("CREA terminology.concept_properties")]:::efecto
-  n46 -->|"sí"| n47
-  n48["Llama a GlossarySeedService.seedMemberships"]:::llamada
+  n35 -->|"al terminar"| n45
+  n46["Repite: por cada const membership de memberships"]:::bucle
+  n45 --> n46
+  n47[("CREA terminology.value_set_members")]:::efecto
+  n46 -->|"cada elemento"| n47
+  n48["Llama a GlossarySeedService.seedRelationships"]:::llamada
   n47 --> n48
-  n46 -->|"no"| n48
-  n45 -->|"no"| n48
-  n35 -->|"al terminar"| n48
-  n49["Repite: por cada const membership de memberships"]:::bucle
+  n46 -->|"al terminar"| n48
+  n49["Repite: por cada const row de resolved"]:::bucle
   n48 --> n49
-  n50[("CREA terminology.value_set_members")]:::efecto
+  n50[("CREA terminology.concept_relationships")]:::efecto
   n49 -->|"cada elemento"| n50
-  n51["Llama a GlossarySeedService.seedRelationships"]:::llamada
+  n51["Llama a GlossarySeedService.reconcile"]:::llamada
   n50 --> n51
   n49 -->|"al terminar"| n51
-  n52["Repite: por cada const row de resolved"]:::bucle
+  n52[("LEE terminology.catalog_concepts")]:::efecto
   n51 --> n52
-  n53[("CREA terminology.concept_relationships")]:::efecto
-  n52 -->|"cada elemento"| n53
-  n54["Llama a GlossarySeedService.reconcile"]:::llamada
-  n53 --> n54
-  n52 -->|"al terminar"| n54
-  n55[("LEE terminology.catalog_concepts")]:::efecto
-  n54 --> n55
-  n56["Repite: por cada const concept de concepts"]:::bucle
+  n53["Repite: por cada const concept de concepts"]:::bucle
+  n52 --> n53
+  n54{"term !== undefined && concept.display !== term.enDisplay"}:::decision
+  n53 -->|"cada elemento"| n54
+  n55[("ACTUALIZA terminology.catalog_concepts")]:::efecto
+  n54 -->|"sí"| n55
+  n56[("LEE terminology.concept_designations")]:::efecto
   n55 --> n56
-  n57{"term !== undefined && concept.display !== term.enDisplay"}:::decision
-  n56 -->|"cada elemento"| n57
-  n58[("ACTUALIZA terminology.catalog_concepts")]:::efecto
-  n57 -->|"sí"| n58
-  n59[("LEE terminology.concept_designations")]:::efecto
-  n58 --> n59
-  n57 -->|"no"| n59
-  n56 -->|"al terminar"| n59
-  n60["Repite: por cada const designation de designations"]:::bucle
-  n59 --> n60
-  n61{"value === undefined"}:::decision
-  n60 -->|"cada elemento"| n61
-  n62[("BORRA terminology.concept_designations")]:::efecto
-  n61 -->|"sí"| n62
-  n63{"designation.value !== value"}:::decision
-  n61 -->|"no"| n63
-  n64[("ACTUALIZA terminology.concept_designations")]:::efecto
-  n63 -->|"sí"| n64
-  n65[("LEE terminology.concept_properties")]:::efecto
-  n62 --> n65
-  n64 --> n65
-  n63 -->|"no"| n65
-  n60 -->|"al terminar"| n65
-  n66["Repite: por cada const property de properties"]:::bucle
+  n54 -->|"no"| n56
+  n53 -->|"al terminar"| n56
+  n57["Repite: por cada const designation de designations"]:::bucle
+  n56 --> n57
+  n58{"value === undefined"}:::decision
+  n57 -->|"cada elemento"| n58
+  n59[("BORRA terminology.concept_designations")]:::efecto
+  n58 -->|"sí"| n59
+  n60{"designation.value !== value"}:::decision
+  n58 -->|"no"| n60
+  n61[("ACTUALIZA terminology.concept_designations")]:::efecto
+  n60 -->|"sí"| n61
+  n62[("LEE terminology.concept_properties")]:::efecto
+  n59 --> n62
+  n61 --> n62
+  n60 -->|"no"| n62
+  n57 -->|"al terminar"| n62
+  n63["Repite: por cada const property de properties"]:::bucle
+  n62 --> n63
+  n64{"!desiredProperties.has(property.id)"}:::decision
+  n63 -->|"cada elemento"| n64
+  n65[("BORRA terminology.concept_properties")]:::efecto
+  n64 -->|"sí"| n65
+  n66{"!sameJson(property.valueJson, value)"}:::decision
   n65 --> n66
-  n67{"!desiredProperties.has(property.id)"}:::decision
-  n66 -->|"cada elemento"| n67
-  n68[("BORRA terminology.concept_properties")]:::efecto
-  n67 -->|"sí"| n68
-  n69{"!sameJson(property.valueJson, value)"}:::decision
+  n64 -->|"no"| n66
+  n67[("ACTUALIZA terminology.concept_properties")]:::efecto
+  n66 -->|"sí"| n67
+  n68[("LEE terminology.value_set_members")]:::efecto
+  n67 --> n68
+  n66 -->|"no"| n68
+  n63 -->|"al terminar"| n68
+  n69["Repite: por cada const membership de memberships"]:::bucle
   n68 --> n69
-  n67 -->|"no"| n69
-  n70[("ACTUALIZA terminology.concept_properties")]:::efecto
-  n69 -->|"sí"| n70
-  n71["… el resto del árbol (8 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
-  n69 -->|"no"| n71
-  n66 -->|"al terminar"| n71
+  n70{"owned && !desiredMemberships.has(membership.id)"}:::decision
+  n69 -->|"cada elemento"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

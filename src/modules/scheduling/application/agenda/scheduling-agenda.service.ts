@@ -11,9 +11,16 @@ import {
   PRACTITIONER_DIRECTORY_PORT,
   type PractitionerDirectoryPort,
 } from '../ports/practitioner-directory.port';
+import {
+  BOOKING_BILLING_PORT,
+  type BookingBillingPort,
+} from '../ports/booking-billing.port';
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
+  BookableOrganizationsResponseDto,
+  BookableResourcesQueryDto,
+  BookableResourcesResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -21,9 +28,12 @@ import {
   ResourceListItemDto,
   ResourceSiteDto,
   SlotListItemDto,
+  SlotPriceDto,
   type ResourceType,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
+import { findBookableOrganizations } from './bookable-organizations.query';
+import { findBookableResources } from './bookable-resources.query';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -56,6 +66,7 @@ export class SchedulingAgendaService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param agendaRepo - Repositorio de lectura de agenda.
    * @param directory - Sede y nombre de los profesionales (`practice` y `profiles`).
+   * @param billing - El precio de la consulta de cada práctica (FAC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -63,16 +74,35 @@ export class SchedulingAgendaService {
     private readonly agendaRepo: SchedulingAgendaRepository,
     @Inject(PRACTITIONER_DIRECTORY_PORT)
     private readonly directory: PractitionerDirectoryPort,
+    @Inject(BOOKING_BILLING_PORT)
+    private readonly billing: BookingBillingPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
+  }
+
+  /**
+   * Organizations a patient can book with today, across tenants
+   * (see `bookable-organizations.query.ts`).
+   */
+  listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
+    return findBookableOrganizations(this.em);
+  }
+
+  /** Practitioners or laboratories a patient can book with, across tenants, paged. */
+  listBookableResources(
+    query: BookableResourcesQueryDto,
+  ): Promise<BookableResourcesResponseDto> {
+    return findBookableResources(this.em, query);
   }
 
   /** Recursos agendables del tenant. */
   async listResources(
     query: ListResourcesQueryDto,
   ): Promise<ListResourcesResponseDto> {
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const resources = await this.agendaRepo.findResources(em, {
       tenantId: query.tenantId,
       practiceId: query.practiceId,
@@ -91,13 +121,18 @@ export class SchedulingAgendaService {
     // una caída.
     let sites = new Map<string, ResourceSiteDto>();
     try {
-      sites = await this.directory.resolveSitesForResources(
-        resources.map((resource) => ({
-          refType: resource.resourceRefType,
-          refId: resource.resourceRefId,
-        })),
-        query.tenantId,
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      sites = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(() =>
+          this.directory.resolveSitesForResources(
+            resources.map((resource) => ({
+              refType: resource.resourceRefType,
+              refId: resource.resourceRefId,
+            })),
+            query.tenantId,
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -111,14 +146,19 @@ export class SchedulingAgendaService {
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
     let names = new Map<string, string>();
     try {
-      names = await this.directory.findPractitionerNames(
-        em,
-        resources
-          .filter((resource) =>
-            PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
-          )
-          .map((resource) => resource.resourceRefId),
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      names = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional((tx) =>
+          this.directory.findPractitionerNames(
+            tx,
+            resources
+              .filter((resource) =>
+                PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
+              )
+              .map((resource) => resource.resourceRefId),
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -146,7 +186,9 @@ export class SchedulingAgendaService {
     this.assertWindow(from, to);
 
     const limit = query.limit ?? DEFAULT_LIMIT;
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const rows = await this.agendaRepo.findSlots(
       em,
       {
@@ -162,7 +204,11 @@ export class SchedulingAgendaService {
     );
 
     const truncated = rows.length > limit;
-    const items = rows.slice(0, limit).map((slot) => this.toSlotItem(slot));
+    const page = rows.slice(0, limit);
+    const prices = await this.slotPrices(em, page);
+    const items = page.map((slot) =>
+      this.toSlotItem(slot, prices.get(slot.resourceId) ?? null),
+    );
     if (truncated) {
       this.logger.warn(
         { operation: 'scheduling.slots.list', limit },
@@ -212,8 +258,36 @@ export class SchedulingAgendaService {
     };
   }
 
+  /**
+   * El precio de la consulta por recurso, en lote: una consulta para las
+   * prácticas y otra para sus precios. Un precio que no es mayor que 0 no se
+   * publica: el paciente ve «todavía no publicó el precio», nunca «0,00».
+   */
+  private async slotPrices(
+    em: EntityManager,
+    slots: readonly BookableSlots[],
+  ): Promise<Map<string, SlotPriceDto>> {
+    const practices = await this.agendaRepo.findResourcePractices(em, [
+      ...new Set(slots.map((s) => s.resourceId)),
+    ]);
+    if (practices.size === 0) return new Map();
+    const prices = await this.billing.findConsultationPrices(em, [
+      ...new Set(practices.values()),
+    ]);
+    const byResource = new Map<string, SlotPriceDto>();
+    for (const [resourceId, practiceId] of practices) {
+      const amount = Number(prices.get(practiceId)?.price);
+      if (amount > 0)
+        byResource.set(resourceId, { amount, currencyCode: 'BOB' });
+    }
+    return byResource;
+  }
+
   /** Proyecta el cupo al contrato de lectura. */
-  private toSlotItem(slot: BookableSlots): SlotListItemDto {
+  private toSlotItem(
+    slot: BookableSlots,
+    price: SlotPriceDto | null,
+  ): SlotListItemDto {
     return {
       id: slot.id,
       resourceId: slot.resourceId,
@@ -224,6 +298,7 @@ export class SchedulingAgendaService {
       remainingCapacity: slot.remainingCapacity,
       statusConceptId: slot.statusConceptId,
       serviceConceptId: slot.serviceConceptId ?? null,
+      price,
     };
   }
 }

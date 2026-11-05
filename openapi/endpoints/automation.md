@@ -120,6 +120,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApprovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApprovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -150,7 +151,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejecución de agente no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución del agente ya terminó; no admite aprobaciones. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -254,6 +254,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExecuteRecordAutomationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExecuteRecordAutomationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExecuteRecordAutomationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExecuteRecordAutomationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExecuteRecordAutomationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -284,8 +285,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejecución de agente no encontrada. | Excepción explícita en src/modules/automation/services/record-automation.service.ts |
-| 404 | `NOT_FOUND` | Automatización de registro no encontrada. | Excepción explícita en src/modules/automation/services/record-automation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución del agente no está en marcha; no puede escribir registros. | Excepción explícita en src/modules/automation/services/record-automation.service.ts |
 | 422 | `PRECONDITION_FAILED` | La automatización de registro no está activa. | Excepción explícita en src/modules/automation/services/record-automation.service.ts |
@@ -411,6 +410,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentStepResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentStepResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentStepResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentStepResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentStepResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -443,7 +443,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejecución de agente no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 404 | `NOT_FOUND` | Herramienta no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución del agente no está en marcha; no admite pasos nuevos. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
@@ -574,6 +573,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -706,6 +706,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AttachGuardrailResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AttachGuardrailResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AttachGuardrailResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AttachGuardrailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AttachGuardrailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -736,8 +737,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Agente no encontrado. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
-| 404 | `NOT_FOUND` | Política de guardrail no encontrada. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 409 | `CONFLICT` | La política ya está adjunta a este agente. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La política de guardrail no está activa. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
@@ -853,6 +852,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentMemoryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentMemoryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentMemoryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentMemoryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentMemoryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -883,7 +883,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Agente no encontrado. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Fuera del ámbito global la memoria tiene que declarar a qué se refiere. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1001,6 +1000,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BindToolsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BindToolsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BindToolsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BindToolsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BindToolsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1029,7 +1029,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | La versión no existe para ese agente. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
+| 404 | `NOT_FOUND` | AUTOMATION_SCOPE_FAILURES.agentVersion.message | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 404 | `NOT_FOUND` | Herramienta no encontrada. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 409 | `CONFLICT` | La misma herramienta viene dos veces en el lote. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 409 | `CONFLICT` | La herramienta ya está enlazada a esta versión. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
@@ -1143,6 +1143,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1175,8 +1176,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Agente no encontrado. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
-| 404 | `NOT_FOUND` | La versión no existe para ese agente. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
+| 404 | `NOT_FOUND` | AUTOMATION_SCOPE_FAILURES.agentVersion.message | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La versión ya no está en borrador. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | Para crear una versión nueva hace falta su plantilla de prompt. | Excepción explícita en src/modules/automation/services/agent-catalog.service.ts |
@@ -1280,6 +1280,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecideApprovalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1312,8 +1313,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aprobación no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
-| 404 | `NOT_FOUND` | Ejecución de agente no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
+| 404 | `NOT_FOUND` | AUTOMATION_SCOPE_FAILURES.approval.message | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 409 | `CONFLICT` | La aprobación ya está decidida. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución del agente no está en pausa. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
@@ -1429,6 +1429,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GuardrailResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GuardrailResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GuardrailResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GuardrailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GuardrailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1567,6 +1568,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1595,8 +1597,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejecución de workflow no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
-| 404 | `NOT_FOUND` | Agente no encontrado. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 404 | `NOT_FOUND` | La versión no existe para ese agente. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución del workflow no está en marcha. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
@@ -1700,6 +1700,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FinalizeWorkflowRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FinalizeWorkflowRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FinalizeWorkflowRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FinalizeWorkflowRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FinalizeWorkflowRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1732,7 +1733,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ejecución de workflow no encontrada. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ejecución tiene aprobaciones pendientes y no puede cerrarse. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1847,6 +1847,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ToolResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ToolResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ToolResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ToolResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ToolResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1997,6 +1998,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TriggerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TriggerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TriggerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TriggerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TriggerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2027,7 +2029,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Workflow no encontrado. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
 | 409 | `CONFLICT` | Ya existe un disparador con ese código. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No se puede disparar un workflow archivado. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
@@ -2127,6 +2128,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluateCalendarTriggersResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluateCalendarTriggersResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluateCalendarTriggersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluateCalendarTriggersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluateCalendarTriggersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2301,6 +2303,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkflowResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkflowResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkflowResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkflowResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkflowResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2333,7 +2336,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Agente referenciado por un paso no encontrado. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
 | 404 | `NOT_FOUND` | Herramienta referenciada por un paso no encontrada. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
 | 409 | `CONFLICT` | Ya existe un workflow de automatización con ese código. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
 | 409 | `CONFLICT` | Dos pasos comparten el mismo código. | Excepción explícita en src/modules/automation/services/automation-definition.service.ts |
@@ -2449,6 +2451,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkflowRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkflowRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkflowRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkflowRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkflowRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2479,8 +2482,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Workflow no encontrado. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
-| 404 | `NOT_FOUND` | Disparador no encontrado. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El workflow está archivado. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |
 | 422 | `PRECONDITION_FAILED` | El disparador está deshabilitado. | Excepción explícita en src/modules/automation/services/automation-execution.service.ts |

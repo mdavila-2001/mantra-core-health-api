@@ -32,7 +32,7 @@ export class InsuranceCatalogController {
   /**
    * Aseguradoras privadas y públicas con sus planes de salud.
    *
-   * @returns El catálogo completo, ordenado por nombre.
+   * @returns Los seguros públicos y las privadas con cuenta, ordenados por nombre.
    */
   @Get('insurance-carrier-catalog')
   @Public()
@@ -40,6 +40,8 @@ export class InsuranceCatalogController {
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @ApiOperation({
     summary: 'Catálogo público de aseguradoras y sus planes de salud',
+    description:
+      'Seguros públicos (seguridad social, SUS y cajas): siempre. Aseguradoras privadas: sólo las que tienen una cuenta registrada, es decir, un tenant activo con un OWNER o ADMIN vigente, usuario activo y credencial activa.',
   })
   @ApiOkResponse({ type: CarrierCatalogResponseDto })
   listCatalog(): Promise<CarrierCatalogResponseDto> {

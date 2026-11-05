@@ -14,7 +14,28 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
+
+const T1 = '00000000-0000-4000-8000-0000000000a1';
+const T2 = '00000000-0000-4000-8000-0000000000b2';
+const OUT_OF_SCOPE = PlatformOpsErrorReason.PLATFORM_OPS_RESOURCE_OUT_OF_SCOPE;
+
+/** Ejecuta `fn` con T1 como tenant activo del request. */
+const inTenant = <T>(fn: () => Promise<T>, tenantId = T1): Promise<T> =>
+  runWithTenant(tenantId, fn);
+
+/** Captura el rechazo de una promesa para comparar su respuesta HTTP. */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('no rechazó');
+}
 
 const actor = { id: 'user-1', roles: ['SRE'] };
 const CHECK = '11111111-1111-1111-1111-111111111111';
@@ -33,6 +54,7 @@ function build() {
   let timelineSeq = 0;
   const incidentsRepo = {
     findHealthCheckById: mockFn(),
+    findDeploymentInTenant: mockFn(),
     createHealthRun: mockFn(() => ({ id: RUN })),
     findRecentRuns: mockFn(() => Promise.resolve([])),
     createIncident: mockFn(() => ({ id: INCIDENT })),
@@ -56,6 +78,7 @@ function build() {
     em as any,
     incidentsRepo,
     improvementsRepo,
+    new PlatformOpsScope(),
     logger as any,
   );
   return { service, tx, incidentsRepo, improvementsRepo, logger };
@@ -70,6 +93,7 @@ function build() {
 function enabledCheck(overrides: Record<string, unknown> = {}): any {
   return {
     id: CHECK,
+    tenantId: T1,
     code: 'gateway-http',
     name: 'Gateway HTTP',
     serviceComponentId: COMPONENT,
@@ -88,10 +112,12 @@ describe('OpsIncidentsService', () => {
       const d = build();
       d.incidentsRepo.findHealthCheckById.mockResolvedValue(enabledCheck());
 
-      const res = await d.service.recordHealthRun(
-        CHECK,
-        { status: 'PASS', source: 'PROBE' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(
+          CHECK,
+          { status: 'PASS', source: 'PROBE' } as any,
+          actor,
+        ),
       );
 
       expect(res).toEqual({
@@ -109,7 +135,9 @@ describe('OpsIncidentsService', () => {
         { statusConceptId: CONCEPTS.HC_RUN_FAIL },
       ]);
 
-      const res = await d.service.recordHealthRun(CHECK, failing, actor);
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(CHECK, failing, actor),
+      );
 
       expect(res.consecutiveFailures).toBe(2);
       expect(res.incidentOpened).toBe(false);
@@ -125,7 +153,9 @@ describe('OpsIncidentsService', () => {
         { statusConceptId: CONCEPTS.HC_RUN_FAIL },
       ]);
 
-      const res = await d.service.recordHealthRun(CHECK, failing, actor);
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(CHECK, failing, actor),
+      );
 
       expect(res.consecutiveFailures).toBe(2);
     });
@@ -138,10 +168,12 @@ describe('OpsIncidentsService', () => {
         { statusConceptId: CONCEPTS.HC_RUN_FAIL },
       ]);
 
-      const res = await d.service.recordHealthRun(
-        CHECK,
-        { status: 'WARN', source: 'SCHEDULER' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(
+          CHECK,
+          { status: 'WARN', source: 'SCHEDULER' } as any,
+          actor,
+        ),
       );
 
       expect(res.consecutiveFailures).toBe(0);
@@ -157,7 +189,9 @@ describe('OpsIncidentsService', () => {
       ]);
       d.incidentsRepo.countIncidents.mockResolvedValue(6);
 
-      const res = await d.service.recordHealthRun(CHECK, failing, actor);
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(CHECK, failing, actor),
+      );
 
       expect(res.consecutiveFailures).toBe(3);
       expect(res.incidentOpened).toBe(true);
@@ -187,7 +221,7 @@ describe('OpsIncidentsService', () => {
         }),
       );
 
-      await d.service.recordHealthRun(CHECK, failing, actor);
+      await inTenant(() => d.service.recordHealthRun(CHECK, failing, actor));
 
       expect(d.incidentsRepo.createIncident).toHaveBeenCalledWith(
         d.tx,
@@ -203,7 +237,9 @@ describe('OpsIncidentsService', () => {
         enabledCheck({ unhealthyThreshold: undefined }),
       );
 
-      const res = await d.service.recordHealthRun(CHECK, failing, actor);
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(CHECK, failing, actor),
+      );
 
       expect(res.incidentOpened).toBe(true);
     });
@@ -217,7 +253,9 @@ describe('OpsIncidentsService', () => {
         id: 'incident-live',
       });
 
-      const res = await d.service.recordHealthRun(CHECK, failing, actor);
+      const res = await inTenant(() =>
+        d.service.recordHealthRun(CHECK, failing, actor),
+      );
 
       expect(res.incidentOpened).toBe(false);
       expect(res.healthIncidentId).toBe('incident-live');
@@ -235,7 +273,7 @@ describe('OpsIncidentsService', () => {
       );
 
       await expect(
-        d.service.recordHealthRun(CHECK, failing, actor as any),
+        inTenant(() => d.service.recordHealthRun(CHECK, failing, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -246,7 +284,7 @@ describe('OpsIncidentsService', () => {
       );
 
       await expect(
-        d.service.recordHealthRun(CHECK, failing, actor as any),
+        inTenant(() => d.service.recordHealthRun(CHECK, failing, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -255,7 +293,7 @@ describe('OpsIncidentsService', () => {
       d.incidentsRepo.findHealthCheckById.mockResolvedValue(null);
 
       await expect(
-        d.service.recordHealthRun(CHECK, failing, actor as any),
+        inTenant(() => d.service.recordHealthRun(CHECK, failing, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -270,6 +308,7 @@ describe('OpsIncidentsService', () => {
     function liveIncident(overrides: Record<string, unknown> = {}): any {
       return {
         id: INCIDENT,
+        tenantId: T1,
         serviceComponentId: COMPONENT,
         statusConceptId: CONCEPTS.INCIDENT_OPEN,
         ...overrides,
@@ -281,10 +320,12 @@ describe('OpsIncidentsService', () => {
       const incident = liveIncident();
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(incident);
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        { transition: 'ACKNOWLEDGE' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          { transition: 'ACKNOWLEDGE' } as any,
+          actor,
+        ),
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.INCIDENT_ACKNOWLEDGED);
@@ -296,10 +337,12 @@ describe('OpsIncidentsService', () => {
       const d = build();
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(liveIncident());
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        { transition: 'MITIGATE' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          { transition: 'MITIGATE' } as any,
+          actor,
+        ),
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.INCIDENT_MITIGATED);
@@ -310,14 +353,16 @@ describe('OpsIncidentsService', () => {
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(liveIncident());
 
       await expect(
-        d.service.updateIncident(
-          INCIDENT,
-          {
-            transition: 'RESOLVE',
-            rootCauseText: 'a',
-            resolutionText: 'b',
-          } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.updateIncident(
+            INCIDENT,
+            {
+              transition: 'RESOLVE',
+              rootCauseText: 'a',
+              resolutionText: 'b',
+            } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -329,10 +374,12 @@ describe('OpsIncidentsService', () => {
       );
 
       await expect(
-        d.service.updateIncident(
-          INCIDENT,
-          { transition: 'RESOLVE', rootCauseText: 'sólo la causa' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.updateIncident(
+            INCIDENT,
+            { transition: 'RESOLVE', rootCauseText: 'sólo la causa' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -344,14 +391,16 @@ describe('OpsIncidentsService', () => {
       });
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(incident);
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        {
-          transition: 'RESOLVE',
-          rootCauseText: 'fuga de conexiones',
-          resolutionText: 'reinicio y parche',
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          {
+            transition: 'RESOLVE',
+            rootCauseText: 'fuga de conexiones',
+            resolutionText: 'reinicio y parche',
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.INCIDENT_RESOLVED);
@@ -363,15 +412,17 @@ describe('OpsIncidentsService', () => {
       const d = build();
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(liveIncident());
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        {
-          transition: 'UPDATE',
-          responders: [
-            { userId: OWNER, role: 'COMMANDER', acknowledged: true },
-          ],
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          {
+            transition: 'UPDATE',
+            responders: [
+              { userId: OWNER, role: 'COMMANDER', acknowledged: true },
+            ],
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.addedResponderIds).toEqual(['responder-1']);
@@ -389,15 +440,17 @@ describe('OpsIncidentsService', () => {
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(liveIncident());
       d.incidentsRepo.findResponder.mockResolvedValue(existing);
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        {
-          transition: 'UPDATE',
-          responders: [
-            { userId: OWNER, role: 'OPERATIONS', acknowledged: true },
-          ],
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          {
+            transition: 'UPDATE',
+            responders: [
+              { userId: OWNER, role: 'OPERATIONS', acknowledged: true },
+            ],
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.addedResponderIds).toEqual([]);
@@ -409,19 +462,21 @@ describe('OpsIncidentsService', () => {
       const d = build();
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(liveIncident());
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        {
-          transition: 'UPDATE',
-          communications: [
-            {
-              type: 'STATUS_UPDATE',
-              audience: 'CUSTOMERS',
-              messageText: 'seguimos en ello',
-            },
-          ],
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          {
+            transition: 'UPDATE',
+            communications: [
+              {
+                type: 'STATUS_UPDATE',
+                audience: 'CUSTOMERS',
+                messageText: 'seguimos en ello',
+              },
+            ],
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.communicationIds).toEqual(['communication-1']);
@@ -439,10 +494,12 @@ describe('OpsIncidentsService', () => {
       const incident = liveIncident();
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(incident);
 
-      const res = await d.service.updateIncident(
-        INCIDENT,
-        { transition: 'UPDATE', summary: 'seguimos investigando' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateIncident(
+          INCIDENT,
+          { transition: 'UPDATE', summary: 'seguimos investigando' } as any,
+          actor,
+        ),
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.INCIDENT_OPEN);
@@ -456,10 +513,12 @@ describe('OpsIncidentsService', () => {
       );
 
       await expect(
-        d.service.updateIncident(
-          INCIDENT,
-          { transition: 'UPDATE' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.updateIncident(
+            INCIDENT,
+            { transition: 'UPDATE' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -469,10 +528,12 @@ describe('OpsIncidentsService', () => {
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.updateIncident(
-          INCIDENT,
-          { transition: 'UPDATE' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.updateIncident(
+            INCIDENT,
+            { transition: 'UPDATE' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -502,6 +563,7 @@ describe('OpsIncidentsService', () => {
     function resolvedIncident(overrides: Record<string, unknown> = {}): any {
       return {
         id: INCIDENT,
+        tenantId: T1,
         serviceComponentId: COMPONENT,
         statusConceptId: CONCEPTS.INCIDENT_RESOLVED,
         rootCauseText: 'fuga de conexiones',
@@ -515,7 +577,9 @@ describe('OpsIncidentsService', () => {
         resolvedIncident(),
       );
 
-      const res = await d.service.openPostmortem(INCIDENT, dto, actor);
+      const res = await inTenant(() =>
+        d.service.openPostmortem(INCIDENT, dto, actor),
+      );
 
       expect(res).toEqual({
         id: 'postmortem-1',
@@ -538,7 +602,7 @@ describe('OpsIncidentsService', () => {
         resolvedIncident(),
       );
 
-      await d.service.openPostmortem(INCIDENT, dto, actor);
+      await inTenant(() => d.service.openPostmortem(INCIDENT, dto, actor));
 
       expect(d.incidentsRepo.createPostmortem).toHaveBeenCalledWith(
         d.tx,
@@ -552,13 +616,15 @@ describe('OpsIncidentsService', () => {
         resolvedIncident(),
       );
 
-      await d.service.openPostmortem(
-        INCIDENT,
-        {
-          ...dto,
-          actionItems: [{ ...dto.actionItems[0], priority: undefined }],
-        },
-        actor,
+      await inTenant(() =>
+        d.service.openPostmortem(
+          INCIDENT,
+          {
+            ...dto,
+            actionItems: [{ ...dto.actionItems[0], priority: undefined }],
+          },
+          actor,
+        ),
       );
 
       expect(d.improvementsRepo.createImprovementItem).toHaveBeenCalledWith(
@@ -573,10 +639,12 @@ describe('OpsIncidentsService', () => {
       const d = build();
 
       await expect(
-        d.service.openPostmortem(
-          INCIDENT,
-          { ...dto, actionItems: [dto.actionItems[0], dto.actionItems[0]] },
-          actor as any,
+        inTenant(() =>
+          d.service.openPostmortem(
+            INCIDENT,
+            { ...dto, actionItems: [dto.actionItems[0], dto.actionItems[0]] },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -588,7 +656,7 @@ describe('OpsIncidentsService', () => {
       );
 
       await expect(
-        d.service.openPostmortem(INCIDENT, dto, actor as any),
+        inTenant(() => d.service.openPostmortem(INCIDENT, dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -602,7 +670,7 @@ describe('OpsIncidentsService', () => {
       });
 
       await expect(
-        d.service.openPostmortem(INCIDENT, dto, actor as any),
+        inTenant(() => d.service.openPostmortem(INCIDENT, dto, actor as any)),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -611,8 +679,150 @@ describe('OpsIncidentsService', () => {
       d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.openPostmortem(INCIDENT, dto, actor as any),
+        inTenant(() => d.service.openPostmortem(INCIDENT, dto, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (POPS-01)', () => {
+    const run: any = { status: 'PASS', source: 'PROBE' };
+    const update: any = { transition: 'ACKNOWLEDGE' };
+    const postmortem: any = {
+      title: 'Caída del gateway',
+      actionItems: [
+        {
+          actionCode: 'A-1',
+          description: 'Añadir alerta',
+          actionType: 'PREVENTIVE',
+        },
+      ],
+    };
+    const incidentOf = (tenantId: string, status = CONCEPTS.INCIDENT_OPEN) => ({
+      id: INCIDENT,
+      tenantId,
+      serviceComponentId: COMPONENT,
+      statusConceptId: status,
+      rootCauseText: 'fuga de conexiones',
+    });
+
+    it('recordHealthRun busca el check acotado al tenant activo', async () => {
+      const d = build();
+      d.incidentsRepo.findHealthCheckById.mockResolvedValue(enabledCheck());
+
+      await inTenant(() => d.service.recordHealthRun(CHECK, run, actor));
+
+      expect(d.incidentsRepo.findHealthCheckById).toHaveBeenCalledWith(
+        d.tx,
+        CHECK,
+        T1,
+      );
+    });
+
+    it('recordHealthRun sobre un check de T2 responde igual que uno inexistente y no registra la corrida', async () => {
+      const d = build();
+      d.incidentsRepo.findHealthCheckById.mockResolvedValue(
+        enabledCheck({ tenantId: T2 }),
+      );
+      const foreign = await rejection(
+        inTenant(() => d.service.recordHealthRun(CHECK, run, actor)),
+      );
+      d.incidentsRepo.findHealthCheckById.mockResolvedValue(null);
+      const missing = await rejection(
+        inTenant(() => d.service.recordHealthRun(CHECK, run, actor)),
+      );
+
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(OUT_OF_SCOPE);
+      expect(foreign.details).toBeUndefined();
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.incidentsRepo.createHealthRun).not.toHaveBeenCalled();
+      expect(d.incidentsRepo.createIncident).not.toHaveBeenCalled();
+    });
+
+    it('recordHealthRun rechaza un despliegue citado que es de T2', async () => {
+      const d = build();
+      d.incidentsRepo.findHealthCheckById.mockResolvedValue(enabledCheck());
+      d.incidentsRepo.findDeploymentInTenant.mockResolvedValue({
+        id: 'deployment-t2',
+        tenantId: T2,
+      });
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.recordHealthRun(
+            CHECK,
+            { ...run, deploymentId: 'deployment-t2' },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.incidentsRepo.createHealthRun).not.toHaveBeenCalled();
+    });
+
+    it('updateIncident sobre un incidente de T2 responde 404 y no lo muta ni escribe su timeline', async () => {
+      const d = build();
+      const foreign = incidentOf(T2);
+      d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(foreign);
+      const foreignError = await rejection(
+        inTenant(() => d.service.updateIncident(INCIDENT, update, actor)),
+      );
+      d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(null);
+      const missingError = await rejection(
+        inTenant(() => d.service.updateIncident(INCIDENT, update, actor)),
+      );
+
+      expect(foreignError.reason).toBe(OUT_OF_SCOPE);
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(foreign.statusConceptId).toBe(CONCEPTS.INCIDENT_OPEN);
+      expect(d.incidentsRepo.createTimelineEvent).not.toHaveBeenCalled();
+      expect(d.incidentsRepo.findIncidentForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        INCIDENT,
+        T1,
+      );
+    });
+
+    it('updateIncident sobre un incidente propio es idempotente en su timeline', async () => {
+      const d = build();
+      d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(incidentOf(T1));
+
+      await expect(
+        inTenant(() =>
+          d.service.updateIncident(INCIDENT, { transition: 'UPDATE' }, actor),
+        ),
+      ).resolves.toMatchObject({ id: INCIDENT });
+      expect(d.incidentsRepo.createTimelineEvent).not.toHaveBeenCalled();
+    });
+
+    it('openPostmortem sobre un incidente de T2 responde 404 y no abre postmortem ni mejoras', async () => {
+      const d = build();
+      d.incidentsRepo.findIncidentForUpdate.mockResolvedValue(
+        incidentOf(T2, CONCEPTS.INCIDENT_RESOLVED),
+      );
+
+      const error = await rejection(
+        inTenant(() => d.service.openPostmortem(INCIDENT, postmortem, actor)),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.incidentsRepo.createPostmortem).not.toHaveBeenCalled();
+      expect(d.improvementsRepo.createImprovementItem).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto ninguna operación llega a la base', async () => {
+      const d = build();
+
+      await expect(
+        d.service.updateIncident(INCIDENT, update, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.recordHealthRun(CHECK, run, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.incidentsRepo.findIncidentForUpdate).not.toHaveBeenCalled();
+      expect(d.incidentsRepo.findHealthCheckById).not.toHaveBeenCalled();
     });
   });
 });

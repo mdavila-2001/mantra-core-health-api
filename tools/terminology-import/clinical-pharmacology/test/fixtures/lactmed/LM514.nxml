@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book-part-wrapper PUBLIC "-//NLM//DTD BITS Book Interchange DTD v2.0 20151225//EN" "http://jats.nlm.nih.gov/extensions/bits/2.0/BITS-book2.dtd">
+<book-part-wrapper id="LM514" content-type="chapter" from-where="body" dtd-version="2.0">
+  <book-meta>
+    <book-id book-id-type="pmcid">lactmed</book-id>
+    <book-title-group>
+      <book-title>Drugs and Lactation Database (LactMed&#x000ae;)</book-title>
+    </book-title-group>
+    <pub-date date-type="pubr" publication-format="electronic">
+      <year>2006</year>
+    </pub-date>
+    <publisher>
+      <publisher-name>National Institute of Child Health and Human Development</publisher-name>
+      <publisher-loc>Bethesda (MD)</publisher-loc>
+    </publisher>
+    <custom-meta-group>
+      <custom-meta>
+        <meta-name>books-source-type</meta-name>
+        <meta-value>Database</meta-value>
+      </custom-meta>
+      <custom-meta>
+        <meta-name>books-subject</meta-name>
+        <meta-value>Chemicals and Drugs</meta-value>
+      </custom-meta>
+      <custom-meta>
+        <meta-name>books-subject</meta-name>
+        <meta-value>Health Care</meta-value>
+      </custom-meta>
+      <custom-meta>
+        <meta-name>books-subject</meta-name>
+        <meta-value>Public Health</meta-value>
+      </custom-meta>
+    </custom-meta-group>
+    <notes specific-use="display-globally" notes-type="disclaimer">
+      <p><bold>Disclaimer: </bold>Information presented in this database is not meant as a substitute for professional judgment. You should consult your healthcare provider for breastfeeding advice related to your particular situation. The U.S. government does not warrant or assume any liability or responsibility for the accuracy or completeness of the information on this Site.</p>
+    </notes>
+    <notes specific-use="display-globally" notes-type="rights">
+      <p><bold>Attribution Statement:</bold> LactMed is a registered trademark of the U.S. Department of Health and Human Services.</p>
+    </notes>
+  </book-meta>
+  <book-part book-part-type="chapter">
+    <book-part-meta>
+      <book-part-id book-part-id-type="pmcid">LM514</book-part-id>
+      <title-group>
+        <title>Colestipol</title>
+      </title-group>
+      <pub-history>
+        <date date-type="revised">
+          <day>15</day>
+          <month>7</month>
+          <year>2026</year>
+        </date>
+      </pub-history>
+      <related-object link-type="parent-book-link" source-id="lactmed">Drugs and Lactation Database (LactMed&#x000ae;)</related-object>
+      <related-object link-type="previous-part-link" source-id="lactmed" document-id="LM516" document-type="chapter">Colesevelam</related-object>
+      <related-object link-type="next-part-link" source-id="lactmed" document-id="LM956" document-type="chapter">Coleus</related-object>
+      <kwd-group>
+        <kwd>Cholestabyl</kwd>
+        <kwd>Colestipolum</kwd>
+        <kwd>colestipol</kwd>
+        <kwd>Colestid</kwd>
+        <kwd>Cholestabyl</kwd>
+        <kwd>Lestid</kwd>
+        <kwd>U 26597A</kwd>
+        <kwd>UNII-X7D10K905G</kwd>
+        <kwd>DTXCID80113228</kwd>
+        <kwd>CHEBI:59602</kwd>
+        <kwd>DTXSID40190737</kwd>
+        <kwd>NSC147003</kwd>
+        <kwd>NSC-147003</kwd>
+        <kwd><italic toggle="yes">N</italic>'-[2-[2-(2-aminoethylamino)ethylamino]ethyl]ethane-1,2-diamine</kwd>
+        <kwd>hydrochloride</kwd>
+      </kwd-group>
+    </book-part-meta>
+    <body>
+      <p>CASRN: 50925-79-6</p>
+      <related-object link-type="ext-image-back-link" source-id="pubchem" document-id="135208937" document-id-type="sid" document-type="summary" object-id="135208937" object-id-type="sid" object-type="image"/>
+      <sec id="LM514.Drug_Levels_and_Effects">
+        <title>Drug Levels and Effects</title>
+        <sec id="LM514.Summary_of_Use_during_Lactation">
+          <title>Summary of Use during Lactation</title>
+          <p content-type="pubmed-excerpt">Colestipol is a nonabsorbable resin. Because it does not enter the mother's bloodstream, it will not reach the infant via breastmilk. It is acceptable for use during lactation.</p>
+        </sec>
+        <sec id="LM514.Drug_Levels">
+          <title>Drug Levels</title>
+          <p><italic toggle="yes">Maternal Levels.</italic> Relevant published information was not found as of the revision date.</p>
+          <p><italic toggle="yes">Infant Levels.</italic> Relevant published information was not found as of the revision date.</p>
+        </sec>
+        <sec id="LM514.Effects_in_Breastfed_Infants">
+          <title>Effects in Breastfed Infants</title>
+          <p>Relevant published information was not found as of the revision date.</p>
+        </sec>
+        <sec id="LM514.Effects_on_Lactation_and_Breastmil">
+          <title>Effects on Lactation and Breastmilk</title>
+          <p>Relevant published information was not found as of the revision date.</p>
+        </sec>
+        <sec id="LM514.Alternate_Drugs_to_Consider">
+          <title>Alternate Drugs to Consider</title>
+          <p>(Hypercholesterolemia) <related-object link-type="booklink" source-id="lactmed" document-id="LM515" document-type="book-part">Cholestyramine</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM516" document-type="book-part">Colesevelam</related-object>; (Type 2 Diabetes) <related-object link-type="booklink" source-id="lactmed" document-id="LM1" document-type="book-part">Acarbose</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM127" document-type="book-part">Glipizide</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM128" document-type="book-part">Glyburide</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM147" document-type="book-part">Insulin</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM173" document-type="book-part">Metformin</related-object>, <related-object link-type="booklink" source-id="lactmed" document-id="LM407" document-type="book-part">Miglitol</related-object>, <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/books/n/lactmed/LM1383/">Semaglutide</ext-link>, <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/books/n/lactmed/LM1383/">Tirzepatide</ext-link></p>
+        </sec>
+      </sec>
+      <sec id="LM514.Substance_Identification">
+        <title>Substance Identification</title>
+        <sec id="LM514.Substance_Name">
+          <title>Substance Name</title>
+          <p>Colestipol</p>
+        </sec>
+        <sec id="LM514.CAS_Registry_Number">
+          <title>CAS Registry Number</title>
+          <p>50925-79-6</p>
+        </sec>
+        <sec id="LM514.Drug_Class">
+          <title>Drug Class</title>
+          <p>Breast Feeding</p>
+          <p>Lactation</p>
+          <p>Milk, Human</p>
+          <p>Anticholesteremic Agents</p>
+          <p>Hypolipidemic Agents</p>
+        </sec>
+      </sec>
+    </body>
+  </book-part>
+</book-part-wrapper>

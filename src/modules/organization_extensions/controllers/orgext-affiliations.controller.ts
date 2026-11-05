@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrgextAffiliationsService } from '../services';
 import {
   CreateAffiliationDto,
@@ -34,6 +39,11 @@ export class OrgextAffiliationsController {
   ) {}
 
   /** UC-22-07. */
+  @Audited({
+    action: 'ORGANIZATION_AFFILIATION_DECLARED',
+    entity: 'organization_affiliation',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -46,6 +56,11 @@ export class OrgextAffiliationsController {
   }
 
   /** UC-22-09. */
+  @Audited({
+    action: 'ORGANIZATION_AFFILIATION_TERMINATED',
+    entity: 'organization_affiliation',
+    entityId: 'param:id',
+  })
   @Post(':id/terminate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

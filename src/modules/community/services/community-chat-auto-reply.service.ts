@@ -56,7 +56,7 @@ export class CommunityChatAutoReplyService {
     actor: AuthenticatedUser,
   ): Promise<ChatAutoReplyDto | null> {
     const em = this.em.fork();
-    await this.visibility.assertActsAsProfile(em, profileId, actor);
+    await this.visibility.assertActsAsMessagingProfile(em, profileId, actor);
     const row = await em.findOne(ChatAutoReplies, {
       publicProfileId: profileId,
     });
@@ -79,7 +79,7 @@ export class CommunityChatAutoReplyService {
     actor: AuthenticatedUser,
   ): Promise<ChatAutoReplyDto> {
     return this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, profileId, actor);
 
       const existing = await tx.findOne(ChatAutoReplies, {
         publicProfileId: profileId,

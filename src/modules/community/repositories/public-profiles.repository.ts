@@ -136,6 +136,54 @@ export class PublicProfilesRepository {
   }
 
   /**
+   * Las vitrinas de varios sujetos en una consulta (por `target_id`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetIds - Sujetos (p. ej. tenants de organizaciones).
+   * @returns Los perfiles existentes, sin orden garantizado.
+   */
+  listByTargetIds(
+    em: EntityManager,
+    targetIds: string[],
+  ): Promise<PublicProfiles[]> {
+    if (targetIds.length === 0) return Promise.resolve([]);
+    return em.find(PublicProfiles, { targetId: { $in: targetIds } });
+  }
+
+  /**
+   * Las vitrinas de varios sujetos, acotadas por tipo y estado, en una
+   * consulta. Ordenadas por nombre visible: es lo que muestra un selector.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Sujetos (`target_id`), tipos de sujeto y estado.
+   * @returns Los perfiles que cumplen los tres filtros.
+   */
+  listByTargetsTypesAndStatus(
+    em: EntityManager,
+    filters: {
+      targetIds: readonly string[];
+      targetTypeConceptIds: readonly string[];
+      statusConceptId: string;
+    },
+  ): Promise<PublicProfiles[]> {
+    if (
+      filters.targetIds.length === 0 ||
+      filters.targetTypeConceptIds.length === 0
+    ) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      PublicProfiles,
+      {
+        targetId: { $in: [...filters.targetIds] },
+        targetTypeConceptId: { $in: [...filters.targetTypeConceptIds] },
+        statusConceptId: filters.statusConceptId,
+      },
+      { orderBy: { displayName: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Personas activas que se pueden elegir para iniciar un chat.
    *
    * Es una lectura autenticada y deliberadamente distinta del directorio
@@ -201,9 +249,7 @@ export class PublicProfilesRepository {
       options.limit,
     ];
 
-    const rows = await em
-      .getConnection()
-      .execute<{ id: string }[]>(sql, params, 'all');
+    const rows = await em.execute<{ id: string }[]>(sql, params, 'all');
     return rows.map((row) => row.id);
   }
 

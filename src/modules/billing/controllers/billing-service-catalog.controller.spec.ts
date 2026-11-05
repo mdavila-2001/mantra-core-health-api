@@ -20,15 +20,27 @@ function build() {
     search: mockFn(),
     create: mockFn(),
     importServices: mockFn(),
+    getImageContent: mockFn(),
   };
   const nomenclature = { listSpecialties: mockFn(), search: mockFn() };
   const repository = { search: mockFn(), facets: mockFn() };
+  const procedureImport = {
+    listMySpecialties: mockFn(),
+    importProcedures: mockFn(),
+  };
   const controller = new BillingServiceCatalogController(
     serviceCatalogService as any,
     nomenclature as any,
     repository as any,
+    procedureImport as any,
   );
-  return { controller, serviceCatalogService, nomenclature, repository };
+  return {
+    controller,
+    serviceCatalogService,
+    nomenclature,
+    repository,
+    procedureImport,
+  };
 }
 
 describe('BillingServiceCatalogController', () => {
@@ -66,6 +78,29 @@ describe('BillingServiceCatalogController', () => {
     expect(d.serviceCatalogService.search).toHaveBeenCalledWith(
       expect.objectContaining({ isActive: undefined }),
     );
+  });
+
+  it('delegates the batch import with the body and the actor', async () => {
+    const d = build();
+    const dto = { practiceId: 'pr1', specialties: ['Cardiología'] };
+    const out = { created: 98, skipped: 0, total: 98 };
+    d.procedureImport.importProcedures.mockResolvedValue(out);
+
+    await expect(
+      d.controller.importProcedures(dto as any, actor),
+    ).resolves.toBe(out);
+    expect(d.procedureImport.importProcedures).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates the specialties of the authenticated doctor', async () => {
+    const d = build();
+    const out = { items: [{ specialty: 'Cardiología', count: 98 }] };
+    d.procedureImport.listMySpecialties.mockResolvedValue(out);
+
+    await expect(d.controller.listMyProcedureSpecialties(actor)).resolves.toBe(
+      out,
+    );
+    expect(d.procedureImport.listMySpecialties).toHaveBeenCalledWith(actor);
   });
 
   it('delegates create', async () => {
@@ -140,5 +175,24 @@ describe('BillingServiceCatalogController', () => {
       dto,
       actor,
     );
+  });
+
+  it('sirve la imagen con no-store sin sniffing y sin pasar el actor al servicio', async () => {
+    const d = build();
+    d.serviceCatalogService.getImageContent.mockResolvedValue({
+      buffer: Buffer.from('png'),
+      mimeType: 'image/png',
+    });
+    const res = { setHeader: mockFn(), send: mockFn() };
+
+    await d.controller.getImage('s1', res as any);
+
+    expect(d.serviceCatalogService.getImageContent).toHaveBeenCalledWith('s1');
+    expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'X-Content-Type-Options',
+      'nosniff',
+    );
+    expect(res.send).toHaveBeenCalledWith(Buffer.from('png'));
   });
 });

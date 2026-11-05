@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   ConfirmVisitRecordDto,
   CreateVisitRecordDto,
@@ -39,6 +44,11 @@ export class VisitRecordsController {
   constructor(private readonly service: VisitRecordsService) {}
 
   /** UC-17-18. */
+  @Audited({
+    action: 'VISIT_RECORD_CREATED',
+    entity: 'visit_record',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles('MEDICAL_VISITOR')
@@ -59,6 +69,11 @@ export class VisitRecordsController {
   }
 
   /** UC-17-19. */
+  @Audited({
+    action: 'VISIT_RECORD_CONFIRMED',
+    entity: 'visit_record',
+    entityId: 'param:visitRecordId',
+  })
   @Post(':visitRecordId/confirm')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Confirmar que la visita ocurrió' })
@@ -71,6 +86,11 @@ export class VisitRecordsController {
   }
 
   /** UC-17-20. */
+  @Audited({
+    action: 'VISIT_RATED',
+    entity: 'visit_rating',
+    entityId: 'result.id',
+  })
   @Post(':visitRecordId/rating')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PRACTITIONER', 'CLINICIAN')

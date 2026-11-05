@@ -25,7 +25,11 @@ import { GatewayConnections } from '../entities';
  * estas pruebas la intención apunta a `conn-1`, cuya referencia es esta variable.
  */
 const CONNECTION_SECRET = 'secreto-de-prueba-de-la-conexion-conn-1';
-process.env.WEBHOOK_SECRET_UNIT_CONN_1 = CONNECTION_SECRET;
+const UNIT_TENANT = '11111111-1111-1111-1111-111111111111';
+// El secreto de una conexión vive en el espacio de nombres de su tenant.
+const CONNECTION_SECRET_VAR =
+  'WEBHOOK_SECRET_11111111111111111111111111111111_UNIT_CONN_1';
+process.env[CONNECTION_SECRET_VAR] = CONNECTION_SECRET;
 
 /** Firma un callback de gateway como lo haría el proveedor (secreto de la conexión). */
 function signCallback(
@@ -71,9 +75,14 @@ function build() {
           ? {
               id: 'conn-1',
               gatewayId: 'gw-1',
-              webhookSecretRef: 'env:WEBHOOK_SECRET_UNIT_CONN_1',
+              tenantId: UNIT_TENANT,
+              webhookSecretRef: `env:${CONNECTION_SECRET_VAR}`,
             }
-          : { id: 'intent-1', gatewayConnectionId: 'conn-1' },
+          : {
+              id: 'intent-1',
+              tenantId: UNIT_TENANT,
+              gatewayConnectionId: 'conn-1',
+            },
       ),
     ),
   };
@@ -91,6 +100,7 @@ function build() {
     createCancellation: mockFn(),
     findWebhookEventByRef: mockFn().mockResolvedValue(null),
     recordWebhookEvent: mockFn(),
+    findCallbackEndpoints: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 

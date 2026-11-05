@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  ChangeRequests,
   OperationalReadinessReviews,
   ReadinessReviewFindings,
   Runbooks,
@@ -17,6 +18,15 @@ import {
  */
 @Injectable()
 export class OpsPracticesRepository {
+  /** Cambio del tenant que una ejecución cita; `null` si no existe o es de otro tenant. */
+  findChangeRequestInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<ChangeRequests | null> {
+    return em.findOne(ChangeRequests, { id, tenantId });
+  }
+
   // --- Revisión de preparación (UC-46-12) ---
 
   /**
@@ -77,15 +87,17 @@ export class OpsPracticesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el runbook de otro tenant no se bloquea.
    * @returns Resultado de find runbook for update conforme al contrato `Promise<Runbooks | null>`.
    */
   findRunbookForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Runbooks | null> {
     return em.findOne(
       Runbooks,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -253,15 +265,17 @@ export class OpsPracticesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el ejercicio de otro tenant no se bloquea.
    * @returns Resultado de find exercise for update conforme al contrato `Promise<ResilienceExercises | null>`.
    */
   findExerciseForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<ResilienceExercises | null> {
     return em.findOne(
       ResilienceExercises,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

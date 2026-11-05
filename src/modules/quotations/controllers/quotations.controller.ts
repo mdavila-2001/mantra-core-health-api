@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { QuotationsService } from '../services';
 import { CreateQuotationDto, QuotationResponseDto } from '../dto';
 
@@ -47,6 +52,11 @@ export class QuotationsController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns La cotización recién creada, con sus cuotas.
    */
+  @Audited({
+    action: 'QUOTATION_CREATED',
+    entity: 'quotation',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)

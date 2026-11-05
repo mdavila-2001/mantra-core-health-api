@@ -15,6 +15,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { COMM } from '../community.concepts';
 
 /** Paciente con perfil clínico: es el único que puede calificar. */
 const patient = { id: 'u1', roles: [], patientProfileId: 'pat-1' } as any;
@@ -390,6 +391,35 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
       'hp-1',
     );
     expect(res).toMatchObject({ id: 'r1', verified: true });
+  });
+
+  it('sin displayMode la reseña es ANONIMA (privacidad por defecto); REAL_NAME sólo si se pide', async () => {
+    const d = build();
+    d.profilesRepo.findByTarget.mockResolvedValue(showcase);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
+    d.reviewsRepo.create.mockReturnValue({ id: 'r1', overallRating: 4 });
+
+    await d.service.publishOwnReview(
+      { ...body, displayMode: undefined } as any,
+      patient,
+    );
+    await d.service.publishOwnReview(
+      { ...body, displayMode: 'ANONYMOUS' } as any,
+      patient,
+    );
+    await d.service.publishOwnReview(
+      { ...body, displayMode: 'REAL_NAME' } as any,
+      patient,
+    );
+
+    const modes = d.reviewsRepo.create.mock.calls.map(
+      (call: any[]) => call[1].reviewerDisplayModeConceptId,
+    );
+    expect(modes).toEqual([
+      COMM.REVIEW_DISPLAY_ANONYMOUS,
+      COMM.REVIEW_DISPLAY_ANONYMOUS,
+      COMM.REVIEW_DISPLAY_REAL_NAME,
+    ]);
   });
 
   it('un encuentro que no existe da el MISMO mensaje que una atención ajena', async () => {

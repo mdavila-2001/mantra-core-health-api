@@ -12,6 +12,7 @@ import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import {
   BO_OCCUPATION_GROUP_PROPERTY_CODE,
   BO_OCCUPATION_VALUE_SET,
+  BO_OCCUPATION_VERSION,
   BO_OCCUPATIONS,
   boOccupationConceptCode,
   boOccupationConceptId,
@@ -93,6 +94,7 @@ describe('BoOccupationsSeedService', () => {
       expect(version).toMatchObject({
         id: boOccupationVersionId(),
         valueSetId: boOccupationValueSetId(),
+        version: '2026.11.0',
         isDefault: true,
       });
     });
@@ -184,6 +186,64 @@ describe('BoOccupationsSeedService', () => {
         memberships: 0,
       });
       expect(created).toHaveLength(0);
+    });
+  });
+
+  describe('catálogo ampliado sobre una base ya sembrada', () => {
+    it('reordena las membresías existentes para que el orden alfabético se mantenga', async () => {
+      const ingeniero = boOccupationMemberId('INGENIERO');
+      const otra = boOccupationMemberId('OTRA');
+      // Las membresías como quedaron con la lista de 64: posiciones viejas.
+      const stored: Record<string, { id: string; ordinal: number }> = {
+        [ingeniero]: { id: ingeniero, ordinal: 25 },
+        [otra]: { id: otra, ordinal: 63 },
+      };
+      const created: unknown[] = [];
+      const em = {
+        find: mockFn((_entity: any, where: any) => {
+          const ids: string[] = where?.id?.$in ?? [];
+          return Promise.resolve(
+            ids.filter((id) => id in stored).map((id) => stored[id]),
+          );
+        }),
+        create: mockFn((_entity: any, data: any) => {
+          created.push(data);
+          return data;
+        }),
+        flush: mockFn(() => Promise.resolve()),
+      };
+      const service = new BoOccupationsSeedService(
+        { em: { fork: mockFn(() => em) } } as any,
+        { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
+      );
+
+      await service.run();
+
+      expect(stored[ingeniero]?.ordinal).toBe(
+        BO_OCCUPATIONS.findIndex(
+          (occupation) => occupation.code === 'INGENIERO',
+        ),
+      );
+      expect(stored[otra]?.ordinal).toBe(OCCUPATIONS - 1);
+    });
+
+    it('el catálogo cubre las ingenierías y conserva los códigos originales', () => {
+      const codes = new Set(
+        BO_OCCUPATIONS.map((occupation) => occupation.code),
+      );
+      for (const code of [
+        'INGENIERO',
+        'ING_CIVIL',
+        'ING_SISTEMAS',
+        'ING_INDUSTRIAL',
+        'ING_PETROLERO',
+        'ABOGADO',
+        'MEDICO',
+        'OTRA',
+      ]) {
+        expect(codes.has(code)).toBe(true);
+      }
+      expect(BO_OCCUPATIONS.length).toBeGreaterThan(300);
     });
   });
 

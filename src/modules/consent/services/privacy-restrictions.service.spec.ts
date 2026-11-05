@@ -8,7 +8,19 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PrivacyRestrictionsService } from './privacy-restrictions.service';
+import {
+  DomainException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { CONS } from '../consent.concepts';
+import { ConsentErrorReason } from '../consent.error-reasons';
+import {
+  ACTIVE_TENANT,
+  buildScope,
+  inTenant,
+  thrown,
+} from './consent-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -23,13 +35,22 @@ function build() {
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new PrivacyRestrictionsService(
+  const scope = buildScope();
+  const raw = new PrivacyRestrictionsService(
     em as any,
     restrictionsRepo as any,
     eventsRepo,
+    scope.scope,
     logger as any,
   );
-  return { service, tx, restrictionsRepo, eventsRepo };
+  return {
+    service: inTenant(raw),
+    raw,
+    scope,
+    tx,
+    restrictionsRepo,
+    eventsRepo,
+  };
 }
 
 describe('PrivacyRestrictionsService', () => {
@@ -61,5 +82,52 @@ describe('PrivacyRestrictionsService', () => {
         eventTypeConceptId: CONS.EVENT_RESTRICTION_APPLIED,
       }),
     );
+  });
+
+  describe('tenant y paciente de la restricción (CON-01)', () => {
+    const body = { patientProfileId: 'p1', dataClassConceptId: 'dc1' } as any;
+
+    it('la restricción nace en el tenant del contexto', async () => {
+      const d = build();
+      d.restrictionsRepo.create.mockReturnValue({
+        id: 'r1',
+        patientProfileId: 'p1',
+        statusConceptId: CONS.RESTRICTION_ACTIVE,
+        createdAt: new Date(),
+      });
+      await d.service.apply(body, actor);
+      expect(d.restrictionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: ACTIVE_TENANT }),
+      );
+    });
+
+    it('un tenantId del cuerpo ajeno da 403 CONSENT_TENANT_SCOPE_REQUIRED y no persiste', async () => {
+      const d = build();
+      const err = await thrown(
+        d.service.apply({ ...body, tenantId: 'ten-otro' }, actor),
+      );
+      expect(err.getStatus()).toBe(403);
+      expect(err.reason).toBe(ConsentErrorReason.CONSENT_TENANT_SCOPE_REQUIRED);
+      expect(d.restrictionsRepo.create).not.toHaveBeenCalled();
+      expect(d.eventsRepo.record).not.toHaveBeenCalled();
+    });
+
+    it('un paciente inexistente da 404 y no persiste', async () => {
+      const d = build();
+      d.scope.patientProfilesRepo.findById.mockResolvedValue(null);
+      await expect(d.service.apply(body, actor)).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.restrictionsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto no hay tenant por defecto', async () => {
+      const d = build();
+      await expect(d.raw.apply(body, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.restrictionsRepo.create).not.toHaveBeenCalled();
+    });
   });
 });

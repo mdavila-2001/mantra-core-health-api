@@ -1,12 +1,18 @@
 // =============================================================================
 // ANVISA (Brasil) · produtos para saúde → filas del formato común.
 //
-// Dos archivos del portal de datos abiertos, leídos de espejos:
-//   - registros (una línea por registro × fabricante), corte 2025-06-17
-//   - modelos   (una línea por registro × fabricante × modelo), corte 2020-12-25
-// Separador `;`, sin comillas que encierren campos (todas las líneas tienen el
+// Dos archivos del portal de datos abiertos (dados.anvisa.gov.br/dados/):
+//   - `TA_PRODUTO_SAUDE_SITE.csv`   una línea por registro × fabricante
+//   - `TA_PRODUTO_SAUDE_MODELO.csv` una línea por registro × fabricante × modelo
+// Codificación windows-1252. Separador `;`, sin comillas que encierren campos (todas las líneas tienen el
 // mismo número de `;`, verificado), así que se parte por `;` y no se interpretan
 // las comillas sueltas que aparecen dentro de los nombres.
+//
+// Si se pasan `ctx.petitionsByProcess` (índice de las peticiones publicadas) y,
+// para modelos, `ctx.processByRegistro` (registro → proceso del archivo de
+// registros), cada fila lleva en `extra.anvisaPetitions` las áreas de interés y
+// los asuntos que ANVISA publica para su proceso (p. ej. «Dispositivos Médicos
+// para Diagnóstico in Vitro», «IVD - Registro de produto», «EQUIPAMENTO - …»).
 //
 // Fabricante: `NOME_FABRICANTE`. Si un registro no trae ninguno, va el titular
 // (`DETENTOR_REGISTRO_CADASTRO`) y se marca `extra.manufacturerNameFrom`.
@@ -79,14 +85,22 @@ function commonFields(lines, ctx) {
   const holderCnpj = textOrNull(first.CNPJ_DETENTOR_REGISTRO_CADASTRO);
   const primary = manufacturers[0] ?? null;
   const manufacturerName = primary?.name ?? holderName;
+  const registro = textOrNull(first.NUMERO_REGISTRO_CADASTRO);
+  const ownProcess = textOrNull(first.NUMERO_PROCESSO);
+  const siteProcess =
+    ownProcess === null ? (ctx.processByRegistro?.get(registro) ?? null) : null;
+  const processFromSite = siteProcess !== null;
+  const processNumber = ownProcess ?? siteProcess;
+  const petitions =
+    processNumber === null
+      ? null
+      : (ctx.petitionsByProcess?.get(processNumber) ?? null);
   const extra = {
     holder: {
       name: holderName,
       ...(holderCnpj === null ? {} : { cnpj: holderCnpj }),
     },
-    ...(textOrNull(first.NUMERO_PROCESSO) === null
-      ? {}
-      : { processNumber: textOrNull(first.NUMERO_PROCESSO) }),
+    ...(processNumber === null ? {} : { processNumber }),
     ...(primary === null
       ? { manufacturerNameFrom: 'DETENTOR_REGISTRO_CADASTRO' }
       : {}),
@@ -96,9 +110,12 @@ function commonFields(lines, ctx) {
     ...(manufacturers.length > 1
       ? { otherManufacturers: manufacturers.slice(1) }
       : {}),
+    ...(processFromSite ? { processNumberFrom: 'TA_PRODUTO_SAUDE_SITE' } : {}),
+    ...(petitions ? { anvisaPetitions: petitions } : {}),
     validity: textOrNull(first.VALIDADE_REGISTRO_CADASTRO),
     dataUpdatedAt: anvisaUpdateStamp(first.DT_ATUALIZACAO_DADO),
-    mirror: ctx.mirror,
+    ...(ctx.mirror ? { mirror: ctx.mirror } : {}),
+    ...(ctx.officialFile ? { officialFile: ctx.officialFile } : {}),
     officialPortal: ctx.officialPortal,
   };
   const classe = textOrNull(first.CLASSE_RISCO);
@@ -146,19 +163,48 @@ export function anvisaProdutosRows(lines, ctx) {
 }
 
 /** Archivo de modelos → una fila por registro + modelo (texto verbatim). */
-export function anvisaModelosRows(lines, ctx) {
-  const rows = [];
+export function* anvisaModelosRows(lines, ctx) {
   const key = (line) =>
     `${line.NUMERO_REGISTRO_CADASTRO.trim()}|${line.DS_MODELO_PRODUTO_MEDICO ?? ''}`;
   for (const [recordId, group] of groupBy(lines, key)) {
-    rows.push(
-      makeRow({
-        source: 'anvisa-produtos-modelos',
-        sourceRecordId: recordId,
-        model: textOrNull(group[0].DS_MODELO_PRODUTO_MEDICO),
-        ...commonFields(group, ctx),
-      }),
-    );
+    yield makeRow({
+      source: 'anvisa-produtos-modelos',
+      sourceRecordId: recordId,
+      model: textOrNull(group[0].DS_MODELO_PRODUTO_MEDICO),
+      ...commonFields(group, ctx),
+    });
   }
-  return rows;
+}
+
+/**
+ * Índice de las peticiones de ANVISA (`CICLO_ANALISE_PETICOES_*`) por número de
+ * proceso: áreas de interés (`DESC_AREA_INTERESSE`) y asuntos de las peticiones
+ * primarias (`DESC_ASSUNTO_PETICAO` con `S_N_PETICAO_PRIMARIA = S`). Es lo que
+ * ANVISA publica sobre cada proceso; la unión con el registro es por número de
+ * proceso exacto.
+ */
+export function addPetitionLine(index, line) {
+  const process = textOrNull(line.NUM_PROCESSO_PETICAO);
+  if (process === null) return;
+  let entry = index.get(process);
+  if (entry === undefined) {
+    entry = { areas: new Set(), primarySubjects: new Set() };
+    index.set(process, entry);
+  }
+  const area = textOrNull(line.DESC_AREA_INTERESSE);
+  if (area !== null) entry.areas.add(area);
+  const subject = textOrNull(line.DESC_ASSUNTO_PETICAO);
+  if (subject !== null && line.S_N_PETICAO_PRIMARIA === 'S')
+    entry.primarySubjects.add(subject);
+}
+
+/** Congela el índice en listas ordenadas (salida determinista). */
+export function freezePetitionIndex(index) {
+  const frozen = new Map();
+  for (const [process, entry] of index)
+    frozen.set(process, {
+      areas: [...entry.areas].sort(),
+      primarySubjects: [...entry.primarySubjects].sort(),
+    });
+  return frozen;
 }

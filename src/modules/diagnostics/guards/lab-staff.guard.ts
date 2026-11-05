@@ -7,6 +7,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, roleAuthorizesInTenant } from '../../../common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { Tenants } from '../../directory/entities';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMembershipsRepository } from '../../directory/repositories';
@@ -38,7 +39,8 @@ export const LAB_CLINICAL_ROLES: readonly string[] = [
  * ## La regla
  *
  * Pasa, en este orden:
- * 1. `SUPERADMIN` (el mismo comodín que `RolesGuard`);
+ * 1. `SUPERADMIN` (el mismo comodín que `RolesGuard`, medido en el tenant
+ *    activo: el acotado en `scopedRoles` sólo vale en el suyo);
  * 2. un rol de {@link LAB_CLINICAL_ROLES} que autorice en el tenant activo
  *    —lo que ya pasaba: el laboratorio de un hospital lo opera su personal
  *    clínico—;
@@ -78,9 +80,12 @@ export class LabStaffGuard implements CanActivate {
     // Ruta sin sujeto: `JwtAuthGuard` ya la habrá rechazado si no es pública.
     if (!actor) return true;
 
-    if (actor.roles.includes('SUPERADMIN')) return true;
-
     const tenantId = request.resolvedTenantId;
+    // El comodín de plataforma se mide en el tenant activo: global en
+    // cualquiera (también sin tenant); acotado en `scopedRoles`, sólo en el
+    // suyo (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return true;
+
     if (
       tenantId !== undefined &&
       LAB_CLINICAL_ROLES.some((role) =>
@@ -103,16 +108,26 @@ export class LabStaffGuard implements CanActivate {
     userId: string,
     tenantId: string,
   ): Promise<boolean> {
-    const em = this.em.fork();
-    const tenant = await em.findOne(Tenants, { id: tenantId });
-    if (tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER)
-      return false;
-    const membership = await this.memberships.findActiveByUserTenant(
-      em,
-      userId,
+    // Guards run before the tenant interceptor: `tenant_memberships` is under
+    // RLS, so the read needs its own short transaction under the verified tenant.
+    return withTenantRls(
+      this.em,
       tenantId,
-      DIR.MEMBERSHIP_ACTIVE,
+      async (em) => {
+        const tenant = await em.findOne(Tenants, { id: tenantId });
+        if (
+          tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+        )
+          return false;
+        const membership = await this.memberships.findActiveByUserTenant(
+          em,
+          userId,
+          tenantId,
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+        return membership !== null;
+      },
+      { readOnly: true },
     );
-    return membership !== null;
   }
 }

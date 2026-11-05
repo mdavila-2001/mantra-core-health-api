@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { EducationCatalogService, EducationLearningService } from '../services';
 import {
   PublishCourseDto,
@@ -57,6 +62,11 @@ export class EducationController {
   ) {}
 
   /** UC-47-01. */
+  @Audited({
+    action: 'COURSE_PUBLISHED',
+    entity: 'course',
+    entityId: 'result.id',
+  })
   @Post('courses/publish')
   @Roles('EDUCATION_ADMIN', 'COURSE_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +82,11 @@ export class EducationController {
   }
 
   /** UC-47-02. */
+  @Audited({
+    action: 'COURSE_VERSION_PUBLISHED',
+    entity: 'course_version',
+    entityId: 'result.id',
+  })
   @Post('courses/:id/versions/publish')
   @Roles('EDUCATION_ADMIN', 'COURSE_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -88,6 +103,11 @@ export class EducationController {
   }
 
   /** UC-47-03. */
+  @Audited({
+    action: 'COURSE_INSTRUCTOR_ASSIGNED',
+    entity: 'course_instructor',
+    entityId: 'result.id',
+  })
   @Post('courses/:id/instructors')
   @Roles('EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -104,6 +124,11 @@ export class EducationController {
   }
 
   /** UC-47-04. */
+  @Audited({
+    action: 'COURSE_COHORT_OPENED',
+    entity: 'course_cohort',
+    entityId: 'result.id',
+  })
   @Post('courses/:id/cohorts')
   @Roles('EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +142,11 @@ export class EducationController {
   }
 
   /** UC-47-05. */
+  @Audited({
+    action: 'LEARNER_ENROLLED',
+    entity: 'enrollment',
+    entityId: 'result.id',
+  })
   @Post('enrollments')
   @Roles('EDUCATION_ADMIN', 'LEARNER')
   @HttpCode(HttpStatus.CREATED)
@@ -132,6 +162,11 @@ export class EducationController {
   }
 
   /** UC-47-06. */
+  @Audited({
+    action: 'LESSON_PROGRESS_RECORDED',
+    entity: 'lesson_progress',
+    entityId: 'result.id',
+  })
   @Post('enrollments/:id/lesson-progress')
   @Roles('LEARNER', 'EDUCATION_ADMIN', 'SYSTEM')
   @HttpCode(HttpStatus.CREATED)
@@ -148,6 +183,11 @@ export class EducationController {
   }
 
   /** UC-47-07. */
+  @Audited({
+    action: 'ASSESSMENT_CREATED',
+    entity: 'assessment',
+    entityId: 'result.id',
+  })
   @Post('courses/:id/assessments')
   @Roles('EDUCATION_ADMIN', 'COURSE_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -164,6 +204,11 @@ export class EducationController {
   }
 
   /** UC-47-08. */
+  @Audited({
+    action: 'ASSESSMENT_ATTEMPT_STARTED',
+    entity: 'assessment_attempt',
+    entityId: 'result.id',
+  })
   @Post('assessments/:id/attempts')
   @Roles('LEARNER', 'EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -181,6 +226,11 @@ export class EducationController {
   }
 
   /** UC-47-09. */
+  @Audited({
+    action: 'ASSESSMENT_ATTEMPT_SUBMITTED',
+    entity: 'assessment_attempt',
+    entityId: 'param:id',
+  })
   @Post('attempts/:id/submit')
   @Roles('LEARNER', 'EDUCATION_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -198,6 +248,11 @@ export class EducationController {
   }
 
   /** UC-47-10. */
+  @Audited({
+    action: 'ENROLLMENT_COMPLETED',
+    entity: 'enrollment',
+    entityId: 'param:id',
+  })
   @Post('enrollments/:id/complete')
   @Roles('SYSTEM', 'EDUCATION_ADMIN', 'LEARNER')
   @HttpCode(HttpStatus.OK)
@@ -214,6 +269,11 @@ export class EducationController {
   }
 
   /** UC-47-11. */
+  @Audited({
+    action: 'CERTIFICATE_ISSUED',
+    entity: 'certificate',
+    entityId: 'result.id',
+  })
   @Post('enrollments/:id/certificate')
   @Roles('SYSTEM', 'EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -230,6 +290,11 @@ export class EducationController {
   }
 
   /** UC-47-12. */
+  @Audited({
+    action: 'CME_CREDIT_RECORDED',
+    entity: 'cme_credit_record',
+    entityId: 'result.id',
+  })
   @Post('certificates/:id/cme-credits')
   @Roles('SYSTEM', 'EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -246,6 +311,11 @@ export class EducationController {
   }
 
   /** UC-47-13. */
+  @Audited({
+    action: 'COURSE_REVIEW_CREATED',
+    entity: 'course_review',
+    entityId: 'result.id',
+  })
   @Post('courses/:id/reviews')
   @Roles('LEARNER', 'EDUCATION_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -263,6 +333,11 @@ export class EducationController {
   }
 
   /** UC-47-14. */
+  @Audited({
+    action: 'CERTIFICATE_REVOKED',
+    entity: 'certificate',
+    entityId: 'param:id',
+  })
   @Post('certificates/:id/revoke')
   @Roles('EDUCATION_ADMIN')
   @HttpCode(HttpStatus.OK)

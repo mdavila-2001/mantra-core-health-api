@@ -11,6 +11,7 @@ import {
   getCurrentTenantId,
   PreconditionFailedException,
   requireTenantId,
+  roleAuthorizesInTenant,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
@@ -542,11 +543,23 @@ export class InsuranceCampaignsService {
 
   // ── autorización ───────────────────────────────────────────────────────────
 
-  /** Tenant activo del actor; un actor sin tenant no administra ninguna aseguradora. */
+  /**
+   * Tenant activo del actor; un actor sin tenant no administra ninguna aseguradora.
+   *
+   * Sin tenant no hay organización contra la cual medir un rol acotado, así que la
+   * pista de plataforma (422) sólo la recibe el rol **global**: `roleAuthorizesInTenant`
+   * con tenant `undefined` es verdadero sólo si el código no figura en `scopedRoles`.
+   * El acotado recibe el 403 auditado de cualquier actor sin tenant. Con tenant, la
+   * decisión es de `TenantAdministrationService`, que ya mide el rol en ese tenant.
+   */
   private tenantOf(actor: AuthenticatedUser): string {
     const tenantId = getCurrentTenantId();
     if (tenantId) return tenantId;
-    if (actor.roles.some((role) => PLATFORM_ROLES.has(role))) {
+    if (
+      [...PLATFORM_ROLES].some((role) =>
+        roleAuthorizesInTenant(actor, role, undefined),
+      )
+    ) {
       // Plataforma sin `X-Tenant-Id`: 422 con la pista, como el resto del módulo.
       return requireTenantId();
     }

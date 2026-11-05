@@ -7,6 +7,8 @@ import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import { DirectoryAuthorizationModule } from './directory-authorization.module';
 import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { MembershipInvitationsController } from './controllers/membership-invitations.controller';
+import { MembershipInvitationsService } from './services/membership-invitations.service';
 import { OrganizationLogoService } from './services/organization-logo.service';
 import {
   TenantTypeProfileService,
@@ -17,6 +19,8 @@ import {
   DirectoryBranchesService,
   DirectoryMembershipsService,
   DirectoryReadService,
+  PharmacyOperatingRequirementsService,
+  TenantDocumentCompletionService,
 } from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
@@ -25,6 +29,7 @@ import {
   BranchesRepository,
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
+  TenantMedicalFacilitiesRepository,
 } from './repositories';
 
 /**
@@ -60,20 +65,27 @@ import {
   ],
   controllers: [
     AdminTenantsController,
+    MembershipInvitationsController,
     TenantsController,
     OrganizationLogoController,
   ],
   providers: [
     OrganizationLogoService,
+    MembershipInvitationsService,
     TenantTypeProfileService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
     TenantLegalRepresentativesService,
+    // P50: lo que una farmacia necesita para operar, y la puerta para
+    // completar los papeles que el alta pública dejó opcionales.
+    PharmacyOperatingRequirementsService,
+    TenantDocumentCompletionService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
+    TenantMedicalFacilitiesRepository,
     // Servicios
     DirectoryTenantsService,
     DirectoryBranchesService,
@@ -93,6 +105,8 @@ import {
   // `TenantAffiliationDocumentsService` lo necesita `iam` para el
   // autorregistro de organización, igual que `TenantTypeProfileService`.
   exports: [
+    // Los seeds de organizaciones dan de alta por el mismo caso de uso que la API.
+    DirectoryTenantsService,
     TenantsRepository,
     DirectoryAuthorizationModule,
     BranchesRepository,
@@ -106,6 +120,10 @@ import {
     // representante y las gerencias de la ficha de la farmacia con la misma
     // lectura que `GET /tenants/me`.
     DirectoryReadService,
+    // `PharmacyOperatingRequirementsService` lo necesita `identity_assurance`:
+    // un tenant verificado por una autoridad externa sólo se activa si cumple
+    // los mismos requisitos para operar que exige `POST /tenants/:id/verify`.
+    PharmacyOperatingRequirementsService,
   ],
 })
 export class DirectoryModule {}

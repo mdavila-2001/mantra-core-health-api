@@ -55,6 +55,13 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 **Pasada 11 (fuentes oficiales):** con los hosts FDA/NLM habilitados, `manifest.json → gaps` queda vacío. MAUDE, retiros, LIVD, CLIA, NAAT y la lista de IA siguen viniendo de espejos (esta región no tiene descargador oficial para ellas).
 
 <!-- coverage:start -->
+## Carga a una base
+
+`load-dx-device-types-us.mjs --apply`, medido el 2026-10-25 en un PostgreSQL 16.15 local desechable con el DDL de
+`database/SQL` sin tocar: de 3 270 product codes en alcance se cargan 3 268 (dos no tienen nombre publicado),
+con 29 230 propiedades, bajo el code system `fda-product-code`; la segunda corrida inserta 0 filas. Las
+1 098 516 filas de `out/` validan sin error contra el formato común que lee `master/`.
+
 ## Cobertura (generada por `coverage-report.mjs`)
 
 | | Cantidad |

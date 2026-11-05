@@ -40,6 +40,7 @@
 | `WORKER_HTTP_TIMEOUT_MS` | Timeout HTTP del cliente interno de los workers (default `30000`) |
 | `MESSAGING_QUEUE_CODES` | Códigos de `messaging.message_queues` que `worker-messaging` drena |
 | `MOCK_PROVIDER_BASE_URL`, `MOCK_PROVIDER_API_KEY` | `mock-provider-server` para el adapter mock de proveedores (notificaciones, borrado cross-store, embeddings) |
+| `EMAIL_ALLOWED_RECIPIENT_DOMAINS` | Guarda opt-in para dev/test: lista de dominios separada por comas (p. ej. `alovida.test`). Con valor, el canal EMAIL solo entrega a esos dominios (dominio exacto, sin distinguir mayúsculas; subdominios solo si se listan); el resto se suprime sin llamar al proveedor y la entrega queda `FAILED` con `RECIPIENT_DOMAIN_NOT_ALLOWED` (no reintentable). Vacía = sin restricción (producción) |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GOOGLE_SENDER_EMAIL` | Proveedor real de email (Gmail API) del canal EMAIL de `messaging`, gana sobre el mock si ambos están configurados — ver [guía de configuración](../operations/gmail-provider-setup.md) |
 
 ## Otras

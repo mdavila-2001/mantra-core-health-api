@@ -70,16 +70,24 @@ Segundo patrón de acoplamiento transversal legítimo, vía el outbox propio
 
 Consumo real de eventos, en detalle: `docs/architecture/integration-map.md`.
 
-## 5. Excepción conocida — acoplamiento fuera de patrón
+## 5. Acoplamiento fuera de patrón — repositorios que importan entidades de otro dominio
 
-**`billing → practice`** (`src/modules/billing/repositories/practices-lookup.repository.ts`):
-importa una entidad del dominio `practice` directamente desde un repositorio de `billing`,
-violando la regla de aislamiento. Es el **único** caso detectado por
-`tools/alovida/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS: 1`).
+`tools/alovida/coverage-report.mjs` cuenta como `DIRECT_CROSS_DOMAIN_ACCESS` cada `import` de una
+entidad de otro módulo desde un `repositories/`. La cifra vigente y la lista completa están en
+[`docs/reports/ALOVIDA-COBERTURA.md`](../reports/ALOVIDA-COBERTURA.md); el análisis anterior que
+decía «un único caso» (`billing → practice`) ya no describe el código.
 
-- **Clasificación:** `HIGH` (arquitectural).
-- **Estado:** aceptado como excepción de solo lectura (`ARCH-001` en la
-  [matriz de trazabilidad](../governance/traceability-matrix.md)).
+El informe clasifica cada arista por lo que el repositorio hace con la entidad ajena:
+
+| Clase | Qué es | Qué se espera |
+|---|---|---|
+| **Solo leen** | `find`/`count`/joins de proyección sobre la entidad de otro módulo. | Legítimo mientras sea lectura; se acepta como excepción de solo lectura (`ARCH-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md)). |
+| **Escriben** | `create`, `persist`, `nativeUpdate`, `nativeDelete`, `new Entidad`, `getReference` sobre la entidad ajena. | Deben pasar por el contrato (servicio o puerto) del módulo dueño de la tabla. |
+| **Documentadas** | El import no cruza un dominio de datos. Hoy: `quotations` opera `billing.quotations` y `billing.quotation_installments`, tablas del schema `billing` que `QuotationsModule` mantiene aparte por decisión de FT-24. | Cada una lleva su porqué en `tools/alovida/exenciones.mjs`. |
+
+La clasificación es textual: un «solo leen» no prueba que el repositorio no escriba por otra vía
+(SQL crudo, un servicio que reciba la entidad). Ordena la revisión; no la cierra. Los repositorios
+que escriben una entidad ajena y no están documentados se siguen en el issue #839.
 
 ## 6. Ausencia de ciclos de imports
 

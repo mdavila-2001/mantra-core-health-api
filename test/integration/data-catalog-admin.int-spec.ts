@@ -15,11 +15,18 @@ import { RolesGuard } from '../../src/common/auth/roles.guard';
 import { SessionValidator } from '../../src/common/auth/session-validator';
 import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
-import { AdminCatalogController } from '../../src/modules/data_catalog/controllers/admin-catalog.controller';
-import { CatalogRepository } from '../../src/modules/data_catalog/repositories/catalog.repository';
-import { CatalogGovernanceService } from '../../src/modules/data_catalog/services/catalog-governance.service';
-import { CatalogReadService } from '../../src/modules/data_catalog/services/catalog-read.service';
-import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
+import { AdminCatalogController } from '../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller';
+import { CatalogRepository } from '../../src/modules/data_catalog/infrastructure/repositories/catalog.repository';
+import { CatalogClassificationService } from '../../src/modules/data_catalog/application/catalog-classification.service';
+import { CatalogInsightsService } from '../../src/modules/data_catalog/application/catalog-insights.service';
+import { CatalogInsightsRepository } from '../../src/modules/data_catalog/infrastructure/repositories/catalog-insights.repository';
+import { CatalogGovernanceService } from '../../src/modules/data_catalog/application/catalog-governance.service';
+import { CatalogReadService } from '../../src/modules/data_catalog/application/catalog-read.service';
+import { CatalogScanService } from '../../src/modules/data_catalog/application/catalog-scan.service';
+import { PermissionDriftService } from '../../src/modules/data_catalog/application/permission-drift.service';
+import { PLATFORM_ROLE_CODES_PORT } from '../../src/modules/data_catalog/application/ports/platform-role-codes.port';
+import { IamPlatformRoleCodesAdapter } from '../../src/modules/data_catalog/infrastructure/adapters/iam-platform-role-codes.adapter';
+import { RouteIndexModule } from '../../src/observability/route-index/route-index.module';
 import { TracingService } from '../../src/observability';
 
 /**
@@ -114,14 +121,26 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
     await sql(`create table public.${tabla} (id int primary key, ref int)`);
 
     const modulo = await Test.createTestingModule({
-      imports: [PassportModule, AuthTokenModule],
+      imports: [PassportModule, AuthTokenModule, RouteIndexModule],
       controllers: [AdminCatalogController],
       providers: [
         { provide: EntityManager, useValue: orm.em },
         CatalogRepository,
         CatalogReadService,
         CatalogGovernanceService,
+        CatalogClassificationService,
         CatalogScanService,
+        // `AdminCatalogController` lo inyecta desde 3c86d35f (PII y calidad).
+        CatalogInsightsRepository,
+        CatalogInsightsService,
+        PermissionDriftService,
+        // Mismo cableado que `DataCatalogModule` desde f1759e1c: el servicio de
+        // deriva lee los códigos de rol por un puerto, no de IAM directo.
+        IamPlatformRoleCodesAdapter,
+        {
+          provide: PLATFORM_ROLE_CODES_PORT,
+          useExisting: IamPlatformRoleCodesAdapter,
+        },
         JwtStrategy,
         // Lo que se prueba es el catálogo, no la sesión: se da por activa.
         {
@@ -289,7 +308,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
 
   // ------------------------------------------------------------------------------------------
   describe('contrato OpenAPI que describen los decoradores', () => {
-    it('declara las 15 operaciones con operationId único, los códigos de error y el esquema de cada respuesta', () => {
+    it('declara las 25 operaciones con operationId único, los códigos de error y el esquema de cada respuesta', () => {
       const doc = SwaggerModule.createDocument(
         app,
         new DocumentBuilder().build(),
@@ -308,14 +327,33 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
           >,
         ).map(([metodo, op]) => ({ ruta, metodo, op })),
       );
-      expect(operaciones).toHaveLength(15);
+      // 20 originales + las 5 de lectura de PII y calidad que sumaron f0c71569
+      // (pii/summary, pii/columns, quality/rules, quality/issues) y 3c86d35f
+      // (pii/reconciliation): cambio de contrato deliberado, no ruido.
+      expect(operaciones).toHaveLength(25);
+      expect(
+        operaciones
+          .filter(
+            (o) =>
+              o.ruta.startsWith('/admin/catalog/pii/') ||
+              o.ruta.startsWith('/admin/catalog/quality/'),
+          )
+          .map((o) => `${o.metodo} ${o.ruta}`)
+          .sort(),
+      ).toEqual([
+        'get /admin/catalog/pii/columns',
+        'get /admin/catalog/pii/reconciliation',
+        'get /admin/catalog/pii/summary',
+        'get /admin/catalog/quality/issues',
+        'get /admin/catalog/quality/rules',
+      ]);
       const operationIds = operaciones.map((o) => o.op.operationId);
       expect(
         operationIds.every(
           (id) => id && id.startsWith('AdminCatalogController_'),
         ),
       ).toBe(true);
-      expect(new Set(operationIds).size).toBe(15);
+      expect(new Set(operationIds).size).toBe(25);
       const por = (m: string, r: string) =>
         operaciones.find((o) => o.metodo === m && o.ruta === r)!.op;
       expect(
@@ -1011,7 +1049,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
       const ok = await post(`/admin/catalog/objects/${objetoId}/evidence`, {
         kind: 'CODE_REFERENCE',
         reference:
-          'src/modules/data_catalog/repositories/catalog.repository.ts',
+          'src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts',
         excerpt: 'insert into data_catalog.catalog_evidence_items',
       }).expect(201);
       expect(ok.body).toMatchObject({

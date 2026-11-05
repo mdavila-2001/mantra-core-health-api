@@ -85,7 +85,8 @@ export class FhirR5Controller {
     name: 'custodian',
     required: false,
     format: 'uuid',
-    description: 'Custodio por el que se acota la búsqueda',
+    description:
+      'Obsoleto: el custodio sale de la sesión (X-Tenant-Id). Si llega y difiere del tenant activo, el paciente no está disponible (404).',
   })
   serveEverything(
     @Param('id', ParseUUIDPipe) id: string,

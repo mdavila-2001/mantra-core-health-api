@@ -1,0 +1,14 @@
+{
+  "source": "Wikidata",
+  "endpoint": "https://query.wikidata.org/sparql",
+  "property": "P3841 (Human Phenotype Ontology ID)",
+  "query": "SELECT ?x ?hpo WHERE { ?x wdt:P3841 ?hpo }",
+  "license": "CC0 1.0",
+  "retrievedAt": "2026-10-24T23:50:56.294Z",
+  "rows": 4873,
+  "hpoIds": 4865,
+  "wikidataItems": 4798,
+  "discardedInvalid": 1,
+  "file": "hpo-wikidata-p3841.ndjson.gz",
+  "gzSha256": "7bfd5f5352298c5ec5716a9464bc8355637b13b2b917e53fe2212ec383d51bfb"
+}

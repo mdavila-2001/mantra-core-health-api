@@ -1,6 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID } from 'class-validator';
-import { TARGET_TYPE_CODES, type TargetTypeCode } from '../surveys.concepts';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsUUID, ValidateIf } from 'class-validator';
+import {
+  SURVEYS,
+  TARGET_TYPE_CODES,
+  type TargetTypeCode,
+} from '../surveys.concepts';
 
 /**
  * Cuerpo de `POST /surveys/assignments`.
@@ -25,18 +29,23 @@ export class CreateAssignmentDto {
    */
   @ApiProperty({
     enum: TARGET_TYPE_CODES,
-    description: 'Qué se evalúa: la reserva, el servicio o el tipo de atención',
+    description:
+      'Qué se evalúa: la reserva, el servicio o el tipo de atención. `CARE_TYPE` sólo admite «todas mis consultas»',
   })
   @IsIn(TARGET_TYPE_CODES as readonly string[])
   targetType!: TargetTypeCode;
 
   /**
-   * Identificador asociado a target.
+   * Identificador de la cosa evaluada, según `targetType`.
    */
-  @ApiProperty({
-    description: 'Identificador de la cosa evaluada, según `targetType`',
+  @ApiPropertyOptional({
+    description:
+      'Identificador de la cosa evaluada, según `targetType`: la reserva (`APPOINTMENT`) o el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`). Con `CARE_TYPE` se puede omitir: es «todas mis consultas» (`' +
+      SURVEYS.CARE_TYPE_CONSULTATION +
+      '`), el único tipo de atención admitido.',
     format: 'uuid',
   })
+  @ValidateIf((dto: CreateAssignmentDto) => dto.targetType !== 'CARE_TYPE')
   @IsUUID()
-  targetId!: string;
+  targetId?: string;
 }

@@ -1,2 +1,2 @@
-<!-- GENERADO POR tools/sync_agents.py - NO EDITAR A MANO -->
-<!-- La fuente es ../../.claude/skills/. Lo que edites aca se pierde en la proxima sync. -->
+<!-- Copia de .claude/skills/ del estándar de la casa, generada en origen por tools/sync_agents.py. -->
+<!-- Ni esa fuente ni el script están en este repo: acá .agents/ es la copia que rige y se edita directamente (ver AGENTS.md §3). -->

@@ -5,6 +5,8 @@ import {
   BusinessPartners,
   BusinessPartnerBankAccounts,
   Contracts,
+  LeaseContracts,
+  PurchaseRequisitions,
   ContractApprovalRequests,
   ContractAmendments,
   ContractRenewals,
@@ -157,13 +159,15 @@ export class ErpContractsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el socio se busca por `id + tenantId`.
    * @returns Resultado de find partner by id conforme al contrato `Promise<BusinessPartners | null>`.
    */
   findPartnerById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<BusinessPartners | null> {
-    return em.findOne(BusinessPartners, { id });
+    return em.findOne(BusinessPartners, { id, tenantId });
   }
 
   /** El número de socio es único por tenant; anticipa el conflicto de la UNIQUE. */
@@ -245,6 +249,14 @@ export class ErpContractsRepository {
     );
   }
 
+  /** Cuenta bancaria por id, sin bloqueo: sirve para comprobar su socio antes de bloquearla. */
+  findBankAccountById(
+    em: EntityManager,
+    id: string,
+  ): Promise<BusinessPartnerBankAccounts | null> {
+    return em.findOne(BusinessPartnerBankAccounts, { id });
+  }
+
   /**
    * Obtiene find bank account for update.
    *
@@ -301,17 +313,45 @@ export class ErpContractsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el bloqueo recae solo en un contrato propio.
    * @returns Resultado de find contract by id for update conforme al contrato `Promise<Contracts | null>`.
    */
   findContractByIdForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Contracts | null> {
     return em.findOne(
       Contracts,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /** Contrato del tenant, sin bloqueo: sirve para validar una referencia. */
+  findContractById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Contracts | null> {
+    return em.findOne(Contracts, { id, tenantId });
+  }
+
+  /** Arrendamiento por id: el tenant lo da su contrato, que el llamador comprueba. */
+  findLeaseContractById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LeaseContracts | null> {
+    return em.findOne(LeaseContracts, { id });
+  }
+
+  /** Requisición de compra del tenant, para validar la referencia de una orden. */
+  findRequisitionById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<PurchaseRequisitions | null> {
+    return em.findOne(PurchaseRequisitions, { id, tenantId });
   }
 
   /**

@@ -26,6 +26,7 @@ class SystemApiClientModule {}
 class MockProviderClientModule {}
 class GoogleEmailClientModule {}
 class WorkerLifecycleService {}
+class WorkerHeartbeatService {}
 class LoggerToken {}
 class PinoLoggerToken {}
 
@@ -74,6 +75,9 @@ jest.unstable_mockModule('./google-email-client.module', () => ({
 jest.unstable_mockModule('./worker-lifecycle.service', () => ({
   WorkerLifecycleService,
 }));
+jest.unstable_mockModule('./worker-heartbeat.service', () => ({
+  WorkerHeartbeatService,
+}));
 jest.unstable_mockModule('./run-tick.util', () => ({ configureTicks }));
 jest.unstable_mockModule('./worker-health.registry', () => ({
   workerHealth: {
@@ -115,6 +119,7 @@ function buildApp() {
 
 const baseEnv = {
   healthPort: 9310,
+  healthHost: '127.0.0.1',
   tickTimeoutMs: 45_000,
   stuckTickMs: 90_000,
   shutdownTimeoutMs: 12_000,
@@ -180,6 +185,7 @@ describe('bootstrapWorker', () => {
     });
     expect(startWorkerHealthServer).toHaveBeenCalledWith({
       port: 9310,
+      host: '127.0.0.1',
       logger,
     });
     expect(logger.warn).not.toHaveBeenCalled();

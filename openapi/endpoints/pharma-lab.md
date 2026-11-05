@@ -152,6 +152,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PharmaLabs[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaLabs[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaLabs[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaLabs[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaLabs[]`. Ejemplo completo derivado de ese DTO:
 
@@ -306,6 +307,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -417,6 +419,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmaLabs>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaLabs>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaLabs>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaLabs>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaLabs`. Ejemplo completo derivado de ese DTO:
 
@@ -585,6 +588,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -736,6 +740,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -850,6 +855,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<AllocationReport>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AllocationReport>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AllocationReport>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AllocationReport>` | No |
 
 El controlador declara `AllocationReport`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -946,6 +952,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmaLabLinkEvents[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaLabLinkEvents[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaLabLinkEvents[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaLabLinkEvents[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaLabLinkEvents[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1071,6 +1078,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<InformationalMaterials[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<InformationalMaterials[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<InformationalMaterials[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<InformationalMaterials[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InformationalMaterials[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1237,6 +1245,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1349,6 +1358,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MaterialApprovals[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MaterialApprovals[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MaterialApprovals[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MaterialApprovals[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MaterialApprovals[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1467,6 +1477,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MaterialAssets[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MaterialAssets[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MaterialAssets[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MaterialAssets[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MaterialAssets[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1610,6 +1621,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1742,6 +1754,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1859,6 +1872,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1972,6 +1986,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MedicalVisitors[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalVisitors[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalVisitors[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalVisitors[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalVisitors[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2154,6 +2169,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2188,6 +2204,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Algún producto no pertenece al catálogo del laboratorio | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un rol de ámbito global se asigna sin tenant, sede ni consultorio | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2293,6 +2310,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2426,6 +2444,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2460,6 +2479,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un rol de ámbito global se asigna sin tenant, sede ni consultorio | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2565,6 +2585,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2696,6 +2717,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UnlinkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UnlinkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UnlinkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UnlinkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UnlinkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2829,6 +2851,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2941,6 +2964,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacovigilanceReports[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacovigilanceReports[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacovigilanceReports[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacovigilanceReports[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacovigilanceReports[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3111,6 +3135,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3223,6 +3248,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<{ /** El reporte. */ report: PharmacovigilanceReports; /** Acciones en orden cronológico. */ actions: PharmacovigilanceActions[]; }>` | No |
 | 429 | Consulta completada correctamente. | `Promise<{ /** El reporte. */ report: PharmacovigilanceReports; /** Acciones en orden cronológico. */ actions: PharmacovigilanceActions[]; }>` | No |
 | 500 | Consulta completada correctamente. | `Promise<{ /** El reporte. */ report: PharmacovigilanceReports; /** Acciones en orden cronológico. */ actions: PharmacovigilanceActions[]; }>` | No |
+| 504 | Consulta completada correctamente. | `Promise<{ /** El reporte. */ report: PharmacovigilanceReports; /** Acciones en orden cronológico. */ actions: PharmacovigilanceActions[]; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** El reporte. */ report: PharmacovigilanceReports; /** Acciones en orden cronológico. */ actions: PharmacovigilanceActions[]; }`. Ejemplo completo derivado de ese DTO:
 
@@ -3434,6 +3460,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3547,6 +3574,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmaProducts[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaProducts[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaProducts[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaProducts[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaProducts[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3728,6 +3756,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3867,6 +3896,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3999,6 +4029,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4112,6 +4143,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<RegulatoryDocuments[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<RegulatoryDocuments[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<RegulatoryDocuments[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<RegulatoryDocuments[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegulatoryDocuments[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4287,6 +4319,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4398,6 +4431,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<{ /** El documento. */ document: RegulatoryDocuments; /** Versiones, de la más reciente a la más antigua. */ versions: RegulatoryDocumentVersions[]; }>` | No |
 | 429 | Consulta completada correctamente. | `Promise<{ /** El documento. */ document: RegulatoryDocuments; /** Versiones, de la más reciente a la más antigua. */ versions: RegulatoryDocumentVersions[]; }>` | No |
 | 500 | Consulta completada correctamente. | `Promise<{ /** El documento. */ document: RegulatoryDocuments; /** Versiones, de la más reciente a la más antigua. */ versions: RegulatoryDocumentVersions[]; }>` | No |
+| 504 | Consulta completada correctamente. | `Promise<{ /** El documento. */ document: RegulatoryDocuments; /** Versiones, de la más reciente a la más antigua. */ versions: RegulatoryDocumentVersions[]; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** El documento. */ document: RegulatoryDocuments; /** Versiones, de la más reciente a la más antigua. */ versions: RegulatoryDocumentVersions[]; }`. Ejemplo completo derivado de ese DTO:
 
@@ -4584,6 +4618,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<RegulatoryDocumentAccessLog[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<RegulatoryDocumentAccessLog[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<RegulatoryDocumentAccessLog[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<RegulatoryDocumentAccessLog[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegulatoryDocumentAccessLog[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4715,6 +4750,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4859,6 +4895,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4976,6 +5013,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RegulatoryDocumentVersions>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegulatoryDocumentVersions>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegulatoryDocumentVersions>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegulatoryDocumentVersions>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegulatoryDocumentVersions`. Ejemplo completo derivado de ese DTO:
 
@@ -5116,6 +5154,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<{ /** Documentos que pasaron a «próximo a vencer». */ expiring: number; /** Documentos que pasaron a «vencido». */ expired: number; }>` | No |
 | 429 | Operación completada correctamente. | `Promise<{ /** Documentos que pasaron a «próximo a vencer». */ expiring: number; /** Documentos que pasaron a «vencido». */ expired: number; }>` | No |
 | 500 | Operación completada correctamente. | `Promise<{ /** Documentos que pasaron a «próximo a vencer». */ expiring: number; /** Documentos que pasaron a «vencido». */ expired: number; }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ /** Documentos que pasaron a «próximo a vencer». */ expiring: number; /** Documentos que pasaron a «vencido». */ expired: number; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** Documentos que pasaron a «próximo a vencer». */ expiring: number; /** Documentos que pasaron a «vencido». */ expired: number; }`. Ejemplo completo derivado de ese DTO:
 
@@ -5226,6 +5265,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmaLabStaff[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaLabStaff[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaLabStaff[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaLabStaff[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaLabStaff[]`. Ejemplo completo derivado de ese DTO:
 
@@ -5390,6 +5430,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5524,6 +5565,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5655,6 +5697,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5768,6 +5811,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<VisitorPostSubmissions[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitorPostSubmissions[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitorPostSubmissions[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitorPostSubmissions[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitorPostSubmissions[]`. Ejemplo completo derivado de ese DTO:
 
@@ -5909,6 +5953,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6025,6 +6070,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -6115,6 +6161,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PharmaLabNotices[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmaLabNotices[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmaLabNotices[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmaLabNotices[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmaLabNotices[]`. Ejemplo completo derivado de ese DTO:
 
@@ -6230,6 +6277,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `PharmaLabConcept[]` | No |
 | 429 | Consulta completada correctamente. | `PharmaLabConcept[]` | No |
 | 500 | Consulta completada correctamente. | `PharmaLabConcept[]` | No |
+| 504 | Consulta completada correctamente. | `PharmaLabConcept[]` | No |
 
 El controlador declara `PharmaLabConcept[]`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -6337,6 +6385,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6446,6 +6495,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DoctorVisitBlocks[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DoctorVisitBlocks[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DoctorVisitBlocks[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DoctorVisitBlocks[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DoctorVisitBlocks[]`. Ejemplo completo derivado de ese DTO:
 
@@ -6578,6 +6628,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6689,6 +6740,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6800,6 +6852,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 
 El controlador declara `PublishedAgenda`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -6892,6 +6945,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublishedAgenda>` | No |
 
 El controlador declara `PublishedAgenda`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -7041,6 +7095,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7194,6 +7249,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7328,6 +7384,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7471,6 +7528,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7578,6 +7636,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitRecords[]`. Ejemplo completo derivado de ese DTO:
 
@@ -7705,6 +7764,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitRecords[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitRecords[]`. Ejemplo completo derivado de ese DTO:
 
@@ -7834,6 +7894,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<RatingAggregate>` | No |
 | 429 | Consulta completada correctamente. | `Promise<RatingAggregate>` | No |
 | 500 | Consulta completada correctamente. | `Promise<RatingAggregate>` | No |
+| 504 | Consulta completada correctamente. | `Promise<RatingAggregate>` | No |
 
 El controlador declara `RatingAggregate`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -7971,6 +8032,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8095,6 +8157,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<{ /** La solicitud. */ request: VisitRequests; /** Productos o temas declarados. */ topics: VisitRequestTopics[]; /** Bitácora de transiciones. */ events: VisitRequestEvents[]; }>` | No |
 | 429 | Consulta completada correctamente. | `Promise<{ /** La solicitud. */ request: VisitRequests; /** Productos o temas declarados. */ topics: VisitRequestTopics[]; /** Bitácora de transiciones. */ events: VisitRequestEvents[]; }>` | No |
 | 500 | Consulta completada correctamente. | `Promise<{ /** La solicitud. */ request: VisitRequests; /** Productos o temas declarados. */ topics: VisitRequestTopics[]; /** Bitácora de transiciones. */ events: VisitRequestEvents[]; }>` | No |
+| 504 | Consulta completada correctamente. | `Promise<{ /** La solicitud. */ request: VisitRequests; /** Productos o temas declarados. */ topics: VisitRequestTopics[]; /** Bitácora de transiciones. */ events: VisitRequestEvents[]; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** La solicitud. */ request: VisitRequests; /** Productos o temas declarados. */ topics: VisitRequestTopics[]; /** Bitácora de transiciones. */ events: VisitRequestEvents[]; }`. Ejemplo completo derivado de ese DTO:
 
@@ -8309,6 +8372,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8437,6 +8501,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8569,6 +8634,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8704,6 +8770,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8830,6 +8897,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8960,6 +9028,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9082,6 +9151,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitRequests[]`. Ejemplo completo derivado de ese DTO:
 
@@ -9208,6 +9278,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitRequests[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitRequests[]`. Ejemplo completo derivado de ese DTO:
 
@@ -9339,6 +9410,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<VisitSurveys[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitSurveys[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitSurveys[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitSurveys[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitSurveys[]`. Ejemplo completo derivado de ese DTO:
 
@@ -9516,6 +9588,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CreatedResourceDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedResourceDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9629,6 +9702,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -9742,6 +9816,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<SurveyResults>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SurveyResults>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SurveyResults>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SurveyResults>` | No |
 
 El controlador declara `SurveyResults`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -9835,6 +9910,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<VisitSurveyResponses[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<VisitSurveyResponses[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<VisitSurveyResponses[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<VisitSurveyResponses[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VisitSurveyResponses[]`. Ejemplo completo derivado de ese DTO:
 
@@ -9952,6 +10028,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<{ /** El envío. */ response: VisitSurveyResponses; /** La encuesta. */ survey: VisitSurveys; /** Preguntas en orden. */ questions: VisitSurveyQuestions[]; }>` | No |
 | 429 | Consulta completada correctamente. | `Promise<{ /** El envío. */ response: VisitSurveyResponses; /** La encuesta. */ survey: VisitSurveys; /** Preguntas en orden. */ questions: VisitSurveyQuestions[]; }>` | No |
 | 500 | Consulta completada correctamente. | `Promise<{ /** El envío. */ response: VisitSurveyResponses; /** La encuesta. */ survey: VisitSurveys; /** Preguntas en orden. */ questions: VisitSurveyQuestions[]; }>` | No |
+| 504 | Consulta completada correctamente. | `Promise<{ /** El envío. */ response: VisitSurveyResponses; /** La encuesta. */ survey: VisitSurveys; /** Preguntas en orden. */ questions: VisitSurveyQuestions[]; }>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ /** El envío. */ response: VisitSurveyResponses; /** La encuesta. */ survey: VisitSurveys; /** Preguntas en orden. */ questions: VisitSurveyQuestions[]; }`. Ejemplo completo derivado de ese DTO:
 
@@ -10177,6 +10254,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransitionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransitionResultDto`. Ejemplo completo derivado de ese DTO:
 

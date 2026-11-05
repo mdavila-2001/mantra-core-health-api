@@ -14,8 +14,34 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
+import { Runbooks, ServiceComponents } from '../entities';
 
+const T1 = '00000000-0000-4000-8000-0000000000a1';
+const T2 = '00000000-0000-4000-8000-0000000000b2';
+const OUT_OF_SCOPE = PlatformOpsErrorReason.PLATFORM_OPS_RESOURCE_OUT_OF_SCOPE;
+
+/** Ejecuta `fn` con T1 como tenant activo del request. */
+const inTenant = <T>(fn: () => Promise<T>, tenantId = T1): Promise<T> =>
+  runWithTenant(tenantId, fn);
+
+/** Captura el rechazo de una promesa para comparar su respuesta HTTP. */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('no rechazó');
+}
+
+/** Componente de T2: las revisiones que lo citan son de T2. */
+const FOREIGN_COMPONENT = 'ffffffff-ffff-ffff-ffff-fffffffffff2';
+/** Runbook de T2: sus versiones son de T2. */
+const FOREIGN_RUNBOOK = 'ffffffff-ffff-ffff-ffff-fffffffffff3';
 const actor = { id: 'user-1', roles: ['SRE'] };
 const REVIEW = '11111111-1111-1111-1111-111111111111';
 const COMPONENT = '22222222-2222-2222-2222-222222222222';
@@ -30,9 +56,29 @@ const OWNER = '77777777-7777-7777-7777-777777777777';
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  // La cadena de propiedad que el alcance recorre con `tx.findOne`: la revisión
+  // hereda el tenant de su componente y la versión, el de su runbook.
+  const tx = {
+    flush: mockFn(),
+    findOne: mockFn(async (entity: unknown, where: { id: string }) => {
+      if (entity === ServiceComponents) {
+        return {
+          id: where.id,
+          tenantId: where.id === FOREIGN_COMPONENT ? T2 : T1,
+        };
+      }
+      if (entity === Runbooks) {
+        return {
+          id: where.id,
+          tenantId: where.id === FOREIGN_RUNBOOK ? T2 : T1,
+        };
+      }
+      return null;
+    }),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = {
+    findChangeRequestInTenant: mockFn(),
     findReviewForUpdate: mockFn(),
     findGoReview: mockFn(),
     findFindingsForUpdate: mockFn(() => Promise.resolve([])),
@@ -58,6 +104,7 @@ function build() {
     practicesRepo,
     incidentsRepo as any,
     improvementsRepo,
+    new PlatformOpsScope(),
     logger as any,
   );
   return {
@@ -108,7 +155,9 @@ describe('OpsPracticesService', () => {
       const review = inProgressReview();
       d.practicesRepo.findReviewForUpdate.mockResolvedValue(review);
 
-      const res = await d.service.completeReadinessReview(REVIEW, dto, actor);
+      const res = await inTenant(() =>
+        d.service.completeReadinessReview(REVIEW, dto, actor),
+      );
 
       expect(res).toEqual({
         id: REVIEW,
@@ -126,15 +175,17 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findReviewForUpdate.mockResolvedValue(inProgressReview());
       d.practicesRepo.findFindingsForUpdate.mockResolvedValue([finding]);
 
-      const res = await d.service.completeReadinessReview(
-        REVIEW,
-        {
-          ...dto,
-          resolvedFindings: [
-            { findingId: 'finding-1', evidenceJson: { pr: 42 } },
-          ],
-        },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeReadinessReview(
+          REVIEW,
+          {
+            ...dto,
+            resolvedFindings: [
+              { findingId: 'finding-1', evidenceJson: { pr: 42 } },
+            ],
+          },
+          actor,
+        ),
       );
 
       expect(res.resolvedCount).toBe(1);
@@ -151,7 +202,9 @@ describe('OpsPracticesService', () => {
       ]);
 
       await expect(
-        d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        inTenant(() =>
+          d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -162,10 +215,12 @@ describe('OpsPracticesService', () => {
         openFinding({ severityConceptId: CONCEPTS.FINDING_SEV_HIGH }),
       ]);
 
-      const res = await d.service.completeReadinessReview(
-        REVIEW,
-        { ...dto, decision: 'NO_GO' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeReadinessReview(
+          REVIEW,
+          { ...dto, decision: 'NO_GO' },
+          actor,
+        ),
       );
 
       expect(res.decisionConceptId).toBe(CONCEPTS.ORR_DECISION_NO_GO);
@@ -188,7 +243,9 @@ describe('OpsPracticesService', () => {
         openFinding({ ownerUserId: 'user-owner' }),
       ]);
 
-      await d.service.completeReadinessReview(REVIEW, dto, actor);
+      await inTenant(() =>
+        d.service.completeReadinessReview(REVIEW, dto, actor),
+      );
 
       expect(d.improvementsRepo.createImprovementItem).toHaveBeenCalledWith(
         d.tx,
@@ -202,10 +259,12 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findFindingsForUpdate.mockResolvedValue([]);
 
       await expect(
-        d.service.completeReadinessReview(
-          REVIEW,
-          { ...dto, resolvedFindings: [{ findingId: 'finding-x' }] },
-          actor as any,
+        inTenant(() =>
+          d.service.completeReadinessReview(
+            REVIEW,
+            { ...dto, resolvedFindings: [{ findingId: 'finding-x' }] },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -218,10 +277,12 @@ describe('OpsPracticesService', () => {
       ]);
 
       await expect(
-        d.service.completeReadinessReview(
-          REVIEW,
-          { ...dto, resolvedFindings: [{ findingId: 'finding-1' }] },
-          actor as any,
+        inTenant(() =>
+          d.service.completeReadinessReview(
+            REVIEW,
+            { ...dto, resolvedFindings: [{ findingId: 'finding-1' }] },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
@@ -234,7 +295,9 @@ describe('OpsPracticesService', () => {
       });
 
       await expect(
-        d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        inTenant(() =>
+          d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -243,7 +306,9 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findReviewForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        inTenant(() =>
+          d.service.completeReadinessReview(REVIEW, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -256,7 +321,11 @@ describe('OpsPracticesService', () => {
      * @returns Resultado de active runbook conforme al contrato `any`.
      */
     function activeRunbook(): any {
-      return { id: RUNBOOK, stateConceptId: CONCEPTS.STATE_ACTIVE };
+      return {
+        id: RUNBOOK,
+        tenantId: T1,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      };
     }
 
     it('publishes the first version and makes it current', async () => {
@@ -264,7 +333,9 @@ describe('OpsPracticesService', () => {
       const runbook = activeRunbook();
       d.practicesRepo.findRunbookForUpdate.mockResolvedValue(runbook);
 
-      const res = await d.service.publishRunbookVersion(RUNBOOK, dto, actor);
+      const res = await inTenant(() =>
+        d.service.publishRunbookVersion(RUNBOOK, dto, actor),
+      );
 
       expect(res).toEqual({
         id: VERSION,
@@ -281,7 +352,9 @@ describe('OpsPracticesService', () => {
         versionNumber: 7,
       });
 
-      const res = await d.service.publishRunbookVersion(RUNBOOK, dto, actor);
+      const res = await inTenant(() =>
+        d.service.publishRunbookVersion(RUNBOOK, dto, actor),
+      );
 
       expect(res.versionNumber).toBe(8);
     });
@@ -294,19 +367,24 @@ describe('OpsPracticesService', () => {
       });
 
       await expect(
-        d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        inTenant(() =>
+          d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('refuses a runbook that is not active', async () => {
       const d = build();
       d.practicesRepo.findRunbookForUpdate.mockResolvedValue({
+        tenantId: T1,
         id: RUNBOOK,
         stateConceptId: CONCEPTS.STATE_REVOKED,
       });
 
       await expect(
-        d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        inTenant(() =>
+          d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -315,7 +393,9 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findRunbookForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        inTenant(() =>
+          d.service.publishRunbookVersion(RUNBOOK, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -336,7 +416,9 @@ describe('OpsPracticesService', () => {
         versionNumber: 3,
       });
 
-      const res = await d.service.recordRunbookExecution(dto, actor);
+      const res = await inTenant(() =>
+        d.service.recordRunbookExecution(dto, actor),
+      );
 
       expect(res).toEqual({
         id: 'execution-1',
@@ -352,11 +434,16 @@ describe('OpsPracticesService', () => {
         id: VERSION,
         versionNumber: 3,
       });
-      d.incidentsRepo.findIncidentById.mockResolvedValue({ id: INCIDENT });
+      d.incidentsRepo.findIncidentById.mockResolvedValue({
+        tenantId: T1,
+        id: INCIDENT,
+      });
 
-      const res = await d.service.recordRunbookExecution(
-        { ...dto, healthIncidentId: INCIDENT },
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordRunbookExecution(
+          { ...dto, healthIncidentId: INCIDENT },
+          actor,
+        ),
       );
 
       expect(res.timelineEventId).toBe('timeline-1');
@@ -375,9 +462,8 @@ describe('OpsPracticesService', () => {
         versionNumber: 3,
       });
 
-      const res = await d.service.recordRunbookExecution(
-        { ...dto, result: 'ABORTED' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordRunbookExecution({ ...dto, result: 'ABORTED' }, actor),
       );
 
       expect(res.resultConceptId).toBe(CONCEPTS.RUNBOOK_RESULT_ABORTED);
@@ -388,9 +474,11 @@ describe('OpsPracticesService', () => {
       const d = build();
 
       await expect(
-        d.service.recordRunbookExecution(
-          { ...dto, endedAt: '2026-07-20T09:00:00.000Z' },
-          actor as any,
+        inTenant(() =>
+          d.service.recordRunbookExecution(
+            { ...dto, endedAt: '2026-07-20T09:00:00.000Z' },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -404,9 +492,11 @@ describe('OpsPracticesService', () => {
       d.incidentsRepo.findIncidentById.mockResolvedValue(null);
 
       await expect(
-        d.service.recordRunbookExecution(
-          { ...dto, healthIncidentId: INCIDENT },
-          actor as any,
+        inTenant(() =>
+          d.service.recordRunbookExecution(
+            { ...dto, healthIncidentId: INCIDENT },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -416,7 +506,7 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findRunbookVersionById.mockResolvedValue(null);
 
       await expect(
-        d.service.recordRunbookExecution(dto, actor as any),
+        inTenant(() => d.service.recordRunbookExecution(dto, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -437,6 +527,7 @@ describe('OpsPracticesService', () => {
     function pendingExercise(): any {
       return {
         id: EXERCISE,
+        tenantId: T1,
         serviceComponentId: COMPONENT,
         scenarioName: 'Caída de la zona A',
         resultConceptId: undefined,
@@ -466,10 +557,8 @@ describe('OpsPracticesService', () => {
         objective(),
       );
 
-      const res = await d.service.completeResilienceExercise(
-        EXERCISE,
-        dto,
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeResilienceExercise(EXERCISE, dto, actor),
       );
 
       expect(res).toEqual({
@@ -492,10 +581,12 @@ describe('OpsPracticesService', () => {
         objective(),
       );
 
-      const res = await d.service.completeResilienceExercise(
-        EXERCISE,
-        { ...dto, observedRtoSeconds: '3600' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeResilienceExercise(
+          EXERCISE,
+          { ...dto, observedRtoSeconds: '3600' },
+          actor,
+        ),
       );
 
       expect(res.resultConceptId).toBe(CONCEPTS.RESILIENCE_FAIL);
@@ -519,10 +610,12 @@ describe('OpsPracticesService', () => {
         objective(),
       );
 
-      const res = await d.service.completeResilienceExercise(
-        EXERCISE,
-        { ...dto, observedRpoSeconds: '600' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeResilienceExercise(
+          EXERCISE,
+          { ...dto, observedRpoSeconds: '600' },
+          actor,
+        ),
       );
 
       expect(res.rtoBreached).toBe(false);
@@ -539,10 +632,12 @@ describe('OpsPracticesService', () => {
         objective(),
       );
 
-      const res = await d.service.completeResilienceExercise(
-        EXERCISE,
-        { ...dto, observedRpoSeconds: undefined },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeResilienceExercise(
+          EXERCISE,
+          { ...dto, observedRpoSeconds: undefined },
+          actor,
+        ),
       );
 
       expect(res.rpoBreached).toBe(false);
@@ -558,10 +653,12 @@ describe('OpsPracticesService', () => {
         objective({ rtoSeconds: '9007199254740992' }),
       );
 
-      const res = await d.service.completeResilienceExercise(
-        EXERCISE,
-        { ...dto, observedRtoSeconds: '9007199254740993' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.completeResilienceExercise(
+          EXERCISE,
+          { ...dto, observedRtoSeconds: '9007199254740993' },
+          actor,
+        ),
       );
 
       expect(res.rtoBreached).toBe(true);
@@ -575,19 +672,24 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findRecoveryObjectiveForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        inTenant(() =>
+          d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('refuses closing an exercise twice', async () => {
       const d = build();
       d.practicesRepo.findExerciseForUpdate.mockResolvedValue({
+        tenantId: T1,
         ...pendingExercise(),
         resultConceptId: CONCEPTS.RESILIENCE_PASS,
       });
 
       await expect(
-        d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        inTenant(() =>
+          d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -595,10 +697,12 @@ describe('OpsPracticesService', () => {
       const d = build();
 
       await expect(
-        d.service.completeResilienceExercise(
-          EXERCISE,
-          { ...dto, endedAt: '2026-07-20T09:00:00.000Z' },
-          actor as any,
+        inTenant(() =>
+          d.service.completeResilienceExercise(
+            EXERCISE,
+            { ...dto, endedAt: '2026-07-20T09:00:00.000Z' },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -608,8 +712,170 @@ describe('OpsPracticesService', () => {
       d.practicesRepo.findExerciseForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        inTenant(() =>
+          d.service.completeResilienceExercise(EXERCISE, dto, actor as any),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (POPS-01)', () => {
+    const complete: any = { decision: 'GO' };
+    const publish: any = { contentMarkdown: '# runbook' };
+    const execution: any = {
+      runbookVersionId: VERSION,
+      mode: 'MANUAL',
+      result: 'SUCCESS',
+      startedAt: '2026-07-20T10:00:00.000Z',
+    };
+    const exerciseDto: any = {
+      startedAt: '2026-07-20T10:00:00.000Z',
+      endedAt: '2026-07-20T11:00:00.000Z',
+      observedRtoSeconds: '600',
+    };
+
+    it('completeReadinessReview sobre una revisión de un componente de T2 responde igual que una inexistente y no la cierra', async () => {
+      const d = build();
+      const foreign = {
+        id: REVIEW,
+        serviceComponentId: FOREIGN_COMPONENT,
+        statusConceptId: CONCEPTS.ORR_IN_PROGRESS,
+      };
+      d.practicesRepo.findReviewForUpdate.mockResolvedValue(foreign);
+      const foreignError = await rejection(
+        inTenant(() =>
+          d.service.completeReadinessReview(REVIEW, complete, actor),
+        ),
+      );
+      d.practicesRepo.findReviewForUpdate.mockResolvedValue(null);
+      const missingError = await rejection(
+        inTenant(() =>
+          d.service.completeReadinessReview(REVIEW, complete, actor),
+        ),
+      );
+
+      expect(foreignError).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreignError.getStatus()).toBe(404);
+      expect(foreignError.reason).toBe(OUT_OF_SCOPE);
+      expect(foreignError.details).toBeUndefined();
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(foreign.statusConceptId).toBe(CONCEPTS.ORR_IN_PROGRESS);
+      expect(d.practicesRepo.findFindingsForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('publishRunbookVersion sobre un runbook de T2 responde 404 y no publica', async () => {
+      const d = build();
+      d.practicesRepo.findRunbookForUpdate.mockResolvedValue({
+        id: RUNBOOK,
+        tenantId: T2,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.publishRunbookVersion(RUNBOOK, publish, actor),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.practicesRepo.createRunbookVersion).not.toHaveBeenCalled();
+      expect(d.practicesRepo.findRunbookForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        RUNBOOK,
+        T1,
+      );
+    });
+
+    it('recordRunbookExecution sobre la versión de un runbook de T2 responde 404 y no registra', async () => {
+      const d = build();
+      d.practicesRepo.findRunbookVersionById.mockResolvedValue({
+        id: VERSION,
+        runbookId: FOREIGN_RUNBOOK,
+        versionNumber: 1,
+      });
+
+      const error = await rejection(
+        inTenant(() => d.service.recordRunbookExecution(execution, actor)),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.practicesRepo.createRunbookExecution).not.toHaveBeenCalled();
+    });
+
+    it('recordRunbookExecution rechaza un incidente o un cambio citados que son de T2', async () => {
+      const d = build();
+      d.practicesRepo.findRunbookVersionById.mockResolvedValue({
+        id: VERSION,
+        runbookId: RUNBOOK,
+        versionNumber: 1,
+      });
+      d.incidentsRepo.findIncidentById.mockResolvedValue({
+        id: INCIDENT,
+        tenantId: T2,
+      });
+      const incident = await rejection(
+        inTenant(() =>
+          d.service.recordRunbookExecution(
+            { ...execution, healthIncidentId: INCIDENT },
+            actor,
+          ),
+        ),
+      );
+      d.incidentsRepo.findIncidentById.mockResolvedValue({
+        id: INCIDENT,
+        tenantId: T1,
+      });
+      d.practicesRepo.findChangeRequestInTenant.mockResolvedValue({
+        id: 'change-t2',
+        tenantId: T2,
+      });
+      const change = await rejection(
+        inTenant(() =>
+          d.service.recordRunbookExecution(
+            { ...execution, changeRequestId: 'change-t2' },
+            actor,
+          ),
+        ),
+      );
+
+      expect(incident.reason).toBe(OUT_OF_SCOPE);
+      expect(change.reason).toBe(OUT_OF_SCOPE);
+      expect(d.practicesRepo.createRunbookExecution).not.toHaveBeenCalled();
+      expect(d.incidentsRepo.createTimelineEvent).not.toHaveBeenCalled();
+    });
+
+    it('completeResilienceExercise sobre un ejercicio de T2 responde 404 y no lo cierra', async () => {
+      const d = build();
+      const foreign = {
+        id: EXERCISE,
+        tenantId: T2,
+        serviceComponentId: COMPONENT,
+        scenarioName: 'Caída de la zona A',
+        resultConceptId: undefined,
+      };
+      d.practicesRepo.findExerciseForUpdate.mockResolvedValue(foreign);
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.completeResilienceExercise(EXERCISE, exerciseDto, actor),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(foreign.resultConceptId).toBeUndefined();
+      expect(
+        d.practicesRepo.findRecoveryObjectiveForUpdate,
+      ).not.toHaveBeenCalled();
+      expect(d.improvementsRepo.createImprovementItem).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto ninguna operación llega a la base', async () => {
+      const d = build();
+
+      await expect(
+        d.service.completeResilienceExercise(EXERCISE, exerciseDto, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.practicesRepo.findExerciseForUpdate).not.toHaveBeenCalled();
     });
   });
 });

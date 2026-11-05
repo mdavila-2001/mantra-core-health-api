@@ -19,13 +19,13 @@ export class DoctorVisitWindows {
   /**
    * Política a la que pertenece la ventana.
    */
-  @Property({ fieldName: 'doctor_visit_policy_id', type: 'uuid' }) // FK → pharma_lab.doctor_visit_policies
+  @Property({ fieldName: 'doctor_visit_policy_id', type: 'uuid' }) // FK → pharma_lab.doctor_visit_policies (inferida)
   doctorVisitPolicyId!: string;
 
   /**
    * Día de la semana, 0 = domingo … 6 = sábado (`Date#getUTCDay`).
    */
-  @Property({ fieldName: 'weekday', columnType: 'int' })
+  @Property({ columnType: 'int' })
   weekday!: number;
 
   /**
@@ -49,7 +49,7 @@ export class DoctorVisitWindows {
   /**
    * Modalidad de la ventana.
    */
-  @Property({ fieldName: 'modality_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   modalityConceptId!: string;
 
   /**
@@ -79,13 +79,13 @@ export class DoctorVisitWindows {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

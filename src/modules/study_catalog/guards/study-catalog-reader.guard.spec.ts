@@ -1,0 +1,137 @@
+import { describe, expect, it, jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
+import { CONCEPTS } from '../../../common';
+import { DIR } from '../../directory/directory.concepts';
+import { StudyCatalogReaderGuard } from './study-catalog-reader.guard';
+
+const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+const LAB = 'aaaaaaaa-0000-0000-0000-00000000000a';
+const CLINIC = 'bbbbbbbb-0000-0000-0000-00000000000b';
+const TYPES: Record<string, string> = {
+  [LAB]: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+  [CLINIC]: CONCEPTS.TENANT_TYPE_PROVIDER,
+};
+
+function build() {
+  const members: Record<string, string> = { 'lab-staff': LAB, patient: CLINIC };
+  const repo = {
+    findActiveByUserTenant: mockFn(
+      (_em: unknown, userId: string, tenantId: string, status: string) =>
+        Promise.resolve(
+          members[userId] === tenantId && status === DIR.MEMBERSHIP_ACTIVE
+            ? { userId, tenantId }
+            : null,
+        ),
+    ),
+  };
+  const calls: string[] = [];
+  const fork: any = {
+    execute: mockFn((_sql: string, params?: unknown[]) => {
+      calls.push(params ? `set_config:${String(params[0])}` : 'system_context');
+      return Promise.resolve([]);
+    }),
+    findOne: mockFn((_e: unknown, where: { id: string }) =>
+      Promise.resolve(
+        TYPES[where.id]
+          ? { id: where.id, tenantTypeConceptId: TYPES[where.id] }
+          : null,
+      ),
+    ),
+    getTransactionContext: () => undefined,
+    isInTransaction: () => false,
+    transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
+      work(fork),
+    ),
+  };
+  const guard = new StudyCatalogReaderGuard(
+    { fork: () => fork } as any,
+    repo as any,
+  );
+  const ctx = (user: any, resolvedTenantId?: string) =>
+    ({
+      switchToHttp: () => ({ getRequest: () => ({ user, resolvedTenantId }) }),
+    }) as any;
+  return { guard, ctx, repo, fork, calls };
+}
+
+describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
+  it.each(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN', 'SUPERADMIN'])(
+    'el rol %s lee el catálogo',
+    async (role) => {
+      const { guard, ctx } = build();
+      await expect(
+        guard.canActivate(ctx({ id: 'u', roles: [role] }, CLINIC)),
+      ).resolves.toBe(true);
+    },
+  );
+
+  it('el personal de un centro diagnóstico (aunque no sea el ejecutor de una orden) lee', async () => {
+    const { guard, ctx } = build();
+    await expect(
+      guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB)),
+    ).resolves.toBe(true);
+  });
+
+  it('fija el tenant en la transacción antes de leer la membresía (RLS cerrado por defecto)', async () => {
+    const previous = process.env.RLS_ENFORCE;
+    process.env.RLS_ENFORCE = 'true';
+    try {
+      const { guard, ctx, calls } = build();
+      await guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB));
+      expect(calls.slice(0, 2)).toEqual([
+        'system_context',
+        `set_config:${LAB}`,
+      ]);
+    } finally {
+      if (previous === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = previous;
+    }
+  });
+
+  it('un paciente (STAFF del tenant por defecto, que no es centro diagnóstico) recibe 403', async () => {
+    const { guard, ctx } = build();
+    await expect(
+      guard.canActivate(ctx({ id: 'patient', roles: ['PATIENT'] }, CLINIC)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('un CLINICIAN con ámbito sólo en otro tenant no lee en este', async () => {
+    const { guard, ctx } = build();
+    const user = {
+      id: 'doc',
+      roles: [],
+      scopedRoles: { [CLINIC]: ['CLINICIAN'] },
+    };
+    await expect(guard.canActivate(ctx(user, LAB))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
+
+  it('SUPERADMIN acotado a otro tenant no lee en este; acotado a éste sí (#1241)', async () => {
+    const { guard, ctx } = build();
+    const scopedTo = (tenantId: string) => ({
+      id: 'root-scoped',
+      roles: ['SUPERADMIN'],
+      scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+    });
+    await expect(
+      guard.canActivate(ctx(scopedTo(LAB), CLINIC)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      guard.canActivate(ctx(scopedTo(CLINIC), CLINIC)),
+    ).resolves.toBe(true);
+  });
+
+  it('sin tenant resuelto y sin rol: 403 sin consultar membresías', async () => {
+    const { guard, ctx, repo } = build();
+    await expect(
+      guard.canActivate(ctx({ id: 'x', roles: ['USER'] }, undefined)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(repo.findActiveByUserTenant).not.toHaveBeenCalled();
+  });
+
+  it('ruta sin sujeto: la decide JwtAuthGuard (401), no este guard', async () => {
+    const { guard, ctx } = build();
+    await expect(guard.canActivate(ctx(undefined, LAB))).resolves.toBe(true);
+  });
+});

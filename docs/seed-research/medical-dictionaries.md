@@ -21,7 +21,11 @@
 - **Castellano**: es el hueco grande. Las ontologías abiertas alcanzables están en inglés; el único
   castellano con idioma declarado por la fuente son 486 nombres de FMA (sin tildes, verbatim). Las fuentes
   en castellano (DeCS, Wikidata, TA2, RANM, MedlinePlus) estaban **bloqueadas por la política de red de
-  la sesión** (403). El importador de etiquetas ES de Wikidata quedó escrito y sin correr.
+  la sesión** (403). **Pasada 9 (2026-10-24, red habilitada):** el importador de Wikidata corrió y suma
+  49 615 nombres ES (CC0) de ítems que declaran el id; en la carga por defecto entran **47 342 conceptos
+  con 56 215 designaciones ES** (sinónimos, nunca preferidas). DeCS: `decs.bvsalud.org` responde desde el
+  2026-10-25 y dice que la descarga XML y el token de la API se entregan bajo un contrato de licencia
+  gratuito con BIREME/OPS (condiciones en `dictionaries/SOURCES.md`); sin ese contrato no hay archivo.
 - **Saturación**: las pasadas 7 y 8 aportaron 0 en todos los dominios **sobre el universo alcanzable**
   (registro completo de OBO Foundry + fuentes no OBO conocidas). No es saturación del universo total: las
   fuentes bloqueadas siguen siendo huecos documentados abajo.
@@ -73,6 +77,29 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 | 6 | Re-barrido del registro: las 3 sin clasificar (CLO, PCL, SLSO) | 39 018 | 0 | 48 186 | 2 | histología (líneas celulares, opt-in) | PCL: sin clases en git; SLSO: NASA, fuera de alcance |
 | 7 | Re-barrido del registro (191/191 clasificadas) + recheck de los 35 hosts no OBO + repos de GitHub hallados por búsqueda web (ansforge/IG-terminologie-de-sante, PlanTL/AbreMES-DB, NCI-Thesaurus/thesaurus-obo-edition, ebi-chebi/ChEBI, obophenotype/ncbitaxon) | **0** | 0 | 0 | 0 | ninguno | EMDN de ANS: 16 códigos en francés (subconjunto, no el nomenclador); el resto sin datos o bloqueado |
 | 8 | Búsqueda web de fuentes abiertas en castellano y de traducciones de Uberon/CL (babelon, hpo-translations), licencias de ICNP/NANDA/NIC/NOC, FMA, Metainventario | **0** | 0 | 0 | 0 | ninguno | Sin traducciones ES de Uberon/CL publicadas; HPO-translations es de la sesión de síntomas; enfermería es de su sesión |
+| 9 | Wikidata (CC0): etiqueta, alias y descripción ES de ítems que declaran P1554 UBERON, P7963 CL, P1402 FMA, P354 HGNC, P685 NCBI taxonomy (sólo los 1 331 del corpus), P686 GO, P3986 SO | **0** (sólo nombres ES de conceptos existentes) | — | 0 | 0 | castellano: genética, anatomía, microbiología, histología, genética molecular | DeCS: `decs.bvsalud.org`/`api.bvsalud.org` cortan la conexión del lado de BIREME y `bvsalud.org` responde 403 de su CDN: no se pudo leer la descarga ni la licencia; sin importador |
+
+**Pasada 9, nombres ES de Wikidata por propiedad** (filas código↔ítem; «en corpus» = códigos que existen
+en el corpus; «cargados» = conceptos que reciben designación ES en la carga por defecto, medido en la base
+desechable):
+
+| Propiedad | Filas | Códigos | En corpus | Cargados |
+|---|---:|---:|---:|---:|
+| P354 HGNC | 42 426 | 42 388 | 41 605 | 41 605 |
+| P1402 FMA | 2 774 | 2 770 | 2 747 | 2 331 (el resto de FMA no se carga por política) |
+| P1554 UBERON | 2 268 | 2 246 | 2 113 | 2 113 |
+| P685 NCBI taxonomy | 1 007 | 1 006 | 1 006 | 1 006 |
+| P686 GO | 837 | 837 | 812 | 0 (GO es opt-in: `--include go`) |
+| P7963 CL | 230 | 229 | 217 | 217 |
+| P3986 SO | 73 | 71 | 70 | 70 |
+| **Total** | **49 615** | | | **47 342** (56 215 designaciones) |
+
+Defecto corregido en la corrida: Wikidata guarda P7963 como `CL_0000738`; `corpusCode` armaba
+`CL:CL_0000738` y no casaba con ningún concepto (test agregado). Los códigos fuera del corpus (ids
+retirados, o basura como `FMA:Radical Feminism` en un ítem de Wikidata) no se cargan: el cargador sólo
+cuelga nombres de conceptos que entran en la corrida. Ojo semántico: UBERON es multiespecie y Wikidata
+le asigna a veces el ítem humano (UBERON:0000948 → «corazón» Q1072 y «corazón humano» Q2419844); quedan
+como sinónimos con su ítem Q en `dictionary-es-labels`, no como nombre preferido.
 
 **Saturado (dos pasadas seguidas con 0) en todos los dominios del universo alcanzable.** La pasada 3 cuenta
 659 y no 660 porque reemplaza el término único del `ogms.obo` de la pasada 1.
@@ -171,7 +198,7 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 
 | Dominio | Hueco | Por qué | Qué lo cierra |
 |---|---|---|---|
-| Todos | Nombres en castellano | Las ontologías abiertas alcanzables están en inglés; DeCS, Wikidata, TA2 y MedlinePlus, bloqueados | Habilitar `query.wikidata.org` y correr `import-wikidata-es-labels.mjs`; habilitar DeCS (BIREME) y escribir su importador contra el archivo real |
+| Todos | Nombres en castellano oficiales | Wikidata ya aporta 47 342 conceptos con nombres ES de la comunidad (pasada 9), pero no son traducciones oficiales; DeCS (BIREME) se entrega sólo con un contrato de licencia (gratuito, por edición, tres años, no exclusivo; la API pide token); TA2 y MedlinePlus, bloqueados | El contrato con BIREME/OPS y el archivo XML (o el token de `api.bvsalud.org`); con eso se escribe el importador contra el archivo real, enlazando por id MeSH |
 | Anatomía | TA2 en latín/inglés/español | FIPAT bloqueado; TA2 no está en git | Habilitar FIPAT. Mientras tanto el latín TA98 entra por FMA (8 669 nombres latinos en 6 744 clases) |
 | Microbiología | 138 taxones declarados por Mondo sin etiqueta | El módulo de importación de NCBITaxon de Mondo es más viejo que sus aristas | NCBI Taxonomy (FTP bloqueado) o un release de OBO NCBITaxon |
 | Microbiología | LPSN (nomenclatura procariota) | Bloqueado | Habilitar `lpsn.dsmz.de` y verificar licencia |
@@ -227,7 +254,7 @@ Cambios de **datos** (no DDL) que trae este PR en `src/common/constants/concepts
 
 ## Verificación
 
-- `node --test "tools/terminology-import/dictionaries/test/*.test.mjs"`: 18/18 (recortes reales de
+- `node --test "tools/terminology-import/dictionaries/test/*.test.mjs"`: 19/19 (pasada 9) (recortes reales de
   Uberon, CL, SO, Mondo, DOID, HGNC, Metainventario, OGMS e IDO). Con los del glosario: 52/52.
 - `corepack yarn typecheck` (tsc): verde. `eslint` y `prettier --check` sobre `concepts.ts`: verdes
   (los `.mjs` de `tools/` están fuera del alcance de `yarn lint`, como el resto del directorio).
@@ -236,4 +263,6 @@ Cambios de **datos** (no DDL) que trae este PR en `src/common/constants/concepts
   `xlsx-parser.spec.ts`, que falla igual sin estos cambios: la sesión no pudo bajar `xlsx-0.20.3` de
   `cdn.sheetjs.com` (bloqueado) y usó `xlsx@0.18.5` de npm sólo para verificar.
 - Carga real en Postgres 16 desechable (DDL de `database/SQL/00_shared` + `03_terminology`, conceptos
-  internos sembrados con los mismos ids deterministas): ver «Resumen».
+  internos sembrados con los mismos ids deterministas): ver «Resumen». Pasada 9, misma receta con la capa
+  de Wikidata: 1.ª corrida 46 s → 47 342 conceptos con 56 215 designaciones ES y 47 342 propiedades
+  `dictionary-es-labels`; **2.ª corrida 26 s → 0 filas nuevas**.

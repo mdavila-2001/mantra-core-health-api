@@ -652,3 +652,61 @@ describe('RegisterPractitionerDto · firma y sello reales', () => {
     ).toContain('signatureImageBase64');
   });
 });
+
+describe('RegisterPractitionerDto · respaldos de la matrícula y del SEDES (P29)', () => {
+  it('acepta los dos fileId precargados', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        licenseFileId: '5b0d7c4e-8f1a-4c2b-9d3e-1a2b3c4d5e6f',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: '6c1e8d5f-9a2b-4d3c-8e4f-2b3c4d5e6f70',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un fileId de matrícula o de SEDES que no es uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        licenseFileId: 'carnet.pdf',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: 'sedes.pdf',
+      }),
+    ).toEqual(['licenseFileId', 'sedesLicenseFileId']);
+  });
+});
+
+describe('RegisterPractitionerDto · fecha del SEDES y registro del colegio', () => {
+  it('acepta la fecha del SEDES y el registro del colegio completo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: '2016-07-11',
+        collegeLicenseNumber: 'CMB-4410',
+        collegeName: 'Colegio Médico de Bolivia',
+        collegeLicenseIssueDate: '2015-09-20',
+        collegeLicenseFileId: '7d2f9e6a-0b3c-4e4d-9f5a-3c4d5e6f7a81',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza fechas que no son ISO, un número vacío y un fileId que no es uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: 'ayer',
+        collegeLicenseNumber: '',
+        collegeLicenseIssueDate: '31/02',
+        collegeLicenseFileId: 'colegio.pdf',
+      }),
+    ).toEqual([
+      'collegeLicenseFileId',
+      'collegeLicenseIssueDate',
+      'collegeLicenseNumber',
+      'sedesLicenseIssueDate',
+    ]);
+  });
+});

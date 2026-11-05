@@ -26,6 +26,7 @@ import {
   PreconditionFailedException,
   Roles,
   type AuthenticatedUser,
+  PatientAnyTenant,
 } from '../../../../common';
 import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 import {
@@ -44,6 +45,8 @@ import {
   UpdateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
+  RetireTemplateQueryDto,
+  TemplateLiveBookingsResponseDto,
   ReactivateTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
@@ -77,6 +80,7 @@ import {
   WalkInAppointmentDto,
   WalkInAppointmentResponseDto,
 } from '../dto';
+import { RequirePermission } from '../../../../common/auth/require-permission.decorator';
 
 /**
  * Configuración de agenda y apertura de reservas. Capa fina sobre los servicios;
@@ -116,6 +120,7 @@ export class SchedulingController {
    * @returns Slots de la ventana, ordenados cronológicamente.
    */
   @Get('resources/:id/slots')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'UC-41-14: agenda publicada del recurso en una ventana',
@@ -326,16 +331,39 @@ export class SchedulingController {
   // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
   // sea del actor con `assertActorResource`.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @RequirePermission('scheduling.templates.delete', { resourceIdParam: 'id' })
   @ApiOperation({
     summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
     description:
-      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.',
+      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).',
   })
   retireTemplate(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: RetireTemplateQueryDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<RetireTemplateResponseDto> {
-    return this.catalogService.retireTemplate(id, actor);
+    return this.catalogService.retireTemplate(id, actor, {
+      cancelAffectedBookings: query.affectedBookings === 'cancel',
+    });
+  }
+
+  /**
+   * La vista previa del retiro: a quién alcanza, con nombre y hora, para que
+   * el profesional elija entre cancelar y avisar o conservar. Sólo para quien
+   * administra la agenda (trae nombres de pacientes).
+   */
+  @Get('templates/:id/live-bookings')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las citas vivas de una plantilla antes de retirarla',
+    description:
+      'Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.',
+  })
+  listTemplateLiveBookings(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateLiveBookingsResponseDto> {
+    return this.catalogService.listTemplateLiveBookings(id, actor);
   }
 
   /** UC-41-03. */
@@ -377,6 +405,7 @@ export class SchedulingController {
   // `PATIENT` entra acotado por el servicio: sólo lee los bloqueos de un médico
   // con el que TIENE cita, y sólo ve el motivo catalogado — nunca el texto
   // libre que el profesional escribe al elegir «Otro».
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'Listar las excepciones de disponibilidad de un recurso',
@@ -429,7 +458,7 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos',
     description:
-      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.',
+      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.',
   })
   closeSlots(
     @Param('id', ParseUUIDPipe) id: string,
@@ -527,7 +556,7 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Registrar una excepción de disponibilidad',
     description:
-      'Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.',
+      'Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.',
   })
   createException(
     @Param('id', ParseUUIDPipe) id: string,
@@ -585,6 +614,7 @@ export class SchedulingController {
   // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
   // la excepción sea del actor (`assertActorResource`).
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @RequirePermission('scheduling.exceptions.delete', { resourceIdParam: 'id' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Eliminar una excepción de disponibilidad',
@@ -667,6 +697,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('slots/:id/holds')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -689,6 +720,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('holds/:holdToken/confirm')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -718,6 +750,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('holds/:holdToken/request')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -740,6 +773,7 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('waitlist')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Inscribir a un paciente en la lista de espera' })
@@ -757,6 +791,7 @@ export class SchedulingController {
    * que «estás en espera» sólo podía ser una suposición del cliente.
    */
   @Get('waitlist')
+  @PatientAnyTenant()
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'Listar las entradas de lista de espera de un paciente',

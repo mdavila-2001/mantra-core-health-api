@@ -7,7 +7,7 @@ function build(rows: unknown[]) {
   const execute = jest
     .fn<(sql: string, params: unknown[]) => Promise<unknown[]>>()
     .mockResolvedValue(rows);
-  const em = { fork: () => ({ getConnection: () => ({ execute }) }) };
+  const em = { execute };
   return {
     service: new PractitionerInsuranceNetworksService(em as never),
     execute,

@@ -39,6 +39,7 @@ function build() {
     findActiveByUserTenant: mockFn(
       (_em: unknown, userId: string, tenantId: string, status: string) => {
         const m = memberships[userId];
+        calls.push('membership');
         return Promise.resolve(
           m && m.tenantId === tenantId && status === DIR.MEMBERSHIP_ACTIVE
             ? { userId, tenantId, tenantRoleConceptId: m.role }
@@ -47,13 +48,26 @@ function build() {
       },
     ),
   };
-  const fork = {
-    findOne: mockFn((_entity: unknown, where: { id: string }) =>
-      Promise.resolve(
+  // Order of DB calls inside the guard's transaction, to prove the tenant
+  // context is set BEFORE the RLS-protected membership read.
+  const calls: string[] = [];
+  const fork: any = {
+    execute: mockFn((_sql: string, params?: unknown[]) => {
+      calls.push(params ? `set_config:${String(params[0])}` : 'system_context');
+      return Promise.resolve([]);
+    }),
+    findOne: mockFn((_entity: unknown, where: { id: string }) => {
+      calls.push('tenant');
+      return Promise.resolve(
         TENANT_TYPES[where.id]
           ? { id: where.id, tenantTypeConceptId: TENANT_TYPES[where.id] }
           : null,
-      ),
+      );
+    }),
+    getTransactionContext: () => undefined,
+    isInTransaction: () => false,
+    transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
+      work(fork),
     ),
   };
   const em = { fork: () => fork };
@@ -64,7 +78,7 @@ function build() {
         getRequest: () => ({ user, resolvedTenantId }),
       }),
     }) as any;
-  return { guard, ctx, repo, fork };
+  return { guard, ctx, repo, fork, calls };
 }
 
 describe('LabStaffGuard', () => {
@@ -74,6 +88,24 @@ describe('LabStaffGuard', () => {
       await expect(
         guard.canActivate(ctx({ id: 'lab-owner', roles: ['USER'] }, LAB)),
       ).resolves.toBe(true);
+    });
+
+    it('fija el tenant en la transacción ANTES de leer la membresía (RLS cerrado por defecto)', async () => {
+      const previous = process.env.RLS_ENFORCE;
+      process.env.RLS_ENFORCE = 'true';
+      try {
+        const { guard, ctx, calls } = build();
+        await guard.canActivate(ctx({ id: 'lab-owner', roles: ['USER'] }, LAB));
+        expect(calls).toEqual([
+          'system_context',
+          `set_config:${LAB}`,
+          'tenant',
+          'membership',
+        ]);
+      } finally {
+        if (previous === undefined) delete process.env.RLS_ENFORCE;
+        else process.env.RLS_ENFORCE = previous;
+      }
     });
 
     it('el STAFF invitado al laboratorio', async () => {
@@ -119,6 +151,24 @@ describe('LabStaffGuard', () => {
       };
       await expect(guard.canActivate(ctx(user, LAB))).rejects.toBeInstanceOf(
         ForbiddenException,
+      );
+    });
+
+    it('SUPERADMIN acotado a otro tenant no es comodín aquí; acotado a éste sí (#1241)', async () => {
+      const { guard, ctx } = build();
+      const scopedTo = (tenantId: string) => ({
+        id: 'root-scoped',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+      });
+      await expect(
+        guard.canActivate(ctx(scopedTo(CLINIC), LAB)),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        guard.canActivate(ctx(scopedTo(CLINIC))),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(guard.canActivate(ctx(scopedTo(LAB), LAB))).resolves.toBe(
+        true,
       );
     });
 

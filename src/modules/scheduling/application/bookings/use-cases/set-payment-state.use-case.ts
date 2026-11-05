@@ -1,8 +1,5 @@
-import { AppointmentPaymentStates } from '../../../entities';
 import {
   PreconditionFailedException,
-  createdBy,
-  touch,
   type AuthenticatedUser,
 } from '../../../../../common';
 import {
@@ -13,13 +10,20 @@ import { BookingAccess } from '../support/booking-access';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
 import { PAYMENT_STATE_CONCEPT } from '../../../domain/booking/payment-state';
-import { PaymentStateDto, SetPaymentStateDto } from '../../../presentation/dto';
+import {
+  SetPaymentStateDto,
+  SetPaymentStateResponseDto,
+} from '../../../presentation/dto';
 import { PinoLogger } from 'nestjs-pino';
-import { SCHED } from '../../../domain/scheduling.concepts';
 import { STATES_WITHOUT_PAYMENT } from '../../../domain/booking/booking-states';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
+import {
+  BookingBillingBridge,
+  amountsOf,
+} from '../support/booking-billing-bridge';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
 import { projectPaymentState } from '../support/booking-projections';
-import { randomUUID } from 'node:crypto';
+import { writePaymentState } from '../support/payment-state-writer';
 
 /** TAREA-13 punto 5: marca el estado de pago de una cita. */
 @Injectable()
@@ -30,6 +34,7 @@ export class SetPaymentStateUseCase {
     private readonly access: BookingAccess,
     @Inject(BOOKING_HISTORY_PORT)
     private readonly history: BookingHistoryPort,
+    private readonly billing: BookingBillingBridge,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SetPaymentStateUseCase.name);
@@ -69,22 +74,46 @@ export class SetPaymentStateUseCase {
    * @param bookingId - La cita que se marca.
    * @param dto - En qué estado queda y si se usó seguro.
    * @param actor - Quien marca; queda firmado en la fila.
-   * @returns El estado de pago tal como quedó.
-   * @throws PreconditionFailedException (422) si la cita está cancelada o rechazada.
+   * ## El monto llega a facturación (FAC-01)
+   *
+   * Si la marca trae `amountReceived`, en la misma transacción se crea (la
+   * primera vez) la cuenta por cobrar de la cita y se le asigna lo recibido.
+   * Si facturación falla, la marca tampoco queda. Sin monto, la marca se
+   * guarda como siempre y `billing` dice por qué no se facturó.
+   *
+   * @returns El estado de pago tal como quedó, con su facturación.
+   * @throws PreconditionFailedException (422) si la cita está cancelada o
+   *   rechazada, si el monto no es válido, si viene con «pendiente» o si pasa
+   *   lo que falta pagar.
    */
   async execute(
     bookingId: string,
     dto: SetPaymentStateDto,
     actor: AuthenticatedUser,
-  ): Promise<PaymentStateDto> {
+  ): Promise<SetPaymentStateResponseDto> {
     this.logger.info(
       {
         operation: 'scheduling.booking.set-payment-state',
         bookingId,
         state: dto.state,
+        withAmount: dto.amountReceived !== undefined,
       },
       'Marking booking payment state',
     );
+
+    // El monto se valida antes de abrir la transacción: un importe mal escrito
+    // no tiene por qué bloquear la fila de pago de nadie.
+    const amountCents =
+      dto.amountReceived === undefined
+        ? undefined
+        : BookingBillingBridge.amountCents(dto.amountReceived);
+    if (amountCents !== undefined && dto.state === 'PENDING') {
+      throw new PreconditionFailedException(
+        'Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía no se cobró.',
+        { bookingId, state: dto.state },
+        SchedulingErrorReason.PAYMENT_AMOUNT_WITHOUT_PAYMENT,
+      );
+    }
 
     return this.em.transactional(async (tx) => {
       const booking = await this.access.loadForOperation(tx, bookingId, actor);
@@ -99,55 +128,30 @@ export class SetPaymentStateUseCase {
         );
       }
 
-      const newConcept = PAYMENT_STATE_CONCEPT[dto.state];
-      const insuranceUsed = dto.insuranceUsed ?? false;
-      const now = new Date();
-
-      const existing = await this.bookingsRepo.findPaymentStateForUpdate(
+      const row = await writePaymentState(
         tx,
-        bookingId,
-      );
-      const previousConcept = existing?.statusConceptId ?? null;
-
-      let row: AppointmentPaymentStates;
-      if (existing) {
-        existing.statusConceptId = newConcept;
-        existing.insuranceUsed = insuranceUsed;
-        existing.markedByUserId = actor.id;
-        existing.markedAt = now;
-        touch(existing, actor.id);
-        row = existing;
-      } else {
-        row = tx.create(AppointmentPaymentStates, {
-          id: randomUUID(),
-          tenantId: booking.tenantId,
-          appointmentBookingId: booking.id,
-          statusConceptId: newConcept,
-          insuranceUsed: insuranceUsed,
-          markedByUserId: actor.id,
-          markedAt: now,
-          // `createdBy` ya pone createdAt y updatedAt con el mismo instante.
-          ...createdBy(actor.id, now),
-          rowVersion: 1,
-        });
-        tx.persist(row);
-      }
-
-      // La huella. Sin esto, volver a «pendiente» borraría que alguna vez
-      // estuvo pagada, y marcar un pago es una afirmación sobre el dinero de
-      // alguien.
-      await this.history.append(tx, booking.id, {
-        operationConceptId: SCHED.HISTORY_OP_PAYMENT_MARKED,
-        dataSnapshot: {
-          bookingId: booking.id,
-          fromPaymentConceptId: previousConcept,
-          toPaymentConceptId: newConcept,
-          insuranceUsed: insuranceUsed,
+        this.bookingsRepo,
+        this.history,
+        booking,
+        {
+          statusConceptId: PAYMENT_STATE_CONCEPT[dto.state],
+          insuranceUsed: dto.insuranceUsed ?? false,
         },
-        changedByUserId: actor.id,
-      });
+        actor,
+      );
 
-      return projectPaymentState(row);
+      const billing = await this.billing.bill(
+        tx,
+        booking,
+        row,
+        amountCents === undefined
+          ? undefined
+          : { amountCents, method: 'CASH', capAtBalance: false },
+        actor.id,
+      );
+      await tx.flush();
+
+      return { ...projectPaymentState(row), ...amountsOf(billing), billing };
     });
   }
 }

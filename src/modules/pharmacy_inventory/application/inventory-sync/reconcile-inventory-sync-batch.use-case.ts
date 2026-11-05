@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -11,6 +10,7 @@ import { SyncRepository } from '../../infrastructure/repositories';
 import type { ReconcileResponseDto } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { reconcileSyncItem } from '../../domain/sync/reconciliation';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Reconcilia y cierra un lote recibido, sin modificar el stock directamente. */
 @Injectable()
@@ -18,6 +18,7 @@ export class ReconcileInventorySyncBatchUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly sync: SyncRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -31,12 +32,13 @@ export class ReconcileInventorySyncBatchUseCase {
     );
     return this.em.transactional(async (tx) => {
       const batch = await this.sync.findBatchById(tx, batchId);
-      if (!batch) {
-        throw new ResourceNotFoundException(
-          'Lote de sincronización no encontrado',
-          { batchId },
-        );
-      }
+      if (!batch) throw this.scope.notAvailable();
+      // El lote sólo guarda la conexión: su farmacia debe ser del actor.
+      await this.scope.requireManagedConnection(
+        tx,
+        batch.pharmacyIntegrationConnectionId,
+        actor,
+      );
       if (batch.statusConceptId !== PINV.BATCH_RECEIVED) {
         throw new PreconditionFailedException(
           'El lote no está en estado reconciliable',

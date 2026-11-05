@@ -5,6 +5,7 @@ import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import { JournalRepository } from '../repositories';
 import { sumCents, fromCents } from './money';
+import { AccountingScopeService } from './accounting-scope.service';
 
 /** Una línea de un asiento generado por un flujo automático (devengo, activo, ...). */
 export interface PostingLine {
@@ -105,7 +106,8 @@ export interface PostingResult {
 /**
  * Ayudante interno para postear un asiento balanceado dentro de la transacción del
  * llamador. Lo reutilizan los flujos que "incluyen UC-16-01" (devengo, activos,
- * pasivos, clearing). Garantiza la partida doble (débito=crédito) antes de escribir.
+ * pasivos, clearing). Garantiza la partida doble (débito=crédito) y el alcance de
+ * tenant de todo lo que referencia (ACC-01) antes de escribir.
  */
 @Injectable()
 export class PostingHelper {
@@ -113,8 +115,13 @@ export class PostingHelper {
    * Inicializa la instancia y sus dependencias.
    *
    * @param journalRepo - Valor de journal repo requerido por la operación.
+   * @param scope - Política de alcance: práctica, periodo, cuentas y dimensiones
+   *   del asiento deben ser del tenant activo.
    */
-  constructor(private readonly journalRepo: JournalRepository) {}
+  constructor(
+    private readonly journalRepo: JournalRepository,
+    private readonly scope: AccountingScopeService,
+  ) {}
 
   /**
    * Ejecuta la operación post.
@@ -141,6 +148,14 @@ export class PostingHelper {
         AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
+
+    // Guardián común de los flujos automáticos: nada se escribe antes de saber
+    // que práctica, periodo, cuentas y dimensiones son del tenant activo.
+    await this.scope.assertPostingScope(tx, {
+      practiceId: req.practiceId,
+      fiscalPeriodId: req.fiscalPeriodId,
+      lines: req.lines,
+    });
 
     const now = new Date();
     const transaction = this.journalRepo.createTransaction(tx, {

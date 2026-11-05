@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { AppealsService } from '../../application/services';
 import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
 
@@ -29,6 +34,11 @@ export class AppealsController {
   constructor(private readonly service: AppealsService) {}
 
   /** UC-26-12. */
+  @Audited({
+    action: 'CLAIM_APPEAL_DECIDED',
+    entity: 'claim_appeal_decision',
+    entityId: 'result.id',
+  })
   @Post(':id/appeal-decisions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir decisión de apelación (inmutable)' })

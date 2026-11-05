@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DiagnosticUnitsService,
   DiagnosticEquipmentService,
@@ -41,6 +46,11 @@ export class DiagnosticUnitSitesController {
   ) {}
 
   /** UC-23-02. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_SITE_UPDATED',
+    entity: 'diagnostic_unit_site',
+    entityId: 'param:siteId',
+  })
   @Patch(':siteId')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -54,6 +64,11 @@ export class DiagnosticUnitSitesController {
   }
 
   /** UC-23-09. */
+  @Audited({
+    action: 'DIAGNOSTIC_EQUIPMENT_ADDED',
+    entity: 'diagnostic_equipment',
+    entityId: 'result.id',
+  })
   @Post(':siteId/equipment')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

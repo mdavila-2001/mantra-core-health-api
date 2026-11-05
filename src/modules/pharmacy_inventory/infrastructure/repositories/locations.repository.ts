@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { InventoryLocations } from '../../entities';
 import { createdBy } from '../../../../common';
+import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { buildSqlFilters } from './sql-filters';
 
 /** Datos para crear una ubicación de inventario. */
 export interface CreateLocationData {
@@ -41,6 +43,10 @@ export interface CreateLocationData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** F5c: espacio físico. */
+  careSpaceId?: string;
+  /** F5c: unidad clínica dueña. */
+  clinicalUnitId?: string;
 }
 
 /** Acceso a datos de `pharmacy_inventory.inventory_locations`. */
@@ -55,6 +61,45 @@ export class LocationsRepository {
    */
   findById(em: EntityManager, id: string): Promise<InventoryLocations | null> {
     return em.findOne(InventoryLocations, { id });
+  }
+
+  /**
+   * La primera ubicación activa de una sede, por fecha de alta: donde el stock
+   * por sede (FAR-06) guarda sus posiciones.
+   */
+  findFirstActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
+  /** El botiquín activo de una unidad (F5c), si existe. */
+  findActiveWardStock(
+    em: EntityManager,
+    clinicalUnitId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(InventoryLocations, {
+      clinicalUnitId,
+      locationTypeConceptId: PINV.LOCATION_TYPE_WARD_STOCK,
+      statusConceptId: PINV.LOCATION_ACTIVE,
+    });
+  }
+
+  /** Todas las ubicaciones activas de una sede, la primera creada primero. */
+  findActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations[]> {
+    return em.find(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
   }
 
   /**
@@ -76,9 +121,51 @@ export class LocationsRepository {
         temperatureZoneConceptId: data.temperatureZoneConceptId,
         controlledAccess: data.controlledAccess,
         statusConceptId: data.statusConceptId,
+        ...(data.careSpaceId ? { careSpaceId: data.careSpaceId } : {}),
+        ...(data.clinicalUnitId ? { clinicalUnitId: data.clinicalUnitId } : {}),
         ...createdBy(data.actorUserId),
       },
       { partial: true },
     );
   }
+
+  /**
+   * Active locations of the sites of a pharmacy with the site name, ordered
+   * by site name, then code. `siteId` narrows to a single site. The pharmacy
+   * comes from the already-resolved scope.
+   */
+  listActiveForManagement(
+    em: EntityManager,
+    pharmacyId: string,
+    siteId?: string,
+  ): Promise<LocationListRow[]> {
+    const { where, params } = buildSqlFilters(
+      [
+        ['s.pharmacy_id = ?', pharmacyId],
+        ['loc.status_concept_id = ?', PINV.LOCATION_ACTIVE],
+      ],
+      [[siteId, 's.id = ?']],
+    );
+    return em.execute<LocationListRow[]>(
+      `select loc.id,
+              s.id as "siteId",
+              s.name as "siteName",
+              loc.code,
+              loc.name
+         from pharmacy_inventory.inventory_locations loc
+         join pharmacy.pharmacy_sites s on s.id = loc.pharmacy_site_id
+        ${where}
+        order by s.name, loc.code, loc.id`,
+      params,
+    );
+  }
+}
+
+/** One active location with its site name. */
+export interface LocationListRow {
+  id: string;
+  siteId: string;
+  siteName: string;
+  code: string;
+  name: string;
 }

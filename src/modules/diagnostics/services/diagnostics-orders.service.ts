@@ -1,9 +1,16 @@
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { DiagnosticOrdersRepository } from '../repositories';
-import { DIAGNOSTIC_CATEGORIES } from '../diagnostics.concepts';
+import { PATIENT_CHART_ORDER_CATEGORIES } from '../diagnostics.concepts';
+import { ServiceRequestNotesService } from '../../clinical/services/service-request-notes.service';
+import { analysisCategoryOf } from '../../clinical/service-request-category';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
+import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
+import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
+import { ClinicalScopeRepository } from '../../clinical/repositories/clinical-scope.repository';
+import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
 
 /**
  * Cara de lectura del circuito diagnóstico (laboratorio e imagenología).
@@ -27,28 +34,39 @@ export class DiagnosticsOrdersService {
    *
    * @param em - Contexto de persistencia.
    * @param ordersRepo - Acceso a órdenes e informes diagnósticos.
+   * @param siteNames - Nombre de la sede sugerida en cada orden.
    * @param logger - Registro estructurado.
+   * @param basedOnNotes - Notas que motivan cada orden (P40).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly ordersRepo: DiagnosticOrdersRepository,
+    private readonly siteNames: SuggestedSiteNamesReader,
     private readonly logger: PinoLogger,
+    private readonly basedOnNotes: ServiceRequestNotesService,
+    private readonly scopeFilter: ClinicalScopeFilterService,
+    private readonly scopeRepo: ClinicalScopeRepository,
   ) {
     this.logger.setContext(DiagnosticsOrdersService.name);
   }
 
   /**
-   * Órdenes de laboratorio e imagenología del paciente, con sus informes.
+   * Órdenes de laboratorio e imagenología del paciente (y las de análisis
+   * «otro» de C2, P40), con sus informes y las notas que motivan cada una.
    *
    * @param custodianTenantId - Tenant del contexto.
    * @param patientProfileId - Paciente cuyo circuito se lee.
    * @param limit - Tope por bloque.
+   * @param scope - Alcance de lectura. Con especialidades sólo se ven las
+   *   órdenes cuyo solicitante (y los informes cuyo autor) ejerce una
+   *   especialidad autorizada; `hiddenByScope` cuenta el resto.
    * @returns Órdenes e informes, con los bloques recortados anotados.
    */
   async getPatientOrders(
     custodianTenantId: string,
     patientProfileId: string,
     limit: number,
+    scope: ClinicalReadScope,
   ): Promise<PatientDiagnosticOrdersResponseDto> {
     this.logger.info(
       { operation: 'diagnostics.patient.read', patientProfileId, limit },
@@ -60,36 +78,107 @@ export class DiagnosticsOrdersService {
     // un `count` aparte. Mismo recurso que usa `ClinicalReadService`.
     const over = limit + 1;
 
-    const [orders, reports] = await Promise.all([
-      this.ordersRepo.findOrdersByPatient(
-        em,
-        custodianTenantId,
-        patientProfileId,
-        DIAGNOSTIC_CATEGORIES,
-        over,
+    const filter = await this.scopeFilter.build(em, patientProfileId, scope);
+    let hiddenByScope: Record<string, number> | undefined;
+    const [orders, reports] = filter
+      ? await Promise.all([
+          this.scopeRepo.page(em, {
+            entity: ServiceRequests,
+            base: {
+              custodianTenantId,
+              patientProfileId,
+              categoryConceptId: { $in: [...PATIENT_CHART_ORDER_CATEGORIES] },
+            },
+            filter,
+            columns: {
+              profile: 'requesterProfileId',
+              encounter: 'encounterId',
+            },
+            orderBy: { createdAt: 'DESC' },
+            limit: over,
+          }),
+          this.scopeRepo.page(em, {
+            entity: DiagnosticReports,
+            base: { custodianTenantId, patientProfileId },
+            filter,
+            columns: { user: 'createdByUserId', encounter: 'encounterId' },
+            orderBy: { createdAt: 'DESC' },
+            limit: over,
+          }),
+        ]).then(([o, r]) => {
+          hiddenByScope = { orders: o.hidden, reports: r.hidden };
+          return [o.rows, r.rows] as const;
+        })
+      : await Promise.all([
+          this.ordersRepo.findOrdersByPatient(
+            em,
+            custodianTenantId,
+            patientProfileId,
+            PATIENT_CHART_ORDER_CATEGORIES,
+            over,
+          ),
+          this.ordersRepo.findReportsByPatient(
+            em,
+            custodianTenantId,
+            patientProfileId,
+            over,
+          ),
+        ]);
+
+    const truncated: string[] = [];
+    const visibleOrders = this.cut(orders, limit, 'orders', truncated);
+    const spaceIds = [
+      ...new Set(
+        visibleOrders
+          .map((row) => row.suggestedCareSpaceId)
+          .filter((x): x is string => !!x),
       ),
-      this.ordersRepo.findReportsByPatient(
+    ];
+    const spaces = new Map(
+      (spaceIds.length
+        ? await em.execute<{ id: string; code: string; name: string }[]>(
+            'SELECT id, code, name FROM practice.care_spaces WHERE id = ANY(?::uuid[])',
+            [`{${spaceIds.join(',')}}`],
+            'all',
+          )
+        : []
+      ).map((r) => [r.id, r]),
+    );
+    const [suggestedSiteNames, notesByOrder] = await Promise.all([
+      this.siteNames.namesFor(
         em,
-        custodianTenantId,
-        patientProfileId,
-        over,
+        visibleOrders.map((row) => row.suggestedPracticeSiteId),
+      ),
+      this.basedOnNotes.noteIdsFor(
+        em,
+        visibleOrders.map((row) => row.id),
       ),
     ]);
 
-    const truncated: string[] = [];
-
     return {
       patientProfileId,
-      orders: this.cut(orders, limit, 'orders', truncated).map((row) => ({
+      orders: visibleOrders.map((row) => ({
         id: row.id,
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
         formInstanceId: row.formInstanceId,
         codeConceptId: row.codeConceptId,
         categoryConceptId: row.categoryConceptId,
+        category: analysisCategoryOf(row.categoryConceptId),
+        basedOnNoteIds: notesByOrder.get(row.id) ?? [],
         statusConceptId: row.statusConceptId,
         priorityConceptId: row.priorityConceptId,
         requesterProfileId: row.requesterProfileId,
+        performerSelectionConceptId: row.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          row.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: row.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: row.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(row.suggestedPracticeSiteId) ?? null)
+          : null,
+        suggestedCareSpace: row.suggestedCareSpaceId
+          ? (spaces.get(row.suggestedCareSpaceId) ?? null)
+          : null,
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,
@@ -109,6 +198,7 @@ export class DiagnosticsOrdersService {
       })),
       limit,
       truncated,
+      hiddenByScope,
     };
   }
 

@@ -191,4 +191,34 @@ describe('AuditLogRepository (serialización del hash-chain WORM)', () => {
       );
     });
   });
+
+  describe('findChain (paginado por cursor)', () => {
+    it('la primera página no lleva cursor y ordena por (recorded_at, id)', async () => {
+      const em: any = { find: mockFn().mockResolvedValue([]) };
+      await new AuditLogRepository().findChain(em, 't1', 50);
+      const [, where, opts] = em.find.mock.calls[0];
+      expect(where).toEqual({ tenantId: 't1' });
+      expect(opts).toMatchObject({
+        orderBy: { recordedAt: 'asc', id: 'asc' },
+        limit: 50,
+      });
+    });
+
+    it('la página siguiente arranca estrictamente después del cursor', async () => {
+      const em: any = { find: mockFn().mockResolvedValue([]) };
+      const at = new Date('2026-01-01T00:00:00.000Z');
+      await new AuditLogRepository().findChain(em, undefined, 50, {
+        id: 'x',
+        recordedAt: at,
+      });
+      const [, where] = em.find.mock.calls[0];
+      expect(where).toEqual({
+        tenantId: null,
+        $or: [
+          { recordedAt: { $gt: at } },
+          { recordedAt: at, id: { $gt: 'x' } },
+        ],
+      });
+    });
+  });
 });

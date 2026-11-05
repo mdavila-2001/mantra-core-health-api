@@ -107,4 +107,40 @@ export class DiagnosticEquipment {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a care space.
+   */
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
+  /**
+   * Valor de ae title mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'ae_title',
+    columnType: 'varchar(16)',
+    nullable: true,
+  })
+  aeTitle?: string;
+
+  /**
+   * Valor de station name mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'station_name',
+    columnType: 'varchar(16)',
+    nullable: true,
+  })
+  stationName?: string;
+
+  /**
+   * Identificador asociado a schedulable resource.
+   */
+  @Property({
+    fieldName: 'schedulable_resource_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.schedulable_resources (inferida)
+  schedulableResourceId?: string;
 }

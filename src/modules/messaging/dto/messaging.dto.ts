@@ -611,7 +611,11 @@ export class CreateNotificationRequestDto {
   /**
    * Identificador asociado a recipient user.
    */
-  @ApiPropertyOptional({ format: 'uuid', description: 'Destinatario interno' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Usuario destinatario. Obligatorio: sin él la solicitud se rechaza con 422 NOTIFICATION_RECIPIENT_INVALID',
+  })
   @IsOptional()
   @IsUUID()
   recipientUserId?: string;
@@ -620,7 +624,8 @@ export class CreateNotificationRequestDto {
    * Valor de recipient address mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Dirección de destino si el canal es externo',
+    description:
+      'Dirección de destino del canal externo; complementa a `recipientUserId`, no lo sustituye',
     maxLength: 300,
   })
   @IsOptional()

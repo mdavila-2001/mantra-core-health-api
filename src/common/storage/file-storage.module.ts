@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { FILE_STORAGE_ADAPTER } from './file-storage.adapter';
 import { LocalDiskFileStorageAdapter } from './local-disk-file-storage.adapter';
 import { S3FileStorageAdapter } from './s3-file-storage.adapter';
-import { loadStorageEnv } from './storage.env';
+import { assertStorageEnvConfigured, loadStorageEnv } from './storage.env';
 
 /** Publica un único puerto de storage y selecciona el adaptador por entorno. */
 @Global()
@@ -16,7 +16,10 @@ import { loadStorageEnv } from './storage.env';
         local: LocalDiskFileStorageAdapter,
         s3: S3FileStorageAdapter,
       ) => {
-        switch (loadStorageEnv().adapter) {
+        const env = loadStorageEnv();
+        // Falla en el arranque, no en la primera subida (CIF-01).
+        assertStorageEnvConfigured(env);
+        switch (env.adapter) {
           case 'local':
             return local;
           case 's3':

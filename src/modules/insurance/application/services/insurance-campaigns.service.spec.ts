@@ -10,6 +10,7 @@ import { encodeKeysetCursor } from '../../../../common/pagination/keyset-cursor'
 import { patientCoverageReferenceDate } from '../../../profiles/domain/patient-coverage-validity';
 import { INS } from '../../domain/insurance.concepts';
 import type { CreateInsuranceCampaignDto } from '../../presentation/dto/insurance-campaigns.dto';
+import { TenantAdministrationService } from '../../../directory/services/tenant-administration.service';
 import { InsuranceCampaignsService } from './insurance-campaigns.service';
 
 const fn = jest.fn as unknown as (impl?: (...args: any[]) => any) => any;
@@ -1023,5 +1024,107 @@ describe('InsuranceCampaignsService · afiliado (CA-4.2 a CA-4.5)', () => {
     ]);
     expect(JSON.stringify(dto)).not.toContain('carrier-andina');
     expect(JSON.stringify(dto)).not.toContain('user-operator');
+  });
+});
+
+/**
+ * Rol de plataforma acotado a un tenant (`scopedRoles`, MCH-001): en
+ * `roles` figura `SECURITY_ADMIN`/`SUPERADMIN`, pero sólo vale en su tenant.
+ */
+describe('InsuranceCampaignsService · plataforma acotada a un tenant', () => {
+  const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN'];
+  const OTHER_TENANT = 'tenant-otra';
+  const scopedTo = (role: string, tenantId: string) =>
+    ({
+      id: 'user-admin-a',
+      roles: [role],
+      scopedRoles: { [tenantId]: [role] },
+    }) as never;
+
+  /** Arma el servicio con la regla real de `TenantAdministrationService`, sin membresías. */
+  function buildWithRealAdministration() {
+    const built = build();
+    const real = new TenantAdministrationService({
+      findActiveByUserTenant: fn().mockResolvedValue(null),
+    } as never);
+    built.tenantAdministration.canAdminister.mockImplementation(
+      (tx: never, tenantId: string, actor: never) =>
+        real.canAdminister(tx, tenantId, actor),
+    );
+    built.tenantAdministration.assertCanRead.mockImplementation(
+      (tx: never, tenantId: string, actor: never) =>
+        real.assertCanRead(tx, tenantId, actor),
+    );
+    return built;
+  }
+
+  it('sin X-Tenant-Id, el acotado no recibe la pista de plataforma: 403 auditado', async () => {
+    for (const role of PLATFORM) {
+      const { service, repo, auditTrail } = build();
+      const actor = scopedTo(role, TENANT_ID);
+
+      await expect(service.create(createDto(), actor)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(repo.createCampaign).not.toHaveBeenCalled();
+      expect(auditTrail.record).toHaveBeenCalledWith(
+        expect.anything(),
+        actor,
+        expect.objectContaining({ action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED' }),
+      );
+    }
+  });
+
+  it('sin X-Tenant-Id, el global sí recibe la pista de 422', async () => {
+    for (const role of PLATFORM) {
+      const { service } = build();
+      await expect(
+        service.create(createDto(), {
+          id: 'user-root',
+          roles: [role],
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    }
+  });
+
+  it('acotado a otra organización NO crea ni lista campañas de esta aseguradora', async () => {
+    for (const role of PLATFORM) {
+      const { service, repo } = buildWithRealAdministration();
+      const actor = scopedTo(role, OTHER_TENANT);
+
+      await expect(
+        asOperator(() => service.create(createDto(), actor)),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        asOperator(() => service.list({} as never, actor)),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(repo.createCampaign).not.toHaveBeenCalled();
+    }
+  });
+
+  it('acotado a esta aseguradora sí crea y lista sus campañas', async () => {
+    for (const role of PLATFORM) {
+      const { service, repo } = buildWithRealAdministration();
+      const actor = scopedTo(role, TENANT_ID);
+
+      await asOperator(() => service.create(createDto(), actor));
+      await asOperator(() => service.list({} as never, actor));
+      expect(repo.createCampaign).toHaveBeenCalled();
+    }
+  });
+
+  it('global crea en esta aseguradora y en otra', async () => {
+    for (const role of PLATFORM) {
+      for (const tenantId of [TENANT_ID, OTHER_TENANT]) {
+        const { service, repo } = buildWithRealAdministration();
+        await runWithTenant(tenantId, () =>
+          service.create(createDto(), {
+            id: 'user-root',
+            roles: [role],
+          } as never),
+        );
+        expect(repo.createCampaign).toHaveBeenCalled();
+      }
+    }
   });
 });

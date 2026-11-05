@@ -21,6 +21,7 @@ import {
   ListPatientStatementsResponseDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
+import { activeTenantId, assertPracticeInTenant } from '../billing-scope';
 import { fromCents, sumAmounts, toCents } from '../money.util';
 
 /** Tope de estados de cuenta por página cuando el cliente no pide uno (CV-12). */
@@ -77,8 +78,16 @@ export class PatientStatementsService {
     );
     const periodStart = new Date(dto.periodStart);
     const periodEnd = new Date(dto.periodEnd);
+    const tenantId = activeTenantId();
 
     return this.em.transactional(async (tx) => {
+      // La práctica es del tenant del contexto, o el estado de cuenta se armaría
+      // con las facturas de otra organización.
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
       const existing = await this.statementsRepo.findByPeriod(
         tx,
         dto.practiceId,
@@ -124,15 +133,13 @@ export class PatientStatementsService {
       });
       await tx.flush();
 
-      if (dto.tenantId) {
-        for (const inv of invoices) {
-          this.linksRepo.create(tx, {
-            tenantId: dto.tenantId,
-            relationTypeConceptId: BILL.REL_STATEMENT_INCLUDES,
-            invoiceId: inv.id,
-            actorUserId: actor.id,
-          });
-        }
+      for (const inv of invoices) {
+        this.linksRepo.create(tx, {
+          tenantId,
+          relationTypeConceptId: BILL.REL_STATEMENT_INCLUDES,
+          invoiceId: inv.id,
+          actorUserId: actor.id,
+        });
       }
 
       this.logger.info(

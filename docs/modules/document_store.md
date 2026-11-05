@@ -38,8 +38,8 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
 | `POST /document-store/collections/:collection/documents` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
-| `GET /document-store/collections/:collection/documents/:id` | sesión | `document-store` |
-| `GET /document-store/collections/:collection/documents` | sesión | `document-store` |
+| `GET /document-store/collections/:collection/documents/:id` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
+| `GET /document-store/collections/:collection/documents` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
 | `PATCH /document-store/collections/:collection/documents/:id` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
 | `DELETE /document-store/collections/:collection/documents/:id` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
 
@@ -48,10 +48,10 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 | Método | Endpoint | Descripción |
 | --- | --- | --- |
 | POST | `/document-store/collections/:collection/documents` | Crear documento (`version` = 1) |
-| GET | `/document-store/collections/:collection/documents/:id?tenantId=` | Leer documento vivo |
-| GET | `/document-store/collections/:collection/documents?tenantId=&page=&pageSize=&documentType=` | Listar paginado |
+| GET | `/document-store/collections/:collection/documents/:id` | Leer documento vivo |
+| GET | `/document-store/collections/:collection/documents?page=&pageSize=&documentType=` | Listar paginado |
 | PATCH | `/document-store/collections/:collection/documents/:id` | Actualizar con concurrencia optimista (`expectedVersion`) |
-| DELETE | `/document-store/collections/:collection/documents/:id?tenantId=` | Borrado **lógico** (`deletedAt`), nunca físico |
+| DELETE | `/document-store/collections/:collection/documents/:id` | Borrado **lógico** (`deletedAt`), nunca físico |
 
 ## Forma del documento
 
@@ -70,21 +70,25 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 ## Gobierno y seguridad
 
-- **Scoping por tenant**: todas las consultas se acotan por `tenantId` (hoy llega en DTO/param).
+- **Scoping por tenant**: el tenant sale siempre del contexto verificado (`X-Tenant-Id`,
+  `requireTenantId()`), nunca de la query ni del cuerpo. Un `tenantId` declarado por el cliente es
+  opcional y solo se acepta si coincide con el activo; si no, responde `404`.
+- **404 uniforme**: un documento inexistente, borrado, con id inválido o de otro tenant responde igual
+  (`404`, mismo mensaje, `reason` `DOCUMENT_NOT_AVAILABLE`, sin `details`).
 - **Guard anti-inyección** (`CollectionNameGuard`): el nombre de colección se valida contra la
   whitelist `/^[a-z][a-z0-9_]{2,40}$/` antes de tocar la base.
 - **Concurrencia optimista**: `PATCH` exige `expectedVersion`; un desfase devuelve `409` con
   `CONCURRENCY_CONFLICT`.
 - **Borrado lógico**: `DELETE` marca `deletedAt`; los documentos borrados quedan excluidos de
   lecturas y listados.
-- **Roles** (`@Roles`) en los mutantes (`STORAGE_ADMIN`/`PLATFORM_ADMIN`); validación de DTOs con
-  class-validator.
+- **Roles** (`@Roles`) en todas las rutas, lecturas incluidas (`STORAGE_ADMIN`/`PLATFORM_ADMIN`);
+  validación de DTOs con class-validator.
 
 ## Auditoría vigente
 
-`GET` no exige rol y entrega el payload flexible completo: no hay autorización
-de lectura por tipo de documento ni por recurso, así que el módulo no es apto
-para documentos con contenido clínico.
+Las lecturas exigen un rol de almacenamiento y devuelven el payload flexible completo: no hay
+autorización por tipo de documento ni por paciente, así que ningún otro usuario del tenant lee
+documentos y el módulo no es apto para exponer contenido clínico a usuarios finales.
 
 ```bash
 corepack yarn test src/modules/document_store --runInBand --silent

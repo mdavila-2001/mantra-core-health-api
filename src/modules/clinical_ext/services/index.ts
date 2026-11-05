@@ -3,6 +3,7 @@ export * from './cds.service';
 export * from './clinical-alerts.service';
 export * from './order-sets.service';
 export * from './referrals.service';
+export * from './referral-notifier.service';
 export * from './care-gaps.service';
 export * from './virtual-encounters.service';
 export * from './prescription-favorites.service';

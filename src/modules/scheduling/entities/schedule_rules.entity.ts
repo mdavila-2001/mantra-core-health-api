@@ -65,12 +65,36 @@ export class ScheduleRules {
   @Property({ fieldName: 'gap_minutes', columnType: 'int', nullable: true })
   gapMinutes?: number;
 
+  /**
+   * Identificador asociado a booking mode concept.
+   */
   @Property({
     fieldName: 'booking_mode_concept_id',
     type: 'uuid',
     nullable: true,
   }) // FK → terminology.catalog_concepts (inferida)
   bookingModeConceptId?: string;
+
+  /**
+   * La franja atiende también por telemedicina (v4.2.61).
+   *
+   * `NOT NULL DEFAULT false`: por defecto la telemedicina está apagada y toda
+   * franja existente queda «sólo presencial». Una cita directa por
+   * TELECONSULTA sólo se acepta si empieza en una franja con este valor en
+   * `true`.
+   */
+  @Property({
+    fieldName: 'telemedicine_enabled',
+    type: 'boolean',
+    default: false,
+  })
+  telemedicineEnabled!: boolean;
+
+  /**
+   * Valor de flexible hours mantenido por la instancia.
+   */
+  @Property({ fieldName: 'flexible_hours', type: 'boolean', default: false })
+  flexibleHours!: boolean;
 
   /**
    * Valor de valid from mantenido por la instancia.

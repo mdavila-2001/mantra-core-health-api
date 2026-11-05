@@ -123,7 +123,7 @@ export class InsuranceAnalyticsRepository {
     reversedConceptId: string,
     bobConceptId: string,
   ): Promise<string | null> {
-    const rows = await em.getConnection().execute<CurrencyCountRow[]>(
+    const rows = await em.execute<CurrencyCountRow[]>(
       `SELECT c.currency_concept_id AS currency_concept_id, count(*)::text AS n
          FROM insurance.insurance_claims c
         WHERE c.insurance_carrier_id = ?
@@ -162,7 +162,7 @@ export class InsuranceAnalyticsRepository {
     dependentActiveConceptId: string,
     reportCurrencyConceptId: string | null,
   ): Promise<KpiRow> {
-    const rows = await em.getConnection().execute<KpiRow[]>(
+    const rows = await em.execute<KpiRow[]>(
       `WITH claims AS (
          SELECT c.id, c.total_amount, c.currency_concept_id
            FROM insurance.insurance_claims c
@@ -338,7 +338,7 @@ export class InsuranceAnalyticsRepository {
     reversedConceptId: string,
     reportCurrencyConceptId: string | null,
   ): Promise<MonthlyTrendRow[]> {
-    return em.getConnection().execute<MonthlyTrendRow[]>(
+    return em.execute<MonthlyTrendRow[]>(
       `WITH claims AS (
          SELECT c.id, c.total_amount, c.currency_concept_id, c.submitted_at
            FROM insurance.insurance_claims c
@@ -405,7 +405,7 @@ export class InsuranceAnalyticsRepository {
     period: AnalyticsPeriod,
     reversedConceptId: string,
   ): Promise<TopMedicationRow[]> {
-    return em.getConnection().execute<TopMedicationRow[]>(
+    return em.execute<TopMedicationRow[]>(
       `WITH claims AS (
          SELECT c.id
            FROM insurance.insurance_claims c
@@ -470,7 +470,7 @@ export class InsuranceAnalyticsRepository {
     coverageActiveConceptId: string,
     dependentActiveConceptId: string,
   ): Promise<SpecialtyRow[]> {
-    return em.getConnection().execute<SpecialtyRow[]>(
+    return em.execute<SpecialtyRow[]>(
       `WITH affiliates AS (
          SELECT pc.patient_profile_id
            FROM insurance.patient_coverages pc
@@ -551,7 +551,7 @@ export class InsuranceAnalyticsRepository {
     coverageActiveConceptId: string,
     dependentActiveConceptId: string,
   ): Promise<PathologyRow[]> {
-    return em.getConnection().execute<PathologyRow[]>(
+    return em.execute<PathologyRow[]>(
       `WITH affiliates AS (
          SELECT pc.patient_profile_id
            FROM insurance.patient_coverages pc
@@ -630,7 +630,7 @@ export class InsuranceAnalyticsRepository {
     dependentActiveConceptId: string,
     immunizationCompletedConceptId: string,
   ): Promise<ImmunizationRow> {
-    const rows = await em.getConnection().execute<ImmunizationRow[]>(
+    const rows = await em.execute<ImmunizationRow[]>(
       `WITH affiliates AS (
          SELECT pc.patient_profile_id
            FROM insurance.patient_coverages pc

@@ -81,6 +81,6 @@ Todas las rutas reciben `@CurrentUser()`. En el retrieval el actor **es** el pri
 `principalId` por el cuerpo — dejaría abrir sesiones a nombre de otro, y el histórico de acceso
 dejaría de significar nada.
 
-## Pruebas
+## Tests
 
 15 pruebas de delegación en `vector-rag-controllers.spec.ts`.

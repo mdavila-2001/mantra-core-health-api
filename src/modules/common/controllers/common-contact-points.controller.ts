@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { Audited, CurrentUser, Roles } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { ContactPointsService } from '../services';
 import {
@@ -17,7 +17,14 @@ import {
   VerifyContactPointDto,
 } from '../dto';
 
-/** Endpoints de puntos de contacto del módulo Common. */
+/**
+ * Endpoints de puntos de contacto del módulo Common.
+ *
+ * Las dos rutas son administrativas: el alta recibe `ownerType` y `ownerId` del cuerpo sin
+ * comprobar de quién es el dueño, y la verificación marca `verified = true` sin validar ningún
+ * código (el servicio acepta cualquiera). Con sólo sesión, cualquiera daría por verificado el
+ * contacto de otro.
+ */
 @ApiTags('common/contact-points')
 @ApiBearerAuth()
 @Controller('common/contact-points')
@@ -30,7 +37,13 @@ export class CommonContactPointsController {
   constructor(private readonly contactPointsService: ContactPointsService) {}
 
   /** UC-02-02: registra un punto de contacto. */
+  @Audited({
+    action: 'CONTACT_POINT_CREATED',
+    entity: 'contact_point',
+    entityId: 'result.id',
+  })
   @Post()
+  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un punto de contacto (UC-02-02)' })
   create(
@@ -41,7 +54,13 @@ export class CommonContactPointsController {
   }
 
   /** UC-02-03: verifica un punto de contacto. */
+  @Audited({
+    action: 'CONTACT_POINT_VERIFIED',
+    entity: 'contact_point',
+    entityId: 'param:id',
+  })
   @Post(':id/verify')
+  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verificar un punto de contacto (UC-02-03)' })
   verify(

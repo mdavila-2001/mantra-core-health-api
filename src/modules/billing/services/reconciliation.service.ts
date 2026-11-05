@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -14,6 +13,20 @@ import {
 } from '../repositories';
 import { ReconciliationClearDto, ReconciliationResultDto } from '../dto';
 import { BILL } from '../billing.concepts';
+import { PracticeTenantLookupService } from '../../practice/services';
+import { activeTenantId, assertDocumentInTenant } from '../billing-scope';
+
+/** "No existe" del pago recibido a conciliar; el ajeno responde idéntico. */
+const PAYMENT_RECEIVED_NOT_FOUND = {
+  message: 'Pago recibido no encontrado',
+  reason: BillingErrorReason.RECONCILIATION_PAYMENT_RECEIVED_NOT_FOUND,
+};
+
+/** "No existe" del pago emitido a conciliar; el ajeno responde idéntico. */
+const PAYMENT_MADE_NOT_FOUND = {
+  message: 'Pago emitido no encontrado',
+  reason: BillingErrorReason.RECONCILIATION_PAYMENT_MADE_NOT_FOUND,
+};
 
 /**
  * UC-17-07: concilia pagos vía un documento de compensación. Marca los pagos
@@ -34,6 +47,7 @@ export class ReconciliationService {
     private readonly em: EntityManager,
     private readonly paymentsReceivedRepo: PaymentsReceivedRepository,
     private readonly paymentsMadeRepo: PaymentsMadeRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReconciliationService.name);
@@ -69,18 +83,36 @@ export class ReconciliationService {
       );
     }
 
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      let reconciledReceived = 0;
+      // Todo pago se acota al tenant ANTES de conciliar el primero: uno ajeno en
+      // el lote no deja a medias a los demás ni se distingue de uno inexistente.
+      const received = [];
       for (const id of receivedIds) {
-        const p = await this.paymentsReceivedRepo.findById(tx, id);
-        if (!p)
-          throw new ResourceNotFoundException(
-            'Pago recibido no encontrado',
-            {
-              paymentReceivedId: id,
-            },
-            BillingErrorReason.RECONCILIATION_PAYMENT_RECEIVED_NOT_FOUND,
-          );
+        received.push(
+          await assertDocumentInTenant(
+            this.practiceTenantLookup,
+            await this.paymentsReceivedRepo.findById(tx, id),
+            tenantId,
+            PAYMENT_RECEIVED_NOT_FOUND,
+          ),
+        );
+      }
+      const made = [];
+      for (const id of madeIds) {
+        made.push(
+          await assertDocumentInTenant(
+            this.practiceTenantLookup,
+            await this.paymentsMadeRepo.findById(tx, id),
+            tenantId,
+            PAYMENT_MADE_NOT_FOUND,
+          ),
+        );
+      }
+
+      let reconciledReceived = 0;
+      for (const [index, p] of received.entries()) {
+        const id = receivedIds[index];
         if (p.clearingDocumentId) {
           throw new PreconditionFailedException(
             'El pago recibido ya está conciliado',
@@ -95,16 +127,8 @@ export class ReconciliationService {
       }
 
       let reconciledMade = 0;
-      for (const id of madeIds) {
-        const p = await this.paymentsMadeRepo.findById(tx, id);
-        if (!p)
-          throw new ResourceNotFoundException(
-            'Pago emitido no encontrado',
-            {
-              paymentMadeId: id,
-            },
-            BillingErrorReason.RECONCILIATION_PAYMENT_MADE_NOT_FOUND,
-          );
+      for (const [index, p] of made.entries()) {
+        const id = madeIds[index];
         if (p.clearingDocumentId) {
           throw new PreconditionFailedException(
             'El pago emitido ya está conciliado',

@@ -6,6 +6,11 @@ import { createdBy } from '../../../common';
 /** Datos para dar de alta una membresía de tenant. */
 export interface CreateMembershipData {
   /**
+   * Identificador fijo. Solo lo fija un proceso interno (los seeds); el alta por
+   * API no lo expone y el valor lo genera la entidad.
+   */
+  id?: string;
+  /**
    * Identificador asociado a user.
    */
   userId: string;
@@ -131,6 +136,7 @@ export class TenantMembershipsRepository {
     return em.create(
       TenantMemberships,
       {
+        ...(data.id ? { id: data.id } : {}),
         userId: data.userId,
         tenantId: data.tenantId,
         tenantRoleConceptId: data.tenantRoleConceptId,

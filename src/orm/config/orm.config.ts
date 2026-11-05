@@ -3,8 +3,13 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { loadOrmEnv, type OrmEnv } from './orm.env';
 import { createOrmLoggerFactory } from '../observability/orm.logger';
-import { warnIfRlsRoleFallbackIsUnsafe } from './rls-role-resolution';
+import {
+  resolveRuntimeCredentials,
+  warnIfRlsRoleFallbackIsUnsafe,
+} from './rls-role-resolution';
 import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
+import { SavepointRootSubscriber } from '../transaction-root.registry';
+import { TransactionInheritingEntityManager } from '../transaction-inheriting-entity-manager';
 
 /**
  * Configuración de runtime de MikroORM para la capa relacional PostgreSQL.
@@ -47,8 +52,7 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // aislamiento por tenant; el rol propietario (`DB_USER`) se reserva para
     // migraciones/DDL/seed. Requiere `ORM_SCHEMA_SYNC=off` (no puede alterar el
     // esquema al no ser propietario).
-    user: process.env.DB_APP_USER ?? env.connection.user,
-    password: process.env.DB_APP_PASSWORD ?? env.connection.password,
+    ...resolveRuntimeCredentials(env.connection),
     dbName: env.connection.name,
 
     // Descubrimiento de entidades. En producción se leen los .js compilados; en
@@ -106,6 +110,8 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // no tiene certificado— pasar el objeto rompería la conexión.
     driverOptions: {
       application_name: APPLICATION_NAME,
+      // Sin esto `pg` espera sin límite una conexión del pool: ver `orm.env.ts`.
+      connectionTimeoutMillis: env.connection.acquireTimeoutMs,
       ...(env.connection.ssl ? { ssl: { rejectUnauthorized: true } } : {}),
     },
 
@@ -124,9 +130,14 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
       disableForeignKeys: false,
     },
 
+    // Argument-less `fork()` joins the live transaction (RLS tenant context).
+    // `orm.em` and the injected EntityManager become this subclass; `OrmModule`
+    // aliases the `@mikro-orm/postgresql` token to it.
+    entityManager: TransactionInheritingEntityManager,
+
     // Espejo de versionado (ALOVIDA §2): puebla `audit.<tabla>_history` en cada
     // flush para todo agregado con tabla de historial, dentro de su transacción.
-    subscribers: [new HistoryMirrorSubscriber()],
+    subscribers: [new HistoryMirrorSubscriber(), new SavepointRootSubscriber()],
 
     // `debug` activa el volcado de cada consulta; el logger propio decide luego
     // qué nivel usar y qué registrar siempre (las consultas lentas).

@@ -203,6 +203,41 @@ export class CredentialsRepository {
     });
   }
 
+  /**
+   * El cerrojo de {@link lockSubjectForRegistration} para un **correo**: la
+   * clave va en minúsculas y sin espacios, así que «Juan@…» y «juan@…» esperan
+   * en la misma cola (#1000).
+   */
+  lockEmailForRegistration(em: EntityManager, email: string): Promise<unknown> {
+    return this.lockSubjectForRegistration(em, email.trim().toLowerCase());
+  }
+
+  /**
+   * Como {@link findLivePasswordBySubject}, pero para un **correo** y sin
+   * distinguir mayúsculas (#1000): el ingreso ya acepta el correo con otras
+   * mayúsculas (`findActivePasswordByLoginIdentifier`), así que dos cuentas
+   * cuyo sujeto sólo difiere en eso serían el mismo buzón y el ingreso no
+   * sabría a cuál entrar. Detecta también los sujetos guardados antes con
+   * mayúsculas; `_` y `%` se buscan literales.
+   */
+  async findLivePasswordByEmail(
+    em: EntityManager,
+    email: string,
+  ): Promise<AuthenticationCredentials | null> {
+    const [found] = await em.find(
+      AuthenticationCredentials,
+      {
+        methodConceptId: CONCEPTS.CRED_PASSWORD,
+        externalSubject: { $ilike: escapeLike(email.trim()) },
+        stateConceptId: {
+          $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING],
+        },
+      },
+      { limit: 1 },
+    );
+    return found ?? null;
+  }
+
   /** Credencial de contraseña PENDIENTE (sin secreto) de un usuario; para su activación. */
   findPendingPasswordByUser(
     em: EntityManager,

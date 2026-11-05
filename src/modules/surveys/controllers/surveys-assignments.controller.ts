@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { SurveysAssignmentsService } from '../services';
 import {
   CreateAssignmentDto,
@@ -29,6 +34,11 @@ export class SurveysAssignmentsController {
   constructor(private readonly assignmentsService: SurveysAssignmentsService) {}
 
   /** Asocia una versión publicada a una consulta o a un servicio. */
+  @Audited({
+    action: 'SURVEY_ASSIGNMENT_CREATED',
+    entity: 'survey_assignment',
+    entityId: 'result.id',
+  })
   @Post('assignments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -42,6 +52,10 @@ export class SurveysAssignmentsController {
   }
 
   /** Emite las invitaciones que correspondan a una atención completada. */
+  @Audited({
+    action: 'SURVEY_INVITATIONS_ISSUED',
+    entity: 'survey_invitation',
+  })
   @Post('invitations')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

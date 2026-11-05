@@ -9,6 +9,18 @@ import {
   MedicationRequestsHistory,
   AppointmentBookingsHistory,
   ConditionsHistory,
+  PracticeSitesHistory,
+  ClinicalUnitsHistory,
+  CareSpacesHistory,
+  CareSpaceBlocksHistory,
+  CleaningOrdersHistory,
+  EncounterLocationsHistory,
+  PlacementIncidentsHistory,
+  OperatingRoomBlockSeriesHistory,
+  OperatingRoomBlocksHistory,
+  CareSpaceCategoryPeriodsHistory,
+  SpaceTariffsHistory,
+  ChargeCapturesHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -17,6 +29,11 @@ export interface AppendHistoryData {
   dataSnapshot: unknown;
   changedByUserId?: string;
   changeReasonConceptId?: string;
+  /**
+   * Tenant de la fila de origen. Sólo se escribe en las historias que tienen
+   * la columna (`tenantScoped`); en el resto se ignora.
+   */
+  tenantId?: string;
 }
 
 /** Una revisión de la línea de tiempo de un registro (proyección de lectura). */
@@ -81,6 +98,12 @@ interface HistoryBinding {
   sourceField: string;
   /** Campo correlativo real de la tabla; algunos historiales legados usan row_version. */
   revisionField: 'revisionNo' | 'rowVersion';
+  /**
+   * La tabla tiene `tenant_id` NOT NULL con RLS (patch v4.2.67b): la revisión
+   * lleva el tenant de su origen. Un trigger lo completa si falta, pero la API
+   * lo manda igual para no depender de él.
+   */
+  tenantScoped?: boolean;
 }
 
 /**
@@ -128,6 +151,83 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
     entity: ConditionsHistory,
     sourceField: 'conditionId',
     revisionField: 'revisionNo',
+  },
+  // F0 de infraestructura hospitalaria: la estructura física de `practice`
+  // (sede, unidad clínica, espacio de atención) versiona sus altas y bajas.
+  // Las tres entidades ya existían en el modelo; nada las escribía.
+  practice_sites: {
+    entity: PracticeSitesHistory,
+    sourceField: 'practiceSiteId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  clinical_units: {
+    entity: ClinicalUnitsHistory,
+    sourceField: 'clinicalUnitId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  care_spaces: {
+    entity: CareSpacesHistory,
+    sourceField: 'careSpaceId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  // F2–F5 de infraestructura hospitalaria (CONTRATO-F2-F5 §0.1): toda tabla
+  // mutable nueva versiona en `audit.<tabla>_history`, con `tenant_id`.
+  care_space_blocks: {
+    entity: CareSpaceBlocksHistory,
+    sourceField: 'careSpaceBlockId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  cleaning_orders: {
+    entity: CleaningOrdersHistory,
+    sourceField: 'cleaningOrderId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  encounter_locations: {
+    entity: EncounterLocationsHistory,
+    sourceField: 'encounterLocationId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  placement_incidents: {
+    entity: PlacementIncidentsHistory,
+    sourceField: 'placementIncidentId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  operating_room_block_series: {
+    entity: OperatingRoomBlockSeriesHistory,
+    sourceField: 'operatingRoomBlockSeriesId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  operating_room_blocks: {
+    entity: OperatingRoomBlocksHistory,
+    sourceField: 'operatingRoomBlockId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  care_space_category_periods: {
+    entity: CareSpaceCategoryPeriodsHistory,
+    sourceField: 'careSpaceCategoryPeriodId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  space_tariffs: {
+    entity: SpaceTariffsHistory,
+    sourceField: 'spaceTariffId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  charge_captures: {
+    entity: ChargeCapturesHistory,
+    sourceField: 'chargeCaptureId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
   },
 };
 
@@ -182,6 +282,9 @@ export class HistoryRepository {
     };
     historyData[binding.sourceField] = id;
     historyData[binding.revisionField] = revisionNo;
+    if (binding.tenantScoped && data.tenantId) {
+      historyData.tenantId = data.tenantId;
+    }
     em.create(binding.entity, historyData, { partial: true });
   }
 

@@ -1,0 +1,812 @@
+<!-- AUTOGENERADO por tools/inventario/endpoints.mjs. No editar manualmente. -->
+
+# Endpoints del módulo `ui_visibility`
+
+- **Bloque:** —
+- **Operaciones:** 9 (9 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 0 · BAJO 9
+- **Tablas distintas que tocan:** 8
+- **Respuestas de error y detalle contractual:** `openapi/endpoints/ui-visibility.md` (generado aparte por `yarn docs:endpoints:generate`)
+
+## Índice
+
+| # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
+|---|---|---|---|---|---|---|
+| 1 | GET | `/admin/ui-visibility/elements` | Catálogo de elementos de la interfaz (cursor por clave) | BAJO | 2 | SECURITY_ADMIN |
+| 2 | POST | `/admin/ui-visibility/elements` | Alta manual de un elemento (source ADMIN) | BAJO | 2 | SECURITY_ADMIN |
+| 3 | POST | `/admin/ui-visibility/elements/sync` | Sincroniza el registro del front (idempotente por key) | BAJO | 0 | SECURITY_ADMIN |
+| 4 | GET | `/admin/ui-visibility/preview` | Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento | BAJO | 6 | SECURITY_ADMIN |
+| 5 | GET | `/admin/ui-visibility/rules` | Reglas de visibilidad (cursor por fecha de alta) | BAJO | 5 | SECURITY_ADMIN |
+| 6 | POST | `/admin/ui-visibility/rules` | Crear una regla SHOW/HIDE | BAJO | 4 | SECURITY_ADMIN |
+| 7 | PATCH | `/admin/ui-visibility/rules/{id}` | Editar una regla con bloqueo optimista (409 si cambió) | BAJO | 4 | SECURITY_ADMIN |
+| 8 | POST | `/admin/ui-visibility/rules/{id}/end` | Terminar una regla (validTo = ahora). Idempotente. | BAJO | 4 | SECURITY_ADMIN |
+| 9 | GET | `/me/ui-visibility` | Claves ocultas para quien llama | BAJO | 1 | sesión (sin roles) |
+
+---
+
+## 1. GET /admin/ui-visibility/elements
+
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de elementos de la interfaz (cursor por clave)
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.elements` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de elementos de la interfaz (cursor por clave).
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/ui-visibility/elements` la atiende `AdminUiVisibilityController.elements` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `UiVisibilityAdminService.listElements`. Lee authz.ui_visibility_elements, authz.ui_visibility_rules.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → MikroOrmUiVisibilityStore.listElements | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:171` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:267` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `module` | query | No | `string` | Código del módulo |
+| `kind` | query | No | `string` | — |
+| `q` | query | No | `string` | Busca en la clave y la etiqueta |
+| `status` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /admin/ui-visibility/elements
+
+- **Origen:** CONTRATO
+- **Nombre:** Alta manual de un elemento (source ADMIN)
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.createElement` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61`
+
+### Qué es y para qué sirve (negocio)
+
+Alta manual de un elemento (source ADMIN).
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/ui-visibility/elements` la atiende `AdminUiVisibilityController.createElement` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateElementDto` (7 campos, 4 obligatorios). Delega en `UiVisibilityAdminService.createElement`. Lee authz.ui_visibility_elements, authz.ui_visibility_rules.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:192` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:267` |
+
+### Cuerpo — DTO `CreateElementDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `key` | `string` | Sí | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:172` |
+| `kind` | `string` | Sí | valores: MODULE, MENU_SECTION, SCREEN, SECTION, WIDGET, FIELD, ACTION | `@IsIn(UI_ELEMENT_KINDS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:176` |
+| `moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:183` |
+| `parentKey` | `object` | No | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:191` |
+| `label` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:198` |
+| `description` | `object` | No | longitud máxima 500; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:205` |
+| `defaultVisible` | `boolean` | No | — | `@IsOptional()` `@Transform(raw)` `@IsBoolean()` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:211` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "key": "pharmacy.orders.export-button",
+  "kind": "MODULE",
+  "moduleCode": "CODIGO_EJEMPLO",
+  "label": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "key": "pharmacy.orders.export-button",
+  "kind": "MODULE",
+  "moduleCode": "CODIGO_EJEMPLO",
+  "parentKey": {},
+  "label": "valor-ejemplo",
+  "description": {},
+  "defaultVisible": true
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. POST /admin/ui-visibility/elements/sync
+
+- **Origen:** CONTRATO
+- **Nombre:** Sincroniza el registro del front (idempotente por key)
+- **Bloque:** —
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.syncElements` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75`
+
+### Qué es y para qué sirve (negocio)
+
+Sincroniza el registro del front (idempotente por key).
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/ui-visibility/elements/sync` la atiende `AdminUiVisibilityController.syncElements` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SyncElementsDto` (8 campos, 6 obligatorios). Delega en `UiVisibilityAdminService.syncElements`. No se determinaron tablas para esta operación.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+
+### Cuerpo — DTO `SyncElementsDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `elements` | `array<UiElementDraftDto>` | Sí | máximo 2000 elemento(s) | `@IsArray()` `@ArrayMaxSize(UI_SYNC_MAX_ELEMENTS)` `@ValidateNested({ each: true })` `@Type(() => UiElementDraftDto)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:220` |
+| `elements[].key` | `string` | Sí | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:121` |
+| `elements[].kind` | `string` | Sí | valores: MODULE, MENU_SECTION, SCREEN, SECTION, WIDGET, FIELD, ACTION | `@IsIn(UI_ELEMENT_KINDS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:125` |
+| `elements[].moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:132` |
+| `elements[].parentKey` | `object` | No | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:140` |
+| `elements[].label` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:147` |
+| `elements[].description` | `object` | No | longitud máxima 500; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:154` |
+| `elements[].defaultVisible` | `boolean` | Sí | — | `@Transform(raw)` `@IsBoolean()` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:159` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "elements": [
+    {
+      "key": "pharmacy.orders.export-button",
+      "kind": "MODULE",
+      "moduleCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "defaultVisible": true
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "elements": [
+    {
+      "key": "pharmacy.orders.export-button",
+      "kind": "MODULE",
+      "moduleCode": "CODIGO_EJEMPLO",
+      "parentKey": {},
+      "label": "valor-ejemplo",
+      "description": {},
+      "defaultVisible": true
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. GET /admin/ui-visibility/preview
+
+- **Origen:** CONTRATO
+- **Nombre:** Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.preview` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153`
+
+### Qué es y para qué sirve (negocio)
+
+Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/ui-visibility/preview` la atiende `AdminUiVisibilityController.preview` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `UiVisibilityAdminService.preview`. Lee authz.roles, authz.user_role_assignments, directory.tenant_memberships, directory.tenants, iam.user_global_roles, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:434` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userInTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:444` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:455` |
+| `iam.user_global_roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:467` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:416` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | query | No | `string` | «Ver como» este usuario |
+| `roleCode` | query | No | `string` | «Ver como» este rol |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /admin/ui-visibility/rules
+
+- **Origen:** CONTRATO
+- **Nombre:** Reglas de visibilidad (cursor por fecha de alta)
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.rules` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90`
+
+### Qué es y para qué sirve (negocio)
+
+Reglas de visibilidad (cursor por fecha de alta).
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/ui-visibility/rules` la atiende `AdminUiVisibilityController.rules` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `UiVisibilityAdminService.listRules`. Lee authz.roles, authz.ui_visibility_elements, authz.ui_visibility_rules, directory.tenants, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:434` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.findElementsByKeys | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:184` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.listRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:301` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:426` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:416` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `elementKey` | query | No | `string` | — |
+| `subjectType` | query | No | `string` | — |
+| `subjectId` | query | No | `string` | — |
+| `active` | query | No | `boolean` | true: sólo reglas en vigor ahora; false: terminadas, vencidas o futuras |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. POST /admin/ui-visibility/rules
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una regla SHOW/HIDE
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.createRule` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una regla SHOW/HIDE.
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/ui-visibility/rules` la atiende `AdminUiVisibilityController.createRule` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRuleDto` (7 campos, 4 obligatorios). Delega en `UiVisibilityAdminService.createRule`. Lee authz.roles, authz.ui_visibility_elements, directory.tenants, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:434` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:192` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:426` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:416` |
+
+### Cuerpo — DTO `CreateRuleDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `elementKey` | `string` | Sí | longitud máxima 160 | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:258` |
+| `effect` | `string` | Sí | valores: SHOW, HIDE | `@IsIn(UI_RULE_EFFECTS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:262` |
+| `subjectType` | `string` | Sí | valores: USER, TENANT, ROLE, ORG_TYPE, ALL | `@IsIn(UI_RULE_SUBJECT_TYPES)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:266` |
+| `subjectId` | `object` | No | longitud máxima 160; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_SUBJECT_ID_MAX)` | USER: id de usuario · TENANT: id de organización · ROLE: código de rol · ORG_TYPE: código del tipo de organización · ALL: null | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:278` |
+| `validFrom` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:283` |
+| `validTo` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:288` |
+| `reason` | `string` | Sí | longitud mínima 10; longitud máxima 500 | `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:295` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "elementKey": "valor-ejemplo",
+  "effect": "SHOW",
+  "subjectType": "USER",
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "elementKey": "valor-ejemplo",
+  "effect": "SHOW",
+  "subjectType": "USER",
+  "subjectId": {},
+  "validFrom": {},
+  "validTo": {},
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. PATCH /admin/ui-visibility/rules/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar una regla con bloqueo optimista (409 si cambió)
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.updateRule` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110`
+
+### Qué es y para qué sirve (negocio)
+
+Editar una regla con bloqueo optimista (409 si cambió).
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /admin/ui-visibility/rules/{id}` la atiende `AdminUiVisibilityController.updateRule` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateRuleDto` (4 campos, 0 obligatorios). Delega en `UiVisibilityAdminService.updateRule`. Lee authz.roles, authz.ui_visibility_elements, directory.tenants, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (obligatoria) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:434` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:192` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:426` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:416` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+| `If-Match` | header | Sí | `string` | Versión de la regla que se leyó |
+
+### Cuerpo — DTO `UpdateRuleDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `effect` | `string` | No | valores: SHOW, HIDE | `@IsOptional()` `@IsIn(UI_RULE_EFFECTS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:302` |
+| `validFrom` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:307` |
+| `validTo` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:312` |
+| `reason` | `string` | No | longitud mínima 10; longitud máxima 500 | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:320` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "effect": "SHOW",
+  "validFrom": {},
+  "validTo": {},
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. POST /admin/ui-visibility/rules/{id}/end
+
+- **Origen:** CONTRATO
+- **Nombre:** Terminar una regla (validTo = ahora). Idempotente.
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdminUiVisibilityController.endRule` — `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139`
+
+### Qué es y para qué sirve (negocio)
+
+Terminar una regla (validTo = ahora). Idempotente.
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`POST /admin/ui-visibility/rules/{id}/end` la atiende `AdminUiVisibilityController.endRule` (src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `UiVisibilityAdminService.endRule`. Lee authz.roles, authz.ui_visibility_elements, directory.tenants, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:434` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:192` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:426` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:416` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:AdminUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. GET /me/ui-visibility
+
+- **Origen:** CONTRATO
+- **Nombre:** Claves ocultas para quien llama
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `MeUiVisibilityController.mine` — `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23`
+
+### Qué es y para qué sirve (negocio)
+
+Claves ocultas para quien llama.
+
+_Fuentes:_ CONTRATO (`summary de la operación`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/ui-visibility` la atiende `MeUiVisibilityController.mine` (src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23). Exige sesión; el controlador no declara roles. Delega en `UiVisibilityMeService.resolveMine`. Lee directory.tenants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
+| CABECERA | x-tenant-id (obligatoria) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | DIRECTA | MeUiVisibilityController.mine → UiVisibilityMeService.resolveMine → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:455` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `x-tenant-id` | header | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ui_visibility.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `ui_visibility` — Visibilidad de la interfaz — etapa `ctrl:MeUiVisibilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+

@@ -6,6 +6,12 @@ import { createdBy } from '../../../common';
 /** Datos para dar de alta una asignación de usuario de organización. */
 export interface CreateOrgAssignmentData {
   /**
+   * Tenant de la membresía (`directory.tenant_memberships.tenant_id`). La
+   * columna es NOT NULL desde el modelo v4.2.79 y el disparador
+   * `support_tenant_consistency` exige que coincida con el de la membresía.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a tenant membership.
    */
   tenantMembershipId: string;
@@ -84,6 +90,26 @@ export class OrganizationUserAssignmentsRepository {
     return em.findOne(OrganizationUserAssignments, { id });
   }
 
+  /**
+   * Tenant de una membresía, leído de `directory.tenant_memberships` (nunca de
+   * un header): es el que se escribe en `organization_user_assignments.tenant_id`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantMembershipId - Membresía de la asignación.
+   * @returns El `tenant_id` de la membresía, o `null` si no existe.
+   */
+  async findMembershipTenantId(
+    em: EntityManager,
+    tenantMembershipId: string,
+  ): Promise<string | null> {
+    const [row] = await em.execute<{ tenant_id: string }[]>(
+      'SELECT tenant_id FROM directory.tenant_memberships WHERE id = ?',
+      [tenantMembershipId],
+      'all',
+    );
+    return row?.tenant_id ?? null;
+  }
+
   /** Asignación ACTIVA que solaparía el mismo rol+scope para la misma membresía. */
   findActiveOverlap(
     em: EntityManager,
@@ -114,6 +140,7 @@ export class OrganizationUserAssignmentsRepository {
     return em.create(
       OrganizationUserAssignments,
       {
+        tenantId: data.tenantId,
         tenantMembershipId: data.tenantMembershipId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,

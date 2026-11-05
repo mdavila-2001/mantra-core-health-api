@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { RetentionExecutionService } from '../services';
 import { RetentionExecutionResponseDto, RunRetentionDto } from '../dto';
 
@@ -20,6 +25,10 @@ export class RetentionExecutionController {
   constructor(private readonly service: RetentionExecutionService) {}
 
   /** UC-11-05. */
+  @Audited({
+    action: 'GOVERNANCE_RETENTION_EXECUTED',
+    entity: 'retention_execution',
+  })
   @Post('retention-executions/run')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

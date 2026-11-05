@@ -39,3 +39,5 @@ export type {
   LiveHold,
   LiveServiceSpan,
 } from './scheduling-offerings.repository';
+
+export { SchedulingPaymentReceiptsRepository } from './scheduling-payment-receipts.repository';

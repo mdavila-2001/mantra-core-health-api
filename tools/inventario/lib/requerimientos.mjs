@@ -26,16 +26,60 @@ function fuenteEn(archivo, texto, patron) {
   return linea ? `${archivo}:${linea}` : archivo;
 }
 
+/**
+ * El `ValidationPipe` global: o está escrito en `main.ts`, o `main.ts` lo pide a una
+ * fábrica (`app.useGlobalPipes(createGlobalValidationPipe())`) que vive en `src/common` y
+ * es la que también usa el harness de integración. Devuelve archivo, texto y la
+ * declaración `new ValidationPipe({…})`, o null si no se encuentra.
+ */
+function pipeDeValidacion(root, main) {
+  const enMain = main?.match(/new ValidationPipe\(\{([\s\S]*?)\}\)/);
+  if (enMain)
+    return { archivo: 'src/main.ts', texto: main, opciones: enMain[1] };
+  const fabrica = main?.match(
+    /useGlobalPipes\(\s*([A-Za-z_$][\w$]*)\(\s*\)\s*\)/,
+  )?.[1];
+  if (!fabrica) return null;
+  const pendientes = ['src/common'];
+  while (pendientes.length) {
+    const dir = pendientes.pop();
+    let entradas;
+    try {
+      entradas = fs.readdirSync(path.join(root, dir), { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entrada of entradas) {
+      const relativa = `${dir}/${entrada.name}`;
+      if (entrada.isDirectory()) pendientes.push(relativa);
+      else if (
+        /\.ts$/.test(entrada.name) &&
+        !/\.spec\.ts$/.test(entrada.name)
+      ) {
+        const texto = leer(root, relativa);
+        if (!texto?.includes(`function ${fabrica}`)) continue;
+        const opciones = texto.match(
+          /new ValidationPipe\(\{([\s\S]*?)\}\)/,
+        )?.[1];
+        if (opciones) return { archivo: relativa, texto, opciones };
+      }
+    }
+  }
+  return null;
+}
+
 /** Lee del código los límites que aplican a todas las rutas. */
 export function leerGlobales(root = process.cwd()) {
   const main = leer(root, 'src/main.ts');
   const modulo = leer(root, 'src/app.module.ts');
 
-  const cuerpo = main?.match(/json\(\{\s*limit:\s*'([^']+)'\s*\}\)/);
+  // `json({ limit, ... })`: otras opciones (p. ej. `verify`, que guarda el
+  // cuerpo crudo para firmar webhooks) no cambian el límite.
+  const cuerpo = main?.match(/json\(\{\s*limit:\s*'([^']+)'[^}]*\}\)/);
   const tasa = modulo?.match(
     /throttlers:\s*\[\{\s*ttl:\s*([\d_]+)\s*,\s*limit:\s*(\d+)\s*\}\]/,
   );
-  const pipe = main?.match(/new ValidationPipe\(\{([\s\S]*?)\}\)/);
+  const pipe = pipeDeValidacion(root, main);
   const tenant =
     modulo &&
     /provide:\s*APP_INTERCEPTOR,\s*useClass:\s*TenantContextInterceptor/.test(
@@ -62,9 +106,9 @@ export function leerGlobales(root = process.cwd()) {
       : null,
     validacion:
       pipe &&
-      /whitelist:\s*true/.test(pipe[1]) &&
-      /forbidNonWhitelisted:\s*true/.test(pipe[1])
-        ? { fuente: fuenteEn('src/main.ts', main, /new ValidationPipe/) }
+      /whitelist:\s*true/.test(pipe.opciones) &&
+      /forbidNonWhitelisted:\s*true/.test(pipe.opciones)
+        ? { fuente: fuenteEn(pipe.archivo, pipe.texto, /new ValidationPipe/) }
         : null,
     tenant: tenant
       ? {

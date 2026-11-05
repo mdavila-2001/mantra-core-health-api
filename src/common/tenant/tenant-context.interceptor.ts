@@ -1,7 +1,8 @@
+import { withTenantTransactionCompletion } from './tenant-transaction-completion';
+import { ownedTransaction } from './owned-transaction';
 import {
   CallHandler,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -19,8 +20,16 @@ import {
   PLATFORM_TENANT_OPTIONAL_KEY,
   hasOptionalPlatformTenant,
 } from './platform-tenant-optional.decorator';
+import {
+  PLATFORM_SCOPE_OPTIONAL_KEY,
+  isPlatformScopeRequest,
+} from './platform-scope';
+import { ROLES_KEY } from '../auth/roles.decorator';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
+import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
+import { PATIENT_ANY_TENANT_KEY } from './patient-any-tenant.decorator';
 import type { AuthenticatedRequest } from '../auth/authenticated-user.interface';
 
 /**
@@ -65,7 +74,17 @@ export class TenantContextInterceptor implements NestInterceptor {
   constructor(
     private readonly em: EntityManager,
     private readonly reflector: Reflector,
-  ) {}
+  ) {
+    if (process.env.NODE_ENV === 'production' && !this.enforceRls) {
+      process.stderr.write(
+        JSON.stringify({
+          level: 'warn',
+          name: 'tenant-security',
+          msg: 'ALERTA CRÍTICA DE AISLAMIENTO: RLS_ENFORCE no está activo en entorno de producción. El aislamiento multi-tenant depende exclusivamente de filtros de capa de aplicación.',
+        }) + '\n',
+      );
+    }
+  }
 
   /**
    * Resuelve, valida y propaga el tenant del request.
@@ -123,11 +142,28 @@ export class TenantContextInterceptor implements NestInterceptor {
     if (hasOptionalPlatformTenant(user, platformRoles))
       return this.runSystemSweep(next);
 
+    const platformScope = this.reflector.getAllAndOverride<boolean>(
+      PLATFORM_SCOPE_OPTIONAL_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    const routeRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isPlatformScopeRequest(platformScope, request, user, routeRoles))
+      return this.runSystemSweep(next);
+
     const tenantId =
       request.resolvedTenantId ??
       (hasPrivilegedTenantRole(user)
         ? resolvePrivilegedTenantId(request)
-        : resolveOrdinaryTenantId(request, user));
+        : resolveOrdinaryTenantId(request, user, {
+            patientAnyTenant:
+              this.reflector.getAllAndOverride<boolean>(
+                PATIENT_ANY_TENANT_KEY,
+                [context.getHandler(), context.getClass()],
+              ) === true,
+          }));
     if (!tenantId) {
       return this.runSystemSweep(next);
     }
@@ -155,16 +191,27 @@ export class TenantContextInterceptor implements NestInterceptor {
       runWithTenant(
         tenantId,
         () =>
-          this.em.transactional(async () => {
-            await this.em.execute(
-              "select set_config('app.system_context', 'false', true)",
-            );
-            await this.em.execute(
-              "select set_config('app.current_tenant_id', ?, true)",
-              [tenantId],
-            );
-            return lastValueFrom(next.handle());
-          }),
+          withTenantTransactionCompletion(() =>
+            ownedTransaction(this.em, async () => {
+              await this.em.execute(
+                "select set_config('app.system_context', 'false', true)",
+              );
+              await this.em.execute(
+                "select set_config('app.current_tenant_id', ?, true)",
+                [tenantId],
+              );
+              // H-01: el paciente espectador del mercado lee las farmacias
+              // PUBLICADAS de otras organizaciones (política de sólo lectura
+              // `pharmacies_marketplace_read`). Se declara sólo para él, nunca
+              // desde el cliente, y dentro de la transacción del request.
+              if (marketplaceViewer) {
+                await this.em.execute(
+                  "select set_config('app.marketplace_viewer', 'true', true)",
+                );
+              }
+              return lastValueFrom(next.handle());
+            }),
+          ),
         options,
       ),
     );
@@ -192,12 +239,14 @@ export class TenantContextInterceptor implements NestInterceptor {
       return from(lastValueFrom(next.handle()));
     }
     return from(
-      this.em.transactional(async () => {
-        await this.em.execute(
-          "select set_config('app.system_context', 'true', true)",
-        );
-        return lastValueFrom(next.handle());
-      }),
+      withTenantTransactionCompletion(() =>
+        ownedTransaction(this.em, async () => {
+          await this.em.execute(
+            "select set_config('app.system_context', 'true', true)",
+          );
+          return lastValueFrom(next.handle());
+        }),
+      ),
     );
   }
 
@@ -206,7 +255,8 @@ export class TenantContextInterceptor implements NestInterceptor {
    * distinto del resuelto. Los roles privilegiados pueden elegir el tenant,
    * pero una vez resuelto tampoco pueden mezclar propietarios.
    *
-   * @throws ForbiddenException con el campo y el valor en conflicto.
+   * @throws ForbiddenException (`TENANT_SCOPE_CONFLICT`) con el origen y el campo en
+   *         conflicto; nunca con los valores.
    */
   private assertInputStaysInTenant(
     input: unknown,
@@ -215,9 +265,13 @@ export class TenantContextInterceptor implements NestInterceptor {
   ): void {
     const violation = findTenantScopeViolation(input, tenantId);
     if (violation) {
-      throw new ForbiddenException(
-        `La ${source} declara ${violation.field}=${violation.declared}, ajeno al ` +
-          `tenant del actor (${tenantId}).`,
+      // Ni el valor declarado ni el tenant del actor viajan en la respuesta:
+      // el primero es un UUID ajeno que el cliente no debería poder sondear
+      // y el segundo no le aporta nada. Basta con saber dónde y en qué campo.
+      throw forbiddenWithReason(
+        `La ${source} declara ${violation.field} con un tenant ajeno al del actor.`,
+        SystemErrorReason.TENANT_SCOPE_CONFLICT,
+        { source, field: violation.field },
       );
     }
   }

@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -11,7 +11,13 @@ import { PRAC } from '../practice.concepts';
 import {
   InventoryItemsRepository,
   InventoryMovementsRepository,
+  PracticesRepository,
 } from '../repositories';
+import {
+  assertPracticeScope,
+  loadPracticeInScope,
+  practiceOutOfScope,
+} from './practice-scope';
 import {
   CreateInventoryItemDto,
   CreateMovementDto,
@@ -38,12 +44,14 @@ export class PracticeInventoryService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param practicesRepo - Prácticas: el tenant de un insumo es el de su práctica.
    * @param itemsRepo - Valor de items repo requerido por la operación.
    * @param movementsRepo - Valor de movements repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
+    private readonly practicesRepo: PracticesRepository,
     private readonly itemsRepo: InventoryItemsRepository,
     private readonly movementsRepo: InventoryMovementsRepository,
     private readonly logger: PinoLogger,
@@ -57,11 +65,13 @@ export class PracticeInventoryService {
     dto: CreateInventoryItemDto,
     actor: AuthenticatedUser,
   ): Promise<InventoryItemResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.inventory.item.create', practiceId },
       'Creating inventory item',
     );
     return this.em.transactional(async (tx) => {
+      await loadPracticeInScope(this.practicesRepo, tx, practiceId, tenantId);
       const item = this.itemsRepo.create(tx, {
         practiceId,
         productConceptId: dto.productConceptId ?? PRAC.PRODUCT_GENERIC,
@@ -100,13 +110,23 @@ export class PracticeInventoryService {
       },
       'Recording inventory movement',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const item = await this.itemsRepo.findById(tx, itemId);
-      if (!item)
-        throw new ResourceNotFoundException(
-          'Insumo de inventario no encontrado',
-          { itemId },
-        );
+      // El insumo no lleva tenant: es el de su práctica. Se compara antes de
+      // mover stock.
+      const found = await this.itemsRepo.findById(tx, itemId);
+      const owner = found
+        ? await this.practicesRepo.findById(tx, found.practiceId)
+        : null;
+      if (!found || !owner) {
+        throw practiceOutOfScope('Insumo de inventario no encontrado');
+      }
+      const item = assertPracticeScope(
+        found,
+        owner.tenantId,
+        tenantId,
+        'Insumo de inventario no encontrado',
+      );
       if (item.statusConceptId !== PRAC.INVENTORY_ACTIVE) {
         throw new PreconditionFailedException('El insumo no está activo', {
           itemId,

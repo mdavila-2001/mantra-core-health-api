@@ -12,7 +12,7 @@ import {
   suiteCode,
   type FlowDefinition,
 } from '../../modules/qa_lab/domain/flow-catalog';
-import { FLOW_CATALOG } from '../../modules/qa_lab/flows';
+import { FLOW_CATALOG } from '../../modules/qa_lab/domain/flows';
 
 const ENABLED = {
   enabled: true,

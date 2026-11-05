@@ -62,7 +62,172 @@ const ALARMA_OBSTETRICA = [
   'Ninguno',
 ];
 
+/**
+ * Cómo termina una cita: es lo que decide si hace falta fecha de control,
+ * referencia o nada más.
+ */
+const DESTINO_DE_LA_CITA = [
+  'Alta, sin control',
+  'Control programado',
+  'Referencia a otro establecimiento',
+  'Derivación a emergencia',
+  'Internación',
+];
+
 export const OTRAS = {
+  /*
+   * La ficha por defecto de toda cita: lo que se registra en cualquier consulta
+   * ambulatoria, de cualquier especialidad, en el orden en que pasa (SOAP de la
+   * NT 022). Es corta a propósito —motivo, lo imprescindible para no dañar
+   * (alergias, medicación, embarazo), signos vitales, examen dirigido,
+   * diagnóstico y plan—: lo propio de cada especialidad está en su ficha base.
+   */
+  TRANSV_CITA_MEDICA: () => [
+    seccion('Datos de la cita', [
+      obl(
+        una('tipo_de_consulta', 'Tipo de consulta', [
+          'Primera vez',
+          'Control o seguimiento',
+          'Reconsulta por el mismo problema',
+          'Consulta de urgencia',
+        ]),
+      ),
+      obl(
+        una('modalidad', 'Modalidad', [
+          'Presencial',
+          'Telemedicina (videollamada)',
+          'Visita domiciliaria',
+        ]),
+      ),
+      una('quien_informa', '¿Quién da la información?', [
+        'El paciente',
+        'Un familiar o acompañante',
+        'El paciente y su acompañante',
+      ]),
+      ...si(
+        'quien_informa',
+        ['Un familiar o acompañante', 'El paciente y su acompañante'],
+        [
+          s('acompanante_parentesco', 'Parentesco o relación del acompañante', {
+            ayuda: 'Por ejemplo: madre, hijo, cuidador.',
+          }),
+        ],
+      ),
+    ]),
+    seccion('Motivo de consulta', [
+      motivo({ relato: 'enfermedad_actual' }),
+      b('tiene_dolor', '¿Tiene dolor?'),
+      ...si('tiene_dolor', true, [
+        s('dolor_localizacion', 'Dolor — ¿dónde se localiza?', { req: true }),
+        i('dolor_intensidad', 'Dolor — intensidad (0 a 10, escala numérica)', {
+          req: true,
+          ayuda: '0 = sin dolor; 10 = el peor dolor imaginable.',
+        }),
+      ]),
+    ]),
+    seccion('Antecedentes relevantes', [
+      antecedentes(),
+      alergias(),
+      medicacion(),
+      una(
+        'embarazo_posible',
+        '¿Está embarazada o podría estarlo?',
+        ['No', 'Sí', 'No sabe', 'No corresponde'],
+        {
+          ayuda:
+            'Antes de indicar medicamentos o estudios con radiación. «No corresponde»: varón o fuera de la edad fértil.',
+        },
+      ),
+      ...si('embarazo_posible', 'Sí', [
+        i('semanas_de_gestacion', 'Semanas de gestación', { req: true }),
+      ]),
+    ]),
+    seccion('Signos vitales', [vitales({}, ['pas', 'pad', 'fc'])]),
+    seccion('Examen físico', [
+      una('estado_general', 'Estado general', ['Bueno', 'Regular', 'Malo']),
+      obl(
+        t('examen_fisico_dirigido', 'Examen físico dirigido', {
+          ayuda:
+            'Lo explorado según el motivo de consulta: hallazgos positivos y negativos relevantes.',
+        }),
+      ),
+    ]),
+    seccion('Diagnóstico', [
+      obl(t('diagnostico', 'Diagnóstico (con código CIE-10 si se conoce)')),
+      obl(
+        una(
+          'tipo_de_diagnostico',
+          'Tipo de diagnóstico',
+          ['Presuntivo', 'Definitivo', 'Repetido (ya registrado antes)'],
+          { ayuda: 'Clasificación P / D / R de la NT 022.' },
+        ),
+      ),
+      t('diagnosticos_secundarios', 'Otros diagnósticos o problemas activos'),
+    ]),
+    seccion('Plan e indicaciones', [
+      t('tratamiento_indicado', 'Tratamiento indicado', {
+        ayuda:
+          'Medicamento, dosis, vía, frecuencia y duración; o medidas no farmacológicas.',
+      }),
+      varias(
+        'examenes_solicitados',
+        'Exámenes solicitados',
+        [
+          'Laboratorio',
+          'Imagenología',
+          'Electrocardiograma',
+          'Anatomía patológica',
+          'Ninguno',
+        ],
+        { otro: true },
+      ),
+      ...si(
+        'examenes_solicitados',
+        [
+          'Laboratorio',
+          'Imagenología',
+          'Electrocardiograma',
+          'Anatomía patológica',
+        ],
+        [t('examenes_detalle', '¿Cuáles?', { req: true })],
+      ),
+      b('requiere_interconsulta', '¿Requiere interconsulta?'),
+      ...si('requiere_interconsulta', true, [
+        s('interconsulta_especialidad', '¿Con qué especialidad y por qué?', {
+          req: true,
+        }),
+      ]),
+      obl(
+        b(
+          'signos_de_alarma_explicados',
+          'Se explicaron los signos de alarma y cuándo volver antes',
+        ),
+      ),
+      b(
+        'comprension_verificada',
+        'El paciente repitió con sus palabras las indicaciones (método «teach-back»)',
+        {
+          ayuda:
+            'Herramienta 5 del Health Literacy Universal Precautions Toolkit (AHRQ, dominio público). Traducción propia, no oficial.',
+        },
+      ),
+      b('requiere_reposo', '¿Requiere reposo o certificado médico?'),
+      ...si('requiere_reposo', true, [
+        i('dias_de_reposo', 'Días de reposo', { req: true }),
+      ]),
+      obl(una('destino', 'Destino al terminar la cita', DESTINO_DE_LA_CITA)),
+      ...si('destino', 'Control programado', [
+        f('fecha_de_control', 'Fecha del próximo control', { req: true }),
+      ]),
+      ...si(
+        'destino',
+        ['Referencia a otro establecimiento', 'Derivación a emergencia'],
+        [t('motivo_de_referencia', 'Motivo de la referencia', { req: true })],
+      ),
+      t('observaciones', 'Observaciones'),
+    ]),
+  ],
+
   TRANSV_ANAMNESIS_GENERAL: () => [
     seccion(
       'Motivo de consulta',
@@ -213,9 +378,47 @@ export const OTRAS = {
     ]),
   ],
 
+  /*
+   * Reorientado el 2026-10-28: el consentimiento es DIRIGIDO a una indicación
+   * concreta —receta, orden de análisis o estudio, derivación, procedimiento o
+   * plan de cuidados—, no a «un procedimiento» genérico. Suma los elementos
+   * que la norma boliviana y la práctica regional piden y la v2 no tenía:
+   * riesgos personalizados, quién informa y por qué canal, idioma, excepción
+   * legal con su justificación, testigo, asentimiento y la constancia del
+   * derecho a revocar. Los códigos de la v2 se conservan con su tipo: la
+   * siembra reconcilia por código y las capturas hechas los leen.
+   */
   TRANSV_CONSENTIMIENTO_INFORMADO: () => [
-    seccion('Procedimiento', [
-      obl(t('procedimiento_propuesto', 'Procedimiento propuesto')),
+    seccion('Qué se consiente', [
+      obl(
+        una(
+          'tipo_de_indicacion',
+          '¿A qué se consiente?',
+          [
+            'Receta o tratamiento farmacológico',
+            'Orden de análisis o estudio',
+            'Derivación a otro profesional o establecimiento',
+            'Procedimiento',
+            'Plan de cuidados',
+          ],
+          {
+            ayuda:
+              'CPE, art. 44.I: ninguna persona será sometida a intervención quirúrgica, examen médico o de laboratorio sin su consentimiento o el de terceros legalmente autorizados, salvo peligro inminente de su vida.',
+          },
+        ),
+      ),
+      obl(
+        t(
+          'procedimiento_propuesto',
+          'Tratamiento, receta, orden o derivación a la que se consiente',
+          {
+            ayuda:
+              'Lo concreto: el fármaco por su denominación común y su dosis, el estudio pedido, el servicio y el destino de la derivación, o el procedimiento.',
+          },
+        ),
+      ),
+    ]),
+    seccion('Información', [
       obl(t('diagnostico_que_lo_motiva', 'Diagnóstico que lo motiva')),
       obl(t('beneficios_esperados', 'Beneficios esperados')),
       obl(
@@ -224,7 +427,14 @@ export const OTRAS = {
           'Riesgos y complicaciones frecuentes y graves',
         ),
       ),
-      t('alternativas_disponibles', 'Alternativas disponibles'),
+      t('riesgos_personalizados', 'Riesgos personalizados', {
+        ayuda:
+          'Los que dependen de esta persona: edad, embarazo, comorbilidades, otros medicamentos.',
+      }),
+      t('alternativas_disponibles', 'Alternativas disponibles', {
+        ayuda:
+          'Incluida la de no tratar. La persona puede pedir otra opinión médica (Ley 3131).',
+      }),
       t('consecuencias_de_no_aceptar', 'Consecuencias de no aceptar'),
       b('hubo_preguntas', '¿El paciente hizo preguntas?'),
       ...si('hubo_preguntas', true, [
@@ -233,8 +443,43 @@ export const OTRAS = {
         }),
       ]),
     ]),
+    seccion('Quién informa y cómo', [
+      obl(s('profesional_que_informa', 'Profesional que informa')),
+      obl(
+        una('canal_de_informacion', 'Canal', ['En persona', 'Por telesalud']),
+      ),
+      una(
+        'idioma_de_la_informacion',
+        'Idioma en que se informó',
+        ['Castellano', 'Quechua', 'Aymara', 'Guaraní'],
+        { otro: true },
+      ),
+    ]),
+    seccion('Excepción legal', [
+      b(
+        'aplica_excepcion',
+        '¿Se actuó sin consentimiento previo por una excepción legal?',
+      ),
+      ...si('aplica_excepcion', true, [
+        una(
+          'tipo_de_excepcion',
+          'Excepción',
+          [
+            'Urgencia con peligro inminente para la vida',
+            'Riesgo para la salud pública',
+            'La persona renunció a recibir la información',
+          ],
+          { req: true },
+        ),
+        t('justificacion_de_la_excepcion', 'Justificación', {
+          req: true,
+          ayuda:
+            'En una urgencia, después se informa a la persona o a su familia y se deja constancia.',
+        }),
+      ]),
+    ]),
     seccion('Decisión', [
-      obl(b('acepta_el_procedimiento', 'Acepta el procedimiento')),
+      obl(b('acepta_el_procedimiento', 'Acepta la indicación')),
       ...si('acepta_el_procedimiento', false, [
         t('motivo_de_rechazo', 'Motivo del rechazo (disentimiento)', {
           req: true,
@@ -245,6 +490,7 @@ export const OTRAS = {
         s('nombre_del_representante', 'Nombre del representante', {
           req: true,
         }),
+        s('documento_del_representante', 'CI del representante'),
         una(
           'representante_vinculo',
           'Vínculo',
@@ -263,7 +509,23 @@ export const OTRAS = {
           ['Menor de edad', 'Incapacidad para decidir', 'Urgencia'],
           { req: true },
         ),
+        b(
+          'asentimiento_de_la_persona',
+          '¿La persona representada dio su asentimiento?',
+          { req: true },
+        ),
       ]),
+      s('nombre_del_testigo', 'Testigo', {
+        ayuda:
+          'Cuando la persona no puede consentir o no sabe firmar, el Código de Ética y Deontología Médica recomienda hacerlo ante testigos.',
+      }),
+      s('documento_del_testigo', 'CI del testigo'),
+      obl(
+        b(
+          'derecho_a_revocar_informado',
+          'Se informó que puede revocar su decisión en cualquier momento, sin efecto sobre lo ya realizado',
+        ),
+      ),
       obl(f('fecha_de_otorgamiento', 'Fecha de otorgamiento')),
     ]),
   ],

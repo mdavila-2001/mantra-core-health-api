@@ -42,8 +42,15 @@ describe('FileUploadService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const forked = {};
-    const em = { fork: fn(() => forked) };
+    const forked: any = {};
+    forked.execute = fn(async () => []);
+    forked.transactional = fn(async (cb: (tx: unknown) => unknown) =>
+      cb(forked),
+    );
+    const em = {
+      fork: fn(() => forked),
+      transactional: fn(async (cb: (tx: unknown) => unknown) => cb(forked)),
+    };
     const storage = { store: fn(), retrieve: fn(), exists: fn(), delete: fn() };
     const filesService = { createFile: fn() };
     const filesRepo = { findById: fn() };
@@ -132,6 +139,30 @@ describe('FileUploadService', () => {
       await expect(
         service.upload(disguised, dto, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una foto HEIC de iPhone nombrando el formato, con reason estable', async () => {
+      const { service, storage } = build();
+      // Caja `ftyp` real de un HEIC: tamaño, 'ftyp', marca mayor 'heic'.
+      const heic = {
+        originalname: 'IMG_0001.HEIC',
+        mimetype: 'image/heic',
+        buffer: Buffer.concat([
+          Buffer.from([0x00, 0x00, 0x00, 0x18]),
+          Buffer.from('ftypheic'),
+          Buffer.from([0x00, 0x00, 0x00, 0x00]),
+          Buffer.from('mif1heic'),
+        ]),
+      };
+
+      const error = await service.upload(heic, dto, actor).catch((e) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe('UNSUPPORTED_IMAGE_FORMAT');
+      expect(error.details).toEqual(
+        expect.objectContaining({ detectedFormat: 'image/heic' }),
+      );
       expect(storage.store).not.toHaveBeenCalled();
     });
 

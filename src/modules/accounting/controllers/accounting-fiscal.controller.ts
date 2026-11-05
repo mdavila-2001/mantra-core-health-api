@@ -34,14 +34,18 @@ export class AccountingFiscalController {
    */
   constructor(private readonly fiscalService: FiscalService) {}
 
-  /** UC-16-04. */
+  /**
+   * UC-16-04. Los roles son los de la lectura (`GET /accounting/fiscal-years`);
+   * el servicio decide si el actor administra la práctica o es el médico
+   * titular de su consultorio propio (S-8).
+   */
   @Audited({
     action: 'FISCAL_YEAR_OPENED',
     entity: 'fiscal_year',
     entityId: 'result.id',
   })
   @Post('fiscal-years')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir un ejercicio fiscal y sus periodos' })
   openFiscalYear(

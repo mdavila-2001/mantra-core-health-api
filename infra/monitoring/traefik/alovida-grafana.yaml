@@ -1,0 +1,48 @@
+# Grafana del monitoreo (stack /opt/alovida-monitoring) con certificado Let's Encrypt.
+# Mismo patrón que alovida-logs.yaml (Dozzle): alias estable `alovida-grafana`
+# en la red coolify. Grafana exige login (anónimo y registro apagados).
+http:
+  routers:
+    alovida-grafana-http:
+      rule: Host(`grafana.62.169.18.132.sslip.io`)
+      entryPoints: [http]
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-grafana
+    alovida-grafana-https:
+      rule: Host(`grafana.62.169.18.132.sslip.io`)
+      entryPoints: [https]
+      middlewares: [alovida-grafana-headers]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-grafana
+    # Login por router propio: frena la fuerza bruta sin limitar los paneles.
+    alovida-grafana-login:
+      rule: Host(`grafana.62.169.18.132.sslip.io`) && Path(`/login`) && Method(`POST`)
+      entryPoints: [https]
+      priority: 100
+      middlewares: [alovida-grafana-login-limit, alovida-grafana-headers]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-grafana
+
+  middlewares:
+    alovida-grafana-login-limit:
+      rateLimit:
+        average: 5
+        period: 1m
+        burst: 5
+    alovida-grafana-headers:
+      headers:
+        stsSeconds: 31536000
+        frameDeny: true
+        contentTypeNosniff: true
+        referrerPolicy: no-referrer
+        customResponseHeaders:
+          X-Robots-Tag: noindex, nofollow
+
+  services:
+    alovida-grafana:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://alovida-grafana:3000

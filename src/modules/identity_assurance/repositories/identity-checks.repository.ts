@@ -248,17 +248,19 @@ export class IdentityChecksRepository {
    * @param em - Contexto de persistencia o transacción activa.
    * @param statuses - Estados que admiten despacho o seguimiento.
    * @param limit - Tamaño máximo del lote.
+   * @param offset - Filas a saltar, para recorrer la cola por páginas.
    * @returns Los checks del lote, más antiguos primero.
    */
   findDispatchable(
     em: EntityManager,
     statuses: string[],
     limit: number,
+    offset = 0,
   ): Promise<IdentityChecks[]> {
     return em.find(
       IdentityChecks,
       { statusConceptId: { $in: statuses } },
-      { orderBy: { createdAt: 'ASC' }, limit },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit, offset },
     );
   }
 }

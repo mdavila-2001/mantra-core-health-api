@@ -16,3 +16,11 @@ graphify-out
 # `docker/db-init/Dockerfile` las hornean, porque en Coolify un bind del
 # repositorio llega vacío (ver la cabecera de ese archivo). Son 5 MB y la
 # imagen de la API no los copia al runtime — solo pasan por la etapa `build`.
+
+# `tools/terminology-import` son los importadores de terminología con sus
+# salidas (`out/*.ndjson.gz`): más de 1,2 GB de los ~1,4 GB del repositorio.
+# Ninguna imagen los usa: `tsconfig.build.json` excluye `tools`, la etapa
+# `runtime` copia solo `dist` e `inventario`, y `docker/db-init/Dockerfile`
+# copia solo `database/` y sus scripts. Fuera del contexto, cada despliegue
+# deja de empaquetarlos, transferirlos y hashearlos en el `COPY . .`.
+tools/terminology-import

@@ -23,7 +23,8 @@ import { createHash } from 'node:crypto';
 
 import { deterministicId } from '../../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../../lib/glossary-es/load-plan.mjs';
-import { sectionPropertyCode } from './sections.mjs';
+import { EML_SOURCE, emlReferencesFromSections } from './eml.mjs';
+import { AUDIENCE_PROFESSIONAL, sectionPropertyCode } from './sections.mjs';
 
 export const CODE_SYSTEM = 'clinical-pharmacology';
 /**
@@ -37,6 +38,7 @@ export const PROPERTY_PREFIX = 'pharmacology_';
 
 export const REL_IS_A = deterministicId('terminology:relationship:is-a');
 export const EQUIV_EQUIVALENT = deterministicId('terminology:equivalence:equivalent');
+export const LANG_EN = deterministicId('terminology:language:en');
 
 export const SOURCE = {
   code: 'MANTRA_CLINICAL_PHARMACOLOGY',
@@ -58,6 +60,7 @@ export const PROPERTY = {
   SAFETY_NOTES: 'pharmacology_safety_notes',
   FDA_CLASSES: 'pharmacology_fda_pharm_classes',
   COVERAGE: 'pharmacology_section_coverage',
+  EXTERNAL_DOCUMENTS: 'pharmacology_external_documents',
 };
 
 export const conceptId = (code) => md5uuid(`mantra:${CODE_SYSTEM}:concept:${code}`);
@@ -80,11 +83,33 @@ function prop(conceptCode, code, dataType, value, discriminator = sha(value)) {
   return { id: md5uuid(`mantra:${CODE_SYSTEM}:property:${conceptCode}:${code}:${discriminator}`), conceptId: conceptId(conceptCode), code, dataType, value };
 }
 
-/** Clave estable de una sección: fuente, documento, versión, número y huella del texto. */
-export const sectionDiscriminator = (s) => `${s.source}:${s.document.id}:${s.document.version ?? s.document.effectiveDate ?? ''}:${s.section.number}:${s.textSha256.slice(0, 16)}`;
+/** Clave estable de una sección: fuente, documento, versión, número y huella de TODO el valor (texto y procedencia). */
+export const sectionDiscriminator = (s) => `${s.source}:${s.document.id}:${s.document.version ?? s.document.effectiveDate ?? ''}:${s.section.number}:${sha(s)}`;
+
+/**
+ * La monografía tal como se carga. Dos garantías que no dependen de cómo se armó el corpus:
+ *   - eEML: sólo referencias. Las filas de sección de la eEML de un corpus anterior a la decisión del
+ *     propietario (2026-10-26, issue 824) se reemplazan por referencias sin texto (`externalDocuments`).
+ *   - Audiencia: toda sección, la posología incluida, es `professional`; si no, no se carga.
+ */
+export function loadableMonograph(m) {
+  for (const s of m.sections) {
+    if (s.audience !== AUDIENCE_PROFESSIONAL) throw new Error(`Sección sin audiencia «${AUDIENCE_PROFESSIONAL}» en ${m.code}: ${s.source}/${s.document?.id}/${s.section?.number}`);
+  }
+  if (!m.sections.some((s) => s.source === EML_SOURCE)) return m;
+  const known = new Set((m.externalDocuments ?? []).filter((d) => d.source === EML_SOURCE).map((d) => String(d.document.id)));
+  const coverage = Object.fromEntries(Object.entries(m.coverage ?? {}).filter(([source]) => source !== EML_SOURCE));
+  return {
+    ...m,
+    sections: m.sections.filter((s) => s.source !== EML_SOURCE),
+    coverage,
+    externalDocuments: [...(m.externalDocuments ?? []), ...emlReferencesFromSections(m.sections).filter((r) => !known.has(r.document.id))],
+  };
+}
 
 /** Propiedades de una monografía (ATC 5). Lo que no hay no genera fila. */
-export function monographProperties(m) {
+export function monographProperties(source) {
+  const m = loadableMonograph(source);
   const out = [prop(m.code, PROPERTY.ATC_LEVEL, 'integer', 5, '5'), prop(m.code, PROPERTY.ATC_PATH, 'json', m.atcPath)];
   if (m.displaySource) out.push(prop(m.code, PROPERTY.NAME_SOURCE, 'string', m.displaySource));
   if (m.cima) {
@@ -94,6 +119,7 @@ export function monographProperties(m) {
   if (m.rxnorm) out.push(prop(m.code, PROPERTY.RXNORM, 'json', m.rxnorm));
   if (m.safetyNotes.length) out.push(prop(m.code, PROPERTY.SAFETY_NOTES, 'json', m.safetyNotes));
   if (m.fdaPharmClasses.length) out.push(prop(m.code, PROPERTY.FDA_CLASSES, 'json', m.fdaPharmClasses));
+  if (m.externalDocuments?.length) out.push(prop(m.code, PROPERTY.EXTERNAL_DOCUMENTS, 'json', m.externalDocuments));
   if (Object.keys(m.coverage).length) out.push(prop(m.code, PROPERTY.COVERAGE, 'json', m.coverage));
   for (const s of m.sections) out.push(prop(m.code, sectionPropertyCode(s.key), 'json', s, sectionDiscriminator(s)));
   return out;
@@ -110,7 +136,7 @@ export function planFor(monographs, version = CODE_SYSTEM_VERSION) {
   for (const m of monographs) {
     for (const n of m.atcPath) {
       const prev = nodes.get(n.code);
-      if (!prev || (!prev.name && n.name)) nodes.set(n.code, { ...n, display: n.level === 5 ? (m.display ?? n.name) : n.name });
+      if (!prev || (!prev.name && n.name)) nodes.set(n.code, { ...n, display: n.level === 5 ? (m.display ?? n.name) : n.name, language: n.level === 5 ? (m.displayLanguage ?? 'es') : 'es' });
     }
   }
   const concepts = [];
@@ -121,7 +147,7 @@ export function planFor(monographs, version = CODE_SYSTEM_VERSION) {
     const id = conceptId(n.code);
     const leaf = n.level === 5;
     concepts.push([id, base.version.id, n.code, n.display ?? n.code, null, !leaf, leaf, CONCEPT.TERM_ACTIVE]);
-    if (n.display) designations.push([md5uuid(`mantra:${CODE_SYSTEM}:designation:${n.code}:es:${n.display}`), id, CONCEPT.LANG_ES, CONCEPT.DESIG_PREFERRED, n.display, true]);
+    if (n.display) designations.push([md5uuid(`mantra:${CODE_SYSTEM}:designation:${n.code}:${n.language}:${n.display}`), id, n.language === 'en' ? LANG_EN : CONCEPT.LANG_ES, CONCEPT.DESIG_PREFERRED, n.display, true]);
     if (!leaf) {
       properties.push(prop(n.code, PROPERTY.ATC_LEVEL, 'integer', n.level, String(n.level)));
       if (n.nameSource) properties.push(prop(n.code, PROPERTY.NAME_SOURCE, 'string', n.nameSource));

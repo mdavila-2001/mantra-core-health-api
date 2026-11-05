@@ -8,6 +8,10 @@
  * discriminar sobre esto sin parsear el mensaje en español.
  */
 export enum SchedulingErrorReason {
+  // R0 (CONTRATO-F2-F5 §F4.3): recurso agendable ligado a un espacio.
+  SPACE_NOT_SCHEDULABLE = 'SPACE_NOT_SCHEDULABLE',
+  SPACE_NOT_ACTIVE = 'SPACE_NOT_ACTIVE',
+  RESOURCE_ALREADY_EXISTS_FOR_SPACE = 'RESOURCE_ALREADY_EXISTS_FOR_SPACE',
   // Motivo de texto libre (corrección #14): cancelar, rechazar, reprogramar.
   REASON_REQUIRED = 'REASON_REQUIRED',
   REASON_PLACEHOLDER = 'REASON_PLACEHOLDER',
@@ -32,9 +36,19 @@ export enum SchedulingErrorReason {
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
   TEMPLATE_RESOURCE_NOT_FOUND = 'TEMPLATE_RESOURCE_NOT_FOUND',
   TEMPLATE_HAS_ACTIVE_BOOKINGS = 'TEMPLATE_HAS_ACTIVE_BOOKINGS',
+  /**
+   * Cita por TELECONSULTA fuera de una franja con la telemedicina habilitada
+   * (v4.2.61). Por defecto ninguna franja la tiene: la activa el profesional.
+   */
+  TELEMEDICINE_NOT_ENABLED = 'TELEMEDICINE_NOT_ENABLED',
 
   // Recursos agendables.
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  /**
+   * Recurso inexistente o de otra organización: se responde igual para los dos
+   * (404 uniforme) porque distinguirlos confirmaría que el UUID existe.
+   */
+  RESOURCE_NOT_AVAILABLE = 'SCHEDULING_RESOURCE_NOT_AVAILABLE',
 
   // Cupos (slots) de una agenda.
   SLOT_NOT_FOUND = 'SLOT_NOT_FOUND',
@@ -71,6 +85,12 @@ export enum SchedulingErrorReason {
   BOOKING_ALREADY_CANCELLED = 'BOOKING_ALREADY_CANCELLED',
   CANCELLATION_WINDOW_NOT_MET = 'CANCELLATION_WINDOW_NOT_MET',
   PAYMENT_STATE_NOT_APPLICABLE = 'PAYMENT_STATE_NOT_APPLICABLE',
+  /** FAC-01 · el monto recibido no es un importe en Bs mayor que 0 con hasta dos decimales. */
+  PAYMENT_AMOUNT_INVALID = 'PAYMENT_AMOUNT_INVALID',
+  /** FAC-01 · un monto recibido solo va con «Pagada» o «Parcialmente pagada». */
+  PAYMENT_AMOUNT_WITHOUT_PAYMENT = 'PAYMENT_AMOUNT_WITHOUT_PAYMENT',
+  /** FAC-01 · el monto pasa lo que falta pagar de la cita (S-11). */
+  PAYMENT_AMOUNT_EXCEEDS_BALANCE = 'PAYMENT_AMOUNT_EXCEEDS_BALANCE',
   PROPOSED_SLOT_SAME_AS_CURRENT = 'PROPOSED_SLOT_SAME_AS_CURRENT',
   PROPOSED_SLOT_NOT_FOUND = 'PROPOSED_SLOT_NOT_FOUND',
   PROPOSED_SLOT_NO_CAPACITY = 'PROPOSED_SLOT_NO_CAPACITY',
@@ -84,4 +104,10 @@ export enum SchedulingErrorReason {
 
   // Tiempo del profesional cruzando todas sus agendas (REGLA MADRE AG-1).
   PRACTITIONER_NOT_AVAILABLE = 'PRACTITIONER_NOT_AVAILABLE',
+  /** F5d: el consultorio de la plantilla no es un consultorio/sala de procedimiento/imagen agendable (422). */
+  TEMPLATE_CARE_SPACE_INVALID_FUNCTION = 'TEMPLATE_CARE_SPACE_INVALID_FUNCTION',
+  /** F5d: el consultorio es de otra práctica que el recurso de la agenda (422). */
+  TEMPLATE_CARE_SPACE_SITE_MISMATCH = 'TEMPLATE_CARE_SPACE_SITE_MISMATCH',
+  /** F5d: otra plantilla publicada ocupa el mismo consultorio a la misma hora (422). */
+  TEMPLATE_RULE_OVERLAP_CARE_SPACE = 'TEMPLATE_RULE_OVERLAP_CARE_SPACE',
 }

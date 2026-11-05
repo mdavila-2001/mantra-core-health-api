@@ -295,10 +295,12 @@ export class CommunityReviewsService {
         verifiedEncounterId: dto.verifiedEncounterId,
         overallRating: dto.overallRating,
         reviewText: dto.reviewText,
+        // Privacidad por defecto: sin `displayMode` la reseña es anónima. Sólo
+        // se muestra el nombre si el paciente lo pide explícitamente.
         reviewerDisplayModeConceptId:
-          dto.displayMode === 'ANONYMOUS'
-            ? COMM.REVIEW_DISPLAY_ANONYMOUS
-            : COMM.REVIEW_DISPLAY_REAL_NAME,
+          dto.displayMode === 'REAL_NAME'
+            ? COMM.REVIEW_DISPLAY_REAL_NAME
+            : COMM.REVIEW_DISPLAY_ANONYMOUS,
         verificationStatusConceptId: verified
           ? COMM.REVIEW_VERIFIED
           : COMM.REVIEW_UNVERIFIED,

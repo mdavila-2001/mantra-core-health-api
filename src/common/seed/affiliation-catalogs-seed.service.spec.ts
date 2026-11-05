@@ -104,6 +104,7 @@ function build(
     rowsOf: (entity: string) =>
       created.filter((row) => row.entity === entity).map((row) => row.data),
     logger,
+    em,
   };
 }
 
@@ -135,10 +136,92 @@ describe('AffiliationCatalogsSeedService', () => {
       );
     });
 
-    it('declara el tamaño exacto del paquete del modelo: 9 / 7 / 5 / 7', () => {
+    it('declara el tamaño exacto del catálogo ampliado: 126 / 76 / 16 / 47', () => {
       expect(AFFILIATION_CATALOG_SETS.map((set) => set.members.length)).toEqual(
-        [9, 7, 5, 7],
+        [126, 76, 16, 47],
       );
+    });
+
+    it('conserva todos los códigos del paquete del modelo, sin renombrar ninguno', () => {
+      const original = [
+        [
+          'ESCRITURA_CONSTITUCION',
+          'PODER_REPRESENTANTE_LEGAL',
+          'MATRICULA_SEPREC',
+          'NIT_EXHIBICION',
+          'CI_REPRESENTANTE_LEGAL',
+          'LICENCIA_FUNCIONAMIENTO',
+          'OTRO',
+          'CERTIFICADO_SEDES',
+          'CERTIFICADO_RADIOPROTECCION',
+        ],
+        [
+          'SEPREC',
+          'SIAT',
+          'SEGIP',
+          'NOTARIA',
+          'GOBIERNO_MUNICIPAL',
+          'OTRO',
+          'SEDES',
+        ],
+        ['PENDIENTE', 'EN_REVISION', 'VERIFICADO', 'RECHAZADO', 'VENCIDO'],
+        [
+          'REPRESENTANTE_LEGAL',
+          'APODERADO',
+          'GERENTE_GENERAL',
+          'ADMINISTRADOR_UNICO',
+          'OTRO',
+          'GERENTE_COMERCIAL',
+          'GERENTE_MARKETING',
+        ],
+      ];
+      AFFILIATION_CATALOG_SETS.forEach((set, index) => {
+        expect(set.members.map((member) => member.code)).toEqual(
+          expect.arrayContaining(original[index]),
+        );
+      });
+    });
+
+    it('cubre los SEDES de los nueve departamentos y las autoridades sanitarias nacionales', () => {
+      const authorities = AFFILIATION_CATALOG_SETS[1].members.map(
+        (member) => member.code,
+      );
+      expect(authorities).toEqual(
+        expect.arrayContaining([
+          'SEDES_CHUQUISACA',
+          'SEDES_LA_PAZ',
+          'SEDES_COCHABAMBA',
+          'SEDES_ORURO',
+          'SEDES_POTOSI',
+          'SEDES_TARIJA',
+          'SEDES_SANTA_CRUZ',
+          'SEDES_BENI',
+          'SEDES_PANDO',
+          'MINISTERIO_SALUD',
+          'AGEMED',
+          'ASUSS',
+          'IBMETRO',
+        ]),
+      );
+    });
+
+    it('deja «Otro» como última opción de cada conjunto que lo tiene', () => {
+      for (const set of AFFILIATION_CATALOG_SETS) {
+        const index = set.members.findIndex((member) => member.code === 'OTRO');
+        if (index === -1) continue;
+        expect(index).toBe(set.members.length - 1);
+      }
+    });
+
+    it('escribe cada rótulo sin espacios sobrantes y sin repetirlo dentro del conjunto', () => {
+      for (const set of AFFILIATION_CATALOG_SETS) {
+        const displays = set.members.map((member) => member.display);
+        for (const display of displays) {
+          expect(display).toBe(display.trim());
+          expect(display.length).toBeGreaterThan(0);
+        }
+        expect(new Set(displays).size).toBe(displays.length);
+      }
     });
 
     it('ordena la expansión con el ordinal del orden declarado', async () => {
@@ -223,6 +306,49 @@ describe('AffiliationCatalogsSeedService', () => {
       expect(rowsOf('ValueSetMembers')[0].id).toBe(
         affiliationMemberId(type, 'NIT_EXHIBICION'),
       );
+    });
+  });
+
+  describe('catálogo ampliado sobre una base ya sembrada', () => {
+    it('realinea el ordinal de las membresías viejas y sólo inserta las nuevas', async () => {
+      const type = AFFILIATION_CATALOG_SETS[0];
+      const other = affiliationMemberId(type, 'OTRO');
+      const radio = affiliationMemberId(type, 'CERTIFICADO_RADIOPROTECCION');
+      // Las membresías como quedaron con la lista de 9: posiciones viejas.
+      const stored: Record<string, { id: string; ordinal: number }> = {
+        [other]: { id: other, ordinal: 6 },
+        [radio]: { id: radio, ordinal: 8 },
+      };
+      const existing = allSeededIds();
+      for (const member of type.members) {
+        const id = affiliationMemberId(type, member.code);
+        if (!(id in stored)) existing.delete(id);
+      }
+      const { service, rowsOf, em } = build(existing);
+      const find = em.find.getMockImplementation();
+      em.find.mockImplementation((entity: any, where: any, options: any) => {
+        const ids: string[] = where?.id?.$in ?? [];
+        if (entity?.name === 'ValueSetMembers' && ids.includes(other)) {
+          return Promise.resolve(
+            ids.filter((id) => id in stored).map((id) => stored[id]),
+          );
+        }
+        return find(entity, where, options);
+      });
+
+      const counters = await service.run();
+
+      expect(stored[other]?.ordinal).toBe(type.members.length - 1);
+      expect(stored[radio]?.ordinal).toBe(
+        type.members.findIndex(
+          (member) => member.code === 'CERTIFICADO_RADIOPROTECCION',
+        ),
+      );
+      expect(counters.memberships).toBe(type.members.length - 2);
+      expect(counters.concepts).toBe(0);
+      const ordinals = rowsOf('ValueSetMembers').map((row) => row.ordinal);
+      expect(ordinals).not.toContain(stored[other]?.ordinal);
+      expect(ordinals).not.toContain(stored[radio]?.ordinal);
     });
   });
 

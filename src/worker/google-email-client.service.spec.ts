@@ -10,6 +10,7 @@ const ENV = {
   googleOAuthClientSecret: 'client-secret',
   googleOAuthRefreshToken: 'refresh-token',
   googleSenderEmail: 'no-reply@example.com',
+  emailAllowedRecipientDomains: [],
 };
 
 function build(env: Partial<typeof ENV> = {}) {

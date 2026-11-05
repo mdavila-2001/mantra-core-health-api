@@ -41,6 +41,7 @@ import {
 } from '../community.concepts';
 import {
   CommunityVerificationService,
+  verificationFromBadge,
   type VerifiedBadgeDto,
 } from './community-verification.service';
 import { CommunityProfileStatsService } from './community-profile-stats.service';
@@ -94,11 +95,9 @@ export const KIND_BY_TARGET_CONCEPT: Record<string, PublicResultKind> = {
 
 /** Prefijo de ruta corta → tipo de sujeto que ese prefijo promete. */
 export const TARGET_CONCEPT_BY_SLUG_PREFIX: Record<string, string> = {
-  p: COMM.PROFILE_TARGET_PRACTITIONER,
-  o: COMM.PROFILE_TARGET_ORGANIZATION,
-  f: COMM.PROFILE_TARGET_PHARMACY,
-  l: COMM.PROFILE_TARGET_DIAGNOSTIC_UNIT,
-  s: COMM.PROFILE_TARGET_INSURER,
+  p: COMM.PROFILE_TARGET_PRACTITIONER, o: COMM.PROFILE_TARGET_ORGANIZATION,
+  f: COMM.PROFILE_TARGET_PHARMACY, l: COMM.PROFILE_TARGET_DIAGNOSTIC_UNIT,
+  s: COMM.PROFILE_TARGET_INSURER, u: COMM.PROFILE_TARGET_USER,
 };
 
 /**
@@ -121,6 +120,8 @@ export const PUBLIC_RESULT_KEYS = [
   // P13. `verified` se mantiene porque el front ya lo consume, pero es el
   // resumen booleano de `verifiedBadge.status`, no una segunda verdad.
   'verifiedBadge',
+  // Objeto aditivo {status, verifiedAt, validUntil}: lo mismo que `verifiedBadge`, en la forma común a todas las superficies.
+  'verification',
   'hasPublishedAgenda',
   'nextAvailableDate',
   // La tarjeta del directorio se mira antes de leerse: sin portada, sin calle
@@ -136,6 +137,9 @@ export const PUBLIC_RESULT_KEYS = [
 /** Las claves que la ficha pública puede tener. Nada más. */
 export const PUBLIC_PROFILE_KEYS = [
   'kind',
+  // La práctica de una organización: con ella un profesional pide pertenecer.
+  // Es un identificador que ya viaja en `/practices`, no un dato interno.
+  'practiceId',
   'slug',
   'displayName',
   'headline',
@@ -153,6 +157,7 @@ export const PUBLIC_PROFILE_KEYS = [
   'ratingCount',
   'acceptsReviews',
   'verifiedBadge',
+  'verification',
   'hasPublishedAgenda',
   'nextAvailableDate',
   'posts',
@@ -212,6 +217,8 @@ interface ProfileSignals {
   >;
   /** Ciudad y punto, por sujeto. */
   readonly locations: Map<string, ProfileLocation>;
+  /** Profesionales con una solicitud de verificación abierta (`target_id`). */
+  readonly inReview: Set<string>;
 }
 
 /**
@@ -870,19 +877,24 @@ export class CommunityPublicService {
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
     // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
     // pedirlas para el resto sería un viaje que siempre vuelve vacío.
-    const [señales, posts, specialties, trajectory, sites] = await Promise.all([
-      this.signals(em, [profile]),
-      this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-      kind === 'PRACTITIONER'
-        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, string[]>()),
-      kind === 'PRACTITIONER'
-        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
-      kind === 'PRACTITIONER'
-        ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
-    ]);
+    const [señales, posts, specialties, trajectory, sites, practiceId] =
+      await Promise.all([
+        this.signals(em, [profile]),
+        this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+        kind === 'PRACTITIONER'
+          ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, string[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
+        // Sólo una organización tiene práctica a la que pedir pertenecer.
+        kind === 'ORGANIZATION'
+          ? this.repo.practiceIdByTenant(em, profile.targetId)
+          : Promise.resolve<string | null>(null),
+      ]);
     // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
     // comentarios lleva. Un solo viaje para todo el lote.
     const engagement = await this.repo.engagementByPost(
@@ -894,6 +906,7 @@ export class CommunityPublicService {
     const badge = this.verification.readBadge(
       profile,
       señales.badges.get(profile.id) ?? [],
+      señales.inReview.has(profile.targetId),
     );
     const agenda = señales.agenda.get(profile.targetId);
     const location = señales.locations.get(profile.targetId);
@@ -904,6 +917,7 @@ export class CommunityPublicService {
 
     return {
       kind,
+      practiceId,
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
@@ -936,6 +950,7 @@ export class CommunityPublicService {
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,
       verifiedBadge: badge,
+      verification: verificationFromBadge(badge),
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
       posts: posts.map((post) => {
@@ -1249,7 +1264,7 @@ export class CommunityPublicService {
     const status = text('verifiedBadgeStatus');
     const verifiedBadge: VerifiedBadgeDto = {
       status:
-        status === 'VERIFIED' || status === 'EXPIRED'
+        status === 'VERIFIED' || status === 'EXPIRED' || status === 'IN_REVIEW'
           ? status
           : source.verified === true
             ? 'VERIFIED'
@@ -1288,6 +1303,7 @@ export class CommunityPublicService {
       ratingAverage: readNumber('ratingAverage'),
       ratingCount: readNumber('ratingCount') ?? 0,
       verifiedBadge,
+      verification: verificationFromBadge(verifiedBadge),
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: text('nextAvailableDate'),
       coverUrl: text('coverUrl'),
@@ -1353,6 +1369,7 @@ export class CommunityPublicService {
     const badge = this.verification.readBadge(
       profile,
       signals.badges.get(profile.id) ?? [],
+      signals.inReview.has(profile.targetId),
     );
     const agenda = signals.agenda.get(profile.targetId);
     const location = signals.locations.get(profile.targetId);
@@ -1377,6 +1394,7 @@ export class CommunityPublicService {
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       verifiedBadge: badge,
+      verification: verificationFromBadge(badge),
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
     };
@@ -1396,13 +1414,14 @@ export class CommunityPublicService {
     const ids = page.map((profile) => profile.id);
     const targetIds = page.map((profile) => profile.targetId);
 
-    const [ratings, badges, agenda, locations] = await Promise.all([
+    const [ratings, badges, agenda, locations, inReview] = await Promise.all([
       this.repo.ratingsByProfile(em, ids),
       this.repo.badgesByProfiles(em, ids),
       this.repo.agendaByPractitioner(em, targetIds),
       this.repo.locationsByOwner(em, targetIds),
+      this.repo.practitionersInReview(em, targetIds),
     ]);
-    return { ratings, badges, agenda, locations };
+    return { ratings, badges, agenda, locations, inReview };
   }
 
   /** Tipo de resultado; un perfil de usuario se sirve como profesional. */

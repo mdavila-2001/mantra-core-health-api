@@ -14,3 +14,4 @@ export * from './request-practitioner-access.dto';
 export * from './decide-practitioner-access-request.dto';
 export * from './practitioner-access-request-response.dto';
 export * from './consent-me.dto';
+export * from './treatment-informed-consent-actions.dto';

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -27,11 +28,15 @@ import {
   CreateMedicalGroupDto,
   MedicalGroupConditionOptionDto,
   MedicalGroupDto,
+  MedicalGroupEligibleMemberDto,
+  MedicalGroupMemberInputDto,
   MedicalGroupPageDto,
   RequestMedicalGroupRescheduleDto,
   RespondMedicalGroupInvitationDto,
   RespondMedicalGroupRescheduleDto,
+  UpdateMedicalGroupDto,
   UpdateMedicalGroupExerciseNotesDto,
+  UpdateMedicalGroupMemberDto,
 } from '../dto';
 
 const VALID_TABS: readonly MedicalGroupTab[] = [
@@ -75,6 +80,23 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-06/07: diagnósticos del paciente, más reciente primero. */
+  /**
+   * Los colegas que se pueden invitar a un grupo del servicio elegido. Va
+   * antes de `:id` por el mismo motivo que `patients/...`: el router de Nest
+   * resuelve en orden de declaración.
+   */
+  @Get('eligible-members')
+  @ApiOperation({
+    summary: 'Colegas que se pueden invitar a un grupo de este servicio',
+  })
+  @ApiQuery({ name: 'serviceCatalogId', required: true })
+  listEligibleMembers(
+    @Query('serviceCatalogId', ParseUUIDPipe) serviceCatalogId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupEligibleMemberDto[]> {
+    return this.service.listEligibleMembers(serviceCatalogId, actor);
+  }
+
   @Get('patients/:patientProfileId/conditions')
   @ApiOperation({
     summary: 'Diagnósticos del paciente para el selector del formulario',
@@ -111,6 +133,88 @@ export class MedicalGroupsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicalGroupDto> {
     return this.service.create(dto, actor);
+  }
+
+  /** Corregir el lugar o las notas: sólo el creador, antes de la cita. */
+  @Audited({
+    action: 'MEDICAL_GROUP_UPDATED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
+  @Patch(':id')
+  @ApiOperation({ summary: 'Corregir el lugar o las notas del grupo médico' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateMedicalGroupDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.service.update(id, dto, actor);
+  }
+
+  /** Eliminar el grupo y su equipo: sólo el creador, antes de la cita. */
+  @Audited({
+    action: 'MEDICAL_GROUP_REMOVED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar un grupo médico no realizado' })
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.service.remove(id, actor);
+  }
+
+  /** El creador suma un cargo al equipo; queda como invitación sin responder. */
+  @Audited({
+    action: 'MEDICAL_GROUP_MEMBER_ADDED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
+  @Post(':id/members')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Agregar un cargo al equipo del grupo' })
+  addMember(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: MedicalGroupMemberInputDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.service.addMember(id, dto, actor);
+  }
+
+  /** Cambiar cargo, pago o términos: la invitación vuelve a quedar sin responder. */
+  @Audited({
+    action: 'MEDICAL_GROUP_MEMBER_UPDATED',
+    entity: 'group_member',
+    entityId: 'param:memberId',
+  })
+  @Patch(':id/members/:memberId')
+  @ApiOperation({ summary: 'Modificar un cargo del equipo' })
+  updateMember(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
+    @Body() dto: UpdateMedicalGroupMemberDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.service.updateMember(id, memberId, dto, actor);
+  }
+
+  /** Quitar un cargo del equipo. */
+  @Audited({
+    action: 'MEDICAL_GROUP_MEMBER_REMOVED',
+    entity: 'group_member',
+    entityId: 'param:memberId',
+  })
+  @Delete(':id/members/:memberId')
+  @ApiOperation({ summary: 'Quitar un cargo del equipo' })
+  removeMember(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.service.removeMember(id, memberId, actor);
   }
 
   /** AC-21-02/03: responder una invitación (solicitud enviada/recibida). */

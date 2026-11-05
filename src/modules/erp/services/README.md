@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `ErpContractsService` | 01, 02, 03, 04, 05, 06, 07, 16 | Socios de negocio y ciclo de vida contractual |
 | `ErpOperationsService` | 08 … 15 | RR. HH., compras, recepción, conciliación, ventas y arrendamientos |
 
-## Reglas de negocio
+## Business rules
 
 - **Socio (01)**: la cuenta bancaria nace `unverified` y su identificador se persiste hasheado
   (SHA-256), nunca en claro.
@@ -55,7 +55,7 @@ ya terminado, ausencia solapada, solicitud ya resuelta).
 `operation: 'erp.<área>.<acción>'`. `warn` en desviaciones del three-way match. Nunca se loguean
 identificadores bancarios, salarios ni datos personales del empleado.
 
-## Pruebas
+## Tests
 
 `erp-contracts.service.spec.ts` (22) y `erp-operations.service.spec.ts` (19): camino feliz,
 precondiciones, conflictos, idempotencia y casos límite.

@@ -44,6 +44,38 @@ export class AccountingControllingRepository {
     );
   }
 
+  /**
+   * Los centros de costo con esos ids, sin acotar: el llamador contrasta la
+   * práctica de cada uno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores pedidos.
+   * @returns Los que existen.
+   */
+  findCostCentersByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<CostCenters[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CostCenters, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * Los centros de beneficio con esos ids, sin acotar: el llamador contrasta el
+   * tenant de cada uno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores pedidos.
+   * @returns Los que existen.
+   */
+  findProfitCentersByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ProfitCenters[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ProfitCenters, { id: { $in: [...ids] } });
+  }
+
   /** Centros de coste de una práctica (D-9), ordenados por código. */
   listCostCentersByPractice(
     em: EntityManager,

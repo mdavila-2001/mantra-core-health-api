@@ -151,7 +151,9 @@ export const foreignKeysLayer: DdlLayer = {
       }
     }
 
-    return { applied, skipped, failures };
+    // Toda FK que no se pudo crear es una invariante declarada que la base no
+    // está haciendo cumplir: bloquea la readiness (ORMN-01).
+    return { applied, skipped, failures, blocking: failures };
   },
 };
 

@@ -1,4 +1,8 @@
 import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
+import { ServiceRequestDetailService } from '../../clinical/services/service-request-detail.service';
+import { summaryOf } from './diagnostics-reception.service';
+import { analysisCategoryOf } from '../../clinical/service-request-category';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -28,7 +32,11 @@ import {
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { DIAGNOSTIC_CATEGORIES, DIAG } from '../diagnostics.concepts';
+import {
+  DIAGNOSTIC_CATEGORIES,
+  DIAG,
+  PATIENT_PORTAL_CATEGORIES,
+} from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
@@ -94,6 +102,9 @@ export class DiagnosticsPatientResultsService {
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
    * @param careRepo - Relaciones asistenciales, para exigir vínculo vigente al compartir (CL-48).
    * @param logger - Registro estructurado.
+   * @param settlements - Liquidación del seguro de cada orden diagnóstica.
+   * @param siteNames - Nombre de la sede que el médico sugirió, para mostrarle al paciente un nombre y no un uuid.
+   * @param detail - Detalle de la orden (muestra, componentes, imagen): el mismo que ve el receptor.
    * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
@@ -106,6 +117,8 @@ export class DiagnosticsPatientResultsService {
     private readonly careRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
+    private readonly siteNames: SuggestedSiteNamesReader,
+    private readonly detail: ServiceRequestDetailService,
     private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
@@ -175,18 +188,30 @@ export class DiagnosticsPatientResultsService {
     const rows = await this.ordersRepo.findOrdersForPatientPortal(
       em,
       patientProfileId,
-      DIAGNOSTIC_CATEGORIES,
+      PATIENT_PORTAL_CATEGORIES,
       limit + 1,
     );
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [settlements, preparation, reportByOrder] = await Promise.all([
+    const [
+      settlements,
+      preparation,
+      reportByOrder,
+      suggestedSiteNames,
+      details,
+    ] = await Promise.all([
+      // La liquidación del seguro es de las órdenes diagnósticas: una orden de
+      // procedimiento no tiene reclamo y no se le inventa una liquidación.
       this.settlements.forOrders(
         em,
         actor.id,
         'DIAGNOSTIC',
-        page.map((order) => order.id),
+        page
+          .filter((order) =>
+            DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
+          )
+          .map((order) => order.id),
       ),
       this.preparationByConcept(
         em,
@@ -196,18 +221,43 @@ export class DiagnosticsPatientResultsService {
         em,
         page.map((order) => order.id),
       ),
+      // Una sola lectura por página: el paciente ve el nombre, no el uuid.
+      this.siteNames.namesFor(
+        em,
+        page.map((order) => order.suggestedPracticeSiteId),
+      ),
+      // Mismo detalle que ve el receptor: muestra, componentes, imagen.
+      this.detail.describe(em, page),
     ]);
 
     const items: PatientOrderSummaryDto[] = page.map((order) => {
       const reportId = reportByOrder.get(order.id);
+      const view = details.get(order.id);
+      const codeDisplay = view?.codeDisplay ?? null;
       return {
         id: order.id,
+        requisitionId: order.requisitionId ?? null,
+        codeDisplay,
+        specimenTypeConceptId: order.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
+        summary: summaryOf(codeDisplay, view),
         ...(settlements.get(order.id) ?? unavailableSettlement()),
         encounterId: order.encounterId,
         codeConceptId: order.codeConceptId,
         categoryConceptId: order.categoryConceptId,
+        category: analysisCategoryOf(order.categoryConceptId),
         statusConceptId: order.statusConceptId,
         priorityConceptId: order.priorityConceptId,
+        performerSelectionConceptId: order.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          order.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: order.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: order.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(order.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: order.createdAt,
         preparationInstructions: preparation.get(order.codeConceptId),
         hasReleasedResult: reportId !== undefined,

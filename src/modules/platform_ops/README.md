@@ -105,7 +105,7 @@ runbooks/:id/versions ──> versión inmutable y vigente; runbook-executions d
 resilience-exercises/:id/complete ──> pass | fail derivado del objetivo de recuperación
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Quien pide el cambio no lo aprueba**. El CAB existe para que lo mire alguien distinto, y sin esa
   comprobación el control es decorativo.
@@ -146,7 +146,7 @@ resilience-exercises/:id/complete ──> pass | fail derivado del objetivo de r
 - **El resultado del ejercicio de resiliencia se deriva**, no se declara: dejar que quien ejecuta el
   simulacro se ponga la nota lo vaciaría de valor.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` cubre el módulo entero. `RELEASE_MANAGER` abre cambios, despliega y cierra
 revisiones de preparación. `CHANGE_APPROVER` decide en el CAB. `DEPLOY_PIPELINE` publica artefactos y
@@ -156,7 +156,7 @@ capacidad. `SYSTEM` registra corridas de health check, mediciones de SLO y event
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la ventana de mantenimiento al atarle un cambio, sobre el cambio en toda decisión
 o despliegue, sobre el despliegue vigente del par componente+entorno —sólo puede haber uno, y ceder
@@ -173,7 +173,7 @@ cerrada con "no go", ejecución de runbook que no completa y ejercicio que incum
 mediciones y los eventos de quema no tienen columnas de auditoría —son logs de sólo inserción—, así
 que quién los registró se deja en el log.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/platform_ops --runInBand --silent` — 5 suites y 146 pruebas
 aprobadas durante la revisión.

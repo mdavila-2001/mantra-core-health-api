@@ -28,9 +28,13 @@ export class AccountingExchangeRateController {
     entityId: 'result.id',
   })
   @Post('exchange-rates')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar tipo de cambio para conversión' })
+  @ApiOperation({
+    summary: 'Registrar tipo de cambio para conversión',
+    description:
+      'Tabla de plataforma compartida por todas las organizaciones: la registra un actor de plataforma (SYSTEM o SUPERADMIN); un administrador de tenant recibe 403.',
+  })
   register(
     @Body() dto: RegisterExchangeRateDto,
     @CurrentUser() actor: AuthenticatedUser,

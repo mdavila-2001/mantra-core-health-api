@@ -9,11 +9,11 @@ PostgreSQL, schema `procedures_perioperative`. Entidades generadas por introspec
 
 ## Repositorios
 
-| Repositorio | Área | Métodos destacados |
-| --- | --- | --- |
-| `PeriopCasesRepository` | Caso, estado, hitos, diagnósticos, equipo, ubicaciones, quirófano, cancelación, cargos | `createCase`, `findCaseForUpdate`, `findCaseByNumber`, `findOverlappingCases`, `createStatusHistory`, `createMilestone`, `findMilestone`, `createDiagnosis`, `findDiagnosesByCase`, `createTeamMember`, `findTeamByCase`, `createLocation`, `findOpenLocation`, `createUtilizationEvent`, `createCancellation`, `createChargeItem`, `findChargeItemsForUpdate` |
-| `PeriopPreopRepository` | Valoración, riesgo, órdenes, checklist, anestesia | `createAssessment`, `findAssessmentByCase`, `createRiskScore`, `findOrdersByCaseForUpdate`, `findChecklistForUpdate`, `findItemsByPhase`, `createResponse`, `findResponsesByChecklist`, `createAnesthesiaPlan`, `findAnesthesiaPlanForUpdate`, `createAirwayAssessment`, `createAnesthesiaEvent` |
-| `PeriopIntraopRepository` | Pasos, hallazgos, implantes, insumos, reporte, PACU | `createStep`, `findStepsByCase`, `createFinding`, `createBodySite`, `findBodySite`, `createImplant`, `createImplantIdentifier`, `createDevice`, `createMedicationUse`, `createSpecimen`, `createReport`, `findLastReport`, `createComplication`, `createPacuStay`, `findPacuStayForUpdate`, `createPacuAssessment`, `findAssessmentsByStay` |
+| Repositorio               | Área                                                                                   | Métodos destacados                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PeriopCasesRepository`   | Caso, estado, hitos, diagnósticos, equipo, ubicaciones, quirófano, cancelación, cargos | `createCase`, `findCaseForUpdate`, `findCaseByNumber`, `findOverlappingCases`, `createStatusHistory`, `createMilestone`, `findMilestone`, `createDiagnosis`, `findDiagnosesByCase`, `createTeamMember`, `findTeamByCase`, `createLocation`, `findOpenLocation`, `createUtilizationEvent`, `createCancellation`, `createChargeItem`, `findChargeItemsForUpdate` |
+| `PeriopPreopRepository`   | Valoración, riesgo, órdenes, checklist, anestesia                                      | `createAssessment`, `findAssessmentByCase`, `createRiskScore`, `findOrdersByCaseForUpdate`, `findChecklistForUpdate`, `findItemsByPhase`, `createResponse`, `findResponsesByChecklist`, `createAnesthesiaPlan`, `findAnesthesiaPlanForUpdate`, `createAirwayAssessment`, `createAnesthesiaEvent`                                                               |
+| `PeriopIntraopRepository` | Pasos, hallazgos, implantes, insumos, reporte, PACU                                    | `createStep`, `findStepsByCase`, `createFinding`, `createBodySite`, `findBodySite`, `createImplant`, `createImplantIdentifier`, `createDevice`, `createMedicationUse`, `createSpecimen`, `createReport`, `findLastReport`, `createComplication`, `createPacuStay`, `findPacuStayForUpdate`, `createPacuAssessment`, `findAssessmentsByStay`                    |
 
 La división sigue las tres fases reales del quirófano —lo que se **decide** antes, lo que se
 **hace** dentro y lo que **gobierna** el caso de punta a punta— porque son las que tienen actores y
@@ -60,7 +60,7 @@ de borrado para estas tablas: son el registro clínico y de seguridad del caso.
 Consultas por PK, FK o clave natural indexada. La de solape filtra por quirófano y rango de fechas,
 ambos indexados. Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos,
 del solape y de las UNIQUE llega con las pruebas de integración.

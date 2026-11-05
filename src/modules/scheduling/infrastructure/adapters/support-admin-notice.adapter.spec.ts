@@ -14,12 +14,14 @@ const notice: AgendaNotice = {
   bodyText: 'Un paciente pidió cita para el lunes a las 09:00.',
   relatedResourceType: 'scheduling.appointment_bookings',
   relatedResourceId: 'booking-1',
-  payload: { route: '/schedule?vista=citas' },
+  payload: { route: '/schedule?vista=citas', bookingId: 'booking-1' },
 };
 
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // The adapter writes inside a savepoint of the request transaction.
+  em.transactional = mockFn((cb: any) => cb(em));
   em.findOne = mockFn().mockResolvedValue({ displayName: 'Ana Pérez' });
 
   const messaging = {
@@ -76,7 +78,11 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
     const [conversationId, messageDto] = d.messaging.sendMessage.mock.calls[0];
     expect(conversationId).toBe('conv-1');
     expect(messageDto.senderProfileId).toBe('perfil-support-admin');
-    expect(messageDto.bodyText).toBe(notice.bodyText);
+    // La versión de chat: el cuerpo del aviso, con encabezado y enlace a la cita.
+    expect(messageDto.bodyText).toContain(notice.bodyText);
+    expect(messageDto.bodyText).toMatch(
+      /\/schedule\?vista=citas&turno=booking-1$/,
+    );
   });
 
   it('firma la conversación y el mensaje con la cuenta de SupportAdmin, no con el worker genérico', async () => {
@@ -111,6 +117,22 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
 
     expect(result.chatDelivered).toBe(false);
     expect(result.chatSkippedReason).toMatch(/no se pudo entregar/i);
+    expect(d.logger.warn).toHaveBeenCalled();
+    // The swallowing `catch` sits outside the savepoint, so the rollback of a
+    // failed notice leaves the request transaction usable.
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    expect(d.em.transactional).toHaveBeenCalledTimes(1);
+  });
+
+  it('un fallo SQL dentro del savepoint tampoco sube: lo traga el catch de afuera', async () => {
+    const d = build();
+    d.em.transactional.mockRejectedValue(
+      new Error('current transaction is aborted'),
+    );
+
+    const result = await d.adapter.notify(notice, 'user-medico');
+
+    expect(result.chatDelivered).toBe(false);
     expect(d.logger.warn).toHaveBeenCalled();
   });
 });

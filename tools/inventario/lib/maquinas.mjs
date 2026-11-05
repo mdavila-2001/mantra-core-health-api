@@ -162,14 +162,27 @@ function usuariosDe(maquina, index) {
       validadores.set(clave, [...(validadores.get(clave) ?? []), nombre]);
     }
   }
+  // clase → métodos que consultan la tabla: sirve para reconocer al que llama al validador
+  // de OTRA clase por una dependencia inyectada (`this.transitions.assertTransition(…)`),
+  // que es como los casos de uso de la cita usan `BookingTransitionRecorder`.
+  const validadoresPorClase = new Map();
+  for (const [clave, nombres] of validadores) {
+    const clase = index.classesPorClave.get(clave)?.node.name?.text;
+    if (clase) validadoresPorClase.set(clase, new Set(nombres));
+  }
   for (const [clave, info] of index.classesPorClave) {
     if (!sinPruebas(info.relative)) continue;
     const propios = new Set(validadores.get(clave) ?? []);
     for (const [nombre, metodo] of info.methods) {
       const texto = metodo.getText(info.sourceFile);
-      const llamaAValidador = [...propios].some((v) =>
-        new RegExp(`this\\.${v}\\(`).test(texto),
+      const llamaAlValidadorAjeno = [
+        ...texto.matchAll(/this\.([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\(/g),
+      ].some(([, propiedad, llamado]) =>
+        validadoresPorClase.get(info.injected?.get(propiedad))?.has(llamado),
       );
+      const llamaAValidador =
+        llamaAlValidadorAjeno ||
+        [...propios].some((v) => new RegExp(`this\\.${v}\\(`).test(texto));
       if (!llamaAValidador && !propios.has(nombre)) continue;
       const nombrados = new Set();
       (function visitar(nodo) {

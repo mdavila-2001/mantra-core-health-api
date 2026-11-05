@@ -1,0 +1,281 @@
+{
+ "tx": {
+  "codeSystemVersion": "http://loinc.org|2.82",
+  "base": "https://tx.fhir.org/r4",
+  "finishedAt": "2026-10-24T17:48:45.428Z",
+  "classes": {
+   "PANEL.CHEM": {
+    "partNumber": "LP7834-7",
+    "classType": "1",
+    "sample": "100149-4",
+    "count": 446,
+    "statusQueried": true
+   },
+   "CHEM": {
+    "partNumber": "LP7786-9",
+    "classType": "1",
+    "sample": "100150-2",
+    "count": 10855,
+    "statusQueried": true
+   }
+  },
+  "terms": {
+   "2345-7": {
+    "display": "Glucose [Mass/volume] in Serum or Plasma",
+    "class": "CHEM",
+    "designations": [
+     {
+      "lang": "en-US",
+      "use": "LONG_COMMON_NAME",
+      "value": "Glucose [Mass/volume] in Serum or Plasma"
+     },
+     {
+      "lang": "es-MX",
+      "use": "LONG_COMMON_NAME",
+      "value": "Glucosa: Suero o Plasma : Punto temporal: Concentración de masa: Cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "SHORTNAME",
+      "value": "Glucose SerPl-mCnc"
+     },
+     {
+      "lang": "es-AR",
+      "use": "SHORTNAME",
+      "value": "glucosa:concentración de masa:punto en el tiempo:suero/plasma:cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "ConsumerName",
+      "value": "Glucose, Blood"
+     }
+    ],
+    "orderObs": "Both"
+   },
+   "24323-8": {
+    "display": "Comprehensive metabolic 2000 panel - Serum or Plasma",
+    "class": "PANEL.CHEM",
+    "designations": [
+     {
+      "lang": "en-US",
+      "use": "LONG_COMMON_NAME",
+      "value": "Comprehensive metabolic 2000 panel - Serum or Plasma"
+     },
+     {
+      "lang": "es-MX",
+      "use": "LONG_COMMON_NAME",
+      "value": "Panel metabólico 2000 completo: Suero o Plasma : Punto temporal: -: Cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "SHORTNAME",
+      "value": "Comp Metab 2000 Pnl SerPl"
+     },
+     {
+      "lang": "es-AR",
+      "use": "SHORTNAME",
+      "value": "panel metabólico HCFA 2000 integral:-:punto en el tiempo:suero/plasma:cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "ConsumerName",
+      "value": "Comprehensive metabolic 2000 panel, Blood"
+     }
+    ],
+    "orderObs": "Order"
+   },
+   "3094-0": {
+    "display": "Urea nitrogen [Mass/volume] in Serum or Plasma",
+    "class": "CHEM",
+    "designations": [
+     {
+      "lang": "en-US",
+      "use": "LONG_COMMON_NAME",
+      "value": "Urea nitrogen [Mass/volume] in Serum or Plasma"
+     },
+     {
+      "lang": "es-MX",
+      "use": "LONG_COMMON_NAME",
+      "value": "Nitrógeno de urea: Suero o Plasma : Punto temporal: Concentración de masa: Cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "SHORTNAME",
+      "value": "BUN SerPl-mCnc"
+     },
+     {
+      "lang": "es-AR",
+      "use": "SHORTNAME",
+      "value": "nitrógeno ureico:concentración de masa:punto en el tiempo:suero/plasma:cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "ConsumerName",
+      "value": "Urea Nitrogen (BUN), Blood"
+     }
+    ],
+    "orderObs": "Both"
+   },
+   "2160-0": {
+    "display": "Creatinine [Mass/volume] in Serum or Plasma",
+    "class": "CHEM",
+    "designations": [
+     {
+      "lang": "en-US",
+      "use": "LONG_COMMON_NAME",
+      "value": "Creatinine [Mass/volume] in Serum or Plasma"
+     },
+     {
+      "lang": "es-MX",
+      "use": "LONG_COMMON_NAME",
+      "value": "Creatinina: Suero o Plasma : Punto temporal: Concentración de masa: Cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "SHORTNAME",
+      "value": "Creat SerPl-mCnc"
+     },
+     {
+      "lang": "es-AR",
+      "use": "SHORTNAME",
+      "value": "creatinina:concentración de masa:punto en el tiempo:suero/plasma:cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "ConsumerName",
+      "value": "Creatinine, Blood"
+     }
+    ],
+    "orderObs": "Both"
+   },
+   "30934-4": {
+    "display": "Natriuretic peptide B [Mass/volume] in Serum or Plasma",
+    "class": "CHEM",
+    "designations": [
+     {
+      "lang": "en-US",
+      "use": "LONG_COMMON_NAME",
+      "value": "Natriuretic peptide B [Mass/volume] in Serum or Plasma"
+     },
+     {
+      "lang": "es-MX",
+      "use": "LONG_COMMON_NAME",
+      "value": "Péptido natriurético B: Suero o Plasma : Punto temporal: Concentración de masa: Cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "SHORTNAME",
+      "value": "BNP SerPl-mCnc"
+     },
+     {
+      "lang": "es-AR",
+      "use": "SHORTNAME",
+      "value": "péptido natriurético.B:concentración de masa:punto en el tiempo:plasma:cuantitativo:"
+     },
+     {
+      "lang": "en-US",
+      "use": "ConsumerName",
+      "value": "Natriuretic Peptide B, Blood"
+     }
+    ],
+    "orderObs": "Both"
+   }
+  }
+ },
+ "ctss": {
+  "source": "https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search",
+  "items": {
+   "2345-7": {
+    "COMPONENT": "Glucose",
+    "PROPERTY": "MCnc",
+    "METHOD_TYP": "",
+    "RELATEDNAMES2": "Chemistry; Endocrine; Endocrinology; Glu; Gluc; Glucoseur; Level; Mass concentration; Pl; Plasma; Plsm; Point in time; QNT; Quan; Quant; Quantitative; Random; SerP; SerPl; SerPlas; Serum; Serum or plasma; SR; UniversalLabOrders",
+    "CONSUMER_NAME": "",
+    "datatype": "REAL",
+    "units": [
+     {
+      "unit": "mg/dL"
+     }
+    ]
+   },
+   "24323-8": {
+    "COMPONENT": "Comprehensive metabolic 2000 panel",
+    "PROPERTY": "-",
+    "METHOD_TYP": "",
+    "RELATEDNAMES2": "00; Chemistry; CMP; Comp Metab 2000 Pnl; Pan; PANEL.CHEMISTRY; Panl; Pl; Plasma; Plsm; Pnl; Point in time; QNT; Quan; Quant; Quantitative; Random; SerP; SerPl; SerPlas; Serum; Serum or plasma; SR; UniversalLabOrders",
+    "CONSUMER_NAME": "",
+    "datatype": null,
+    "units": null
+   },
+   "3094-0": {
+    "COMPONENT": "Urea nitrogen",
+    "PROPERTY": "MCnc",
+    "METHOD_TYP": "",
+    "RELATEDNAMES2": "Blood urea nitrogen; BUN; Chemistry; Kidney; Level; Mass concentration; N; N2; Nephrology; Nit; Pl; Plasma; Plsm; Point in time; QNT; Quan; Quant; Quantitative; Random; Renal; SerP; SerPl; SerPlas; Serum; Serum or plasma; SR; UN; UniversalLabOrders",
+    "CONSUMER_NAME": "",
+    "datatype": "REAL",
+    "units": [
+     {
+      "unit": "mg/dL"
+     }
+    ]
+   },
+   "2160-0": {
+    "COMPONENT": "Creatinine",
+    "PROPERTY": "MCnc",
+    "METHOD_TYP": "",
+    "RELATEDNAMES2": "Chemistry; CR; Crea; Creat; Kidney; Level; Mass concentration; Nephrology; Pl; Plasma; Plsm; Point in time; QNT; Quan; Quant; Quantitative; Random; Renal; SerP; SerPl; SerPlas; Serum; Serum or plasma; SR; UniversalLabOrders",
+    "CONSUMER_NAME": "",
+    "datatype": "REAL",
+    "units": [
+     {
+      "unit": "mg/dL"
+     }
+    ]
+   },
+   "30934-4": {
+    "COMPONENT": "Natriuretic peptide.B",
+    "PROPERTY": "MCnc",
+    "METHOD_TYP": "",
+    "RELATEDNAMES2": "Beta Natriuretic Peptide; BNP; Brain Natriuretic Peptide; B-type natriuretic peptide; Cardio; Cardiology; Chemistry; Heart Disease; Level; Mass concentration; Natriutietic peptide.B; Pept; Pl; Plasma; Plsm; Point in time; QNT; Quan; Quant; Quantitative; Random; SerP; SerPl; SerPlas; Serum; Serum or plasma; SR; UniversalLabOrders",
+    "CONSUMER_NAME": "",
+    "datatype": "REAL",
+    "units": [
+     {
+      "unit": "pg/mL"
+     }
+    ]
+   }
+  }
+ },
+ "panels": {
+  "panels": {
+   "24323-8": [
+    {
+     "loinc": "2345-7",
+     "sequence": 1,
+     "displayNameForForm": "Glucose SerPl-mCnc",
+     "units": [
+      "mg/dL"
+     ]
+    },
+    {
+     "loinc": "3094-0",
+     "sequence": 2,
+     "displayNameForForm": "BUN SerPl-mCnc",
+     "units": [
+      "mg/dL"
+     ]
+    },
+    {
+     "loinc": "2160-0",
+     "sequence": 3,
+     "displayNameForForm": "Creat SerPl-mCnc",
+     "units": [
+      "mg/dL"
+     ]
+    }
+   ]
+  }
+ }
+}

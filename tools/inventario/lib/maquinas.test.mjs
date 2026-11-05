@@ -36,9 +36,9 @@ export class OrdersController {
 }`,
 };
 
-function construir() {
+function construir(archivos = ARCHIVOS) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'inventario-maq-'));
-  for (const [ruta, texto] of Object.entries(ARCHIVOS)) {
+  for (const [ruta, texto] of Object.entries(archivos)) {
     fs.mkdirSync(path.dirname(path.join(root, ruta)), { recursive: true });
     fs.writeFileSync(path.join(root, ruta), texto);
   }
@@ -79,5 +79,42 @@ test('relaciona cada handler con los estados de destino que su método nombra', 
     'OrdersController_listar' in por,
     false,
     'un handler que no consulta la tabla no figura',
+  );
+});
+
+test('un caso de uso que valida por un colaborador inyectado también ejerce la máquina', () => {
+  // Como la cita: el caso de uso no valida él mismo, le pide la guarda a otra clase
+  // (`this.transiciones.assertTransition(…)`) y es él quien nombra el estado de destino.
+  const { index, datos } = construir({
+    'src/modules/m/state/machine.ts':
+      ARCHIVOS['src/modules/m/state/machine.ts'],
+    'src/modules/m/support/recorder.ts': `
+import { esValida } from '../state/machine';
+export class OrderTransitionRecorder {
+  assertTransition(de: string, a: string) { if (!esValida(de, a)) throw new Error('x'); }
+}`,
+    'src/modules/m/use-cases/pagar.use-case.ts': `
+import { OrderTransitionRecorder } from '../support/recorder';
+export class PagarUseCase {
+  constructor(private readonly transiciones: OrderTransitionRecorder) {}
+  execute(de: string) { this.transiciones.assertTransition(de, S.PAGADA); return 1; }
+  listar() { return 2; }
+}`,
+    'src/modules/m/controllers/orders.controller.ts': `
+import { PagarUseCase } from '../use-cases/pagar.use-case';
+export class OrdersController {
+  constructor(private readonly pagarUseCase: PagarUseCase) {}
+  pagar() { return this.pagarUseCase.execute('x'); }
+  listar() { return this.pagarUseCase.listar(); }
+}`,
+  });
+  const [m] = leerMaquinas(index);
+  const d = disparadoresDe(m, index, datos);
+  const por = Object.fromEntries([...d].map(([k, v]) => [k, [...v.estados]]));
+  assert.deepEqual(por.OrdersController_pagar, ['PAGADA']);
+  assert.equal(
+    'OrdersController_listar' in por,
+    false,
+    'el que no pasa por la guarda no figura',
   );
 });

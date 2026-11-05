@@ -9,7 +9,7 @@
 # Módulo `graph_intelligence`
 
 **Fuente:** [`src/modules/graph_intelligence/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/graph_intelligence/README.md)
-· 2 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
+· 2 controllers · 4 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
 
@@ -238,9 +238,13 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
   analítica los aporta. Este módulo gobierna, versiona y registra.
 - **Alta de `graph_projection_definitions` y `graph_rule_definitions`**: las dos tablas se leen pero
   ningún caso de uso del módulo 61 les da un endpoint de alta. No se ha inventado uno.
-- **Comprobación de consentimiento contra `consent.consents` / `consent.privacy_restrictions`**
-  (UC-61-05): el alcance exige `patientProfileId` cuando `requiresPatientContext`, pero no se
-  contrasta contra el módulo 07.
+- **Consentimiento por contexto de paciente (UC-61-05, GRAPH-02):** `traverse` y `findPath` con
+  `patientProfileId` pasan por `GraphConsentGate`, que exige un consentimiento `ACTIVE` del paciente
+  para el propósito declarado, emitido para el tenant activo y vigente, y ninguna restricción de
+  privacidad activa que le aplique al actor. Toda denegación es `403 FORBIDDEN /
+  GRAPH_CONSENT_REQUIRED` y ocurre antes de resolver el nodo, leer la caché o recorrer.
+  `consent.privacy_restrictions` no declara propósito, así que una restricción vigente niega la
+  consulta completa (opción conservadora).
 - **`audit.audit_events`** en cambio de política de acceso, consulta al grafo y triage: el caso de uso
   lo pide. El registro de auditoría es del módulo 06.
 - **`redis_runtime.*_cache_entries`** (UC-61-04, 12): la invalidación se publica por outbox
@@ -250,5 +254,8 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
 
 ## Revisión ALOVIDA
 
-Las mutaciones por UUID no comparan el tenant activo contra el recurso cargado, y el recorrido
-con paciente no contrasta consentimiento.
+Las mutaciones por UUID (corrida, definición, arista, scope, regla y hallazgo) toman el tenant de
+`requireTenantId()` y cargan el agregado con `assertGraphResourceInTenant`: ajeno e inexistente
+responden igual (`404 / GRAPH_RESOURCE_OUT_OF_SCOPE`). Un actor de sistema sin tenant declarado
+(`X-Tenant-Id` o `tenantId` en el cuerpo) recibe `412 TENANT_REQUIRED`. El recorrido con paciente
+contrasta consentimiento (ver arriba).

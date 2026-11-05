@@ -9,6 +9,7 @@
 // falla mostrando los encabezados reales.
 // =============================================================================
 
+import { createRequire } from 'node:module';
 import { clean, md5uuid, resolveHeaders } from '../common.mjs';
 import { classifyEmdn } from '../emdn-scope.mjs';
 
@@ -21,6 +22,7 @@ export const EMDN_HEADER_SPEC = {
     aliases: [
       'term',
       'EMDN term',
+      'TERM EMDN',
       'description',
       'EMDN description',
       'descrizione',
@@ -139,14 +141,24 @@ export function discoverExcelLinks(html, pageUrl) {
   return [...out];
 }
 
-/** Lee la primera hoja de un .xlsx con la librería `xlsx` ya declarada en el repo. */
+/**
+ * Lee la primera hoja de un .xlsx con la librería `xlsx` ya declarada en el repo.
+ *
+ * Se carga con `createRequire` (el build CommonJS de `xlsx`, como el resto de los importadores):
+ * el build ESM no trae `fs` y `readFile` falla con «Cannot access file» salvo que se le inyecte
+ * con `set_fs`.
+ */
 export async function readFirstSheet(path) {
-  const XLSX = (await import('xlsx')).default;
+  const XLSX = createRequire(import.meta.url)('xlsx');
   const wb = XLSX.readFile(path);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
+  // Fila de encabezados: la primera con una celda «CODE»/«EMDN CODE»/«codice»
+  // exacta (el Excel oficial trae antes una fila de título «EMDN_v.2026»).
   const headerIdx = rows.findIndex((r) =>
-    r.some((v) => /emdn|code|codice/i.test(String(v ?? ''))),
+    r.some((v) =>
+      /^(emdn\s*)?(code|codice)(\s*emdn)?$/i.test(String(v ?? '').trim()),
+    ),
   );
   if (headerIdx < 0)
     throw new Error(`No se encontró la fila de encabezados en ${path}`);

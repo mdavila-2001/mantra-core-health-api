@@ -3,11 +3,16 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import {
+  assertPracticeScope,
+  loadPracticeInScope,
+  practiceOutOfScope,
+} from './practice-scope';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -50,16 +55,13 @@ export class PracticeAccreditationsService {
     dto: CreateAccreditationDto,
     actor: AuthenticatedUser,
   ): Promise<AccreditationResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.accreditation.create', practiceId },
       'Submitting accreditation',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
+      await loadPracticeInScope(this.practicesRepo, tx, practiceId, tenantId);
 
       if (dto.practiceSiteId) {
         const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
@@ -105,16 +107,26 @@ export class PracticeAccreditationsService {
     actor: AuthenticatedUser,
   ): Promise<AccreditationResponseDto> {
     const decision = dto.decision ?? 'VERIFIED';
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.accreditation.verify', id, decision },
       'Verifying accreditation',
     );
     return this.em.transactional(async (tx) => {
-      const accreditation = await this.accreditationsRepo.findById(tx, id);
-      if (!accreditation)
-        throw new ResourceNotFoundException('Acreditación no encontrada', {
-          id,
-        });
+      // La acreditación no lleva tenant: es el de su práctica. Se compara antes
+      // de cualquier transición.
+      const found = await this.accreditationsRepo.findById(tx, id);
+      const owner = found
+        ? await this.practicesRepo.findById(tx, found.practiceId)
+        : null;
+      if (!found || !owner)
+        throw practiceOutOfScope('Acreditación no encontrada');
+      const accreditation = assertPracticeScope(
+        found,
+        owner.tenantId,
+        tenantId,
+        'Acreditación no encontrada',
+      );
 
       if (decision === 'VERIFIED') {
         if (accreditation.verificationStatusConceptId !== PRAC.ACCRED_PENDING) {

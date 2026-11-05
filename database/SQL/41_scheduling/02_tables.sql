@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 41 · schema scheduling
+-- SALUD v4.2.85 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedulable_resources" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
     CONSTRAINT "pk_schedulable_resources" PRIMARY KEY ("id")
 );
 
@@ -67,6 +68,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_templates" (
     "valid_from" date,
     "valid_to" date,
     "slot_minutes" integer,
+    "flexible_hours" boolean NOT NULL DEFAULT false,
     "booking_policy_id" uuid,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
@@ -74,6 +76,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_templates" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
     CONSTRAINT "pk_schedule_templates" PRIMARY KEY ("id")
 );
 
@@ -87,6 +90,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_rules" (
     "capacity_per_slot" integer,
     "gap_minutes" integer,
     "booking_mode_concept_id" uuid,
+    "telemedicine_enabled" boolean NOT NULL DEFAULT false,
+    "flexible_hours" boolean NOT NULL DEFAULT false,
     "valid_from" date,
     "valid_to" date,
     "created_at" timestamptz NOT NULL,
@@ -110,6 +115,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."availability_exceptions" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "source_kind_concept_id" uuid,
+    "source_ref_id" uuid,
     CONSTRAINT "pk_availability_exceptions" PRIMARY KEY ("id")
 );
 
@@ -129,6 +136,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."bookable_slots" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
+    "healthcare_service_id" uuid,
     CONSTRAINT "pk_bookable_slots" PRIMARY KEY ("id")
 );
 
@@ -169,6 +178,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."booking_policies" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "no_show_fee_percentage" numeric,
+    "no_show_retains_deposit" boolean DEFAULT false,
     CONSTRAINT "pk_booking_policies" PRIMARY KEY ("id")
 );
 
@@ -195,8 +206,12 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_bookings" (
     "cancellation_policy_snapshot" jsonb,
     "practitioner_service_offering_id" uuid,
     "service_snapshot" jsonb,
+    "pre_visit_instructions_snapshot" text,
     "follow_up_of_booking_id" uuid,
     "form_instance_id" uuid,
+    "care_space_id" uuid,
+    "healthcare_service_id" uuid,
+    "booked_via_grant_id" uuid,
     CONSTRAINT "pk_appointment_bookings" PRIMARY KEY ("id")
 );
 
@@ -217,6 +232,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."practitioner_service_offerings" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "pre_visit_instructions" text,
     CONSTRAINT "pk_practitioner_service_offerings" PRIMARY KEY ("id")
 );
 
@@ -342,6 +358,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_states" (
     "appointment_booking_id" uuid NOT NULL,
     "status_concept_id" uuid NOT NULL,
     "insurance_used" boolean NOT NULL,
+    "invoice_id" uuid,
     "marked_by_user_id" uuid NOT NULL,
     "marked_at" timestamptz NOT NULL,
     "created_at" timestamptz NOT NULL,
@@ -350,4 +367,26 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_states" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_appointment_payment_states" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_receipts" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "appointment_booking_id" uuid NOT NULL,
+    "file_id" uuid NOT NULL,
+    "amount" numeric(12,2),
+    "paid_at" timestamptz,
+    "note" varchar(500),
+    "uploaded_by_user_id" uuid NOT NULL,
+    "uploaded_at" timestamptz NOT NULL,
+    "review_status_concept_id" uuid NOT NULL,
+    "reviewed_by_user_id" uuid,
+    "reviewed_at" timestamptz,
+    "rejection_reason" varchar(500),
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_appointment_payment_receipts" PRIMARY KEY ("id")
 );

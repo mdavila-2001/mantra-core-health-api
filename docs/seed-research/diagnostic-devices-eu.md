@@ -1,34 +1,34 @@
 # Equipos de diagnóstico y sus marcas — registros de Europa (EUDAMED, MHRA, Swissmedic)
 
 Sesión `seed-dx-devices-eu` · rama `claude/adoring-curie-xdkt83` (desde `dev`) · código en
-[`tools/terminology-import/diagnostic-devices/eu/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/tools/terminology-import/diagnostic-devices/eu/)
+[`tools/terminology-import/diagnostic-devices/eu/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/tools/terminology-import/diagnostic-devices/eu)
 · formato común: `tools/terminology-import/diagnostic-devices/README.md`, escrito por la sesión
 `master` (rama `justin/seed-dx-devices-master`); esta rama lo respeta y no lo modifica
 · fuentes y términos en [`SOURCES.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
 
 ## Resumen honesto
 
-- **Las fuentes oficiales siguen bloqueadas** por la política de red del entorno (403 en EUDAMED,
-  la Comisión, MHRA, swissdamed, el Ministero della Salute, NANDO, BfArM, AEMPS y ANSM).
-- Desde la pasada 4 el corpus sale de **réplicas públicas en GitHub fijadas por commit**
-  (descubiertas por la sesión `master` y verificadas acá: licencia, formato y procedencia):
-  - **716 equipos de diagnóstico** de EUDAMED (UDI-DI, EMDN, fabricante con SRN, marca, modelo o
-    referencia, clase, estado y, cuando hay, certificado y organismo notificado), de **114
-    fabricantes** y **391 marcas**;
-  - **EMDN V2 completa**: 8 453 conceptos con jerarquía (3 121 en alcance diagnóstico);
-  - **26 583 actores fabricantes de EUDAMED** con SRN (versión vigente de cada uno).
-- Cada fila cita la ficha oficial de EUDAMED (`sourceUrl`) y la réplica (`extra.mirror`: repo,
-  commit, ruta, sha256). Nada se inventó.
-- **No está saturado**: EUDAMED tiene millones de UDI-DI y estas réplicas cubren solo los
-  fabricantes que sus autores descargaron. El cuello de botella sigue siendo la red: con los
-  hosts habilitados, `fetch.mjs` baja EUDAMED completo por código EMDN.
-
-**Para destrabarlo**: habilitar en *Network access* del entorno estos hosts y volver a correr
-`probe.mjs → fetch.mjs → build.mjs`:
-`api.datalake.sante.service.ec.europa.eu`, `health.ec.europa.eu`, `webgate.ec.europa.eu`,
-`ec.europa.eu`, `www.dati.salute.gov.it`, `pard.mhra.gov.uk`, `swissdamed.ch`,
-`www.bfarm.de`, `www.aemps.gob.es`, `ansm.sante.fr`. Para instalar dependencias:
-`repo.yarnpkg.com` y `cdn.sheetjs.com` (ver «Entorno»).
+- **Pasada 7 (2026-10-24, red abierta): el corpus sale de las fuentes oficiales.**
+  - **EUDAMED (Data Lake oficial de DG SANTE)**: `GET /udi` por cada uno de los **3 142 códigos
+    EMDN en alcance**, paginado hasta el final (`_complete.json` en los 3 142, 0 huecos):
+    306 474 UDI-DI leídos → **303 085 equipos de diagnóstico** exportados, cada uno con su ficha
+    pública `udiDiData/{uuid}` como `sourceUrl`.
+  - **BD/RDM del Ministero della Salute (Italia)**: ZIP oficial del 2026-10-19, 2 435 599
+    dispositivos leídos → 216 848 en alcance → **200 563** exportados tras deduplicar.
+  - **EMDN v2026 oficial** (Excel de la Comisión): 8 516 conceptos, 3 142 en alcance.
+  - **32 753 actores fabricantes** del Data Lake (solo datos de la organización).
+- Total: **503 648 equipos** de **11 414 fabricantes** y **267 471 marcas** (fabricante + marca),
+  0 filas rechazadas, 20 547 duplicados descartados (exactos: misma fila, mismo UDI-DI o mismo
+  fabricante + modelo + marca cuando no hay UDI-DI). Las réplicas de git de las pasadas 4–6
+  quedan como respaldo: solo 14 de sus filas en alcance no estaban ya en el Data Lake y se
+  conservan con su procedencia de réplica.
+- **Huecos que no se pueden llenar sin autorización o sin descarga pública**: swissdamed (las
+  condiciones de Swissmedic prohíben la extracción automatizada), MHRA PARD (sin licencia abierta),
+  certificados del portal de EUDAMED (API interna sin términos), NANDO, BfArM, AEMPS y ANSM (sin
+  descarga masiva). Los certificados que hay salen de la réplica `eudamed2firstbase` por UUID.
+- **Saturación**: con las fuentes oficiales alcanzables y con licencia, el Data Lake se recorrió
+  entero para cada código en alcance y la BD/RDM es un volcado completo. La pasada 8 (volver a
+  pedir y reconstruir) aportó 0 filas nuevas y dio una salida idéntica byte a byte.
 
 ## Paso 0 — discovery del modelo
 
@@ -63,8 +63,10 @@ la EMDN descargada.
 | **V** | Tipo por tipo | Entran: dispositivos de medición (V03: termómetros, sondas de temperatura, calibres, goniómetros, tallímetros, balanzas). |
 | **A, B, D, F, H, J, K, L, M, P, S, T, X, Y** | Excluidas | Administración/infusión, transfusión, desinfección, diálisis, suturas, implantables activos, endoterapia/electrocirugía, instrumental quirúrgico, apósitos, prótesis, esterilización, protección/incontinencia, productos sin finalidad médica, ayudas técnicas. La recolección de muestras que es IVD ya está en W. |
 
-La lista exacta, con el motivo de cada uno de los 79 prefijos, está en `INCLUDED_TYPE_PREFIXES`
-(`lib/emdn-scope.mjs`), decidida leyendo el nombre oficial de cada tipo en la EMDN V2. El árbol
+La lista exacta, con el motivo de cada uno de los 80 prefijos, está en `INCLUDED_TYPE_PREFIXES`
+(`lib/emdn-scope.mjs`), decidida leyendo el nombre oficial de cada tipo en la EMDN v2026 (en la
+pasada 7 se quitó `Z120306`, que no existe en la v2026 y queda cubierto por `Z120302`, y se
+agregaron `C01040401` y `C040401`, angiografía y guías neurovasculares diagnósticas). El árbol
 completo con ✔/✘ por tipo queda en `out/emdn-scope-review.md`.
 
 Clases de riesgo: se conservan tal como las publica la fuente (EUDAMED decodifica
@@ -85,22 +87,27 @@ node --test "tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs"
   `manufacturerRegistryId` con prefijo `srn:`; clase con esquema (`eu-mdr:IIa`, `eu-ivdr:C`) solo
   si legislación y etiqueta decodificadas encajan exactamente, si no `eudamed:<etiqueta>`; lo
   propio de la fuente en `extra`. La EMDN va aparte en `out/emdn/` (clasificación, no filas).
-- **Recorte**: se exportan las filas en alcance (W) **y** las de categorías en revisión, marcadas
-  en `extra.dxScope = "pendiente-revision:<letra>"`, para que `master` las clasifique con su
-  taxonomía; las categorías excluidas ni se piden.
-- **EUDAMED**: `GET /udi?NOMENCLATURE_CODE=<código>` por cada código EMDN exportable, siguiendo
-  `nextLink`; luego `GET /actors?ACTOR_ID=<SRN>` por cada fabricante visto. País del fabricante =
-  `ACT_COUNTRY_ISO2_CODE` del actor; si falta, prefijo del SRN (`XX-MF-000000000`), marcado en
-  `extra.manufacturerCountrySource`.
-  Certificado y organismo notificado no están en el Data Lake; el adaptador del portal
-  (`basicUdiData`) queda listo pero sin descarga en bloque hasta verificar términos.
+- **Recorte**: solo se exportan las filas cuyo código EMDN/CND cae en W o en uno de los 80 tipos
+  incluidos (`extra.dxScope` dice la regla); el resto ni se pide a EUDAMED.
+- **EUDAMED**: `GET /udi?NOMENCLATURE_CODE=%20<código>` (el Data Lake guarda el código con un
+  espacio inicial; sin él devuelve 0 filas) por cada código en alcance, 10 en paralelo, siguiendo
+  `nextLink` (`$after=…`), con reintentos ante 429/5xx y páginas gzip reanudables. Luego
+  `GET /actors?ACTOR_TYPE=Manufacturer`. País del fabricante = `ACT_COUNTRY_ISO2_CODE` del actor;
+  si falta, prefijo del SRN, marcado en `extra.manufacturerCountrySource`. Certificado y organismo
+  notificado no están en el Data Lake: se copian de la réplica `eudamed2firstbase` por UUID
+  (`extra.certificatesSource`).
 - **EMDN**: el enlace al Excel se descubre en la página oficial; se valida que cada código tenga
   la forma oficial, que el nivel declarado coincida con la estructura y que la jerarquía cierre.
-- **BD/RDM Italia**: el mapeo de columnas (`it-bdrdm.columns.json`) está en `verified: false`
-  porque el encabezado real no se pudo ver; `build.mjs` imprime el encabezado y no normaliza nada
-  hasta que se complete.
+- **BD/RDM Italia**: columnas verificadas contra el CSV real y el diccionario v2.0
+  (`it-bdrdm.columns.json`, `verified: true`); lectura en streaming (525 MB). Modelo =
+  `cod_catalogo_fabbr_ass`, marca = `denominazione_commerciale`, tipo = `classificazione_cnd`
+  (sistema `cnd`), id del fabricante `it-cf:` (solo código fiscal de empresa, 11 dígitos) o
+  `vat:`. Sin UDI-DI, clase ni país en la fuente: van en null.
+- **Datos personales**: de los actores solo se publican datos de la organización (nunca PRRC,
+  correo ni teléfono); un correo dentro de un campo descriptivo deja el campo en null
+  (`extra.redactedFields`, 32 filas); el código fiscal de persona física no se publica.
 - **swissdamed**: adaptador listo y probado, **desactivado** por términos.
-- **MHRA PARD, NANDO, BfArM, AEMPS, ANSM**: sin descarga masiva documentada; solo sondeo.
+- **MHRA PARD, NANDO, BfArM, AEMPS, ANSM**: sin descarga masiva documentada o sin licencia; solo sondeo.
 
 ## Protocolo de saturación — bitácora de pasadas
 
@@ -153,8 +160,8 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 
 - `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0335.json`). Sin cambios en la
   política de red: no se descargó nada.
-- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO** por los hosts listados
-  arriba.
+- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO**. Para reanudar, habilitar
+  los hosts listados arriba y relanzar el /loop (o `probe → fetch → build`).
 
 ### Pasada 4 — 2026-10-24 · réplicas públicas en GitHub (aviso de `master`)
 
@@ -200,6 +207,25 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 - Dos pasadas seguidas en 0 con todo lo alcanzable agotado: **loop detenido**. No es saturación
   de EUDAMED: el resto exige los hosts oficiales.
 
+### Pasada 7 — 2026-10-24 · fuentes oficiales con la red abierta
+
+- Fuentes: EMDN oficial, EUDAMED Data Lake (`/reference`, `/udi` × 3 142 códigos, `/actors`),
+  BD/RDM y CND de dati.salute.gov.it. Términos leídos en vivo: EMDN (CC BY 4.0 de la Comisión),
+  IODL 2.0, Swissmedic (prohíbe la extracción automatizada) y PARD (solo Crown Copyright).
+- Resultado: **+303 085 equipos de EUDAMED y +200 563 de la BD/RDM**; 0 huecos de descarga.
+  Evidencia en el historial de git (commit `6bed69e1`, carpeta `evidencia/` de la corrida).
+- Arreglos que salieron al usar datos reales: espacio inicial en `NOMENCLATURE_CODE`; `$after`
+  que cambia en cada página; encabezado del Excel v2026; la deduplicación colapsaba UDI-DI
+  distintos con el mismo modelo (ahora el UDI-DI manda); 21 páginas sin metadatos de corridas
+  cortadas (se volvieron a pedir en vez de rellenar la fecha).
+
+### Pasada 8 — 2026-10-24 · repetición (cierre)
+
+- Se volvió a correr `fetch.mjs` (reanuda: solo pide lo que falta) y dos veces `build.mjs`.
+- Resultado: **Nuevos: 0**; la salida es idéntica byte a byte entre corridas (sha256 en la
+  evidencia). Dos pasadas seguidas sin filas nuevas con todo lo oficial y licenciado agotado:
+  **loop detenido**. Lo que falta exige autorización (Swissmedic, MHRA) o fuentes sin descarga.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 El modelo no tiene catálogo de equipos. Propuesta concreta (a decidir y escribir en el repo del
@@ -226,9 +252,11 @@ modelo; la API no escribe DDL, ADR-0021):
 
 ## Entorno (para quien retome)
 
-- Red: además de las fuentes, están bloqueados `repo.yarnpkg.com` (Corepack baja Yarn 4 de ahí) y
-  `cdn.sheetjs.com` (dependencia `xlsx` del `package.json`). Se instaló con
+- Red: desde el 2026-10-24 16:29 UTC el entorno tiene red completa. Antes estaban bloqueados los
+  hosts oficiales, `repo.yarnpkg.com` y `cdn.sheetjs.com`; se instaló con
   `COREPACK_NPM_REGISTRY=https://registry.npmjs.org` y un ajuste **local y temporal** de `xlsx` a
-  `0.18.5` del registro npm, revertido antes del commit (`package.json` y `yarn.lock` sin cambios).
-- Crudos fuera de git en `../diagnostic-devices-data/eu/` (`DX_DEVICES_BUILD_DIR` lo redefine).
-  Lo normalizado va comprimido a `out/` (partes < 50 MB), por orden del propietario.
+  `0.18.5` del registro npm, revertido (`package.json` y `yarn.lock` sin cambios).
+- Crudos fuera de git en `../diagnostic-devices-data/eu/` (`DX_DEVICES_BUILD_DIR` lo redefine):
+  ~3 300 páginas gzip del Data Lake, el CSV de la BD/RDM (525 MB) y el Excel de la EMDN. Lo
+  normalizado va comprimido a `out/` (partes < 45 MB), por orden del propietario.
+- `build.mjs` necesita `node --max-old-space-size=12288` con el corpus completo (~90 s).

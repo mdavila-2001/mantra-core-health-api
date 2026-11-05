@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import {
   CreateReportVersionDto,
   ReleaseReportVersionDto,
@@ -35,12 +36,14 @@ export class DiagnosticsReportsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
    * @param ordersRepo - Acceso al informe en `clinical`, para marcarlo liberado.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: ReportsRepository,
     private readonly ordersRepo: DiagnosticOrdersRepository,
+    private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsReportsService.name);
@@ -57,12 +60,19 @@ export class DiagnosticsReportsService {
       'Creating report version',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio del informe',
-          {},
+      const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+      // El informe, sus observaciones y sus archivos son del tenant activo y del
+      // mismo paciente; se resuelven antes de escribir la primera fila.
+      const report = await this.scope.report(tx, reportId);
+      for (const r of dto.results ?? []) {
+        await this.scope.observation(
+          tx,
+          r.observationId,
+          report.patientProfileId,
         );
+      }
+      for (const f of dto.files ?? []) {
+        await this.scope.file(tx, f.fileId);
       }
       if (dto.supersedesVersionId) {
         const prev = await this.repo.findVersionInReport(
@@ -92,7 +102,7 @@ export class DiagnosticsReportsService {
         clinicalStatusConceptId: DIAG.REPORT_PRELIMINARY,
         custodianTenantId: tenantId,
         conclusionText: dto.conclusionText,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId: this.scope.authorFor(actor, dto.authorProfileId),
         supersedesVersionId: dto.supersedesVersionId,
         amendmentReasonConceptId: dto.amendmentReasonConceptId,
         amendmentReasonText: dto.amendmentReasonText,
@@ -139,9 +149,10 @@ export class DiagnosticsReportsService {
       'Releasing report version',
     );
     return this.em.transactional(async (tx) => {
+      const report = await this.scope.report(tx, reportId);
       const version = await this.repo.findVersionInReport(
         tx,
-        reportId,
+        report.id,
         versionId,
       );
       if (!version) {
@@ -183,16 +194,13 @@ export class DiagnosticsReportsService {
       // esto, `current_released_version_id` seguía en `null` para siempre y la
       // única forma de saber si un resultado estaba liberado era recorrer sus
       // eventos — que es justo lo que la columna existe para evitar.
-      const report = await this.ordersRepo.findReportById(tx, reportId);
-      if (report) {
-        this.ordersRepo.markReportReleased(
-          tx,
-          report,
-          version.id,
-          visibility,
-          actor.id,
-        );
-      }
+      this.ordersRepo.markReportReleased(
+        tx,
+        report,
+        version.id,
+        visibility,
+        actor.id,
+      );
 
       await tx.flush();
 
@@ -213,11 +221,13 @@ export class DiagnosticsReportsService {
       'Detecting critical result',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio de la notificación',
-          {},
+      const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+      await this.scope.observation(tx, dto.observationId, dto.patientProfileId);
+      if (dto.diagnosticReportId) {
+        await this.scope.report(
+          tx,
+          dto.diagnosticReportId,
+          dto.patientProfileId,
         );
       }
       // Evita doble alerta por observación.
@@ -267,16 +277,10 @@ export class DiagnosticsReportsService {
       'Acknowledging critical notification',
     );
     return this.em.transactional(async (tx) => {
-      const notification = await this.repo.findCriticalNotification(
+      const notification = await this.scope.criticalNotification(
         tx,
         notificationId,
       );
-      if (!notification) {
-        throw new ResourceNotFoundException(
-          'Notificación crítica no encontrada',
-          { notificationId },
-        );
-      }
       if (
         notification.notificationStatusConceptId === DIAG.CRITICAL_ACKNOWLEDGED
       ) {
@@ -291,7 +295,10 @@ export class DiagnosticsReportsService {
       notification.notificationStatusConceptId = escalated
         ? DIAG.CRITICAL_ESCALATED
         : DIAG.CRITICAL_ACKNOWLEDGED;
-      notification.acknowledgedByProfileId = dto.acknowledgedByProfileId;
+      notification.acknowledgedByProfileId = this.scope.authorFor(
+        actor,
+        dto.acknowledgedByProfileId,
+      );
       notification.acknowledgedAt = now;
       notification.communicationEvidenceId = dto.communicationEvidenceId;
       touch(notification, actor.id);

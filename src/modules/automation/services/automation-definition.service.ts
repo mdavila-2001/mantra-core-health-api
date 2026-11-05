@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
@@ -14,6 +15,7 @@ import {
   AgentsRepository,
   AutomationGovernanceRepository,
 } from '../repositories';
+import { AUTOMATION_SCOPE_FAILURES, inTenantScope } from './automation-scope';
 import {
   DefineWorkflowDto,
   WorkflowResponseDto,
@@ -59,11 +61,16 @@ export class AutomationDefinitionService {
    *
    * Un salto a un paso que no está en el lote se rechaza. Un grafo con una arista
    * colgando no falla al definirlo, falla a mitad de una ejecución.
+   *
+   * El tenant propietario sale del contexto de la petición, nunca del cuerpo, y
+   * el agente que cada paso referencia tiene que ser de ese mismo tenant: un
+   * UUID de agente ajeno responde igual que uno inexistente.
    */
   async defineWorkflow(
     dto: DefineWorkflowDto,
     actor: AuthenticatedUser,
   ): Promise<WorkflowResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.governanceRepo.findWorkflowByCode(
         tx,
@@ -124,17 +131,11 @@ export class AutomationDefinitionService {
           );
         }
         if (step.agentId) {
-          const agent = await this.agentsRepo.findAgentById(tx, step.agentId);
-          if (!agent) {
-            throw new ResourceNotFoundException(
-              'Agente referenciado por un paso no encontrado.',
-              {
-                stepCode: step.stepCode,
-                agentId: step.agentId,
-              },
-              AutomationErrorReason.STEP_AGENT_NOT_FOUND,
-            );
-          }
+          inTenantScope(
+            await this.agentsRepo.findAgentById(tx, step.agentId),
+            tenantId,
+            AUTOMATION_SCOPE_FAILURES.stepAgent,
+          );
         }
         if (step.agentToolId) {
           const tool = await this.agentsRepo.findToolById(tx, step.agentToolId);
@@ -149,7 +150,7 @@ export class AutomationDefinitionService {
       }
 
       const workflow = this.governanceRepo.createWorkflow(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         description: dto.description,
@@ -197,7 +198,7 @@ export class AutomationDefinitionService {
       }
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'WorkflowDefined',
         aggregateType: 'automation.workflows',
         aggregateId: workflow.id,
@@ -232,11 +233,15 @@ export class AutomationDefinitionService {
    *
    * El workflow tiene que estar activo: registrar un disparador contra un borrador
    * lo dejaría armado para arrancar algo que aún se está escribiendo.
+   *
+   * El disparador hereda el tenant del contexto, y el workflow que enlaza tiene
+   * que ser de ese mismo tenant; uno ajeno responde igual que uno inexistente.
    */
   async configureTrigger(
     dto: ConfigureTriggerDto,
     actor: AuthenticatedUser,
   ): Promise<TriggerResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.governanceRepo.findTriggerByCode(
         tx,
@@ -252,19 +257,11 @@ export class AutomationDefinitionService {
         );
       }
 
-      const workflow = await this.governanceRepo.findWorkflowById(
-        tx,
-        dto.workflowId,
+      const workflow = inTenantScope(
+        await this.governanceRepo.findWorkflowById(tx, dto.workflowId),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.workflow,
       );
-      if (!workflow) {
-        throw new ResourceNotFoundException(
-          'Workflow no encontrado.',
-          {
-            workflowId: dto.workflowId,
-          },
-          AutomationErrorReason.WORKFLOW_NOT_FOUND,
-        );
-      }
       if (workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED) {
         throw new PreconditionFailedException(
           'No se puede disparar un workflow archivado.',
@@ -295,7 +292,7 @@ export class AutomationDefinitionService {
       }
 
       const trigger = this.governanceRepo.createTrigger(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         triggerTypeConceptId: dto.triggerTypeConceptId,
@@ -314,7 +311,7 @@ export class AutomationDefinitionService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'TriggerRegistered',
         aggregateType: 'automation.automation_triggers',
         aggregateId: trigger.id,

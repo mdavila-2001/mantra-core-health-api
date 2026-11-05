@@ -4,6 +4,8 @@
  * `logout-all` y en la detección de reuso; `roles` evita un lookup por request.
  */
 export interface JwtPayload {
+  /** Unix timestamp de expiración firmado por el emisor JWT. */
+  exp?: number;
   /**
    * Valor de sub mantenido por la instancia.
    */

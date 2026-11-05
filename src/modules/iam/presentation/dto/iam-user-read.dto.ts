@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 /**
  * Contratos de lectura de `/iam/users`.
@@ -59,6 +60,70 @@ export class UserListItemDto {
    */
   @ApiProperty()
   createdAt!: Date;
+}
+
+/** Tope de filas que acepta el listado de usuarios: el de `ParseOptionalLimitPipe`. */
+export const SEARCH_USERS_MAX_LIMIT = 500;
+
+/** Mensaje del `limit` fuera de rango, el mismo que da el `GET` con `?limit=`. */
+const SEARCH_USERS_LIMIT_MESSAGE = `limit debe ser un entero entre 1 y ${SEARCH_USERS_MAX_LIMIT}`;
+
+/**
+ * Filtros de `POST /iam/users/search`, en el cuerpo.
+ *
+ * Son exactamente los del `GET /iam/users` (`q`, `status`, `cursor`, `limit`),
+ * con los mismos límites: `status` es un uuid y `limit` un entero entre 1 y
+ * 500. Todos opcionales; una clave que no está acá responde `400` por
+ * `forbidNonWhitelisted`, porque ignorar en silencio un filtro devolvería
+ * filas que el llamador cree haber descartado.
+ */
+export class SearchUsersBodyDto {
+  /**
+   * Texto a buscar en el nombre visible o en el correo de acceso.
+   */
+  @ApiPropertyOptional({
+    description: 'Texto a buscar en el nombre visible o en el correo de acceso',
+  })
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  /**
+   * Concepto de estado al que acotar.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concepto de estado al que acotar',
+  })
+  @IsOptional()
+  @IsUUID()
+  status?: string;
+
+  /**
+   * Cursor opaco devuelto por la página anterior.
+   */
+  @ApiPropertyOptional({
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
+  /**
+   * Tope de resultados de la página (por defecto 50).
+   */
+  @ApiPropertyOptional({
+    description: 'Tope de resultados (por defecto 50)',
+    type: 'integer',
+    default: 50,
+    minimum: 1,
+    maximum: SEARCH_USERS_MAX_LIMIT,
+  })
+  @IsOptional()
+  @IsInt({ message: SEARCH_USERS_LIMIT_MESSAGE })
+  @Min(1, { message: SEARCH_USERS_LIMIT_MESSAGE })
+  @Max(SEARCH_USERS_MAX_LIMIT, { message: SEARCH_USERS_LIMIT_MESSAGE })
+  limit?: number;
 }
 
 /** Página del listado de usuarios. */

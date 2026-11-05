@@ -68,6 +68,8 @@ import {
   // tiene que poder comprobar dentro de su propia transacción que ese archivo
   // existe y es de quien lo adjunta.
   exports: [
+    // Los seeds de organizaciones escriben la dirección por el mismo servicio que la API.
+    AddressesService,
     IdentifiersRepository,
     ContactPointsRepository,
     // El alta pública escribe el domicilio del municipio elegido, y vive en

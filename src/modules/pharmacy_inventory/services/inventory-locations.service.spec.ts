@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CreateInventoryLocationUseCase } from '../application/inventory-locations/create-inventory-location.use-case';
 import { InventoryLocationsService } from '../application/inventory-locations/inventory-locations.service';
+import { allowAllScope } from '../application/scope/pharmacy-inventory-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -24,6 +25,7 @@ function build() {
   const createLocation = new CreateInventoryLocationUseCase(
     em as any,
     locationsRepo as any,
+    allowAllScope(),
     logger as any,
   );
   const service = new InventoryLocationsService(createLocation, logger as any);

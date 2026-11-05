@@ -19,6 +19,7 @@ import {
   FacilityLicensesRepository,
   OrganizationAffiliationsRepository,
   OrganizationDataBoundariesRepository,
+  OrgextReferencesRepository,
 } from './repositories';
 
 /**
@@ -42,6 +43,7 @@ import {
     FacilityLicensesRepository,
     OrganizationAffiliationsRepository,
     OrganizationDataBoundariesRepository,
+    OrgextReferencesRepository,
     // Servicios
     OrgextHospitalsService,
     OrgextFacilityLicensesService,

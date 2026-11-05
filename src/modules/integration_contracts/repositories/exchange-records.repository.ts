@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { IntegrationExchangeRecords } from '../entities';
 
@@ -63,6 +64,22 @@ export class ExchangeRecordsRepository {
     id: string,
   ): Promise<IntegrationExchangeRecords | null> {
     return em.findOne(IntegrationExchangeRecords, { id });
+  }
+
+  /**
+   * Busca un registro de intercambio bloqueándolo: dos reintentos concurrentes
+   * del mismo intercambio se serializan y sólo el primero ve el último intento
+   * FAILED.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationExchangeRecords | null> {
+    return em.findOne(
+      IntegrationExchangeRecords,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /** Crea la entidad de registro en la unidad de trabajo (sin flush). */

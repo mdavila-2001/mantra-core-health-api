@@ -50,6 +50,28 @@ export interface RecordEvidenceData {
 @Injectable()
 export class ConsentEvidenceRepository {
   /**
+   * La evidencia de varios sujetos del mismo tipo, de la más antigua a la más
+   * reciente (lectura para el consentimiento de tratamiento, enmienda 1).
+   *
+   * @param em - Contexto de persistencia.
+   * @param subjectTypeConceptId - Tipo de sujeto (concept id).
+   * @param subjectIds - Sujetos.
+   * @returns Las filas de evidencia.
+   */
+  findBySubjects(
+    em: EntityManager,
+    subjectTypeConceptId: string,
+    subjectIds: string[],
+  ): Promise<ConsentEvidence[]> {
+    if (subjectIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      ConsentEvidence,
+      { subjectTypeConceptId, subjectId: { $in: subjectIds } },
+      { orderBy: { recordedAt: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

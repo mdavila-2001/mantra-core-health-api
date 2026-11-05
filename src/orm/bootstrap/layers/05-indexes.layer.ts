@@ -55,7 +55,12 @@ export const indexesLayer: DdlLayer = {
       ).map((row) => `${row.schemaname}.${row.indexname}`),
     );
 
-    const pending: string[] = [];
+    // Los índices únicos (y los parciales únicos) materializan reglas de negocio:
+    // si no se crean, la base deja de impedir duplicados. Se separan de los de
+    // rendimiento para que un fallo de estos últimos no se confunda con uno de
+    // integridad y para que un lote de únicos nunca arrastre a uno de afinado.
+    const pendingUnique: string[] = [];
+    const pendingPerformance: string[] = [];
     let skipped = 0;
 
     for (const [schema, batches] of Object.entries(indexCatalog)) {
@@ -65,45 +70,58 @@ export const indexesLayer: DdlLayer = {
             skipped += 1;
             continue;
           }
-          pending.push(buildCreateIndex(schema, index));
+          (index[3] ? pendingUnique : pendingPerformance).push(
+            buildCreateIndex(schema, index),
+          );
         }
       }
     }
 
-    if (pending.length === 0) {
+    const pendingCount = pendingUnique.length + pendingPerformance.length;
+    if (pendingCount === 0) {
       context.logger.log('Índices al día: los ~7000 del modelo ya existen');
       return { applied: 0, skipped, failures: [] };
     }
 
-    context.logger.log(`Índices a crear: ${pending.length}`);
+    context.logger.log(`Índices a crear: ${pendingCount}`);
 
     // Se agrupan en lotes en vez de una sola sentencia gigante: un lote acotado
     // mantiene los mensajes de error legibles (se sabe en qué grupo falló) y
     // evita construir en memoria una cadena de varios megabytes.
     const failures: string[] = [];
+    const blocking: string[] = [];
     let applied = 0;
 
-    for (let i = 0; i < pending.length; i += INDEX_BATCH_SIZE) {
-      const batch = pending.slice(i, i + INDEX_BATCH_SIZE);
-      try {
-        await context.execute(
-          batch.join(';\n'),
-          `índices ${i + 1}-${i + batch.length}`,
-        );
-        applied += batch.length;
-      } catch (error) {
-        // Un índice que no se puede crear (por ejemplo, un UNIQUE sobre datos
-        // que ya violan la restricción) no debe impedir arrancar: se reporta y
-        // se continúa con el resto.
-        const reason = error instanceof Error ? error.message : String(error);
-        failures.push(
-          `lote de índices ${i + 1}-${i + batch.length}: ${reason}`,
-        );
-        context.logger.warn(`Índices no aplicados en un lote: ${reason}`);
+    const createBatches = async (
+      pending: readonly string[],
+      critical: boolean,
+    ): Promise<void> => {
+      for (let i = 0; i < pending.length; i += INDEX_BATCH_SIZE) {
+        const batch = pending.slice(i, i + INDEX_BATCH_SIZE);
+        const kind = critical ? 'únicos' : 'de rendimiento';
+        try {
+          await context.execute(
+            batch.join(';\n'),
+            `índices ${kind} ${i + 1}-${i + batch.length}`,
+          );
+          applied += batch.length;
+        } catch (error) {
+          // Un índice que no se puede crear (por ejemplo, un UNIQUE sobre datos
+          // que ya violan la restricción) no impide arrancar: se reporta y se
+          // continúa. Si es único, además bloquea la readiness (ORMN-01).
+          const reason = error instanceof Error ? error.message : String(error);
+          const failure = `lote de índices ${kind} ${i + 1}-${i + batch.length}: ${reason}`;
+          failures.push(failure);
+          if (critical) blocking.push(failure);
+          context.logger.warn(`Índices no aplicados en un lote: ${reason}`);
+        }
       }
-    }
+    };
 
-    return { applied, skipped, failures };
+    await createBatches(pendingUnique, true);
+    await createBatches(pendingPerformance, false);
+
+    return { applied, skipped, failures, blocking };
   },
 };
 

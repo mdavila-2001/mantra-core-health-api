@@ -1,16 +1,19 @@
 import { createHash } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  DomainException,
+  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { SystemContextRepository } from '../repositories';
+import { SystemContextErrorReason } from '../system_context.error-reasons';
 import {
   CreateSystemContextDto,
   SystemContextResponseDto,
@@ -32,6 +35,9 @@ const REFRESH_TRIGGER_CONCEPT: Readonly<Record<RefreshTrigger, string>> = {
 };
 
 const DEFAULT_SCHEMA_VERSION = '1';
+
+/** Tamaño máximo (bytes UTF-8) del JSON de un contexto. */
+const MAX_CONTEXT_JSON_BYTES = 1_048_576;
 
 /**
  * Contextos de sistema: alta con versión inicial, refresco idempotente con
@@ -67,6 +73,7 @@ export class SystemContextsService {
       { operation: 'system-context.context.create', code: dto.code },
       'Creating system context',
     );
+    this.assertContextJsonSize(dto.contextJson);
 
     return this.em.transactional(async (tx) => {
       const duplicate = await this.contextRepo.findContextByCode(tx, dto.code);
@@ -136,9 +143,29 @@ export class SystemContextsService {
       'Refreshing system context',
     );
 
+    // La forma se valida antes de abrir la corrida: una entrada no ausente sin
+    // procedencia completa acabaría en un NOT NULL de la base.
+    this.assertContextJsonSize(dto.contextJson);
+    this.assertInputProvenance(dto.inputs ?? []);
+
     return this.em.transactional(async (tx) => {
+      // El contexto se carga y bloquea primero: un contexto inexistente es 404
+      // sin importar si la clave ya se usó en otro, y dos refrescos paralelos
+      // del mismo contexto se serializan, de modo que el segundo ve la corrida
+      // del primero.
+      const context = await this.contextRepo.findContextForUpdate(
+        tx,
+        contextId,
+      );
+      if (!context) {
+        throw new ResourceNotFoundException('Contexto no encontrado', {
+          contextId,
+        });
+      }
+
       const existingRun = await this.contextRepo.findRefreshRunByKey(
         tx,
+        contextId,
         dto.idempotencyKey,
       );
       if (existingRun) {
@@ -153,15 +180,6 @@ export class SystemContextsService {
         };
       }
 
-      const context = await this.contextRepo.findContextForUpdate(
-        tx,
-        contextId,
-      );
-      if (!context) {
-        throw new ResourceNotFoundException('Contexto no encontrado', {
-          contextId,
-        });
-      }
       if (context.statusConceptId !== CONCEPTS.SYSCTX_ACTIVE) {
         throw new PreconditionFailedException('El contexto no está activo', {
           contextId,
@@ -250,6 +268,9 @@ export class SystemContextsService {
       // UC-45-08: la procedencia se snapshotea en la misma transacción, ordenada
       // por precedencia, y es inmutable.
       inputs.forEach((input, index) => {
+        // Una entrada ausente (no requerida) no tiene procedencia que
+        // snapshotear: no se crea una fila incompleta ni se inventan datos.
+        if (input.missing) return;
         this.contextRepo.createContextInput(tx, {
           systemContextVersionId: version.id,
           sourceTypeConceptId: input.sourceTypeConceptId,
@@ -421,7 +442,13 @@ export class SystemContextsService {
     }
 
     return this.em.transactional(async (tx) => {
-      const context = await this.contextRepo.findContextById(tx, contextId);
+      // Se bloquea la fila del contexto: sin el lock, dos bindings paralelos
+      // del mismo consumidor ven ambos "sin solape" y quedan solapados (el DDL
+      // no tiene exclusion constraint de rango). El segundo espera y ve al primero.
+      const context = await this.contextRepo.findContextForUpdate(
+        tx,
+        contextId,
+      );
       if (!context) {
         throw new ResourceNotFoundException('Contexto no encontrado', {
           contextId,
@@ -452,6 +479,7 @@ export class SystemContextsService {
             contextId,
             bindingId: overlapping.id,
           },
+          SystemContextErrorReason.SYSTEM_CONTEXT_BINDING_CONFLICT,
         );
       }
 
@@ -596,6 +624,55 @@ export class SystemContextsService {
     return createHash('sha256')
       .update(this.canonicalise(contextJson))
       .digest('hex');
+  }
+
+  /** El JSON de un contexto no puede crecer sin tope: se rechaza antes de abrir la transacción. */
+  private assertContextJsonSize(contextJson: unknown): void {
+    const bytes = Buffer.byteLength(JSON.stringify(contextJson) ?? '', 'utf8');
+    if (bytes > MAX_CONTEXT_JSON_BYTES) {
+      throw new DomainException(
+        HttpStatus.PAYLOAD_TOO_LARGE,
+        ErrorCode.PAYLOAD_TOO_LARGE,
+        'El contenido del contexto supera el tamaño admitido',
+        { maxBytes: MAX_CONTEXT_JSON_BYTES },
+        SystemContextErrorReason.SYSTEM_CONTEXT_PAYLOAD_TOO_LARGE,
+      );
+    }
+  }
+
+  /**
+   * Toda entrada que no esté marcada como ausente debe traer la procedencia
+   * completa que la tabla exige (`NOT NULL`): esquema, entidad, registro y hash
+   * del contenido de la fuente.
+   */
+  private assertInputProvenance(
+    inputs: readonly {
+      missing?: boolean;
+      sourceSchemaName?: string;
+      sourceEntityName?: string;
+      sourceRecordId?: string;
+      sourceContentHash?: string;
+    }[],
+  ): void {
+    const incomplete = inputs.findIndex(
+      (input) =>
+        !input.missing &&
+        !(
+          input.sourceSchemaName &&
+          input.sourceEntityName &&
+          input.sourceRecordId &&
+          input.sourceContentHash
+        ),
+    );
+    if (incomplete >= 0) {
+      throw new DomainException(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_FAILED,
+        'Una entrada no ausente debe declarar su procedencia completa',
+        { inputIndex: incomplete },
+        SystemContextErrorReason.SYSTEM_CONTEXT_INPUT_PROVENANCE_REQUIRED,
+      );
+    }
   }
 
   /**

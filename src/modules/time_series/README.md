@@ -105,7 +105,7 @@ CONSULTA
                        bucket múltiplo de 1 h / 1 día  ──> continuous_sli_hourly / _daily
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nada se actualiza en su sitio.** Una corrección es un evento nuevo con `source_version` mayor y
   `quality_state = backfill`. Un histórico reescribible deja de servir para responder "qué se sabía
@@ -124,9 +124,14 @@ CONSULTA
   historial del paciente mostraría dos tomas donde hubo una.
 - **La vital y su observación clínica se confirman juntas.** Si no, quedaría una vital marcada como
   promovida apuntando a una observación que no existe.
-- **La ubicación exige consentimiento** como campo obligatorio de la petición, no como comprobación
-  aparte. Es el dato más fácil de recoger sin darse cuenta de que hace falta permiso, y el permiso
-  viaja en el evento para que quien proyecte pueda comprobarlo.
+- **La ubicación exige un consentimiento verificado.** `consentId` es obligatorio y además se
+  contrasta con `consent.consents` antes de insertar (`LocationConsentPolicy`): del tenant del
+  contexto, `ACTIVE` y no retirado, con vigencia `[valid_from, valid_to)` que cubre el instante de
+  ingesta y cada ping (`valid_to` es exclusivo), de un propósito con `code` `LOCATION_TRACKING`
+  activo, y con todos los sujetos del lote siendo el titular (su perfil de paciente) o un
+  dispositivo de una cuenta con vínculo vigente a él. Cualquier fallo es `403 FORBIDDEN /
+  TIME_SERIES_LOCATION_CONSENT_INVALID`, idéntico para todas las causas y sin persistir nada. El
+  tenant sale del contexto autenticado, no del cuerpo. El permiso además viaja en el evento.
 - **El backfill exige justificación y ventana.** Una corrección sin motivo declarado es
   indistinguible de una manipulación, y una corrección fuera de la ventana aprobada no es la
   corrección que se aprobó.
@@ -173,7 +178,7 @@ listas cerradas del módulo (`TIMESERIES_TABLES`, `ROLLUPS`, `VALUE_COLUMN`, `AG
 `COMPRESSION_SEGMENTS`) antes de entrar en la sentencia. Los valores —intervalos, rangos, tenant,
 serie, límites— sí van parametrizados.
 
-## Permisos
+## Permissions
 
 `INGEST_GATEWAY`, `DEVICE` y `SYSTEM` ingieren. `SYSTEM` normaliza. `DATA_PLATFORM_ADMIN` administra
 particiones, compresión, retención y rollups, y es el único que puede hacer backfill.
@@ -181,7 +186,7 @@ particiones, compresión, retención y rollups, y es el único que puede hacer b
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sólo en un sitio: la lectura cruda que se va a normalizar, para no promoverla dos veces.
 El resto de la ingesta es `INSERT` puro sobre el chunk activo, sin bloqueos: es lo que permite que
@@ -193,7 +198,7 @@ varios colectores escriban a la vez.
 momentos en que se altera o se pierde histórico—. No se loguean valores de medición, ni coordenadas,
 ni `raw_value`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/time_series --runInBand --silent` — 6 suites y 89 pruebas
 aprobadas durante la revisión.
@@ -222,8 +227,9 @@ aprobadas durante la revisión.
   aquí viven en `ROLLUPS`, dentro del módulo.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-58-01, 05, 12): aquí lo
   cubren las claves naturales y la clave de idempotencia del outbox.
-- **Comprobación de consentimiento contra `consent.consents`** (UC-58-09, 13): el consentimiento se
-  exige y se propaga, pero no se contrasta contra el módulo 07.
+- **Consentimiento en la lectura** (UC-58-09): la consulta de rango no contrasta consentimiento; sólo
+  la ingesta de ubicación (UC-58-13) lo hace. El propósito `LOCATION_TRACKING` debe existir en
+  `consent.processing_purposes` (no hay semilla): sin él, la ingesta de ubicación se rechaza.
 - **`audit.audit_events` en la lectura de datos sensibles** (UC-58-09): el caso de uso pide registrar
   la consulta. El registro de auditoría es del módulo 06.
 - **Re-materialización automática de los rollups afectados por un backfill** (UC-58-12): el evento
@@ -233,5 +239,5 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-La referencia de consentimiento de ubicación se exige pero no se verifica contra la política
-canónica.
+La referencia de consentimiento de ubicación se verifica contra `consent.consents` (TS-01); ver
+«Reglas de negocio».

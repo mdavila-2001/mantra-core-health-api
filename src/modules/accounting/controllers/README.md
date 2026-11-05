@@ -13,6 +13,7 @@ Capa fina bajo `@Controller('accounting')`: `@ApiTags` + `@ApiBearerAuth`,
 | `AccountingAssetController` | `assets/capitalize`, `depreciation/run` |
 | `AccountingLiabilityController` | `liabilities/:id/payments` |
 | `AccountingExchangeRateController` | `exchange-rates` |
+| `AccountingPractitionerSimpleController` | `practitioner/simple/{summary,accounts,records,transactions}` (P49, rol `PRACTITIONER`) |
 
 Specs (`*.spec.ts`) verifican la delegación al servicio con los argumentos
 correctos, mockeando el servicio por completo.

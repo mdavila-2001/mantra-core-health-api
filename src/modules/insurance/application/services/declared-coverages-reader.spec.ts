@@ -25,7 +25,7 @@ import { CONCEPTS } from '../../../../common';
 describe('DeclaredCoveragesReader', () => {
   function build() {
     const execute = mockFn().mockResolvedValue([]);
-    const em = { getConnection: mockFn().mockReturnValue({ execute }) };
+    const em = { execute };
     const reader = new DeclaredCoveragesReader();
     return { reader, em, execute };
   }
@@ -88,7 +88,7 @@ describe('DeclaredCoveragesReader', () => {
           ];
         return [];
       });
-      em.getConnection.mockReturnValue({ execute });
+      em.execute = execute;
 
       const coverages = await reader.read(em as any, 'pat-1');
 
@@ -155,7 +155,7 @@ describe('DeclaredCoveragesReader', () => {
       if (sql.includes('from insurance.insurance_plan_benefits')) return [];
       return [];
     });
-    em.getConnection.mockReturnValue({ execute });
+    em.execute = execute;
 
     const coverages = await reader.read(em as any, 'pat-1');
 
@@ -206,7 +206,7 @@ describe('DeclaredCoveragesReader', () => {
         }
         return [];
       });
-      em.getConnection.mockReturnValue({ execute });
+      em.execute = execute;
 
       const coverages = await reader.read(em as any, 'pat-1');
 

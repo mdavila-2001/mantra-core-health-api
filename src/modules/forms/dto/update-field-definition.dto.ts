@@ -4,10 +4,13 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsInt,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import {
   TECHNICAL_DATA_TYPES,
@@ -21,6 +24,8 @@ import {
  * parche por posición se rompe en cuanto alguien inserta una opción en el
  * medio. `description: null` la **quita**; ausente significa «no cambió».
  * Las cuadrículas (`rows`) están fuera del modelo (decisión D-D) y dan 400.
+ * `cardinalityMin` / `cardinalityMax` siguen la misma regla que `description`:
+ * `null` quita el tope y ausente no lo toca.
  *
  * Cambiar `dataType` con valores ya capturados reescribiría la historia
  * clínica: responde 409.
@@ -91,4 +96,35 @@ export class UpdateFieldDefinitionDto {
   @IsString()
   @MaxLength(1000)
   description?: string | null;
+
+  /**
+   * Cuántas respuestas hay que marcar como mínimo, en un campo de varias.
+   * `null` quita el tope; ausente, no lo toca. Es la columna
+   * `cardinality_min` que el alta ya escribía (carril 27, REQ-27-007).
+   */
+  @ApiPropertyOptional({
+    description: 'Mínimo de respuestas; null quita el tope',
+    minimum: 0,
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsInt()
+  @Min(0)
+  cardinalityMin?: number | null;
+
+  /**
+   * Cuántas respuestas se pueden marcar como máximo. `null` quita el tope;
+   * ausente, no lo toca. «Exactamente n» es mínimo y máximo iguales.
+   */
+  @ApiPropertyOptional({
+    description: 'Máximo de respuestas; null quita el tope',
+    minimum: 1,
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsInt()
+  @Min(1)
+  cardinalityMax?: number | null;
 }

@@ -3,13 +3,13 @@
 # Flujos del módulo `data_catalog`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 31 (28 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 50 (43 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [data_catalog](../endpoints/data_catalog.md)
 
 ## Proceso: Módulo 67 — Catálogo de datos y portal administrativo
 
-- **Código:** `data_catalog` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 31
-- **Actores:** DATA_PLATFORM_ADMIN · DPO · GOVERNANCE_ADMIN · PLATFORM_ADMIN · SECURITY_ADMIN
+- **Código:** `data_catalog` · **Agrupación:** MIXTO · **Operaciones:** 50
+- **Actores:** ...PORTAL_VIEW_ROLES · AUDITOR · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD · DPO · GOVERNANCE_ADMIN · PLATFORM_ADMIN · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/data_catalog/README.md`
 
@@ -32,51 +32,86 @@ ficha de un objeto:   PUT annotation (expectedVersion) ──> revisión N inmut
   └─ submit=true: exige propósito, razón de existir y grano de fila (o una pregunta abierta por campo)
        └─ NEEDS_REVIEW ──> POST review (otro usuario, con evidencia) ──> APPROVED | REJECTED
             └─ editar una ficha aprobada la devuelve a DRAFT: la aprobación deja de ser vigente
+
+sonda (worker scan-tick, cada pocos segundos): POST /internal/catalog/scans/run-next
+  ├─ cierra los escaneos abandonados (lease vencido) ── failAbandoned
+  ├─ retoma el escaneo en cola, si lo hay
+  └─ si no hay ninguno y pasaron PROBE_INTERVAL_MS desde que terminó el último → pide uno y lo ejecuta
+       └─ al terminar bien: clasificación automática de las columnas nuevas o cambiadas
+
+importación del inventario (worker scan-tick, tras un escaneo SUCCEEDED): POST /internal/catalog/inventory/import
+  └─ pg_advisory_xact_lock: una importación a la vez
+       └─ planImport: compara inventario/ con las cinco tablas -> altas / cambios / sin cambios / NOT_OBSERVED / reaparecidas
+            └─ catalog_operations + catalog_operation_impacts + catalog_processes + catalog_process_steps + catalog_process_step_operations
+               (todo en una transacción; lo que no cambió no se toca ni sube row_version)
+
+columna: PUT columns/:id/annotation  /  POST columns/:id/evidence   (mismas reglas que la tabla)
+clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda)
+  └─ una persona que guarda la ficha la saca de AUTO_DETECTED (queda DRAFT o NEEDS_REVIEW, origin MANUAL)
 ```
 
-_Fuente: `src/modules/data_catalog/README.md:56`_
+_Fuente: `src/modules/data_catalog/README.md:99`_
 
 ### Etapas y operaciones
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-67-01` | Versión y huella del inventario servido | GET /admin/portal/version | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-02` | Listar operaciones del sistema, con filtros | GET /admin/portal/operaciones | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-03` | Ficha de una operación: tablas, DTO, requisitos, flujo | GET /admin/portal/operaciones/{id} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-04` | Árbol de decisión de una operación | GET /admin/portal/operaciones/{id}/arbol | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-05` | Listar procesos | GET /admin/portal/flujos | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-06` | Mapa de procesos y hallazgos del recorrido | GET /admin/portal/flujos/mapa | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-07` | Listar hallazgos del inventario de flujos | GET /admin/portal/flujos/hallazgos | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-08` | Un hallazgo | GET /admin/portal/flujos/hallazgos/{id} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-09` | Detalle de un proceso | GET /admin/portal/flujos/{codigo} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-10` | Grafo de un proceso | GET /admin/portal/flujos/{codigo}/grafo | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-11` | Tablas del catálogo estático (modelo), paginadas | GET /admin/portal/catalogo/tablas | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-12` | Ficha de una tabla: columnas, relaciones, índices | GET /admin/portal/catalogo/tablas/{schema}/{tabla} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-13` | Deriva entre modelo, ORM y base desplegada | GET /admin/portal/catalogo/deriva | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-14` | Grafo de linaje endpoint → tabla | GET /admin/portal/linaje | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-15` | Linaje de una tabla | GET /admin/portal/linaje/tablas/{schema}/{tabla} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-16` | Glosario de dominio | GET /admin/portal/glosario | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 0 |
-| `UC-67-17` | Schemas observados, con fichas y aprobaciones | GET /admin/catalog/schemas | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 2 |
-| `UC-67-18` | Objetos observados, con filtros y cursor | GET /admin/catalog/objects | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 3 |
-| `UC-67-19` | Ficha técnica, observación, ficha curada, cobertura | GET /admin/catalog/objects/{id} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 5 |
-| `UC-67-20` | Columnas observadas con su ficha | GET /admin/catalog/objects/{id}/columns | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 4 |
-| `UC-67-21` | Evidencia enlazada | GET /admin/catalog/objects/{id}/evidence | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 3 |
-| `UC-67-22` | Enlazar evidencia | POST /admin/catalog/objects/{id}/evidence | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN | MEDIO | 3 |
-| `UC-67-23` | Revisiones y decisiones de la ficha | GET /admin/catalog/objects/{id}/history | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 5 |
-| `UC-67-24` | Cambios que los escaneos detectaron | GET /admin/catalog/objects/{id}/changes | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 4 |
-| `UC-67-25` | Análisis de impacto por claves foráneas observadas | GET /admin/catalog/objects/{id}/impact | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 4 |
-| `UC-67-26` | Crear o editar la ficha (con versión esperada) | PUT /admin/catalog/objects/{id}/annotation | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN | MEDIO | 6 |
-| `UC-67-27` | Aprobar o rechazar la revisión vigente | POST /admin/catalog/annotations/{id}/review | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN | MEDIO | 5 |
-| `UC-67-28` | Cobertura del catálogo por dimensión | GET /admin/catalog/coverage | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 3 |
-| `UC-67-29` | Listar escaneos | GET /admin/catalog/scans | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 1 |
-| `UC-67-30` | Un escaneo | GET /admin/catalog/scans/{id} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO | BAJO | 1 |
-| `UC-67-31` | Pedir un escaneo de la base primaria (202, idempotente) | POST /admin/catalog/scans | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN | MEDIO | 10 |
+| `UC-67-01` | Versión y huella del inventario servido | GET /admin/portal/version | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-02` | Listar operaciones del sistema, con filtros | GET /admin/portal/operaciones | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-03` | Ficha de una operación: tablas, DTO, requisitos, flujo | GET /admin/portal/operaciones/{id} | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-04` | Árbol de decisión de una operación | GET /admin/portal/operaciones/{id}/arbol | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-05` | Listar procesos | GET /admin/portal/flujos | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-06` | Mapa de procesos y hallazgos del recorrido | GET /admin/portal/flujos/mapa | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-07` | Listar hallazgos del inventario de flujos | GET /admin/portal/flujos/hallazgos | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-08` | Un hallazgo | GET /admin/portal/flujos/hallazgos/{id} | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-09` | Detalle de un proceso | GET /admin/portal/flujos/{codigo} | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-10` | Grafo de un proceso | GET /admin/portal/flujos/{codigo}/grafo | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-11` | Tablas del catálogo estático (modelo), paginadas | GET /admin/portal/catalogo/tablas | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-12` | Ficha de una tabla: columnas, relaciones, índices | GET /admin/portal/catalogo/tablas/{schema}/{tabla} | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-13` | Deriva entre modelo, ORM y base desplegada | GET /admin/portal/catalogo/deriva | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-14` | Grafo de linaje endpoint → tabla | GET /admin/portal/linaje | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-15` | Linaje de una tabla | GET /admin/portal/linaje/tablas/{schema}/{tabla} | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-16` | Glosario de dominio | GET /admin/portal/glosario | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `UC-67-17` | Schemas observados, con fichas y aprobaciones | GET /admin/catalog/schemas | ...PORTAL_VIEW_ROLES | BAJO | 2 |
+| `UC-67-18` | Objetos observados, con filtros y cursor | GET /admin/catalog/objects | ...PORTAL_VIEW_ROLES | BAJO | 3 |
+| `UC-67-19` | Ficha técnica, observación, ficha curada, cobertura | GET /admin/catalog/objects/{id} | ...PORTAL_VIEW_ROLES | BAJO | 5 |
+| `UC-67-20` | Columnas observadas con su ficha | GET /admin/catalog/objects/{id}/columns | ...PORTAL_VIEW_ROLES | BAJO | 4 |
+| `UC-67-21` | Evidencia enlazada | GET /admin/catalog/objects/{id}/evidence | ...PORTAL_VIEW_ROLES | BAJO | 3 |
+| `UC-67-22` | Enlazar evidencia | POST /admin/catalog/objects/{id}/evidence | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 3 |
+| `UC-67-23` | Revisiones y decisiones de la ficha | GET /admin/catalog/objects/{id}/history | ...PORTAL_VIEW_ROLES | BAJO | 5 |
+| `UC-67-24` | Cambios que los escaneos detectaron | GET /admin/catalog/objects/{id}/changes | ...PORTAL_VIEW_ROLES | BAJO | 4 |
+| `UC-67-25` | Análisis de impacto por claves foráneas observadas | GET /admin/catalog/objects/{id}/impact | ...PORTAL_VIEW_ROLES | BAJO | 4 |
+| `UC-67-26` | Crear o editar la ficha (con versión esperada) | PUT /admin/catalog/objects/{id}/annotation | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 6 |
+| `UC-67-27` | Aprobar o rechazar la revisión vigente | POST /admin/catalog/annotations/{id}/review | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 5 |
+| `UC-67-28` | Cobertura del catálogo por dimensión | GET /admin/catalog/coverage | ...PORTAL_VIEW_ROLES | BAJO | 3 |
+| `UC-67-29` | Listar escaneos | GET /admin/catalog/scans | ...PORTAL_VIEW_ROLES | BAJO | 1 |
+| `UC-67-30` | Un escaneo | GET /admin/catalog/scans/{id} | ...PORTAL_VIEW_ROLES | BAJO | 1 |
+| `UC-67-31` | Pedir un escaneo de la base primaria (202, idempotente) | POST /admin/catalog/scans | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 15 |
+| `ctrl:AdminCatalogController` | Operaciones de AdminCatalogController que el README no asigna a un caso de uso | POST /admin/catalog/classification/run | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 7 |
+|  |  | PUT /admin/catalog/columns/{id}/annotation | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 5 |
+|  |  | GET /admin/catalog/columns/{id}/evidence | ...PORTAL_VIEW_ROLES | BAJO | 2 |
+|  |  | POST /admin/catalog/columns/{id}/evidence | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | MEDIO | 2 |
+|  |  | GET /admin/catalog/permission-drift | ...PORTAL_VIEW_ROLES | BAJO | 1 |
+|  |  | GET /admin/catalog/pii/columns | ...PORTAL_VIEW_ROLES | BAJO | 5 |
+|  |  | GET /admin/catalog/pii/reconciliation | ...PORTAL_VIEW_ROLES | BAJO | 5 |
+|  |  | GET /admin/catalog/pii/summary | ...PORTAL_VIEW_ROLES | BAJO | 5 |
+|  |  | GET /admin/catalog/quality/issues | ...PORTAL_VIEW_ROLES | BAJO | 3 |
+|  |  | GET /admin/catalog/quality/rules | ...PORTAL_VIEW_ROLES | BAJO | 3 |
+| `ctrl:AdminCatalogFitController` | Operaciones de AdminCatalogFitController que el README no asigna a un caso de uso | GET /admin/catalog/fit | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 1 |
+|  |  | POST /admin/catalog/fit/run | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | ALTO | 7 |
+| `ctrl:AdminPortalController` | Operaciones de AdminPortalController que el README no asigna a un caso de uso | GET /admin/portal/linaje/aristas | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+|  |  | GET /admin/portal/linaje/nodos | ...PORTAL_VIEW_ROLES | BAJO | 0 |
+| `ctrl:GovernanceQueueController` | Operaciones de GovernanceQueueController que el README no asigna a un caso de uso | GET /admin/governance/jobs | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
+|  |  | GET /admin/governance/review-queue | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
+| `ctrl:InternalCatalogFitController` | Operaciones de InternalCatalogFitController que el README no asigna a un caso de uso | POST /internal/catalog/fit/run | SYSTEM | ALTO | 7 |
+| `ctrl:InternalCatalogInventoryController` | Operaciones de InternalCatalogInventoryController que el README no asigna a un caso de uso | POST /internal/catalog/inventory/import | SYSTEM | ALTO | 15 |
+| `ctrl:InternalCatalogScansController` | Operaciones de InternalCatalogScansController que el README no asigna a un caso de uso | POST /internal/catalog/scans/run-next | SYSTEM | MEDIO | 12 |
 
-### Diagrama 1 de 2 — etapas `UC-67-01`, `UC-67-02`, `UC-67-03`…
+### Diagrama 1 de 3 — etapas `UC-67-01`, `UC-67-02`, `UC-67-03`…
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_P…"]):::actor
+  a2(["...PORTAL_VIEW_ROLES"]):::actor
   t19[("data_catalog.catalog_annotations")]:::tabla
   t20[("data_catalog.catalog_objects")]:::tabla
   t22[("data_catalog.catalog_scan_runs")]:::tabla
@@ -163,12 +198,12 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `UC-67-19`, `UC-67-20`, `UC-67-21`…
+### Diagrama 2 de 3 — etapas `UC-67-19`, `UC-67-20`, `UC-67-21`…
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_P…"]):::actor
-  a12(["GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN"]):::actor
+  a2(["...PORTAL_VIEW_ROLES"]):::actor
+  a12(["GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD"]):::actor
   t3[("data_catalog.catalog_annotations")]:::tabla
   t4[("data_catalog.catalog_evidence_items")]:::tabla
   t5[("data_catalog.catalog_objects")]:::tabla
@@ -214,7 +249,7 @@ flowchart LR
   subgraph s11["UC-67-30 · Un escaneo"]
     o23["GET /admin/catalog/scans/{id}"]:::op
   end
-  t25[("+4 tablas más")]
+  t25[("+9 tablas más")]
   subgraph s12["UC-67-31 · Pedir un escaneo de la base primaria (202, idempotente)"]
     o24["POST /admin/catalog/scans"]:::op
   end
@@ -275,13 +310,176 @@ flowchart LR
   a2 --> o23
   o23 -->|"LEE"| t6
   a12 --> o24
+  o24 -->|"CREA"| t14
+  o24 -->|"CREA"| t3
+  o24 -->|"ACTUALIZA"| t3
+  o24 -->|"LEE"| t3
   o24 -->|"CREA"| t17
-  o24 -->|"CREA"| t9
-  o24 -->|"ACTUALIZA"| t9
-  o24 -->|"LEE"| t9
-  o24 -->|"CREA"| t5
-  o24 -->|"ACTUALIZA"| t5
+  o24 -->|"LEE"| t17
   o24 -.-> t25
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 3 de 3 — etapas `ctrl:AdminCatalogController`, `ctrl:AdminCatalogFitController`, `ctrl:AdminPortalController`…
+
+```mermaid
+flowchart LR
+  a2(["GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD"]):::actor
+  a10(["...PORTAL_VIEW_ROLES"]):::actor
+  a24(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_P…"]):::actor
+  a32(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_G…"]):::actor
+  a39(["SYSTEM"]):::actor
+  t3[("data_catalog.catalog_annotation_revisions")]:::tabla
+  t4[("data_catalog.catalog_annotations")]:::tabla
+  t5[("data_catalog.catalog_change_events")]:::tabla
+  t6[("data_catalog.catalog_columns")]:::tabla
+  t11[("data_catalog.catalog_evidence_items")]:::tabla
+  t14[("authz.roles")]:::tabla
+  t16[("data_catalog.catalog_objects")]:::tabla
+  t17[("system_ops.entity_registry")]:::tabla
+  t18[("system_ops.field_registry")]:::tabla
+  t25[("data_catalog.catalog_fit_runs")]:::tabla
+  t27[("data_catalog.catalog_operations")]:::tabla
+  t33[("audit.audit_log")]:::tabla
+  t34[("data_catalog.catalog_scan_runs")]:::tabla
+  t35[("system_ops.retention_executions")]:::tabla
+  t36[("terminology.catalog_concepts")]:::tabla
+  t42[("data_catalog.catalog_operation_impacts")]:::tabla
+  t7[("+1 tablas más")]
+  subgraph s0["ctrl:AdminCatalogController · Operaciones de AdminCatalogController que el READ…"]
+    o1["POST /admin/catalog/classification/run"]:::op
+    o8["PUT /admin/catalog/columns/{id}/annotation"]:::op
+    o9["GET /admin/catalog/columns/{id}/evidence"]:::op
+    o12["POST /admin/catalog/columns/{id}/evidence"]:::op
+    o13["GET /admin/catalog/permission-drift"]:::op
+    o15["GET /admin/catalog/pii/columns"]:::op
+    o19["GET /admin/catalog/pii/reconciliation"]:::op
+    o20["GET /admin/catalog/pii/summary"]:::op
+    o21["GET /admin/catalog/quality/issues"]:::op
+    o22["GET /admin/catalog/quality/rules"]:::op
+  end
+  t28[("+1 tablas más")]
+  subgraph s1["ctrl:AdminCatalogFitController · Operaciones de AdminCatalogFitController que e…"]
+    o23["GET /admin/catalog/fit"]:::op
+    o26["POST /admin/catalog/fit/run"]:::op
+  end
+  subgraph s2["ctrl:AdminPortalController · Operaciones de AdminPortalController que el README…"]
+    o29["GET /admin/portal/linaje/aristas"]:::op
+    o30["GET /admin/portal/linaje/nodos"]:::op
+  end
+  subgraph s3["ctrl:GovernanceQueueController · Operaciones de GovernanceQueueController que e…"]
+    o31["GET /admin/governance/jobs"]:::op
+    o37["GET /admin/governance/review-queue"]:::op
+  end
+  t40[("+1 tablas más")]
+  subgraph s4["ctrl:InternalCatalogFitController · Operaciones de InternalCatalogFitController…"]
+    o38["POST /internal/catalog/fit/run"]:::op
+  end
+  t43[("+9 tablas más")]
+  subgraph s5["ctrl:InternalCatalogInventoryController · Operaciones de InternalCatalogInvento…"]
+    o41["POST /internal/catalog/inventory/import"]:::op
+  end
+  t45[("+6 tablas más")]
+  subgraph s6["ctrl:InternalCatalogScansController · Operaciones de InternalCatalogScansContro…"]
+    o44["POST /internal/catalog/scans/run-next"]:::op
+  end
+  a2 --> o1
+  o1 -->|"CREA"| t3
+  o1 -->|"CREA"| t4
+  o1 -->|"ACTUALIZA"| t4
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -.-> t7
+  a2 --> o8
+  o8 -->|"CREA"| t3
+  o8 -->|"CREA"| t4
+  o8 -->|"ACTUALIZA"| t4
+  o8 -->|"LEE"| t4
+  o8 -->|"LEE"| t6
+  a10 --> o9
+  o9 -->|"LEE"| t6
+  o9 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"LEE"| t6
+  o12 -->|"CREA"| t11
+  a10 --> o13
+  o13 -->|"LEE"| t14
+  a10 --> o15
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t6
+  o15 -->|"LEE"| t16
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  a10 --> o19
+  o19 -->|"LEE"| t4
+  o19 -->|"LEE"| t6
+  o19 -->|"LEE"| t16
+  o19 -->|"LEE"| t17
+  o19 -->|"LEE"| t18
+  a10 --> o20
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t17
+  o20 -->|"LEE"| t18
+  a10 --> o21
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t6
+  o21 -->|"LEE"| t16
+  a10 --> o22
+  o22 -->|"LEE"| t4
+  o22 -->|"LEE"| t6
+  o22 -->|"LEE"| t16
+  a24 --> o23
+  o23 -->|"LEE"| t25
+  a2 --> o26
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t6
+  o26 -->|"BORRA"| t25
+  o26 -->|"CREA"| t25
+  o26 -->|"LEE"| t16
+  o26 -->|"LEE"| t27
+  o26 -.-> t28
+  a10 --> o29
+  a10 --> o30
+  a32 --> o31
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  a32 --> o37
+  o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t4
+  o37 -->|"LEE"| t6
+  o37 -->|"LEE"| t16
+  a39 --> o38
+  o38 -->|"LEE"| t4
+  o38 -->|"LEE"| t6
+  o38 -->|"BORRA"| t25
+  o38 -->|"CREA"| t25
+  o38 -->|"LEE"| t16
+  o38 -->|"LEE"| t27
+  o38 -.-> t40
+  a39 --> o41
+  o41 -->|"LEE"| t16
+  o41 -->|"BORRA"| t42
+  o41 -->|"CREA"| t42
+  o41 -->|"CREA"| t27
+  o41 -->|"ACTUALIZA"| t27
+  o41 -->|"LEE"| t27
+  o41 -.-> t43
+  a39 --> o44
+  o44 -->|"LEE"| t4
+  o44 -->|"CREA"| t5
+  o44 -->|"LEE"| t5
+  o44 -->|"CREA"| t6
+  o44 -->|"ACTUALIZA"| t6
+  o44 -->|"LEE"| t6
+  o44 -.-> t45
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -331,36 +529,40 @@ flowchart TD
   n7 -->|"no"| n9
   n10[("LEE data_catalog.catalog_annotation_revisions")]:::efecto
   n9 --> n10
-  n11["Llama a CatalogRepository.evidenceCount"]:::llamada
+  n11["Llama a CatalogRepository.columnEvidenceCount"]:::llamada
   n10 --> n11
   n12[("LEE data_catalog.catalog_evidence_items")]:::efecto
   n11 --> n12
-  n13{"!veredicto.ok"}:::decision
+  n13["Llama a CatalogRepository.evidenceCount"]:::llamada
   n12 --> n13
-  n14{"según kind"}:::decision
-  n13 -->|"sí"| n14
-  n15(["409 CONCURRENCY_CONFLICT {message}"]):::error
-  n14 -->|"'STALE_REVISION'"| n15
-  n16(["500 INTERNAL {403}"]):::error
-  n14 -->|"'SELF_REVIEW'"| n16
-  n17(["500 INTERNAL {422}"]):::error
-  n14 -->|"'REJECTION_NEEDS_REASON'"| n17
-  n18(["422 PRECONDITION_FAILED {message}"]):::error
-  n14 -->|"por defecto"| n18
-  n19["Llama a CatalogRepository.decide"]:::llamada
-  n13 -->|"no"| n19
-  n20[("ACTUALIZA data_catalog.catalog_annotations · CREA data_catalog.catalog_review_decisions")]:::efecto
-  n19 --> n20
-  n21{"!decidida"}:::decision
-  n20 --> n21
-  n22(["409 CONCURRENCY_CONFLICT La ficha cambió mientras se revisaba"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a CatalogRepository.annotationById"]:::llamada
-  n21 -->|"no"| n23
-  n24[("LEE data_catalog.catalog_annotations")]:::efecto
-  n23 --> n24
-  n25(("200 Responde con éxito")):::ok
-  n24 --> n25
+  n14[("LEE data_catalog.catalog_evidence_items")]:::efecto
+  n13 --> n14
+  n15{"!veredicto.ok"}:::decision
+  n14 --> n15
+  n16{"según kind"}:::decision
+  n15 -->|"sí"| n16
+  n17(["409 CONCURRENCY_CONFLICT {message}"]):::error
+  n16 -->|"'STALE_REVISION'"| n17
+  n18(["500 INTERNAL {403}"]):::error
+  n16 -->|"'SELF_REVIEW'"| n18
+  n19(["500 INTERNAL {422}"]):::error
+  n16 -->|"'REJECTION_NEEDS_REASON'"| n19
+  n20(["422 PRECONDITION_FAILED {message}"]):::error
+  n16 -->|"por defecto"| n20
+  n21["Llama a CatalogRepository.decide"]:::llamada
+  n15 -->|"no"| n21
+  n22[("ACTUALIZA data_catalog.catalog_annotations · CREA data_catalog.catalog_review_decisions")]:::efecto
+  n21 --> n22
+  n23{"!decidida"}:::decision
+  n22 --> n23
+  n24(["409 CONCURRENCY_CONFLICT La ficha cambió mientras se revisaba"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a CatalogRepository.annotationById"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE data_catalog.catalog_annotations")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -369,7 +571,326 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /admin/catalog/objects
+#### 2. POST /admin/catalog/classification/run
+
+Corre la clasificación automática de sensibilidad sobre las columnas observadas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogClassificationService.run"]:::llamada
+  n2 --> n3
+  n4["Llama a CatalogClassificationService.runScope"]:::llamada
+  n3 --> n4
+  n5["Repite: ciclo for"]:::bucle
+  n4 --> n5
+  n6["Llama a CatalogRepository.columnsToClassify"]:::llamada
+  n5 -->|"cada elemento"| n6
+  n7{"f.scanId"}:::decision
+  n6 --> n7
+  n8[("LEE data_catalog.catalog_change_events")]:::efecto
+  n7 -->|"sí"| n8
+  n9[("LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects")]:::efecto
+  n8 --> n9
+  n7 -->|"no"| n9
+  n10["Llama a CatalogRepository.annotationsOfColumns"]:::llamada
+  n9 --> n10
+  n11[("LEE data_catalog.catalog_annotations")]:::efecto
+  n10 --> n11
+  n12["Repite: por cada const columna de pagina"]:::bucle
+  n11 --> n12
+  n13["Llama a CatalogClassificationService.classifyOne"]:::llamada
+  n12 -->|"cada elemento"| n13
+  n14["Intenta"]:::intento
+  n13 --> n14
+  n15{"!esUnicidad(error)"}:::decision
+  n14 -->|"si falla"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n14 --> n17
+  n15 -->|"no"| n17
+  n12 -->|"al terminar"| n17
+  n5 -->|"al terminar"| n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. PUT /admin/catalog/columns/{id}/annotation
+
+Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Columna del catálogo no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La ficha cambió desde que se leyó |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {422} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogGovernanceService.saveColumnAnnotation"]:::llamada
+  n2 --> n3
+  n4["Llama a CatalogGovernanceService.save"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a CatalogGovernanceService.fichaDe"]:::llamada
+  n5 --> n6
+  n7["Llama a CatalogRepository.annotationOfColumn"]:::llamada
+  n6 --> n7
+  n8[("LEE data_catalog.catalog_annotations")]:::efecto
+  n7 --> n8
+  n9{"dto.expectedVersion !== version"}:::decision
+  n8 --> n9
+  n10(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.submit"}:::decision
+  n9 -->|"no"| n11
+  n12{"violations.length"}:::decision
+  n11 -->|"sí"| n12
+  n13(["500 INTERNAL {422}"]):::error
+  n12 -->|"sí"| n13
+  n14{"!ficha"}:::decision
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
+  n15["Intenta"]:::intento
+  n14 -->|"sí"| n15
+  n16["Llama a CatalogRepository.insertAnnotation"]:::llamada
+  n15 --> n16
+  n17[("CREA data_catalog.catalog_annotations")]:::efecto
+  n16 --> n17
+  n18["Llama a CatalogRepository.annotationById"]:::llamada
+  n17 --> n18
+  n19[("LEE data_catalog.catalog_annotations")]:::efecto
+  n18 --> n19
+  n20{"esUnicidad(error)"}:::decision
+  n15 -->|"si falla"| n20
+  n21(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n20 -->|"sí"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"no"| n22
+  n23["Llama a CatalogRepository.updateAnnotation"]:::llamada
+  n14 -->|"no"| n23
+  n24[("ACTUALIZA data_catalog.catalog_annotations")]:::efecto
+  n23 --> n24
+  n25{"!ok"}:::decision
+  n24 --> n25
+  n26(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a CatalogRepository.insertRevision"]:::llamada
+  n19 --> n27
+  n25 -->|"no"| n27
+  n28[("CREA data_catalog.catalog_annotation_revisions")]:::efecto
+  n27 --> n28
+  n29["Llama a CatalogRepository.annotationById"]:::llamada
+  n28 --> n29
+  n30[("LEE data_catalog.catalog_annotations")]:::efecto
+  n29 --> n30
+  n31["Transacción: save(…)"]:::transaccion
+  n30 --> n31
+  n32["Llama a CatalogRepository.columnById"]:::llamada
+  n31 --> n32
+  n33[("LEE data_catalog.catalog_columns")]:::efecto
+  n32 --> n33
+  n34{"!columna"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Columna del catálogo no encontrada"]):::error
+  n34 -->|"sí"| n35
+  n36(("200 Responde con éxito")):::ok
+  n34 -->|"no"| n36
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. GET /admin/catalog/columns/{id}/evidence
+
+Evidencia enlazada a una columna
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Columna del catálogo no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogReadService.columnEvidence"]:::llamada
+  n2 --> n3
+  n4["Llama a CatalogRepository.columnById"]:::llamada
+  n3 --> n4
+  n5[("LEE data_catalog.catalog_columns")]:::efecto
+  n4 --> n5
+  n6{"!(await this.repo.columnById(em, columnId))"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Columna del catálogo no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a CatalogRepository.columnEvidence"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE data_catalog.catalog_evidence_items")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /admin/catalog/columns/{id}/evidence
+
+Enlaza evidencia a una columna
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Columna del catálogo no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogGovernanceService.addColumnEvidence"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CatalogRepository.columnById"]:::llamada
+  n4 --> n5
+  n6[("LEE data_catalog.catalog_columns")]:::efecto
+  n5 --> n6
+  n7{"!columna"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Columna del catálogo no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a CatalogGovernanceService.guardarEvidencia"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a CatalogRepository.addEvidence"]:::llamada
+  n9 --> n10
+  n11[("CREA data_catalog.catalog_evidence_items")]:::efecto
+  n10 --> n11
+  n12(("201 Responde con éxito")):::ok
+  n11 --> n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. GET /admin/catalog/fit
+
+Último resultado de la sonda de ajuste de la catalogación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogFitService.latest"]:::llamada
+  n2 --> n3
+  n4{"this.runs"}:::decision
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 -->|"sí"| n5
+  n6["Llama a FitRunsRepository.latestCompleted"]:::llamada
+  n5 --> n6
+  n7[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n6 --> n7
+  n8["Llama a FitRunsRepository.latestFailed"]:::llamada
+  n7 --> n8
+  n9[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n8 --> n9
+  n10["Llama a FitRunsRepository.history"]:::llamada
+  n9 --> n10
+  n11[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
+  n4 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /admin/catalog/fit/run
+
+Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 202 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3{"!key || !IDEMPOTENCY_KEY.test(key)"}:::decision
+  n2 --> n3
+  n4(["↩ (relanza el error capturado)"]):::error
+  n3 -->|"sí"| n4
+  n5(("202 Responde con éxito")):::ok
+  n3 -->|"no"| n5
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. GET /admin/catalog/objects
 
 Objetos del catálogo, paginados por cursor
 
@@ -410,7 +931,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. GET /admin/catalog/objects/{id}
+#### 9. GET /admin/catalog/objects/{id}
 
 Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
 
@@ -463,7 +984,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PUT /admin/catalog/objects/{id}/annotation
+#### 10. PUT /admin/catalog/objects/{id}/annotation
 
 Crea o edita la ficha de un objeto (con versión esperada)
 
@@ -485,70 +1006,74 @@ flowchart TD
   n1 --> n2
   n3["Llama a CatalogGovernanceService.saveAnnotation"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a CatalogGovernanceService.save"]:::llamada
   n3 --> n4
-  n5["Llama a CatalogRepository.objectById"]:::llamada
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6[("LEE data_catalog.catalog_objects · LEE data_catalog.catalog_scan_runs")]:::efecto
+  n6["Llama a CatalogGovernanceService.fichaDe"]:::llamada
   n5 --> n6
-  n7{"!(await this.repo.objectById(tx, objectId))"}:::decision
+  n7["Llama a CatalogRepository.annotationOfColumn"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Objeto del catálogo no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a CatalogRepository.annotationOfObject"]:::llamada
-  n7 -->|"no"| n9
-  n10["Llama a CatalogRepository.annotationsOf"]:::llamada
-  n9 --> n10
-  n11[("LEE data_catalog.catalog_annotations")]:::efecto
-  n10 --> n11
-  n12{"dto.expectedVersion !== version"}:::decision
-  n11 --> n12
-  n13(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n8[("LEE data_catalog.catalog_annotations")]:::efecto
+  n7 --> n8
+  n9{"dto.expectedVersion !== version"}:::decision
+  n8 --> n9
+  n10(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.submit"}:::decision
+  n9 -->|"no"| n11
+  n12{"violations.length"}:::decision
+  n11 -->|"sí"| n12
+  n13(["500 INTERNAL {422}"]):::error
   n12 -->|"sí"| n13
-  n14{"dto.submit"}:::decision
+  n14{"!ficha"}:::decision
   n12 -->|"no"| n14
-  n15{"violations.length"}:::decision
+  n11 -->|"no"| n14
+  n15["Intenta"]:::intento
   n14 -->|"sí"| n15
-  n16(["500 INTERNAL {422}"]):::error
-  n15 -->|"sí"| n16
-  n17{"!ficha"}:::decision
-  n15 -->|"no"| n17
-  n14 -->|"no"| n17
-  n18["Intenta"]:::intento
-  n17 -->|"sí"| n18
-  n19["Llama a CatalogRepository.insertAnnotation"]:::llamada
+  n16["Llama a CatalogRepository.insertAnnotation"]:::llamada
+  n15 --> n16
+  n17[("CREA data_catalog.catalog_annotations")]:::efecto
+  n16 --> n17
+  n18["Llama a CatalogRepository.annotationById"]:::llamada
+  n17 --> n18
+  n19[("LEE data_catalog.catalog_annotations")]:::efecto
   n18 --> n19
-  n20[("CREA data_catalog.catalog_annotations")]:::efecto
-  n19 --> n20
-  n21["Llama a CatalogRepository.annotationById"]:::llamada
-  n20 --> n21
-  n22[("LEE data_catalog.catalog_annotations")]:::efecto
-  n21 --> n22
-  n23{"esUnicidad(error)"}:::decision
-  n18 -->|"si falla"| n23
-  n24(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
-  n23 -->|"sí"| n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n23 -->|"no"| n25
-  n26["Llama a CatalogRepository.updateAnnotation"]:::llamada
-  n17 -->|"no"| n26
-  n27[("ACTUALIZA data_catalog.catalog_annotations")]:::efecto
-  n26 --> n27
-  n28{"!ok"}:::decision
+  n20{"esUnicidad(error)"}:::decision
+  n15 -->|"si falla"| n20
+  n21(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n20 -->|"sí"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"no"| n22
+  n23["Llama a CatalogRepository.updateAnnotation"]:::llamada
+  n14 -->|"no"| n23
+  n24[("ACTUALIZA data_catalog.catalog_annotations")]:::efecto
+  n23 --> n24
+  n25{"!ok"}:::decision
+  n24 --> n25
+  n26(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a CatalogRepository.insertRevision"]:::llamada
+  n19 --> n27
+  n25 -->|"no"| n27
+  n28[("CREA data_catalog.catalog_annotation_revisions")]:::efecto
   n27 --> n28
-  n29(["409 CONCURRENCY_CONFLICT La ficha cambió desde que se leyó"]):::error
-  n28 -->|"sí"| n29
-  n30["Llama a CatalogRepository.insertRevision"]:::llamada
-  n22 --> n30
-  n28 -->|"no"| n30
-  n31[("CREA data_catalog.catalog_annotation_revisions")]:::efecto
+  n29["Llama a CatalogRepository.annotationById"]:::llamada
+  n28 --> n29
+  n30[("LEE data_catalog.catalog_annotations")]:::efecto
+  n29 --> n30
+  n31["Transacción: save(…)"]:::transaccion
   n30 --> n31
-  n32["Llama a CatalogRepository.annotationById"]:::llamada
+  n32["Llama a CatalogRepository.objectById"]:::llamada
   n31 --> n32
-  n33[("LEE data_catalog.catalog_annotations")]:::efecto
+  n33[("LEE data_catalog.catalog_objects · LEE data_catalog.catalog_scan_runs")]:::efecto
   n32 --> n33
-  n34(("200 Responde con éxito")):::ok
+  n34{"!(await this.repo.objectById(tx, objectId))"}:::decision
   n33 --> n34
+  n35(["404 NOT_FOUND Objeto del catálogo no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36(("200 Responde con éxito")):::ok
+  n34 -->|"no"| n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -557,7 +1082,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /admin/catalog/objects/{id}/changes
+#### 11. GET /admin/catalog/objects/{id}/changes
 
 Cambios que los escaneos detectaron en un objeto
 
@@ -600,7 +1125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /admin/catalog/objects/{id}/columns
+#### 12. GET /admin/catalog/objects/{id}/columns
 
 Columnas observadas de un objeto, con su ficha si la tienen
 
@@ -647,7 +1172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /admin/catalog/objects/{id}/evidence
+#### 13. GET /admin/catalog/objects/{id}/evidence
 
 Evidencia enlazada a un objeto
 
@@ -690,7 +1215,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /admin/catalog/objects/{id}/evidence
+#### 14. POST /admin/catalog/objects/{id}/evidence
 
 Enlaza evidencia a un objeto
 
@@ -720,12 +1245,14 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Objeto del catálogo no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a CatalogRepository.addEvidence"]:::llamada
+  n9["Llama a CatalogGovernanceService.guardarEvidencia"]:::llamada
   n7 -->|"no"| n9
-  n10[("CREA data_catalog.catalog_evidence_items")]:::efecto
+  n10["Llama a CatalogRepository.addEvidence"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("CREA data_catalog.catalog_evidence_items")]:::efecto
   n10 --> n11
+  n12(("201 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -734,7 +1261,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. GET /admin/catalog/objects/{id}/history
+#### 15. GET /admin/catalog/objects/{id}/history
 
 Revisiones y decisiones de la ficha de un objeto
 
@@ -787,7 +1314,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /admin/catalog/objects/{id}/impact
+#### 16. GET /admin/catalog/objects/{id}/impact
 
 Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
 
@@ -838,7 +1365,145 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /admin/catalog/scans
+#### 17. GET /admin/catalog/pii/columns
+
+Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: {CURSOR_INVALIDO} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogInsightsService.piiColumns"]:::llamada
+  n2 --> n3
+  n4["Llama a CatalogInsightsRepository.piiColumns"]:::llamada
+  n3 --> n4
+  n5[("LEE system_ops.field_registry · LEE system_ops.entity_registry · LEE data_catalog.catalog_columns · LEE data_…")]:::efecto
+  n4 --> n5
+  n6["Llama a CatalogInsightsService.piiCursor"]:::llamada
+  n5 --> n6
+  n7{"k.m !== modo || !esTexto(k.s) || !esTexto(k.o) || !esTexto(k.c) || (modo === 's' && typeof k.rk !== 'number')"}:::decision
+  n6 --> n7
+  n8(["400 VALIDATION_FAILED {CURSOR_INVALIDO}"]):::error
+  n7 -->|"sí"| n8
+  n9(("200 Responde con éxito")):::ok
+  n7 -->|"no"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. GET /admin/catalog/pii/reconciliation
+
+Conciliación de las columnas personales del catálogo con el registro declarado de gobierno
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: {CURSOR_INVALIDO} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogInsightsService.piiReconciliation"]:::llamada
+  n2 --> n3
+  n4{"q.cursor"}:::decision
+  n3 --> n4
+  n5{"!esTexto(k.s) || !esTexto(k.o) || !esTexto(k.c) || !esTexto(k.k)"}:::decision
+  n4 -->|"sí"| n5
+  n6(["400 VALIDATION_FAILED {CURSOR_INVALIDO}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a CatalogInsightsRepository.piiReconciliation"]:::llamada
+  n5 -->|"no"| n7
+  n4 -->|"no"| n7
+  n8["Llama a CatalogInsightsRepository.reconciliationCte"]:::llamada
+  n7 --> n8
+  n9[("LEE system_ops.entity_registry · LEE system_ops.field_registry · LEE data_catalog.catalog_columns · LEE data_…")]:::efecto
+  n8 --> n9
+  n10["Llama a CatalogInsightsRepository.piiReconciliationCounts"]:::llamada
+  n9 --> n10
+  n11["Llama a CatalogInsightsRepository.reconciliationCte"]:::llamada
+  n10 --> n11
+  n12[("LEE system_ops.entity_registry · LEE system_ops.field_registry · LEE data_catalog.catalog_columns · LEE data_…")]:::efecto
+  n11 --> n12
+  n13["Llama a CatalogInsightsRepository.piiReconciliationTotals"]:::llamada
+  n12 --> n13
+  n14[("LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects · LEE data_catalog.catalog_annotations ·…")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. GET /admin/catalog/quality/issues
+
+Incidencias de calidad del catálogo (derivadas al leer), paginadas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: {CURSOR_INVALIDO} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogInsightsService.qualityIssues"]:::llamada
+  n2 --> n3
+  n4["Llama a CatalogInsightsRepository.qualityIssues"]:::llamada
+  n3 --> n4
+  n5["Llama a CatalogInsightsRepository.issuesCte"]:::llamada
+  n4 --> n5
+  n6[("LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects · LEE data_catalog.catalog_annotations")]:::efecto
+  n5 --> n6
+  n7["Llama a CatalogInsightsService.qualityCursor"]:::llamada
+  n6 --> n7
+  n8{"!esTexto(k.r) || !esTexto(k.s) || !esTexto(k.o) || !esTexto(k.c)"}:::decision
+  n7 --> n8
+  n9(["400 VALIDATION_FAILED {CURSOR_INVALIDO}"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a CatalogInsightsRepository.qualityCounts"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a CatalogInsightsRepository.issuesCte"]:::llamada
+  n10 --> n11
+  n12[("LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects · LEE data_catalog.catalog_annotations")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /admin/catalog/scans
 
 Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
 
@@ -849,6 +1514,7 @@ Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya hay un escaneo en curso de esta fuente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ScanFenced |
 
 ```mermaid
 flowchart TD
@@ -902,108 +1568,35 @@ flowchart TD
   n20 --> n24
   n25["Llama a CatalogScanService.run"]:::llamada
   n24 --> n25
-  n26["Llama a CatalogRepository.claimScan"]:::llamada
+  n26["Llama a CatalogScanService.execute"]:::llamada
   n25 --> n26
-  n27[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n27["Intenta"]:::intento
   n26 --> n27
-  n28["Llama a CatalogRepository.scanById"]:::llamada
+  n28["Transacción: transactional(…)"]:::transaccion
   n27 --> n28
-  n29[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n29{"!cerrado"}:::decision
   n28 --> n29
-  n30{"!tomado"}:::decision
-  n29 --> n30
-  n31["Llama a CatalogRepository.scanById"]:::llamada
-  n30 -->|"sí"| n31
-  n32[("LEE data_catalog.catalog_scan_runs")]:::efecto
-  n31 --> n32
-  n33["Intenta"]:::intento
+  n30(["500 INTERNAL ScanFenced"]):::error
+  n29 -->|"sí"| n30
+  n31{"resultado.created && autorun"}:::decision
+  n29 -->|"no"| n31
+  n32["Llama a CatalogScanService.start"]:::llamada
+  n31 -->|"sí"| n32
+  n33["Llama a CatalogScanService.run"]:::llamada
   n32 --> n33
-  n30 -->|"no"| n33
-  n34["Transacción: transactional(…)"]:::transaccion
+  n34["Llama a CatalogScanService.execute"]:::llamada
   n33 --> n34
-  n35["Llama a CatalogRepository.knownObjects"]:::llamada
+  n35["Intenta"]:::intento
   n34 --> n35
-  n36[("LEE data_catalog.catalog_objects · LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects")]:::efecto
+  n36["Transacción: transactional(…)"]:::transaccion
   n35 --> n36
-  n37["Llama a CatalogRepository.applyScan"]:::llamada
+  n37{"!cerrado"}:::decision
   n36 --> n37
-  n38{"objetosNuevos.length"}:::decision
-  n37 --> n38
-  n39[("CREA data_catalog.catalog_objects")]:::efecto
-  n38 -->|"sí"| n39
-  n40{"objetosExistentes.length"}:::decision
-  n39 --> n40
-  n38 -->|"no"| n40
-  n41[("ACTUALIZA data_catalog.catalog_objects")]:::efecto
-  n40 -->|"sí"| n41
-  n42{"columnasNuevas.length"}:::decision
-  n41 --> n42
-  n40 -->|"no"| n42
-  n43[("CREA data_catalog.catalog_columns")]:::efecto
-  n42 -->|"sí"| n43
-  n44{"columnasExistentes.length"}:::decision
-  n43 --> n44
-  n42 -->|"no"| n44
-  n45[("ACTUALIZA data_catalog.catalog_columns")]:::efecto
-  n44 -->|"sí"| n45
-  n46{"columnasFaltantes.length"}:::decision
-  n45 --> n46
-  n44 -->|"no"| n46
-  n47[("ACTUALIZA data_catalog.catalog_columns")]:::efecto
-  n46 -->|"sí"| n47
-  n48{"plan.vanished.length"}:::decision
-  n47 --> n48
-  n46 -->|"no"| n48
-  n49[("ACTUALIZA data_catalog.catalog_objects · ACTUALIZA data_catalog.catalog_columns")]:::efecto
-  n48 -->|"sí"| n49
-  n50{"eventos.length"}:::decision
-  n49 --> n50
-  n48 -->|"no"| n50
-  n51[("CREA data_catalog.catalog_change_events")]:::efecto
-  n50 -->|"sí"| n51
-  n52["Llama a CatalogRepository.finishScan"]:::llamada
-  n51 --> n52
-  n50 -->|"no"| n52
-  n53[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
-  n52 --> n53
-  n54["Llama a CatalogRepository.failScan"]:::llamada
-  n33 -->|"si falla"| n54
-  n55[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
-  n54 --> n55
-  n56["Llama a CatalogRepository.scanById"]:::llamada
-  n53 --> n56
-  n55 --> n56
-  n57[("LEE data_catalog.catalog_scan_runs")]:::efecto
-  n56 --> n57
-  n58{"resultado.created && autorun"}:::decision
-  n57 --> n58
-  n59["Llama a CatalogScanService.start"]:::llamada
-  n58 -->|"sí"| n59
-  n60["Llama a CatalogScanService.run"]:::llamada
-  n59 --> n60
-  n61["Llama a CatalogRepository.claimScan"]:::llamada
-  n60 --> n61
-  n62[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
-  n61 --> n62
-  n63["Llama a CatalogRepository.scanById"]:::llamada
-  n62 --> n63
-  n64[("LEE data_catalog.catalog_scan_runs")]:::efecto
-  n63 --> n64
-  n65{"!tomado"}:::decision
-  n64 --> n65
-  n66["Llama a CatalogRepository.scanById"]:::llamada
-  n65 -->|"sí"| n66
-  n67[("LEE data_catalog.catalog_scan_runs")]:::efecto
-  n66 --> n67
-  n68["Intenta"]:::intento
-  n67 --> n68
-  n65 -->|"no"| n68
-  n69["Transacción: transactional(…)"]:::transaccion
-  n68 --> n69
-  n70["Llama a CatalogRepository.knownObjects"]:::llamada
-  n69 --> n70
-  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n38(["500 INTERNAL ScanFenced"]):::error
+  n37 -->|"sí"| n38
+  n39(("202 Responde con éxito")):::ok
+  n37 -->|"no"| n39
+  n31 -->|"no"| n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1012,7 +1605,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /admin/catalog/scans/{id}
+#### 21. GET /admin/catalog/scans/{id}
 
 Un escaneo
 
@@ -1049,7 +1642,44 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. GET /admin/portal/catalogo/deriva
+#### 22. GET /admin/governance/jobs
+
+Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceQueueService.jobs"]:::llamada
+  n2 --> n3
+  n4{"to && to ‹= from"}:::decision
+  n3 --> n4
+  n5(["400 VALIDATION_FAILED «to» debe ser posterior a «from»"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a GovernanceQueueRepository.jobs"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE data_catalog.catalog_scan_runs · LEE system_ops.retention_executions · LEE terminology.catalog_concepts ·…")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. GET /admin/portal/catalogo/deriva
 
 Deriva entre el DDL del modelo y las entidades del ORM
 
@@ -1096,7 +1726,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /admin/portal/catalogo/tablas
+#### 24. GET /admin/portal/catalogo/tablas
 
 Listar las tablas del catálogo de datos
 
@@ -1143,7 +1773,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
+#### 25. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
 
 Ver la ficha de una tabla
 
@@ -1217,7 +1847,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /admin/portal/flujos
+#### 26. GET /admin/portal/flujos
 
 Listar los procesos de negocio
 
@@ -1264,7 +1894,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /admin/portal/flujos/{codigo}
+#### 27. GET /admin/portal/flujos/{codigo}
 
 Ver un proceso con sus etapas y máquinas de estado
 
@@ -1330,7 +1960,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /admin/portal/flujos/{codigo}/grafo
+#### 28. GET /admin/portal/flujos/{codigo}/grafo
 
 Ver el grafo de un proceso
 
@@ -1396,7 +2026,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /admin/portal/flujos/hallazgos
+#### 29. GET /admin/portal/flujos/hallazgos
 
 Resumen de hallazgos del mapa
 
@@ -1443,7 +2073,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /admin/portal/flujos/hallazgos/{id}
+#### 30. GET /admin/portal/flujos/hallazgos/{id}
 
 Ver los casos de un hallazgo
 
@@ -1495,7 +2125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /admin/portal/flujos/mapa
+#### 31. GET /admin/portal/flujos/mapa
 
 Mapa de operaciones con sus señales
 
@@ -1542,7 +2172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /admin/portal/glosario
+#### 32. GET /admin/portal/glosario
 
 Buscar en el glosario
 
@@ -1589,7 +2219,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /admin/portal/linaje
+#### 33. GET /admin/portal/linaje
 
 Métricas del linaje de datos
 
@@ -1636,7 +2266,101 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /admin/portal/linaje/tablas/{schema}/{tabla}
+#### 34. GET /admin/portal/linaje/aristas
+
+Aristas del linaje (lee, escribe, borra, referencia, pertenece)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: El inventario del portal no está disponible: falta {relative}. Se genera con `yarn inventario:endpoints`, `yarn inventario:flujos` y `yarn inventario:catalogo`…; ServiceUnavailableException: El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo con `yarn inventario:verificar`. |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PortalInventoryService.linajeAristas"]:::llamada
+  n2 --> n3
+  n4["Llama a InventoryRepository.linaje"]:::llamada
+  n3 --> n4
+  n5["Llama a InventoryRepository.read"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7["Llama a InventoryRepository.raw"]:::llamada
+  n6 --> n7
+  n8{"!existsSync(file)"}:::decision
+  n7 --> n8
+  n9(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta {relative}. Se genera con `yarn…"]):::error
+  n8 -->|"sí"| n9
+  n10{"error instanceof ServiceUnavailableException"}:::decision
+  n6 -->|"si falla"| n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n10 -->|"no"| n12
+  n13(("200 Responde con éxito")):::ok
+  n8 -->|"no"| n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 35. GET /admin/portal/linaje/nodos
+
+Nodos del linaje (operaciones, tablas, dominios)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: El inventario del portal no está disponible: falta {relative}. Se genera con `yarn inventario:endpoints`, `yarn inventario:flujos` y `yarn inventario:catalogo`…; ServiceUnavailableException: El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo con `yarn inventario:verificar`. |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PortalInventoryService.linajeNodos"]:::llamada
+  n2 --> n3
+  n4["Llama a InventoryRepository.linaje"]:::llamada
+  n3 --> n4
+  n5["Llama a InventoryRepository.read"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7["Llama a InventoryRepository.raw"]:::llamada
+  n6 --> n7
+  n8{"!existsSync(file)"}:::decision
+  n7 --> n8
+  n9(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta {relative}. Se genera con `yarn…"]):::error
+  n8 -->|"sí"| n9
+  n10{"error instanceof ServiceUnavailableException"}:::decision
+  n6 -->|"si falla"| n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n10 -->|"no"| n12
+  n13(("200 Responde con éxito")):::ok
+  n8 -->|"no"| n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 36. GET /admin/portal/linaje/tablas/{schema}/{tabla}
 
 Linaje de una tabla
 
@@ -1688,7 +2412,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /admin/portal/operaciones
+#### 37. GET /admin/portal/operaciones
 
 Listar las operaciones HTTP del sistema
 
@@ -1749,7 +2473,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /admin/portal/operaciones/{id}
+#### 38. GET /admin/portal/operaciones/{id}
 
 Ver la ficha de una operación
 
@@ -1807,7 +2531,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /admin/portal/operaciones/{id}/arbol
+#### 39. GET /admin/portal/operaciones/{id}/arbol
 
 Ver el árbol de decisión de una operación
 
@@ -1876,7 +2600,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /admin/portal/version
+#### 40. GET /admin/portal/version
 
 Versión y tamaño del inventario publicado
 
@@ -1956,6 +2680,383 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 41. POST /internal/catalog/fit/run
+
+Corre la sonda de ajuste y espera su desenlace (worker)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3{"key !== undefined && !IDEMPOTENCY_KEY.test(key)"}:::decision
+  n2 --> n3
+  n4(["↩ (relanza el error capturado)"]):::error
+  n3 -->|"sí"| n4
+  n5(("200 Responde con éxito")):::ok
+  n3 -->|"no"| n5
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 42. POST /internal/catalog/inventory/import
+
+Importa el inventario de la API a las tablas de operaciones y procesos (worker)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: El inventario del portal no está disponible: falta el directorio {relative}.; ServiceUnavailableException: El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo con `yarn inventario:verificar`.; ServiceUnavailableException: El inventario del portal no está disponible: falta {relative}. Se genera con `yarn inventario:endpoints`, `yarn inventario:flujos` y `yarn inventario:catalogo`… |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InventoryImportService.importInventory"]:::llamada
+  n2 --> n3
+  n4["Llama a InventoryRepository.operaciones"]:::llamada
+  n3 --> n4
+  n5["Llama a InventoryRepository.readDirectory"]:::llamada
+  n4 --> n5
+  n6{"!existsSync(dir)"}:::decision
+  n5 --> n6
+  n7(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta el directorio {relative}."]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a InventoryRepository.read"]:::llamada
+  n6 -->|"no"| n8
+  n9["Intenta"]:::intento
+  n8 --> n9
+  n10{"error instanceof ServiceUnavailableException"}:::decision
+  n9 -->|"si falla"| n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n10 -->|"no"| n12
+  n13["Llama a InventoryRepository.procesos"]:::llamada
+  n9 --> n13
+  n14["Llama a InventoryRepository.read"]:::llamada
+  n13 --> n14
+  n15["Intenta"]:::intento
+  n14 --> n15
+  n16["Llama a InventoryRepository.raw"]:::llamada
+  n15 --> n16
+  n17{"!existsSync(file)"}:::decision
+  n16 --> n17
+  n18(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta {relative}. Se genera con `yarn…"]):::error
+  n17 -->|"sí"| n18
+  n19{"error instanceof ServiceUnavailableException"}:::decision
+  n15 -->|"si falla"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n19 -->|"no"| n21
+  n22["Llama a InventoryRepository.version"]:::llamada
+  n17 -->|"no"| n22
+  n23["Repite: por cada const f de [ 'endpoints/indice.json', 'catalogo/indice.json'…"]:::bucle
+  n22 --> n23
+  n24["Llama a InventoryRepository.raw"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25{"!existsSync(file)"}:::decision
+  n24 --> n25
+  n26(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta {relative}. Se genera con `yarn…"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a InventoryRepository.catalogoIndice"]:::llamada
+  n25 -->|"no"| n27
+  n23 -->|"al terminar"| n27
+  n28["Llama a InventoryRepository.read"]:::llamada
+  n27 --> n28
+  n29["Intenta"]:::intento
+  n28 --> n29
+  n30{"error instanceof ServiceUnavailableException"}:::decision
+  n29 -->|"si falla"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n30 -->|"no"| n32
+  n33["Llama a InventoryRepository.read"]:::llamada
+  n29 --> n33
+  n34["Intenta"]:::intento
+  n33 --> n34
+  n35["Llama a InventoryRepository.raw"]:::llamada
+  n34 --> n35
+  n36{"!existsSync(file)"}:::decision
+  n35 --> n36
+  n37(["503 DEPENDENCY_UNAVAILABLE El inventario del portal no está disponible: falta {relative}. Se genera con `yarn…"]):::error
+  n36 -->|"sí"| n37
+  n38{"error instanceof ServiceUnavailableException"}:::decision
+  n34 -->|"si falla"| n38
+  n39(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"sí"| n39
+  n40(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n38 -->|"no"| n40
+  n41["Llama a InventoryRepository.procesos"]:::llamada
+  n36 -->|"no"| n41
+  n42["Llama a InventoryRepository.read"]:::llamada
+  n41 --> n42
+  n43["Intenta"]:::intento
+  n42 --> n43
+  n44{"error instanceof ServiceUnavailableException"}:::decision
+  n43 -->|"si falla"| n44
+  n45(["↩ (relanza el error capturado)"]):::error
+  n44 -->|"sí"| n45
+  n46(["503 DEPENDENCY_UNAVAILABLE El inventario del portal está dañado: {relative} no es un JSON válido. Regenerarlo…"]):::error
+  n44 -->|"no"| n46
+  n47["Transacción: transactional(…)"]:::transaccion
+  n43 --> n47
+  n48["Llama a CatalogInventoryRepository.known"]:::llamada
+  n47 --> n48
+  n49[("LEE data_catalog.catalog_operations · LEE data_catalog.catalog_objects · LEE data_catalog.catalog_processes ·…")]:::efecto
+  n48 --> n49
+  n50["Llama a CatalogInventoryRepository.insertOperations"]:::llamada
+  n49 --> n50
+  n51["Repite: por cada const lote de lotes(filas)"]:::bucle
+  n50 --> n51
+  n52[("CREA data_catalog.catalog_operations")]:::efecto
+  n51 -->|"cada elemento"| n52
+  n53["Llama a CatalogInventoryRepository.updateOperations"]:::llamada
+  n52 --> n53
+  n51 -->|"al terminar"| n53
+  n54["Repite: por cada const lote de lotes(filas)"]:::bucle
+  n53 --> n54
+  n55[("ACTUALIZA data_catalog.catalog_operations")]:::efecto
+  n54 -->|"cada elemento"| n55
+  n56["Llama a CatalogInventoryRepository.retireOperations"]:::llamada
+  n55 --> n56
+  n54 -->|"al terminar"| n56
+  n57["Repite: por cada const lote de lotes(ids)"]:::bucle
+  n56 --> n57
+  n58[("ACTUALIZA data_catalog.catalog_operations")]:::efecto
+  n57 -->|"cada elemento"| n58
+  n59["Llama a CatalogInventoryRepository.deleteImpactsOf"]:::llamada
+  n58 --> n59
+  n57 -->|"al terminar"| n59
+  n60["Repite: por cada const lote de lotes(operationIds)"]:::bucle
+  n59 --> n60
+  n61[("BORRA data_catalog.catalog_operation_impacts")]:::efecto
+  n60 -->|"cada elemento"| n61
+  n62["Llama a CatalogInventoryRepository.insertImpacts"]:::llamada
+  n61 --> n62
+  n60 -->|"al terminar"| n62
+  n63["Repite: por cada const lote de lotes(filas)"]:::bucle
+  n62 --> n63
+  n64[("CREA data_catalog.catalog_operation_impacts")]:::efecto
+  n63 -->|"cada elemento"| n64
+  n65["Llama a CatalogInventoryRepository.insertProcesses"]:::llamada
+  n64 --> n65
+  n63 -->|"al terminar"| n65
+  n66["Repite: por cada const lote de lotes(filas)"]:::bucle
+  n65 --> n66
+  n67[("CREA data_catalog.catalog_processes")]:::efecto
+  n66 -->|"cada elemento"| n67
+  n68["Llama a CatalogInventoryRepository.updateProcesses"]:::llamada
+  n67 --> n68
+  n66 -->|"al terminar"| n68
+  n69["Repite: por cada const lote de lotes(filas)"]:::bucle
+  n68 --> n69
+  n70[("ACTUALIZA data_catalog.catalog_processes")]:::efecto
+  n69 -->|"cada elemento"| n70
+  n71["… el resto del árbol (11 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  n69 -->|"al terminar"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 43. POST /internal/catalog/scans/run-next
+
+Sonda: reclama y ejecuta el siguiente escaneo (worker)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya hay un escaneo en curso de esta fuente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ScanFenced |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogScanService.runNext"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CatalogRepository.failAbandoned"]:::llamada
+  n4 --> n5
+  n6[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n5 --> n6
+  n7["Llama a CatalogRepository.activeScan"]:::llamada
+  n6 --> n7
+  n8[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n7 --> n8
+  n9{"activo"}:::decision
+  n8 --> n9
+  n10["Llama a CatalogScanService.runClaimed"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a CatalogScanService.execute"]:::llamada
+  n10 --> n11
+  n12["Llama a CatalogRepository.claimScan"]:::llamada
+  n11 --> n12
+  n13[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n12 --> n13
+  n14{"!tomado"}:::decision
+  n13 --> n14
+  n15["Llama a CatalogRepository.scanById"]:::llamada
+  n14 -->|"sí"| n15
+  n16[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n15 --> n16
+  n17["Intenta"]:::intento
+  n16 --> n17
+  n14 -->|"no"| n17
+  n18["Transacción: transactional(…)"]:::transaccion
+  n17 --> n18
+  n19["Llama a CatalogRepository.knownObjects"]:::llamada
+  n18 --> n19
+  n20[("LEE data_catalog.catalog_objects · LEE data_catalog.catalog_columns · LEE data_catalog.catalog_objects")]:::efecto
+  n19 --> n20
+  n21["Llama a CatalogRepository.applyScan"]:::llamada
+  n20 --> n21
+  n22{"objetosNuevos.length"}:::decision
+  n21 --> n22
+  n23[("CREA data_catalog.catalog_objects")]:::efecto
+  n22 -->|"sí"| n23
+  n24{"objetosExistentes.length"}:::decision
+  n23 --> n24
+  n22 -->|"no"| n24
+  n25[("ACTUALIZA data_catalog.catalog_objects")]:::efecto
+  n24 -->|"sí"| n25
+  n26{"columnasNuevas.length"}:::decision
+  n25 --> n26
+  n24 -->|"no"| n26
+  n27[("CREA data_catalog.catalog_columns")]:::efecto
+  n26 -->|"sí"| n27
+  n28{"columnasExistentes.length"}:::decision
+  n27 --> n28
+  n26 -->|"no"| n28
+  n29[("ACTUALIZA data_catalog.catalog_columns")]:::efecto
+  n28 -->|"sí"| n29
+  n30{"columnasFaltantes.length"}:::decision
+  n29 --> n30
+  n28 -->|"no"| n30
+  n31[("ACTUALIZA data_catalog.catalog_columns")]:::efecto
+  n30 -->|"sí"| n31
+  n32{"plan.vanished.length"}:::decision
+  n31 --> n32
+  n30 -->|"no"| n32
+  n33[("ACTUALIZA data_catalog.catalog_objects · ACTUALIZA data_catalog.catalog_columns")]:::efecto
+  n32 -->|"sí"| n33
+  n34{"eventos.length"}:::decision
+  n33 --> n34
+  n32 -->|"no"| n34
+  n35[("CREA data_catalog.catalog_change_events")]:::efecto
+  n34 -->|"sí"| n35
+  n36["Llama a CatalogRepository.finishScan"]:::llamada
+  n35 --> n36
+  n34 -->|"no"| n36
+  n37[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n36 --> n37
+  n38{"!cerrado"}:::decision
+  n37 --> n38
+  n39(["500 INTERNAL ScanFenced"]):::error
+  n38 -->|"sí"| n39
+  n40{"error instanceof ScanFenced"}:::decision
+  n17 -->|"si falla"| n40
+  n41["Llama a CatalogRepository.failScan"]:::llamada
+  n40 -->|"no"| n41
+  n42[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n41 --> n42
+  n43["Llama a CatalogRepository.scanById"]:::llamada
+  n38 -->|"no"| n43
+  n40 -->|"sí"| n43
+  n42 --> n43
+  n44[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n43 --> n44
+  n45["Llama a CatalogRepository.lastFinishedScanAt"]:::llamada
+  n44 --> n45
+  n9 -->|"no"| n45
+  n46[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n45 --> n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48["Llama a CatalogScanService.request"]:::llamada
+  n47 --> n48
+  n49["Transacción: transactional(…)"]:::transaccion
+  n48 --> n49
+  n50["Llama a CatalogRepository.failAbandoned"]:::llamada
+  n49 --> n50
+  n51[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n50 --> n51
+  n52{"idempotencyKey"}:::decision
+  n51 --> n52
+  n53["Llama a CatalogRepository.scanByIdempotency"]:::llamada
+  n52 -->|"sí"| n53
+  n54[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n53 --> n54
+  n55["Llama a CatalogRepository.activeScan"]:::llamada
+  n54 --> n55
+  n52 -->|"no"| n55
+  n56[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n55 --> n56
+  n57{"activo"}:::decision
+  n56 --> n57
+  n58(["409 CONFLICT Ya hay un escaneo en curso de esta fuente"]):::error
+  n57 -->|"sí"| n58
+  n59["Intenta"]:::intento
+  n57 -->|"no"| n59
+  n60["Llama a CatalogRepository.insertScan"]:::llamada
+  n59 --> n60
+  n61[("CREA data_catalog.catalog_scan_runs")]:::efecto
+  n60 --> n61
+  n62["Llama a CatalogRepository.scanById"]:::llamada
+  n61 --> n62
+  n63[("LEE data_catalog.catalog_scan_runs")]:::efecto
+  n62 --> n63
+  n64{"error instanceof Error && /ux_data_catalog_scan_runs_(one_active|idempotency)/.test( error.message, )"}:::decision
+  n59 -->|"si falla"| n64
+  n65(["409 CONFLICT Ya hay un escaneo en curso de esta fuente"]):::error
+  n64 -->|"sí"| n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n64 -->|"no"| n66
+  n67["Llama a CatalogScanService.runClaimed"]:::llamada
+  n63 --> n67
+  n68["Llama a CatalogScanService.execute"]:::llamada
+  n67 --> n68
+  n69["Llama a CatalogRepository.claimScan"]:::llamada
+  n68 --> n69
+  n70[("ACTUALIZA data_catalog.catalog_scan_runs")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (34 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -1963,5 +3064,9 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | GET /admin/catalog/coverage | 200, 401, 403, 429 | 3 |
+| GET /admin/catalog/permission-drift | 200, 401, 403, 429 | 1 |
+| GET /admin/catalog/pii/summary | 200, 401, 403, 429 | 5 |
+| GET /admin/catalog/quality/rules | 200, 401, 403, 429 | 3 |
 | GET /admin/catalog/scans | 200, 401, 403, 429 | 1 |
 | GET /admin/catalog/schemas | 200, 401, 403, 429 | 2 |
+| GET /admin/governance/review-queue | 200, 401, 403, 429 | 4 |

@@ -176,7 +176,7 @@ export class Persons {
     fieldName: 'work_employer_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   workEmployerConceptId?: string;
 
   /**

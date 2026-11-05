@@ -2,7 +2,7 @@
 
 Prohíbe el trabajo silencioso. Aplica a todo trabajo que dure más de un puñado de operaciones:
 quien mira tiene que poder saber en qué andás **sin preguntarte**, y quien retoma mañana tiene
-que poder reconstruir el estado desde el `PLAN.md`.
+que poder reconstruir el estado desde el plan del issue o del PR.
 
 ## 1. Checkpoints obligatorios
 
@@ -12,16 +12,16 @@ Emitís un checkpoint en cada uno de estos momentos. No son sugerencias.
 |---|---|
 | Al arrancar el trabajo | Fija objetivo, alcance y primera fase |
 | Al cerrar el descubrimiento | Separa lo confirmado de lo supuesto antes de planificar |
-| Al publicar el `PLAN.md` | Da la oportunidad de corregir el rumbo antes de escribir código |
+| Al publicar el plan | Da la oportunidad de corregir el rumbo antes de escribir código |
 | **Al abrir cada microtarea** | Declara qué vas a tocar y qué esperás observar |
 | **Al cerrar cada microtarea** | Declara el estado real y la evidencia |
-| Al encontrar un bug | Se reporta apenas aparece, no al final |
+| Al encontrar un bug | Se reporta apenas aparece, no al final; si queda fuera de alcance, va a un issue |
 | Al encontrar una contradicción en los requisitos | Se registra como ambigüedad, no se resuelve en silencio |
 | Antes de correr la suite o el E2E | Anticipa qué se va a ejercitar |
 | Después de cada resultado de test | Incluido el rojo, **sobre todo** el rojo |
 | Después de cada corrección | Con el re-test correspondiente |
 | Antes de la regresión | |
-| Al cerrar el trabajo | Junto con el `REPORTE.md` (regla 40) |
+| Al cerrar el trabajo | Junto con el reporte en el PR (regla 40) |
 
 ## 2. Frecuencia mínima
 
@@ -46,12 +46,14 @@ AVANCE — <trabajo> — <fase> — <ID de microtarea si aplica>
 
 Los estados son exactamente los seis de la regla 20. No se inventan otros.
 
-## 4. El `PLAN.md` es el estado durable
+## 4. El plan del issue o del PR es el estado durable
 
-El checkpoint en el chat es efímero; **el estado vive en el archivo**. Cada apertura y cierre de
-microtarea actualiza su fila en el `PLAN.md` en el momento, no al final de la sesión.
+El checkpoint en el chat es efímero; **el estado vive en el plan**, que está en el issue o en la
+descripción del PR (regla 20), nunca en un archivo del repo. Cada apertura y cierre de
+microtarea actualiza su fila en el momento, no al final de la sesión.
 
-Si la sesión se corta sin previo aviso, el `PLAN.md` tiene que alcanzar para retomar. Esa es la prueba.
+Si la sesión se corta sin previo aviso, el PR y sus issues tienen que alcanzar para retomar. Esa
+es la prueba.
 
 ## 5. Porcentajes
 
@@ -71,7 +73,8 @@ tiene mitades, estaba mal descompuesta y hay que partirla (regla 20).
 - Presentar un resumen optimista mientras hay algo en rojo.
 - Informar un porcentaje que no salga de la fórmula de arriba.
 - Cerrar una microtarea como `HECHO` en el checkpoint sin haber ejecutado su DoD.
-- Dejar el `PLAN.md` desactualizado "para ordenarlo después".
-- Anunciar el plan solo en el chat sin escribirlo en disco.
+- Dejar el plan desactualizado "para ordenarlo después".
+- Anunciar el plan solo en el chat sin escribirlo en el issue o en el PR.
+- Guardar el estado del trabajo en un archivo del repo.
 
 Skills relacionadas: `progress-reporting`, `finish-your-turn`, `evidence-and-verification`.

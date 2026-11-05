@@ -28,14 +28,6 @@ const SUBJECT_TYPES = ['SPECIMEN', 'ORDER', 'DEVICE'] as const;
 /** Cuerpo de `POST /tracking/trackable-subjects` (UC-37-01). */
 export class OpenSubjectDto {
   /**
-   * Identificador asociado a tenant.
-   */
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  tenantId?: string;
-
-  /**
    * Valor de subject type mantenido por la instancia.
    */
   @ApiProperty({ enum: SUBJECT_TYPES })
@@ -219,14 +211,6 @@ export class MilestoneDefinitionDto {
 
 /** Cuerpo de `POST /tracking/milestone-definitions` (UC-37-02). */
 export class DefineMilestonesDto {
-  /**
-   * Identificador asociado a tenant.
-   */
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  tenantId?: string;
-
   /**
    * Valor de subject type mantenido por la instancia.
    */

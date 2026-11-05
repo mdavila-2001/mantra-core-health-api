@@ -13,12 +13,12 @@
 | [coupons](#coupons) | Administra cupones y códigos promocionales para redimir descuentos con uso controlado. | 16 | 8 | 9 | COINCIDE |
 | [discount_rules](#discount_rules) | Define condiciones y cálculos de descuentos para aplicar promociones en checkout o facturación. | 17 | 6 | 5 | COINCIDE |
 | [earning_rules](#earning_rules) | Define reglas para ganar puntos o créditos por actividades elegibles del producto. | 20 | 8 | 2 | COINCIDE |
-| [loyalty_memberships](#loyalty_memberships) | Relaciona personas o cuentas con programas de fidelidad para controlar nivel y vigencia de participación. | 14 | 6 | 19 | COINCIDE |
-| [loyalty_programs](#loyalty_programs) | Define programas de fidelidad para premiar interacciones elegibles con la plataforma y sus prestadores. | 16 | 10 | 8 | COINCIDE |
+| [loyalty_memberships](#loyalty_memberships) | Relaciona personas o cuentas con programas de fidelidad para controlar nivel y vigencia de participación. | 14 | 6 | 14 | COINCIDE |
+| [loyalty_programs](#loyalty_programs) | Define programas de fidelidad para premiar interacciones elegibles con la plataforma y sus prestadores. | 16 | 10 | 13 | COINCIDE |
 | [loyalty_tiers](#loyalty_tiers) | Organiza niveles de beneficios dentro de programas de fidelidad según criterios de participación. | 13 | 4 | 6 | COINCIDE |
 | [member_referrals](#member_referrals) | Relaciona miembros que recomiendan con personas referidas para seguir atribución y recompensas. | 15 | 9 | 4 | COINCIDE |
 | [points_ledger_entries](#points_ledger_entries) | Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas. | 14 | 7 | 15 | COINCIDE |
-| [promotions](#promotions) | Cataloga promociones temporales que aplican descuentos o incentivos en pagos de servicios. | 21 | 9 | 7 | COINCIDE |
+| [promotions](#promotions) | Cataloga promociones temporales que aplican descuentos o incentivos en pagos de servicios. | 21 | 9 | 8 | COINCIDE |
 | [redemptions](#redemptions) | Registra redenciones de cupones o promociones para evitar duplicaciones y conservar evidencia de uso. | 18 | 9 | 7 | COINCIDE |
 | [referral_programs](#referral_programs) | Define programas de recomendación para invitar nuevos participantes mediante incentivos gobernados. | 19 | 11 | 2 | COINCIDE |
 
@@ -418,7 +418,7 @@ Relaciona personas o cuentas con programas de fidelidad para controlar nivel y v
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: loyalty_memberships`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `LoyaltyMemberships` — `src/modules/promotions/entities/loyalty_memberships.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 4 entrantes · 19 operaciones
+- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 4 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -473,20 +473,15 @@ Relaciona personas o cuentas con programas de fidelidad para controlar nivel y v
 | POST /loyalty/jobs/expire-points | LEE | DIRECTA |
 | GET /loyalty/me | LEE | DIRECTA |
 | GET /loyalty/me/points | LEE | DIRECTA |
-| POST /loyalty/me/points/redeem | ACTUALIZA | POR_TIPO |
 | POST /loyalty/me/points/redeem | LEE | DIRECTA |
-| POST /loyalty/memberships/{id}/points/earn | ACTUALIZA | POR_TIPO |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
-| POST /loyalty/memberships/{id}/points/redeem | ACTUALIZA | POR_TIPO |
 | POST /loyalty/memberships/{id}/points/redeem | LEE | DIRECTA |
-| POST /loyalty/memberships/{id}/recompute | ACTUALIZA | POR_TIPO |
 | POST /loyalty/memberships/{id}/recompute | LEE | DIRECTA |
 | POST /loyalty/programs/{id}/memberships | ACTUALIZA | POR_TIPO |
 | POST /loyalty/programs/{id}/memberships | CREA | DIRECTA |
 | POST /loyalty/programs/{id}/memberships | LEE | DIRECTA |
 | POST /redemptions/{id}/reverse | ACTUALIZA | POR_TIPO |
 | POST /redemptions/{id}/reverse | LEE | DIRECTA |
-| POST /referrals/{id}/qualify | ACTUALIZA | POR_TIPO |
 | POST /referrals/{id}/qualify | LEE | DIRECTA |
 
 #### Gobierno
@@ -512,7 +507,7 @@ Define programas de fidelidad para premiar interacciones elegibles con la plataf
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: loyalty_programs`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `LoyaltyPrograms` — `src/modules/promotions/entities/loyalty_programs.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 7 FK salientes · 4 entrantes · 8 operaciones
+- **Resumen:** 16 columnas · 10 índices · 7 FK salientes · 4 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -576,14 +571,19 @@ Define programas de fidelidad para premiar interacciones elegibles con la plataf
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /loyalty/jobs/expire-points | LEE | DIRECTA |
 | GET /loyalty/me | LEE | DIRECTA |
 | GET /loyalty/me/points | LEE | DIRECTA |
 | POST /loyalty/me/points/redeem | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
+| POST /loyalty/memberships/{id}/points/redeem | LEE | DIRECTA |
+| POST /loyalty/memberships/{id}/recompute | LEE | DIRECTA |
 | GET /loyalty/programs | LEE | DIRECTA |
 | POST /loyalty/programs | CREA | DIRECTA |
 | POST /loyalty/programs | LEE | DIRECTA |
 | POST /loyalty/programs/{id}/memberships | LEE | DIRECTA |
+| POST /redemptions/{id}/reverse | LEE | DIRECTA |
+| POST /referrals/{id}/qualify | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -859,7 +859,7 @@ Cataloga promociones temporales que aplican descuentos o incentivos en pagos de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: promotions`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `Promotions` — `src/modules/promotions/entities/promotions.entity.ts`
-- **Resumen:** 21 columnas · 9 índices · 6 FK salientes · 5 entrantes · 7 operaciones
+- **Resumen:** 21 columnas · 9 índices · 6 FK salientes · 5 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -934,6 +934,7 @@ Cataloga promociones temporales que aplican descuentos o incentivos en pagos de 
 | POST /promotions/{id}/coupons/batch | LEE | DIRECTA |
 | GET /promotions/me | LEE | DIRECTA |
 | POST /redemptions | LEE | DIRECTA |
+| POST /redemptions/{id}/reverse | LEE | DIRECTA |
 
 #### Gobierno
 

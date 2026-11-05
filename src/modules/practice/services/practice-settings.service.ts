@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { loadPracticeInScope } from './practice-scope';
 import {
   PracticesRepository,
   PracticeSettingsRepository,
@@ -40,16 +41,13 @@ export class PracticeSettingsService {
     dto: UpsertSettingDto,
     actor: AuthenticatedUser,
   ): Promise<SettingResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.setting.upsert', practiceId, settingKey },
       'Upserting setting',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
+      await loadPracticeInScope(this.practicesRepo, tx, practiceId, tenantId);
 
       const existing = await this.settingsRepo.findByPracticeAndKey(
         tx,

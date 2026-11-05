@@ -1,10 +1,25 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
-import {
-  canonicalJson,
-  deriveWebhookSecret,
-  signPayload,
-} from '../../../src/common';
+import { canonicalJson, signPayload } from '../../../src/common';
+
+/**
+ * Secreto con que el servidor firma el despacho y verifica el callback de la conexión del smoke.
+ * Debe medir al menos 32 caracteres (`MIN_WEBHOOK_SECRET_LENGTH`).
+ */
+const SMOKE_WEBHOOK_SECRET = 'smoke-integrations-webhook-secret-0123456789';
+
+/**
+ * Variable de entorno que guarda el secreto de la conexión del tenant.
+ *
+ * La credencial de una conexión ya no se deriva del UUID de la conexión: su `secretRef` nombra una
+ * variable del entorno del servidor y sólo vale si lleva el prefijo del tenant dueño
+ * (`WEBHOOK_SECRET_<UUID sin guiones, en mayúsculas>_<NOMBRE>`, ver
+ * `IntegrationsSecretsService`). El smoke levanta la aplicación en el mismo proceso, así que basta
+ * con definir la variable en `process.env` antes de aprovisionar la conexión.
+ */
+function smokeSecretEnvName(tenantId: string): string {
+  return `WEBHOOK_SECRET_${tenantId.replace(/-/g, '').toUpperCase()}_SMOKE`;
+}
 
 /**
  * Smoke del módulo integrations (12): registro de proveedor, conexión, endpoint,
@@ -59,11 +74,15 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) =>
       `/integrations/providers/${c.vars.integProviderId}/connections`,
+    setup: (c) => {
+      process.env[smokeSecretEnvName(c.tenantId)] = SMOKE_WEBHOOK_SECRET;
+      return Promise.resolve();
+    },
     body: (c) => ({
       tenantId: c.tenantId,
       environment: 'SANDBOX',
       secretType: 'API_KEY',
-      secretRef: `ref-${c.u}`,
+      secretRef: `env:${smokeSecretEnvName(c.tenantId)}`,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -196,10 +215,7 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
         endpointId: c.vars.integEndpointId,
         correlationId: `idem-${c.u}`,
         payloadJson: payload,
-        signature: signPayload(
-          deriveWebhookSecret('connection', c.vars.integConnectionId),
-          canonicalJson(payload),
-        ),
+        signature: signPayload(SMOKE_WEBHOOK_SECRET, canonicalJson(payload)),
       };
     },
     expectedStatus: 201,

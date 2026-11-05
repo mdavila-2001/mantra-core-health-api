@@ -21,10 +21,18 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { CACHE_DIR, MIRRORS, mirrorFilePath } from './lib/sources.mjs';
+import {
+  CACHE_DIR,
+  MIRRORS,
+  OFFICIAL,
+  mirrorFilePath,
+  officialFilePath,
+} from './lib/sources.mjs';
 
+const HERE = dirname(fileURLToPath(import.meta.url));
 const FORCE = process.argv.includes('--force');
 const sha256 = (path) =>
   createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -87,6 +95,65 @@ for (const [key, m] of Object.entries(MIRRORS)) {
     };
     console.log(`[${key}] ${f.path} ✓ ${got.slice(0, 12)}`);
   }
+}
+
+// Descargas oficiales: curl (respeta el proxy del entorno) + sha256 de lo
+// bajado y del archivo extraído. Un hash distinto no corta la etapa: avisa y
+// la build usa la copia en git.
+const EXTRACT = {
+  unzip: (download, out, o) =>
+    writeFileSync(
+      out,
+      execFileSync('unzip', ['-p', download, o.path], { maxBuffer: 1 << 30 }),
+    ),
+  'emdn-xlsx': (download, out) =>
+    execFileSync(
+      'python3',
+      ['-I', join(HERE, 'extract-emdn-xlsx.py'), download, out],
+      { stdio: ['ignore', 'ignore', 'inherit'] },
+    ),
+};
+manifest.official = {};
+for (const [key, o] of Object.entries(OFFICIAL)) {
+  const path = officialFilePath(key);
+  if (FORCE || !existsSync(path) || sha256(path) !== o.sha256) {
+    const dir = dirname(path);
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
+    const download = join(dir, `download${extname(new URL(o.url).pathname)}`);
+    try {
+      execFileSync('curl', ['-sSfL', '-m', '300', '-o', download, o.url], {
+        stdio: ['ignore', 'ignore', 'pipe'],
+      });
+    } catch (e) {
+      console.warn(`[${key}] no se pudo bajar ${o.url}: ${e.message}`);
+      continue;
+    }
+    const gotDownload = sha256(download);
+    if (gotDownload !== o.downloadSha256) {
+      console.warn(
+        `[${key}] lo publicado tiene sha256 ${gotDownload} ≠ fijado ${o.downloadSha256} (otra versión): no se usa; actualizá el pin en lib/sources.mjs`,
+      );
+      rmSync(dir, { recursive: true, force: true });
+      continue;
+    }
+    EXTRACT[o.extract](download, path, o);
+    rmSync(download, { force: true });
+  }
+  const got = sha256(path);
+  if (got !== o.sha256) {
+    console.warn(`[${key}] ${o.path} sha256 ${got} ≠ ${o.sha256}: no se usa`);
+    rmSync(path, { force: true });
+    continue;
+  }
+  manifest.official[key] = {
+    url: o.url,
+    exportDate: o.exportDate,
+    downloadSha256: o.downloadSha256,
+    path: o.path,
+    sha256: got,
+  };
+  console.log(`[${key}] ${o.path} ✓ ${got.slice(0, 12)} (${o.exportDate})`);
 }
 
 writeFileSync(

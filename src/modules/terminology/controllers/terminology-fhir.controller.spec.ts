@@ -60,16 +60,17 @@ describe('TerminologyFhirController', () => {
     expect(result).toBe(expected);
   });
 
-  it('$lookup delega system y code', async () => {
+  it('$lookup delega system, code y el sujeto (decide qué propiedades ve)', async () => {
     const { controller, conceptsService } = build();
     const expected = { conceptId: 'c-1', code: 'E11' };
     conceptsService.lookupConcept.mockResolvedValue(expected);
 
-    const result = await controller.lookup('http://x', 'E11');
+    const result = await controller.lookup('http://x', 'E11', user);
 
     expect(conceptsService.lookupConcept).toHaveBeenCalledWith(
       'http://x',
       'E11',
+      user,
     );
     expect(result).toBe(expected);
   });
@@ -77,13 +78,15 @@ describe('TerminologyFhirController', () => {
   it('$lookup rechaza la llamada sin system', () => {
     const { controller } = build();
 
-    expect(() => controller.lookup('', 'E11')).toThrow(BadRequestException);
+    expect(() => controller.lookup('', 'E11', user)).toThrow(
+      BadRequestException,
+    );
   });
 
   it('$lookup rechaza la llamada sin code', () => {
     const { controller } = build();
 
-    expect(() => controller.lookup('http://x', '')).toThrow(
+    expect(() => controller.lookup('http://x', '', user)).toThrow(
       BadRequestException,
     );
   });

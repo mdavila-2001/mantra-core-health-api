@@ -116,6 +116,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -262,6 +263,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -290,7 +292,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-auth-profiles.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -396,6 +397,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -420,7 +422,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil de autenticación no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-auth-profiles.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -532,6 +533,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExchangeRecordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExchangeRecordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExchangeRecordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExchangeRecordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExchangeRecordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -564,7 +566,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 409 | `CONFLICT` | La clave de idempotencia se reusó con un payload distinto | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Falta la clave de idempotencia (idempotency-key) | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
@@ -682,6 +683,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExchangeAttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -714,7 +716,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Registro de intercambio no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -815,6 +816,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -839,7 +841,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato ya está retirado | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -945,6 +946,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SyncCursorResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SyncCursorResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SyncCursorResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SyncCursorResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SyncCursorResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -975,7 +977,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El cursor solo puede avanzar hacia adelante | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1084,6 +1085,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContractVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContractVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContractVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContractVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1116,7 +1118,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se pueden publicar versiones en contratos DRAFT o ACTIVE | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1216,6 +1217,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1240,8 +1242,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
-| 404 | `NOT_FOUND` | Versión no encontrada para el contrato | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se puede activar una versión DRAFT | Excepción explícita en src/modules/integration_contracts/services/integration-contracts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1350,6 +1350,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebhookSubscriptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1382,7 +1383,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Contrato no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 409 | `CONFLICT` | Ya existe una suscripción para ese evento y callback | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El contrato debe estar ACTIVE para suscribir webhooks | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
@@ -1486,6 +1486,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExchangeAttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExchangeAttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1518,7 +1519,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Registro de intercambio no encontrado | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se reintenta un intercambio con último intento FAILED | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
 | 422 | `PRECONDITION_FAILED` | El último intento marcó fallo permanente (no reintentable) | Excepción explícita en src/modules/integration_contracts/services/integration-exchanges.service.ts |
@@ -1628,6 +1628,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeliveryEvidenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeliveryEvidenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeliveryEvidenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeliveryEvidenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeliveryEvidenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1656,7 +1657,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Suscripción de webhook no encontrada | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La suscripción no está ACTIVE | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 422 | `PRECONDITION_FAILED` | La suscripción aún no es válida | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |

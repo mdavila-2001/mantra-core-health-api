@@ -216,6 +216,21 @@ export class JournalRepository {
   }
 
   /**
+   * Una línea del mayor por id, sin acotar: quien la usa la contrasta contra el
+   * tenant activo a través de la práctica de su asiento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la línea.
+   * @returns La línea, o `null` si no existe.
+   */
+  findLedgerEntryById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LedgerEntries | null> {
+    return em.findOne(LedgerEntries, { id });
+  }
+
+  /**
    * Obtiene find by transaction number.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -611,6 +626,25 @@ export class JournalRepository {
     ledgerEntryId: string,
   ): Promise<JournalEntryAssignments | null> {
     return em.findOne(JournalEntryAssignments, { ledgerEntryId });
+  }
+
+  /**
+   * Imputaciones (centro de costo, de beneficio, activo…) de varias líneas en
+   * una sola consulta: la lectura del detalle de un asiento las devuelve junto
+   * a cada línea sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ledgerEntryIds - Líneas del mayor cuyas imputaciones se piden.
+   * @returns Las imputaciones encontradas, sin orden garantizado.
+   */
+  assignmentsForEntries(
+    em: EntityManager,
+    ledgerEntryIds: readonly string[],
+  ): Promise<JournalEntryAssignments[]> {
+    if (ledgerEntryIds.length === 0) return Promise.resolve([]);
+    return em.find(JournalEntryAssignments, {
+      ledgerEntryId: { $in: [...ledgerEntryIds] },
+    });
   }
 
   /**

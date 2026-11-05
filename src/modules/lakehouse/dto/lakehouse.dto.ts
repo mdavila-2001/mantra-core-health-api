@@ -60,7 +60,7 @@ export class DefineZoneDto {
   /**
    * Identificador asociado a namespace.
    */
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiProperty({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   namespaceId?: string;
@@ -68,7 +68,7 @@ export class DefineZoneDto {
   /**
    * Valor de encryption profile code mantenido por la instancia.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     maxLength: 100,
     description: 'Perfil de cifrado en reposo',
   })
@@ -80,7 +80,7 @@ export class DefineZoneDto {
   /**
    * Valor de retention policy code mantenido por la instancia.
    */
-  @ApiPropertyOptional({ maxLength: 100 })
+  @ApiProperty({ maxLength: 100 })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -958,7 +958,7 @@ export class QualityFindingDto {
   /**
    * Identificador asociado a partition.
    */
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiProperty({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   partitionId?: string;
@@ -975,7 +975,7 @@ export class QualityFindingDto {
   /**
    * Identificador asociado a sample object manifest.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description: 'Muestra para diagnosticar',
   })
@@ -996,7 +996,7 @@ export class RunQualityCheckDto {
   /**
    * Identificador asociado a transformation run.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description: 'Corrida de transformación evaluada',
   })
@@ -1161,7 +1161,7 @@ export class DefineCohortDto {
   /**
    * Valor de inclusion expression mantenido por la instancia.
    */
-  @ApiPropertyOptional({ maxLength: 2000 })
+  @ApiProperty({ maxLength: 2000 })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
@@ -1328,7 +1328,7 @@ export class ApproveDatasetReleaseDto {
   /**
    * Identificador asociado a object manifest.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description: 'Manifiesto del objeto de-identificado',
   })
@@ -1339,7 +1339,7 @@ export class ApproveDatasetReleaseDto {
   /**
    * Valor de schema version mantenido por la instancia.
    */
-  @ApiPropertyOptional({ maxLength: 50 })
+  @ApiProperty({ maxLength: 50 })
   @IsOptional()
   @IsString()
   @MaxLength(50)

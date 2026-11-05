@@ -121,4 +121,76 @@ export class Permissions {
    */
   @Property({ fieldName: 'allow_direct_user_grant', type: 'boolean' })
   allowDirectUserGrant!: boolean;
+
+  /**
+   * Identificador asociado a sensitivity concept.
+   */
+  @Property({
+    fieldName: 'sensitivity_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  sensitivityConceptId?: string;
+
+  /**
+   * Valor de requires reason mantenido por la instancia.
+   */
+  @Property({ fieldName: 'requires_reason', type: 'boolean', default: false })
+  requiresReason!: boolean;
+
+  /**
+   * Valor de requires step up mantenido por la instancia.
+   */
+  @Property({ fieldName: 'requires_step_up', type: 'boolean', default: false })
+  requiresStepUp!: boolean;
+
+  /**
+   * Identificador asociado a approval mode concept.
+   */
+  @Property({
+    fieldName: 'approval_mode_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  approvalModeConceptId?: string;
+
+  /**
+   * Identificador asociado a purpose of use concept.
+   */
+  @Property({
+    fieldName: 'purpose_of_use_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  purposeOfUseConceptId?: string;
+
+  /**
+   * Identificador asociado a legal basis concept.
+   */
+  @Property({
+    fieldName: 'legal_basis_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  legalBasisConceptId?: string;
+
+  /**
+   * Valor de touches clinical data mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'touches_clinical_data',
+    type: 'boolean',
+    default: false,
+  })
+  touchesClinicalData!: boolean;
+
+  /**
+   * Valor de support assignable mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'support_assignable',
+    type: 'boolean',
+    default: false,
+  })
+  supportAssignable!: boolean;
 }

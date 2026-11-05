@@ -1,8 +1,6 @@
-import {
-  createParamDecorator,
-  ExecutionContext,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { internalWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import type {
   AuthenticatedRequest,
   AuthenticatedUser,
@@ -19,8 +17,9 @@ export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
     const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.user) {
-      throw new InternalServerErrorException(
+      throw internalWithReason(
         'CurrentUser usado en un handler sin autenticación aplicada',
+        SystemErrorReason.AUTHENTICATION_NOT_APPLIED,
       );
     }
     return request.user;

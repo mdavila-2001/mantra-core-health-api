@@ -14,7 +14,9 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 
 const actor = { id: 'user-1', roles: ['PROMOTIONS_ADMIN'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
@@ -24,6 +26,26 @@ const INTENT = '44444444-4444-4444-4444-444444444444';
 const ORDER = '55555555-5555-5555-5555-555555555555';
 const REDEMPTION = '66666666-6666-6666-6666-666666666666';
 const MEMBERSHIP = '77777777-7777-7777-7777-777777777777';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -32,19 +54,27 @@ const MEMBERSHIP = '77777777-7777-7777-7777-777777777777';
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const discountsRepo = {
+  const discountsRepo: Record<string, any> = {
     createPromotion: mockFn(),
-    findPromotionById: mockFn(),
+    // Sin bloqueo: por defecto devuelve lo mismo que la lectura bloqueada.
+    findPromotionById: mockFn((...args: unknown[]) =>
+      discountsRepo.findPromotionForUpdate(...args),
+    ),
     findPromotionForUpdate: mockFn(),
     findPromotionByCode: mockFn(),
     createDiscountRule: mockFn(),
     findRulesByPromotion: mockFn(),
     createCoupon: mockFn(),
-    findCouponByCode: mockFn(),
+    findCouponByCode: mockFn((...args: unknown[]) =>
+      discountsRepo.findCouponByCodeForUpdate(...args),
+    ),
     findCouponByCodeForUpdate: mockFn(),
     findCouponForUpdate: mockFn(),
     findCouponsByCodes: mockFn(),
     createRedemption: mockFn(),
+    findRedemptionById: mockFn((...args: unknown[]) =>
+      discountsRepo.findRedemptionForUpdate(...args),
+    ),
     findRedemptionForUpdate: mockFn(),
     findRedemptionsByRedeemer: mockFn(),
     findAppliedRedemptions: mockFn(),
@@ -54,19 +84,33 @@ function build() {
     findPersonalCoupons: mockFn(),
     findConcepts: mockFn(),
   };
-  const loyaltyRepo = {
+  const loyaltyRepo: Record<string, any> = {
     findLedgerEntryByKey: mockFn(),
     findMembershipForUpdate: mockFn(),
+    findMembershipById: mockFn((...args: unknown[]) =>
+      loyaltyRepo.findMembershipForUpdate(...args),
+    ),
+    // El programa de la membresía es, por defecto, del tenant activo.
+    findProgramById: mockFn().mockResolvedValue({
+      id: 'prog-1',
+      tenantId: TENANT,
+    }),
     createLedgerEntry: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PromotionsDiscountsService(
     em as any,
-    discountsRepo,
+    discountsRepo as any,
     loyaltyRepo as any,
     logger as any,
   );
-  return { service, tx, discountsRepo, loyaltyRepo };
+  return {
+    service: inTenant(service, TENANT),
+    raw: service,
+    tx,
+    discountsRepo,
+    loyaltyRepo,
+  };
 }
 
 /**
@@ -78,6 +122,7 @@ function build() {
 function activePromotion(overrides: Record<string, unknown> = {}): any {
   return {
     id: PROMOTION,
+    tenantId: TENANT,
     statusConceptId: CONCEPTS.PROMOTION_ACTIVE,
     validFrom: new Date('2020-01-01T00:00:00Z'),
     validTo: new Date('2099-01-01T00:00:00Z'),
@@ -645,6 +690,7 @@ describe('PromotionsDiscountsService', () => {
 
     it('reverses the redemption and gives the coupon use back', async () => {
       const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
       const redemption = appliedRedemption();
       d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(redemption);
       const coupon = activeCoupon({
@@ -666,6 +712,7 @@ describe('PromotionsDiscountsService', () => {
 
     it('compensates the points with an adjustment entry instead of deleting', async () => {
       const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
       d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(
         appliedRedemption(),
       );
@@ -695,6 +742,7 @@ describe('PromotionsDiscountsService', () => {
 
     it('does not restore the points twice on a repeated reversal attempt', async () => {
       const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
       d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(
         appliedRedemption(),
       );
@@ -719,6 +767,7 @@ describe('PromotionsDiscountsService', () => {
 
     it('rejects reversing a redemption that is already reversed', async () => {
       const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
       d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(
         appliedRedemption({ statusConceptId: CONCEPTS.REDEMPTION_REVERSED }),
       );
@@ -734,6 +783,7 @@ describe('PromotionsDiscountsService', () => {
 
     it('fails when the redemption does not exist', async () => {
       const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
       d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(null);
 
       await expect(
@@ -743,6 +793,283 @@ describe('PromotionsDiscountsService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de PROM-01. */
+async function expectOutOfScope(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(
+    PromotionsErrorReason.PROMOTIONS_RESOURCE_OUT_OF_SCOPE,
+  );
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('PromotionsDiscountsService · alcance de tenant (PROM-01)', () => {
+  const foreignPromotion = (overrides: Record<string, unknown> = {}) =>
+    activePromotion({ tenantId: TENANT_B, ...overrides });
+  const redeemDto = {
+    code: 'SALUD10',
+    orderAmount: '200.00',
+    redeemerType: 'USER' as const,
+    redeemerRefId: REDEEMER,
+  };
+
+  it('createPromotion persiste el tenant del contexto e ignora el del cuerpo', async () => {
+    const d = build();
+    d.discountsRepo.findPromotionByCode.mockResolvedValue(null);
+    d.discountsRepo.createPromotion.mockReturnValue({ id: PROMOTION });
+    d.discountsRepo.createDiscountRule.mockReturnValue({ id: 'rule-1' });
+
+    await d.service.createPromotion(
+      {
+        tenantId: TENANT_B,
+        code: 'P1',
+        name: 'P',
+        promotionType: 'COUPON',
+        validFrom: '2026-01-01T00:00:00Z',
+        validTo: '2026-12-31T00:00:00Z',
+        rules: [{ discountType: 'PERCENTAGE', percentage: '10' }],
+      } as any,
+      actor,
+    );
+
+    expect(d.discountsRepo.createPromotion.mock.calls[0][1].tenantId).toBe(
+      TENANT,
+    );
+    expect(d.discountsRepo.findPromotionByCode).toHaveBeenCalledWith(
+      expect.anything(),
+      TENANT,
+      'P1',
+    );
+  });
+
+  it('createPromotion sin tenant en el contexto se rechaza y no persiste', async () => {
+    const d = build();
+
+    await expect(
+      d.raw.createPromotion({ code: 'P1', rules: [] } as any, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.discountsRepo.createPromotion).not.toHaveBeenCalled();
+  });
+
+  it('emitir cupones sobre la promoción de otro tenant: 404 uniforme, igual que inexistente; no crea cupones', async () => {
+    const d = build();
+    const dto = { couponType: 'PUBLIC' as const, quantity: 3 };
+    d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+    const foreign = await expectOutOfScope(
+      d.service.issueCoupons(PROMOTION, dto, actor),
+      'Promoción no encontrada',
+    );
+    d.discountsRepo.findPromotionById.mockResolvedValue(null);
+    const missing = await expectOutOfScope(
+      d.service.issueCoupons(PROMOTION, dto, actor),
+      'Promoción no encontrada',
+    );
+
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.discountsRepo.createCoupon).not.toHaveBeenCalled();
+  });
+
+  describe('validateCoupon', () => {
+    it('un cupón de otro tenant se informa exactamente igual que uno inexistente', async () => {
+      const d = build();
+      d.discountsRepo.findCouponByCode.mockResolvedValue(activeCoupon());
+      d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+      const foreign = await d.service.validateCoupon({
+        code: 'SALUD10',
+        orderAmount: '200.00',
+        redeemerRefId: REDEEMER,
+      } as any);
+
+      d.discountsRepo.findCouponByCode.mockResolvedValue(null);
+      const missing = await d.service.validateCoupon({
+        code: 'SALUD10',
+        orderAmount: '200.00',
+        redeemerRefId: REDEEMER,
+      } as any);
+
+      expect(foreign).toEqual(missing);
+      expect(foreign.valid).toBe(false);
+      expect(d.discountsRepo.findRulesByPromotion).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto no valida nada', async () => {
+      const d = build();
+
+      await expect(
+        d.raw.validateCoupon({ code: 'SALUD10' } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.discountsRepo.findCouponByCode).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('redimir y aplicar descuento', () => {
+    it('canjear el cupón de otro tenant: 404 uniforme; ni se bloquea ni cambia el cupón ni se crea la redención', async () => {
+      const d = build();
+      const coupon = activeCoupon();
+      d.discountsRepo.findCouponByCode.mockResolvedValue(coupon);
+      d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+
+      const foreign = await expectOutOfScope(
+        d.service.redeemCoupon(redeemDto, actor),
+        'Cupón no encontrado',
+      );
+      d.discountsRepo.findCouponByCode.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.redeemCoupon(redeemDto, actor),
+        'Cupón no encontrado',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(coupon.redemptionCount).toBe(0);
+      expect(d.discountsRepo.findCouponByCodeForUpdate).not.toHaveBeenCalled();
+      expect(d.discountsRepo.createRedemption).not.toHaveBeenCalled();
+    });
+
+    it('aplicar descuento con el cupón de otro tenant: 404 uniforme y no registra redención', async () => {
+      const d = build();
+      d.discountsRepo.findCouponByCode.mockResolvedValue(activeCoupon());
+      d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+
+      await expectOutOfScope(
+        d.service.applyDiscount(
+          ORDER,
+          {
+            paymentIntentId: INTENT,
+            orderAmount: '200.00',
+            redeemerType: 'USER' as const,
+            redeemerRefId: REDEEMER,
+            couponCode: 'SALUD10',
+          },
+          actor,
+        ),
+        'Cupón no encontrado',
+      );
+      expect(d.discountsRepo.createRedemption).not.toHaveBeenCalled();
+    });
+
+    it('aplicar una promoción automática de otro tenant: 404 uniforme, sin bloquear ni registrar', async () => {
+      const d = build();
+      d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+
+      await expectOutOfScope(
+        d.service.applyDiscount(
+          ORDER,
+          {
+            paymentIntentId: INTENT,
+            orderAmount: '200.00',
+            redeemerType: 'USER' as const,
+            redeemerRefId: REDEEMER,
+            promotionId: PROMOTION,
+          },
+          actor,
+        ),
+        'Promoción no encontrada',
+      );
+      expect(d.discountsRepo.findPromotionForUpdate).not.toHaveBeenCalled();
+      expect(d.discountsRepo.createRedemption).not.toHaveBeenCalled();
+    });
+
+    it('canje propio: la redención y el cupón se resuelven en el tenant activo y el cupón se consume una vez', async () => {
+      const d = build();
+      const coupon = activeCoupon();
+      d.discountsRepo.findCouponByCodeForUpdate.mockResolvedValue(coupon);
+      d.discountsRepo.findPromotionForUpdate.mockResolvedValue(
+        activePromotion(),
+      );
+      d.discountsRepo.findRulesByPromotion.mockResolvedValue([
+        percentageRule(),
+      ]);
+      d.discountsRepo.findAppliedRedemptions.mockResolvedValue([]);
+      d.discountsRepo.createRedemption.mockReturnValue({ id: REDEMPTION });
+
+      const res = await d.service.redeemCoupon(redeemDto, actor);
+
+      expect(res.id).toBe(REDEMPTION);
+      expect(coupon.redemptionCount).toBe(1);
+      expect(d.discountsRepo.createRedemption).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reverseRedemption', () => {
+    const redemption = (overrides: Record<string, unknown> = {}): any => ({
+      id: REDEMPTION,
+      promotionId: PROMOTION,
+      couponId: 'coupon-1',
+      statusConceptId: CONCEPTS.REDEMPTION_APPLIED,
+      discountAmount: '20.00',
+      ...overrides,
+    });
+
+    it('revertir la redención de otro tenant: 404 uniforme; no se libera el cupón ni se compensan puntos', async () => {
+      const d = build();
+      const row = redemption();
+      d.discountsRepo.findRedemptionById.mockResolvedValue(row);
+      d.discountsRepo.findPromotionById.mockResolvedValue(foreignPromotion());
+
+      const foreign = await expectOutOfScope(
+        d.service.reverseRedemption(
+          REDEMPTION,
+          { reason: 'REFUND' as const },
+          actor,
+        ),
+        'Redención no encontrada',
+      );
+      d.discountsRepo.findRedemptionById.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.reverseRedemption(
+          REDEMPTION,
+          { reason: 'REFUND' as const },
+          actor,
+        ),
+        'Redención no encontrada',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(row.statusConceptId).toBe(CONCEPTS.REDEMPTION_APPLIED);
+      expect(d.discountsRepo.findRedemptionForUpdate).not.toHaveBeenCalled();
+      expect(d.discountsRepo.findCouponForUpdate).not.toHaveBeenCalled();
+      expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
+    });
+
+    it('devolver puntos a una membresía de otro tenant: 404 uniforme; el saldo de B no cambia', async () => {
+      const d = build();
+      d.discountsRepo.findRedemptionForUpdate.mockResolvedValue(redemption());
+      d.discountsRepo.findPromotionById.mockResolvedValue(activePromotion());
+      d.discountsRepo.findCouponForUpdate.mockResolvedValue(activeCoupon());
+      d.loyaltyRepo.findLedgerEntryByKey.mockResolvedValue(null);
+      const memberOfB: any = { id: MEMBERSHIP, pointsBalance: '10.00' };
+      d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(memberOfB);
+      d.loyaltyRepo.findProgramById.mockResolvedValue({
+        id: 'prog-b',
+        tenantId: TENANT_B,
+      });
+
+      await expectOutOfScope(
+        d.service.reverseRedemption(
+          REDEMPTION,
+          {
+            reason: 'CANCEL' as const,
+            membershipId: MEMBERSHIP,
+            restorePoints: '30',
+          },
+          actor,
+        ),
+        'Membresía no encontrada',
+      );
+
+      expect(memberOfB.pointsBalance).toBe('10.00');
+      expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
     });
   });
 });

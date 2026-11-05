@@ -30,6 +30,12 @@ export class PharmacyOrdersService {
     return this.useCases.getOrder(...args);
   }
 
+  openConversation(
+    ...args: Parameters<PharmacyOrdersUseCases['openConversation']>
+  ): ReturnType<PharmacyOrdersUseCases['openConversation']> {
+    return this.useCases.openConversation(...args);
+  }
+
   cancel(
     ...args: Parameters<PharmacyOrdersUseCases['cancel']>
   ): ReturnType<PharmacyOrdersUseCases['cancel']> {

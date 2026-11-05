@@ -9,15 +9,19 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { MarketingCampaignsService } from './marketing-campaigns.service';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { MarketingErrorReason } from '../marketing.error-reasons';
 
 const actor = { id: 'user-1', roles: ['MARKETING_MANAGER'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
 const SEGMENT = '22222222-2222-2222-2222-222222222222';
 const CAMPAIGN = '33333333-3333-3333-3333-333333333333';
 const MEMBER_A = '44444444-4444-4444-4444-444444444444';
@@ -51,10 +55,35 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new MarketingCampaignsService(
     em as any,
-    campaignsRepo,
+    campaignsRepo as any,
     logger as any,
   );
-  return { service, tx, campaignsRepo };
+  return {
+    service: inTenant(service, TENANT),
+    raw: service,
+    tx,
+    em,
+    campaignsRepo,
+  };
+}
+
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
 }
 
 /** Miembro de segmento tal como lo devuelve el repositorio. */
@@ -144,6 +173,7 @@ describe('MarketingCampaignsService', () => {
       const d = build();
       const segment: any = {
         id: SEGMENT,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       };
       d.campaignsRepo.findSegmentForUpdate.mockResolvedValue(segment);
@@ -165,6 +195,7 @@ describe('MarketingCampaignsService', () => {
       const d = build();
       d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
         id: SEGMENT,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       const leaving = segmentMember({ memberRefId: MEMBER_B });
@@ -180,6 +211,7 @@ describe('MarketingCampaignsService', () => {
       const d = build();
       d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
         id: SEGMENT,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       const returning = segmentMember({
@@ -198,6 +230,7 @@ describe('MarketingCampaignsService', () => {
       const d = build();
       d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
         id: SEGMENT,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       d.campaignsRepo.findSegmentMembers.mockResolvedValue([segmentMember()]);
@@ -225,6 +258,7 @@ describe('MarketingCampaignsService', () => {
       const d = build();
       d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
         id: SEGMENT,
+        tenantId: TENANT,
         stateConceptId: CONCEPTS.STATE_REVOKED,
       });
 
@@ -248,7 +282,10 @@ describe('MarketingCampaignsService', () => {
     it('creates the campaign as scheduled', async () => {
       const d = build();
       d.campaignsRepo.findCampaignByCode.mockResolvedValue(null);
-      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({ id: SEGMENT });
+      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
+        id: SEGMENT,
+        tenantId: TENANT,
+      });
       d.campaignsRepo.createCampaign.mockReturnValue({ id: 'cmp-1' });
 
       const res = await d.service.createCampaign(dto, actor);
@@ -309,6 +346,7 @@ describe('MarketingCampaignsService', () => {
     function scheduledCampaign(): any {
       return {
         id: CAMPAIGN,
+        tenantId: TENANT,
         segmentId: SEGMENT,
         statusConceptId: CONCEPTS.CAMPAIGN_SCHEDULED,
       };
@@ -492,6 +530,239 @@ describe('MarketingCampaignsService', () => {
           channelConceptId: CONCEPTS.CH_EMAIL,
         }),
       );
+    });
+  });
+  describe('aislamiento por tenant (MKT-01)', () => {
+    it('crea el segmento en el tenant del contexto aunque el cuerpo no lo declare', async () => {
+      const d = build();
+      d.campaignsRepo.findSegmentByCode.mockResolvedValue(null);
+      d.campaignsRepo.createSegment.mockReturnValue({ id: 'seg-1' });
+
+      await d.service.createSegment(
+        {
+          code: 'SEG-A',
+          name: 'A',
+          segmentType: 'DYNAMIC' as const,
+        },
+        actor,
+      );
+
+      expect(d.campaignsRepo.findSegmentByCode).toHaveBeenCalledWith(
+        d.em,
+        TENANT,
+        'SEG-A',
+      );
+      expect(d.campaignsRepo.createSegment).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+    });
+
+    it('rechaza un alta cuyo tenantId del cuerpo es de otro tenant, sin persistir', async () => {
+      const d = build();
+      const attempt = d.service.createSegment(
+        {
+          tenantId: OTHER_TENANT,
+          code: 'SEG-B',
+          name: 'B',
+          segmentType: 'STATIC' as const,
+        },
+        actor,
+      );
+
+      await expect(attempt).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: MarketingErrorReason.TENANT_MISMATCH,
+      });
+      expect(d.campaignsRepo.createSegment).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo el alta falla con TENANT_REQUIRED', async () => {
+      const d = build();
+      await expect(
+        d.raw.createSegment(
+          {
+            code: 'SEG-C',
+            name: 'C',
+            segmentType: 'STATIC' as const,
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      expect(d.campaignsRepo.createSegment).not.toHaveBeenCalled();
+    });
+
+    it('un segmento de otro tenant responde igual que uno inexistente al refrescar', async () => {
+      const d = build();
+      const dto = {
+        members: [{ memberType: 'CONTACT' as const, memberRefId: MEMBER_A }],
+      };
+      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
+        id: SEGMENT,
+        tenantId: OTHER_TENANT,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      const foreign = await d.service
+        .refreshSegment(SEGMENT, dto, actor)
+        .catch((e: any) => e);
+      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue(null);
+      const missing = await d.service
+        .refreshSegment(SEGMENT, dto, actor)
+        .catch((e: any) => e);
+
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.reason).toBe(MarketingErrorReason.SEGMENT_NOT_AVAILABLE);
+      expect(foreign.details).toBeUndefined();
+      expect(d.campaignsRepo.createSegmentMember).not.toHaveBeenCalled();
+      expect(d.campaignsRepo.findSegmentMembers).not.toHaveBeenCalled();
+    });
+
+    it('busca y bloquea el segmento con el tenant activo', async () => {
+      const d = build();
+      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue(null);
+      await d.service
+        .refreshSegment(SEGMENT, { members: [] }, actor)
+        .catch(() => undefined);
+      expect(d.campaignsRepo.findSegmentForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        SEGMENT,
+      );
+    });
+
+    it('no permite vincular una campaña a un segmento de otro tenant', async () => {
+      const d = build();
+      d.campaignsRepo.findCampaignByCode.mockResolvedValue(null);
+      d.campaignsRepo.findSegmentForUpdate.mockResolvedValue({
+        id: SEGMENT,
+        tenantId: OTHER_TENANT,
+      });
+
+      await expect(
+        d.service.createCampaign(
+          {
+            code: 'CMP-X',
+            name: 'X',
+            campaignType: 'ONE_SHOT' as const,
+            objective: 'AWARENESS' as const,
+            segmentId: SEGMENT,
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.SEGMENT_NOT_AVAILABLE,
+      });
+      expect(d.campaignsRepo.createCampaign).not.toHaveBeenCalled();
+    });
+
+    it('una campaña de otro tenant no materializa audiencia y responde 404 uniforme', async () => {
+      const d = build();
+      const foreignCampaign = {
+        id: CAMPAIGN,
+        tenantId: OTHER_TENANT,
+        segmentId: SEGMENT,
+        statusConceptId: CONCEPTS.CAMPAIGN_SCHEDULED,
+      };
+      d.campaignsRepo.findCampaignForUpdate.mockResolvedValue(foreignCampaign);
+      const foreign = await d.service
+        .materializeMembers(CAMPAIGN, {}, actor)
+        .catch((e: any) => e);
+      d.campaignsRepo.findCampaignForUpdate.mockResolvedValue(null);
+      const missing = await d.service
+        .materializeMembers(CAMPAIGN, {}, actor)
+        .catch((e: any) => e);
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.reason).toBe(MarketingErrorReason.CAMPAIGN_NOT_AVAILABLE);
+      expect(foreignCampaign.statusConceptId).toBe(CONCEPTS.CAMPAIGN_SCHEDULED);
+      expect(d.campaignsRepo.createCampaignMember).not.toHaveBeenCalled();
+      expect(d.campaignsRepo.findCampaignForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        CAMPAIGN,
+      );
+    });
+
+    it('publica la plantilla en el tenant del contexto, no en el del cuerpo', async () => {
+      const d = build();
+      d.campaignsRepo.findLatestTemplateVersionForUpdate.mockResolvedValue(
+        null,
+      );
+      d.campaignsRepo.createContentTemplate.mockReturnValue({ id: 'tpl-1' });
+
+      await d.service.publishTemplateVersion(
+        'TPL-REM',
+        { name: 'Recordatorio', channel: 'EMAIL' as const },
+        actor,
+      );
+      expect(
+        d.campaignsRepo.findLatestTemplateVersionForUpdate,
+      ).toHaveBeenCalledWith(d.tx, TENANT, 'TPL-REM');
+
+      await expect(
+        d.service.publishTemplateVersion(
+          'TPL-REM',
+          {
+            tenantId: OTHER_TENANT,
+            name: 'Recordatorio',
+            channel: 'EMAIL' as const,
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: MarketingErrorReason.TENANT_MISMATCH });
+    });
+  });
+
+  describe('unicidad del código (MKT-02)', () => {
+    it('traduce la violación de unicidad de la base a un 409 estable', async () => {
+      const d = build();
+      d.campaignsRepo.findSegmentByCode.mockResolvedValue(null);
+      d.campaignsRepo.createSegment.mockReturnValue({ id: 'seg-1' });
+      d.em.transactional.mockRejectedValue(
+        new UniqueConstraintViolationException(new Error('duplicate key')),
+      );
+
+      const attempt = d.service.createSegment(
+        { code: 'SEG-DUP', name: 'Dup', segmentType: 'STATIC' as const },
+        actor,
+      );
+      await expect(attempt).rejects.toBeInstanceOf(ConflictException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: MarketingErrorReason.CODE_ALREADY_EXISTS,
+      });
+    });
+
+    it('el duplicado detectado por el servicio lleva el mismo reason', async () => {
+      const d = build();
+      d.campaignsRepo.findCampaignByCode.mockResolvedValue({ id: 'cmp-1' });
+      await expect(
+        d.service.createCampaign(
+          {
+            code: 'CMP-DUP',
+            name: 'Dup',
+            campaignType: 'ONE_SHOT' as const,
+            objective: 'AWARENESS' as const,
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: MarketingErrorReason.CODE_ALREADY_EXISTS,
+      });
+    });
+
+    it('otros errores de la base no se disfrazan de conflicto', async () => {
+      const d = build();
+      d.campaignsRepo.findSegmentByCode.mockResolvedValue(null);
+      d.em.transactional.mockRejectedValue(new Error('conexión perdida'));
+      await expect(
+        d.service.createSegment(
+          { code: 'SEG-E', name: 'E', segmentType: 'STATIC' as const },
+          actor,
+        ),
+      ).rejects.toThrow('conexión perdida');
     });
   });
 });

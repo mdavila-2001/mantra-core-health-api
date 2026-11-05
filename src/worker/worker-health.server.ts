@@ -26,7 +26,8 @@ import { workerHealth } from './worker-health.registry';
  * Rutas:
  *   - `GET /health`, `GET /liveness` → 200 / 503. **¿Reiniciar el proceso?**
  *   - `GET /readiness`              → 200 / 503. **¿Puede trabajar ahora?**
- *   - `GET /status`                 → 200 siempre. Diagnóstico completo.
+ *   - `GET /status`                 → 200 siempre. Diagnóstico completo, sin
+ *                                     mensajes de error (sólo códigos estables).
  */
 
 /** Cabeceras comunes: nada cacheable, nada adivinable por tipo. */
@@ -36,10 +37,19 @@ const JSON_HEADERS = {
   'x-content-type-options': 'nosniff',
 } as const;
 
+/** Interfaz por defecto de la sonda: sólo accesible desde el propio proceso/contenedor. */
+export const DEFAULT_HEALTH_HOST = '127.0.0.1';
+
 export interface WorkerHealthServerOptions {
   /** Puerto de escucha. `0` deshabilita el servidor. */
   port: number;
-  /** Interfaz de escucha. Por defecto todas, para que Docker pueda sondear. */
+  /**
+   * Interfaz de escucha. Por defecto el loopback: `/status` no se autentica y el
+   * healthcheck de Compose corre dentro del propio contenedor
+   * (`localhost:9100`). Abrirla a otras interfaces (`0.0.0.0`) es una decisión
+   * explícita del despliegue (`WORKER_HEALTH_HOST`) que sólo debe tomarse con
+   * el puerto aislado de redes ajenas al orquestador.
+   */
   host?: string;
   logger: PinoLogger;
 }
@@ -82,7 +92,7 @@ export function startWorkerHealthServer(
   server.requestTimeout = 15_000;
   server.keepAliveTimeout = 5_000;
 
-  server.listen(options.port, options.host ?? '0.0.0.0', () => {
+  server.listen(options.port, options.host ?? DEFAULT_HEALTH_HOST, () => {
     options.logger.info(
       { port: options.port },
       'Sonda HTTP del worker escuchando (/health, /readiness, /status)',

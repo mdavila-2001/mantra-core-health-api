@@ -11,7 +11,7 @@ describe('PublicProfilesRepository.searchChatContacts', () => {
   it('acota por nombre normalizado a personas públicas y excluye perfil propio y bloqueos', async () => {
     const execute = mockFn().mockResolvedValue([{ id: 'p-visible' }]);
     const find = mockFn().mockResolvedValue([{ id: 'p-visible' }]);
-    const em = { find, getConnection: () => ({ execute }) } as any;
+    const em = { find, execute } as any;
     const repository = new PublicProfilesRepository();
 
     await repository.searchChatContacts(em, {
@@ -54,7 +54,7 @@ describe('PublicProfilesRepository.searchChatContacts', () => {
   it('no hace una segunda consulta si ningún perfil cumple privacidad y bloqueo', async () => {
     const execute = mockFn().mockResolvedValue([]);
     const find = mockFn();
-    const em = { find, getConnection: () => ({ execute }) } as any;
+    const em = { find, execute } as any;
 
     await new PublicProfilesRepository().searchChatContacts(em, {
       ownProfileId: 'p-propio',

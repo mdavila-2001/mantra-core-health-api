@@ -37,12 +37,33 @@ export function scopeOf(record) {
 export const isExported = (s) => s.inScope;
 
 /**
+ * El Data Lake no publica certificados. Si otra fuente con el MISMO UUID de
+ * EUDAMED los trae (réplica eudamed2firstbase), se copian citando esa fuente
+ * en extra.certificatesSource. Nunca se pisa un certificado ya presente.
+ */
+export function withCertificates(record, certificatesByUuid) {
+  const c = certificatesByUuid.get(record.sourceRecordId);
+  if (!c || record.authorizationId || !c.authorizationId) return record;
+  return {
+    ...record,
+    authorizationId: c.authorizationId,
+    authorizationDate: c.authorizationDate,
+    extra: {
+      ...record.extra,
+      certificates: c.certificates,
+      certificatesSource: c.mirror,
+    },
+  };
+}
+
+/**
  * @param {{
  *   emdnConcepts?: object[],
  *   referenceRows?: object[],
  *   udiPages?: { rows: object[], sourceUrl: string, retrievedAt: string }[],
  *   actorRows?: object[],
  *   extraDevices?: object[],
+ *   certificatesByUuid?: Map<string, { authorizationId, authorizationDate, certificates, mirror }>,
  *   gaps?: object[],
  * }} input
  */
@@ -52,6 +73,7 @@ export function buildCorpus({
   udiPages = [],
   actorRows = [],
   extraDevices = [],
+  certificatesByUuid = new Map(),
   gaps = [],
 }) {
   const emdnByCode = new Map(emdnConcepts.map((c) => [c.code, c]));
@@ -66,13 +88,16 @@ export function buildCorpus({
     for (const row of p.rows)
       try {
         normalized.push(
-          normalizeUdiRow(row, {
-            reference,
-            emdnByCode,
-            actorsBySrn,
-            sourceUrl: p.sourceUrl,
-            retrievedAt: p.retrievedAt,
-          }),
+          withCertificates(
+            normalizeUdiRow(row, {
+              reference,
+              emdnByCode,
+              actorsBySrn,
+              sourceUrl: p.sourceUrl,
+              retrievedAt: p.retrievedAt,
+            }),
+            certificatesByUuid,
+          ),
         );
       } catch (err) {
         if (!(err instanceof RowError)) throw err;

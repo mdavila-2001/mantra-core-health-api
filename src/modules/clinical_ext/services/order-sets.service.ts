@@ -5,10 +5,17 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { OrderSetsRepository } from '../repositories';
-import { ServiceRequestsRepository } from '../../clinical/repositories';
+import {
+  EncountersRepository,
+  ServiceRequestsRepository,
+} from '../../clinical/repositories';
+import { ClinicalReadService } from '../../clinical/services/clinical-read.service';
+import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
+import { assertBodyTenantMatches } from './clinical-ext-access';
 import {
   CreateOrderSetDto,
   ApplyOrderSetDto,
@@ -32,12 +39,16 @@ export class OrderSetsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param orderSetsRepo - Valor de order sets repo requerido por la operación.
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param encountersRepo - Encuentros clínicos: prueba que el encuentro es del paciente.
+   * @param clinicalRead - Política de acceso a la historia del paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly orderSetsRepo: OrderSetsRepository,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
+    private readonly encountersRepo: EncountersRepository,
+    private readonly clinicalRead: ClinicalReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrderSetsService.name);
@@ -97,7 +108,14 @@ export class OrderSetsService {
     });
   }
 
-  /** UC-18-06: aplica el order set (fan-out de órdenes por ítem seleccionado). */
+  /**
+   * UC-18-06: aplica el order set (fan-out de órdenes por ítem seleccionado).
+   *
+   * Antes de leer ítems o crear órdenes exige base de escritura sobre la
+   * historia del paciente y que el encuentro sea de ese paciente y del tenant
+   * activo. El tenant custodio de las órdenes sale del encuentro autorizado:
+   * el del cuerpo sólo se contrasta y el de la plantilla no decide.
+   */
   async apply(
     orderSetId: string,
     dto: ApplyOrderSetDto,
@@ -111,12 +129,38 @@ export class OrderSetsService {
       },
       'Applying order set',
     );
+    const activeTenantId = requireTenantId();
+    assertBodyTenantMatches(dto.custodianTenantId, activeTenantId);
+    await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
+
     return this.em.transactional(async (tx) => {
+      // Un encuentro inexistente, de otro paciente o de otro tenant responde
+      // igual: distinguirlos confirmaría que ese id existe en otra historia.
+      const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+      if (
+        !encounter ||
+        encounter.patientProfileId !== dto.patientProfileId ||
+        encounter.tenantId !== activeTenantId
+      ) {
+        throw new ResourceNotFoundException(
+          'Encuentro no encontrado',
+          undefined,
+          ClinicalExtErrorReason.ENCOUNTER_NOT_FOUND,
+        );
+      }
+
       const orderSet = await this.orderSetsRepo.findById(tx, orderSetId);
-      if (!orderSet)
-        throw new ResourceNotFoundException('Order set no encontrado', {
-          orderSetId,
-        });
+      // La plantilla sin tenant es global; la de otro tenant no existe para el actor.
+      if (
+        !orderSet ||
+        (orderSet.tenantId && orderSet.tenantId !== activeTenantId)
+      ) {
+        throw new ResourceNotFoundException(
+          'Order set no encontrado',
+          undefined,
+          ClinicalExtErrorReason.ORDER_SET_NOT_FOUND,
+        );
+      }
       if (orderSet.statusConceptId !== CEXT.ORDER_SET_ACTIVE) {
         throw new PreconditionFailedException('El order set no está activo', {
           orderSetId,
@@ -137,16 +181,9 @@ export class OrderSetsService {
         );
       }
 
-      // El service_request exige tenant custodio (NOT NULL): del DTO o, en su
-      // defecto, el del propio order set. Sin ninguno no se puede materializar la
-      // orden, así que se corta con una precondición clara.
-      const custodianTenantId = dto.custodianTenantId ?? orderSet.tenantId;
-      if (!custodianTenantId) {
-        throw new PreconditionFailedException(
-          'Se requiere tenant custodio para materializar las órdenes del order set',
-          { orderSetId },
-        );
-      }
+      // El service_request exige tenant custodio (NOT NULL): el del encuentro
+      // ya autorizado, que es el tenant activo.
+      const custodianTenantId = encounter.tenantId;
 
       // Fan-out real: una service_request por ítem seleccionado, dentro de la
       // misma transacción, enlazada al paciente/encuentro del DTO.

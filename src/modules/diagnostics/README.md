@@ -56,6 +56,41 @@ Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): `accession_specimens`,
 | `POST /diagnostics/specimens/:id/containers` | sesión | `diagnostics-specimens` |
 | `POST /diagnostics/containers/:id/custody-events` | sesión | `diagnostics-specimens` |
 
+## Portal del laboratorio y del centro de imagen (`/diagnostics/lab/*`)
+
+Tres controllers (`diagnostics-lab-portal`, `diagnostics-lab-results`, `diagnostics-lab-uploads`),
+todos con `LabStaffGuard` y acotados al tenant activo. El catálogo de servicios del mismo prefijo
+(`/diagnostics/lab/services`, `/categories`) vive en `diagnostic_units`.
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `GET /diagnostics/lab/summary` | Resumen: ofertas de la unidad del tenant, órdenes sin resultado, archivos y actividad |
+| `GET /diagnostics/lab/orders` | Órdenes con `performer_tenant_id` = tenant (laboratorio, patología, imagen), hasta 500 |
+| `POST /diagnostics/lab/orders/:orderId/transitions` | `RECEIVE`, `PROCESS`, `REJECT`, `CANCEL`; paso fuera de orden: 409 |
+| `GET /diagnostics/lab/result-targets` | Órdenes procesadas a las que se adjunta un resultado |
+| `GET /diagnostics/lab/result-files` | Archivos subidos (`kind`, `orderId`, `includeWithdrawn`), sin búsqueda por texto en la URL |
+| `POST /diagnostics/lab/result-files/search` | Lo mismo con `q` en el cuerpo (puede ser un nombre de paciente) |
+| `GET /diagnostics/lab/result-files/:id/content` | Bytes del archivo |
+| `POST /diagnostics/lab/result-files/:id/withdrawal` | Retira el archivo con motivo; queda en el historial |
+| `POST /diagnostics/lab/result-uploads` | Abre una subida por partes (orden procesada; tamaño ≤ `FILE_STORAGE_MAX_SIZE_BYTES`) |
+| `PUT /diagnostics/lab/result-uploads/:uploadId/parts/:index` | Una parte en `application/octet-stream` |
+| `POST /diagnostics/lab/result-uploads/:uploadId/complete` | Guarda el archivo y lo publica en el informe |
+| `DELETE /diagnostics/lab/result-uploads/:uploadId` | Cancela la subida |
+
+El estado de la orden no se guarda: se deriva de filas del ejecutor. `RECEIVED` es una acesión
+(`ACC_RECEIVED`; en laboratorio con tipo de muestra, también el espécimen recibido), `PROCESSED`
+una orden de trabajo con `completed_at`, `UPLOADED` un archivo en la última versión del informe,
+`REJECTED` un `specimen_rejection_events` (motivo en `notes`) y `CANCELLED` la orden revocada.
+`CANCEL` responde 422 `DIAGNOSTICS_LAB_ORDER_ACTION_UNSUPPORTED`: la orden es del tenant que la
+pidió y el ejecutor no tiene dónde registrar la anulación; `REJECT` responde lo mismo si la orden
+no tiene muestra (imagen).
+
+Un archivo subido entra por `FileUploadService.upload` y se publica en una versión nueva de
+`clinical.diagnostic_reports` del ejecutor, liberada y visible al paciente (la que lee
+`GET /diagnostic-results/me`). Retirarlo publica otra versión sin él, con el motivo en
+`amendment_reason_text`. Las partes de una subida viven en la memoria del proceso hasta `complete`:
+una subida no sobrevive a un reinicio ni cambia de instancia.
+
 ## Endpoints (UC → ruta / método)
 
 | UC | Método y ruta | Descripción |
@@ -134,9 +169,19 @@ rechazos de regla de negocio.
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 registró autorizaciones incompletas para cadenas
-de tenant, paciente y recurso diagnóstico, además de límites ausentes en algunos
-DTO.
+Los writes clínicos (especímenes, acesiones, laboratorio, informes, críticos, imagen,
+media y calidad de datos) toman el tenant custodio del contexto (`requireTenantId()`):
+un `custodianTenantId` o `tenantId` del cuerpo solo se acepta si coincide. Cada recurso que
+enlazan (endpoint, estudio, espécimen, contenedor, acesión, informe, notificación,
+encuentro, orden, observación, archivo) se resuelve con `DiagnosticsScopeService` dentro
+del tenant y del mismo paciente antes de escribir; lo ajeno responde igual que lo inexistente
+(`404`, `reason` `DIAGNOSTICS_RESOURCE_NOT_AVAILABLE`, sin `details`). Un autor declarado en
+el cuerpo debe ser el profesional que firma cuando la cuenta tiene perfil profesional
+(`403` `DIAGNOSTICS_AUTHOR_NOT_ACTOR`). `GET /diagnostics/patients/:id/imaging-studies`
+exige una relación asistencial vigente entre el profesional y el paciente
+(`DiagnosticsPatientAccessService`; `404` `DIAGNOSTICS_PATIENT_NOT_AVAILABLE` sin vínculo).
+No existe un vínculo paciente–tenant: un paciente declarado sin encuentro, orden,
+observación o informe que lo ancle no se contrasta con el tenant.
 
 La ejecución dirigida actual fue:
 

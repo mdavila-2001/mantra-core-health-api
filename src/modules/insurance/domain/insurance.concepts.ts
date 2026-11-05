@@ -66,6 +66,26 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       display: 'En red',
     },
 
+    // El médico pide trabajar con una aseguradora (v4.2.64,
+    // `insurance.practitioner_insurer_requests`). Distintos de MEMBERSHIP_*: la
+    // solicitud no es el contrato con una red, es el pedido que la precede.
+    PRACTITIONER_REQUEST_PENDING: {
+      code: 'PRACTITIONER_REQUEST_PENDING',
+      display: 'Solicitud del profesional pendiente',
+    },
+    PRACTITIONER_REQUEST_APPROVED: {
+      code: 'PRACTITIONER_REQUEST_APPROVED',
+      display: 'Solicitud del profesional aprobada',
+    },
+    PRACTITIONER_REQUEST_REJECTED: {
+      code: 'PRACTITIONER_REQUEST_REJECTED',
+      display: 'Solicitud del profesional rechazada',
+    },
+    PRACTITIONER_REQUEST_WITHDRAWN: {
+      code: 'PRACTITIONER_REQUEST_WITHDRAWN',
+      display: 'Solicitud del profesional retirada',
+    },
+
     // Coberturas y dependientes
     COVERAGE_ACTIVE: { code: 'COVERAGE_ACTIVE', display: 'Cobertura activa' },
     DEPENDENT_ACTIVE: {
@@ -199,6 +219,24 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
     DISPUTE_REASON_UNDERPAID: {
       code: 'DISPUTE_REASON_UNDERPAID',
       display: 'Motivo: pago insuficiente',
+    },
+    // Objeción del paciente a un cobro (carril 16, REQ-16-032). Mientras esté
+    // abierta, el cobro de esa factura queda en pausa.
+    DISPUTE_TYPE_PATIENT_OBJECTION: {
+      code: 'DISPUTE_TYPE_PATIENT_OBJECTION',
+      display: 'Tipo: objeción del paciente',
+    },
+    DISPUTE_REASON_CHARGE_AMOUNT: {
+      code: 'DISPUTE_REASON_CHARGE_AMOUNT',
+      display: 'Motivo: el importe cobrado no coincide',
+    },
+    DISPUTE_REASON_SERVICE_NOT_RECEIVED: {
+      code: 'DISPUTE_REASON_SERVICE_NOT_RECEIVED',
+      display: 'Motivo: servicio no recibido',
+    },
+    DISPUTE_REASON_NOT_INFORMED: {
+      code: 'DISPUTE_REASON_NOT_INFORMED',
+      display: 'Motivo: cobro no informado previamente',
     },
     PARTY_PROVIDER: { code: 'PARTY_PROVIDER', display: 'Parte: prestador' },
     PARTY_PATIENT: { code: 'PARTY_PATIENT', display: 'Parte: paciente' },

@@ -19,7 +19,7 @@ import {
  * define antes de arrancar la app porque la referencia se lee del entorno del
  * proceso (en despliegue, del gestor de secretos que lo alimenta).
  */
-const CONNECTION_SECRET_ENV = 'WEBHOOK_SECRET_MCH003';
+const CONNECTION_SECRET_ENV = `WEBHOOK_SECRET_${SEED.tenantId.replace(/-/g, '').toUpperCase()}_MCH003`;
 const CONNECTION_SECRET = 'secreto-de-conexion-mch003-para-integracion';
 process.env[CONNECTION_SECRET_ENV] = CONNECTION_SECRET;
 

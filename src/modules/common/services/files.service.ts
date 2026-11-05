@@ -28,7 +28,9 @@ import {
   FileVersionsRepository,
   FilesRepository,
 } from '../repositories';
-import { canActorReadOwnFile } from './file-access';
+import { canActorMutateOwnFile, canActorReadOwnFile } from './file-access';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { CommonErrorReason } from '../common.error-reasons';
 import { FileVersions, Files } from '../entities';
 import {
   CLINICAL_RECORD_OWNER_TYPES,
@@ -259,6 +261,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       const nextNumber =
         (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
@@ -328,6 +331,11 @@ export class FilesService {
         dto.storageUri,
         { contentHash: dto.contentHash, sizeBytes: dto.sizeBytes },
       );
+      const file = await this.filesRepo.findById(tx, fileId);
+      if (!file) {
+        throw new ResourceNotFoundException('Archivo no encontrado');
+      }
+      this.assertCanMutateFile(file, actor);
       const source = await this.fileVersionsRepo.findByFileAndId(
         tx,
         fileId,
@@ -418,6 +426,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       const link = this.fileLinksRepo.create(tx, {
         fileId,
@@ -507,7 +516,7 @@ export class FilesService {
    * @returns Las versiones pendientes, de la más antigua a la más nueva.
    */
   async listPendingScan(limit: number): Promise<PendingScanResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const versions = await this.fileVersionsRepo.findPendingScan(em, limit);
     return {
       items: versions.map((version) => ({
@@ -537,6 +546,7 @@ export class FilesService {
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
+      this.assertCanMutateFile(file, actor);
 
       if (file.legalHoldUntil && file.legalHoldUntil.getTime() > Date.now()) {
         this.logger.warn(
@@ -561,6 +571,37 @@ export class FilesService {
       );
       return { id: file.id, deletedAt };
     });
+  }
+
+  /**
+   * AUTHZ-T03 · política única de escritura sobre un archivo ya cargado.
+   *
+   * Se llama después de cargar el archivo y antes de mutar nada, dentro de la
+   * transacción. Quien no puede ni leerlo recibe el mismo 404 que un id
+   * inexistente (no se confirma que el uuid existe); un revisor de sólo lectura
+   * sí sabe que existe y recibe 403 con `FILE_MUTATION_NOT_ALLOWED`.
+   */
+  private assertCanMutateFile(
+    file: Pick<Files, 'id' | 'createdByUserId'>,
+    actor: AuthenticatedUser,
+  ): void {
+    if (canActorMutateOwnFile(file, actor)) return;
+    this.logger.warn(
+      {
+        operation: 'common.file.mutation_denied',
+        fileId: file.id,
+        actorId: actor.id,
+      },
+      'File mutation denied',
+    );
+    if (!canActorReadOwnFile(file, actor)) {
+      throw new ResourceNotFoundException('Archivo no encontrado');
+    }
+    throw new InsufficientRoleException(
+      'No tiene permiso para modificar este archivo',
+      undefined,
+      CommonErrorReason.FILE_MUTATION_NOT_ALLOWED,
+    );
   }
 
   private assertLifecycleWired(): void {
@@ -608,7 +649,7 @@ export class FilesService {
       'Generating download URL',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
 
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
@@ -786,7 +827,7 @@ export class FilesService {
       'Listing linked files',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
     const ownerTypeConceptId = CONCEPTS[`OWNER_${ownerType}`];
 
     const links = await this.fileLinksRepo.findByOwner(

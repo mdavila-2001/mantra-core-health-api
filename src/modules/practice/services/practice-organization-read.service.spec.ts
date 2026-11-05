@@ -13,7 +13,7 @@ import { PRAC } from '../practice.concepts';
 import {
   buildPracticeAccess,
   type AssignmentRow,
-} from '../../../../test/doubles/practice-access.double';
+} from './practice-access.testing';
 
 const ADMIN = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 const DOCTOR = {

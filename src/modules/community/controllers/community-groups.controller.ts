@@ -18,9 +18,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import {
   CommunityGroupsService,
@@ -55,7 +57,14 @@ const JOIN_STATUS_BY_CODE: Record<string, string> = {
   REMOVED: COMM.GROUP_JOIN_REMOVED,
 };
 
-/** Endpoints de grupos/comunidades. */
+/** Endpoints de grupos/comunidades. *
+ * `@Roles()` vacío en cada ruta (O3-3): cualquier cuenta participa de la
+ * comunidad, así que no hay rol global que pedir. Decide el servicio:
+ * `CommunityGroupAccessService` por la membresía y el rol **en el grupo**
+ * (administrar miembros, publicar, ver un grupo secreto) y
+ * `CommunityVisibilityService` exige que el perfil con que se actúa sea del
+ * actor.
+ */
 @ApiTags('community-groups')
 @ApiBearerAuth()
 @Controller('community/groups')
@@ -74,7 +83,13 @@ export class CommunityGroupsController {
   ) {}
 
   /** Bootstrap: crea un grupo. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_CREATED',
+    entity: 'group',
+    entityId: 'result.id',
+  })
   @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un grupo/comunidad' })
   createGroup(
@@ -85,7 +100,13 @@ export class CommunityGroupsController {
   }
 
   /** UC-19-13. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_JOINED',
+    entity: 'group_member',
+    entityId: 'result.id',
+  })
   @Post(':groupId/members')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Unirse a un grupo / comunidad' })
   joinGroup(
@@ -97,7 +118,13 @@ export class CommunityGroupsController {
   }
 
   /** P7: resuelve un alta pendiente y/o cambia el rol de un integrante. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_MEMBER_UPDATED',
+    entity: 'group_member',
+    entityId: 'param:member',
+  })
   @Patch(':groupId/members/:member')
+  @Roles()
   @ApiOperation({ summary: 'Aprobar/rechazar un alta o cambiar el rol' })
   @ApiParam({
     name: 'member',
@@ -124,7 +151,13 @@ export class CommunityGroupsController {
    * que sólo difieran en el nombre del parámetro (`no-identical-paths`). El
    * nombre no viaja en la URL: la diferencia queda dicha en `@ApiParam`.
    */
+  @Audited({
+    action: 'COMMUNITY_GROUP_LEFT',
+    entity: 'group_member',
+    entityId: 'param:member',
+  })
   @Delete(':groupId/members/:member')
+  @Roles()
   @ApiOperation({ summary: 'Salir del grupo o dar de baja a un integrante' })
   @ApiParam({
     name: 'member',
@@ -140,7 +173,13 @@ export class CommunityGroupsController {
   }
 
   /** P7: publica en el muro del grupo, o responde a una publicación. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_POST_CREATED',
+    entity: 'social_post',
+    entityId: 'result.id',
+  })
   @Post(':groupId/posts')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar en el muro del grupo' })
   createGroupPost(
@@ -160,24 +199,31 @@ export class CommunityGroupsController {
    * acotarlo mostraría los grupos de una organización a otra.
    */
   @Get()
+  @Roles()
   @ApiOperation({ summary: 'Grupos de una organización' })
   listGroups(
     @Query('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('topicId') topicId?: string,
     @Query('q') query?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<GroupPageDto> {
-    return this.readService.listGroups(tenantId, {
-      cursor,
-      limit: limit ?? DEFAULT_PAGE_LIMIT,
-      topicId,
-      query,
-    });
+    return this.readService.listGroups(
+      tenantId,
+      {
+        cursor,
+        limit: limit ?? DEFAULT_PAGE_LIMIT,
+        topicId,
+        query,
+      },
+      actor,
+    );
   }
 
   /** P7: ficha del grupo con la posición del lector frente a él. */
   @Get(':groupId')
+  @Roles()
   @ApiOperation({ summary: 'Ficha de un grupo' })
   getGroup(
     @Param('groupId', ParseUUIDPipe) groupId: string,
@@ -189,6 +235,7 @@ export class CommunityGroupsController {
 
   /** Integrantes de un grupo. */
   @Get(':groupId/members')
+  @Roles()
   @ApiOperation({ summary: 'Integrantes de un grupo' })
   listMembers(
     @Param('groupId', ParseUUIDPipe) groupId: string,
@@ -209,6 +256,7 @@ export class CommunityGroupsController {
 
   /** P7: muro del grupo. */
   @Get(':groupId/posts')
+  @Roles()
   @ApiOperation({ summary: 'Muro de un grupo' })
   listWall(
     @Param('groupId', ParseUUIDPipe) groupId: string,

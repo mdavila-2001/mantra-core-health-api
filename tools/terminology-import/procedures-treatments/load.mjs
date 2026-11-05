@@ -33,6 +33,7 @@ import {
   OWNED_CODE_SYSTEMS,
   PROVENANCE_SOURCE_CODE,
   PROVENANCE_TABLE,
+  RELATION_ONLY_SOURCES,
   alternateRelationshipId,
   buildLoadPlan,
   conceptRowId,
@@ -342,6 +343,20 @@ async function main() {
         rels,
         ['uuid', 'uuid', 'uuid', 'uuid', null],
       );
+      for (const src of RELATION_ONLY_SOURCES) {
+        await client.query(
+          `INSERT INTO terminology.terminology_sources (id, code, name, owner, official_url, license, created_at, updated_at, row_version)
+           VALUES ($1::uuid, $2, $3, $4, $5, $6, now(), now(), 1) ON CONFLICT DO NOTHING`,
+          [
+            md5uuid(`mantra:procedures-treatments:source:${src.code}`),
+            src.code,
+            src.name,
+            src.owner,
+            src.officialUrl,
+            src.license,
+          ],
+        );
+      }
       const { rows: srcRows } = await client.query(
         'SELECT code, id FROM terminology.terminology_sources',
       );

@@ -96,12 +96,17 @@ export class OutboundMessagesRepository {
     return em.findOne(OutboundMessages, { idempotencyKey });
   }
 
-  /** Correlación de callbacks entrantes (UC-12-10). */
-  findByCorrelationId(
+  /**
+   * Correlación de callbacks entrantes (UC-12-10). Sólo alcanza mensajes de la
+   * misma conexión que recibió el callback: callback → conexión → mensaje
+   * saliente. Un `correlationId` de otra conexión no correlaciona.
+   */
+  findByCorrelationIdInConnection(
     em: EntityManager,
+    connectionId: string,
     correlationId: string,
   ): Promise<OutboundMessages | null> {
-    return em.findOne(OutboundMessages, { correlationId });
+    return em.findOne(OutboundMessages, { connectionId, correlationId });
   }
 
   /**
@@ -172,12 +177,14 @@ export class OutboundMessagesRepository {
     queuedStatusConceptId: string,
     now: Date,
     limit: number,
+    connectionIds?: string[],
   ): Promise<OutboundMessages[]> {
     return em.find(
       OutboundMessages,
       {
         statusConceptId: queuedStatusConceptId,
         scheduledAt: { $lte: now },
+        ...(connectionIds ? { connectionId: { $in: connectionIds } } : {}),
       },
       { orderBy: { scheduledAt: 'ASC' }, limit },
     );
@@ -192,10 +199,14 @@ export class OutboundMessagesRepository {
     em: EntityManager,
     failedStatusConceptId: string,
     limit: number,
+    connectionIds?: string[],
   ): Promise<OutboundMessages[]> {
     return em.find(
       OutboundMessages,
-      { statusConceptId: failedStatusConceptId },
+      {
+        statusConceptId: failedStatusConceptId,
+        ...(connectionIds ? { connectionId: { $in: connectionIds } } : {}),
+      },
       { orderBy: { updatedAt: 'ASC' }, limit },
     );
   }

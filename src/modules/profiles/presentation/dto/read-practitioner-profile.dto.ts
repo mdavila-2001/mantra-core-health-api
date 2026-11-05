@@ -1,3 +1,4 @@
+import { PractitionerVerificationDto } from './practitioner-verification.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AffiliationResponseDto } from './affiliation.dto';
 import { OwnAddressDto } from './read-patients.dto';
@@ -327,11 +328,19 @@ export class PractitionerProfileSummaryDto {
   sexAtBirth?: BirthSexCode;
 
   /**
-   * Documento de identidad. **No editable desde el perfil**: es un identificador
-   * oficial y tiene su propio circuito de verificación.
+   * Documento de identidad. Se corrige con el `PATCH` del perfil mientras
+   * `identityVerified` es `false` (P28).
    */
   @ApiPropertyOptional()
   nationalId?: string;
+
+  /**
+   * Si la identidad de la persona está verificada (aserción vigente en
+   * `identity_assurance`). Con `true`, el número del documento ya no se corrige
+   * desde el perfil (409). Sólo en la lectura propia y en la de plataforma.
+   */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  identityVerified?: boolean;
 
   @ApiPropertyOptional({
     format: 'uuid',
@@ -401,6 +410,13 @@ export class PractitionerProfileSummaryDto {
 
   @ApiProperty({ format: 'uuid' })
   verificationStatusConceptId!: string;
+
+  /**
+   * Estado visible de verificación (admisión vigente): lo que el cliente pinta
+   * como «en proceso de verificación» o con el check de verificado. Aditivo.
+   */
+  @ApiProperty({ type: PractitionerVerificationDto })
+  verification!: PractitionerVerificationDto;
 
   @ApiProperty({ format: 'uuid' })
   practiceStatusConceptId!: string;

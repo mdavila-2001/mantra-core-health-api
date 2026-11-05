@@ -153,6 +153,7 @@ export class PeriopDentalRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Paciente consultado.
+   * @param custodianTenantId - Tenant activo: sólo lo que custodia (#893).
    * @param categoryConceptId - Categoría que marca el procedimiento odontológico.
    * @param limit - Tope de filas.
    * @returns Los procedimientos odontológicos de la persona.
@@ -160,12 +161,13 @@ export class PeriopDentalRepository {
   findByPatient(
     em: EntityManager,
     patientProfileId: string,
+    custodianTenantId: string,
     categoryConceptId: string,
     limit: number,
   ): Promise<Procedures[]> {
     return em.find(
       Procedures,
-      { patientProfileId, categoryConceptId },
+      { patientProfileId, custodianTenantId, categoryConceptId },
       {
         orderBy: { performedAt: 'DESC', createdAt: 'DESC' },
         limit,
@@ -178,15 +180,21 @@ export class PeriopDentalRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Paciente consultado.
+   * @param custodianTenantId - Tenant activo: sólo lo que custodia (#893).
    * @param categoryConceptId - Categoría que marca el procedimiento odontológico.
    * @returns El total de filas que cumplen el filtro.
    */
   countByPatient(
     em: EntityManager,
     patientProfileId: string,
+    custodianTenantId: string,
     categoryConceptId: string,
   ): Promise<number> {
-    return em.count(Procedures, { patientProfileId, categoryConceptId });
+    return em.count(Procedures, {
+      patientProfileId,
+      custodianTenantId,
+      categoryConceptId,
+    });
   }
 
   /**

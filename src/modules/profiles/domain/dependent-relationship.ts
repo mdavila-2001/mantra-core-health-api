@@ -40,6 +40,66 @@ export function describeRelatedPersonRelationship(
       return 'Otro familiar';
     case PROF.RELATIONSHIP_FRIEND:
       return 'Amistad';
+    // El resto del catálogo `related-person-relationship`, con el mismo
+    // rótulo que su designación en castellano.
+    case PROF.RELATIONSHIP_GRANDPARENT:
+      return 'Abuelo o abuela';
+    case PROF.RELATIONSHIP_GRANDCHILD:
+      return 'Nieto o nieta';
+    case PROF.RELATIONSHIP_UNCLE_AUNT:
+      return 'Tío o tía';
+    case PROF.RELATIONSHIP_NEPHEW_NIECE:
+      return 'Sobrino o sobrina';
+    case PROF.RELATIONSHIP_COUSIN:
+      return 'Primo o prima';
+    case PROF.RELATIONSHIP_HALF_SIBLING:
+      return 'Medio hermano o media hermana';
+    case PROF.RELATIONSHIP_GREAT_GRANDPARENT:
+      return 'Bisabuelo o bisabuela';
+    case PROF.RELATIONSHIP_GREAT_GRANDCHILD:
+      return 'Bisnieto o bisnieta';
+    case PROF.RELATIONSHIP_PARENT_IN_LAW:
+      return 'Suegro o suegra';
+    case PROF.RELATIONSHIP_CHILD_IN_LAW:
+      return 'Yerno o nuera';
+    case PROF.RELATIONSHIP_SIBLING_IN_LAW:
+      return 'Cuñado o cuñada';
+    case PROF.RELATIONSHIP_STEPPARENT:
+      return 'Padrastro o madrastra';
+    case PROF.RELATIONSHIP_STEPCHILD:
+      return 'Hijastro o hijastra';
+    case PROF.RELATIONSHIP_STEPSIBLING:
+      return 'Hermanastro o hermanastra';
+    case PROF.RELATIONSHIP_ADOPTIVE_PARENT:
+      return 'Padre o madre adoptivos';
+    case PROF.RELATIONSHIP_ADOPTED_CHILD:
+      return 'Hijo o hija adoptivos';
+    case PROF.RELATIONSHIP_FOSTER_PARENT:
+      return 'Familia sustituta';
+    case PROF.RELATIONSHIP_EX_SPOUSE:
+      return 'Excónyuge o expareja';
+    case PROF.RELATIONSHIP_GODPARENT:
+      return 'Padrino o madrina';
+    case PROF.RELATIONSHIP_GODCHILD:
+      return 'Ahijado o ahijada';
+    case PROF.RELATIONSHIP_COMPADRE:
+      return 'Compadre o comadre';
+    case PROF.RELATIONSHIP_CAREGIVER:
+      return 'Cuidador o cuidadora';
+    case PROF.RELATIONSHIP_DOMESTIC_WORKER:
+      return 'Trabajadora o trabajador del hogar';
+    case PROF.RELATIONSHIP_ATTORNEY_IN_FACT:
+      return 'Apoderado o apoderada';
+    case PROF.RELATIONSHIP_CARE_HOME_STAFF:
+      return 'Responsable del hogar o centro de acogida';
+    case PROF.RELATIONSHIP_NEIGHBOR:
+      return 'Vecino o vecina';
+    case PROF.RELATIONSHIP_HOUSEMATE:
+      return 'Persona con quien comparte vivienda';
+    case PROF.RELATIONSHIP_COWORKER:
+      return 'Compañero o compañera de trabajo';
+    case PROF.RELATIONSHIP_EMPLOYER:
+      return 'Empleador o empleadora';
     default:
       return 'Otra relación';
   }

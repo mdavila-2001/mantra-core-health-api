@@ -16,5 +16,6 @@
 | [Recuperación desde backup](restore-from-backup.md) | Pérdida de datos — **procedimiento no probado, ver advertencia en el propio runbook** |
 | [Rollback de despliegue](deployment-rollback.md) | Un despliegue reciente causó una regresión |
 | [Tabla de seed vacía y arranque mudo](seed-tables-empty.md) | Falta una tabla que la cadena de seeds debía poblar y los logs no acusan nada |
+| [Datos que la ronda de seguridad no migra](datos-posteriores-a-la-ronda-de-seguridad.md) | Cuentas asistidas sin persona, filas con `tenant_id` nulo o residuos de `lane16` en una base compartida |
 
 Ver también [operación](../maintenance.md), [observabilidad](../../observability/alerts.md).

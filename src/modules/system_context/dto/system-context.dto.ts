@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -885,6 +886,7 @@ export class RefreshSystemContextDto {
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(500)
   @ValidateNested({ each: true })
   @Type(() => ContextInputDto)
   inputs?: ContextInputDto[];

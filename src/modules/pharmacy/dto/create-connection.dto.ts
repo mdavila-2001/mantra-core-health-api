@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Modos de integración soportados. */
 export type IntegrationModeCode = 'REALTIME' | 'BATCH';
@@ -15,18 +16,6 @@ export class CreateConnectionDto {
   })
   @IsIn(['REALTIME', 'BATCH'])
   integrationMode!: IntegrationModeCode;
-
-  /**
-   * Identificador asociado a connection.
-   */
-  @ApiPropertyOptional({
-    description:
-      'Conexión de integración externa registrada; si se omite, la fila se auto-referencia',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  connectionId?: string;
 
   /**
    * Identificador asociado a pharmacy site.
@@ -55,7 +44,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta consulta de stock' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsStockQuery?: boolean;
 
   /**
@@ -63,7 +52,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta consulta de precio' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsPriceQuery?: boolean;
 
   /**
@@ -71,7 +60,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta reserva' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsReservation?: boolean;
 
   /**
@@ -79,7 +68,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta confirmación de dispensación' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsDispenseConfirmation?: boolean;
 
   /**
@@ -87,6 +76,6 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Permite fallback manual' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   manualFallbackAllowed?: boolean;
 }

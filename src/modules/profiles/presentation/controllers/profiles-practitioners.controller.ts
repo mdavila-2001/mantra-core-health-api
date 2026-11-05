@@ -60,6 +60,11 @@ import {
 /**
  * Endpoints de la fuerza laboral de salud (profesionales y credenciales). Capa
  * fina que delega en `ProfilesPractitionersService`; exige rol `SECURITY_ADMIN`.
+ *
+ * Las rutas `me` y las de `:profileId` que el titular ejerce sobre su propio
+ * perfil (foto, matrícula, especialidad) llevan `@Roles()` vacío (O3-3): decide
+ * `ProfileOwnershipService` (titular o plataforma; `me` sin atajo de
+ * plataforma).
  */
 @ApiTags('profiles-practitioners')
 @ApiBearerAuth()
@@ -251,6 +256,43 @@ export class ProfilesPractitionersController {
   }
 
   /**
+   * Corregir el perfil profesional de otro — la plataforma (P28).
+   *
+   * Mismo cuerpo que `practitioners/me`. Sin `@Roles` por el mismo criterio
+   * que la foto: quién puede lo decide `ProfileOwnershipService` (titular o
+   * `SECURITY_ADMIN`/`SUPERADMIN`), y un profesional que apunta al perfil de un
+   * colega recibe 403.
+   *
+   * Va DESPUÉS de `practitioners/me`: Nest resuelve por orden de declaración y
+   * el parámetro capturaría `me`.
+   */
+  @Audited({
+    action: 'PRACTITIONER_PROFILE_UPDATED',
+    entity: 'health_practitioner_profile',
+    entityId: 'param:profileId',
+  })
+  @Patch('practitioners/:profileId')
+  @ApiOperation({
+    summary: 'Corregir el perfil profesional de otro (titular o plataforma)',
+    description:
+      '`403` si quien pide no es el titular ni plataforma. `409` ' +
+      '`NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del ' +
+      'documento de una identidad verificada o con un caso de verificación en curso.',
+  })
+  @ApiOkResponse({ type: PractitionerProfileSummaryDto })
+  updatePractitionerProfile(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: UpdateOwnPractitionerProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.updatePractitionerProfile(
+      profileId,
+      dto,
+      actor,
+    );
+  }
+
+  /**
    * Fijar la foto del perfil profesional.
    *
    * Va con `:profileId` y no con `me` a propósito: la misma ruta sirve al
@@ -274,6 +316,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:profileId',
   })
   @Put('practitioners/:profileId/photo')
+  @Roles()
   @ApiOperation({ summary: 'Fijar la foto del perfil profesional' })
   setPractitionerPhoto(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -304,6 +347,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:profileId',
   })
   @Delete('practitioners/:profileId/photo')
+  @Roles()
   @ApiOperation({ summary: 'Quitar la foto del perfil profesional' })
   removePractitionerPhoto(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -338,6 +382,7 @@ export class ProfilesPractitionersController {
     entityId: 'result.id',
   })
   @Post('practitioners/:profileId/jurisdiction-authorizations')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar/renovar autorización jurisdiccional (licencia)',
@@ -407,6 +452,7 @@ export class ProfilesPractitionersController {
    * garantiza que ni siquiera llegue a intentarlo.
    */
   @Get('practitioners/me/affiliations')
+  @Roles()
   @ApiOperation({
     summary: 'Historial laboral propio (instituciones donde trabajó)',
   })
@@ -423,6 +469,7 @@ export class ProfilesPractitionersController {
     entityId: 'result.id',
   })
   @Post('practitioners/me/affiliations')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar una afiliación institucional en el historial propio',
@@ -448,6 +495,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:affiliationId',
   })
   @Patch('practitioners/me/affiliations/:affiliationId')
+  @Roles()
   @ApiOperation({
     summary: 'Corregir una afiliación del historial laboral propio',
     description:
@@ -474,6 +522,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:affiliationId',
   })
   @Delete('practitioners/me/affiliations/:affiliationId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Quitar una afiliación del historial laboral propio',
@@ -501,6 +550,7 @@ export class ProfilesPractitionersController {
     entityId: 'result.id',
   })
   @Post('practitioners/me/credentials')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Agregar un título propio (diplomado, maestría, doctorado…)',
@@ -524,6 +574,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:credentialId',
   })
   @Patch('practitioners/me/credentials/:credentialId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Editar un título propio pendiente de verificación',
@@ -561,6 +612,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:credentialId',
   })
   @Delete('practitioners/me/credentials/:credentialId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Retirar un título propio pendiente',
@@ -612,6 +664,7 @@ export class ProfilesPractitionersController {
     entityId: 'result.id',
   })
   @Post('practitioners/:profileId/specialties')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Agregar especialidad con credencial de soporte' })
   addSpecialty(
@@ -634,6 +687,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:specialtyId',
   })
   @Patch('practitioners/me/specialties/:specialtyId/primary')
+  @Roles()
   @ApiOperation({
     summary: 'Marcar una especialidad propia como la principal',
     description:
@@ -658,6 +712,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:specialtyId',
   })
   @Patch('practitioners/me/specialties/:specialtyId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Corregir una especialidad propia pendiente de verificación',
@@ -684,6 +739,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:specialtyId',
   })
   @Delete('practitioners/me/specialties/:specialtyId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Retirar una especialidad propia pendiente de verificación',
@@ -705,6 +761,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:licenseId',
   })
   @Patch('practitioners/me/jurisdiction-authorizations/:licenseId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Corregir una matrícula propia pendiente de verificación',
@@ -727,6 +784,7 @@ export class ProfilesPractitionersController {
     entityId: 'param:licenseId',
   })
   @Delete('practitioners/me/jurisdiction-authorizations/:licenseId')
+  @Roles()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Retirar una matrícula propia pendiente de verificación',

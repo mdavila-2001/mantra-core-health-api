@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityGroupsReadService } from './community-groups-read.service';
 import { CommunityPollsReadService } from './community-polls-read.service';
+import { CommunityVisibilityService } from './community-visibility.service';
 import { ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
 
@@ -33,17 +34,24 @@ function buildGroups() {
     resolveActorProfileId: mockFn((_em: any, _actor: any, order?: string) =>
       Promise.resolve(order),
     ),
+    isPlatform: mockFn().mockReturnValue(false),
   };
-  const access = { resolve: mockFn() };
+  const access = {
+    resolve: mockFn(),
+    assertAudienceVisible: mockFn().mockResolvedValue(undefined),
+  };
+  // API#837: por defecto el lector pertenece a todo público autorizado.
+  const audience = { hiddenFrom: mockFn().mockResolvedValue([]) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupsReadService(
     em as any,
     groupsRepo as any,
     visibility as any,
     access as any,
+    audience as any,
     logger as any,
   );
-  return { service, groupsRepo, visibility, access };
+  return { service, groupsRepo, visibility, access, audience };
 }
 
 /**
@@ -79,7 +87,7 @@ function buildPolls() {
 describe('CommunityGroupsReadService', () => {
   it('excluye los grupos secretos del directorio', async () => {
     const d = buildGroups();
-    await d.service.listGroups('t-1', { limit: 10 });
+    await d.service.listGroups('t-1', { limit: 10 }, actor);
 
     expect(d.groupsRepo.searchPage).toHaveBeenCalledWith(
       expect.anything(),
@@ -87,8 +95,74 @@ describe('CommunityGroupsReadService', () => {
       COMM.GROUP_VISIBILITY_SECRET,
       undefined,
       11,
-      { topicId: undefined, query: undefined },
+      {
+        topicId: undefined,
+        query: undefined,
+        hiddenVisibilityConceptIds: [],
+      },
     );
+  });
+
+  it('oculta del directorio los foros cuyo público no incluye al lector (API#837)', async () => {
+    const d = buildGroups();
+    d.audience.hiddenFrom.mockResolvedValue([
+      COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+      COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+    ]);
+
+    await d.service.listGroups('t-1', { limit: 10 }, actor);
+
+    expect(d.audience.hiddenFrom).toHaveBeenCalledWith(
+      expect.anything(),
+      't-1',
+      actor,
+    );
+    expect(d.groupsRepo.searchPage).toHaveBeenCalledWith(
+      expect.anything(),
+      't-1',
+      COMM.GROUP_VISIBILITY_SECRET,
+      undefined,
+      11,
+      expect.objectContaining({
+        hiddenVisibilityConceptIds: [
+          COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+          COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+        ],
+      }),
+    );
+  });
+
+  it('la plataforma ve el directorio completo, sin evaluar el público', async () => {
+    const d = buildGroups();
+    d.visibility.isPlatform.mockReturnValue(true);
+
+    await d.service.listGroups('t-1', { limit: 10 }, actor);
+
+    expect(d.audience.hiddenFrom).not.toHaveBeenCalled();
+    expect(d.groupsRepo.searchPage).toHaveBeenCalledWith(
+      expect.anything(),
+      't-1',
+      COMM.GROUP_VISIBILITY_SECRET,
+      undefined,
+      11,
+      expect.objectContaining({ hiddenVisibilityConceptIds: [] }),
+    );
+  });
+
+  it('el padrón de un foro de público autorizado responde 404 a quien no es del público', async () => {
+    const d = buildGroups();
+    d.groupsRepo.findById.mockResolvedValue({
+      id: 'g-1',
+      visibilityConceptId: COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+    });
+    d.access.assertAudienceVisible.mockRejectedValue(
+      new ResourceNotFoundException('Grupo no encontrado'),
+    );
+
+    await expect(
+      d.service.listMembers('g-1', actor, undefined, { limit: 10 }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.groupsRepo.listMembers).not.toHaveBeenCalled();
   });
 
   it('404 si el grupo no existe', async () => {
@@ -147,6 +221,53 @@ describe('CommunityGroupsReadService', () => {
     await expect(
       d.service.listMembers('g-1', actor, 'p-1', { limit: 10 }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  /**
+   * Rol de plataforma acotado a un tenant: con la regla real de
+   * `CommunityVisibilityService.isPlatform`, un `SECURITY_ADMIN`/`SUPERADMIN`/
+   * `SYSTEM` concedido sólo en A no es plataforma sobre lo de B.
+   */
+  describe('rol de plataforma acotado a un tenant', () => {
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
+    const scopedTo = (role: string, tenantId: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [tenantId]: [role] },
+      }) as any;
+    const realIsPlatform = (a: any, t: any) =>
+      CommunityVisibilityService.prototype.isPlatform.call(undefined, a, t);
+
+    it('acotado a A: en el directorio de B se evalúa el público; en el de A, no', async () => {
+      for (const role of PLATFORM) {
+        const d = buildGroups();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        const scoped = scopedTo(role, 't-a');
+
+        await d.service.listGroups('t-b', { limit: 10 }, scoped);
+        expect(d.audience.hiddenFrom).toHaveBeenCalledWith(
+          expect.anything(),
+          't-b',
+          scoped,
+        );
+
+        d.audience.hiddenFrom.mockClear();
+        await d.service.listGroups('t-a', { limit: 10 }, scoped);
+        expect(d.audience.hiddenFrom).not.toHaveBeenCalled();
+      }
+    });
+
+    it('global: ve el directorio completo de A y de B', async () => {
+      for (const role of PLATFORM) {
+        const d = buildGroups();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        const global = { id: 'admin-g', roles: [role] } as any;
+        await d.service.listGroups('t-a', { limit: 10 }, global);
+        await d.service.listGroups('t-b', { limit: 10 }, global);
+        expect(d.audience.hiddenFrom).not.toHaveBeenCalled();
+      }
+    });
   });
 });
 

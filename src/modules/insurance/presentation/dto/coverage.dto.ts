@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { CoverageValidity } from '../../domain/coverage-validity';
 import {
   ArrayMaxSize,
   IsArray,
@@ -226,4 +227,45 @@ export class MyCoverageDto {
   /** Fecha de alta. */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+}
+
+/**
+ * Un seguro de la persona, tal como lo necesita quien cobra (carril 16,
+ * REQ-16-026). Lleva lo que la pantalla de cotización usa y nada más: no el
+ * número de póliza ni el de afiliado, que son datos de la persona que quien
+ * cotiza no necesita ver.
+ */
+export class PatientCoverageOptionDto {
+  /** Cobertura que se cotiza y se cobra. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Aseguradora a la que pertenece el plan de la cobertura. */
+  @ApiProperty({ format: 'uuid' })
+  insuranceCarrierId!: string;
+
+  /** Razón social de la aseguradora. */
+  @ApiProperty()
+  carrierName!: string;
+
+  /** Nombre del plan. */
+  @ApiProperty({ nullable: true, type: String })
+  planName!: string | null;
+
+  /** Si hoy está vigente, por vencer, vencida o inactiva. */
+  @ApiProperty({
+    enum: ['CURRENT', 'UPCOMING', 'EXPIRED', 'INACTIVE', 'UNKNOWN'],
+  })
+  validityStatus!: CoverageValidity;
+
+  /** Moneda del plan. */
+  @ApiProperty({ nullable: true, type: String })
+  currencyCode!: string | null;
+}
+
+/** Los seguros de una persona, para quien cobra. */
+export class PatientCoverageOptionListDto {
+  /** Sus coberturas, por orden (1 = privada, 2 = pública) y luego alta. */
+  @ApiProperty({ type: [PatientCoverageOptionDto] })
+  items!: PatientCoverageOptionDto[];
 }

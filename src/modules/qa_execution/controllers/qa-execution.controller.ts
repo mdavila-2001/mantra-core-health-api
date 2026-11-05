@@ -17,7 +17,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   ApprovePlanDto,
   ListPlansQueryDto,
@@ -64,6 +69,11 @@ export class QaExecutionController {
     return this.execution.listTargets();
   }
 
+  @Audited({
+    action: 'QA_EXECUTION_TARGET_UPSERTED',
+    entity: 'execution_target',
+    entityId: 'result.id',
+  })
   @Put('environments/:environmentId/target')
   @Roles(...QA_TARGET_ROLES)
   @ApiOperation({
@@ -78,6 +88,10 @@ export class QaExecutionController {
     return this.execution.upsertTarget(environmentId, dto, actor);
   }
 
+  @Audited({
+    action: 'QA_EXECUTION_PLAN_PREFLIGHTED',
+    entity: 'execution_plan',
+  })
   @Post('plans/preflight')
   @Roles(...QA_PLAN_ROLES)
   @HttpCode(HttpStatus.OK)
@@ -89,6 +103,11 @@ export class QaExecutionController {
     return this.execution.preflight(dto);
   }
 
+  @Audited({
+    action: 'QA_EXECUTION_PLAN_CREATED',
+    entity: 'execution_plan',
+    entityId: 'result.id',
+  })
   @Post('plans')
   @Roles(...QA_PLAN_ROLES)
   @HttpCode(HttpStatus.ACCEPTED)
@@ -126,6 +145,11 @@ export class QaExecutionController {
     return this.execution.getPlan(planId);
   }
 
+  @Audited({
+    action: 'QA_EXECUTION_PLAN_APPROVED',
+    entity: 'plan_approval',
+    entityId: 'result.id',
+  })
   @Post('plans/:planId/approvals')
   @Roles(...QA_APPROVE_ROLES)
   @HttpCode(HttpStatus.OK)
@@ -140,6 +164,11 @@ export class QaExecutionController {
     return this.execution.approve(planId, dto, actor);
   }
 
+  @Audited({
+    action: 'QA_EXECUTION_PLAN_CANCELLED',
+    entity: 'execution_plan',
+    entityId: 'param:planId',
+  })
   @Post('plans/:planId/cancel')
   @Roles(...QA_PLAN_ROLES)
   @HttpCode(HttpStatus.ACCEPTED)
@@ -161,6 +190,11 @@ export class QaExecutionController {
 export class QaExecutionInternalController {
   constructor(private readonly execution: QaExecutionService) {}
 
+  @Audited({
+    action: 'QA_EXECUTION_PLAN_RUN',
+    entity: 'execution_plan',
+    entityId: 'result.id',
+  })
   @Post('run-next')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)

@@ -74,6 +74,22 @@ async function main() {
     console.log(`  ${file.path}: ${rows} filas, ${(size / 1e6).toFixed(1)} MB`);
   }
 
+  for (const nomenclature of manifest.nomenclatures ?? []) {
+    const path = join(OUT_DIR, nomenclature.path);
+    if (!existsSync(path)) {
+      report(`${nomenclature.path} no existe`);
+      continue;
+    }
+    const sha = await sha256File(path);
+    if (sha !== nomenclature.sha256)
+      report(
+        `${nomenclature.path} sha256 ${sha} ≠ manifiesto ${nomenclature.sha256}`,
+      );
+    console.log(
+      `  ${nomenclature.path}: ${nomenclature.entries} términos (${nomenclature.system})`,
+    );
+  }
+
   if (errors.length > 0) {
     console.error(`FALLA: ${errors.length} errores en ${total} filas`);
     process.exit(1);

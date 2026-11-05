@@ -14,6 +14,7 @@ import {
   AccountingLiabilityController,
   AccountingExchangeRateController,
   AccountingPractitionerController,
+  AccountingPractitionerSimpleController,
   AccountingCockpitController,
 } from './controllers';
 import {
@@ -25,8 +26,10 @@ import {
   AssetService,
   LiabilityService,
   ExchangeRateService,
+  AccountingScopeService,
   PostingHelper,
   PractitionerAccountingService,
+  PractitionerSimpleAccountingService,
   AccountingReadService,
 } from './services';
 import {
@@ -39,6 +42,7 @@ import {
   LiabilityRepository,
   ExchangeRateRepository,
   AccountingControllingRepository,
+  PractitionerSimpleAccountingRepository,
 } from './repositories';
 
 /**
@@ -47,6 +51,13 @@ import {
  * para el plan de cuentas. Mantiene `MikroOrmModule.forFeature` con todas las
  * entidades del esquema `accounting`.
  */
+import { AccountingSpaceController } from './controllers/accounting-space.controller';
+import { SpaceAccountingService } from './services/space-accounting.service';
+import { InfraF5fPolicyRegistrar } from './policies/infra-f5f.policy';
+import { ReportTemplatesController } from './report-templates/report-templates.controller';
+import { ReportTemplatesService } from './report-templates/report-templates.service';
+import { ReportTemplatesRepository } from './report-templates/report-templates.repository';
+
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
@@ -60,6 +71,8 @@ import {
     MessagingModule,
   ],
   controllers: [
+    ReportTemplatesController,
+    AccountingSpaceController,
     AccountingLedgerController,
     AccountingFiscalController,
     AccountingAccrualController,
@@ -68,9 +81,14 @@ import {
     AccountingLiabilityController,
     AccountingExchangeRateController,
     AccountingPractitionerController,
+    AccountingPractitionerSimpleController,
     AccountingCockpitController,
   ],
   providers: [
+    ReportTemplatesRepository,
+    ReportTemplatesService,
+    SpaceAccountingService,
+    InfraF5fPolicyRegistrar,
     // Repositorios
     JournalRepository,
     AccountsRepository,
@@ -81,7 +99,9 @@ import {
     LiabilityRepository,
     ExchangeRateRepository,
     AccountingControllingRepository,
+    PractitionerSimpleAccountingRepository,
     // Servicios
+    AccountingScopeService,
     PostingHelper,
     LedgerService,
     LedgerReadService,
@@ -92,6 +112,7 @@ import {
     LiabilityService,
     ExchangeRateService,
     PractitionerAccountingService,
+    PractitionerSimpleAccountingService,
     AccountingReadService,
   ],
 })

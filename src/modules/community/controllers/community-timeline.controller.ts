@@ -4,6 +4,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import { CommunityTimelineReadService } from '../services';
 import type { FeedPageDto, NotificationPageDto } from '../dto';
@@ -18,6 +19,9 @@ const DEFAULT_PAGE_LIMIT = 50;
  * cuelga de `internal/community/feed` y es del worker: mezclar la lectura de la
  * persona con el disparo del fan-out en el mismo prefijo obligaría a que las
  * dos compartan rol, y no lo comparten.
+ *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global; el servicio exige que
+ * el perfil pedido sea del actor (`assertOwnProfile`).
  */
 @ApiTags('community-timeline')
 @ApiBearerAuth()
@@ -32,6 +36,7 @@ export class CommunityTimelineController {
 
   /** UC-19-13 (cara de lectura). Timeline del propio perfil. */
   @Get('feed')
+  @Roles()
   @ApiOperation({ summary: 'Timeline de un perfil' })
   getFeed(
     @Query('profileId', ParseUUIDPipe) profileId: string,
@@ -47,6 +52,7 @@ export class CommunityTimelineController {
 
   /** Bandeja de notificaciones del propio perfil, con el total sin leer. */
   @Get('notifications')
+  @Roles()
   @ApiOperation({ summary: 'Notificaciones sociales de un perfil' })
   listNotifications(
     @Query('profileId', ParseUUIDPipe) profileId: string,

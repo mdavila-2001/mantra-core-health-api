@@ -343,17 +343,18 @@ describe('FormsInstancesController', () => {
 
   it('delegates listInstances by encounter with the default limit', async () => {
     const d = build();
-    await d.controller.listInstances('enc-1', undefined);
+    await d.controller.listInstances('enc-1', actor, undefined);
     expect(d.readService.listInstancesByEncounter).toHaveBeenCalledWith(
       'enc-1',
       50,
+      actor,
     );
   });
 
   it('delegates getInstance', async () => {
     const d = build();
-    await d.controller.getInstance('i1');
-    expect(d.readService.getInstance).toHaveBeenCalledWith('i1');
+    await d.controller.getInstance('i1', actor);
+    expect(d.readService.getInstance).toHaveBeenCalledWith('i1', actor);
   });
 
   it('delegates openInstance (UC-09-07)', async () => {

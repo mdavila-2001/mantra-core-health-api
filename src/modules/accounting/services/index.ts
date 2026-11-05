@@ -6,6 +6,8 @@ export { SubledgerService } from './subledger.service';
 export { AssetService } from './asset.service';
 export { LiabilityService } from './liability.service';
 export { ExchangeRateService } from './exchange-rate.service';
+export { AccountingScopeService } from './accounting-scope.service';
 export { PostingHelper } from './posting.helper';
 export { PractitionerAccountingService } from './practitioner-accounting.service';
 export { AccountingReadService } from './accounting-read.service';
+export { PractitionerSimpleAccountingService } from './practitioner-simple-accounting.service';

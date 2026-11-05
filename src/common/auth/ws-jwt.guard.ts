@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Socket } from 'socket.io';
 import { JWT_ALGORITHM } from './auth.env';
@@ -6,6 +6,8 @@ import { toAuthenticatedUser } from './jwt.strategy';
 import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
 import { SessionValidator } from './session-validator';
+import { unauthorizedWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /** `client.data` de un socket ya autenticado por `authenticateSocket`. */
 export interface AuthenticatedSocketData {
@@ -24,7 +26,8 @@ export interface AuthenticatedSocketData {
  * dónde sale el token: acá viaja en `handshake.auth.token`, no en la cabecera
  * `Authorization`.
  *
- * @throws UnauthorizedException si falta el token, es inválido, expiró, o no
+ * @throws UnauthorizedException (con `reason`: `ACCESS_TOKEN_MISSING`, `ACCESS_TOKEN_INVALID`
+ *   o `TOKEN_TYPE_INVALID`) si falta el token, es inválido, expiró, o no
  *   es un access token (`typ !== 'access'`).
  */
 @Injectable()
@@ -48,7 +51,10 @@ export class WsJwtGuard {
   async authenticate(client: Socket): Promise<AuthenticatedUser> {
     const token = this.extractToken(client);
     if (!token) {
-      throw new UnauthorizedException('Falta el token de acceso');
+      throw unauthorizedWithReason(
+        'Falta el token de acceso',
+        SystemErrorReason.ACCESS_TOKEN_MISSING,
+      );
     }
 
     let payload: JwtPayload;
@@ -57,12 +63,16 @@ export class WsJwtGuard {
         algorithms: [JWT_ALGORITHM],
       });
     } catch {
-      throw new UnauthorizedException('Token inválido o expirado');
+      throw unauthorizedWithReason(
+        'Token inválido o expirado',
+        SystemErrorReason.ACCESS_TOKEN_INVALID,
+      );
     }
 
     if (payload.typ !== 'access') {
-      throw new UnauthorizedException(
+      throw unauthorizedWithReason(
         'Tipo de token no válido para autenticación',
+        SystemErrorReason.TOKEN_TYPE_INVALID,
       );
     }
 

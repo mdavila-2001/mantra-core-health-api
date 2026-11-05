@@ -117,6 +117,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -167,6 +168,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | ORGEXT_NOT_AVAILABLE.message | Excepción explícita en src/modules/organization_extensions/services/orgext-affiliations.service.ts |
 | 409 | `CONFLICT` | Ya existe una afiliación activa de ese tipo | Excepción explícita en src/modules/organization_extensions/services/orgext-affiliations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El tenant primario y el participante deben ser distintos | Excepción explícita en src/modules/organization_extensions/services/orgext-affiliations.service.ts |
@@ -255,6 +257,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -279,7 +282,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/organization_extensions/services/orgext-affiliations.service.ts |
 | 422 | `PRECONDITION_FAILED` | La afiliación no está activa | Excepción explícita en src/modules/organization_extensions/services/orgext-affiliations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -394,6 +396,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DataBoundaryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DataBoundaryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DataBoundaryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DataBoundaryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DataBoundaryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -543,6 +546,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FacilityLicenseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FacilityLicenseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FacilityLicenseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FacilityLicenseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FacilityLicenseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -675,6 +679,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -699,7 +704,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Licencia no encontrada | Excepción explícita en src/modules/organization_extensions/services/orgext-facility-licenses.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La licencia no está en estado pendiente | Excepción explícita en src/modules/organization_extensions/services/orgext-facility-licenses.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -813,6 +817,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HospitalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -945,6 +950,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HospitalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HospitalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -977,7 +983,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Hospital no encontrado | Excepción explícita en src/modules/organization_extensions/services/orgext-hospitals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El hospital no está en estado borrador/inactivo | Excepción explícita en src/modules/organization_extensions/services/orgext-hospitals.service.ts |
 | 422 | `PRECONDITION_FAILED` | El hospital no tiene ninguna licencia de instalación verificada | Excepción explícita en src/modules/organization_extensions/services/orgext-hospitals.service.ts |
@@ -1087,6 +1092,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceLineResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceLineResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceLineResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceLineResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceLineResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1117,7 +1123,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Hospital no encontrado | Excepción explícita en src/modules/organization_extensions/services/orgext-hospitals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El hospital no está activo | Excepción explícita en src/modules/organization_extensions/services/orgext-hospitals.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1205,6 +1210,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 

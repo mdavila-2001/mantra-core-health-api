@@ -73,6 +73,16 @@ export class LedgerLineDto {
   profitCenterId?: string;
 
   /**
+   * Activo fijo de la práctica al que se imputa la línea (TAREA-20 · entidad
+   * relacionada por tipo). Se acota a la práctica del asiento en
+   * `AccountingScopeService.assertPostingScope`: un activo ajeno da 404.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  assetId?: string;
+
+  /**
    * Identificador asociado a currency concept.
    */
   @ApiPropertyOptional({ format: 'uuid' })

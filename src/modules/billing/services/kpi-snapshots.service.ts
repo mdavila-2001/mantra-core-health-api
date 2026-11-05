@@ -5,6 +5,8 @@ import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { BillingErrorReason } from '../billing.error-reasons';
 import { KpiSnapshotsRepository } from '../repositories';
 import { ComputeKpiSnapshotDto, KpiSnapshotResponseDto } from '../dto';
+import { PracticeTenantLookupService } from '../../practice/services';
+import { activeTenantId, assertPracticeInTenant } from '../billing-scope';
 
 /**
  * UC-17-12: registra un snapshot de KPI financiero / aging (tabla LOG,
@@ -23,6 +25,7 @@ export class KpiSnapshotsService {
   constructor(
     private readonly em: EntityManager,
     private readonly kpiRepo: KpiSnapshotsRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(KpiSnapshotsService.name);
@@ -50,8 +53,16 @@ export class KpiSnapshotsService {
       'Computing financial KPI snapshot',
     );
     const computedAt = dto.computedAt ? new Date(dto.computedAt) : new Date();
+    const tenantId = activeTenantId();
 
     return this.em.transactional(async (tx) => {
+      // La práctica es del tenant del contexto: el snapshot de otra organización
+      // no se escribe ni se consulta (el 409 de abajo lo delataría).
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
       const existing = await this.kpiRepo.findExisting(
         tx,
         dto.practiceId,

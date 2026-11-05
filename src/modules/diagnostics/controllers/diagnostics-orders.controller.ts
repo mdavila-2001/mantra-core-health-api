@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -12,6 +19,14 @@ import {
   AccessLogged,
 } from '../../../common';
 import { DiagnosticsOrdersService } from '../services';
+import {
+  ClinicalReadScopeParam,
+  ClinicalRecordAccessGuard,
+} from '../../clinical/guards';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../../clinical/domain/clinical-read-scope';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -40,6 +55,10 @@ export class DiagnosticsOrdersController {
    * @returns Órdenes e informes diagnósticos.
    */
   @Get(':patientProfileId/orders')
+  // P40: la lectura devuelve las notas que motivan cada orden. El rol y el
+  // tenant no alcanzan: el mismo guard que el alta (`POST
+  // /clinical/service-requests`) exige acceso vigente a la historia.
+  @UseGuards(ClinicalRecordAccessGuard)
   @AccessLogged({
     resourceType: 'DIAGNOSTIC_ORDERS',
     patient: 'param:patientProfileId',
@@ -59,11 +78,13 @@ export class DiagnosticsOrdersController {
   getPatientOrders(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PatientDiagnosticOrdersResponseDto> {
     return this.readService.getPatientOrders(
       requireTenantId(),
       patientProfileId,
       limit ?? 50,
+      scope ?? IPS_ONLY_READ_SCOPE,
     );
   }
 }

@@ -25,9 +25,6 @@ describe('Refresh token en cookie httpOnly (integración)', () => {
 
   beforeAll(async () => {
     process.env.AUTH_REFRESH_COOKIE_ENABLED = 'true';
-    // `Secure` apagado explícitamente: supertest habla HTTP contra un servidor
-    // efímero, y una cookie `Secure` no volvería en la petición siguiente.
-    process.env.AUTH_REFRESH_COOKIE_SECURE = 'false';
 
     ctx = await bootstrapTestApp();
     server = ctx.app.getHttpServer();
@@ -42,7 +39,6 @@ describe('Refresh token en cookie httpOnly (integración)', () => {
   afterAll(async () => {
     await ctx.app.close();
     delete process.env.AUTH_REFRESH_COOKIE_ENABLED;
-    delete process.env.AUTH_REFRESH_COOKIE_SECURE;
   });
 
   /** Extrae la cookie del refresh de las cabeceras `Set-Cookie`. */
@@ -63,6 +59,7 @@ describe('Refresh token en cookie httpOnly (integración)', () => {
     // Los tres atributos son el ejercicio entero: sin `HttpOnly` el token sigue
     // al alcance de un XSS, y sin `Path` acotado viaja en cada petición del API.
     expect(cookie).toContain('HttpOnly');
+    expect(cookie).toContain('Secure');
     expect(cookie).toContain('SameSite=Strict');
     expect(cookie).toContain('Path=/iam/auth/token/refresh');
 
@@ -158,5 +155,9 @@ describe('Refresh token en cookie httpOnly (integración)', () => {
     // no vale y el cliente vería un 401 donde debería ver "sin sesión".
     expect(cleared).toContain('redesa_refresh=;');
     expect(cleared).toContain('Path=/iam/auth/token/refresh');
+    await request(server)
+      .get('/iam/users')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .expect(401);
   });
 });

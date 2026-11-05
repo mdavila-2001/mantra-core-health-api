@@ -11,6 +11,7 @@ import {
   ensureTestSession,
   type TestContext,
 } from './harness';
+import { ensureIcd10Concept } from './icd10-fixture';
 
 /**
  * Tarea 4 · M-06 — campañas preventivas de la aseguradora, contra Postgres
@@ -27,6 +28,8 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
   // y un UUID en hexadecimal minúscula lo rechazaba (400) en casi todas las corridas.
   const suffix = randomUUID().slice(0, 8).toUpperCase();
   const created: { userId: string; tenantId: string }[] = [];
+  /** Borra el CIE-10 `I10` sintético, si esta suite tuvo que crearlo. */
+  let removeIcd10Fixture: () => Promise<void> = async () => undefined;
   const organizations: Array<{
     tenantId: string;
     ownerUserId: string;
@@ -163,13 +166,26 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    // Las campañas resuelven `targetConditionCode` contra el catálogo CIE-10-CM,
+    // que importa un job aparte. Sin él, el alta daría 400 «I10 no está en el
+    // catálogo»: se crea un concepto mínimo y se borra al final (no toca uno real).
+    removeIcd10Fixture = await ensureIcd10Concept(
+      ctx.orm,
+      'I10',
+      'Hipertensión esencial (primaria)',
+    );
     await register('CA');
     await register('CB');
   });
 
   afterAll(async () => {
     await ctx.app.close();
-    await deleteRegisteredOrganizations(created);
+    // Primero las organizaciones (sus campañas apuntan al concepto), después el concepto.
+    try {
+      await deleteRegisteredOrganizations(created);
+    } finally {
+      await removeIcd10Fixture();
+    }
   });
 
   it('CA-01: el owner crea la campaña, persiste en Postgres y la lee de vuelta', async () => {

@@ -1,4 +1,6 @@
+import { PractitionerVerificationDto } from './practitioner-verification.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PractitionerActivityDto } from './read-practitioner-profile.dto';
 
 /**
  * Una especialidad en la fila de la guía — lo justo para agrupar y rotular.
@@ -74,8 +76,18 @@ export class PractitionerListItemDto {
    * dibuja como sello — la guía lista el padrón entero, y esto distingue a
    * quien además probó lo que declara.
    */
-  @ApiProperty({ description: 'Si la matrícula fue verificada' })
+  @ApiProperty({
+    description:
+      'Si la matrícula fue verificada. Equivale a `verification.status === "VERIFIED"`: ' +
+      'una verificación vencida o suspendida ya no cuenta.',
+  })
   verified!: boolean;
+
+  /**
+   * Estado visible de verificación (admisión vigente), aditivo.
+   */
+  @ApiProperty({ type: PractitionerVerificationDto })
+  verification!: PractitionerVerificationDto;
 
   /**
    * Si declara tomar pacientes nuevos.
@@ -109,6 +121,37 @@ export class PractitionerListItemDto {
    */
   @ApiProperty({ type: [String], description: 'Dónde atiende, en texto' })
   workplaces!: string[];
+
+  /**
+   * Media de sus reseñas publicadas (1 a 5, una decimal).
+   *
+   * `null` y no `0` cuando nadie lo calificó: cero estrellas es una nota
+   * pésima, y «todavía nadie opinó» no lo es. Es lo que deja ordenar la guía
+   * por «mejor calificados» sin abrir ficha por ficha (P61 del front).
+   */
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description: 'Media de reseñas publicadas; null si no tiene',
+  })
+  ratingAverage!: number | null;
+
+  /**
+   * Cuántas reseñas publicadas sostienen esa media.
+   */
+  @ApiProperty({ description: 'Reseñas publicadas' })
+  ratingCount!: number;
+
+  /**
+   * Lo que asentó en la plataforma: consultas, recetas, notas y documentos.
+   *
+   * Las mismas cuatro cifras —y el mismo criterio— que la sección `activity`
+   * de su ficha, para que ordenar la guía por «más atenciones» y abrir al
+   * primero muestren el mismo número. Cuentas, nunca contenido: no es PHI.
+   * En cero para quien no tiene cuenta vinculada.
+   */
+  @ApiProperty({ type: PractitionerActivityDto })
+  activity!: PractitionerActivityDto;
 }
 
 /**

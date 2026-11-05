@@ -58,7 +58,8 @@ export interface AffiliationCatalogsSeedResult {
  * Todo id es determinista (UUIDv5 sobre una clave estable): una corrida
  * repetida compara por id e inserta sólo lo que falta, así que arrancar dos
  * veces no duplica ni escribe nada la segunda vez. Una siembra a medias se
- * completa.
+ * completa. Lo único que se actualiza de una fila existente es el `ordinal`
+ * de una membresía, cuando la ampliación del catálogo la corrió de lugar.
  *
  * ## Convivencia con el paquete de seeds del modelo
  *
@@ -277,17 +278,39 @@ export class AffiliationCatalogsSeedService {
       await em.flush();
     }
 
-    // Nivel 5: la expansión, en el orden declarado.
-    const existingMembers = new Set(
-      await this.existingIds(
-        em,
-        ValueSetMembers,
-        set.members.map((member) => affiliationMemberId(set, member.code)),
-      ),
+    // Nivel 5: la expansión, en el orden declarado. Las membresías ya
+    // sembradas se leen con su `ordinal`: al ampliar el catálogo las opciones
+    // nuevas caen entre medio de las viejas, y si las viejas conservaran su
+    // posición original el desplegable quedaría con ordinales repetidos y
+    // «Otro» a mitad de la lista. Se realinean (mismo criterio que
+    // `BoOccupationsSeedService.seedMemberships`); no cuentan como inserción.
+    const rows = await em.find(
+      ValueSetMembers,
+      {
+        id: {
+          $in: set.members.map((member) =>
+            affiliationMemberId(set, member.code),
+          ),
+        },
+      },
+      { fields: ['id', 'ordinal'] as never },
+    );
+    const existingMembers = new Map(
+      rows.map((row) => [
+        (row as { id: string }).id,
+        row as { ordinal?: number; updatedAt?: Date },
+      ]),
     );
     set.members.forEach((member, ordinal) => {
       const id = affiliationMemberId(set, member.code);
-      if (existingMembers.has(id)) return;
+      const current = existingMembers.get(id);
+      if (current !== undefined) {
+        if (current.ordinal !== ordinal) {
+          current.ordinal = ordinal;
+          current.updatedAt = now;
+        }
+        return;
+      }
       em.create(
         ValueSetMembers,
         {

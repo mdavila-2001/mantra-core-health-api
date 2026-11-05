@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AddPharmacovigilanceActionDto,
   CreatePharmacovigilanceReportDto,
@@ -45,6 +50,11 @@ export class PharmacovigilanceController {
   constructor(private readonly service: PharmacovigilanceService) {}
 
   /** UC-17-29. */
+  @Audited({
+    action: 'PHARMACOVIGILANCE_REPORT_CREATED',
+    entity: 'pharmacovigilance_report',
+    entityId: 'result.id',
+  })
   @Post('reports')
   @HttpCode(HttpStatus.CREATED)
   // Cualquier médico reporta al laboratorio del medicamento que sospecha,
@@ -93,6 +103,11 @@ export class PharmacovigilanceController {
   }
 
   /** UC-17-30. */
+  @Audited({
+    action: 'PHARMACOVIGILANCE_ACTION_RECORDED',
+    entity: 'pharmacovigilance_action',
+    entityId: 'result.id',
+  })
   @Post('reports/:reportId/actions')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMACOVIGILANCE_OFFICER', 'PHARMA_LAB_ADMIN', 'PLATFORM_ADMIN')

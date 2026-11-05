@@ -1,6 +1,9 @@
+import type { CareSpaceDirectoryPort } from '../ports/care-space-directory.port';
 import { SchedulingCatalogService } from './scheduling-catalog.service';
 import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
+import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
 import { CloseSlotsUseCase } from './use-cases/close-slots.use-case';
+import { ListTemplateLiveBookingsUseCase } from './use-cases/list-template-live-bookings.use-case';
 import { CreateBookingPolicyUseCase } from './use-cases/create-booking-policy.use-case';
 import { CreateExceptionUseCase } from './use-cases/create-exception.use-case';
 import { CreateResourceUseCase } from './use-cases/create-resource.use-case';
@@ -26,6 +29,14 @@ export interface CatalogServiceDoubles {
   professionalTime: any;
   noticeRepo: any;
   notices: any;
+  /**
+   * El caso de uso de cancelar, simulado. Opcional: las pruebas que no
+   * bloquean ratos con citas no lo tocan, y un doble que no cancela nada
+   * basta para ellas.
+   */
+  cancelBooking?: any;
+  /** R0: espacios físicos (por defecto, ninguno). */
+  careSpaces?: CareSpaceDirectoryPort;
 }
 
 /**
@@ -43,23 +54,62 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     d.logger,
   );
   const { em, catalogRepo, logger, professionalTime } = d;
+  const noticeRepo = {
+    findDisplayNameForProfile: async () => null,
+    ...d.noticeRepo,
+  };
+  const blockedBookings = new BlockedBookingsCanceller(
+    catalogRepo,
+    noticeRepo,
+    d.cancelBooking ?? {
+      cancelInTransaction: async () => {
+        throw new Error('la prueba no esperaba cancelar ninguna cita');
+      },
+      announceChange: async () => undefined,
+    },
+  );
 
   return new SchedulingCatalogService(
-    new CreateResourceUseCase(em, catalogRepo, access, logger),
+    new CreateResourceUseCase(
+      em,
+      catalogRepo,
+      access,
+      logger,
+      d.careSpaces ?? {
+        describe: async () => null,
+        hasActiveResource: async () => false,
+        announceLinked: async () => undefined,
+        names: async () => new Map(),
+        announceTemplateCareSpace: async () => undefined,
+      },
+    ),
     new CreateBookingPolicyUseCase(em, catalogRepo, access, logger),
     new CreateTemplateUseCase(em, catalogRepo, access, overlapGuard, logger),
     new UpdateTemplateUseCase(em, catalogRepo, access, logger),
     new ReactivateTemplateUseCase(em, catalogRepo, access, logger),
-    new RetireTemplateUseCase(em, catalogRepo, access, logger),
+    new RetireTemplateUseCase(em, catalogRepo, access, blockedBookings, logger),
     new GenerateSlotsUseCase(em, catalogRepo, professionalTime, access, logger),
-    new CloseSlotsUseCase(em, catalogRepo, access, logger),
+    new CloseSlotsUseCase(em, catalogRepo, access, blockedBookings, logger),
     new ShiftSlotsUseCase(em, catalogRepo, access, moveNotifier, logger),
-    new CreateExceptionUseCase(em, catalogRepo, professionalTime, logger),
+    new CreateExceptionUseCase(
+      em,
+      catalogRepo,
+      professionalTime,
+      access,
+      blockedBookings,
+      logger,
+    ),
     new UpdateExceptionUseCase(em, catalogRepo, access, logger),
     new RemoveExceptionUseCase(em, catalogRepo, access, logger),
     new ListTemplatesUseCase(em, catalogRepo, access),
     new ListExceptionsUseCase(em, catalogRepo, access),
     new GetResourceAgendaUseCase(em, catalogRepo),
     new ListCatalogLookupsUseCase(),
+    new ListTemplateLiveBookingsUseCase(
+      em,
+      catalogRepo,
+      access,
+      blockedBookings,
+    ),
   );
 }

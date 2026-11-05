@@ -180,6 +180,24 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
     });
   });
 
+  it('con startAttention false registra y agenda, sin encuentro ni arranque', async () => {
+    const { service, bookingsService, encountersRepo } = build();
+
+    const result = await service.createWalkInAppointment(
+      { ...DTO, startAttention: false },
+      actor as any,
+    );
+
+    expect(
+      bookingsService.createDirectAppointmentInTransaction,
+    ).toHaveBeenCalled();
+    expect(encountersRepo.create).not.toHaveBeenCalled();
+    expect(encountersRepo.createParticipant).not.toHaveBeenCalled();
+    expect(bookingsService.startInTransaction).not.toHaveBeenCalled();
+    expect(result.encounterId).toBeUndefined();
+    expect(result.bookingId).toBeDefined();
+  });
+
   it('el conflicto del alta sale de la transacción sin llamar a la cita', async () => {
     const { service, bookingsService, identifiersRepo } = build();
     identifiersRepo.findActiveDuplicate.mockResolvedValue({

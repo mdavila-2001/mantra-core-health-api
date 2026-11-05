@@ -265,6 +265,114 @@ describe('PaymentsIntentsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
+    /** Intención de `amount` con los repartos ya asignados `allocated`. */
+    function intentWith(
+      d: ReturnType<typeof build>,
+      amount: string,
+      allocated: string[],
+    ) {
+      d.intentsRepo.findByIdForUpdate.mockResolvedValue({
+        id: 'intent-1',
+        amount,
+        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+      });
+      d.flowRepo.findSplitsByIntent.mockResolvedValue(
+        allocated.map((value) => ({ amount: value })),
+      );
+      d.flowRepo.createSplit.mockReturnValue({ id: 'split-1' });
+    }
+
+    it('accepts a split that fills the intent exactly: 0.10 allocated + 0.20 = 0.30 (PAY-01)', async () => {
+      // Con Number: 0.1 + 0.2 = 0.30000000000000004 > 0.3 y se rechazaba.
+      const d = build();
+      intentWith(d, '0.30', ['0.10']);
+
+      const res = await d.service.addSplit(
+        'intent-1',
+        { ...splitBase, splitType: 'AMOUNT', amount: '0.20' },
+        actor,
+      );
+
+      expect(res.amount).toBe('0.20');
+      expect(d.flowRepo.createSplit).toHaveBeenCalled();
+    });
+
+    it('rejects a split one unit above the intent at six decimals', async () => {
+      const d = build();
+      intentWith(d, '0.300000', ['0.100000']);
+
+      await expect(
+        d.service.addSplit(
+          'intent-1',
+          { ...splitBase, splitType: 'AMOUNT', amount: '0.200001' },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.flowRepo.createSplit).not.toHaveBeenCalled();
+    });
+
+    it('accepts three decimals that add up exactly', async () => {
+      const d = build();
+      intentWith(d, '0.003', ['0.001']);
+
+      await expect(
+        d.service.addSplit(
+          'intent-1',
+          { ...splitBase, splitType: 'AMOUNT', amount: '0.002' },
+          actor,
+        ),
+      ).resolves.toMatchObject({ amount: '0.002' });
+    });
+
+    it('does not lose precision at the maximum admissible amount', async () => {
+      const d = build();
+      intentWith(d, '99999999999999.99', ['99999999999999.98']);
+
+      await expect(
+        d.service.addSplit(
+          'intent-1',
+          { ...splitBase, splitType: 'AMOUNT', amount: '0.01' },
+          actor,
+        ),
+      ).resolves.toMatchObject({ amount: '0.01' });
+      await expect(
+        d.service.addSplit(
+          'intent-1',
+          { ...splitBase, splitType: 'AMOUNT', amount: '0.02' },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('computes a percentage split exactly (33.3333 % of 0.30 is 0.10)', async () => {
+      const d = build();
+      intentWith(d, '0.30', []);
+
+      const res = await d.service.addSplit(
+        'intent-1',
+        { ...splitBase, splitType: 'PERCENTAGE', percentage: '33.3333' },
+        actor,
+      );
+
+      expect(res.amount).toBe('0.10');
+    });
+
+    it('rejects a zero or negative split', async () => {
+      const d = build();
+      intentWith(d, '100.00', []);
+
+      for (const amount of ['0.00', '-5.00']) {
+        await expect(
+          d.service.addSplit(
+            'intent-1',
+            { ...splitBase, splitType: 'AMOUNT', amount },
+            actor as any,
+          ),
+        ).rejects.toMatchObject({ reason: 'SPLIT_AMOUNT_NOT_POSITIVE' });
+      }
+      expect(d.flowRepo.createSplit).not.toHaveBeenCalled();
+    });
+
     it('requires an amount for AMOUNT splits', async () => {
       const d = build();
       await expect(

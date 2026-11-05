@@ -100,7 +100,7 @@ decodificar y `%24expand` devuelve 404.
 
 Registradas en el módulo con `MikroOrmModule.forFeature(Object.values(entities))`.
 
-## Reglas de negocio
+## Business rules
 
 - **Unicidad**: `code_systems.internal_code` y `value_sets.internal_code` únicos;
   `(code_system_id, version)` único por sistema → `409 Conflict`.
@@ -150,11 +150,26 @@ conceptos):
 | `VS_OP_IS_A` | — | Código del ancestro | El ancestro y sus descendientes `is-a`, de forma transitiva (con corte de ciclos) |
 | `VS_OP_PROP` | Código de propiedad | Valor esperado | Los conceptos cuyo `value_json` textual coincide con `value` |
 
-## Permisos
+## Permissions
 
 Los endpoints administrativos exigen rol global `SECURITY_ADMIN` (`@Roles`) sobre
 el `JwtAuthGuard` global. `$translate` y `$lookup` sólo exigen autenticación: el
 caso de uso los asigna al consumidor FHIR, no al terminólogo.
+
+### Contenido `professional` (farmacología clínica)
+
+Las secciones del code system `clinical-pharmacology` (posología incluida) llevan
+`audience: 'professional'` dentro de su `value_json`. `$lookup` y
+`GET /terminology/concepts/:conceptId` las omiten salvo que el sujeto tenga un rol
+clínico (los asistenciales de `CLINICAL_ROLE_SEED` o el `SUPERADMIN` de plataforma); sin sujeto no
+se entrega ninguna. Un `SECURITY_ADMIN` o un `PATIENT` no las ven. La regla vive en
+`pharmacology-audience.ts`. La expansión de un conjunto de valores no las alcanza:
+ese code system no es miembro de ninguno.
+
+`$lookup` agrega a cada propiedad que es una sección `sourceAge` (estado S7):
+`{ known, sourceDate?, retrievedAt }`. `known: false` es una ficha de CIMA que no
+publica su fecha (`document.versionUnpublished`): se carga igual y el dato que vale
+es la fecha de consulta.
 
 ## Persistencia
 
@@ -180,7 +195,7 @@ terminology/
 └── terminology.module.ts
 ```
 
-## Pruebas
+## Tests
 
 86 pruebas unitarias en 12 suites (`*.spec.ts`) con `EntityManager` y repositorios
 mockeados, sin acceso a base de datos:

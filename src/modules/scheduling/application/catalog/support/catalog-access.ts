@@ -125,6 +125,37 @@ export class CatalogAccess {
    * uno del que no es miembro — donde su agenda existiría pero jamás se
    * listaría, que es una forma silenciosa de no existir.
    */
+  /**
+   * Quién puede **leer los pacientes citados** de una agenda y cancelarlos.
+   *
+   * Más estricto que {@link assertActorResource}, a propósito: ése deja pasar a
+   * cualquier rol de administración de agenda sin mirar de qué organización es
+   * la agenda — razonable para publicar un horario, no para ver nombres de
+   * pacientes ni para cancelar sus citas y avisarles (revisión de seguridad del
+   * 24/10/2026). Acá el profesional dueño pasa por serlo; cualquier otro,
+   * administrador incluido, tiene que pertenecer a la organización de la
+   * agenda.
+   */
+  assertMayReadAgendaBookings(
+    resource: {
+      resourceRefType: string;
+      resourceRefId: string;
+      tenantId: string;
+    },
+    actor: AuthenticatedUser,
+  ): void {
+    const isOwnAgenda =
+      actor.practitionerProfileId !== undefined &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
+    if (isOwnAgenda) return;
+    if (!actor.tenantIds?.includes(resource.tenantId)) {
+      throw new ForbiddenException(
+        'Esta agenda es de otra organización: no puede ver ni cancelar sus citas.',
+      );
+    }
+  }
+
   assertActorTenant(tenantId: string, actor: AuthenticatedUser): void {
     if (this.isCatalogAdmin(actor)) return;
     if (!actor.tenantIds?.includes(tenantId)) {

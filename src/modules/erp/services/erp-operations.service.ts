@@ -9,10 +9,9 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import {
-  ErpOperationsRepository,
-  ErpContractsRepository,
-} from '../repositories';
+import { ErpOperationsRepository } from '../repositories';
+import { ErpErrorReason } from '../erp.error-reasons';
+import { ErpScopeService, TIME_OFF_NOT_FOUND } from './erp-scope.service';
 import {
   OnboardEmployeeDto,
   EmployeeResponseDto,
@@ -52,13 +51,13 @@ export class ErpOperationsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param operationsRepo - Valor de operations repo requerido por la operación.
-   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly operationsRepo: ErpOperationsRepository,
-    private readonly contractsRepo: ErpContractsRepository,
+    private readonly scope: ErpScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ErpOperationsService.name);
@@ -75,6 +74,10 @@ export class ErpOperationsService {
     );
 
     return this.em.transactional(async (tx) => {
+      // La práctica del alta debe ser del tenant activo: de ella hereda el
+      // empleado su organización.
+      await this.scope.practice(tx, dto.practiceId);
+
       const employee = this.operationsRepo.createEmployee(tx, {
         practiceId: dto.practiceId,
         fullName: dto.fullName,
@@ -127,15 +130,10 @@ export class ErpOperationsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const employee = await this.operationsRepo.findEmployeeById(
-        tx,
-        employeeId,
-      );
-      if (!employee) {
-        throw new ResourceNotFoundException('Empleado no encontrado', {
-          employeeId,
-        });
-      }
+      const employee = await this.scope.employee(tx, employeeId);
+      // Un EMPLOYEE solo pide ausencias para sí; RR. HH. y administración, para
+      // cualquier empleado de su organización.
+      this.scope.assertSelfOrHr(employee, actor);
 
       const overlapping = await this.operationsRepo.findOverlappingTimeOff(
         tx,
@@ -173,24 +171,35 @@ export class ErpOperationsService {
 
   /** UC-38-09: resuelve la solicitud de ausencia. */
   async approveTimeOff(
+    employeeId: string,
     requestId: string,
     dto: ApproveTimeOffDto,
     actor: AuthenticatedUser,
   ): Promise<TimeOffResponseDto> {
     this.logger.info(
-      { operation: 'erp.timeoff.approve', requestId, approved: dto.approved },
+      {
+        operation: 'erp.timeoff.approve',
+        employeeId,
+        requestId,
+        approved: dto.approved,
+      },
       'Resolving time off request',
     );
 
     return this.em.transactional(async (tx) => {
+      // El empleado de la ruta debe ser de la organización y la solicitud,
+      // suya: cualquier discrepancia responde igual que una solicitud inexistente.
+      await this.scope.employee(tx, employeeId, TIME_OFF_NOT_FOUND);
       const request = await this.operationsRepo.findTimeOffForUpdate(
         tx,
         requestId,
+        employeeId,
       );
       if (!request) {
         throw new ResourceNotFoundException(
-          'Solicitud de ausencia no encontrada',
-          { requestId },
+          TIME_OFF_NOT_FOUND.message,
+          undefined,
+          TIME_OFF_NOT_FOUND.reason,
         );
       }
       if (request.statusConceptId !== CONCEPTS.TIMEOFF_REQUESTED) {
@@ -220,28 +229,30 @@ export class ErpOperationsService {
     dto: CreatePurchaseOrderDto,
     actor: AuthenticatedUser,
   ): Promise<PurchaseOrderResponseDto> {
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     this.logger.info(
       {
         operation: 'erp.po.create',
-        tenantId: dto.tenantId,
+        tenantId,
         poNumber: dto.purchaseOrderNumber,
       },
       'Creating purchase order',
     );
 
     return this.em.transactional(async (tx) => {
-      const supplier = await this.contractsRepo.findPartnerById(
+      // Proveedor, contrato y requisición referenciados son del mismo tenant.
+      await this.scope.partner(
         tx,
         dto.supplierBusinessPartnerId,
+        'Proveedor no encontrado',
       );
-      if (!supplier) {
-        throw new ResourceNotFoundException('Proveedor no encontrado', {
-          partnerId: dto.supplierBusinessPartnerId,
-        });
+      if (dto.contractId) await this.scope.contract(tx, dto.contractId);
+      if (dto.purchaseRequisitionId) {
+        await this.scope.requisition(tx, dto.purchaseRequisitionId);
       }
 
       const order = this.operationsRepo.createPurchaseOrder(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         purchaseOrderNumber: dto.purchaseOrderNumber,
         supplierBusinessPartnerId: dto.supplierBusinessPartnerId,
         contractId: dto.contractId,
@@ -302,16 +313,12 @@ export class ErpOperationsService {
       'Registering goods receipt',
     );
 
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const order = await this.operationsRepo.findPurchaseOrderForUpdate(
+      const order = await this.scope.purchaseOrderForUpdate(
         tx,
         purchaseOrderId,
       );
-      if (!order) {
-        throw new ResourceNotFoundException('Orden de compra no encontrada', {
-          purchaseOrderId,
-        });
-      }
       if (order.statusConceptId === CONCEPTS.PO_CLOSED) {
         throw new PreconditionFailedException(
           'La orden de compra está cerrada',
@@ -321,8 +328,28 @@ export class ErpOperationsService {
         );
       }
 
+      // Cada línea debe existir, no repetirse y ser hija de esta orden: se
+      // cargan todas de una vez (`id IN (...) + purchaseOrderId`) y se contrasta
+      // la cardinalidad antes de crear la recepción.
+      const requestedIds = dto.items.map((item) => item.purchaseOrderItemId);
+      const orderItems = await this.operationsRepo.findItemsInPurchaseOrder(
+        tx,
+        purchaseOrderId,
+        requestedIds,
+      );
+      if (
+        new Set(requestedIds).size !== requestedIds.length ||
+        orderItems.length !== requestedIds.length
+      ) {
+        throw new PreconditionFailedException(
+          'Alguna línea de la recepción no pertenece a la orden de compra',
+          undefined,
+          ErpErrorReason.ERP_PO_ITEM_NOT_IN_ORDER,
+        );
+      }
+
       const receipt = this.operationsRepo.createGoodsReceipt(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         receiptNumber: dto.receiptNumber,
         purchaseOrderId,
         receivedAt: new Date(),
@@ -388,19 +415,15 @@ export class ErpOperationsService {
       'Registering service entry sheet',
     );
 
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const order = await this.operationsRepo.findPurchaseOrderForUpdate(
+      const order = await this.scope.purchaseOrderForUpdate(
         tx,
         purchaseOrderId,
       );
-      if (!order) {
-        throw new ResourceNotFoundException('Orden de compra no encontrada', {
-          purchaseOrderId,
-        });
-      }
 
       const sheet = this.operationsRepo.createServiceEntrySheet(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         sheetNumber: dto.sheetNumber,
         purchaseOrderId,
         supplierBusinessPartnerId: order.supplierBusinessPartnerId,
@@ -442,16 +465,11 @@ export class ErpOperationsService {
       'Running invoice match',
     );
 
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const order = await this.operationsRepo.findPurchaseOrderForUpdate(
-        tx,
-        dto.purchaseOrderId,
-      );
-      if (!order) {
-        throw new ResourceNotFoundException('Orden de compra no encontrada', {
-          purchaseOrderId: dto.purchaseOrderId,
-        });
-      }
+      // La factura y la orden conciliadas son del mismo tenant.
+      await this.scope.bill(tx, billId);
+      await this.scope.purchaseOrderForUpdate(tx, dto.purchaseOrderId);
 
       const items = await this.operationsRepo.findItemsByPurchaseOrder(
         tx,
@@ -467,7 +485,7 @@ export class ErpOperationsService {
       const matched = Math.abs(variance) <= tolerance;
 
       const run = this.operationsRepo.createInvoiceMatchRun(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         billId,
         matchTypeConceptId: CONCEPTS.MATCH_THREE_WAY,
         purchaseOrderId: dto.purchaseOrderId,
@@ -506,24 +524,22 @@ export class ErpOperationsService {
     dto: CreateSalesOrderDto,
     actor: AuthenticatedUser,
   ): Promise<SalesOrderResponseDto> {
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     this.logger.info(
-      { operation: 'erp.sales-order.create', tenantId: dto.tenantId },
+      { operation: 'erp.sales-order.create', tenantId },
       'Creating sales order',
     );
 
     return this.em.transactional(async (tx) => {
-      const customer = await this.contractsRepo.findPartnerById(
+      await this.scope.partner(
         tx,
         dto.customerBusinessPartnerId,
+        'Cliente no encontrado',
       );
-      if (!customer) {
-        throw new ResourceNotFoundException('Cliente no encontrado', {
-          partnerId: dto.customerBusinessPartnerId,
-        });
-      }
+      if (dto.contractId) await this.scope.contract(tx, dto.contractId);
 
       const order = this.operationsRepo.createSalesOrder(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         salesOrderNumber: dto.salesOrderNumber,
         customerBusinessPartnerId: dto.customerBusinessPartnerId,
         contractId: dto.contractId,
@@ -554,6 +570,9 @@ export class ErpOperationsService {
     );
 
     return this.em.transactional(async (tx) => {
+      // El arrendamiento hereda su organización del contrato.
+      await this.scope.leaseContract(tx, leaseContractId);
+
       const valuation = this.operationsRepo.createLeaseValuation(tx, {
         leaseContractId,
         valuationDate: new Date(dto.valuationDate),

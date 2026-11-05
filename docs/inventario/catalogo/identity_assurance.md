@@ -2,7 +2,7 @@
 
 # Catálogo del schema `identity_assurance`
 
-- **Tablas:** 11 · **Columnas:** 147 (31 con descripción: 21.1 %) · **Índices:** 76
+- **Tablas:** 11 · **Columnas:** 148 (31 con descripción: 20.9 %) · **Índices:** 77
 - **Dominio:** Identidad y Seguridad
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,16 +10,16 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [identity_assertions](#identity_assertions) | Registra afirmaciones de identidad verificadas para que otros procesos puedan consumir evidencia confiable de atributos. | 14 | 7 | 6 | COINCIDE |
-| [identity_authorities](#identity_authorities) | Cataloga autoridades que emiten identidades o credenciales usadas para verificar personas en procesos médicos. | 14 | 10 | 2 | COINCIDE |
+| [identity_assertions](#identity_assertions) | Registra afirmaciones de identidad verificadas para que otros procesos puedan consumir evidencia confiable de atributos. | 14 | 7 | 5 | COINCIDE |
+| [identity_authorities](#identity_authorities) | Cataloga autoridades que emiten identidades o credenciales usadas para verificar personas en procesos médicos. | 14 | 10 | 5 | COINCIDE |
 | [identity_authority_endpoints](#identity_authority_endpoints) | Registra endpoints de autoridades de identidad para consultar o verificar atributos con fuentes autorizadas. | 13 | 7 | 4 | COINCIDE |
 | [identity_check_results](#identity_check_results) | Conserva resultados de controles de identidad para explicar qué validaciones fueron satisfactorias o fallidas. | 11 | 4 | 8 | COINCIDE |
 | [identity_checks](#identity_checks) | Representa verificaciones individuales ejecutadas dentro de un caso de identidad. | 12 | 6 | 21 | COINCIDE |
 | [identity_evidence_records](#identity_evidence_records) | Cataloga evidencia presentada o consultada durante verificaciones para fundamentar sus resultados. | 14 | 8 | 15 | COINCIDE |
 | [identity_fraud_signals](#identity_fraud_signals) | Documenta señales de posible fraude de identidad para apoyar revisión de riesgo y protección de cuentas. | 11 | 6 | 4 | COINCIDE |
-| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 6 | COINCIDE |
+| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 5 | COINCIDE |
 | [identity_verification_attempts](#identity_verification_attempts) | Registra intentos de verificación para conservar métodos, tiempos y resultados parciales del proceso. | 13 | 7 | 13 | COINCIDE |
-| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 16 | 6 | 34 | COINCIDE |
+| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 17 | 7 | 37 | COINCIDE |
 | [identity_verification_policies](#identity_verification_policies) | Define políticas que determinan requisitos y métodos de verificación de identidad para personas usuarias o pacientes. | 15 | 8 | 2 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -51,6 +51,7 @@ erDiagram
   }
   identity_assurance_identity_verification_cases["identity_assurance.identity_verification_cases"] {
     uuid id PK
+    uuid tenant_id FK
     uuid subject_type_concept_id FK
     uuid identity_verification_policy_id FK
     uuid requested_assurance_level_concept_id FK
@@ -156,7 +157,7 @@ Registra afirmaciones de identidad verificadas para que otros procesos puedan co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_assertions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityAssertions` — `src/modules/identity_assurance/entities/identity_assertions.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -204,7 +205,6 @@ Registra afirmaciones de identidad verificadas para que otros procesos puedan co
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | CREA | DIRECTA |
 | POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
@@ -234,7 +234,7 @@ Cataloga autoridades que emiten identidades o credenciales usadas para verificar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_authorities`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityAuthorities` — `src/modules/identity_assurance/entities/identity_authorities.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 8 FK salientes · 4 entrantes · 2 operaciones
+- **Resumen:** 14 columnas · 10 índices · 8 FK salientes · 4 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -299,6 +299,9 @@ Cataloga autoridades que emiten identidades o credenciales usadas para verificar
 |---|---|---|
 | POST /identity/authorities | CREA | DIRECTA |
 | POST /identity/authorities/{id}/endpoints | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/checks:plan | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -725,7 +728,7 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_manual_review_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityManualReviewCases` — `src/modules/identity_assurance/entities/identity_manual_review_cases.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -774,7 +777,6 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | GET /identity/me/verification-cases | LEE | DIRECTA |
 | GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
@@ -894,34 +896,36 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_verification_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityVerificationCases` — `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts`
-- **Resumen:** 16 columnas · 6 índices · 6 FK salientes · 7 entrantes · 34 operaciones
+- **Resumen:** 17 columnas · 7 índices · 7 FK salientes · 7 entrantes · 37 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:15`)_ | coincide |
-| 2 | `subject_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 3 | `subject_entity_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
-| 4 | `identity_verification_policy_id` | `uuid` | Clave foránea → identity_assurance.identity_verification_policies.id; Obligatoria | _sin dato_ | coincide |
-| 5 | `requested_assurance_level_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 6 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 7 | `risk_score` | `numeric` | Opcional | _sin dato_ | coincide |
-| 8 | `opened_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 9 | `completed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 10 | `expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 11 | `correlation_id` | `uuid` | Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:97`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:103`)_ | coincide |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:121`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
+| 3 | `subject_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `subject_entity_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 5 | `identity_verification_policy_id` | `uuid` | Clave foránea → identity_assurance.identity_verification_policies.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `requested_assurance_level_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 7 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `risk_score` | `numeric` | Opcional | _sin dato_ | coincide |
+| 9 | `opened_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 10 | `completed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 11 | `expires_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 12 | `correlation_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:103`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:109`)_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts:127`)_ | coincide |
 
 #### Relaciones
 
 | Sentido | Columnas | Tabla | Restricción |
 |---|---|---|---|
 | hacia | identity_verification_policy_id | identity_assurance.identity_verification_policies (id) | fk_identity_verification_cases_identity_verification_policy_id |
+| hacia | tenant_id | directory.tenants (id) | fk_identity_verification_cases_tenant_id |
 | hacia | subject_type_concept_id | terminology.catalog_concepts (id) | fk_identity_verification_cases_subject_type_concept_id |
 | hacia | requested_assurance_level_concept_id | terminology.catalog_concepts (id) | fk_identity_verification_cases_requested_assurance_lev_ee8e6b18 |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_identity_verification_cases_status_concept_id |
@@ -939,6 +943,7 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
+| `ix_identity_verification_cases_tenant_id` | no | tenant_id | Soporta la clave foránea fk_identity_verification_cases_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_verification_cases_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_identity_verification_cases_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «subject_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identity_verification_cases_identity_verification_policy_id` | no | identity_verification_policy_id | Soporta la clave foránea fk_identity_verification_cases_identity_verification_policy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_verification_cases_requested_assurance_lev_ebd923e4` | no | requested_assurance_level_concept_id | Soporta la clave foránea fk_identity_verification_cases_requested_assurance_lev_ee8e6b18: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -950,8 +955,8 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
+| POST /identity/checks/{id}/attempts | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
@@ -970,19 +975,22 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | GET /identity/verification-cases | LEE | DIRECTA |
 | POST /identity/verification-cases | CREA | DIRECTA |
 | GET /identity/verification-cases/{id} | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/assertions | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/checks:plan | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/checks:plan | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/fraud-signals | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/fraud-signals | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/manual-review | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/manual-review | LEE | DIRECTA |
-| POST /identity/verification-cases/expire-sweep | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/expire-sweep | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/attempts | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /internal/identity/checks/dispatchable | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
-| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
-| PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno

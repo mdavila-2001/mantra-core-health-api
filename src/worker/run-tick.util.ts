@@ -156,11 +156,9 @@ async function runRootTick(
         workerHealth.tickFinished(operation, 'ok');
       } catch (error) {
         const timedOut = error instanceof OperationTimeoutError;
-        workerHealth.tickFinished(
-          operation,
-          timedOut ? 'timeout' : 'failed',
-          error,
-        );
+        // Al registro de salud (visible por `/status`) sólo llega el resultado,
+        // nunca el mensaje: el detalle va al log de abajo.
+        workerHealth.tickFinished(operation, timedOut ? 'timeout' : 'failed');
 
         // El error se absorbe para no tumbar el scheduler, así que hay que
         // marcar la traza explícitamente: si no, el tick aparecería como

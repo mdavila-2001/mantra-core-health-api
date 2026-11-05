@@ -1,0 +1,154 @@
+{
+ "url": "(extracto de p\u00e1ginas reales de https://clinicaltrials.gov/api/v2/studies)",
+ "body": {
+  "studies": [
+   {
+    "protocolSection": {
+     "identificationModule": {
+      "nctId": "NCT02210728"
+     },
+     "statusModule": {
+      "overallStatus": "UNKNOWN",
+      "lastUpdatePostDateStruct": {
+       "date": "2018-08-28",
+       "type": "ACTUAL"
+      }
+     },
+     "conditionsModule": {
+      "conditions": [
+       "Attention Deficit Hyperactivity Disorder"
+      ]
+     },
+     "designModule": {
+      "studyType": "INTERVENTIONAL",
+      "phases": [
+       "NA"
+      ]
+     },
+     "armsInterventionsModule": {
+      "interventions": [
+       {
+        "type": "DRUG",
+        "name": "methylphenidate or amphetamine product",
+        "description": "Medication is titrated over a 4-week period with stepwise increments each week. Patients and significant others complete ADHD symptom scales at baseline and before each medication visit. Patients also complete side effects scales at baseline and before each medication visit. The gradual increase will continue until there is no further improvement in symptoms and in the Clinical Global Improvement Scale or side effects are such that further increases are not indicated. Once the optimal dose is reached, the subjects remain on this dose for the remainder of the study.",
+        "armGroupLabels": [
+         "Cognitive behavioral therapy + medication",
+         "Medication only"
+        ],
+        "otherNames": [
+         "Ritalin",
+         "Concerta",
+         "Biphentin",
+         "Dexedrine",
+         "Adderall XR",
+         "Vyvanse"
+        ]
+       },
+       {
+        "type": "BEHAVIORAL",
+        "name": "Cognitive behavioral therapy",
+        "description": "12 sessions of group cognitive behavioral therapy. Participants also receive individual coaching 3 times a week (twice over telephone and once in person). Coaching sessions are 15 minutes each in duration and are aimed at implementation, practice, and generalization of skills acquired in therapy.",
+        "armGroupLabels": [
+         "Cognitive behavioral therapy + medication",
+         "Cognitive behavioral therapy alone"
+        ]
+       }
+      ]
+     }
+    },
+    "derivedSection": {
+     "conditionBrowseModule": {
+      "meshes": [
+       {
+        "id": "D001289",
+        "term": "Attention Deficit Disorder with Hyperactivity"
+       }
+      ]
+     },
+     "interventionBrowseModule": {
+      "meshes": [
+       {
+        "id": "D008774",
+        "term": "Methylphenidate"
+       },
+       {
+        "id": "D003913",
+        "term": "Dextroamphetamine"
+       },
+       {
+        "id": "C449521",
+        "term": "SLI381"
+       },
+       {
+        "id": "D000069478",
+        "term": "Lisdexamfetamine Dimesylate"
+       },
+       {
+        "id": "D015928",
+        "term": "Cognitive Behavioral Therapy"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "protocolSection": {
+     "identificationModule": {
+      "nctId": "NCT01949883"
+     },
+     "statusModule": {
+      "overallStatus": "COMPLETED",
+      "lastUpdatePostDateStruct": {
+       "date": "2024-05-08",
+       "type": "ACTUAL"
+      }
+     },
+     "conditionsModule": {
+      "conditions": [
+       "Lymphoma"
+      ]
+     },
+     "designModule": {
+      "studyType": "INTERVENTIONAL",
+      "phases": [
+       "PHASE1"
+      ]
+     },
+     "armsInterventionsModule": {
+      "interventions": [
+       {
+        "type": "DRUG",
+        "name": "CPI-0610",
+        "armGroupLabels": [
+         "CPI-0610"
+        ]
+       }
+      ]
+     }
+    },
+    "derivedSection": {
+     "conditionBrowseModule": {
+      "meshes": [
+       {
+        "id": "D008223",
+        "term": "Lymphoma"
+       },
+       {
+        "id": "D009369",
+        "term": "Neoplasms"
+       }
+      ]
+     },
+     "interventionBrowseModule": {
+      "meshes": [
+       {
+        "id": "C000623150",
+        "term": "CPI-0610"
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

@@ -1,6 +1,6 @@
 # src / modules / chart
 
-Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **chart**-related components and keeps this system responsibility cohesive.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -45,9 +45,9 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
 | `GET /charts/templates` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
 | `GET /charts/templates/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
 
-## Contenido
+## Contents
 
-### Subcarpetas
+### Subdirectories
 
 - [`controllers/`](./controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
 - [`dto/`](./dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
@@ -55,12 +55,12 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
 - [`repositories/`](./repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 - [`services/`](./services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `chart.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `chart.module.ts` | Composición de dependencias del módulo NestJS. |
+| `chart.concepts.ts` | Support implementation or resource for this folder. |
+| `chart.module.ts` | NestJS module dependency composition. |
 
 ## Documentos del expediente y firma
 
@@ -91,10 +91,10 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   perfil profesional en la sesión, también 403. Un rol `SUPERADMIN` tiene
   paso franco, igual que en el resto de barreras por rol del sistema.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 - Ejecutar la evidencia dirigida con `corepack yarn test src/modules/chart --runInBand --silent`
   (18 suites y 139 pruebas aprobadas durante la revisión).

@@ -24,8 +24,10 @@ import {
   ConsentEvidenceService,
   ConsentSweepService,
   PractitionerAccessRequestsService,
+  PractitionerAccessRevocationService,
   ConsentMeService,
   EncounterInformedConsentsService,
+  ConsentScopeService,
 } from './services';
 import {
   ConsentsRepository,
@@ -36,6 +38,7 @@ import {
   PatientObjectionsRepository,
   PrivacyRestrictionsRepository,
   ProcessingLegalBasesRepository,
+  ProcessingPurposesRepository,
   TreatmentInformedConsentsRepository,
 } from './repositories';
 import { ClinicalAccessGrantsRepository } from '../authz/repositories';
@@ -45,6 +48,15 @@ import {
 } from '../profiles/infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
+// Cada especialidad pedida o autorizada se valida contra `VS_MEDICAL_SPECIALTY`
+// con el mismo servicio que el alta de profesional. Se provee la clase suelta
+// (y su adaptador) y no `ProfilesModule` entero, por lo mismo que hace
+// `CommunityModule`: importarlo cerraría un ciclo. `terminology` no depende
+// de ningún módulo de dominio.
+import { TerminologyModule } from '../terminology/terminology.module';
+import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
+import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
+import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
 // El médico registra el consentimiento informado desde su consulta (CL-77): hace
 // falta el encuentro y la autorización de escritura sobre la historia. `clinical`
 // no conoce a `consent`, así que no hay ciclo.
@@ -64,6 +76,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     AuditModule,
     MessagingModule,
     ClinicalModule,
+    TerminologyModule,
   ],
   controllers: [
     ConsentsController,
@@ -88,6 +101,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     PatientObjectionsRepository,
     PrivacyRestrictionsRepository,
     ProcessingLegalBasesRepository,
+    ProcessingPurposesRepository,
     TreatmentInformedConsentsRepository,
     // Repositorio de authz reutilizado para propagar la revocación de consent a
     // los accesos clínicos que se apoyaban en él (C-20), y ahora también para
@@ -99,7 +113,13 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     // nueva. Importar `ProfilesModule` entero cerraría un ciclo.
     PatientProfilesRepository,
     PersonAccountLinksRepository,
+    MedicalSpecialtyCatalogService,
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
     // Servicios
+    ConsentScopeService,
     ConsentsService,
     HipaaAuthorizationsService,
     PatientObjectionsService,
@@ -109,6 +129,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     ConsentEvidenceService,
     ConsentSweepService,
     PractitionerAccessRequestsService,
+    PractitionerAccessRevocationService,
     ConsentMeService,
     EncounterInformedConsentsService,
     {

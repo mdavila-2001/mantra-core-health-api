@@ -4,8 +4,10 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  DomainException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -14,6 +16,7 @@ import {
   GraphAnalyticsRepository,
   GraphProjectionRepository,
 } from '../repositories';
+import { GraphConsentGate } from './graph-consent-gate.service';
 import { MAX_TRAVERSAL_NODES, PATH_CACHE_TTL_SECONDS } from '../constants';
 import {
   DefineAccessScopeDto,
@@ -24,6 +27,19 @@ import {
   FindPathDto,
   PathResponseDto,
 } from '../dto';
+import { assertGraphResourceInTenant } from '../graph-scope';
+import { GraphErrorReason } from '../graph_intelligence.error-reasons';
+
+/**
+ * Consentimiento de los pacientes que el recorrido encuentra, con memoria por
+ * paciente: la compuerta se consulta una vez por paciente y consulta.
+ */
+interface PatientConsentContext {
+  /** Actor que consulta. */
+  readonly actor: AuthenticatedUser;
+  /** Paciente → si la compuerta lo autoriza para esta consulta. */
+  readonly allowed: Map<string, boolean>;
+}
 
 /** Lo que un recorrido acumula mientras avanza. */
 interface TraversalResult {
@@ -86,6 +102,7 @@ export class GraphTraversalService {
    * @param analyticsRepo - Valor de analytics repo requerido por la operación.
    * @param projectionRepo - Valor de projection repo requerido por la operación.
    * @param outbox - Valor de outbox requerido por la operación.
+   * @param consentGate - Compuerta de consentimiento del contexto de paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -93,6 +110,7 @@ export class GraphTraversalService {
     private readonly analyticsRepo: GraphAnalyticsRepository,
     private readonly projectionRepo: GraphProjectionRepository,
     private readonly outbox: OutboxService,
+    private readonly consentGate: GraphConsentGate,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(GraphTraversalService.name);
@@ -173,14 +191,13 @@ export class GraphTraversalService {
     dto: UpdateAccessScopeDto,
     actor: AuthenticatedUser,
   ): Promise<AccessScopeResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const scope = await this.analyticsRepo.findScopeById(tx, scopeId);
-      if (!scope) {
-        throw new ResourceNotFoundException(
-          'Alcance de acceso no encontrado.',
-          { scopeId },
-        );
-      }
+      const scope = assertGraphResourceInTenant(
+        await this.analyticsRepo.findScopeById(tx, scopeId),
+        'Alcance de acceso no encontrado.',
+        tenantId,
+      );
 
       if (dto.state) scope.state = dto.state;
       if (dto.allowedNodeTypes) scope.allowedNodeTypes = dto.allowedNodeTypes;
@@ -224,18 +241,25 @@ export class GraphTraversalService {
   /** UC-61-05 (recorrido): explorar desde un nodo dentro del alcance. */
   async traverse(
     dto: TraverseDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<TraverseResponseDto> {
     return this.em.transactional(async (tx) => {
       const scope = await this.requireActiveScope(tx, dto);
+      await this.requirePatientConsent(tx, dto, actor);
       const start = await this.requireStartNode(
         tx,
         dto.startNodeId,
         dto.tenantId,
         scope,
       );
+      const consent = await this.requireStartPatientConsent(
+        tx,
+        dto,
+        actor,
+        start,
+      );
 
-      const result = await this.walk(tx, dto, scope, start);
+      const result = await this.walk(tx, dto, scope, start, consent);
 
       this.logger.info(
         {
@@ -274,15 +298,22 @@ export class GraphTraversalService {
    */
   async findPath(
     dto: FindPathDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<PathResponseDto> {
     return this.em.transactional(async (tx) => {
       const scope = await this.requireActiveScope(tx, dto);
+      await this.requirePatientConsent(tx, dto, actor);
       const start = await this.requireStartNode(
         tx,
         dto.startNodeId,
         dto.tenantId,
         scope,
+      );
+      const consent = await this.requireStartPatientConsent(
+        tx,
+        dto,
+        actor,
+        start,
       );
 
       const maxHops = Math.min(dto.maxHops ?? scope.maxHops, scope.maxHops);
@@ -298,7 +329,13 @@ export class GraphTraversalService {
         relationshipFilterHash,
         maxHops,
       });
-      if (cached && cached.expiresAt > new Date()) {
+      // Una ruta cacheada se sirve sólo si todos sus pacientes siguen autorizados:
+      // el consentimiento pudo retirarse después de calcularla.
+      if (
+        cached &&
+        cached.expiresAt > new Date() &&
+        (await this.pathPatientsAllowed(tx, cached.pathNodes, dto, consent))
+      ) {
         return {
           startNodeId: dto.startNodeId,
           endNodeId: dto.endNodeId,
@@ -314,6 +351,7 @@ export class GraphTraversalService {
         { ...dto, maxHops },
         scope,
         start,
+        consent,
         dto.endNodeId,
       );
 
@@ -387,6 +425,7 @@ export class GraphTraversalService {
     dto: TraverseDto,
     scope: GraphAccessScopes,
     start: GraphNodes,
+    consent: PatientConsentContext,
     stopAtNodeId?: string,
   ): Promise<TraversalResult> {
     const maxHops = Math.min(dto.maxHops ?? scope.maxHops, scope.maxHops);
@@ -444,6 +483,7 @@ export class GraphTraversalService {
         uniqueNextIds,
       );
       const nodeById = new Map(nextNodes.map((node) => [node.nodeId, node]));
+      const patientByNode = await this.patientIdsOf(tx, nextNodes);
 
       const nextFrontier: string[] = [];
       for (const edge of edges) {
@@ -452,6 +492,15 @@ export class GraphTraversalService {
         // Poda por seguridad: un nodo fuera de alcance no se visita, así que
         // tampoco se recorre lo que hay detrás de él.
         if (!node || !this.isVisible(node, scope)) continue;
+        // Lo mismo con el consentimiento: el nodo de un paciente que no lo
+        // otorgó (o lo retiró) no se visita ni se sigue.
+        const patientId = patientByNode.get(node.nodeId);
+        if (
+          patientId &&
+          !(await this.patientAllowed(tx, patientId, dto, consent))
+        ) {
+          continue;
+        }
 
         if (visited.size >= MAX_TRAVERSAL_NODES) {
           truncated = true;
@@ -519,6 +568,171 @@ export class GraphTraversalService {
       );
     }
     return scope;
+  }
+
+  /**
+   * Contrasta el consentimiento del paciente del contexto antes de tocar el grafo.
+   *
+   * Corre después de validar el alcance (política, no topología) y antes de
+   * resolver el nodo de partida, de consultar la caché de rutas y de recorrer:
+   * una denegación no deja nodos, aristas ni caché escrita.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param dto - Consulta; si trae `patientProfileId` se exige consentimiento.
+   * @param actor - Actor que consulta.
+   * @throws DomainException 403 `GRAPH_CONSENT_REQUIRED` si no hay autorización.
+   */
+  private async requirePatientConsent(
+    tx: EntityManager,
+    dto: TraverseDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (!dto.patientProfileId) return;
+    await this.consentGate.assertAllowed(tx, {
+      tenantId: dto.tenantId,
+      patientProfileId: dto.patientProfileId,
+      purposeOfUse: dto.purposeOfUse,
+      actorId: actor.id,
+    });
+  }
+
+  /**
+   * Aplica la compuerta de consentimiento al paciente al que pertenece el nodo
+   * de partida, lo declare o no el cliente.
+   *
+   * `patientProfileId` es una declaración del cliente: omitirlo, o declarar a
+   * otro paciente, no puede evitar la compuerta del paciente cuyo nodo se
+   * recorre. Si el cliente declara un paciente, el nodo de partida no puede ser
+   * de otro (mismo 404 que un nodo inexistente).
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param dto - Consulta.
+   * @param actor - Actor que consulta.
+   * @param start - Nodo de partida ya resuelto y dentro del alcance.
+   * @returns El contexto de consentimiento que usará el recorrido.
+   * @throws DomainException 403 `GRAPH_CONSENT_REQUIRED` si no hay autorización.
+   * @throws ResourceNotFoundException si el nodo es de un paciente distinto del declarado.
+   */
+  private async requireStartPatientConsent(
+    tx: EntityManager,
+    dto: TraverseDto,
+    actor: AuthenticatedUser,
+    start: GraphNodes,
+  ): Promise<PatientConsentContext> {
+    const allowed = new Map<string, boolean>();
+    // La compuerta del paciente declarado ya corrió en `requirePatientConsent`.
+    if (dto.patientProfileId) allowed.set(dto.patientProfileId, true);
+    const consent: PatientConsentContext = { actor, allowed };
+
+    const startPatient = (await this.patientIdsOf(tx, [start])).get(
+      start.nodeId,
+    );
+    if (!startPatient) return consent;
+    if (dto.patientProfileId && dto.patientProfileId !== startPatient) {
+      throw new ResourceNotFoundException('Nodo de partida no encontrado.', {
+        startNodeId: start.nodeId,
+      });
+    }
+    if (!allowed.has(startPatient)) {
+      await this.consentGate.assertAllowed(tx, {
+        tenantId: dto.tenantId,
+        patientProfileId: startPatient,
+        purposeOfUse: dto.purposeOfUse,
+        actorId: actor.id,
+      });
+      allowed.set(startPatient, true);
+    }
+    return consent;
+  }
+
+  /**
+   * Si la compuerta autoriza al paciente para esta consulta. Una denegación
+   * poda el nodo en vez de abortar el recorrido: abortar revelaría que hay un
+   * paciente sin consentimiento detrás de esa arista.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param patientId - Paciente al que pertenece el nodo.
+   * @param dto - Consulta.
+   * @param consent - Contexto de consentimiento de la consulta.
+   * @returns `true` si el paciente está autorizado.
+   */
+  private async patientAllowed(
+    tx: EntityManager,
+    patientId: string,
+    dto: TraverseDto,
+    consent: PatientConsentContext,
+  ): Promise<boolean> {
+    const known = consent.allowed.get(patientId);
+    if (known !== undefined) return known;
+    let allowed = true;
+    try {
+      await this.consentGate.assertAllowed(tx, {
+        tenantId: dto.tenantId,
+        patientProfileId: patientId,
+        purposeOfUse: dto.purposeOfUse,
+        actorId: consent.actor.id,
+      });
+    } catch (error) {
+      if (
+        !(error instanceof DomainException) ||
+        error.reason !== GraphErrorReason.CONSENT_REQUIRED
+      ) {
+        throw error;
+      }
+      allowed = false;
+    }
+    consent.allowed.set(patientId, allowed);
+    return allowed;
+  }
+
+  /**
+   * Si todos los pacientes de los nodos de una ruta cacheada siguen autorizados.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param nodeIds - Nodos de la ruta cacheada.
+   * @param dto - Consulta.
+   * @param consent - Contexto de consentimiento de la consulta.
+   * @returns `false` si algún nodo es de un paciente que ya no está autorizado.
+   */
+  private async pathPatientsAllowed(
+    tx: EntityManager,
+    nodeIds: string[],
+    dto: TraverseDto,
+    consent: PatientConsentContext,
+  ): Promise<boolean> {
+    const nodes = await this.projectionRepo.findNodesByIds(tx, nodeIds);
+    for (const patientId of (await this.patientIdsOf(tx, nodes)).values()) {
+      if (!(await this.patientAllowed(tx, patientId, dto, consent))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Paciente al que pertenece cada nodo, para los que son de un paciente.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param nodes - Nodos a clasificar.
+   * @returns `nodeId` → `profile_id` del paciente; los demás nodos no figuran.
+   */
+  private async patientIdsOf(
+    tx: EntityManager,
+    nodes: readonly GraphNodes[],
+  ): Promise<Map<string, string>> {
+    const sourceIds = [
+      ...new Set(nodes.map((node) => node.sourceEntityId).filter(Boolean)),
+    ];
+    const patients = new Set(
+      await this.projectionRepo.findPatientProfileIds(tx, sourceIds),
+    );
+    const byNode = new Map<string, string>();
+    for (const node of nodes) {
+      if (patients.has(node.sourceEntityId)) {
+        byNode.set(node.nodeId, node.sourceEntityId);
+      }
+    }
+    return byNode;
   }
 
   /**

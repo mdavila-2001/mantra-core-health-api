@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ErpContractsService, ErpOperationsService } from '../services';
 import {
   CreatePartnerDto,
@@ -60,6 +65,11 @@ export class ErpController {
   ) {}
 
   /** UC-38-01. */
+  @Audited({
+    action: 'ERP_BUSINESS_PARTNER_CREATED',
+    entity: 'business_partner',
+    entityId: 'result.id',
+  })
   @Post('business-partners')
   @Roles('ERP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +82,11 @@ export class ErpController {
   }
 
   /** UC-38-02. */
+  @Audited({
+    action: 'ERP_BUSINESS_PARTNER_BANK_ACCOUNT_VERIFIED',
+    entity: 'business_partner_bank_account',
+    entityId: 'param:accId',
+  })
   @Post('business-partners/:id/bank-accounts/:accId/verify')
   @Roles('ERP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -88,6 +103,11 @@ export class ErpController {
   }
 
   /** UC-38-03. */
+  @Audited({
+    action: 'ERP_CONTRACT_CREATED',
+    entity: 'contract',
+    entityId: 'result.id',
+  })
   @Post('contracts')
   @Roles('ERP_ADMIN', 'CONTRACT_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +120,11 @@ export class ErpController {
   }
 
   /** UC-38-04. */
+  @Audited({
+    action: 'ERP_CONTRACT_APPROVAL_REQUESTED',
+    entity: 'contract_approval_request',
+    entityId: 'result.id',
+  })
   @Post('contracts/:id/approval-requests')
   @Roles('ERP_ADMIN', 'CONTRACT_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -116,6 +141,11 @@ export class ErpController {
   }
 
   /** UC-38-05. */
+  @Audited({
+    action: 'ERP_CONTRACT_AMENDMENT_CREATED',
+    entity: 'contract_amendment',
+    entityId: 'result.id',
+  })
   @Post('contracts/:id/amendments')
   @Roles('ERP_ADMIN', 'CONTRACT_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -132,6 +162,11 @@ export class ErpController {
   }
 
   /** UC-38-06. */
+  @Audited({
+    action: 'ERP_CONTRACT_RENEWAL_CREATED',
+    entity: 'contract_renewal',
+    entityId: 'result.id',
+  })
   @Post('contracts/:id/renewals')
   @Roles('ERP_ADMIN', 'CONTRACT_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -145,6 +180,11 @@ export class ErpController {
   }
 
   /** UC-38-07. */
+  @Audited({
+    action: 'ERP_CONTRACT_TERMINATION_CREATED',
+    entity: 'contract_termination',
+    entityId: 'result.id',
+  })
   @Post('contracts/:id/terminations')
   @Roles('ERP_ADMIN', 'CONTRACT_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -158,6 +198,11 @@ export class ErpController {
   }
 
   /** UC-38-16. */
+  @Audited({
+    action: 'ERP_CONTRACT_PAYMENT_SCHEDULE_GENERATED',
+    entity: 'contract_payment_schedule',
+    entityId: 'param:id',
+  })
   @Post('contracts/:id/payment-schedules/generate')
   @Roles('ERP_ADMIN', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.CREATED)
@@ -174,6 +219,11 @@ export class ErpController {
   }
 
   /** UC-38-08. */
+  @Audited({
+    action: 'ERP_EMPLOYEE_ONBOARDED',
+    entity: 'employee',
+    entityId: 'result.id',
+  })
   @Post('employees/onboard')
   @Roles('ERP_ADMIN', 'HR_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -186,6 +236,11 @@ export class ErpController {
   }
 
   /** UC-38-09. */
+  @Audited({
+    action: 'ERP_TIME_OFF_REQUESTED',
+    entity: 'time_off_request',
+    entityId: 'result.id',
+  })
   @Post('employees/:id/time-off')
   @Roles('ERP_ADMIN', 'HR_ADMIN', 'EMPLOYEE')
   @HttpCode(HttpStatus.CREATED)
@@ -199,6 +254,11 @@ export class ErpController {
   }
 
   /** UC-38-09. */
+  @Audited({
+    action: 'ERP_TIME_OFF_APPROVED',
+    entity: 'time_off_request',
+    entityId: 'param:reqId',
+  })
   @Post('employees/:id/time-off/:reqId/approve')
   @Roles('ERP_ADMIN', 'HR_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -209,10 +269,15 @@ export class ErpController {
     @Body() dto: ApproveTimeOffDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TimeOffResponseDto> {
-    return this.operationsService.approveTimeOff(reqId, dto, actor);
+    return this.operationsService.approveTimeOff(id, reqId, dto, actor);
   }
 
   /** UC-38-10. */
+  @Audited({
+    action: 'ERP_PURCHASE_ORDER_CREATED',
+    entity: 'purchase_order',
+    entityId: 'result.id',
+  })
   @Post('purchase-orders')
   @Roles('ERP_ADMIN', 'BUYER')
   @HttpCode(HttpStatus.CREATED)
@@ -225,6 +290,11 @@ export class ErpController {
   }
 
   /** UC-38-11. */
+  @Audited({
+    action: 'ERP_GOODS_RECEIPT_CREATED',
+    entity: 'goods_receipt',
+    entityId: 'result.id',
+  })
   @Post('purchase-orders/:id/goods-receipts')
   @Roles('ERP_ADMIN', 'BUYER', 'WAREHOUSE')
   @HttpCode(HttpStatus.CREATED)
@@ -238,6 +308,11 @@ export class ErpController {
   }
 
   /** UC-38-12. */
+  @Audited({
+    action: 'ERP_SERVICE_ENTRY_SHEET_CREATED',
+    entity: 'service_entry_sheet',
+    entityId: 'result.id',
+  })
   @Post('purchase-orders/:id/service-entry-sheets')
   @Roles('ERP_ADMIN', 'BUYER')
   @HttpCode(HttpStatus.CREATED)
@@ -251,6 +326,11 @@ export class ErpController {
   }
 
   /** UC-38-13. */
+  @Audited({
+    action: 'ERP_INVOICE_MATCH_RUN',
+    entity: 'invoice_match_run',
+    entityId: 'result.id',
+  })
   @Post('bills/:billId/invoice-match-runs')
   @Roles('ERP_ADMIN', 'ACCOUNTS_PAYABLE')
   @HttpCode(HttpStatus.CREATED)
@@ -268,6 +348,11 @@ export class ErpController {
   }
 
   /** UC-38-14. */
+  @Audited({
+    action: 'ERP_SALES_ORDER_CREATED',
+    entity: 'sales_order',
+    entityId: 'result.id',
+  })
   @Post('sales-orders')
   @Roles('ERP_ADMIN', 'SALES')
   @HttpCode(HttpStatus.CREATED)
@@ -280,6 +365,11 @@ export class ErpController {
   }
 
   /** UC-38-15. */
+  @Audited({
+    action: 'ERP_LEASE_VALUATION_CREATED',
+    entity: 'lease_valuation',
+    entityId: 'result.id',
+  })
   @Post('lease-contracts/:id/valuations')
   @Roles('ERP_ADMIN', 'ACCOUNTANT')
   @HttpCode(HttpStatus.CREATED)

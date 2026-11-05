@@ -22,6 +22,7 @@ import {
   existsSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -29,7 +30,15 @@ import {
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
-import { cacheDir, ensureDir, outDir, writeJson } from './lib/common.mjs';
+import {
+  cacheDir,
+  ensureDir,
+  outDir,
+  readLines,
+  writeJson,
+} from './lib/common.mjs';
+import { ctgovStudies } from './lib/sources/ctgov.mjs';
+import { pubmedRecords } from './lib/sources/pubmed.mjs';
 
 const DATA = join(dirname(fileURLToPath(import.meta.url)), 'data');
 const PART_LIMIT = 45 * 1024 * 1024; // GitHub rechaza > 100 MB y advierte > 50 MB
@@ -56,16 +65,48 @@ function writeGz(rel, buf, extra = {}) {
   });
 }
 
-/** NDJSON partido por líneas para que cada parte comprimida quede bajo el límite. */
-function writeNdjsonParts(name) {
+/**
+ * NDJSON partido por líneas para que cada parte comprimida quede bajo el límite.
+ * Se lee en streaming: `assertions.ndjson` pasa de 300 MB y no cabe entero en el heap.
+ */
+async function writeNdjsonParts(name) {
   const src = outDir(`${name}.ndjson`);
   if (!existsSync(src)) return;
-  const lines = readFileSync(src, 'utf8').split('\n').filter(Boolean);
+  const partRel = (i) =>
+    `out/${name}.part${String(i).padStart(3, '0')}.ndjson.gz`;
+  let cur = [];
+  let size = 0;
+  let n = 0;
+  const flush = () => {
+    n += 1;
+    writeGz(partRel(n), Buffer.from(`${cur.join('\n')}\n`), {
+      rows: cur.length,
+    });
+    cur = [];
+    size = 0;
+  };
+  for await (const l of readLines(src)) {
+    if (!l) continue;
+    // Umbral sobre el tamaño SIN comprimir (cota segura: el gzip nunca crece por encima de esto).
+    if (size + l.length + 1 > PART_LIMIT && cur.length) flush();
+    cur.push(l);
+    size += l.length + 1;
+  }
+  if (cur.length) flush();
+  if (n === 1) {
+    // Una sola parte: nombre sin sufijo, como antes.
+    const entry = manifest.files.find((f) => f.path === partRel(1));
+    entry.path = `out/${name}.ndjson.gz`;
+    renameSync(join(DATA, partRel(1)), join(DATA, entry.path));
+  }
+}
+
+/** Líneas NDJSON → partes gzip bajo el límite (umbral sobre el tamaño sin comprimir). */
+function writeNdjsonGzParts(base, lines, extra = {}) {
   const parts = [];
   let cur = [];
   let size = 0;
   for (const l of lines) {
-    // Umbral sobre el tamaño SIN comprimir (cota segura: el gzip nunca crece por encima de esto).
     if (size + l.length + 1 > PART_LIMIT && cur.length) {
       parts.push(cur);
       cur = [];
@@ -78,14 +119,18 @@ function writeNdjsonParts(name) {
   parts.forEach((p, i) => {
     const rel =
       parts.length === 1
-        ? `out/${name}.ndjson.gz`
-        : `out/${name}.part${String(i + 1).padStart(3, '0')}.ndjson.gz`;
-    writeGz(rel, Buffer.from(`${p.join('\n')}\n`), { rows: p.length });
+        ? `${base}.ndjson.gz`
+        : `${base}.part${String(i + 1).padStart(3, '0')}.ndjson.gz`;
+    writeGz(rel, Buffer.from(`${p.join('\n')}\n`), {
+      rows: p.length,
+      ...extra,
+    });
   });
 }
 
 rmSync(DATA, { recursive: true, force: true });
-for (const name of ['procedures', 'assertions', 'maps']) writeNdjsonParts(name);
+for (const name of ['procedures', 'assertions', 'maps'])
+  await writeNdjsonParts(name);
 for (const name of ['coverage', 'load-plan.dry-run', 'validate-siblings']) {
   const src = outDir(`${name}.json`);
   if (existsSync(src)) writeGz(`out/${name}.json.gz`, readFileSync(src));
@@ -104,6 +149,66 @@ for (const key of readdirSync(cacheDir()).sort()) {
     continue;
   const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
   writeJson(join(DATA, 'sources', `${key}.meta.json`), meta);
+  if (key.startsWith('pubmed-')) {
+    const pagesDir = join(dir, 'pages');
+    const pagesBytes = readdirSync(pagesDir).reduce(
+      (n, f) => n + statSync(join(pagesDir, f)).size,
+      0,
+    );
+    if (pagesBytes > RAW_LIMIT) {
+      // Crudo pesado (p. ej. 673 366 ensayos aleatorizados, 57 MB comprimidos): no
+      // se sube; el corpus normalizado sí. meta.json guarda la búsqueda exacta y
+      // sus particiones por fecha de alta para repetir la descarga.
+      manifest.omittedRaw.push({
+        source: key,
+        file: 'pages/*.json.gz',
+        bytes: pagesBytes,
+        records: meta.records,
+        query: meta.query,
+        retrievedAt: meta.retrievedAt,
+        reproduce: `node tools/terminology-import/procedures-treatments/fetch-pubmed.mjs --subset ${key.slice('pubmed-'.length)} (PubMed agrega registros a diario: otra fecha da otro corpus)`,
+      });
+      continue;
+    }
+    // Metadatos compactos (PMID, tipos de publicación, MeSH) tal como se descargaron.
+    const lines = [...pubmedRecords(join(dir, 'pages'))].map((r) =>
+      JSON.stringify(r),
+    );
+    writeNdjsonGzParts(`raw/${key}/records`, lines, { source: key });
+    continue;
+  }
+  if (key === 'ctgov') {
+    // ~70 MB de páginas que la API reemplaza a diario: no se suben, y volver a
+    // bajarlas no reproduce este corpus. Se sube el extracto exacto que usa el
+    // normalizador (ids tal cual los publica la fuente) para poder rehacer el build.
+    const lines = [];
+    for (const st of ctgovStudies(join(dir, 'pages'))) {
+      const p = st.protocolSection ?? {};
+      lines.push(
+        JSON.stringify({
+          nct: p.identificationModule?.nctId,
+          studyType: p.designModule?.studyType ?? null,
+          interventionMeshes: (
+            st.derivedSection?.interventionBrowseModule?.meshes ?? []
+          ).map((m) => m.id),
+          conditionMeshes: (
+            st.derivedSection?.conditionBrowseModule?.meshes ?? []
+          ).map((m) => m.id),
+        }),
+      );
+    }
+    writeNdjsonGzParts('raw/ctgov/studies-mesh', lines, { source: key });
+    manifest.omittedRaw.push({
+      source: key,
+      file: 'pages/*.json.gz',
+      pages: meta.pages,
+      studies: meta.studies,
+      dataTimestamp: meta.dataTimestamp,
+      reproduce:
+        'node tools/terminology-import/procedures-treatments/fetch-ctgov.mjs (la API se actualiza a diario: otra fecha da otro corpus)',
+    });
+    continue;
+  }
   for (const [file, info] of Object.entries(meta.files)) {
     const path = join(dir, file);
     if (info.bytes <= RAW_LIMIT && existsSync(path)) {

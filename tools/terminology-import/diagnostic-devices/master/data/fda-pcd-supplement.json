@@ -1,0 +1,105 @@
+{
+  "source": "fda-pcd",
+  "via": {
+    "repo": "https://github.com/bjoleary/fdadata",
+    "commit": "227bdaa24aec8565e333cc67689ff2c63ce5cea7",
+    "commitDate": "2026-10-20T17:14:47+00:00",
+    "path": "data/product_codes.rda",
+    "sha256": "4423c192af7a282af72270f0e732e83a58504e083b6c9d588a7356b228f3894b",
+    "license": "MIT (repositorio); datos de la FDA, dominio público"
+  },
+  "transformation": "bjoleary/fdadata limpia el foiclass: paneles por nombre, regulación numérica; aquí la sección se reconstruye a 4 dígitos. Solo códigos ausentes en la copia literal.",
+  "officialUrl": "https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files",
+  "rows": [
+    {
+      "PRODUCTCODE": "QEO",
+      "DEVICENAME": "Light Attenuation Lenses For Migraine-Associated Light Sensitivity",
+      "DEVICECLASS": "1",
+      "REGULATIONNUMBER": "882.5811",
+      "DEFINITION": "Light attenuation lenses for migraine-associated light sensitivity are devices that limit light incidence of specific wavelengths to the eyes and are intended to decrease the impact of light sensitivity in patients diagnosed with migraine. The lenses can be mounted on a spectacle frame, clips, or other apertures used to hold lenses. The device is intended to be adjunctive to other therapies for migraine-associated light sensitivity. Sunglasses (nonprescription) and prescription spectacle lenses are separately classified under \u001a 886.5850 and \u001a 886.5844, respectively.",
+      "reviewPanelName": "Neurology",
+      "medicalSpecialtyName": "Neurology",
+      "submissionType": "510(k) Exempt"
+    },
+    {
+      "PRODUCTCODE": "SHJ",
+      "DEVICENAME": "Thrombectomy Whole Blood Return System",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "868.5830",
+      "DEFINITION": "Filtration and return of aspirated whole blood during a thrombectomy procedure",
+      "reviewPanelName": "Cardiovascular",
+      "medicalSpecialtyName": "Anesthesiology",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SIW",
+      "DEVICENAME": "Robotic Peripheral Venous Blood Collection System",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "880.6975",
+      "DEFINITION": "A robotic peripheral venous blood collection system is an electromechanical device used to obtain blood samples from peripheral veins for diagnostic purposes. The device uses robotic systems to assist with the blood collection procedure, including vessel identification, targeting, and/or needle insertion, and may perform its functions in an automated or autonomous manner.",
+      "reviewPanelName": "General Hospital",
+      "medicalSpecialtyName": "General Hospital",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJA",
+      "DEVICENAME": "Injectable For Thermal Treatment Of Musculoskeletal Pain",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "888.3048",
+      "DEFINITION": "An injectable for thermal treatment of musculoskeletal pain is an injectable device intended to inhibit sensory nerve signaling through exchange of thermal energy (e.g., cold temperatures). The device is injected into the extraneural space of the target nerve.",
+      "reviewPanelName": "Orthopedic",
+      "medicalSpecialtyName": "Orthopedic",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJB",
+      "DEVICENAME": "Powered Fecal Management System",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "876.5230",
+      "DEFINITION": "A powered fecal management system is a device that uses powered components to partially or fully divert and contain fecal waste away from a bed-ridden patient. This classification includes accessories such as filters, conduits for fecal waste transfer, and receptacles for fecal waste containment.",
+      "reviewPanelName": "Gastroenterology & Urology",
+      "medicalSpecialtyName": "Gastroenterology & Urology",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJD",
+      "DEVICENAME": "Integrated Continuous Glucose Ketone Monitoring System",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "862.1354",
+      "DEFINITION": "An integrated continuous glucose ketone monitoring system (iCGK) is intended to automatically measure glucose and ketones in bodily fluids continuously or frequently for a specified period of time. iCGK systems are designed to reliably and securely transmit glucose and ketone measurement data to digitally connected devices, including automated insulin dosing systems, and are intended to be used alone or in conjunction with these digitally connected medical devices for the purpose of managing a disease or condition related to glycemic control or ketone fluctuation. When making therapeutic adjustments, ketone output should be used in conjunction with glucose levels, symptoms, and factors that may affect ketone levels such as eating patterns and exercise.",
+      "reviewPanelName": "Clinical Chemistry",
+      "medicalSpecialtyName": "Clinical Chemistry",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJH",
+      "DEVICENAME": "Portable Dental Operative Unit",
+      "DEVICECLASS": "1",
+      "REGULATIONNUMBER": "872.6640",
+      "DEFINITION": "A portable dental operative unit is a device intended to serve as a base station for dental instruments and accessories, delivering utilities such as compressed air, water, suction, and power to handheld dental instruments. The device is designed for use in non-permanent healthcare environments, including dental clinics, hospitals, mobile clinics, long-term care facilities, patient residences, schools, correctional facilities, military or humanitarian field settings, and similar settings, by dental professionals.",
+      "reviewPanelName": "Dental",
+      "medicalSpecialtyName": "Dental",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJJ",
+      "DEVICENAME": "Cardiac Device Identifier",
+      "DEVICECLASS": "2",
+      "REGULATIONNUMBER": "870.3645",
+      "DEFINITION": "A cardiac device identifier is a noninvasive device that is intended to provide information about implanted cardiac devices. The device detects and matches telemetry based on manufacturer-specific wireless communication signals, including radiofrequency or inductive signals, to identify an implanted cardiac device, including manufacturer, model, or type. The device is not intended to deliver therapeutic stimulation to, modify the programming of, or manipulate the stored data of the implanted device.",
+      "reviewPanelName": "Cardiovascular",
+      "medicalSpecialtyName": "Cardiovascular",
+      "submissionType": "510(k)"
+    },
+    {
+      "PRODUCTCODE": "SJL",
+      "DEVICENAME": "Heart-Valve, Polymeric",
+      "DEVICECLASS": "3",
+      "REGULATIONNUMBER": null,
+      "DEFINITION": "This device is a permanent implant intended to replace a heart valve.",
+      "reviewPanelName": "Cardiovascular",
+      "medicalSpecialtyName": null,
+      "submissionType": "PMA"
+    }
+  ]
+}

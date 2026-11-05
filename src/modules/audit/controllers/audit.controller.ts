@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AuditEventsService,
   AuditHistoryService,
@@ -56,6 +61,11 @@ export class AuditController {
   ) {}
 
   /** UC-10-01. */
+  @Audited({
+    action: 'DATA_ACCESS',
+    entity: 'data_access_log',
+    entityId: 'result.id',
+  })
   @Post('data-access')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +80,11 @@ export class AuditController {
   }
 
   /** UC-10-04 (sella cadena hash, UC-10-03). */
+  @Audited({
+    action: 'AUDIT_EVENT_RECORDED',
+    entity: 'audit_log',
+    entityId: 'result.id',
+  })
   @Post('events')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +115,10 @@ export class AuditController {
   }
 
   /** UC-10-06. */
+  @Audited({
+    action: 'INTEGRITY_ATTESTATION',
+    entity: 'audit_log',
+  })
   @Post('integrity/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -114,6 +133,10 @@ export class AuditController {
   }
 
   /** UC-10-09. */
+  @Audited({
+    action: 'RETENTION_APPLIED',
+    entity: 'audit_log',
+  })
   @Post('retention/apply')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -126,6 +149,10 @@ export class AuditController {
   }
 
   /** UC-10-10. */
+  @Audited({
+    action: 'AUDIT_ANOMALY_SCANNED',
+    entity: 'audit_log',
+  })
   @Post('anomaly/scan')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -138,6 +165,11 @@ export class AuditController {
   }
 
   /** UC-10-12. */
+  @Audited({
+    action: 'THIRD_PARTY_ACCESS',
+    entity: 'delegated_access_audit_log',
+    entityId: 'result.id',
+  })
   @Post('third-party-access')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

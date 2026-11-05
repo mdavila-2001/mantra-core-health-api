@@ -1,0 +1,1086 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book-part-wrapper PUBLIC "-//NLM//DTD BITS Book Interchange DTD v2.0 20151225//EN" "http://jats.nlm.nih.gov/extensions/bits/2.0/BITS-book2.dtd">
+<book-part-wrapper content-type="chapter" id="Acarbose" from-where="body" dtd-version="2.0">
+  <book-meta>
+    <book-id book-id-type="pmcid">livertox</book-id>
+    <book-title-group>
+      <book-title>LiverTox</book-title>
+      <subtitle>Clinical and Research Information on Drug-Induced Liver Injury</subtitle>
+    </book-title-group>
+    <pub-date date-type="pubr" publication-format="electronic">
+      <year>2012</year>
+    </pub-date>
+    <publisher>
+      <publisher-name>National Institute of Diabetes and Digestive and Kidney Diseases</publisher-name>
+      <publisher-loc>Bethesda (MD)</publisher-loc>
+    </publisher>
+    <abstract>
+      <p>LiverTox<sup>&#x000ae;</sup> provides up-to-date, unbiased and easily accessed information on the diagnosis, cause, frequency, clinical patterns and management of liver injury attributable to prescription and nonprescription medications and selected herbal and dietary supplements. The LiverTox site is meant as a resource for both physicians and patients as well as for clinical academicians and researchers who specialize in idiosyncratic drug induced hepatotoxicity.</p>
+      <p>Information on a specific medication or supplement can be found by entering its name in the &#x0201c;Search this book&#x0201d; box shown above or by browsing the list of agents by its first letter using the alphabetic list shown below.</p>
+      <p>LiverTox is produced by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK) and is copyright free. It is requested that use of LiverTox data in publications be given appropriate acknowledgment.</p>
+      <p>The LiverTox team welcomes user comments and enquiries. <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/books/n/livertox/Contactus/">Contact Us</ext-link></p>
+    </abstract>
+    <custom-meta-group>
+      <custom-meta>
+        <meta-name>books-source-type</meta-name>
+        <meta-value>Database</meta-value>
+      </custom-meta>
+    </custom-meta-group>
+    <notes notes-type="disclaimer">
+      <title>Disclaimer:</title>
+      <p>Information presented in the LiverTox database is derived from the scientific literature and public databases and reflects professional expertise of the authors. Such information does not represent official policy of the U.S. Government or any agency thereof. The information in LiverTox is not meant as a substitute for FDA approved product labeling and professional judgment in the diagnosis and treatment of drug induced liver injury. The U.S. Government and its individual agencies, including the NIDDK, NLM and NIH, does not warrant or assume any legal responsibility for the accuracy, completeness, or usefulness of the information contained on this Site.</p>
+      <p>NIH does not provide patient-specific medical advice concerning the potential of a drug or herbal supplement to cause hepatotoxicity; please consult with a physician for guidance.</p>
+      <p>As of September&#x0202f;2026, initial drafts of new and updated LiverTox chapters will be generated using Artificial Intelligence. Each draft will then undergo careful review, verification, and editing by the LiverTox editorial team. New chapters will also undergo independent peer review from an external expert in drug&#x02011;induced liver injury</p>
+    </notes>
+  </book-meta>
+  <book-part book-part-type="chapter">
+    <book-part-meta>
+      <book-part-id book-part-id-type="pmcid">Acarbose</book-part-id>
+      <title-group>
+        <title>Acarbose</title>
+      </title-group>
+      <pub-history>
+        <date date-type="updated">
+          <day>10</day>
+          <month>1</month>
+          <year>2021</year>
+        </date>
+      </pub-history>
+    </book-part-meta>
+    <body>
+      <sec id="Acarbose.OVERVIEW">
+        <title>OVERVIEW</title>
+        <sec id="Acarbose.Introduction" sec-type="pubmed-excerpt">
+          <title>Introduction</title>
+          <p>Acarbose is an alpha glucosidase inhibitor which decreases intestinal absorption of carbohydrates and is used as an adjunctive therapy in the management of type 2 diabetes. Acarbose has been linked to rare instances of clinically apparent acute liver injury.</p>
+        </sec>
+        <sec id="Acarbose.Background">
+          <title>Background</title>
+          <p>Acarbose (ay' kar bose) is an inhibitor of intestinal alpha glucosidase, an enzyme responsible for digestion and absorption of starch, disaccharides and dextrin. Acarbose is a complex oligosaccharide produced in bacteria that has activity against glucoamylase, sucrase, maltase and isomaltase, intestinal brush border glucosidases. The inhibition of the glucosidase activity blocks the breakdown of starch and disaccharides to absorbable monosaccharides, leading to delay in glucose absorption and a degree of carbohydrate malabsorption which results in a blunting of the postprandial rise in blood glucose. Acarbose was approved for use in the United States in 1995 and was the first alpha glucosidase inhibitor introduced into clinical practice. A similar alpha glucosidase inhibitor, miglitol, was approved the following year. The current indications for acarbose are for management of glycemic control in type 2 diabetes used in combination with diet and exercise, with or without other oral hypoglycemic agents or insulin. Acarbose is available generically and under the brand name Precose in tablets of 25, 50 and 100 mg. The typical initial dose in adults is 25 mg with each meal (with the first bite), followed by a gradual increase to a maximum of 100 mg three times daily. Acarbose causes malabsorption and gastrointestinal side effects of flatulence, diarrhea and abdominal boating are not uncommon. More severe but rare adverse events include skin rash and pneumatosis cystoides intestinalis.</p>
+        </sec>
+        <sec id="Acarbose.Hepatotoxicity">
+          <title>Hepatotoxicity</title>
+          <p>In several large clinical trials, serum enzyme elevations above 3 times the upper limit of normal were more common with acarbose therapy (2% to 5%) than with placebo, but all elevations were asymptomatic and resolved rapidly with stopping therapy. These studies reported no instances of clinically apparent liver injury. Subsequent to approval and with wide clinical use, however, at least a dozen instances of clinically apparent liver injury have been linked to acarbose use. The liver injury typically arises 2 to 8 months after starting therapy and is associated with a hepatocellular pattern of serum enzyme elevations with marked increases in serum ALT levels, suggestive of acute viral hepatitis. Immunoallergic features and autoantibody formation are not typical. While most cases are mild, some are associated with marked jaundice and cases with a fatal outcome have been reported to the sponsor. No cases of chronic liver injury or vanishing bile duct syndrome have been linked to acarbose use, and most large series of cases of drug induced liver injury and acute liver failure have not identified cases due to acarbose. Rechallenge has been carried out in several instances and resulted in recurrence with a shortening of the time to onset.</p>
+          <p>Likelihood score: B (rare but likely cause of clinically apparent liver injury).</p>
+        </sec>
+        <sec id="Acarbose.Mechanism_of_Injury">
+          <title>Mechanism of Injury</title>
+          <p>The cause of liver injury during acarbose therapy is not known. Acarbose is an oligosaccharide of microbial origin and is minimally absorbed (0.5% to 1.7%), so that systemic toxicity and liver injury were not expected and remain unexplained. Liver injury from acarbose is clearly idiosyncratic and may relate to an immunological reaction to the bacterially derived oligosaccharide molecule or to alterations in the microbiome and absorption of bacterial products.</p>
+        </sec>
+        <sec id="Acarbose.Outcome_and_Management">
+          <title>Outcome and Management</title>
+          <p>The liver injury caused by acarbose has generally been mild and self-limited with the injury resolving rapidly once acarbose is discontinued. Cross sensitivity with other hypoglycemic agents has not been described. Furthermore, liver injury has not been described in patients taking the other currently available alpha glucosidase inhibitor, miglitol. Recurrence of injury with reintroduction of acarbose has been reported and should be avoided.</p>
+          <p>Drug Class: <related-object link-type="booklink" source-id="livertox" document-id="Antidiabetic" document-type="chapter">Antidiabetic Agents</related-object></p>
+          <p>Other Drugs in the Subclass <related-object link-type="booklink" source-id="livertox" document-id="AlphaGlucosidaseInhi" document-type="chapter">Alpha Glucosidase Inhibitors</related-object>: <related-object link-type="booklink" source-id="livertox" document-id="Miglitol" document-type="chapter">Miglitol</related-object></p>
+        </sec>
+      </sec>
+      <sec id="Acarbose.CASE_REPORT">
+        <title>CASE REPORT</title>
+        <sec id="Acarbose.Case_1_Acute_hepatocellular_inj">
+          <title>Case 1. Acute hepatocellular injury due to acarbose.(<xref ref-type="bibr" rid="Acarbose.REF.1">1</xref>)</title>
+          <p>A 57 year old woman with type 2 diabetes developed nausea, right upper quadrant pain, dark urine and jaundice 2 months after starting acarbose (50 mg three times daily before meals). She was taking no other medications for diabetes, but had been on a laxative (cyclobutyrol) intermittently for several years. She had no history of liver disease or drug reactions, had no risk factors for viral hepatitis and did not drink alcohol. Examination showed jaundice and hepatic tenderness, but no fever or rash or signs of chronic liver disease. Laboratory results demonstrated hyperbilirubinemia (3.8 mg/dL) and marked elevations in serum aminotransferase levels (ALT 1580 U/L, AST 1090 U/L), with minimal increase in alkaline phosphatase (220 U/L). Tests for acute hepatitis A and B, cytomegalovirus and Epstein Barr virus infection were negative as were autoantibodies. An abdominal ultrasound was normal. Acarbose was discontinued and she improved within the next 10 days (Table). In follow up, all liver tests had returned to normal and she later tolerated glipizide without evidence of liver injury.</p>
+          <sec id="Acarbose.Key_Points">
+            <title>Key Points</title>
+            <table-wrap id="Acarbose.Tc" orientation="portrait" position="anchor">
+              <table frame="hsides" rules="groups">
+                <tbody>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Medication:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_1_1" valign="top" align="left" rowspan="1" colspan="1">Acarbose (150 mg daily)</td>
+                  </tr>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_2_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Pattern:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_2_1" valign="top" align="left" rowspan="1" colspan="1">Hepatocellular (R=~20)</td>
+                  </tr>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_3_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Severity:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_3_1" valign="top" align="left" rowspan="1" colspan="1">3+ (jaundice, hospitalization)</td>
+                  </tr>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_4_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Latency:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_4_1" valign="top" align="left" rowspan="1" colspan="1">2 months</td>
+                  </tr>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_5_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Recovery:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_5_1" valign="top" align="left" rowspan="1" colspan="1">5 weeks</td>
+                  </tr>
+                  <tr>
+                    <th id="hd_b_Acarbose.Tc_1_1_6_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Other medications:</th>
+                    <td headers="hd_b_Acarbose.Tc_1_1_6_1" valign="top" align="left" rowspan="1" colspan="1">Cyclobutyrol</td>
+                  </tr>
+                </tbody>
+              </table>
+            </table-wrap>
+          </sec>
+          <sec id="Acarbose.Laboratory_Values">
+            <title>Laboratory Values</title>
+            <table-wrap id="Acarbose.Td" orientation="portrait" position="anchor">
+              <table frame="hsides" rules="groups">
+                <thead>
+                  <tr>
+                    <th id="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="center" scope="col" rowspan="1" colspan="1">Time After<break/>Starting</th>
+                    <th id="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="center" scope="col" rowspan="1" colspan="1">Time After<break/>Stopping</th>
+                    <th id="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" scope="col" rowspan="1" colspan="1">ALT<break/>(U/L)</th>
+                    <th id="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" scope="col" rowspan="1" colspan="1">Alk P<break/>(U/L)</th>
+                    <th id="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" scope="col" rowspan="1" colspan="1">Bilirubin<break/>(mg/dL)</th>
+                    <th id="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="center" scope="col" rowspan="1" colspan="1">Other</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">2 months</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">0</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">1580</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">220</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">3.8</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1">Acarbose stopped</td>
+                  </tr>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1"/>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">4 days</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">1344</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">217</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">1.9</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1"/>
+                  </tr>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1"/>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">10 days</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">638</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">154</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">1.2</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1"/>
+                  </tr>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">3 months</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">21 days</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">91</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">93</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">0.9</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1"/>
+                  </tr>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">4 months</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">2 months</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">34</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">161</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">0.5</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1">Started on glipizide</td>
+                  </tr>
+                  <tr>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_1 hd_h_Acarbose.Td_1_1_1_2" colspan="2" valign="top" align="center" scope="row" rowspan="1">
+<bold>Normal Values</bold>
+</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_3" valign="top" align="center" rowspan="1" colspan="1">
+<bold>&#x0003c;42</bold>
+</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_4" valign="top" align="center" rowspan="1" colspan="1">
+<bold>&#x0003c;115</bold>
+</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_5" valign="top" align="center" rowspan="1" colspan="1">
+<bold>&#x0003c;1.2</bold>
+</td>
+                    <td headers="hd_h_Acarbose.Td_1_1_1_6" valign="top" align="left" rowspan="1" colspan="1"/>
+                  </tr>
+                </tbody>
+              </table>
+            </table-wrap>
+          </sec>
+          <sec id="Acarbose.Comment">
+            <title>Comment</title>
+            <p>Acarbose therapy has been linked to rare instances of an acute hepatitis-like injury arising 2 to 8 months after starting treatment. This case is typical of the injury described, with marked elevations in serum aminotransferase levels and mild jaundice, rapid improvement on stopping acarbose and lack of cross sensitivity with other antidiabetic medications. Several cases of recurrence of liver injury after reexposure have been described making it likely that the injury is idiosyncratic.</p>
+          </sec>
+        </sec>
+      </sec>
+      <sec id="Acarbose.PRODUCT_INFORMATION">
+        <title>PRODUCT INFORMATION</title>
+        <p>
+<bold>REPRESENTATIVE TRADE NAMES</bold>
+</p>
+        <p>Acarbose &#x02013; Generic, Precose&#x000ae;</p>
+        <p>
+<bold>DRUG CLASS</bold>
+</p>
+        <p>Antidiabetic Agents</p>
+        <p>
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?labeltype=all&#x00026;query=Acarbose">COMPLETE LABELING</ext-link>
+</p>
+        <p>Product labeling at DailyMed, National Library of Medicine, NIH</p>
+      </sec>
+      <sec id="Acarbose.CHEMICAL_FORMULA_AND_STRUCTURE">
+        <title>CHEMICAL FORMULA AND STRUCTURE</title>
+        <table-wrap id="Acarbose.Te" orientation="portrait" position="anchor">
+          <table frame="hsides" rules="groups">
+            <thead>
+              <tr>
+                <th id="hd_h_Acarbose.Te_1_1_1_1" valign="top" align="left" scope="col" rowspan="1" colspan="1">DRUG</th>
+                <th id="hd_h_Acarbose.Te_1_1_1_2" valign="top" align="left" scope="col" rowspan="1" colspan="1">CAS REGISTRY NUMBER</th>
+                <th id="hd_h_Acarbose.Te_1_1_1_3" valign="top" align="left" scope="col" rowspan="1" colspan="1">MOLECULAR FORMULA</th>
+                <th id="hd_h_Acarbose.Te_1_1_1_4" valign="top" align="left" scope="col" rowspan="1" colspan="1">STRUCTURE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td headers="hd_h_Acarbose.Te_1_1_1_1" valign="top" align="left" scope="row" rowspan="1" colspan="1">Acarbose</td>
+                <td headers="hd_h_Acarbose.Te_1_1_1_2" valign="top" align="left" rowspan="1" colspan="1">
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="pubchem" xlink:href="sid://135003847">56180-94-0</ext-link>
+</td>
+                <td headers="hd_h_Acarbose.Te_1_1_1_3" valign="top" align="left" rowspan="1" colspan="1">C25-H43-N-O18</td>
+                <td headers="hd_h_Acarbose.Te_1_1_1_4" valign="top" align="left" rowspan="1" colspan="1">
+<related-object link-type="ext-image-back-link" source-id="pubchem" document-id="135003847" document-id-type="sid" document-type="summary" object-id="135003847" object-id-type="sid" object-type="image"/>
+</td>
+              </tr>
+            </tbody>
+          </table>
+        </table-wrap>
+      </sec>
+      <sec id="Acarbose.CITED_REFERENCES">
+        <title>CITED REFERENCES</title>
+        <ref-list id="Acarbose.CITED_REFERENCES.reflist0">
+          <ref id="Acarbose.REF.1">
+            <label>1</label>
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Diaz-Gutierrez</surname><given-names>FL</given-names></name>
+<name name-style="western"><surname>Ladero</surname><given-names>JM</given-names></name>
+<name name-style="western"><surname>Diaz-Rubio</surname><given-names>M</given-names></name>
+</person-group>
+              <article-title>Acarbose-induced acute hepatitis.</article-title>
+              <source>Am J Gastroenterol</source>
+              <year>1998</year>
+              <volume>93</volume>
+              <fpage>481</fpage>
+              <pub-id pub-id-type="pmid">9517669</pub-id>
+            </element-citation>
+          </ref>
+        </ref-list>
+      </sec>
+      <sec id="Acarbose.ANNOTATED_BIBLIOGRAPHY">
+        <title>ANNOTATED BIBLIOGRAPHY</title>
+        <p>References updated: 10 January 2021</p>
+        <ref-list id="Acarbose.ANNOTATED_BIBLIOGRAPHY.reflist0">
+          <ref id="Acarbose.REF.zimmerman.1999">
+            <mixed-citation publication-type="book">Zimmerman HJ. Oral hypoglycemic agents and other diabetes therapy. In, Zimmerman, HJ. Hepatotoxicity: the adverse effects of drugs and other chemicals on the liver. 2nd ed. Philadelphia: Lippincott,1999: pp. 575-9.<annotation><p><italic toggle="yes">(Textbook of hepatotoxicity published in 1999 mentions that several instances of serum enzyme elevations and at least two cases of liver injury with jaundice have been linked to acarbose use).</italic></p></annotation></mixed-citation>
+          </ref>
+          <ref id="Acarbose.REF.de_marzio.2013">
+            <mixed-citation publication-type="book">De Marzio DH, Navarro VJ. Alpha-glucosidase inhibitors. Hepatotoxicity of cardiovascular and antidiabetic drugs. In, Kaplowitz N, DeLeve LD, eds. Drug-induced liver disease. 3rd ed. Amsterdam: Elsevier, 2013, pp. 529-30.<annotation><p><italic toggle="yes">(Review of hepatotoxicity of drugs for diabetes mentions that acarbose has been implicated in cases of liver injury that occur 2-12 months after starting and are typically hepatocellular and resolve rapidly upon stopping).</italic></p></annotation></mixed-citation>
+          </ref>
+          <ref id="Acarbose.REF.powers.2018">
+            <mixed-citation publication-type="book">Powers AC, D'Alessio D. Therapy of diabetes. Endocrine pancreas and pharmacotherapy of diabetes mellitus and hypoglycemia. In, Brunton LL, Hilal-Dandan R, Knollman BC, eds. Goodman &#x00026; Gilman&#x02019;s the pharmacological basis of therapeutics. 13th ed. New York: McGraw-Hill, 2018, pp. 863-86.<annotation><p><italic toggle="yes">(Textbook of pharmacology and therapeutics).</italic></p></annotation></mixed-citation>
+          </ref>
+          <ref id="Acarbose.REF.chiasson.1994.928">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chiasson</surname><given-names>JL</given-names></name>
+<name name-style="western"><surname>Josse</surname><given-names>RG</given-names></name>
+<name name-style="western"><surname>Hunt</surname><given-names>JA</given-names></name>
+<name name-style="western"><surname>Palmason</surname><given-names>C</given-names></name>
+<name name-style="western"><surname>Rodger</surname><given-names>NW</given-names></name>
+<name name-style="western"><surname>Ross</surname><given-names>SA</given-names></name>
+<name name-style="western"><surname>Ryan</surname><given-names>EA</given-names></name>
+<etal/>
+</person-group>
+              <article-title>The efficacy of acarbose in the treatment of patients with non-insulin-dependent diabetes mellitus. A multicenter controlled clinical trial.</article-title>
+              <source>Ann Intern Med</source>
+              <year>1994</year>
+              <volume>121</volume>
+              <fpage>928</fpage>
+              <lpage>35</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of adding acarbose vs placebo to standard therapies for 1 year in 354 patients with diabetes; side effects were mild and largely gastrointestinal; "doses of acarbose as large as 200 mg three times daily had no toxic effect according to results of hematologic and biochemical profiles including liver function tests").</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">7734015</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.coniff.1994.2442">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Coniff</surname><given-names>RF</given-names></name>
+<name name-style="western"><surname>Shapiro</surname><given-names>JA</given-names></name>
+<name name-style="western"><surname>Seaton</surname><given-names>TB</given-names></name>
+</person-group>
+              <article-title>Long-term efficacy and safety of acarbose in the treatment of obese subjects with non-insulin-dependent diabetes mellitus.</article-title>
+              <source>Arch Intern Med</source>
+              <year>1994</year>
+              <volume>154</volume>
+              <fpage>2442</fpage>
+              <lpage>8</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of acarbose vs placebo in 212 obese subjects with diabetes treated for 36 weeks; ALT elevations occurred in 9% of acarbose vs 2% of placebo recipients, but no patient had symptoms and abnormal values resolved rapidly with stopping therapy).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">7979840</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.coniff.1995.443">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Coniff</surname><given-names>RF</given-names></name>
+<name name-style="western"><surname>Shapiro</surname><given-names>JA</given-names></name>
+<name name-style="western"><surname>Seaton</surname><given-names>TB</given-names></name>
+<name name-style="western"><surname>Bray</surname><given-names>GA</given-names></name>
+</person-group>
+              <article-title>Multicenter, placebo-controlled trial comparing acarbose (BAY g 5421) with placebo, tolbutamide, and tolbutamide-plus-acarbose in non-insulin-dependent diabetes mellitus.</article-title>
+              <source>Am J Med</source>
+              <year>1995</year>
+              <volume>98</volume>
+              <fpage>443</fpage>
+              <lpage>51</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of acarbose vs placebo with and without tolbutamide in 290 patients with diabetes; while overall rates of ALT elevations were similar with and without acarbose, elevations &#x0003e;3 times ULN occurred in 5 patients [4%] on acarbose and none on placebo; all abnormalities were reversible with discontinuation of treatment).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">7733122</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.andrade.1996.931">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Andrade</surname><given-names>RJ</given-names></name>
+<name name-style="western"><surname>Lucena</surname><given-names>MI</given-names></name>
+<name name-style="western"><surname>Rodr&#x000ed;guez-Mendiz&#x000e1;bal</surname><given-names>M</given-names></name>
+</person-group>
+              <article-title>Hepatic injury caused by acarbose.</article-title>
+              <source>Ann Intern Med</source>
+              <year>1996</year>
+              <volume>124</volume>
+              <fpage>931</fpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(65 year old woman developed malaise followed by jaundice 2 months after adding acarbose to chronic glyburide therapy [bilirubin 9.9 mg/dL, ALT 690 U/L, Alk P 221 U/L], resolving within few months of stopping).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">8610937</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.coniff.1997.16">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Coniff</surname><given-names>R</given-names></name>
+<name name-style="western"><surname>Krol</surname><given-names>A.</given-names></name>
+</person-group>
+              <article-title>Acarbose: a review of US clinical experience.</article-title>
+              <source>Clin Ther</source>
+              <year>1997</year>
+              <volume>19</volume>
+              <fpage>16</fpage>
+              <lpage>26</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Review of safety of acarbose based on results from 1108 patients treated for an average of 6 months; most common adverse events were gastrointestinal pain, diarrhea and flatulence; rates of ALT elevations were no different than with placebo).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9083705</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.carrascosa.1997.698">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Carrascosa</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Pascual</surname><given-names>F</given-names></name>
+<name name-style="western"><surname>Aresti</surname><given-names>S</given-names></name>
+</person-group>
+              <article-title>Acarbose-induced acute severe hepatotoxicity.</article-title>
+              <source>Lancet</source>
+              <year>1997</year>
+              <volume>349</volume>
+              <fpage>698</fpage>
+              <lpage>9</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(40 year old woman developed jaundice 2 months after adding acarbose to glyburide therapy [bilirubin 11.0 mg/dL, ALT 2350 U/L, Alk P 325 U/L], resolving within 3 months of stopping and ALT elevations developing within a week of restarting).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9078205</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.diazgutierrez.1998.481">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Diaz-Gutierrez</surname><given-names>FL</given-names></name>
+<name name-style="western"><surname>Ladero</surname><given-names>JM</given-names></name>
+<name name-style="western"><surname>Diaz-Rubio</surname><given-names>M</given-names></name>
+</person-group>
+              <article-title>Acarbose-induced acute hepatitis.</article-title>
+              <source>Am J Gastroenterol</source>
+              <year>1998</year>
+              <volume>93</volume>
+              <fpage>481</fpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(57 year old woman developed jaundice 2 months after starting acarbose [bilirubin 3.8 mg/dL, ALT 1580 U/L, Alk P 220], resolving within 2 months of stopping: Case 1).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9517669</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.fujimoto.1998.340">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Fujimoto</surname><given-names>Y</given-names></name>
+<name name-style="western"><surname>Ohhira</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Miyokawa</surname><given-names>N</given-names></name>
+<name name-style="western"><surname>Kitamori</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>Kohgo</surname><given-names>Y.</given-names></name>
+</person-group>
+              <article-title>Acarbose-induced hepatic injury.</article-title>
+              <source>Lancet</source>
+              <year>1998</year>
+              <volume>351</volume>
+              <fpage>340</fpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Brief descriptions of 3 women, ages 52 to 62 years, with hepatic injury arising within 2.5-8 months of starting acarbose, one with jaundice [bilirubin 0.6-4.5 mg/dL, ALT 907-1837 U/L, Alk P not given], biopsies showing hepatitis-like injury, resolving within 1 month of stopping).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9652620</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.andrade.1998.2029">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Andrade</surname><given-names>RJ</given-names></name>
+<name name-style="western"><surname>Lucena</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Vega</surname><given-names>JL</given-names></name>
+<name name-style="western"><surname>Torres</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Salmer&#x000f3;n</surname><given-names>FJ</given-names></name>
+<name name-style="western"><surname>Bellot</surname><given-names>V</given-names></name>
+<name name-style="western"><surname>Garc&#x000ed;a-Esca&#x000f1;o</surname><given-names>MD</given-names></name>
+<etal/>
+</person-group>
+              <article-title>Acarbose-associated hepatotoxicity.</article-title>
+              <source>Diabetes Care</source>
+              <year>1998</year>
+              <volume>21</volume>
+              <fpage>2029</fpage>
+              <lpage>30</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(45 year old man and 54 year old woman had onset of liver injury 5 and 6 months after starting acarbose [bilirubin normal and 4.7 mg/dL, ALT 153 and 2556 U/L, Alk P normal and 174 U/L], resolving within a few months of stopping).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9802764</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.holman.1999.960">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Holman</surname><given-names>RR</given-names></name>
+<name name-style="western"><surname>Cull</surname><given-names>CA</given-names></name>
+<name name-style="western"><surname>Turner</surname><given-names>RC</given-names></name>
+</person-group>
+              <article-title>A randomized double-blind trial of acarbose in type 2 diabetes shows improved glycemic control over 3 years (U.K. Prospective Diabetes Study 44).</article-title>
+              <source>Diabetes Care</source>
+              <year>1999</year>
+              <volume>22</volume>
+              <fpage>960</fpage>
+              <lpage>4</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of acarbose vs placebo for up to 3 years in 3309 patients with diabetes; side effects and ALT results were not discussed).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">10372249</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.gentile.1999.1217">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Gentile</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>Turco</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>Guarino</surname><given-names>G</given-names></name>
+<name name-style="western"><surname>Sasso</surname><given-names>FC</given-names></name>
+<name name-style="western"><surname>Torella</surname><given-names>R</given-names></name>
+</person-group>
+              <article-title>Aminotransferase activity and acarbose treatment in patients with type 2 diabetes.</article-title>
+              <source>Diabetes Care</source>
+              <year>1999</year>
+              <volume>22</volume>
+              <fpage>1217</fpage>
+              <lpage>8</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 770 patients with diabetes treated with acarbose, preexisting liver disease was common and mild de novo ALT elevations occurred in 1.9%, usually near the beginning of therapy and none were clinically apparent).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">10388994</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.mennecier.1999.1398">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Mennecier</surname><given-names>D</given-names></name>
+<name name-style="western"><surname>Zafrani</surname><given-names>ES</given-names></name>
+<name name-style="western"><surname>Dhumeaux</surname><given-names>D</given-names></name>
+<name name-style="western"><surname>Mallat</surname><given-names>A</given-names></name>
+</person-group>
+              <comment>[Acarbose-induced acute hepatitis]</comment>
+              <source>Gastroenterol Clin Biol</source>
+              <year>1999</year>
+              <volume>23</volume>
+              <fpage>1398</fpage>
+              <lpage>9</lpage>
+              <comment>French.</comment>
+              <annotation>
+                <p>
+<italic toggle="yes">(59 year old man developed liver injury 3 months after restarting acarbose [bilirubin normal, ALT 22 times ULN, Alk P 1.1 times ULN], resolving within 2 weeks and recurring within 4 weeks of restarting [eosinophilia and ALT 12 times ULN]).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">10642627</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.kr_henb_hl.1999.285">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Kr&#x000e4;henb&#x000fc;hl</surname><given-names>S.</given-names></name>
+</person-group>
+              <article-title>Acarbose and acetaminophen.a dangerous combination?</article-title>
+              <source>Hepatology</source>
+              <year>1999</year>
+              <volume>29</volume>
+              <fpage>285</fpage>
+              <lpage>7</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Editorial discussing a study of the effects of acarbose in rats fed alcohol demonstrating increased sensitivity to hepatic injury from acetaminophen; mentions that there have been 200 reports of liver injury due to acarbose reported to the WHO, but none associated with acetaminophen toxicity).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">9862881</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.de_la_vega.2000.282">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>de la Vega</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Crespo</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Escudero</surname><given-names>JM</given-names></name>
+<name name-style="western"><surname>S&#x000e1;nchez</surname><given-names>L</given-names></name>
+<name name-style="western"><surname>Rivas</surname><given-names>LL</given-names></name>
+</person-group>
+              <comment>[Acarbose-induced acute hepatitis. Report of two events in the same patient]</comment>
+              <source>Gastroenterol Hepatol</source>
+              <year>2000</year>
+              <volume>23</volume>
+              <fpage>282</fpage>
+              <lpage>4</lpage>
+              <comment>Spanish.</comment>
+              <annotation>
+                <p>
+<italic toggle="yes">(57 year old woman developed jaundice 2 months after adding acarbose to glyburide therapy [bilirubin 20 mg/dL, ALT 2300 U/L], having a recurrence within 1 week, 3 years later when acarbose was restarted [bilirubin 3.9 mg/dL, ALT 2778 U/L, Alk P 624 U/L], resolving within 2 months of stopping).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">15324623</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.madonia.2001.615">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Madonia</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>Pietrosi</surname><given-names>G</given-names></name>
+<name name-style="western"><surname>Pagliaro</surname><given-names>L</given-names></name>
+</person-group>
+              <article-title>Acarbose-induced liver injury in an anti-hepatitis C virus positive patient.</article-title>
+              <source>Dig Liver Dis</source>
+              <year>2001</year>
+              <volume>33</volume>
+              <fpage>615</fpage>
+              <lpage>6</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(74 year old woman developed jaundice 3 months after adding acarbose to glyburide [bilirubin 8.9 mg/dL, ALT 519 U/L, Alk P 258 U/L], resolving within 1 month of stopping; patient was also positive for anti-HCV and HCV RNA and no follow up provided).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">11816556</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.benavente_fern_ndez.2001.317">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Benavente Fern&#x000e1;ndez</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Maraver Gac&#x000ed;a</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Talavera Fabuel</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Barrios Merino</surname><given-names>A.</given-names></name>
+</person-group>
+              <comment>[Acute hepatitis induced by acarbose]</comment>
+              <source>Med Clin (Barc)</source>
+              <year>2001</year>
+              <volume>117</volume>
+              <fpage>317</fpage>
+              <lpage>8</lpage>
+              <comment>Spanish.</comment>
+              <annotation>
+                <p>
+<italic toggle="yes">(73 year old woman developed jaundice 3 months after starting acarbose [bilirubin 25 mg/dL, ALT 2500 U/L, Alk P not given], resolving with stopping).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">11571129</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.chitturi.2002.169">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chitturi</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>George</surname><given-names>J</given-names></name>
+</person-group>
+              <article-title>Hepatotoxicity of commonly used drugs: nonsteroidal anti-inflammatory drugs, antihypertensives, antidiabetic agents, anticonvulsants, lipid-lowering agents, psychotropic drugs.</article-title>
+              <source>Semin Liver Dis</source>
+              <year>2002</year>
+              <volume>22</volume>
+              <fpage>169</fpage>
+              <lpage>83</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Overview of hepatotoxicity of antidiabetic medications mentions that acarbose has been incriminated in hepatotoxicity, generally arising within 2-8 months of starting therapy with an acute hepatitis-like clinical picture, but that miglitol has not).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">12016548</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.chiasson.2002.2072">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chiasson</surname><given-names>JL</given-names></name>
+<name name-style="western"><surname>Josse</surname><given-names>RG</given-names></name>
+<name name-style="western"><surname>Gomis</surname><given-names>R</given-names></name>
+<name name-style="western"><surname>Hanefeld</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Karasik</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Laakso</surname><given-names>M</given-names></name>
+<collab>STOP-NIDDM Trail Research Group</collab>
+</person-group>
+              <article-title>Acarbose for prevention of type 2 diabetes mellitus: the STOP-NIDDM randomised trial.</article-title>
+              <source>Lancet</source>
+              <year>2002</year>
+              <volume>359</volume>
+              <issue>9323</issue>
+              <fpage>2072</fpage>
+              <lpage>7</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of acarbose vs placebo in 1429 patients with impaired glucose tolerance with follow up for an average of 3.3 years; serum enzyme results and liver injury not mentioned).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">12086760</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.segal.2005.589">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Segal</surname><given-names>P</given-names></name>
+<name name-style="western"><surname>Eliahou</surname><given-names>HE</given-names></name>
+<name name-style="western"><surname>Petzinna</surname><given-names>D</given-names></name>
+<name name-style="western"><surname>Neuser</surname><given-names>D</given-names></name>
+<name name-style="western"><surname>Br&#x000fc;ckner</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Spengler</surname><given-names>M</given-names></name>
+</person-group>
+              <article-title>Long-term efficacy and tolerability of acarbose treatment in patients with type 2 diabetes mellitus.</article-title>
+              <source>Clin Drug Investig</source>
+              <year>2005</year>
+              <volume>25</volume>
+              <fpage>589</fpage>
+              <lpage>95</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Controlled trial of acarbose vs placebo in 139 patients with diabetes; 2 patients [3%] on acarbose developed ALT elevations above 3 times ULN, both apparently receiving high doses [&#x0003e;600 mg daily]).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">17532703</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.van_de_laar.2005.154">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>van de Laar</surname><given-names>FA</given-names></name>
+<name name-style="western"><surname>Lucassen</surname><given-names>PL</given-names></name>
+<name name-style="western"><surname>Akkermans</surname><given-names>RP</given-names></name>
+<name name-style="western"><surname>van de Lisdonk</surname><given-names>EH</given-names></name>
+<name name-style="western"><surname>Rutten</surname><given-names>GE</given-names></name>
+<name name-style="western"><surname>van Weel</surname><given-names>C</given-names></name>
+</person-group>
+              <article-title>Alpha-glucosidase inhibitors for patients with type 2 diabetes: results from a Cochrane systematic review and meta-analysis.</article-title>
+              <source>Diabetes Care</source>
+              <year>2005</year>
+              <volume>28</volume>
+              <fpage>154</fpage>
+              <lpage>63</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Review of 41 studies, 30 of acarbose, 7 miglitol, 1 voglibose and 3 combined; discusses relative rates of side effects in comparison to placebo overall, but does not mention hepatic effects specifically).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">15616251</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.hsiao.2006.151">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Hsiao</surname><given-names>SH</given-names></name>
+<name name-style="western"><surname>Liao</surname><given-names>LH</given-names></name>
+<name name-style="western"><surname>Cheng</surname><given-names>PN</given-names></name>
+<name name-style="western"><surname>Wu</surname><given-names>TJ</given-names></name>
+</person-group>
+              <article-title>Hepatotoxicity associated with acarbose therapy.</article-title>
+              <source>Ann Pharmacother</source>
+              <year>2006</year>
+              <volume>40</volume>
+              <fpage>151</fpage>
+              <lpage>4</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(57 year old woman developed abdominal pain 6 months after starting acarbose [bilirubin normal, ALT 454 U/L, GGT 109 U/L]; ALT decreased but remained elevated after reducing dose of acarbose, but resolved completely only when it was stopped; review of 10 cases in literature).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">16317107</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.chalasani.2008.1924">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chalasani</surname><given-names>N</given-names></name>
+<name name-style="western"><surname>Fontana</surname><given-names>RJ</given-names></name>
+<name name-style="western"><surname>Bonkovsky</surname><given-names>HL</given-names></name>
+<name name-style="western"><surname>Watkins</surname><given-names>PB</given-names></name>
+<name name-style="western"><surname>Davern</surname><given-names>T</given-names></name>
+<name name-style="western"><surname>Serrano</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Yang</surname><given-names>H</given-names></name>
+<name name-style="western"><surname>Rochon</surname><given-names>J</given-names></name>
+<collab>Drug Induced Liver Injury Network (DILIN)</collab>
+</person-group>
+              <article-title>Causes, clinical features, and outcomes from a prospective study of drug-induced liver injury in the United States.</article-title>
+              <source>Gastroenterology</source>
+              <year>2008</year>
+              <volume>135</volume>
+              <fpage>1924</fpage>
+              <lpage>34</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 300 cases of drug induced liver injury in the US collected from 2004 to 2008, none were attributed to acarbose).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">18955056</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.reuben.2010.2065">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Reuben</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Koch</surname><given-names>DG</given-names></name>
+<name name-style="western"><surname>Lee</surname><given-names>WM</given-names></name>
+<collab>Acute Liver Failure Study Group</collab>
+</person-group>
+              <article-title>Drug-induced acute liver failure: results of a U.S. multicenter, prospective study.</article-title>
+              <source>Hepatology</source>
+              <year>2010</year>
+              <volume>52</volume>
+              <fpage>2065</fpage>
+              <lpage>76</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 1198 patients with acute liver failure enrolled in a US prospective study between 1998 and 2007, 133 [11%] were attributed to drug induced liver injury, none of which were due to acarbose).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">20949552</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF28">
+            <element-citation publication-type="journal">
+              <article-title>Drugs for type 2 diabetes.</article-title>
+              <source>Treat Guidel Med Lett</source>
+              <year>2011</year>
+              <volume>9</volume>
+              <issue>108</issue>
+              <fpage>47</fpage>
+              <lpage>54</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Concise review of the role of current antidiabetes medications in management of type 2 diabetes).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">21778966</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.wu.2012.134">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Wu</surname><given-names>QL</given-names></name>
+<name name-style="western"><surname>Liu</surname><given-names>YP</given-names></name>
+<name name-style="western"><surname>Lu</surname><given-names>JM</given-names></name>
+<name name-style="western"><surname>Wang</surname><given-names>CJ</given-names></name>
+<name name-style="western"><surname>Yang</surname><given-names>T</given-names></name>
+<name name-style="western"><surname>Dong</surname><given-names>JX</given-names></name>
+<name name-style="western"><surname>Li</surname><given-names>CJ</given-names></name>
+<etal/>
+</person-group>
+              <article-title>Efficacy and safety of acarbose chewable tablet in patients with type 2 diabetes: a multicenter, randomized, double-blinded, double-dummy positive controlled trial.</article-title>
+              <source>J Evid Based Med</source>
+              <year>2012</year>
+              <volume>5</volume>
+              <fpage>134</fpage>
+              <lpage>8</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 207 patients with type 2 diabetes treated with a standard or chewable tablet of acarbose three times daily for 12 weeks, there were no "clinically relevant changes in biochemical parameters").</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">23672220</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.wang.2013.16">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Wang</surname><given-names>JS</given-names></name>
+<name name-style="western"><surname>Huang</surname><given-names>CN</given-names></name>
+<name name-style="western"><surname>Hung</surname><given-names>YJ</given-names></name>
+<name name-style="western"><surname>Kwok</surname><given-names>CF</given-names></name>
+<name name-style="western"><surname>Sun</surname><given-names>JH</given-names></name>
+<name name-style="western"><surname>Pei</surname><given-names>D</given-names></name>
+<name name-style="western"><surname>Yang</surname><given-names>CY</given-names></name>
+<etal/>
+</person-group>
+              <article-title>acarbose/metformin fixed-dose combination study investigators. Acarbose plus metformin fixed-dose combination outperforms acarbose monotherapy for type 2 diabetes.</article-title>
+              <source>Diabetes Res Clin Pract</source>
+              <year>2013</year>
+              <volume>102</volume>
+              <fpage>16</fpage>
+              <lpage>24</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 233 patients with type 2 diabetes treated with acarbose alone or acarbose and metformin for 16 weeks, serious adverse events were rare [~3%] and none were hepatic; no mention of ALT elevations).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">23993469</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.yang.2014.46">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Yang</surname><given-names>W</given-names></name>
+<name name-style="western"><surname>Liu</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Shan</surname><given-names>Z</given-names></name>
+<name name-style="western"><surname>Tian</surname><given-names>H</given-names></name>
+<name name-style="western"><surname>Zhou</surname><given-names>Z</given-names></name>
+<name name-style="western"><surname>Ji</surname><given-names>Q</given-names></name>
+<name name-style="western"><surname>Weng</surname><given-names>J</given-names></name>
+<etal/>
+</person-group>
+              <article-title>Acarbose compared with metformin as initial therapy in patients with newly diagnosed type 2 diabetes: an open-label, non-inferiority randomised trial.</article-title>
+              <source>Lancet Diabetes Endocrinol</source>
+              <year>2014</year>
+              <volume>2</volume>
+              <issue>1</issue>
+              <fpage>46</fpage>
+              <lpage>55</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 784 patients with type 2 diabetes treated with either metformin or acarbose for 24-48 weeks, serious adverse events were rare [2%] and none were hepatic; no mention of ALT elevations).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">24622668</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.rochahonor.2014.109">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Rocha-Honor</surname><given-names>E</given-names></name>
+<name name-style="western"><surname>Polo-Romero</surname><given-names>FJ</given-names></name>
+<name name-style="western"><surname>S&#x000e1;nchez-Beteta</surname><given-names>P</given-names></name>
+<name name-style="western"><surname>Mart&#x000ed;nez-Peguero</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Santisteban-L&#x000f3;pez</surname><given-names>Y</given-names></name>
+<name name-style="western"><surname>Beato-P&#x000e9;rez</surname><given-names>JL</given-names></name>
+</person-group>
+              <article-title>Acarbosa y propofol: &#x000bf;una peligrosa combinaci&#x000f3;n?</article-title>
+              <comment>[Acarbose and propofol: a dangerous combination?]</comment>
+              <source>Rev Esp Anestesiol Reanim</source>
+              <year>2014</year>
+              <volume>61</volume>
+              <fpage>109</fpage>
+              <lpage>11</lpage>
+              <comment>Spanish.</comment>
+              <annotation>
+                <p>
+<italic toggle="yes">(67 year old woman developed pruritus, nausea and fatigue 3 months after starting acarbose, which improved on stopping but had an acute hepatitis 2 weeks later following cataract surgery [ALT 1345 U/L, Alk P 273 U/L, bilirubin 2.8], resolving within 2 months).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">23276378</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF33">
+            <element-citation publication-type="journal">
+              <article-title>Drugs for type 2 diabetes.</article-title>
+              <source>Treat Guidel Med Lett</source>
+              <year>2014</year>
+              <volume>12</volume>
+              <issue>139</issue>
+              <fpage>17</fpage>
+              <lpage>24</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Concise review of current therapy of type 2 diabetes mentions that acarbose and miglitol are generally less effective than other drugs in lowering A1c levels; no discussion of side effects).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">24566424</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.chalasani.2015.1340">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chalasani</surname><given-names>N</given-names></name>
+<name name-style="western"><surname>Bonkovsky</surname><given-names>HL</given-names></name>
+<name name-style="western"><surname>Fontana</surname><given-names>R</given-names></name>
+<name name-style="western"><surname>Lee</surname><given-names>W</given-names></name>
+<name name-style="western"><surname>Stolz</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Talwalkar</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Reddy</surname><given-names>KR</given-names></name>
+<etal/>
+<collab>United States Drug Induced Liver Injury Network</collab>
+</person-group>
+              <article-title>Features and outcomes of 899 patients with drug-induced liver injury: The DILIN Prospective Study.</article-title>
+              <source>Gastroenterology</source>
+              <year>2015</year>
+              <volume>148</volume>
+              <fpage>1340</fpage>
+              <lpage>52.e7</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 899 cases of drug induced liver injury enrolled in a US prospective study between 2004 and 2013, four were attributed to antidiabetic agents, including metformin, sitagliptin and glibenclamide, but none specifically to acarbose or miglitol).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">25754159</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.komatsu.2018.1092">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Komatsu</surname><given-names>M</given-names></name>
+<name name-style="western"><surname>Tanaka</surname><given-names>N</given-names></name>
+<name name-style="western"><surname>Kimura</surname><given-names>T</given-names></name>
+<name name-style="western"><surname>Fujimori</surname><given-names>N</given-names></name>
+<name name-style="western"><surname>Sano</surname><given-names>K</given-names></name>
+<name name-style="western"><surname>Horiuchi</surname><given-names>A</given-names></name>
+<name name-style="western"><surname>Sugiura</surname><given-names>A</given-names></name>
+<etal/>
+</person-group>
+              <article-title>Miglitol attenuates non-alcoholic steatohepatitis in diabetic patients.</article-title>
+              <source>Hepatol Res</source>
+              <year>2018</year>
+              <volume>48</volume>
+              <fpage>1092</fpage>
+              <lpage>8</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Among 17 adults with type 2 diabetes and nonalcoholic steatohepatitis treated with miglitol for 12 months, ALT and HbA1c levels and body weight decreased overall as did liver biopsy scores for steatosis and inflammation but not for fibrosis or ballooning; there were no serious adverse events and no mention of ALT elevations or hepatotoxicity).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">29935004</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.chao.2018.860">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Chao</surname><given-names>CT</given-names></name>
+<name name-style="western"><surname>Wang</surname><given-names>J</given-names></name>
+<name name-style="western"><surname>Huang</surname><given-names>JW</given-names></name>
+<name name-style="western"><surname>Chien</surname><given-names>KL</given-names></name>
+</person-group>
+              <article-title>Acarbose use and liver injury in diabetic patients with severe renal insufficiency and hepatic diseases: a propensity score-matched cohort study.</article-title>
+              <source>Front Pharmacol</source>
+              <year>2018</year>
+              <volume>9</volume>
+              <fpage>860</fpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Analysis of the Taiwan National Health Insurance Research Database identified patients with type 2 diabetes and end stage renal disease found rates of development of acute hepatic injury were not affected by acarbose use in those with or without preexisting liver disease or cirrhosis).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">30131698</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.hedrington.2019.2229">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Hedrington</surname><given-names>MS</given-names></name>
+<name name-style="western"><surname>Davis</surname><given-names>SN</given-names></name>
+</person-group>
+              <article-title>Considerations when using alpha-glucosidase inhibitors in the treatment of type 2 diabetes.</article-title>
+              <source>Expert Opin Pharmacother</source>
+              <year>2019</year>
+              <volume>20</volume>
+              <fpage>2229</fpage>
+              <lpage>35</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Review of the role of alpha glucosidase inhibitors in the therapy of type 2 diabetes mentions that side effects are largely gastrointestinal [diarrhea, abdominal pain, flatulence] and are transient and mostly dose dependent; no mention of ALT elevations or hepatotoxicity).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">31593486</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF38">
+            <element-citation publication-type="journal">
+              <article-title>Drugs for type 2 diabetes.</article-title>
+              <source>Med Lett Drugs Ther</source>
+              <year>2019</year>
+              <volume>61</volume>
+              <issue>1584</issue>
+              <fpage>169</fpage>
+              <lpage>78</lpage>
+              <annotation>
+                <p>
+<italic toggle="yes">(Concise review of the mechanisms of action, clinical efficacy, side effects and costs of currently available drugs for type 2 diabetes mentions that miglitol and acarbose must be taken with each meal and can lower HbA1c levels by 0.5-1.0%; side effects are not discussed).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">31770362</pub-id>
+            </element-citation>
+          </ref>
+          <ref id="Acarbose.REF.lin.2020.108489">
+            <element-citation publication-type="journal">
+              <person-group>
+<name name-style="western"><surname>Lin</surname><given-names>WH</given-names></name>
+<name name-style="western"><surname>Yang</surname><given-names>CY</given-names></name>
+<name name-style="western"><surname>Kuo</surname><given-names>S</given-names></name>
+<name name-style="western"><surname>Kuo</surname><given-names>TH</given-names></name>
+<name name-style="western"><surname>Roan</surname><given-names>JN</given-names></name>
+<name name-style="western"><surname>Li</surname><given-names>CY</given-names></name>
+<name name-style="western"><surname>Wang</surname><given-names>MC</given-names></name>
+<name name-style="western"><surname>Ou</surname><given-names>HT</given-names></name>
+</person-group>
+              <article-title>Hepatic and cardiovascular safety of acarbose among type 2 diabetes patients with end-stage renal disease: a nationwide population-based longitudinal study.</article-title>
+              <source>Diabetes Res Clin Pract</source>
+              <year>2020</year>
+              <month>Oct</month>
+              <day>6</day>
+              <elocation-id>108489</elocation-id>
+              <comment>[ePub ahead of print]</comment>
+              <annotation>
+                <p>
+<italic toggle="yes">(Analysis of the Taiwan National Health Insurance Research Database between 1999 and 2013 identified 32,531 patients with diabetes and end stage renal disease, of whom 6263 were treated with acarbose and had a slightly lower rate of development of hepatic disease [1.25 vs 1.34 per 100 patient years] as well as lower rates of cardiovascular events and all-cause mortality).</italic>
+</p>
+              </annotation>
+              <pub-id pub-id-type="pmid">33035600</pub-id>
+            </element-citation>
+          </ref>
+        </ref-list>
+      </sec>
+      <sec sec-type="link-group" id="Acarbose.OTHER_REFERENCE_LINKS">
+        <title>OTHER REFERENCE LINKS</title>
+        <list list-type="order">
+          <list-item>
+            <label>1</label>
+            <p>
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://www.ncbi.nlm.nih.gov/sites/entrez?cmd=search&#x00026;db=pubmed&#x00026;pubmedfilters=true&#x00026;term=(Acarbose/AE)+AND+Human%5BMH%5D+AND+(drug+induced+liver+injury+OR+jaundice/CI+OR+bile+duct+diseases/CI+OR+liver/DE+OR+liver+diseases/CI)+AND+(%221900/1/1%22%5BEDat%5D:%222999/12/31%22%5BEDat%5D)">Recent References on Acarbose: from PubMed.gov</ext-link>
+</p>
+          </list-item>
+          <list-item>
+            <label>2</label>
+            <p>
+<ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://clinicaltrials.gov/ct2/results?term=Acarbose">Trials on Acarbose: from ClinicalTrials.gov</ext-link>
+</p>
+          </list-item>
+        </list>
+      </sec>
+    </body>
+  </book-part>
+</book-part-wrapper>

@@ -13,7 +13,7 @@ rechazado una sola operación.
 
 Ver [`docs/resilience/00-auditoria.md`](../../../docs/resilience/00-auditoria.md).
 
-## Contenido
+## Contents
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -77,7 +77,7 @@ muere por OOM sin haber rechazado ninguna.
 aporta trabajo nuevo —el siguiente recogerá lo que quedó—, así que encolarlo sólo
 garantiza que la cola crezca al ritmo al que el sistema va lento.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - **Sin dependencias de NestJS ni de terceros.** Estas piezas las usan por igual
   un interceptor HTTP, un cliente axios y un tick de worker, y varias se

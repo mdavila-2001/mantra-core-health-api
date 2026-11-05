@@ -1,4 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScopedReadResponseDto } from '../../clinical/dto/scoped-read-response.dto';
+
+/** P39: una fila campo/valor de la nota médica, tal como se guardó. */
+export class ChartNoteEntryDto {
+  /** El campo: «Presión arterial». */
+  @ApiProperty({ example: 'Presión arterial' })
+  label!: string;
+
+  /** Lo que se anotó: «120/80». */
+  @ApiProperty({ example: '120/80' })
+  value!: string;
+}
 
 /**
  * Una nota del expediente con el texto de su versión vigente.
@@ -49,6 +61,13 @@ export class ChartNoteItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   authorProfileId?: string;
+
+  /**
+   * P39: filas campo/valor de la versión vigente, en orden. Ausente cuando la
+   * versión no tiene filas (las notas SOAP de antes de C1).
+   */
+  @ApiPropertyOptional({ type: [ChartNoteEntryDto] })
+  entries?: ChartNoteEntryDto[];
 
   /**
    * Valor de chief complaint text mantenido por la instancia.
@@ -278,7 +297,7 @@ export class ChartDocumentItemDto {
  * es exactamente la clase de omisión que no puede pasar en una historia
  * clínica.
  */
-export class PatientChartResponseDto {
+export class PatientChartResponseDto extends ScopedReadResponseDto {
   /**
    * Identificador asociado a patient profile.
    */
@@ -309,9 +328,7 @@ export class PatientChartResponseDto {
   @ApiProperty({ description: 'Tope aplicado a cada bloque' })
   limit!: number;
 
-  /**
-   * Valor de truncated mantenido por la instancia.
-   */
+  /** Bloques recortados por el tope. */
   @ApiProperty({
     description:
       'Qué bloques quedaron recortados por el tope. Vacío si el expediente cabe entero',

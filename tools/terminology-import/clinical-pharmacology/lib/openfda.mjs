@@ -23,6 +23,9 @@ export const OPENFDA_LICENSE =
   'openFDA: datos de dominio público (CC0 1.0), «no copyright restrictions»; https://open.fda.gov/license/. ' +
   'El texto de la etiqueta es el aprobado por la FDA y publicado por la NLM en DailyMed.';
 export const OPENFDA_DOWNLOAD_INDEX = 'https://api.fda.gov/download.json';
+/** Aviso literal que openFDA devuelve en `meta.disclaimer` de cada respuesta (leído el 2026-10-24). Viaja en cada sección. */
+export const OPENFDA_DISCLAIMER =
+  'Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.';
 
 const first = (v) => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));
 const list = (v) => (Array.isArray(v) ? v.filter((x) => x != null && x !== '') : v == null || v === '' ? [] : [v]);
@@ -58,37 +61,40 @@ export function labelIdentity(label) {
   };
 }
 
+const RX = 'HUMAN PRESCRIPTION DRUG';
+const OTC = 'HUMAN OTC DRUG';
 const sameSet = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 
 /**
  * Etiqueta de referencia por (conjunto de UNII, vías): entre las etiquetas de
- * medicamento de prescripción humano cuyo `openfda.unii` es exactamente el
- * conjunto pedido, la de `effective_time` más reciente; a igualdad, el
- * `set_id` menor. Si no hay de prescripción, se acepta OTC (queda dicho en el
- * criterio). Determinista y auditable; no juzga cuál etiqueta es «mejor».
+ * uso humano cuyo `openfda.unii` es exactamente el conjunto pedido, se agrupa
+ * por vías; en cada vía se prefieren las de prescripción y, si esa vía sólo
+ * tiene de venta libre, se acepta OTC (queda dicho en el criterio). Dentro del
+ * grupo, la de `effective_time` más reciente; a igualdad, el `set_id` menor.
+ * Determinista y auditable; no juzga cuál etiqueta es «mejor».
  * @param {ReturnType<typeof labelIdentity>[]} identities
  * @param {string[]} uniiSet  ordenado
  */
 export function referenceLabels(identities, uniiSet) {
-  const matching = identities.filter((l) => l.id && sameSet(l.unii, uniiSet));
-  const rx = matching.filter((l) => l.productType === 'HUMAN PRESCRIPTION DRUG');
-  const pool = rx.length > 0 ? rx : matching.filter((l) => l.productType === 'HUMAN OTC DRUG');
-  const kind = rx.length > 0 ? 'de prescripción (HUMAN PRESCRIPTION DRUG)' : 'de venta libre (HUMAN OTC DRUG), porque no hay de prescripción';
-  const groups = new Map();
-  for (const l of pool) {
+  const matching = identities.filter((l) => l.id && sameSet(l.unii, uniiSet) && (l.productType === RX || l.productType === OTC));
+  const byRoute = new Map();
+  for (const l of matching) {
     const key = l.routes.join(' | ') || '(sin vía declarada)';
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(l);
+    if (!byRoute.has(key)) byRoute.set(key, []);
+    byRoute.get(key).push(l);
   }
-  return [...groups.entries()]
-    .map(([routes, members]) => {
+  return [...byRoute.entries()]
+    .map(([routes, all]) => {
+      const rx = all.filter((l) => l.productType === RX);
+      const members = rx.length > 0 ? rx : all;
+      const kind = rx.length > 0 ? 'de prescripción (HUMAN PRESCRIPTION DRUG)' : 'de venta libre (HUMAN OTC DRUG), porque esa vía no tiene de prescripción';
       const ref = [...members].sort((a, b) => String(b.effectiveDate).localeCompare(String(a.effectiveDate)) || String(a.setId).localeCompare(String(b.setId)))[0];
       return {
         identity: ref,
         criterion:
-          `Etiqueta de referencia por (UNII exactos, vías): entre las etiquetas ${kind} con ese conjunto exacto de UNII, ` +
+          `Etiqueta de referencia por (UNII exactos, vías): entre las etiquetas ${kind} con ese conjunto exacto de UNII y esas vías, ` +
           'la de effective_time más reciente; a igualdad, el set_id menor.',
-        group: { unii: uniiSet, routes, candidates: members.length },
+        group: { unii: uniiSet, routes, candidates: members.length, productType: ref.productType },
       };
     })
     .sort((a, b) => a.group.routes.localeCompare(b.group.routes));
@@ -126,6 +132,7 @@ export function openFdaSections(label, ref, retrievedAt) {
       tables,
       retrievedAt,
       license: OPENFDA_LICENSE,
+      disclaimer: OPENFDA_DISCLAIMER,
       citation:
         `U.S. FDA. openFDA drug label, set_id ${id.setId}, versión ${id.version ?? '?'} (effective_time ${id.effectiveDate ?? '?'}), ` +
         `campo «${field}». ${dailyMedSetUrl(id.setId)} (consultado el ${retrievedAt.slice(0, 10)}).`,

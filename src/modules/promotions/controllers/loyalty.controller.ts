@@ -17,10 +17,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   getCurrentTenantId,
   PreconditionFailedException,
   Roles,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { PromotionsErrorReason } from '../promotions.error-reasons';
@@ -77,7 +79,7 @@ export class LoyaltyController {
     // El worker SYSTEM barre todos los tenants; cualquier otro rol debe
     // acotarse al tenant del contexto (X-Tenant-Id), igual que el resto de
     // endpoints de administración de lealtad.
-    if (actor.roles.includes('SYSTEM')) {
+    if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
       return this.loyaltyService.listActivePrograms(query.limit);
     }
     const tenantId = getCurrentTenantId();
@@ -149,6 +151,11 @@ export class LoyaltyController {
    * negativo, idempotencia por clave—, pero la membresía la deriva el servidor
    * del token en vez de aceptarla en la ruta.
    */
+  @Audited({
+    action: 'LOYALTY_OWN_POINTS_REDEEMED',
+    entity: 'points_ledger_entry',
+    entityId: 'result.id',
+  })
   @Post('loyalty/me/points/redeem')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -186,6 +193,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-01. */
+  @Audited({
+    action: 'LOYALTY_PROGRAM_CREATED',
+    entity: 'loyalty_program',
+    entityId: 'result.id',
+  })
   @Post('loyalty/programs')
   @Roles('PROMOTIONS_ADMIN', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
@@ -200,6 +212,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-02. */
+  @Audited({
+    action: 'LOYALTY_MEMBER_ENROLLED',
+    entity: 'loyalty_membership',
+    entityId: 'result.id',
+  })
   @Post('loyalty/programs/:id/memberships')
   @Roles('PROMOTIONS_ADMIN', 'MEMBER')
   @HttpCode(HttpStatus.CREATED)
@@ -217,6 +234,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-03. */
+  @Audited({
+    action: 'LOYALTY_POINTS_EARNED',
+    entity: 'points_ledger_entry',
+    entityId: 'result.id',
+  })
   @Post('loyalty/memberships/:id/points/earn')
   @Roles('SYSTEM', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -234,6 +256,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-04. */
+  @Audited({
+    action: 'LOYALTY_POINTS_REDEEMED',
+    entity: 'points_ledger_entry',
+    entityId: 'result.id',
+  })
   @Post('loyalty/memberships/:id/points/redeem')
   @Roles('MEMBER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -251,6 +278,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-05. */
+  @Audited({
+    action: 'LOYALTY_BALANCE_RECOMPUTED',
+    entity: 'loyalty_membership',
+    entityId: 'param:id',
+  })
   @Post('loyalty/memberships/:id/recompute')
   @Roles('SYSTEM', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -267,6 +299,10 @@ export class LoyaltyController {
   }
 
   /** UC-51-06. */
+  @Audited({
+    action: 'LOYALTY_POINTS_EXPIRED',
+    entity: 'points_ledger_entry',
+  })
   @Post('loyalty/jobs/expire-points')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -283,6 +319,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-12. */
+  @Audited({
+    action: 'MEMBER_REFERRAL_CREATED',
+    entity: 'member_referral',
+    entityId: 'result.id',
+  })
   @Post('referral-programs/:id/referrals')
   @Roles('MEMBER', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -299,6 +340,11 @@ export class LoyaltyController {
   }
 
   /** UC-51-13. */
+  @Audited({
+    action: 'MEMBER_REFERRAL_QUALIFIED',
+    entity: 'member_referral',
+    entityId: 'param:id',
+  })
   @Post('referrals/:id/qualify')
   @Roles('SYSTEM', 'PROMOTIONS_ADMIN')
   @HttpCode(HttpStatus.OK)

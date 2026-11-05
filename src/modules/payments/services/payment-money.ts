@@ -91,3 +91,125 @@ export function isPositiveAmount(amount: string): boolean {
     return false;
   }
 }
+
+/** Decimales con los que se persisten los importes de las monedas operadas (BOB y USD). */
+export const MONEY_SCALE = 2;
+
+/**
+ * Forma admisible de un importe o una tasa que llega como cadena: decimal con
+ * signo opcional, hasta 14 dígitos enteros y 6 decimales. El tope entero deja
+ * cualquier suma de miles de líneas dentro de `numeric(20,6)`; los 6 decimales
+ * son los que el modelo guarda. `@IsNumberString` por sí solo no fija escala ni
+ * rango (admitía `.5` y cadenas de cientos de dígitos).
+ */
+export const BOUNDED_DECIMAL_REGEX = /^-?\d{1,14}(\.\d{1,6})?$/;
+
+/** Mensaje de validación para {@link BOUNDED_DECIMAL_REGEX}. */
+export const BOUNDED_DECIMAL_MESSAGE =
+  'Debe ser un decimal con hasta 14 dígitos enteros y 6 decimales';
+
+/**
+ * Vuelve a poner el punto decimal en un entero escalado.
+ *
+ * @param value - Entero escalado, con signo.
+ * @param decimals - Posiciones decimales a restituir.
+ * @returns La cadena decimal.
+ */
+function format(value: bigint, decimals: number): string {
+  if (decimals === 0) return value.toString();
+  const negative = value < 0n;
+  const digits = (negative ? -value : value)
+    .toString()
+    .padStart(decimals + 1, '0');
+  const cut = digits.length - decimals;
+  const text = `${digits.slice(0, cut)}.${digits.slice(cut)}`;
+  return negative ? `-${text}` : text;
+}
+
+/**
+ * Lleva un entero escalado de `decimals` a `target` posiciones. Al reducir
+ * redondea half-up (el .5 se aleja de cero), igual que el resto del sistema.
+ */
+function rescale(value: bigint, decimals: number, target: number): bigint {
+  if (decimals <= target) return value * 10n ** BigInt(target - decimals);
+  const factor = 10n ** BigInt(decimals - target);
+  const half = value < 0n ? -(factor / 2n) : factor / 2n;
+  return (value + half) / factor;
+}
+
+/**
+ * Redondea un importe a `scale` decimales (half-up) sin pasar por `Number`.
+ *
+ * @param amount - Importe como cadena decimal.
+ * @param scale - Decimales de salida; por defecto {@link MONEY_SCALE}.
+ * @returns El importe redondeado, siempre con `scale` decimales.
+ */
+export function roundAmount(
+  amount: string,
+  scale: number = MONEY_SCALE,
+): string {
+  const parsed = escalate(amount);
+  return format(rescale(parsed.valor, parsed.decimales, scale), scale);
+}
+
+/**
+ * Normaliza un importe para persistirlo: al menos {@link MONEY_SCALE} decimales
+ * y sin ceros de relleno por encima de eso (`0.100000` → `0.10`, `0.1234` se
+ * conserva). No pierde precisión.
+ *
+ * @param amount - Importe como cadena decimal.
+ * @returns La cadena normalizada.
+ */
+export function normalizeAmount(amount: string): string {
+  const parsed = escalate(amount);
+  let decimals = parsed.decimales;
+  let value = parsed.valor;
+  while (decimals > MONEY_SCALE && value % 10n === 0n) {
+    value /= 10n;
+    decimals -= 1;
+  }
+  const target = Math.max(decimals, MONEY_SCALE);
+  return format(rescale(value, decimals, target), target);
+}
+
+/**
+ * `amount × factor` exacto, redondeado half-up a `scale` decimales.
+ *
+ * @param amount - Importe.
+ * @param factor - Factor o tasa (por ejemplo una cotización).
+ * @param scale - Decimales de salida; por defecto {@link MONEY_SCALE}.
+ * @returns El producto como cadena decimal.
+ */
+export function multiplyAmount(
+  amount: string,
+  factor: string,
+  scale: number = MONEY_SCALE,
+): string {
+  const a = escalate(amount);
+  const b = escalate(factor);
+  return format(
+    rescale(a.valor * b.valor, a.decimales + b.decimales, scale),
+    scale,
+  );
+}
+
+/**
+ * `amount × percentage / 100` exacto, redondeado half-up a `scale` decimales.
+ *
+ * @param amount - Importe base.
+ * @param percentage - Porcentaje (`15` es el 15 %).
+ * @param scale - Decimales de salida; por defecto {@link MONEY_SCALE}.
+ * @returns La parte porcentual como cadena decimal.
+ */
+export function percentageOfAmount(
+  amount: string,
+  percentage: string,
+  scale: number = MONEY_SCALE,
+): string {
+  const a = escalate(amount);
+  const b = escalate(percentage);
+  return format(
+    rescale(a.valor * b.valor, a.decimales + b.decimales + 2, scale),
+    scale,
+  );
+}

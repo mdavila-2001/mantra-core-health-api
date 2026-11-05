@@ -81,6 +81,27 @@ export class MedicalSpecialtyCatalogService {
   }
 
   /**
+   * Falla con 422 si alguno de los conceptos no es una especialidad médica
+   * vigente. Lee el catálogo una sola vez para toda la lista.
+   *
+   * @param em - Contexto de persistencia (la transacción del caso de uso).
+   * @param specialtyConceptIds - Los conceptos a comprobar.
+   */
+  async assertAllAreSpecialties(
+    em: EntityManager,
+    specialtyConceptIds: readonly string[],
+  ): Promise<void> {
+    const members = await this.listMemberIds(em);
+    const outside = specialtyConceptIds.filter((id) => !members.has(id));
+    if (outside.length > 0) {
+      throw new PreconditionFailedException(
+        'La especialidad no pertenece al catálogo de especialidades médicas',
+        { specialtyConceptIds: outside, valueSet: MEDICAL_SPECIALTY_VALUE_SET },
+      );
+    }
+  }
+
+  /**
    * Los conceptos que el catálogo declara hoy.
    *
    * Un catálogo ausente —value set sin sembrar o sin versión vigente— **no** se

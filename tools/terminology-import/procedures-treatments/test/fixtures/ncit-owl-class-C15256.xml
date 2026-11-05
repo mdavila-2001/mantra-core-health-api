@@ -1,0 +1,46 @@
+<owl:Class rdf:about="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15256">
+        <rdfs:subClassOf rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15332"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#R167"/>
+                <owl:someValuesFrom rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C12405"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C141477"/>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15256"/>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15701"/>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C17998"/>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C43234"/>
+        <A31 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C94470"/>
+        <A32 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15256"/>
+        <A32 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25218"/>
+        <A32 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C70700"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C116977"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C118169"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C156952"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C157711"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C158036"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C158037"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C158520"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C177536"/>
+        <A8 rdf:resource="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C177537"/>
+        <NHC0>C15256</NHC0>
+        <P106>Therapeutic or Preventive Procedure</P106>
+        <P107>Hysterectomy</P107>
+        <P108>Hysterectomy</P108>
+        <P207>C0020699</P207>
+        <P322>CPTAC</P322>
+        <P322>CTRP</P322>
+        <P322>GDC</P322>
+        <P325>Surgery to remove the uterus and, sometimes, the cervix. When the uterus and the cervix are removed, it is called a total hysterectomy. When only the uterus is removed, it is called a partial hysterectomy.</P325>
+        <P366>Hysterectomy</P366>
+        <P375>Hysterectomy NOS</P375>
+        <P375>Hysterectomy, NOS</P375>
+        <P90>Hysterectomy</P90>
+        <P90>Hysterectomy NOS</P90>
+        <P90>hysterectomy</P90>
+        <P90>hysterectomy type</P90>
+        <P90>hysterectomy_type</P90>
+        <P97>A surgical procedure to remove the uterine body (partial hysterectomy) or the uterine body and cervix (total hysterectomy).</P97>
+        <rdfs:label>Hysterectomy</rdfs:label>
+    </owl:Class>

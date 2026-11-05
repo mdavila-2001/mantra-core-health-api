@@ -87,6 +87,50 @@ describe('LegalEntityTypesSeedService', () => {
     expect(categoryLlc?.data.valueJson).toBe('LIMITED_LIABILITY');
   });
 
+  it('cubre las 40 formas del diccionario ampliado', () => {
+    expect(QUANTITY).toBe(40);
+  });
+
+  it('siembra la categoría de las formas no societarias y del sector público', async () => {
+    const { service, created } = build();
+
+    await service.run();
+
+    const categoryOf = (code: string) =>
+      created.find(
+        (row) =>
+          row.data.conceptId ===
+            LEGAL_ENTITY_TYPES.find((e) => e.code === code)!.conceptId &&
+          row.data.propertyCode === 'legal-entity-canonical-category',
+      )?.data.valueJson;
+    expect(categoryOf('COOPERATIVA')).toBe('COOPERATIVE');
+    expect(categoryOf('FUNDACION')).toBe('NONPROFIT');
+    expect(categoryOf('ENTIDAD_PUBLICA')).toBe('PUBLIC_ENTITY');
+    expect(categoryOf('EMPRESA_ESTATAL_MIXTA')).toBe('STATE_OWNED_ENTERPRISE');
+    expect(categoryOf('SAM')).toBe('CORPORATION');
+    expect(categoryOf('PROFESIONAL_INDEPENDIENTE')).toBe('SOLE_PROPRIETORSHIP');
+  });
+
+  it('en una base sembrada con el diccionario de 21 agrega sólo las formas nuevas', async () => {
+    const original = LEGAL_ENTITY_TYPES.slice(0, 21);
+    const first = build(new Set(original.map((e) => e.conceptId)));
+    await first.service.run();
+    const already = new Set(first.created.map((row) => row.data.id as string));
+
+    const { service, created } = build(
+      new Set(LEGAL_ENTITY_TYPES.map((e) => e.conceptId)),
+      already,
+    );
+
+    const result = await service.run();
+
+    expect(result.properties).toBe((QUANTITY - 21) * 2);
+    const touched = new Set(created.map((row) => row.data.conceptId));
+    for (const entry of original) {
+      expect(touched.has(entry.conceptId)).toBe(false);
+    }
+  });
+
   it('no inserta nada en una segunda corrida: todo ya existe', async () => {
     // Primera corrida real, para conocer los ids deterministas que generó.
     const first = build();

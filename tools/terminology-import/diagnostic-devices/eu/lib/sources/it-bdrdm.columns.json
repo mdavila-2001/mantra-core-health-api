@@ -1,21 +1,27 @@
 {
-  "verified": false,
-  "note": "Completar mirando el encabezado real del CSV (build.mjs lo imprime) y pasar verified a true. Solo progressivo_dm_ass y tipologia_dm están confirmados por el diccionario v2.0; el resto queda en null hasta verlo.",
+  "verified": true,
+  "verifiedAgainst": "Encabezado de DISPO_RDM_1_20261019.csv (ZIP _csv de dati.salute.gov.it, descargado el 2026-10-24) y diccionario «Dataset Dispositivi medici» v2.0 (ID_1_16_Dataset_Dispositivi_medici_v2.0.pdf)",
+  "note": "El diccionario llama p_iva_fabbr_ass a la Partita IVA; el CSV real la publica como PARTITAIVA_VATNUMBER_MAND. El CSV no trae país, UDI-DI, clase de riesgo ni estado: esos campos quedan en null. data_fine_validita vale 9999-12-31 salvo cancelación administrativa (diccionario v2.0).",
   "columns": {
     "recordNumber": "progressivo_dm_ass",
     "recordType": "tipologia_dm",
-    "cndCode": null,
-    "cndName": null,
-    "manufacturerName": null,
+    "cndCode": "classificazione_cnd",
+    "cndName": "descrizione_cnd",
+    "manufacturerName": "fabbricante_assemblatore",
     "manufacturerCountry": null,
-    "manufacturerRegistryId": null,
-    "brandName": null,
-    "model": null,
+    "fiscalCode": "cod_fiscale",
+    "vatNumber": "PARTITAIVA_VATNUMBER_MAND",
+    "brandName": "denominazione_commerciale",
+    "model": "cod_catalogo_fabbr_ass",
     "udiDi": null,
     "riskClass": null,
-    "registrationDate": null,
+    "registrationDate": "data_prima_pubblicazione",
+    "versionStartDate": "data_inizio_validita",
+    "versionEndDate": "data_fine_validita",
     "status": null,
-    "repertorio": null,
-    "endOfMarketingDate": null
+    "repertorio": "iscrizione_repertorio",
+    "endOfMarketingDate": "data_fine_commercio",
+    "referenceRecord": "dm_riferimento",
+    "similarGroup": "gruppo_dm_simili"
   }
 }

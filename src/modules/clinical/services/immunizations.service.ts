@@ -6,6 +6,7 @@ import { ClinicalErrorReason } from '../clinical.error-reasons';
 import { ImmunizationsRepository } from '../repositories';
 import { CreateImmunizationDto, ImmunizationResponseDto } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { ReceivedServicesProjector } from './received-services-projector';
 
 /** UC-08-13: registro de inmunizaciones; evita doble dosis por vacuna+número. */
 @Injectable()
@@ -16,11 +17,13 @@ export class ImmunizationsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param immunizationsRepo - Valor de immunizations repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param receivedServices - Proyecta la vacuna a «Servicios recibidos».
    */
   constructor(
     private readonly em: EntityManager,
     private readonly immunizationsRepo: ImmunizationsRepository,
     private readonly logger: PinoLogger,
+    private readonly receivedServices: ReceivedServicesProjector,
   ) {
     this.logger.setContext(ImmunizationsService.name);
   }
@@ -71,6 +74,15 @@ export class ImmunizationsService {
         administeredByProfileId: dto.administeredByProfileId,
         actorUserId: actor.id,
       });
+      await tx.flush();
+      // Misma transacción: o la vacuna y su servicio recibido, o ninguno. El primer
+      // flush va antes porque las FK de la entidad son columnas, no relaciones: el
+      // ORM no sabe que el servicio depende de la vacuna.
+      await this.receivedServices.projectImmunization(
+        tx,
+        immunization,
+        actor.id,
+      );
       await tx.flush();
 
       this.logger.info(

@@ -163,3 +163,86 @@ Los huecos están en `out/manifest.json` → `gaps`: dependen de la red hacia lo
 portales oficiales. Los normalizadores ya leen esos formatos (ANVISA, MDALL,
 PMDA, CDSCO); para las demás autoridades no hay normalizador, porque no se
 escribe sin el archivo real.
+
+## Pasada 5 — red completa: ANVISA oficial (2026-10-24)
+
+Con la red del entorno en Full, ANVISA se baja de `dados.anvisa.gov.br/dados/`
+(`fetch-official.mjs`) y reemplaza a los dos espejos de la pasada 1.
+
+| Fuente | Archivo oficial | Filas antes (espejo) | Filas ahora |
+|---|---|--:|--:|
+| `anvisa-produtos` | `TA_PRODUTO_SAUDE_SITE.csv` (`Last-Modified` 2026-10-13) | 93 770 | 100 681 |
+| `anvisa-produtos-modelos` | `TA_PRODUTO_SAUDE_MODELO.csv` (`Last-Modified` 2025-12-29) | 1 027 762 | 3 274 089 |
+
+Nuevo: marca de diagnóstico publicada por ANVISA (`extra.anvisaPetitions`), a
+partir de las peticiones por número de proceso. 86 213 de 100 681 registros
+cruzan; 18 968 tienen área de diagnóstico in vitro. Los asuntos primarios
+separan MATERIAL (44 922), IVD (13 744) y EQUIPAMENTO (11 306).
+
+## Pasada 6 — Taiwán TFDA y TUDID (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas | Notas |
+|---|---|--:|---|
+| `tfda-devices` | data.fda.gov.tw export 68 (data.gov.tw 9576, `modifiedDate` 2026-10-15) | 93 430 | una fila por licencia; 104 891 líneas, 11 289 licencias con más de un fabricante |
+| `tfda-tudid` | data.fda.gov.tw export 197 (data.gov.tw 151955, `modifiedDate` 2026-10-12) | 688 258 | UDI-DI con modelo; fabricante y clase por licencia exacta; 41 sin licencia conocida |
+
+Licencia: 政府資料開放授權條款 — 第1版. Era hueco hasta la pasada 4 (la copia
+estaba en una release de GitHub que no se pudo bajar).
+
+## Pasada 7 — Japón: maestro JMDN (2026-10-24)
+
+| Fuente | Archivo oficial | Aporte |
+|---|---|---|
+| `pmda-approvals` (enriquecida) | 医療機器基準データベース, `std.pmda.go.jp` (4496 一般的名称 al 2026-09-30) | 33 498 de 35 298 filas con código JMDN, clase y 類別 (`extra.deviceTypes`, unión por nombre exacto) |
+| `out/nomenclature-jmdn.json.gz` | idem | maestro completo, 4496 términos, para `master/` |
+
+0 filas de dispositivos nuevas (es enriquecimiento). La base no tiene descarga
+masiva: se recorre por clase y por lotes, con pausa.
+
+## Pasada 8 — Colombia INVIMA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas | Notas |
+|---|---|--:|---|
+| `invima-dispositivos` | datos.gov.co `y4qt-w6tk` (`rowsUpdatedAt` 2026-10-16), 433 404 líneas en 9 páginas | 71 434 | 34 053 registros sanitarios; grupo y nivel de riesgo propios de INVIMA |
+
+La descarga directa del CSV completo se cortaba a los 32 MB (curl 18); se baja
+paginada por la API Socrata, ordenada por `:id`. Licencia CC BY-SA 4.0.
+
+## Pasada 9 — OMS precalificación IVD (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas |
+|---|---|--:|
+| `who-pq-ivd` | export CSV de la lista de IVD precalificados (125 productos, 40 fabricantes) | 435 |
+
+## Pasada 10 — Singapur HSA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas |
+|---|---|--:|
+| `hsa-smdr` | data.gov.sg, Listing of Registered Medical Devices (Apr 2026, CSV) | 20 857 |
+| `hsa-class-a` | data.gov.sg, Class A Medical Devices (Apr 2026, CSV) | 1 127 525 |
+
+Licencia: Singapore Open Data Licence.
+
+## Pasada 11 — China NMPA, India CDSCO oficial, Sudáfrica SAHPRA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas | Notas |
+|---|---|--:|---|
+| `nmpa-udi` | `UDID_FULL_RELEASE_20261001.zip` de udi.nmpa.gov.cn (MD5 publicado `ED0CD3AF…`, verificado) | 6 294 994 | 1259 XML; 249 577 UDI-DI de 体外诊断试剂 (`extra.qxlb`); 6 sin registrante no salen |
+| `cdsco-approved-devices` | «List of Approved Devices» de cdscomdonline.gov.in, cuatro listas (MD/IVD × importación/fabricación) | 180 124 | reemplaza al espejo `cdsco-import-licences` (25 792); 74 428 filas IVD; 1998 copias juntadas |
+| `sahpra-covid-ivd` | cuatro listas xlsx de kits de COVID-19 autorizados | 283 | sin número de autorización ni clase en la fuente |
+
+- El encabezado de los XML de NMPA declara 6 293 777 registros; los 1259 XML
+  traen 6 295 000 `<device>` con UDI-DI únicos. Se cargan los que vienen; la
+  diferencia queda anotada en `manifest.stats.nmpa-udi`.
+- NMPA: significado de cada etiqueta según el «数据共享API 标准文档 V2.1».
+  `contactList` (correo y teléfono de contacto) no se copia.
+- CDSCO: con la red Full el portal responde (antes 403 del proxy); cubre las
+  licencias de fabricación nacional y de autoridades estatales que faltaban.
+- Huecos revisados uno por uno (motivo al día en `manifest.gaps`): Health Canada
+  sigue en 503; TGA, MFDS, SFDA, Thai FDA e ISP no responden desde la nube;
+  DIGEMID y UNICEF dan 403 desde su propio servidor; MDA solo tiene buscador sin
+  fabricante en el listado; COFEPRIS solo visor; datos.gob.mx y datos.gob.ar no
+  tienen conjuntos de dispositivos; AGEMED y SAHPRA no publican registros
+  descargables.
+
+Total del manifiesto: 14 239 561 filas en 26 archivos.

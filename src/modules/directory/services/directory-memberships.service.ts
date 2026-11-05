@@ -57,11 +57,20 @@ export class DirectoryMembershipsService {
     this.logger.setContext(DirectoryMembershipsService.name);
   }
 
-  /** UC-04-05: incorpora un usuario al tenant (evita membresía activa duplicada). */
+  /**
+   * UC-04-05: incorpora un usuario al tenant (evita membresía activa duplicada).
+   *
+   * @param tenantId - Organización a la que se incorpora.
+   * @param dto - Usuario, rol y alcance.
+   * @param actor - Quién invita.
+   * @param membershipId - Id fijo de la membresía. Solo lo pasa un proceso
+   *   interno (los seeds); el endpoint nunca lo recibe del cliente.
+   */
   async invite(
     tenantId: string,
     dto: CreateMembershipDto,
     actor: AuthenticatedUser,
+    membershipId?: string,
   ): Promise<MembershipResponseDto> {
     this.logger.info(
       { operation: 'directory.membership.invite', tenantId, actorId: actor.id },
@@ -94,6 +103,7 @@ export class DirectoryMembershipsService {
       }
 
       const membership = this.membershipsRepo.create(tx, {
+        id: membershipId,
         userId: dto.userId,
         tenantId,
         tenantRoleConceptId: TENANT_ROLE_CONCEPT_BY_CODE[dto.role ?? 'STAFF'],

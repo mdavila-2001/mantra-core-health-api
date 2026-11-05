@@ -8,18 +8,27 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
-import { PractitionerAccessRequestsService } from '../services';
+import {
+  PractitionerAccessRequestsService,
+  PractitionerAccessRevocationService,
+} from '../services';
 import {
   DecidePractitionerAccessRequestDto,
   PractitionerAccessRequestResponseDto,
   RequestPractitionerAccessDto,
+  StatusResultDto,
 } from '../dto';
 
 /**
@@ -30,7 +39,10 @@ import {
 @ApiBearerAuth()
 @Controller('consent/practitioner-access-requests')
 export class PractitionerAccessRequestsController {
-  constructor(private readonly service: PractitionerAccessRequestsService) {}
+  constructor(
+    private readonly service: PractitionerAccessRequestsService,
+    private readonly revocation: PractitionerAccessRevocationService,
+  ) {}
 
   /** FT-07-R05: el profesional pide acceso tras encontrar al paciente. */
   @Audited({
@@ -83,5 +95,25 @@ export class PractitionerAccessRequestsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerAccessRequestResponseDto> {
     return this.service.decide(id, dto, actor);
+  }
+
+  /** El paciente revoca un acceso granular que ya había aceptado. */
+  @Audited({
+    action: 'PRACTITIONER_ACCESS_REVOKED',
+    entity: 'consent',
+    entityId: 'param:id',
+  })
+  @Post(':id/revoke')
+  @ApiOkResponse({ type: StatusResultDto })
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Revocar un acceso granular que el paciente ya había aceptado',
+  })
+  revoke(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    return this.revocation.revoke(id, actor);
   }
 }

@@ -82,10 +82,11 @@ contarlos juntos al final; reportar el arreglo sin haber reportado el fallo.
 
 ## 5. Estado durable y reanudable
 
-El chat se resume y las sesiones se cortan. El avance tiene que sobrevivir en un archivo.
+El chat se resume y las sesiones se cortan. El avance tiene que sobrevivir fuera de la sesión.
 
-**Dónde**: una ubicación por tarea/carril definida en el `CLAUDE.md` del proyecto. Si no
-hay convención, un archivo de progreso junto a la evidencia de la tarea.
+**Dónde**: en la descripción del PR del trabajo (abierto como borrador mientras dure) o en el
+issue que lo origina. **Nunca en un archivo del repo**: el repo describe lo que existe, no el
+estado del trabajo (regla 40).
 
 **Qué guarda** (estructurado, no prosa):
 
@@ -98,17 +99,17 @@ hay convención, un archivo de progreso junto a la evidencia de la tarea.
 | Hecho | Slices cerrados, con archivos y commit/rama por repo |
 | Nivel de evidencia | El más alto alcanzado, con el comando que lo sostiene |
 | QA | Último resultado y cuándo |
-| Pendiente inmediato | La próxima acción, lo bastante concreta para ejecutarla sin contexto |
+| Próxima acción | La siguiente, lo bastante concreta para ejecutarla sin contexto; si nadie la va a tomar ya, es un issue |
 | Bloqueos y decisiones | Con motivo y fecha |
 | Actualizado | Fecha absoluta |
 
-**Cuándo se actualiza**: en cada checkpoint obligatorio de §1. El archivo y el mensaje
+**Cuándo se actualiza**: en cada checkpoint obligatorio de §1. El estado y el mensaje
 dicen lo mismo; si discrepan, está mal el que sea más optimista.
 
 **Al reanudar**:
 
-1. Leé el archivo de estado antes de tocar nada.
-2. Contrastalo con la realidad: `git status`, rama actual en cada repo, y re-ejecutá el último chequeo que figuraba en PASS. El archivo es una foto, no una garantía.
+1. Leé el estado (PR e issues del trabajo) antes de tocar nada.
+2. Contrastalo con la realidad: `git status`, rama actual en cada repo, y re-ejecutá el último chequeo que figuraba en PASS. El estado escrito es una foto, no una garantía.
 3. Emití un checkpoint de reanudación: dónde quedó, qué confirmaste, qué sigue.
 4. No rehagas discovery ya documentado (`context-thrift`); sí verificá que los archivos y símbolos citados sigan existiendo.
 
@@ -129,7 +130,8 @@ bloqueada de forma explícita. No la dejes colgada.
 - ❌ Porcentajes inventados.
 - ❌ Reportar como hecho lo que está planeado.
 - ❌ Estado durable que solo existe en el chat.
-- ❌ Reanudar confiando en el archivo de estado sin mirar el repo.
+- ❌ Reanudar confiando en el estado escrito sin mirar el repo.
+- ❌ Guardar el estado en un archivo versionado del repo.
 - ❌ Dejar una tarea abandonada en estado "activo".
 
 ## Checklist
@@ -139,7 +141,7 @@ bloqueada de forma explícita. No la dejes colgada.
 - [ ] Cada fallo se reportó al ocurrir, con el error literal y una hipótesis.
 - [ ] Ningún tramo largo de operaciones sin checkpoint; ninguna narración de relleno.
 - [ ] Los campos Hecho / Evidencia / QA dicen exactamente lo que pasó.
-- [ ] El archivo de estado está actualizado y coincide con el último mensaje.
+- [ ] El estado en el PR o el issue está actualizado y coincide con el último mensaje.
 - [ ] El pendiente inmediato se puede ejecutar sin el contexto de esta sesión.
 - [ ] Al reanudar, contrasté el estado guardado con `git` y con un chequeo real.
 - [ ] Al terminar o abandonar, el estado quedó cerrado o bloqueado, no colgado.

@@ -82,6 +82,38 @@ export const { seeds: SURVEYS_CONCEPT_SEEDS, ids: SURVEYS } =
       display: 'Assigned to a care type',
     },
 
+    // La asignación de la encuesta base del sistema. No es un destino que el
+    // profesional pueda elegir (no está en `TARGET_TYPE_CODES`): existe porque
+    // `survey_invitations.survey_assignment_id` no admite nulo y toda invitación
+    // base cuelga de la asignación de sistema de su tenant.
+    TARGET_SYSTEM_BASE: {
+      code: 'SURVEY_TARGET_SYSTEM_BASE',
+      display: 'Assigned by the system base survey',
+    },
+
+    // --- Dueño de la plantilla de sistema (survey_templates.owner_type) ------
+    // La encuesta base no es de ningún profesional: su dueño es el par tipado
+    // (`owner_type_concept_id`, `owner_id` = tenant), y el tipo dice cuál de las
+    // dos es. Ver `surveys.base-definitions.ts`.
+    SYSTEM_BASE_CONSULTATION: {
+      code: 'SURVEY_SYSTEM_BASE_CONSULTATION',
+      display: 'System base survey of consultations',
+    },
+    SYSTEM_BASE_SERVICE: {
+      code: 'SURVEY_SYSTEM_BASE_SERVICE',
+      display: 'System base survey of services',
+    },
+
+    // --- Tipo de atención (target_id de una asignación CARE_TYPE) ------------
+    // El modelo de agenda no lleva «tipo de atención» en la reserva: lo único
+    // que distingue una consulta de un servicio es que la reserva no tenga
+    // oferta de servicio. Este concepto es la identidad de «todas mis
+    // consultas», el único tipo de atención que se puede asociar.
+    CARE_TYPE_CONSULTATION: {
+      code: 'SURVEY_CARE_TYPE_CONSULTATION',
+      display: 'Care type: consultation',
+    },
+
     // --- Estado de la invitación (survey_invitations.status) ----------------
     INVITATION_PENDING: {
       code: 'SURVEY_INVITATION_PENDING',
@@ -134,6 +166,14 @@ export const TARGET_TYPE_BY_CODE: Record<TargetTypeCode, string> = {
   CARE_TYPE: SURVEYS.TARGET_CARE_TYPE,
 };
 
+/** Inverso de `TARGET_TYPE_BY_CODE`: concept id → código del contrato. */
+export const TARGET_TYPE_CODE_BY_ID: Readonly<Record<string, TargetTypeCode>> =
+  Object.freeze({
+    [SURVEYS.TARGET_APPOINTMENT]: 'APPOINTMENT',
+    [SURVEYS.TARGET_SERVICE]: 'SERVICE',
+    [SURVEYS.TARGET_CARE_TYPE]: 'CARE_TYPE',
+  });
+
 /** Códigos de destino admitidos en el contrato HTTP. */
 export type TargetTypeCode = 'APPOINTMENT' | 'SERVICE' | 'CARE_TYPE';
 
@@ -155,3 +195,28 @@ export const ANSWER_TYPES_REQUIRING_OPTIONS: readonly AnswerTypeCode[] = [
   'SINGLE_CHOICE',
   'MULTIPLE_CHOICE',
 ];
+
+/**
+ * Quién escribió una pregunta que ve el paciente: el sistema (encuesta base) o
+ * el profesional (su encuesta, que viaja detrás de la base).
+ */
+export type QuestionSource = 'SYSTEM' | 'PRACTITIONER';
+
+/** Tipo de encuesta base → concepto que la marca como plantilla de sistema. */
+export const SYSTEM_OWNER_TYPE_BY_KIND: Readonly<
+  Record<'CONSULTATION' | 'SERVICE', string>
+> = {
+  CONSULTATION: SURVEYS.SYSTEM_BASE_CONSULTATION,
+  SERVICE: SURVEYS.SYSTEM_BASE_SERVICE,
+};
+
+/**
+ * Si el tipo de dueño de una plantilla es el de una encuesta base del sistema.
+ * Es la guarda de inmutabilidad: una plantilla así no la toca ningún profesional.
+ */
+export function isSystemOwnerType(ownerTypeConceptId: unknown): boolean {
+  return (
+    ownerTypeConceptId === SURVEYS.SYSTEM_BASE_CONSULTATION ||
+    ownerTypeConceptId === SURVEYS.SYSTEM_BASE_SERVICE
+  );
+}

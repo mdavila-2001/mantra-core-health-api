@@ -6,6 +6,8 @@ import {
   describeRelatedPersonRelationship,
 } from './dependent-relationship';
 import { PROF } from '../profiles.concepts';
+import { DYNAMIC_ENUM_CATALOG } from '../../../common/seed/dynamic-enum-catalog';
+import { SPANISH_DESIGNATIONS } from '../../../common/seed/terminology-designations.es';
 
 /**
  * El parentesco se guarda como lo declara el titular —«soy su madre»— y se lee
@@ -77,6 +79,21 @@ describe('describeRelatedPersonRelationship', () => {
     expect(describeRelatedPersonRelationship(relationshipConceptId)).toBe(
       expected,
     );
+  });
+
+  it('nombra cada opción del catálogo igual que su designación en castellano', () => {
+    // Un parentesco que se agrega al catálogo sin rótulo acá caería en «Otra
+    // relación» en la ficha, aunque el desplegable lo ofrezca con su nombre.
+    const entry = DYNAMIC_ENUM_CATALOG.find(
+      (candidate) => candidate.code === 'related-person-relationship',
+    );
+    expect(entry).toBeDefined();
+    const mismatches = entry!.concepts.filter(
+      (conceptId) =>
+        describeRelatedPersonRelationship(conceptId) !==
+        SPANISH_DESIGNATIONS.get(conceptId)?.display,
+    );
+    expect(mismatches).toEqual([]);
   });
 });
 

@@ -10,6 +10,7 @@ import {
 } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { LedgerService } from './ledger.service';
+import { AccountingScopeService } from './accounting-scope.service';
 import { AssetService } from './asset.service';
 import { LiabilityService } from './liability.service';
 import { buildAmortizationSchedule } from './liability-amortization';
@@ -39,6 +40,7 @@ import {
   CapitalizeAssetDto,
   AssetResponseDto,
   AssetSummaryDto,
+  AssetDepreciationHistoryResponseDto,
   SetAutomationDto,
   RegisterAssetProgressDto,
   CreateOwnLiabilityDto,
@@ -81,13 +83,19 @@ export class PractitionerAccountingService {
     private readonly fiscalRepo: FiscalRepository,
     private readonly accountsRepo: AccountsRepository,
     private readonly auditTrail: AuditTrailService,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerAccountingService.name);
   }
 
-  /** Exige perfil profesional y vinculación activa con `practiceId`. */
-  private async assertOwnsPractice(
+  /**
+   * Exige perfil profesional y vinculación activa con `practiceId`.
+   *
+   * Público para que la contabilidad simple del doctor (P49) aplique la misma
+   * regla de pertenencia sin copiarla.
+   */
+  async assertOwnsPractice(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<string> {
@@ -192,16 +200,11 @@ export class PractitionerAccountingService {
     );
 
     const em = this.em.fork();
-    const invoice = await em.findOne(Invoices, { id: dto.invoiceId });
-    if (!invoice) {
-      throw new ResourceNotFoundException(
-        'Factura no encontrada',
-        {
-          invoiceId: dto.invoiceId,
-        },
-        AccountingErrorReason.INVOICE_NOT_FOUND,
-      );
-    }
+    // ACC-01: una factura de otra organización responde como inexistente, no
+    // como «de otra práctica»: el 422 confirmaría que ese UUID existe.
+    const invoice = await this.scope.invoice(
+      await em.findOne(Invoices, { id: dto.invoiceId }),
+    );
     if (invoice.practiceId !== dto.practiceId) {
       throw new PreconditionFailedException(
         'La factura no pertenece a esa práctica',
@@ -382,10 +385,11 @@ export class PractitionerAccountingService {
     assetId: string,
   ): Promise<{ practiceId: string }> {
     const em = this.em.fork();
-    const asset = await this.assetRepo.findById(em, assetId);
-    if (!asset) {
-      throw new ResourceNotFoundException('Activo no encontrado', { assetId });
-    }
+    // El tenant primero: un activo ajeno responde 404 sin pasar por el chequeo
+    // de vinculación, que nombraría su práctica.
+    const asset = await this.scope.asset(
+      await this.assetRepo.findById(em, assetId),
+    );
     await this.assertOwnsPractice(actor, asset.practiceId);
     return { practiceId: asset.practiceId };
   }
@@ -396,12 +400,9 @@ export class PractitionerAccountingService {
     liabilityId: string,
   ): Promise<{ practiceId: string; code: string }> {
     const em = this.em.fork();
-    const liability = await this.liabilityRepo.findById(em, liabilityId);
-    if (!liability) {
-      throw new ResourceNotFoundException('Pasivo no encontrado', {
-        liabilityId,
-      });
-    }
+    const liability = await this.scope.liability(
+      await this.liabilityRepo.findById(em, liabilityId),
+    );
     await this.assertOwnsPractice(actor, liability.practiceId);
     return { practiceId: liability.practiceId, code: liability.code };
   }
@@ -452,6 +453,50 @@ export class PractitionerAccountingService {
       bookValue: asset.bookValue ?? null,
       automated: asset.automated,
     }));
+  }
+
+  /**
+   * El histórico de depreciación de un activo propio (T26 · criterio 6). La
+   * tabla `accounting.asset_depreciations` ya guardaba una fila por período
+   * depreciado y ninguna ruta la publicaba: el profesional veía sólo el
+   * valor en libros, no cómo se llegó a él.
+   */
+  async readAssetDepreciations(
+    assetId: string,
+    actor: AuthenticatedUser,
+  ): Promise<AssetDepreciationHistoryResponseDto> {
+    await this.assertOwnsAsset(actor, assetId);
+    const em = this.em.fork();
+    const asset = await this.assetRepo.findById(em, assetId);
+    if (!asset) {
+      throw new ResourceNotFoundException('Activo no encontrado', { assetId });
+    }
+    const rows = await this.assetRepo.listDepreciations(em, assetId);
+    const periods = await this.fiscalRepo.findPeriodsByIds(em, [
+      ...new Set(rows.map((row) => row.fiscalPeriodId)),
+    ]);
+    const periodById = new Map(periods.map((period) => [period.id, period]));
+    return {
+      assetId: asset.id,
+      code: asset.code,
+      acquisitionCost: asset.acquisitionCost ?? null,
+      accumulatedDepreciation: asset.accumulatedDepreciation ?? null,
+      bookValue: asset.bookValue ?? null,
+      depreciations: rows.map((row) => {
+        const period = periodById.get(row.fiscalPeriodId);
+        return {
+          id: row.id,
+          fiscalPeriodId: row.fiscalPeriodId,
+          fiscalPeriodCode: period?.code ?? null,
+          periodStartDate: toIsoDate(period?.startDate),
+          periodEndDate: toIsoDate(period?.endDate),
+          amount: row.amount,
+          bookValueAfter: row.bookValueAfter ?? null,
+          transactionId: row.transactionId ?? null,
+          registeredAt: row.createdAt.toISOString(),
+        };
+      }),
+    };
   }
 
   /** Da de alta un activo propio. Delega en {@link AssetService.capitalize} tal cual. */
@@ -650,6 +695,10 @@ export class PractitionerAccountingService {
     await this.assertOwnsPractice(actor, dto.practiceId);
 
     return this.em.transactional(async (tx) => {
+      // ACC-01: la práctica es del tenant activo y la cuenta del pasivo, de esa
+      // práctica, antes de escribir el pasivo.
+      await this.scope.practice(dto.practiceId);
+      await this.scope.accountsInPractice(tx, [dto.accountId], dto.practiceId);
       const clash = await tx.findOne(Liabilities, {
         practiceId: dto.practiceId,
         code: dto.code,

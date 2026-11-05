@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals';
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import { get, type IncomingMessage, type ServerResponse } from 'node:http';
+import { networkInterfaces } from 'node:os';
+import type { AddressInfo } from 'node:net';
 import type { PinoLogger } from 'nestjs-pino';
 import {
+  DEFAULT_HEALTH_HOST,
   handleHealthRequest,
   startWorkerHealthServer,
 } from './worker-health.server';
@@ -97,6 +100,38 @@ describe('sonda HTTP del worker', () => {
   });
 });
 
+describe('/status no entrega mensajes de error', () => {
+  beforeEach(() => {
+    workerHealth.reset();
+    workerHealth.configure('messaging', 10_000);
+  });
+
+  afterEach(() => {
+    workerHealth.reset();
+  });
+
+  it('un fallo con una cadena sensible sólo aparece como código estable', () => {
+    const sensitive = 'paciente 4455667 DNI 12345678 alergia penicilina';
+    workerHealth.setStatus('running');
+    workerHealth.tickStarted('worker.demo.tick');
+    workerHealth.tickFinished('worker.demo.tick', 'failed');
+    workerHealth.tickStarted('worker.demo.timeout');
+    workerHealth.tickFinished('worker.demo.timeout', 'timeout');
+
+    const result = call('/status');
+
+    expect(result.status).toBe(200);
+    expect(JSON.stringify(result.body)).not.toContain(sensitive);
+    expect(result.body).toMatchObject({
+      ticks: [
+        { operation: 'worker.demo.tick', lastErrorCode: 'TICK_FAILED' },
+        { operation: 'worker.demo.timeout', lastErrorCode: 'TICK_TIMEOUT' },
+      ],
+    });
+    expect(JSON.stringify(result.body)).not.toContain('lastError"');
+  });
+});
+
 describe('startWorkerHealthServer', () => {
   const info = jest.fn();
   const logger = {
@@ -110,5 +145,80 @@ describe('startWorkerHealthServer', () => {
 
     expect(server).toBeUndefined();
     expect(info).toHaveBeenCalledWith(expect.stringContaining('deshabilitada'));
+  });
+  const closeServer = (server: ReturnType<typeof startWorkerHealthServer>) =>
+    new Promise<void>((resolve) => {
+      if (!server) return resolve();
+      server.close(() => resolve());
+      server.closeAllConnections();
+    });
+
+  const listening = (
+    server: NonNullable<ReturnType<typeof startWorkerHealthServer>>,
+  ) =>
+    new Promise<AddressInfo>((resolve) => {
+      if (server.listening) return resolve(server.address() as AddressInfo);
+      server.once('listening', () => resolve(server.address() as AddressInfo));
+    });
+
+  const request = (host: string, port: number, path: string) =>
+    new Promise<{ status: number; body: string }>((resolve, reject) => {
+      const req = get({ host, port, path, timeout: 2_000 }, (res) => {
+        let body = '';
+        res.on('data', (chunk: Buffer) => (body += chunk.toString()));
+        res.on('end', () => resolve({ status: res.statusCode ?? 0, body }));
+      });
+      req.on('error', reject);
+    });
+
+  async function freePort(): Promise<number> {
+    const { createServer } = await import('node:net');
+    return new Promise<number>((resolve, reject) => {
+      const probe = createServer();
+      probe.once('error', reject);
+      probe.listen(0, '127.0.0.1', () => {
+        const { port } = probe.address() as AddressInfo;
+        probe.close(() => resolve(port));
+      });
+    });
+  }
+
+  it('por defecto escucha sólo en el loopback y responde ahí', async () => {
+    workerHealth.reset();
+    workerHealth.configure('messaging', 10_000);
+    workerHealth.setStatus('running');
+    const port = await freePort();
+    const server = startWorkerHealthServer({ port, logger });
+    try {
+      const address = await listening(server!);
+      expect(DEFAULT_HEALTH_HOST).toBe('127.0.0.1');
+      expect(address.address).toBe('127.0.0.1');
+
+      const status = await request('127.0.0.1', port, '/status');
+      expect(status.status).toBe(200);
+    } finally {
+      await closeServer(server);
+      workerHealth.reset();
+    }
+  });
+
+  it('no atiende desde otra interfaz de la máquina (sin credencial)', async () => {
+    const external = Object.values(networkInterfaces())
+      .flat()
+      .find((iface) => iface && !iface.internal && iface.family === 'IPv4');
+    const port = await freePort();
+    const server = startWorkerHealthServer({ port, logger });
+    try {
+      await listening(server!);
+      // Sin interfaz externa (contenedor aislado) no hay otra dirección por la
+      // que intentarlo: el enlace al loopback ya lo prueba la prueba anterior.
+      if (!external) return;
+
+      await expect(request(external.address, port, '/status')).rejects.toThrow(
+        /ECONNREFUSED|ETIMEDOUT|timeout/i,
+      );
+    } finally {
+      await closeServer(server);
+    }
   });
 });

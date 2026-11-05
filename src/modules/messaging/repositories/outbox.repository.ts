@@ -144,8 +144,13 @@ export class OutboxRepository {
   findDomainEventById(
     em: EntityManager,
     id: string,
+    options: { forUpdate?: boolean } = {},
   ): Promise<DomainEvents | null> {
-    return em.findOne(DomainEvents, { id });
+    return em.findOne(
+      DomainEvents,
+      { id },
+      options.forUpdate ? { lockMode: LockMode.PESSIMISTIC_WRITE } : undefined,
+    );
   }
 
   // --- Mensajes de outbox (UC-35-01, 02) ---

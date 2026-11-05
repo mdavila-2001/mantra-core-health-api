@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -7,6 +7,7 @@ import {
   type TraceSpan,
 } from '../../../../observability';
 import * as argon2 from 'argon2';
+import { SessionValidator } from '../../../../common/auth/session-validator';
 import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
@@ -35,22 +36,23 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
-// Los roles de negocio (los diez actores clínicos incluidos) viven en `authz`,
-// no en `iam.user_global_roles`: el emisor del token los pide a su dueño.
-import { AuthzEffectiveRolesService } from '../../../authz/services';
-// Lectura cross-dominio acotada al límite de autenticación: al emitir el token
-// se resuelven las membresías de tenant del sujeto para embeberlas como claim.
-import { TenantMemberships, Tenants } from '../../../directory/entities';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 import {
-  DIR,
-  TENANT_TYPE_CODE_BY_CONCEPT_ID,
-  type TenantTypeCode,
-} from '../../../directory/directory.concepts';
+  IamLoginDevicesService,
+  type LoginClient,
+} from './iam-login-devices.service';
 import {
-  HealthPractitionerProfilesRepository,
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-} from '../../../profiles/infrastructure/repositories';
+  ACCOUNT_PROFILE_IDS_PORT,
+  type AccountProfileIdsPort,
+} from '../ports/account-profile-ids.port';
+import {
+  BUSINESS_ROLES_PORT,
+  type BusinessRolesPort,
+} from '../ports/business-roles.port';
+import {
+  TENANT_CLAIMS_PORT,
+  type TenantClaimsPort,
+} from '../ports/tenant-claims.port';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
@@ -119,13 +121,17 @@ export class IamAuthService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
-    private readonly effectiveRoles: AuthzEffectiveRolesService,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
-    private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
+    @Inject(BUSINESS_ROLES_PORT)
+    private readonly effectiveRoles: BusinessRolesPort,
+    @Inject(ACCOUNT_PROFILE_IDS_PORT)
+    private readonly profileIds: AccountProfileIdsPort,
+    @Inject(TENANT_CLAIMS_PORT)
+    private readonly tenantClaims: TenantClaimsPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly sessionValidator: SessionValidator,
     private readonly mfaRepo?: MfaFactorsRepository,
+    private readonly loginDevices?: IamLoginDevicesService,
   ) {
     this.logger.setContext(IamAuthService.name);
   }
@@ -134,16 +140,10 @@ export class IamAuthService {
    * Tenants de los que el usuario es miembro ACTIVO. Se embeben en el token para
    * que el `X-Tenant-Id` del request pueda validarse sin un lookup por petición.
    *
-   * Se filtra por DOS conceptos a propósito. El correcto es
-   * `DIR.MEMBERSHIP_ACTIVE` (`directory:membership-status:active`), que es lo
-   * que escribe todo `directory` — provisión de tenant, sub-tenant, invitación
-   * de miembro. Este método, en cambio, filtraba sólo por
-   * `CONCEPTS.MEMBERSHIP_ACTIVE`, que pese al nombre es
-   * `promotions:membership-status:active`: la membresía de un programa de
-   * fidelización, otra tabla y otro dominio. El resultado era que el owner de
-   * una organización recién creada no veía su propio tenant en el claim y
-   * `TenantContextInterceptor` le respondía 403 "no pertenece a ningún tenant"
-   * en cada request posterior: la organización nacía inutilizable.
+   * Filtra por DOS conceptos: `DIR.MEMBERSHIP_ACTIVE` (el que escribe
+   * `directory`) y `CONCEPTS.MEMBERSHIP_ACTIVE` (de promotions, pese al nombre).
+   * Filtrar sólo por el segundo dejaba al owner de una organización nueva fuera
+   * de su tenant: `TenantContextInterceptor` le respondía 403 en cada request.
    *
    * El concepto de promotions se mantiene en el filtro porque las cuentas de
    * pacientes auto-registradas antes de este cambio tienen su membresía con ese
@@ -226,14 +226,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string[]> {
-    const memberships =
-      (await em.find(TenantMemberships, {
-        userId,
-        statusConceptId: {
-          $in: [DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE],
-        },
-      })) ?? [];
-    return [...new Set(memberships.map((m) => m.tenantId))];
+    return this.tenantClaims.listActiveTenantIds(em, userId);
   }
 
   /**
@@ -259,10 +252,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string | undefined> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
-    if (!link) return undefined;
-    const patient = await this.patientProfilesRepo.findById(em, link.personId);
-    return patient?.profileId;
+    return this.profileIds.findPatientProfileId(em, userId);
   }
 
   /**
@@ -288,13 +278,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string | undefined> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
-    if (!link) return undefined;
-    const practitioner = await this.practitionerProfilesRepo.findById(
-      em,
-      link.personId,
-    );
-    return practitioner?.profileId;
+    return this.profileIds.findPractitionerProfileId(em, userId);
   }
 
   /**
@@ -329,26 +313,7 @@ export class IamAuthService {
     tenantNames: Record<string, string>;
     tenantTypes: Record<string, string>;
   }> {
-    if (tenantIds.length === 0) return { tenantNames: {}, tenantTypes: {} };
-    const rows = await em.find(Tenants, { id: { $in: tenantIds } });
-    const tenantNames = Object.fromEntries(
-      rows.map((row) => [row.id, row.tradeName || row.legalName || row.code]),
-    );
-    const tenantTypes = Object.fromEntries(
-      rows
-        .map(
-          (row) =>
-            [
-              row.id,
-              TENANT_TYPE_CODE_BY_CONCEPT_ID[row.tenantTypeConceptId],
-            ] as const,
-        )
-        .filter(
-          (entry): entry is readonly [string, TenantTypeCode] =>
-            entry[1] !== undefined,
-        ),
-    );
-    return { tenantNames, tenantTypes };
+    return this.tenantClaims.describeTenants(em, tenantIds);
   }
 
   /**
@@ -359,16 +324,14 @@ export class IamAuthService {
    * auto-registrados. Ambos viven en la misma columna, así que la búsqueda es
    * idéntica; sólo cambia de qué campo del DTO sale.
    */
-  async login(dto: LoginDto, ip?: string): Promise<TokenResponseDto> {
-    // Span de negocio: la autenticación es la operación con más caminos de
-    // fallo distintos del sistema (sin credencial, usuario inactivo, contraseña
-    // incorrecta, cuenta bloqueada) y todos devuelven el mismo 401 opaco al
-    // cliente, por diseño. Los eventos del span son el único sitio donde queda
-    // registrado CUÁL de los cuatro ocurrió, sin filtrarlo al atacante.
-    //
-    // Nunca se registran aquí ni la contraseña, ni el documento de identidad,
-    // ni el correo: son datos personales o secretos. El `userId` solo se añade
-    // cuando ya está autenticado.
+  async login(
+    dto: LoginDto,
+    ip?: string,
+    client?: LoginClient,
+  ): Promise<TokenResponseDto> {
+    // Span de negocio: los cuatro fallos (sin credencial, usuario inactivo,
+    // contraseña incorrecta, cuenta bloqueada) dan el mismo 401 opaco; el span
+    // registra CUÁL ocurrió. Nunca se registran contraseña, documento ni correo.
     return this.tracing.runInSpan(
       'iam.authenticate',
       {
@@ -377,7 +340,7 @@ export class IamAuthService {
         [APP_ATTR.ENTITY_TYPE]: 'iam.users',
         'iam.auth.subject_kind': dto.nationalId ? 'national_id' : 'email',
       },
-      (span) => this.performLogin(dto, span, ip),
+      (span) => this.performLogin(dto, span, ip, client),
     );
   }
 
@@ -389,6 +352,7 @@ export class IamAuthService {
     dto: LoginDto,
     span: TraceSpan,
     ip?: string,
+    client?: LoginClient,
   ): Promise<TokenResponseDto> {
     const subject = dto.nationalId ?? dto.email;
     if (!subject) {
@@ -437,6 +401,7 @@ export class IamAuthService {
     await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
 
     return this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
       const { roles, scopedRoles } = await this.mergeRoleCodes(
         tx,
@@ -470,6 +435,7 @@ export class IamAuthService {
         tokenId: issued.sessionTokenId,
         expiresAt: issued.expiresAt,
         ip,
+        deviceId: await this.loginDevices?.link(tx, user.id, client),
       });
       // La sesión es el padre del refresh token: persistir antes de crearlo.
       await tx.flush();
@@ -583,6 +549,7 @@ export class IamAuthService {
     // la política de reuso, igual que un token repetido más tarde.
     const outcome = await this.em.transactional(
       async (tx): Promise<RefreshOutcome> => {
+        await enterAuthBoundaryContext(tx);
         const rt = await this.refreshRepo.findByHashForUpdate(tx, tokenHash);
         if (!rt) return { kind: 'invalid' };
 
@@ -748,7 +715,7 @@ export class IamAuthService {
     // tokens de sistema que firman los workers.
     if (!actor.sessionId) return { revoked: false };
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const session = await this.sessionsRepo.findActiveByTokenId(
         tx,
         actor.sessionId as string,
@@ -772,6 +739,13 @@ export class IamAuthService {
 
       return { revoked: true };
     });
+    if (result.revoked && actor.sessionId) {
+      await this.sessionValidator.revokeSession(
+        actor.sessionId,
+        actor.tokenExpiresAt,
+      );
+    }
+    return result;
   }
 
   /** UC-01-11: expira sesiones y refresh tokens ya vencidos. */
@@ -823,6 +797,9 @@ export class IamAuthService {
     ip: string | undefined,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
+      // `iam.account_lockouts` tiene RLS forzado: sin esto el bloqueo no se ve
+      // ni se puede insertar, y el intento que alcanza el umbral daba 500.
+      await enterAuthBoundaryContext(tx);
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
         outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,

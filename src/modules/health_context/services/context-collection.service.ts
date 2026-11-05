@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { CronTime } from 'cron';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -11,7 +12,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { HealthContextRepository } from '../repositories';
-import type { CountryContextSchedules } from '../entities';
+import { HealthContextErrorReason } from '../health_context.error-reasons';
+import type {
+  CountryContextSchedules,
+  HealthContextSources,
+} from '../entities';
 import {
   CreateAgentDto,
   AgentResponseDto,
@@ -59,6 +64,27 @@ const DEFAULT_DUE_SCHEDULES_BATCH = 20;
  * igual que `automation`/`qa_lab` con sus disparadores de calendario.
  */
 const DEFAULT_SCHEDULE_TIMEZONE = 'UTC';
+/** Índice único que arbitra la idempotencia de las corridas (`04_indexes.sql`). */
+const RUN_IDEMPOTENCY_UNIQUE = 'uq_context_collection_runs_idempotency_key';
+
+/**
+ * Si el error es una violación de unicidad. Con `constraint` sólo es cierta
+ * cuando la restricción violada es esa: la misma excepción cubre cualquier
+ * otro índice único de la tabla y no debe confundirse con el que se espera.
+ */
+function isUniqueViolation(error: unknown, constraint?: string): boolean {
+  if (!(error instanceof UniqueConstraintViolationException)) return false;
+  if (!constraint) return true;
+  let current: unknown = error;
+  for (let depth = 0; depth < 5 && current; depth += 1) {
+    const candidate = current as { constraint?: unknown; cause?: unknown };
+    if (typeof candidate.constraint === 'string') {
+      return candidate.constraint === constraint;
+    }
+    current = candidate.cause;
+  }
+  return error.message.includes(constraint);
+}
 
 /**
  * Recolección de contexto: agentes, fuentes, programaciones, corridas y
@@ -95,31 +121,36 @@ export class ContextCollectionService {
       'Registering context agent',
     );
 
-    return this.em.transactional(async (tx) => {
-      const duplicate = await this.contextRepo.findAgentByCode(tx, dto.code);
-      if (duplicate) {
-        throw new ConflictException('Ya existe un agente con ese código', {
-          code: dto.code,
-        });
-      }
-
-      const agent = this.contextRepo.createAgent(tx, {
+    const duplicated = (): ConflictException =>
+      new ConflictException('Ya existe un agente con ese código', {
         code: dto.code,
-        name: dto.name,
-        agentTypeConceptId: dto.agentTypeConceptId,
-        providerId: dto.providerId,
-        implementationRef: dto.implementationRef,
-        ownerTenantId: dto.ownerTenantId,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        actorUserId: actor.id,
       });
+    return this.resolvingUniqueRace(
+      this.em.transactional(async (tx) => {
+        const duplicate = await this.contextRepo.findAgentByCode(tx, dto.code);
+        if (duplicate) {
+          throw duplicated();
+        }
 
-      return {
-        id: agent.id,
-        code: dto.code,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-      };
-    });
+        const agent = this.contextRepo.createAgent(tx, {
+          code: dto.code,
+          name: dto.name,
+          agentTypeConceptId: dto.agentTypeConceptId,
+          providerId: dto.providerId,
+          implementationRef: dto.implementationRef,
+          ownerTenantId: dto.ownerTenantId,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: actor.id,
+        });
+
+        return {
+          id: agent.id,
+          code: dto.code,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        };
+      }),
+      () => Promise.reject(duplicated()),
+    );
   }
 
   /** UC-44-02: registrar la fuente con su licencia y su nivel de confianza. */
@@ -132,33 +163,38 @@ export class ContextCollectionService {
       'Registering health context source',
     );
 
-    return this.em.transactional(async (tx) => {
-      const duplicate = await this.contextRepo.findSourceByCode(tx, dto.code);
-      if (duplicate) {
-        throw new ConflictException('Ya existe una fuente con ese código', {
-          code: dto.code,
-        });
-      }
-
-      const source = this.contextRepo.createSource(tx, {
+    const duplicated = (): ConflictException =>
+      new ConflictException('Ya existe una fuente con ese código', {
         code: dto.code,
-        name: dto.name,
-        sourceTypeConceptId: dto.sourceTypeConceptId,
-        ownerName: dto.ownerName,
-        canonicalUrl: dto.canonicalUrl,
-        countryConceptId: dto.countryConceptId,
-        licenseText: dto.licenseText,
-        trustTierConceptId: dto.trustTierConceptId,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        actorUserId: actor.id,
       });
+    return this.resolvingUniqueRace(
+      this.em.transactional(async (tx) => {
+        const duplicate = await this.contextRepo.findSourceByCode(tx, dto.code);
+        if (duplicate) {
+          throw duplicated();
+        }
 
-      return {
-        id: source.id,
-        code: dto.code,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-      };
-    });
+        const source = this.contextRepo.createSource(tx, {
+          code: dto.code,
+          name: dto.name,
+          sourceTypeConceptId: dto.sourceTypeConceptId,
+          ownerName: dto.ownerName,
+          canonicalUrl: dto.canonicalUrl,
+          countryConceptId: dto.countryConceptId,
+          licenseText: dto.licenseText,
+          trustTierConceptId: dto.trustTierConceptId,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: actor.id,
+        });
+
+        return {
+          id: source.id,
+          code: dto.code,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        };
+      }),
+      () => Promise.reject(duplicated()),
+    );
   }
 
   /** UC-44-03: programar la recolección de un país con su agente. */
@@ -344,6 +380,12 @@ export class ContextCollectionService {
   /**
    * UC-44-05: arrancar la corrida. Es idempotente por clave: el scheduler
    * reintenta, y dos corridas de la misma marca duplicarían las observaciones.
+   *
+   * El índice único de la clave es el árbitro: si dos peticiones simultáneas
+   * pasan la lectura previa, la que pierde recibe la violación de unicidad al
+   * confirmar y se resuelve releyendo la corrida ganadora (`duplicate: true`).
+   * Una corrida con `scheduleId` toma agente y país de la programación
+   * bloqueada; enviar valores que la contradicen se rechaza.
    */
   async startCollectionRun(
     dto: StartCollectionRunDto,
@@ -358,89 +400,161 @@ export class ContextCollectionService {
       'Starting context collection run',
     );
 
-    return this.em.transactional(async (tx) => {
-      const existing = await this.contextRepo.findRunByIdempotencyKey(
-        tx,
-        dto.idempotencyKey,
-      );
-      if (existing) {
-        return {
-          id: existing.id,
-          statusConceptId: existing.statusConceptId,
-          duplicate: true,
-        };
-      }
-
-      let agentId = dto.agentId;
-      let countryConceptId = dto.countryConceptId;
-
-      if (dto.scheduleId) {
-        const schedule = await this.contextRepo.findScheduleForUpdate(
+    return this.resolvingUniqueRace(
+      this.em.transactional(async (tx) => {
+        const existing = await this.contextRepo.findRunByIdempotencyKey(
           tx,
-          dto.scheduleId,
+          dto.idempotencyKey,
         );
-        if (!schedule) {
-          throw new ResourceNotFoundException('Programación no encontrada', {
-            scheduleId: dto.scheduleId,
-          });
+        if (existing) {
+          return {
+            id: existing.id,
+            statusConceptId: existing.statusConceptId,
+            duplicate: true,
+          };
         }
-        if (schedule.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-          throw new PreconditionFailedException(
-            'La programación no está activa',
-            {
+
+        let agentId = dto.agentId;
+        let countryConceptId = dto.countryConceptId;
+
+        if (dto.scheduleId) {
+          const schedule = await this.contextRepo.findScheduleForUpdate(
+            tx,
+            dto.scheduleId,
+          );
+          if (!schedule) {
+            throw new ResourceNotFoundException('Programación no encontrada', {
               scheduleId: dto.scheduleId,
-            },
+            });
+          }
+          if (schedule.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
+            throw new PreconditionFailedException(
+              'La programación no está activa',
+              {
+                scheduleId: dto.scheduleId,
+              },
+            );
+          }
+
+          // La programación manda: agente y país salen siempre del registro
+          // bloqueado. Un valor del DTO sólo se tolera si coincide; contradecirlo
+          // atribuiría la corrida a otro agente o país y dejaría sin ejecutar la
+          // marca legítima. Se rechaza antes de tocar `next_run_at`.
+          if (
+            (dto.agentId !== undefined && dto.agentId !== schedule.agentId) ||
+            (dto.countryConceptId !== undefined &&
+              dto.countryConceptId !== schedule.countryConceptId)
+          ) {
+            throw new PreconditionFailedException(
+              'El agente y el país de la corrida deben coincidir con los de la programación',
+              { scheduleId: dto.scheduleId },
+              HealthContextErrorReason.SCHEDULE_BINDING_MISMATCH,
+            );
+          }
+          agentId = schedule.agentId;
+          countryConceptId = schedule.countryConceptId;
+
+          // Adelantar `next_run_at` en el mismo arranque evita que el scheduler
+          // vuelva a encolar la misma marca mientras la corrida sigue viva.
+          if (dto.nextRunAt) {
+            schedule.nextRunAt = new Date(dto.nextRunAt);
+            touch(schedule, actor.id);
+          }
+        }
+
+        // Una corrida manual sin programación tiene que decir a quién y a qué país
+        // pertenece; deducirlo sería inventarlo.
+        if (!agentId || !countryConceptId) {
+          throw new PreconditionFailedException(
+            'La corrida necesita agente y país, o una programación de la que salgan',
+            { idempotencyKey: dto.idempotencyKey },
           );
         }
 
-        agentId ??= schedule.agentId;
-        countryConceptId ??= schedule.countryConceptId;
-
-        // Adelantar `next_run_at` en el mismo arranque evita que el scheduler
-        // vuelva a encolar la misma marca mientras la corrida sigue viva.
-        if (dto.nextRunAt) {
-          schedule.nextRunAt = new Date(dto.nextRunAt);
-          touch(schedule, actor.id);
+        const agent = await this.contextRepo.findAgentById(tx, agentId);
+        if (!agent) {
+          throw new ResourceNotFoundException('Agente no encontrado', {
+            agentId,
+          });
         }
-      }
+        if (agent.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
+          throw new PreconditionFailedException('El agente no está activo', {
+            agentId,
+          });
+        }
 
-      // Una corrida manual sin programación tiene que decir a quién y a qué país
-      // pertenece; deducirlo sería inventarlo.
-      if (!agentId || !countryConceptId) {
-        throw new PreconditionFailedException(
-          'La corrida necesita agente y país, o una programación de la que salgan',
-          { idempotencyKey: dto.idempotencyKey },
-        );
-      }
-
-      const agent = await this.contextRepo.findAgentById(tx, agentId);
-      if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado', {
+        const run = this.contextRepo.createCollectionRun(tx, {
+          scheduleId: dto.scheduleId,
           agentId,
+          countryConceptId,
+          idempotencyKey: dto.idempotencyKey,
+          triggerConceptId: TRIGGER_CONCEPT[dto.trigger],
+          statusConceptId: CONCEPTS.HCTX_RUN_RUNNING,
+          recordedByUserId: actor.id,
         });
-      }
-      if (agent.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El agente no está activo', {
-          agentId,
-        });
-      }
 
-      const run = this.contextRepo.createCollectionRun(tx, {
-        scheduleId: dto.scheduleId,
-        agentId,
-        countryConceptId,
-        idempotencyKey: dto.idempotencyKey,
-        triggerConceptId: TRIGGER_CONCEPT[dto.trigger],
-        statusConceptId: CONCEPTS.HCTX_RUN_RUNNING,
-        recordedByUserId: actor.id,
-      });
+        return {
+          id: run.id,
+          statusConceptId: CONCEPTS.HCTX_RUN_RUNNING,
+          duplicate: false,
+        };
+      }),
+      (error) => this.resolveIdempotencyRace(error, dto.idempotencyKey),
+    );
+  }
 
-      return {
-        id: run.id,
-        statusConceptId: CONCEPTS.HCTX_RUN_RUNNING,
-        duplicate: false,
-      };
-    });
+  /**
+   * Resuelve la carrera de dos arranques con la misma clave: relee la corrida
+   * ganadora en una transacción nueva y la devuelve como repetición. Si la
+   * violación es de otro único, o la ganadora no se puede releer, falla con
+   * un conflicto catalogado: nunca se inventa una corrida.
+   */
+  private async resolveIdempotencyRace(
+    error: UniqueConstraintViolationException,
+    idempotencyKey: string,
+  ): Promise<CollectionRunResponseDto> {
+    const winner = isUniqueViolation(error, RUN_IDEMPOTENCY_UNIQUE)
+      ? await this.em
+          .fork()
+          .transactional((tx) =>
+            this.contextRepo.findRunByIdempotencyKey(tx, idempotencyKey),
+          )
+      : null;
+    if (!winner) {
+      this.logger.warn(
+        { operation: 'health-context.run.start' },
+        'Idempotency race could not be resolved',
+      );
+      throw new ConflictException(
+        'No se pudo resolver la corrida de esa clave de idempotencia',
+        undefined,
+        HealthContextErrorReason.IDEMPOTENCY_RESOLUTION_FAILED,
+      );
+    }
+    return {
+      id: winner.id,
+      statusConceptId: winner.statusConceptId,
+      duplicate: true,
+    };
+  }
+
+  /**
+   * Espera la unidad de trabajo y, si pierde una carrera por un índice único
+   * (el chequeo previo y el insert no son atómicos), delega en `onRace`.
+   * Cualquier otro error se propaga tal cual.
+   */
+  private async resolvingUniqueRace<T>(
+    work: Promise<T>,
+    onRace: (error: UniqueConstraintViolationException) => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await work;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        return onRace(error as UniqueConstraintViolationException);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -485,6 +599,8 @@ export class ContextCollectionService {
           sourceId: dto.sourceId,
         });
       }
+
+      this.assertSourceEligible(source, run.countryConceptId, dto, runId);
 
       const duplicate = await this.contextRepo.findObservationByHash(
         tx,
@@ -625,6 +741,52 @@ export class ContextCollectionService {
   }
 
   // --- Apoyo ---
+
+  /**
+   * Procedencia de la fuente frente a la corrida (HC-01).
+   *
+   * - Una fuente localizada (`countryConceptId` presente) sólo alimenta corridas
+   *   de su propio país; sin país la fuente es global (alcance internacional).
+   *   Vale para cualquier observación, aceptada o rechazada: no se registra
+   *   material de un país bajo la corrida de otro.
+   * - Aceptar exige una fuente con nivel de confianza declarado: "la confianza
+   *   gobierna la aceptación" no se puede cumplir con una fuente sin nivel.
+   *   Registrar una observación como rechazada no exige confianza.
+   *
+   * El rechazo es el mismo para ambas causas y no revela el país ni la fuente
+   * fuera de alcance; la causa queda sólo en el log.
+   */
+  private assertSourceEligible(
+    source: HealthContextSources,
+    runCountryConceptId: string,
+    dto: RecordObservationDto,
+    runId: string,
+  ): void {
+    let cause: 'COUNTRY_MISMATCH' | 'TRUST_TIER_MISSING' | undefined;
+    if (
+      source.countryConceptId &&
+      source.countryConceptId !== runCountryConceptId
+    ) {
+      cause = 'COUNTRY_MISMATCH';
+    } else if (dto.status === 'ACCEPTED' && !source.trustTierConceptId) {
+      cause = 'TRUST_TIER_MISSING';
+    }
+    if (!cause) return;
+    this.logger.warn(
+      {
+        operation: 'health-context.observation.record',
+        runId,
+        sourceId: source.id,
+        cause,
+      },
+      'Context source not eligible for the run',
+    );
+    throw new PreconditionFailedException(
+      'La fuente no es elegible para esta observación',
+      undefined,
+      HealthContextErrorReason.SOURCE_NOT_ELIGIBLE,
+    );
+  }
 
   /**
    * Los contadores de la corrida son `bigint` y viajan como cadena: se suman con

@@ -80,6 +80,6 @@ Todas las rutas reciben `@CurrentUser()`. En `/deletion-requests` el actor **es*
 (`requestedByUserId`): no se acepta por el cuerpo, porque en un borrado por derecho al olvido hay que
 poder decir quién lo pidió.
 
-## Pruebas
+## Tests
 
 14 pruebas de delegación en `cross-store-controllers.spec.ts`.

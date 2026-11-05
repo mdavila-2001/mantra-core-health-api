@@ -4,7 +4,15 @@ import {
 } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import {
+  ServiceRequestComponentDto,
+  ServiceRequestImagingDto,
+} from '../../clinical/dto/service-request-detail.dto';
 import { IsDate, IsUUID } from 'class-validator';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../../clinical/service-request-category';
 
 /**
  * Un archivo del informe: lo que se descarga.
@@ -137,6 +145,36 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Identificador de la orden. */
   @ApiProperty({ format: 'uuid' }) id!: string;
 
+  /** Requisición que agrupa lo pedido junto; `null` si se pidió suelto. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  requisitionId!: string | null;
+
+  /** Nombre legible del estudio pedido (castellano si existe). */
+  @ApiProperty({ nullable: true, type: String })
+  codeDisplay!: string | null;
+
+  /** Muestra indicada (concept id), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  specimenTypeConceptId!: string | null;
+
+  /** Nombre de la muestra indicada, o `null`. */
+  @ApiProperty({ nullable: true, type: String })
+  specimenTypeDisplay!: string | null;
+
+  /** Componentes pedidos de un panel, en orden; `[]` si no se especificaron. */
+  @ApiProperty({ type: [ServiceRequestComponentDto] })
+  components!: ServiceRequestComponentDto[];
+
+  /** `true` si el médico marcó componentes (distinto de «ninguno»: el panel completo). */
+  @ApiProperty() componentsSpecified!: boolean;
+
+  /** Detalle de imagen (modalidad, parte del cuerpo, lateralidad, contraste); `null` si no hay. */
+  @ApiProperty({ type: ServiceRequestImagingDto, nullable: true })
+  imaging!: ServiceRequestImagingDto | null;
+
+  /** Resumen legible, igual al de la bandeja del receptor («Hemograma · 3 componentes»). */
+  @ApiProperty() summary!: string;
+
   /** Encuentro en el que se pidió, si se pidió durante uno. */
   @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
 
@@ -146,11 +184,39 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Laboratorio o imagenología (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
 
+  /**
+   * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.
+   * Las notas que motivan la orden (`basedOnNoteIds`) no viajan al portal:
+   * una nota puede no estar liberada al paciente.
+   */
+  @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
+  category?: AnalysisCategory;
+
   /** Estado de la orden (concept id). */
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
 
   /** Prioridad (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) priorityConceptId?: string;
+
+  /**
+   * Quién ejecuta la orden según la recomendación del médico (concept id del
+   * conjunto `service-request-performer-selection`); `null` en una orden
+   * anterior a ese dato. Es una recomendación: el paciente puede elegir otro centro.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerSelectionConceptId!: string | null;
+
+  /** Médico ejecutor («lo hago yo»), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /** Sede que el médico sugirió, o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
 
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;

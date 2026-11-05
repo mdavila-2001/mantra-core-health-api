@@ -51,7 +51,7 @@ export class GetResourceAgendaUseCase {
       );
     }
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     // Un recurso inexistente devuelve 404 y no una agenda vacía: son cosas
     // distintas y el cliente tiene que poder distinguirlas —"este médico no
     // existe" no es "este médico no tiene huecos".

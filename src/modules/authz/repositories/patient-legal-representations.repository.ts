@@ -69,6 +69,24 @@ export class PatientLegalRepresentationsRepository {
     });
   }
 
+  /**
+   * Representación ACTIVA concreta (paciente, representante) dentro de un
+   * tenant: evita duplicados sin sondear otras organizaciones.
+   */
+  findActiveInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    representativeUserId: string,
+    tenantId: string,
+  ): Promise<PatientLegalRepresentations | null> {
+    return em.findOne(PatientLegalRepresentations, {
+      patientProfileId,
+      representativeUserId,
+      tenantId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /** Representaciones ACTIVAS de un usuario sobre un paciente (para el PDP). */
   findActiveForRepresentativePatient(
     em: EntityManager,

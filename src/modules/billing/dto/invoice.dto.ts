@@ -1,17 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  ValidateBy,
   ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDateString,
-  IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { MONEY_PATTERN, QUANTITY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
+const QUANTITY_MESSAGE =
+  'debe ser una cantidad decimal no negativa con hasta 4 decimales';
 
 /** Línea de cargo a facturar (UC-17-01). */
 export class InvoiceLineInputDto {
@@ -39,14 +48,14 @@ export class InvoiceLineInputDto {
    * Valor de quantity mantenido por la instancia.
    */
   @ApiProperty({ description: 'Cantidad', example: '1' })
-  @IsNumberString()
+  @Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })
   quantity!: string;
 
   /**
    * Valor de unit price mantenido por la instancia.
    */
   @ApiProperty({ description: 'Precio unitario', example: '100.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   unitPrice!: string;
 
   /**
@@ -54,7 +63,7 @@ export class InvoiceLineInputDto {
    */
   @ApiPropertyOptional({ description: 'Descuento de línea', example: '0.00' })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   discount?: string;
 
   /**
@@ -76,7 +85,7 @@ export class InvoiceLineInputDto {
     example: '0.00',
   })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   taxAmount?: string;
 
   /**
@@ -203,13 +212,44 @@ export class IssueInvoiceFromEncounterDto {
    */
   @ApiProperty({
     type: [InvoiceLineInputDto],
-    description: 'Líneas de cargo (al menos una)',
+    description:
+      'Líneas de cargo (al menos una, salvo que se facturen cargos devengados con chargeCaptureIds)',
   })
   @IsArray()
-  @ArrayMinSize(1)
+  @ValidateBy({
+    name: 'linesOrCharges',
+    validator: {
+      validate: (value: unknown, args): boolean =>
+        (Array.isArray(value) && value.length > 0) ||
+        (Array.isArray(
+          (args?.object as { chargeCaptureIds?: unknown }).chargeCaptureIds,
+        ) &&
+          ((args?.object as { chargeCaptureIds: unknown[] }).chargeCaptureIds
+            .length ?? 0) > 0),
+      defaultMessage: () =>
+        'lines must contain at least 1 elements (o enviar chargeCaptureIds)',
+    },
+  })
   @ValidateNested({ each: true })
   @Type(() => InvoiceLineInputDto)
   lines!: InvoiceLineInputDto[];
+
+  /**
+   * F5e: cargos devengados (día-cama, quirófano por tiempo) que se facturan:
+   * cada uno se vuelve una línea y queda `CHG_INVOICED` con su `invoice_line_id`
+   * en la misma transacción (409 `CHARGE_ALREADY_INVOICED`).
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description: 'Cargos devengados a facturar (F5e), hasta 200, sin repetir',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  chargeCaptureIds?: string[];
 }
 
 /** Línea de reverso para una nota de crédito (UC-17-03). */
@@ -230,14 +270,14 @@ export class CreditNoteLineInputDto {
     description: 'Cantidad (positiva; se invierte el signo del total)',
     example: '1',
   })
-  @IsNumberString()
+  @Matches(QUANTITY_PATTERN, { message: QUANTITY_MESSAGE })
   quantity!: string;
 
   /**
    * Valor de unit price mantenido por la instancia.
    */
   @ApiProperty({ description: 'Precio unitario a revertir', example: '100.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   unitPrice!: string;
 
   /**
@@ -245,7 +285,7 @@ export class CreditNoteLineInputDto {
    */
   @ApiPropertyOptional({ description: 'Impuesto a revertir', example: '0.00' })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   taxAmount?: string;
 }
 

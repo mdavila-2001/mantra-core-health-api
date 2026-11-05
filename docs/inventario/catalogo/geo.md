@@ -13,9 +13,9 @@
 | [geofence_events](#geofence_events) | Registra entradas y salidas de geocercas para activar seguimiento logístico o de seguridad. | 8 | 6 | 2 | COINCIDE |
 | [geofences](#geofences) | Define límites geográficos usados para detectar proximidad o entrada a zonas operativas. | 14 | 6 | 3 | COINCIDE |
 | [location_pings](#location_pings) | Conserva puntos de ubicación recibidos de sujetos rastreables para reconstruir movimiento y contexto temporal. | 14 | 5 | 2 | COINCIDE |
-| [tracked_subjects](#tracked_subjects) | Cataloga personas, vehículos o activos cuyo movimiento necesita seguimiento geográfico autorizado. | 11 | 7 | 9 | COINCIDE |
+| [tracked_subjects](#tracked_subjects) | Cataloga personas, vehículos o activos cuyo movimiento necesita seguimiento geográfico autorizado. | 11 | 7 | 10 | COINCIDE |
 | [tracking_sessions](#tracking_sessions) | Agrupa observaciones de ubicación en sesiones para limitar su continuidad temporal y propósito. | 13 | 5 | 8 | COINCIDE |
-| [trips](#trips) | Representa recorridos entre puntos para resumir desplazamientos de sujetos o entregas. | 14 | 6 | 5 | COINCIDE |
+| [trips](#trips) | Representa recorridos entre puntos para resumir desplazamientos de sujetos o entregas. | 14 | 6 | 4 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -305,7 +305,7 @@ Cataloga personas, vehículos o activos cuyo movimiento necesita seguimiento geo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_13_geo.puml: tracked_subjects`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_13_geo.puml` · **DDL:** `SQL/13_geo/02_tables.sql`
 - **Entidad del ORM:** `TrackedSubjects` — `src/modules/geo/entities/tracked_subjects.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 4 entrantes · 9 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 4 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -359,10 +359,11 @@ Cataloga personas, vehículos o activos cuyo movimiento necesita seguimiento geo
 | POST /geo/tracked-subjects | LEE | DIRECTA |
 | GET /geo/tracked-subjects/{id}/last-position | LEE | DIRECTA |
 | POST /geo/tracked-subjects/{id}/pings | LEE | DIRECTA |
-| POST /geo/tracked-subjects/{id}/revoke-consent | ACTUALIZA | POR_TIPO |
 | POST /geo/tracked-subjects/{id}/revoke-consent | LEE | DIRECTA |
 | POST /geo/tracking-sessions | LEE | DIRECTA |
 | POST /geo/tracking-sessions/{id}/close | LEE | DIRECTA |
+| POST /geo/trips | LEE | DIRECTA |
+| POST /geo/trips/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -437,9 +438,9 @@ Agrupa observaciones de ubicación en sesiones para limitar su continuidad tempo
 | POST /geo/tracked-subjects/{id}/revoke-consent | LEE | DIRECTA |
 | POST /geo/tracking-sessions | CREA | DIRECTA |
 | POST /geo/tracking-sessions | LEE | DIRECTA |
-| POST /geo/tracking-sessions/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /geo/tracking-sessions/{id}/close | LEE | DIRECTA |
 | POST /geo/trips | LEE | DIRECTA |
+| POST /geo/trips/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -464,7 +465,7 @@ Representa recorridos entre puntos para resumir desplazamientos de sujetos o ent
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_13_geo.puml: trips`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_13_geo.puml` · **DDL:** `SQL/13_geo/02_tables.sql`
 - **Entidad del ORM:** `Trips` — `src/modules/geo/entities/trips.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -514,7 +515,6 @@ Representa recorridos entre puntos para resumir desplazamientos de sujetos o ent
 | POST /geo/tracking-sessions/{id}/close | LEE | DIRECTA |
 | POST /geo/trips | CREA | DIRECTA |
 | POST /geo/trips | LEE | DIRECTA |
-| POST /geo/trips/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /geo/trips/{id}/close | LEE | DIRECTA |
 
 #### Gobierno

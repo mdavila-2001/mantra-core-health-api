@@ -9,6 +9,14 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { AccountingErrorReason } from '../accounting.error-reasons';
+import {
+  buildScope,
+  expectScopeNotFound,
+  inTenant,
+} from './accounting-scope.testing';
+import { Invoices } from '../../billing/entities';
+import { BILL } from '../../billing/billing.concepts';
 
 const actor = {
   id: 'user-1',
@@ -77,6 +85,24 @@ function build() {
     ]),
     setAutomated: mockFn().mockResolvedValue({ id: 'as1', automated: false }),
     findDepreciation: mockFn().mockResolvedValue({ amount: '16.67' }),
+    listDepreciations: mockFn().mockResolvedValue([
+      {
+        id: 'dep-1',
+        fiscalPeriodId: 'period-1',
+        amount: '16.67',
+        bookValueAfter: '983.33',
+        transactionId: 'tx-dep-1',
+        createdAt: new Date('2026-02-01T12:00:00Z'),
+      },
+      {
+        id: 'dep-2',
+        fiscalPeriodId: 'period-gone',
+        amount: '16.66',
+        bookValueAfter: undefined,
+        transactionId: undefined,
+        createdAt: new Date('2026-03-01T12:00:00Z'),
+      },
+    ]),
   };
   const accountsRepo = {
     findByIds: mockFn().mockResolvedValue([
@@ -162,10 +188,19 @@ function build() {
   };
   const fiscalRepo = {
     findOpenPeriodForPractice: mockFn().mockResolvedValue({ id: 'period-1' }),
+    findPeriodsByIds: mockFn().mockResolvedValue([
+      {
+        id: 'period-1',
+        code: '2026-01',
+        startDate: new Date('2026-01-01T00:00:00Z'),
+        endDate: new Date('2026-01-31T00:00:00Z'),
+      },
+    ]),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
 
-  const service = new PractitionerAccountingService(
+  const { scope, doubles } = buildScope();
+  const raw = new PractitionerAccountingService(
     em as any,
     {} as any, // ledgerService — no lo usa ningún método de FT-26
     practiceTenantLookup as any,
@@ -178,11 +213,14 @@ function build() {
     fiscalRepo as any,
     accountsRepo as any,
     auditTrail as any,
+    scope,
     logger as any,
   );
+  const service = inTenant(raw);
 
   return {
     service,
+    doubles,
     em,
     tx,
     assetService,
@@ -266,6 +304,52 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
     });
   });
 
+  describe('readAssetDepreciations (criterio 6)', () => {
+    it('devuelve el histórico en orden de registro, con su período y el valor que dejó', async () => {
+      const d = build();
+      const res = await d.service.readAssetDepreciations('as1', actor);
+      expect(d.fiscalRepo.findPeriodsByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        ['period-1', 'period-gone'],
+      );
+      expect(res.depreciations[0]).toEqual({
+        id: 'dep-1',
+        fiscalPeriodId: 'period-1',
+        fiscalPeriodCode: '2026-01',
+        periodStartDate: '2026-01-01',
+        periodEndDate: '2026-01-31',
+        amount: '16.67',
+        bookValueAfter: '983.33',
+        transactionId: 'tx-dep-1',
+        registeredAt: '2026-02-01T12:00:00.000Z',
+      });
+      // Un período que ya no se resuelve no rompe el histórico: viaja en null.
+      expect(res.depreciations[1]).toMatchObject({
+        fiscalPeriodCode: null,
+        periodStartDate: null,
+        bookValueAfter: null,
+        transactionId: null,
+      });
+    });
+
+    it('rechaza (422) el histórico de un activo de una práctica ajena, sin leer sus filas', async () => {
+      const d = build();
+      d.assetRepo.findById.mockResolvedValue({ id: 'as1', practiceId: 'p2' });
+      await expect(
+        d.service.readAssetDepreciations('as1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.assetRepo.listDepreciations).not.toHaveBeenCalled();
+    });
+
+    it('rechaza (404) un activo inexistente', async () => {
+      const d = build();
+      d.assetRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.readAssetDepreciations('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('readLiabilitySchedule (AC-26-10, AC-26-11)', () => {
     it('devuelve el cronograma cuota por cuota, con capital e interés separados', async () => {
       const d = build();
@@ -293,7 +377,7 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
       const d = build();
       d.liabilityRepo.findById.mockResolvedValue({
         id: 'liab1',
-        practiceId: 'ajena',
+        practiceId: 'p2',
         code: 'X',
       });
       await expect(
@@ -334,7 +418,7 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
       const d = build();
       d.assetRepo.findById.mockResolvedValue({
         id: 'as1',
-        practiceId: 'otra-practica',
+        practiceId: 'p2',
       });
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['p1'],
@@ -620,6 +704,183 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('alcance de tenant (ACC-01)', () => {
+    it('un activo de otra organización responde 404 idéntico a uno inexistente, sin pasar por el chequeo de vinculación', async () => {
+      const foreign = build();
+      foreign.assetRepo.findById.mockResolvedValue({
+        id: 'as1',
+        practiceId: 'p-b',
+      });
+      const absent = build();
+      absent.assetRepo.findById.mockResolvedValue(null);
+
+      const a = await expectScopeNotFound(
+        foreign.service.setAssetAutomation('as1', { automated: false }, actor),
+        AccountingErrorReason.ASSET_NOT_FOUND,
+      );
+      const b = await expectScopeNotFound(
+        absent.service.setAssetAutomation('as1', { automated: false }, actor),
+        AccountingErrorReason.ASSET_NOT_FOUND,
+      );
+
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(
+        foreign.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+      ).not.toHaveBeenCalled();
+      expect(foreign.assetRepo.setAutomated).not.toHaveBeenCalled();
+      expect(foreign.auditTrail.record).not.toHaveBeenCalled();
+    });
+
+    it('registrar avance sobre un activo de otra organización responde 404 y no deprecia', async () => {
+      const d = build();
+      d.assetRepo.findById.mockResolvedValue({ id: 'as1', practiceId: 'p-b' });
+
+      await expectScopeNotFound(
+        d.service.registerAssetProgress(
+          'as1',
+          {
+            depreciationExpenseAccountId: 'acc-exp',
+            accumulatedDepreciationAccountId: 'acc-dep',
+          },
+          actor,
+        ),
+        AccountingErrorReason.ASSET_NOT_FOUND,
+      );
+      expect(d.assetService.runDepreciation).not.toHaveBeenCalled();
+    });
+
+    it('un pasivo de otra organización responde 404 idéntico a uno inexistente en las tres rutas con id', async () => {
+      const foreign = build();
+      foreign.liabilityRepo.findById.mockResolvedValue({
+        id: 'liab1',
+        practiceId: 'p-b',
+        code: 'X',
+      });
+      const absent = build();
+      absent.liabilityRepo.findById.mockResolvedValue(null);
+
+      const calls: ((d: ReturnType<typeof build>) => Promise<unknown>)[] = [
+        (d) => d.service.readLiabilitySchedule('liab1', actor),
+        (d) =>
+          d.service.setLiabilityAutomation('liab1', { automated: true }, actor),
+        (d) =>
+          d.service.registerLiabilityProgress(
+            'liab1',
+            { bankAccountId: 'b', interestExpenseAccountId: 'i' },
+            actor,
+          ),
+      ];
+      for (const call of calls) {
+        const a = await expectScopeNotFound(
+          call(foreign),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          call(absent),
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
+        expect(a.getResponse()).toEqual(b.getResponse());
+      }
+      expect(foreign.liabilityRepo.setAutomated).not.toHaveBeenCalled();
+      expect(foreign.liabilityService.payLiability).not.toHaveBeenCalled();
+      expect(foreign.liabilityRepo.listSchedules).not.toHaveBeenCalled();
+    });
+
+    describe('createOwnLiability', () => {
+      const dto = {
+        practiceId: 'p1',
+        code: 'LIAB-9',
+        name: 'Préstamo',
+        accountId: 'acc-liab',
+        principalAmount: '1200.00',
+        installments: 3,
+        startDate: '2026-01-01',
+      } as any;
+
+      it('una cuenta de otra práctica responde 404 y no crea el pasivo', async () => {
+        const d = build();
+        d.doubles.accountsRepo.findByIds.mockResolvedValue([
+          { id: 'acc-liab', practiceId: 'p2' },
+        ]);
+
+        await expectScopeNotFound(
+          d.service.createOwnLiability(dto, actor),
+          AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
+        );
+        expect(d.liabilityRepo.createLiability).not.toHaveBeenCalled();
+        expect(d.liabilityRepo.createSchedule).not.toHaveBeenCalled();
+      });
+
+      it('una práctica vinculada al profesional pero de otra organización que la sesión responde 404', async () => {
+        const d = build();
+        d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+          ['p-b'],
+        );
+
+        await expectScopeNotFound(
+          d.service.createOwnLiability({ ...dto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        expect(d.liabilityRepo.createLiability).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('registerConsultationIncome', () => {
+      const dto = {
+        practiceId: 'p1',
+        invoiceId: 'inv-1',
+        transactionDate: '2026-01-31',
+        debitAccountId: 'acc-d',
+        creditAccountId: 'acc-c',
+      } as any;
+
+      /** Servicio cuyo `em.fork().findOne(Invoices)` devuelve la factura dada. */
+      function withInvoice(invoice: object | null) {
+        const d = build();
+        const findOne = mockFn().mockResolvedValue(invoice);
+        d.em.fork.mockReturnValue({ findOne });
+        return { d, findOne };
+      }
+
+      it('una factura de otra organización responde 404 idéntico a una inexistente, no 422', async () => {
+        const foreign = withInvoice({
+          id: 'inv-1',
+          practiceId: 'p-b',
+          statusConceptId: BILL.INVOICE_PAID,
+        });
+        const absent = withInvoice(null);
+
+        const a = await expectScopeNotFound(
+          foreign.d.service.registerConsultationIncome(dto, actor),
+          AccountingErrorReason.INVOICE_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          absent.d.service.registerConsultationIncome(dto, actor),
+          AccountingErrorReason.INVOICE_NOT_FOUND,
+        );
+
+        expect(a.getResponse()).toEqual(b.getResponse());
+        expect(foreign.findOne).toHaveBeenCalledWith(Invoices, {
+          id: 'inv-1',
+        });
+      });
+
+      it('una factura de otra práctica de la misma organización sigue siendo 422 de práctica distinta', async () => {
+        const { d } = withInvoice({
+          id: 'inv-1',
+          practiceId: 'p2',
+          statusConceptId: BILL.INVOICE_PAID,
+        });
+
+        await expect(
+          d.service.registerConsultationIncome(dto, actor),
+        ).rejects.toMatchObject({
+          reason: AccountingErrorReason.INVOICE_PRACTICE_MISMATCH,
+        });
+      });
     });
   });
 });

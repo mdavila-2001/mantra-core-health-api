@@ -1,5 +1,7 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { DomainException, ErrorCode } from '../../../common';
+import { AutomationErrorReason } from '../automation.error-reasons';
 
 /** Destino de la escritura, ya partido en esquema y tabla. */
 export interface TargetTable {
@@ -34,6 +36,72 @@ export interface WriteRecordResult {
  */
 const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]{0,62}$/;
 
+/** Columna que identifica al tenant propietario de la fila destino. */
+const TENANT_COLUMN = 'tenant_id';
+
+/**
+ * Esquemas en los que una automatización de registro puede escribir. El resto
+ * se rechaza (denegar por defecto): un agente nunca escribe de forma dinámica
+ * en esquemas clínicos, de identidad, de autorización, de auditoría ni
+ * financieros, por mucho que el identificador sea sintácticamente válido.
+ */
+const ALLOWED_TARGET_SCHEMAS: ReadonlySet<string> = new Set([
+  'crm',
+  'marketing',
+  'promotions',
+  'scheduling',
+  'surveys',
+  'education',
+  'tracking',
+]);
+
+/**
+ * SQLSTATE con los que PostgreSQL informa de que el destino configurado no
+ * existe tal cual está escrito: tabla (`42P01`), columna (`42703`) o clave de
+ * deduplicación sin índice único que la respalde (`42P10`).
+ */
+const INVALID_TARGET_SQLSTATES: ReadonlySet<string> = new Set([
+  '42P01',
+  '42703',
+  '42P10',
+]);
+
+/**
+ * Error 400 de configuración del destino. Es entrada corregible, no un fallo del
+ * servidor, y lleva un `reason` estable para que el runtime no tenga que leer
+ * texto libre. Nunca incluye el identificador recibido ni SQL.
+ */
+function invalidTarget(
+  message: string,
+  reason:
+    | AutomationErrorReason.AUTOMATION_RECORD_TARGET_INVALID
+    | AutomationErrorReason.AUTOMATION_RECORD_MAPPING_EMPTY = AutomationErrorReason.AUTOMATION_RECORD_TARGET_INVALID,
+): DomainException {
+  return new DomainException(
+    HttpStatus.BAD_REQUEST,
+    ErrorCode.VALIDATION_FAILED,
+    message,
+    undefined,
+    reason,
+  );
+}
+
+/** SQLSTATE de PostgreSQL de la cadena de causas del error, si lo hay. */
+function sqlStateOf(error: unknown): string | undefined {
+  let current: unknown = error;
+  for (let depth = 0; depth < 5 && current; depth += 1) {
+    const candidate = current as { code?: unknown; cause?: unknown };
+    if (
+      typeof candidate.code === 'string' &&
+      /^[0-9A-Z]{5}$/.test(candidate.code)
+    ) {
+      return candidate.code;
+    }
+    current = candidate.cause;
+  }
+  return undefined;
+}
+
 /**
  * Ejecuta la operación quote identifier.
  *
@@ -46,7 +114,7 @@ function quoteIdentifier(value: string, what: string): string {
   if (!SAFE_IDENTIFIER.test(value)) {
     // No se devuelve el valor recibido: si alguien logró configurar un
     // identificador hostil, el mensaje de error no debe reflejárselo.
-    throw new InternalServerErrorException(
+    throw invalidTarget(
       `La automatización de registro declara un ${what} que no es un identificador SQL válido.`,
     );
   }
@@ -60,11 +128,31 @@ function quoteIdentifier(value: string, what: string): string {
 export function parseTargetResource(targetResourceType: string): TargetTable {
   const parts = targetResourceType.split('.');
   if (parts.length !== 2) {
-    throw new InternalServerErrorException(
+    throw invalidTarget(
       'La automatización de registro debe declarar el destino como `esquema.tabla`.',
     );
   }
-  return { schemaName: parts[0], tableName: parts[1] };
+  const target = { schemaName: parts[0], tableName: parts[1] };
+  assertTargetAllowed(target);
+  return target;
+}
+
+/**
+ * Exige que el destino sea un identificador válido de un esquema permitido.
+ *
+ * @param target - Destino ya partido en esquema y tabla.
+ * @throws DomainException 400 `VALIDATION_FAILED` / `AUTOMATION_RECORD_TARGET_INVALID`
+ *   si el esquema no está permitido o algún identificador no es válido. El mensaje
+ *   no refleja lo recibido.
+ */
+export function assertTargetAllowed(target: TargetTable): void {
+  quoteIdentifier(target.schemaName, 'esquema de destino');
+  quoteIdentifier(target.tableName, 'tabla de destino');
+  if (!ALLOWED_TARGET_SCHEMAS.has(target.schemaName)) {
+    throw invalidTarget(
+      'La automatización de registro declara un esquema de destino que no admite escritura automática.',
+    );
+  }
 }
 
 /**
@@ -90,13 +178,15 @@ export class TargetRecordRepository {
     dedupeColumns: string[],
     upsert: boolean,
   ): Promise<WriteRecordResult> {
+    assertTargetAllowed(target);
     const schema = quoteIdentifier(target.schemaName, 'esquema de destino');
     const table = quoteIdentifier(target.tableName, 'tabla de destino');
 
     const columnNames = Object.keys(columns);
     if (columnNames.length === 0) {
-      throw new InternalServerErrorException(
+      throw invalidTarget(
         'La automatización de registro no produjo ninguna columna que escribir.',
+        AutomationErrorReason.AUTOMATION_RECORD_MAPPING_EMPTY,
       );
     }
 
@@ -118,8 +208,11 @@ export class TargetRecordRepository {
       if (upsert) {
         // Se actualiza todo menos las columnas de la clave: reescribirlas con el
         // mismo valor es ruido, y con otro valor sería cambiar la identidad de la
-        // fila desde una operación que decía estar actualizándola.
-        const updatable = columnNames.filter((c) => !dedupeColumns.includes(c));
+        // fila desde una operación que decía estar actualizándola. El dueño de la
+        // fila (`tenant_id`) tampoco se reasigna nunca.
+        const updatable = columnNames.filter(
+          (c) => !dedupeColumns.includes(c) && c !== TENANT_COLUMN,
+        );
         if (updatable.length === 0) {
           sql += ` on conflict (${conflictTarget}) do nothing`;
         } else {
@@ -130,6 +223,13 @@ export class TargetRecordRepository {
             })
             .join(', ');
           sql += ` on conflict (${conflictTarget}) do update set ${assignments}`;
+          // Una clave de deduplicación sin `tenant_id` puede chocar con la fila de
+          // otra organización: sólo se actualiza la fila que ya es de este tenant.
+          // Si es ajena no se toca y la respuesta es `written: false`.
+          if (columnNames.includes(TENANT_COLUMN)) {
+            const tenant = quoteIdentifier(TENANT_COLUMN, 'campo de destino');
+            sql += ` where ${schema}.${table}.${tenant} = excluded.${tenant}`;
+          }
         }
       } else {
         sql += ` on conflict (${conflictTarget}) do nothing`;
@@ -138,14 +238,35 @@ export class TargetRecordRepository {
 
     sql += ' returning id';
 
-    const rows = await em.getConnection().execute<
-      {
-        /**
-         * Identificador único de la instancia.
-         */
-        id: string;
-      }[]
-    >(sql, values, 'all', em.getTransactionContext());
+    let rows:
+      | {
+          /**
+           * Identificador único de la instancia.
+           */
+          id: string;
+        }[]
+      | undefined;
+    try {
+      rows = await em.getConnection().execute<
+        {
+          /**
+           * Identificador único de la instancia.
+           */
+          id: string;
+        }[]
+      >(sql, values, 'all', em.getTransactionContext());
+    } catch (error) {
+      // Una tabla, columna o clave de deduplicación que la base no reconoce es
+      // configuración corregible. Se traduce sin SQL ni identificadores: el
+      // mensaje de la base nombra tabla y columna, y no debe salir al cliente.
+      const sqlState = sqlStateOf(error);
+      if (sqlState && INVALID_TARGET_SQLSTATES.has(sqlState)) {
+        throw invalidTarget(
+          'La automatización de registro declara un destino que la base no reconoce.',
+        );
+      }
+      throw error;
+    }
 
     const row = rows?.[0];
     // `do nothing` sobre una colisión no devuelve filas: eso es exactamente la

@@ -52,7 +52,7 @@ El acceso DICOMweb denegado devuelve **`200` con `outcome: 'denied'`**, no un `4
 la respuesta del control de acceso y viene acompañada de su registro; un error HTTP haría perder el
 `accessLogId` que permite correlacionar el intento.
 
-## Permisos
+## Permissions
 
 `STORAGE_ADMIN` en todo. Además: `STORAGE_CLIENT` (01, 02), `SYSTEM` (01–03, 06, 09–11),
 `PACS_GATEWAY` (04), `COMPLIANCE_OFFICER` (07, 12), `LEGAL_COUNSEL` (08), y `DICOM_VIEWER` /
@@ -60,7 +60,7 @@ la respuesta del control de acceso y viene acompañada de su registro; un error 
 
 Ninguna ruta es `@Public()`.
 
-## Pruebas
+## Tests
 
 - `object-storage.controller.spec.ts` (12): una por endpoint, comprobando que delega en el servicio
   correcto y que pasa los ids de ruta, el cuerpo y el actor.

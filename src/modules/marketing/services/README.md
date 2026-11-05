@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `MarketingCampaignsService` | 01, 02, 03, 04, 05 | Segmentos, campañas y plantillas de contenido |
 | `MarketingJourneysService` | 06 … 12 | Journeys, inscripciones, enlaces, touchpoints y atribución |
 
-## Reglas de negocio
+## Business rules
 
 - **Segmento (01)**: nace `active` con `estimated_size = 0`; el código es único por tenant.
 - **Refresco (02)**: el cuerpo trae la membresía completa. Quien falta pasa a `removed` (baja
@@ -73,7 +73,7 @@ duplicado, journey ya activado, inscripción ya cerrada).
 `operation: 'marketing.<área>.<acción>'`. No se loguean plantillas ni datos del destinatario más
 allá del identificador.
 
-## Pruebas
+## Tests
 
 `marketing-campaigns.service.spec.ts` (25) y `marketing-journeys.service.spec.ts` (33): camino
 feliz, precondiciones, conflictos, idempotencia, reingreso al segmento, ramas del journey y suma

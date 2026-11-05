@@ -22,9 +22,14 @@ export class CreateSpecimenDto {
   /**
    * Identificador asociado a custodian tenant.
    */
-  @ApiProperty({ format: 'uuid', description: 'Tenant custodio' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404',
+  })
+  @IsOptional()
   @IsUUID()
-  custodianTenantId!: string;
+  custodianTenantId?: string;
 
   /**
    * Identificador asociado a specimen type concept.
@@ -87,6 +92,12 @@ export class CreateSpecimenDto {
   @IsOptional()
   @IsUUID()
   collectorProfileId?: string;
+
+  /** F5b: punto de toma (espacio `SPACE_FN_SAMPLE_COLLECTION`) donde se tomó. */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Punto de toma (F5b)' })
+  @IsOptional()
+  @IsUUID()
+  collectionCareSpaceId?: string;
 }
 
 /** Cuerpo de `POST /diagnostics/accessions` (UC-20-01). */
@@ -103,7 +114,8 @@ export class CreateAccessionDto {
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Tenant custodio (por defecto el del token)',
+    description:
+      'Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404',
   })
   @IsOptional()
   @IsUUID()

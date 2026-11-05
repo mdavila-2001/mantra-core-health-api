@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GovernanceCatalogService } from '../services';
 import {
   ApplyRetentionPolicyDto,
@@ -40,6 +45,11 @@ export class GovernanceCatalogController {
   constructor(private readonly service: GovernanceCatalogService) {}
 
   /** UC-11-01. */
+  @Audited({
+    action: 'GOVERNED_ENTITY_CATALOGUED',
+    entity: 'entity_registry',
+    entityId: 'result.id',
+  })
   @Post('entity-registry')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -54,6 +64,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-02. */
+  @Audited({
+    action: 'WRITE_POLICY_CREATED',
+    entity: 'write_policy',
+    entityId: 'result.id',
+  })
   @Post('write-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -66,6 +81,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-02. */
+  @Audited({
+    action: 'GOVERNED_ENTITY_WRITE_POLICY_APPLIED',
+    entity: 'entity_registry',
+    entityId: 'param:id',
+  })
   @Patch('entity-registry/:id/write-policy')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -79,6 +99,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-03. */
+  @Audited({
+    action: 'GOVERNANCE_RETENTION_POLICY_CREATED',
+    entity: 'retention_policy',
+    entityId: 'result.id',
+  })
   @Post('retention-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -91,6 +116,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-03. */
+  @Audited({
+    action: 'GOVERNED_ENTITY_RETENTION_APPLIED',
+    entity: 'entity_registry',
+    entityId: 'param:id',
+  })
   @Patch('entity-registry/:id/retention')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -104,6 +134,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-04. */
+  @Audited({
+    action: 'ANONYMIZATION_RULE_CREATED',
+    entity: 'anonymization_rule',
+    entityId: 'result.id',
+  })
   @Post('anonymization-rules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -116,6 +151,11 @@ export class GovernanceCatalogController {
   }
 
   /** UC-11-04. */
+  @Audited({
+    action: 'GOVERNED_FIELD_UPDATED',
+    entity: 'field_registry',
+    entityId: 'param:id',
+  })
   @Patch('field-registry/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

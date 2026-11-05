@@ -12,7 +12,12 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { PractitionerSettlementBatchesService } from '../../application/services';
 import {
   GeneratePractitionerSettlementBatchDto,
@@ -41,6 +46,11 @@ export class PractitionerSettlementBatchesController {
    * Genera el lote del período, o devuelve el existente (contrato §9):
    * `201` si es nuevo, `200` con `replayed: true` si ya existía.
    */
+  @Audited({
+    action: 'PRACTITIONER_SETTLEMENT_BATCH_GENERATED',
+    entity: 'insurance_reconciliation_batch',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles()
   @ApiOperation({

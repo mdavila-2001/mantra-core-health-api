@@ -123,6 +123,30 @@ export class LookupDesignationDto {
   preferred?: boolean;
 }
 
+/**
+ * Antigüedad del dato de una propiedad que es una sección de farmacología
+ * clínica (estado S7 del contrato de vistas).
+ */
+export class PropertySourceAgeDto {
+  @ApiProperty({
+    description:
+      'Falso si la fuente no publica la fecha de la versión (p. ej. fichas de CIMA de autorización centralizada): la antigüedad es desconocida y la fecha que vale es la de consulta',
+  })
+  known!: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Fecha de la versión de la fuente tal como se cargó (ISO, o mm/aaaa en las fichas de CIMA que solo la traen en el texto). Solo si known es verdadero',
+  })
+  sourceDate?: string;
+
+  @ApiProperty({
+    format: 'date-time',
+    description: 'Cuándo se consultó la fuente',
+  })
+  retrievedAt!: string;
+}
+
 /** Propiedad tal como la devuelve `$lookup`. */
 export class LookupPropertyDto {
   /**
@@ -142,6 +166,17 @@ export class LookupPropertyDto {
    */
   @ApiProperty({ description: 'Valor de la propiedad' })
   valueJson!: unknown;
+
+  /**
+   * Antigüedad del dato. Solo en las propiedades que son una sección de
+   * farmacología clínica; el resto no la lleva.
+   */
+  @ApiPropertyOptional({
+    type: PropertySourceAgeDto,
+    description:
+      'Antigüedad del dato (estado S7). Solo en las secciones de farmacología clínica. known=false: antigüedad desconocida',
+  })
+  sourceAge?: PropertySourceAgeDto;
 }
 
 /** Resultado de `$lookup` (UC-03-11). */

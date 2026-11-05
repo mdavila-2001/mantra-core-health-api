@@ -1,13 +1,3 @@
-import { jest } from '@jest/globals';
-
-/**
- * Ejecuta la operación mock fn.
- *
- * @param impl - Valor de impl requerido por la operación.
- * @returns Resultado de mock fn conforme al contrato `any`.
- */
-const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-
 import { GlossarySeedService } from './glossary-seed.service';
 import { GLOSSARY_TERMS } from './glossary-terms.catalog';
 import {
@@ -30,89 +20,19 @@ import {
   GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
 } from '../../modules/terminology/glossary.constants';
-
-/** Filas por entidad y por id: el estado de la base de prueba. */
-type Store = Map<string, Map<string, any>>;
+import {
+  buildGlossarySeed,
+  type GlossarySeedStore as Store,
+} from './glossary-seed.testing';
 
 /**
- * Construye el seed con un contexto de persistencia controlado — el mismo
- * patrón que `dynamic-enum-seed.service.spec.ts`: un `em` en memoria que
- * responde `find`/`create`/`remove`/`flush` sin tocar una base real. Desde la
- * reconciliación guarda las filas enteras, porque `find` ya no pregunta sólo
- * por ids: compara contenido.
+ * El seed con un `em` en memoria (ver `glossary-seed.testing.ts`).
  *
  * @param initial - Filas que la base ya tiene, por entidad.
  * @returns Servicio, filas creadas y quitadas, y el estado final.
  */
-function build(initial: Store = new Map()) {
-  const store: Store = new Map(
-    [...initial].map(([entity, rows]) => [
-      entity,
-      new Map([...rows].map(([id, row]) => [id, { ...row }])),
-    ]),
-  );
-  const table = (entity: string): Map<string, any> => {
-    if (!store.has(entity)) store.set(entity, new Map());
-    return store.get(entity)!;
-  };
-  const matches = (row: any, where: Record<string, any>): boolean =>
-    Object.entries(where).every(([key, value]) =>
-      value !== null && typeof value === 'object' && '$in' in value
-        ? (value.$in as unknown[]).includes(row[key])
-        : row[key] === value,
-    );
-
-  const created: { entity: string; data: any }[] = [];
-  const removed: { entity: string; data: any }[] = [];
-  let flushes = 0;
-
-  const em = {
-    find: mockFn((entity: any, where: any) =>
-      Promise.resolve(
-        [...table(entity.name).values()].filter((row) => matches(row, where)),
-      ),
-    ),
-    create: mockFn((entity: any, data: any) => {
-      created.push({ entity: entity.name, data });
-      table(entity.name).set(data.id, data);
-      return data;
-    }),
-    remove: mockFn((row: any) => {
-      for (const [entity, rows] of store) {
-        if (rows.get(row.id) === row) {
-          rows.delete(row.id);
-          removed.push({ entity, data: row });
-        }
-      }
-    }),
-    flush: mockFn(() => {
-      flushes += 1;
-      return Promise.resolve();
-    }),
-    // `backfillTermCodeSystem` (FND-25-03) es un `UPDATE ... WHERE` de una
-    // sola sentencia: todo lo que siembra este doble ya cuelga del code
-    // system propio, así que no hay nada que backfillear — 0.
-    nativeUpdate: mockFn(() => Promise.resolve(0)),
-  };
-  const orm = { em: { fork: mockFn(() => em) } };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new GlossarySeedService(orm as any, logger as any);
-
-  return {
-    service,
-    created,
-    removed,
-    store,
-    /** Filas creadas para una entidad concreta. */
-    rowsOf: (entity: string) =>
-      created.filter((row) => row.entity === entity).map((row) => row.data),
-    /** Filas que la base tiene ahora para una entidad. */
-    rowsIn: (entity: string) => [...table(entity).values()],
-    /** Cuántas veces se flusheó. */
-    flushes: () => flushes,
-    logger,
-  };
-}
+const build = (initial?: Store) =>
+  buildGlossarySeed(GlossarySeedService, initial);
 
 /** Una base ya sembrada con el catálogo actual. */
 async function seeded(): Promise<Store> {
@@ -153,17 +73,24 @@ const TOTAL_DESIGNATIONS = GLOSSARY_TERMS.reduce(
 /**
  * Cuántas propiedades declara el catálogo: 3 por término (slug, definición
  * clínica, resumen llano), fuentes editoriales cuando están curadas y 4 más
- * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`,
- * más el artículo enciclopédico (`glossary-article`) de los términos que lo tienen.
+ * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`.
+ * El artículo enciclopédico va aparte (`CURATED_ARTICLE_SLUGS`).
  */
 const TOTAL_PROPERTIES = GLOSSARY_TERMS.reduce(
   (total, term) =>
     total +
     3 +
     (GLOSSARY_SOURCE_REFERENCES[term.slug] !== undefined ? 1 : 0) +
-    (glossaryArticleFor(term.slug) !== undefined ? 1 : 0) +
     (term.drugFacts ? 4 : 0),
   0,
+);
+
+/**
+ * Los artículos de términos curados: los únicos cuyo concepto existe en una
+ * base vacía después de este seed. El resto los cargan los importadores.
+ */
+const CURATED_ARTICLE_SLUGS = GLOSSARY_ARTICLE_SLUGS.filter((slug) =>
+  KNOWN_SLUGS.has(slug),
 );
 
 describe('GlossarySeedService', () => {
@@ -176,7 +103,9 @@ describe('GlossarySeedService', () => {
     expect(g.rowsOf('ValueSetVersions')).toHaveLength(GLOSSARY_TAXONOMY.length);
     expect(g.rowsOf('CatalogConcepts')).toHaveLength(GLOSSARY_TERMS.length);
     expect(g.rowsOf('ConceptDesignations')).toHaveLength(TOTAL_DESIGNATIONS);
-    expect(g.rowsOf('ConceptProperties')).toHaveLength(TOTAL_PROPERTIES);
+    expect(g.rowsOf('ConceptProperties')).toHaveLength(
+      TOTAL_PROPERTIES + CURATED_ARTICLE_SLUGS.length,
+    );
     expect(g.rowsOf('ValueSetMembers')).toHaveLength(TOTAL_MEMBERSHIPS);
     expect(g.rowsOf('ConceptRelationships')).toHaveLength(
       TOTAL_RESOLVABLE_RELATIONS,
@@ -186,6 +115,8 @@ describe('GlossarySeedService', () => {
     expect(result.terms).toBe(GLOSSARY_TERMS.length);
     expect(result.memberships).toBe(TOTAL_MEMBERSHIPS);
     expect(result.relationships).toBe(TOTAL_RESOLVABLE_RELATIONS);
+    expect(result.properties).toBe(TOTAL_PROPERTIES);
+    expect(result.articles).toBe(CURATED_ARTICLE_SLUGS.length);
     expect(result.orphanRelationships).toBe(
       TOTAL_DECLARED_RELATIONS - TOTAL_RESOLVABLE_RELATIONS,
     );
@@ -260,18 +191,23 @@ describe('GlossarySeedService', () => {
     }
   });
 
-  it('siembra el artículo enciclopédico propio, íntegro, sólo en los términos que lo tienen', async () => {
+  it('siembra el artículo enciclopédico propio, íntegro, en los términos curados que lo tienen', async () => {
     const g = build();
 
-    await g.service.run();
+    const result = await g.service.run();
 
     const articles = g
       .rowsOf('ConceptProperties')
       .filter((property) => property.propertyCode === 'glossary-article');
     expect(articles.map((property) => property.conceptId).sort()).toEqual(
-      GLOSSARY_ARTICLE_SLUGS.map((slug) => glossaryTermConceptId(slug)).sort(),
+      CURATED_ARTICLE_SLUGS.map((slug) => glossaryTermConceptId(slug)).sort(),
     );
-    for (const slug of GLOSSARY_ARTICLE_SLUGS) {
+    // En una base vacía sólo existen los conceptos curados: el resto de los
+    // artículos espera a que un importador cargue su término.
+    expect(result.orphanArticles).toBe(
+      GLOSSARY_ARTICLE_SLUGS.length - CURATED_ARTICLE_SLUGS.length,
+    );
+    for (const slug of CURATED_ARTICLE_SLUGS) {
       const property = articles.find(
         (candidate) =>
           candidate.id === glossaryPropertyId(slug, 'glossary-article'),
@@ -304,6 +240,9 @@ describe('GlossarySeedService', () => {
       codeSystemBackfilled: 0,
       updated: 0,
       removed: 0,
+      articles: 0,
+      orphanArticles:
+        GLOSSARY_ARTICLE_SLUGS.length - CURATED_ARTICLE_SLUGS.length,
     });
   });
 
@@ -476,7 +415,7 @@ describe('GlossarySeedService', () => {
     });
 
     it('un artículo desactualizado en la base se reescribe con el del catálogo', async () => {
-      const slug = GLOSSARY_ARTICLE_SLUGS[0];
+      const slug = CURATED_ARTICLE_SLUGS[0];
       const store = await seeded();
       const property = store
         .get('ConceptProperties')!

@@ -8,6 +8,7 @@ import { GetResourceAgendaUseCase } from './use-cases/get-resource-agenda.use-ca
 import { Injectable } from '@nestjs/common';
 import { ListCatalogLookupsUseCase } from './use-cases/list-catalog-lookups.use-case';
 import { ListExceptionsUseCase } from './use-cases/list-exceptions.use-case';
+import { ListTemplateLiveBookingsUseCase } from './use-cases/list-template-live-bookings.use-case';
 import { ListTemplatesUseCase } from './use-cases/list-templates.use-case';
 import { ReactivateTemplateUseCase } from './use-cases/reactivate-template.use-case';
 import { RemoveExceptionUseCase } from './use-cases/remove-exception.use-case';
@@ -40,6 +41,7 @@ export class SchedulingCatalogService {
     private readonly listExceptionsUseCase: ListExceptionsUseCase,
     private readonly getResourceAgendaUseCase: GetResourceAgendaUseCase,
     private readonly lookups: ListCatalogLookupsUseCase,
+    private readonly listTemplateLiveBookingsUseCase: ListTemplateLiveBookingsUseCase,
   ) {}
 
   createResource(...args: Parameters<CreateResourceUseCase['execute']>) {
@@ -66,6 +68,12 @@ export class SchedulingCatalogService {
 
   retireTemplate(...args: Parameters<RetireTemplateUseCase['execute']>) {
     return this.retireTemplateUseCase.execute(...args);
+  }
+
+  listTemplateLiveBookings(
+    ...args: Parameters<ListTemplateLiveBookingsUseCase['execute']>
+  ) {
+    return this.listTemplateLiveBookingsUseCase.execute(...args);
   }
 
   generateSlots(...args: Parameters<GenerateSlotsUseCase['execute']>) {

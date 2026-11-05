@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { QuotationInstallments, Quotations } from '../billing/entities';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { ClinicalModule } from '../clinical/clinical.module';
 import { PracticeModule } from '../practice/practice.module';
 import { QuotationsController } from './controllers';
 import {
@@ -28,11 +29,15 @@ import { QuotationsService } from './services';
  * es lo mismo que hace el `PATCH` del catálogo, y por lo mismo `BillingModule`
  * y `AccountingModule` ya lo importan. `practice` no importa `quotations`, así
  * que la dependencia va en un solo sentido y no cierra ciclo.
+ *
+ * `ClinicalModule` entra por `ClinicalReadService`: tener la práctica al
+ * alcance no da acceso a cualquier paciente, y esa política vive allí.
  */
 @Module({
   imports: [
     MikroOrmModule.forFeature([Quotations, QuotationInstallments]),
     PracticeModule,
+    ClinicalModule,
   ],
   controllers: [QuotationsController],
   providers: [

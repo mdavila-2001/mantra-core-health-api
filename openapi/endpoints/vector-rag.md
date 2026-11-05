@@ -125,6 +125,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CollectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CollectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CollectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CollectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CollectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -160,7 +161,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Versión de modelo no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
-| 404 | `NOT_FOUND` | Política de acceso RAG no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 409 | `CONFLICT` | Ya existe una colección con ese código para el tenant. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 409 | `CONFLICT` | El namespace ya está en uso por otro vínculo. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -274,6 +274,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EmbeddingJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EmbeddingJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EmbeddingJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EmbeddingJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EmbeddingJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -306,7 +307,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La colección no está activa; no admite jobs de embedding. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -408,6 +408,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LifecycleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LifecycleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LifecycleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LifecycleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LifecycleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -436,7 +437,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -538,6 +538,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReEmbedResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReEmbedResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReEmbedResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReEmbedResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReEmbedResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -568,7 +569,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 404 | `NOT_FOUND` | Versión de modelo no encontrada. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 409 | `CONFLICT` | La colección ya usa esa versión de modelo. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -682,6 +682,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReconciliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -718,7 +719,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-maintenance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -823,6 +823,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeletionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeletionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeletionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeletionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -857,6 +858,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Referencia de borrado no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-maintenance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Hay que declarar qué se borra: un documento fuente o un paciente. | Excepción explícita en src/modules/vector_rag/services/vector-maintenance.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1009,6 +1011,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunEmbeddingJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunEmbeddingJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunEmbeddingJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunEmbeddingJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunEmbeddingJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1043,8 +1046,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Job de embedding no encontrado. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 404 | `NOT_FOUND` | Versión de modelo no encontrada. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El job ya no está en cola ni en ejecución. | Excepción explícita en src/modules/vector_rag/services/embedding-pipeline.service.ts |
@@ -1131,6 +1132,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingEmbeddingJobsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingEmbeddingJobsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingEmbeddingJobsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingEmbeddingJobsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingEmbeddingJobsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1275,6 +1277,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModelVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1410,6 +1413,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ModelVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModelVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1575,6 +1579,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RagPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1707,6 +1712,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RagPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RagPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1737,10 +1743,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Política de acceso RAG no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La colección pertenece a otro tenant que la política. | Excepción explícita en src/modules/vector_rag/services/vector-governance.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1850,6 +1853,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetrievalSessionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetrievalSessionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetrievalSessionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetrievalSessionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetrievalSessionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1880,8 +1884,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Colección no encontrada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
-| 404 | `NOT_FOUND` | Política de acceso RAG no encontrada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La colección está deprecada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 422 | `PRECONDITION_FAILED` | La política no admite ese tipo de principal. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
@@ -2002,6 +2004,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvidenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvidenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2030,7 +2033,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de retrieval no encontrada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión tiene que estar ranqueada para materializar evidencia. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no tiene ningún candidato seleccionado y autorizado que citar. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
@@ -2139,6 +2141,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FeedbackResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FeedbackResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FeedbackResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FeedbackResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedbackResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2286,6 +2289,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RankCandidatesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RankCandidatesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RankCandidatesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RankCandidatesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RankCandidatesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2329,10 +2333,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de retrieval no encontrada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 404 | `NOT_FOUND` | Chunk candidato no encontrado. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
-| 404 | `NOT_FOUND` | Documento del chunk no encontrado. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
-| 404 | `NOT_FOUND` | Política de acceso RAG no encontrada. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión ya no está abierta. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |
 | 422 | `PRECONDITION_FAILED` | La colección no tiene política de acceso RAG; no se puede consultar. | Excepción explícita en src/modules/vector_rag/services/retrieval.service.ts |

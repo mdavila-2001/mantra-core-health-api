@@ -5,17 +5,24 @@ import {
   SurveysTemplatesController,
   SurveysAssignmentsController,
   SurveysPatientController,
+  SurveysInsightsController,
+  SurveysCatalogController,
 } from './controllers';
 import {
   SurveysTemplatesService,
   SurveysAssignmentsService,
   SurveysResponsesService,
+  SurveysSystemTemplatesService,
+  SurveysInsightsService,
+  SurveysCatalogService,
 } from './services';
 import {
   TemplatesRepository,
   AssignmentsRepository,
   InvitationsRepository,
   ResponsesRepository,
+  TargetsRepository,
+  InsightsRepository,
 } from './repositories';
 
 /**
@@ -38,6 +45,8 @@ import {
     SurveysTemplatesController,
     SurveysAssignmentsController,
     SurveysPatientController,
+    SurveysInsightsController,
+    SurveysCatalogController,
   ],
   providers: [
     // Repositorios
@@ -45,15 +54,19 @@ import {
     AssignmentsRepository,
     InvitationsRepository,
     ResponsesRepository,
+    TargetsRepository,
+    InsightsRepository,
     // Servicios
     SurveysTemplatesService,
     SurveysAssignmentsService,
     SurveysResponsesService,
+    SurveysSystemTemplatesService,
+    SurveysInsightsService,
+    SurveysCatalogService,
   ],
-  // `billing` los reutiliza para auto-crear la encuesta de satisfacción por
-  // defecto de un servicio médico nuevo (FT-31), en la misma transacción que
-  // lo da de alta — no vale la pena un segundo viaje HTTP a este módulo para
-  // algo que puede ser una escritura más dentro de la misma.
-  exports: [TemplatesRepository, AssignmentsRepository],
+  // `scheduling` emite la invitación al completarse una reserva, detrás de su
+  // puerto `BOOKING_COMPLETED_PORT`. Este módulo no importa `scheduling` (sólo
+  // lee sus entidades), así que la dependencia es de un solo sentido.
+  exports: [SurveysAssignmentsService],
 })
 export class SurveysModule {}

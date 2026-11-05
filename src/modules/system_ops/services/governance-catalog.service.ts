@@ -25,7 +25,7 @@ import {
 
 /**
  * Casos de uso de catálogo y políticas de gobierno de datos:
- *  - UC-11-01 catalogar entidad + campos (dominio/clasificación UPSERT).
+ *  - UC-11-01 catalogar entidad + campos (dominio/clasificación/entidad/campo UPSERT).
  *  - UC-11-02 definir y aplicar política de escritura.
  *  - UC-11-03 definir y aplicar política de retención (con base legal).
  *  - UC-11-04 definir regla de anonimización y asignarla a un campo PII/PHI.
@@ -96,27 +96,57 @@ export class GovernanceCatalogService {
         await tx.flush();
       }
 
-      // Entidad.
-      const entity = this.repo.createEntity(tx, {
-        schemaName: dto.schemaName,
-        tableName: dto.tableName,
-        domainId: domain.id,
-        classificationId: classification.id,
-        isAppendOnly: dto.isAppendOnly,
-        isSoftDelete: dto.isSoftDelete,
-        hasHistory: dto.hasHistory,
-        historyTable: dto.historyTable,
-        containsPii: dto.containsPii,
-        containsPhi: dto.containsPhi,
-        ownerTeam: dto.ownerTeam,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
-        actorUserId: actor.id,
-      });
+      // Entidad: UPSERT por (schema_name, table_name), clave única del registro
+      // (`uq_entity_registry_schema_name_table_name`). Un alta repetida actualiza la
+      // fila existente: el ciclo de purga de identidad exige exactamente una por tabla.
+      const existing = await this.repo.findEntityByTable(
+        tx,
+        dto.schemaName,
+        dto.tableName,
+      );
+      const entity =
+        existing ??
+        this.repo.createEntity(tx, {
+          schemaName: dto.schemaName,
+          tableName: dto.tableName,
+          domainId: domain.id,
+          classificationId: classification.id,
+          isAppendOnly: dto.isAppendOnly,
+          isSoftDelete: dto.isSoftDelete,
+          hasHistory: dto.hasHistory,
+          historyTable: dto.historyTable,
+          containsPii: dto.containsPii,
+          containsPhi: dto.containsPhi,
+          ownerTeam: dto.ownerTeam,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: actor.id,
+        });
+      const previousSnapshot = existing
+        ? this.applyEntityUpdate(existing, dto, domain.id, classification.id)
+        : undefined;
+      if (existing) touch(existing, actor.id);
       await tx.flush();
 
-      // Campos.
+      // Campos: UPSERT por column_name dentro de la entidad. Los campos ya
+      // registrados que no vienen en el alta se conservan (no se borran).
+      const registered = existing
+        ? await this.repo.findFieldsByEntity(tx, entity.id)
+        : [];
+      const byColumn = new Map(registered.map((f) => [f.columnName, f]));
       const fieldIds: string[] = [];
       for (const f of dto.fields) {
+        const current = byColumn.get(f.columnName);
+        if (current) {
+          current.classificationId = classification.id;
+          if (f.isPii !== undefined) current.isPii = f.isPii;
+          if (f.isPhi !== undefined) current.isPhi = f.isPhi;
+          if (f.maskingStrategyConceptId !== undefined)
+            current.maskingStrategyConceptId = f.maskingStrategyConceptId;
+          if (f.notes !== undefined) current.notes = f.notes;
+          touch(current, actor.id);
+          fieldIds.push(current.id);
+          continue;
+        }
         const field = this.repo.createField(tx, {
           entityRegistryId: entity.id,
           columnName: f.columnName,
@@ -128,6 +158,7 @@ export class GovernanceCatalogService {
           notes: f.notes,
           actorUserId: actor.id,
         });
+        byColumn.set(f.columnName, field);
         fieldIds.push(field.id);
       }
       await tx.flush();
@@ -135,8 +166,9 @@ export class GovernanceCatalogService {
       this.repo.recordChange(tx, {
         targetType: 'entity_registry',
         targetId: entity.id,
-        actionConceptId: SYSOPS.ACTION_CREATE,
+        actionConceptId: existing ? SYSOPS.ACTION_UPDATE : SYSOPS.ACTION_CREATE,
         changedByUserId: actor.id,
+        previousSnapshotJson: previousSnapshot,
         newSnapshotJson: {
           schemaName: dto.schemaName,
           tableName: dto.tableName,
@@ -157,6 +189,49 @@ export class GovernanceCatalogService {
         fieldIds,
       };
     });
+  }
+
+  /**
+   * Aplica un alta repetida sobre la fila ya registrada y devuelve la foto previa
+   * para la bitácora. Los opcionales ausentes en el DTO no pisan lo guardado.
+   */
+  private applyEntityUpdate(
+    entity: {
+      domainId?: string;
+      classificationId?: string;
+      isAppendOnly: boolean;
+      isSoftDelete: boolean;
+      hasHistory: boolean;
+      historyTable?: string;
+      containsPii?: boolean;
+      containsPhi?: boolean;
+      ownerTeam?: string;
+    },
+    dto: CatalogEntityDto,
+    domainId: string,
+    classificationId: string,
+  ): Record<string, unknown> {
+    const previous = {
+      domainId: entity.domainId,
+      classificationId: entity.classificationId,
+      isAppendOnly: entity.isAppendOnly,
+      isSoftDelete: entity.isSoftDelete,
+      hasHistory: entity.hasHistory,
+      historyTable: entity.historyTable,
+      containsPii: entity.containsPii,
+      containsPhi: entity.containsPhi,
+      ownerTeam: entity.ownerTeam,
+    };
+    entity.domainId = domainId;
+    entity.classificationId = classificationId;
+    entity.isAppendOnly = dto.isAppendOnly;
+    entity.isSoftDelete = dto.isSoftDelete;
+    entity.hasHistory = dto.hasHistory;
+    if (dto.historyTable !== undefined) entity.historyTable = dto.historyTable;
+    if (dto.containsPii !== undefined) entity.containsPii = dto.containsPii;
+    if (dto.containsPhi !== undefined) entity.containsPhi = dto.containsPhi;
+    if (dto.ownerTeam !== undefined) entity.ownerTeam = dto.ownerTeam;
+    return previous;
   }
 
   /** UC-11-02: define una política de escritura (code único). */

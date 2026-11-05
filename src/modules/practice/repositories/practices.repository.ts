@@ -93,6 +93,26 @@ export class PracticesRepository {
   }
 
   /**
+   * La práctica de la organización con ese código, si ya existe.
+   *
+   * El código se deriva del nombre al dar de alta, así que dos altas con el
+   * mismo nombre chocan acá y no en la base: `practice.practices` no tiene
+   * índice único sobre `(tenant_id, code)`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización dueña.
+   * @param code - Código de la práctica.
+   * @returns La práctica, o `null` si la organización no tiene ninguna con ese código.
+   */
+  findByTenantAndCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<Practices | null> {
+    return em.findOne(Practices, { tenantId, code });
+  }
+
+  /**
    * La práctica personal del profesional dentro del tenant, si ya la tiene.
    *
    * ALV-005: un profesional puede tener varios consultorios propios, pero

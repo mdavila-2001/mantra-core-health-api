@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   OpsReleasesService,
   OpsIncidentsService,
@@ -70,6 +75,11 @@ export class PlatformOpsController {
   ) {}
 
   /** UC-46-01. */
+  @Audited({
+    action: 'OPS_CHANGE_REQUEST_CREATED',
+    entity: 'change_request',
+    entityId: 'result.id',
+  })
   @Post('change-requests')
   @Roles('RELEASE_MANAGER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -86,6 +96,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-02. */
+  @Audited({
+    action: 'OPS_CHANGE_APPROVAL_RECORDED',
+    entity: 'change_approval',
+    entityId: 'result.id',
+  })
   @Post('change-requests/:id/approvals')
   @Roles('CHANGE_APPROVER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -103,6 +118,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-03. */
+  @Audited({
+    action: 'OPS_ARTIFACT_PUBLISHED',
+    entity: 'artifact',
+    entityId: 'result.id',
+  })
   @Post('artifacts')
   @Roles('DEPLOY_PIPELINE', 'RELEASE_MANAGER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -119,6 +139,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-04. */
+  @Audited({
+    action: 'OPS_DEPLOYMENT_CREATED',
+    entity: 'deployment',
+    entityId: 'result.id',
+  })
   @Post('deployments')
   @Roles('RELEASE_MANAGER', 'DEPLOY_PIPELINE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -135,6 +160,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-05. */
+  @Audited({
+    action: 'OPS_DEPLOYMENT_ROLLED_BACK',
+    entity: 'deployment',
+    entityId: 'param:id',
+  })
   @Post('deployments/:id/rollback')
   @Roles('SRE', 'RELEASE_MANAGER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -152,6 +182,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-06. */
+  @Audited({
+    action: 'OPS_HEALTH_CHECK_RUN_RECORDED',
+    entity: 'health_check_run',
+    entityId: 'result.id',
+  })
   @Post('health-checks/:id/runs')
   @Roles('SYSTEM', 'SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -169,6 +204,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-07. */
+  @Audited({
+    action: 'OPS_INCIDENT_UPDATED',
+    entity: 'health_incident',
+    entityId: 'param:id',
+  })
   @Patch('incidents/:id')
   @Roles('INCIDENT_COMMANDER', 'SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -186,6 +226,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-08. */
+  @Audited({
+    action: 'OPS_POSTMORTEM_OPENED',
+    entity: 'postmortem',
+    entityId: 'result.id',
+  })
   @Post('incidents/:id/postmortem')
   @Roles('SRE', 'INCIDENT_COMMANDER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -203,6 +248,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-09. */
+  @Audited({
+    action: 'OPS_SLO_MEASUREMENT_RECORDED',
+    entity: 'slo_measurement',
+    entityId: 'result.id',
+  })
   @Post('slo/:id/measurements')
   @Roles('SYSTEM', 'SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -220,6 +270,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-10. */
+  @Audited({
+    action: 'OPS_ERROR_BUDGET_BURN_RECORDED',
+    entity: 'error_budget_burn_event',
+    entityId: 'result.id',
+  })
   @Post('error-budget/:policyId/burn-events')
   @Roles('SYSTEM', 'SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -237,6 +292,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-11. */
+  @Audited({
+    action: 'OPS_CAPACITY_MEASUREMENT_RECORDED',
+    entity: 'capacity_measurement',
+    entityId: 'result.id',
+  })
   @Post('capacity-plans/:id/measurements')
   @Roles('CAPACITY_PLANNER', 'SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -254,6 +314,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-12. */
+  @Audited({
+    action: 'OPS_READINESS_REVIEW_COMPLETED',
+    entity: 'operational_readiness_review',
+    entityId: 'param:id',
+  })
   @Post('readiness-reviews/:id/complete')
   @Roles('RELEASE_MANAGER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -270,6 +335,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-13. */
+  @Audited({
+    action: 'OPS_RUNBOOK_VERSION_PUBLISHED',
+    entity: 'runbook_version',
+    entityId: 'result.id',
+  })
   @Post('runbooks/:id/versions')
   @Roles('SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -286,6 +356,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-13. */
+  @Audited({
+    action: 'OPS_RUNBOOK_EXECUTION_RECORDED',
+    entity: 'runbook_execution',
+    entityId: 'result.id',
+  })
   @Post('runbook-executions')
   @Roles('SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -301,6 +376,11 @@ export class PlatformOpsController {
   }
 
   /** UC-46-14. */
+  @Audited({
+    action: 'OPS_RESILIENCE_EXERCISE_COMPLETED',
+    entity: 'resilience_exercise',
+    entityId: 'param:id',
+  })
   @Post('resilience-exercises/:id/complete')
   @Roles('SRE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

@@ -662,11 +662,12 @@ export class QaExecutionService {
       .findOneOrFail(ExecutionPlans, { id: planId });
     let ctx: PlanContext;
     try {
-      ctx = await this.loadContext(
-        this.em.fork(),
-        plan.suiteId,
-        plan.environmentId,
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      ctx = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional((tx) =>
+          this.loadContext(tx, plan.suiteId, plan.environmentId),
+        );
     } catch (error) {
       const status = await this.close(planId, leaseOwner, 'INFRA_ERROR', {
         errorCode: 'CONTEXT_UNAVAILABLE',

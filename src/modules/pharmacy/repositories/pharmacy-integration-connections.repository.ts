@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import { PharmacyIntegrationConnections } from '../entities';
 import { createdBy } from '../../../common';
+import { PHARM } from '../pharmacy.concepts';
 
 /** Datos para establecer una conexión de integración (UC-24-07). */
 export interface CreateConnectionData {
@@ -15,9 +16,9 @@ export interface CreateConnectionData {
    */
   pharmacySiteId?: string;
   /**
-   * Id de la conexión de integración externa. `connection_id` es una FK NOT NULL
-   * (auto-referencia a esta misma tabla): si el cliente no aporta una conexión
-   * existente, la fila se auto-referencia usando su propio id.
+   * Id de la conexión registrada en `integrations.provider_connections`.
+   * `connection_id` es opcional: sin valor, la farmacia todavía no tiene
+   * configurado su sistema externo y trabaja en manual.
    */
   connectionId?: string;
   /**
@@ -81,6 +82,23 @@ export class PharmacyIntegrationConnectionsRepository {
     });
   }
 
+  /**
+   * Conexiones activas con consulta de stock del mismo nivel y alcance: las de
+   * la sucursal indicada o, sin sucursal, las de toda la farmacia.
+   */
+  findActiveStockInScope(
+    em: EntityManager,
+    pharmacyId: string,
+    pharmacySiteId: string | null,
+  ): Promise<PharmacyIntegrationConnections[]> {
+    return em.find(PharmacyIntegrationConnections, {
+      pharmacyId,
+      pharmacySiteId,
+      statusConceptId: PHARM.CONNECTION_ACTIVE,
+      supportsStockQuery: true,
+    });
+  }
+
   /** Crea la conexión en la unidad de trabajo (sin flush). */
   create(
     em: EntityManager,
@@ -93,8 +111,7 @@ export class PharmacyIntegrationConnectionsRepository {
         id,
         pharmacyId: data.pharmacyId,
         pharmacySiteId: data.pharmacySiteId,
-        // Auto-referencia si no se aporta una conexión externa registrada.
-        connectionId: data.connectionId ?? id,
+        connectionId: data.connectionId,
         integrationModeConceptId: data.integrationModeConceptId,
         inventoryAuthorityConceptId: data.inventoryAuthorityConceptId,
         supportsStockQuery: data.supportsStockQuery,

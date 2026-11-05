@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
 
 /**
  * Ejecuta la operación mock fn.
@@ -70,8 +76,23 @@ function build() {
     outbox as any,
     logger as any,
   );
+  // Las operaciones exigen el tenant activo: estas pruebas actúan dentro de
+  // TENANT_ID. `raw` conserva la operación sin contexto para probar otro tenant.
+  const raw = service;
+  const scoped = Object.create(raw) as typeof service;
+  for (const name of [
+    'openSession',
+    'rankCandidates',
+    'materializeEvidence',
+    'captureFeedback',
+  ] as const) {
+    (scoped as any)[name] = (...args: unknown[]) =>
+      runWithTenant(TENANT_ID, () => (raw as any)[name](...args));
+  }
+
   return {
-    service,
+    service: scoped,
+    raw,
     em,
     tx,
     retrievalRepo,
@@ -91,6 +112,7 @@ function build() {
 function policy(overrides: any = {}) {
   return {
     id: POLICY_ID,
+    tenantId: TENANT_ID,
     code: 'p',
     state: 'published',
     allowedPrincipalTypes: ['user'],
@@ -112,6 +134,7 @@ function session(overrides: any = {}) {
   return {
     id: SESSION_ID,
     tenantId: TENANT_ID,
+    principalId: actor.id,
     status: 'open',
     patientProfileId: PATIENT_ID,
     consentDirectiveId: CONSENT_ID,
@@ -185,6 +208,7 @@ describe('RetrievalService', () => {
       const d = build();
       d.catalogRepo.findCollectionById.mockResolvedValue({
         id: COLLECTION_ID,
+        tenantId: TENANT_ID,
         lifecycleState: 'active',
       });
 
@@ -241,6 +265,7 @@ describe('RetrievalService', () => {
       const d = build();
       d.catalogRepo.findCollectionById.mockResolvedValue({
         id: COLLECTION_ID,
+        tenantId: TENANT_ID,
         lifecycleState: 'deprecated',
         accessPolicyId: POLICY_ID,
       });
@@ -527,6 +552,252 @@ describe('RetrievalService', () => {
           actor,
         ),
       ).rejects.toThrow(/sesión completada/);
+    });
+
+    it('otro usuario del mismo tenant no puede dar feedback ni marcar la sesión de alguien más', async () => {
+      const d = build();
+      const s = session({ status: 'completed', principalId: 'user-owner' });
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(s);
+
+      let error: ResourceNotFoundException | undefined;
+      try {
+        await d.service.captureFeedback(
+          SESSION_ID,
+          { feedbackType: 'safety', safetyIssueCode: 'HALLUCINATION' },
+          actor,
+        );
+      } catch (e) {
+        error = e as ResourceNotFoundException;
+      }
+
+      expect(error?.getStatus()).toBe(404);
+      expect(error?.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(error?.details).toBeUndefined();
+      expect(s.status).toBe('completed');
+      expect(d.retrievalRepo.createFeedback).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('la sesión ajena responde igual que una inexistente', async () => {
+      const ajena = build();
+      ajena.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const inexistente = build();
+      inexistente.retrievalRepo.findSessionForUpdate.mockResolvedValue(null);
+      const feedback = { feedbackType: 'relevance' } as any;
+
+      const a: any = await ajena.service
+        .captureFeedback(SESSION_ID, feedback, actor)
+        .catch((e: unknown) => e);
+      const b: any = await inexistente.service
+        .captureFeedback(SESSION_ID, feedback, actor)
+        .catch((e: unknown) => e);
+
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('PLATFORM_ADMIN global sí puede dar feedback de la sesión de otro principal', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const admin = { id: 'admin-1', roles: ['PLATFORM_ADMIN'] } as any;
+
+      const result = await d.service.captureFeedback(
+        SESSION_ID,
+        { feedbackType: 'relevance' } as any,
+        admin,
+      );
+
+      expect(result.flagged).toBe(false);
+      expect(d.retrievalRepo.createFeedback).toHaveBeenCalled();
+    });
+
+    it('un PLATFORM_ADMIN con ámbito en otro tenant no cuenta como administrador de plataforma', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const scopedElsewhere = {
+        id: 'admin-2',
+        roles: ['PLATFORM_ADMIN'],
+        scopedRoles: {
+          '99999999-9999-9999-9999-999999999999': ['PLATFORM_ADMIN'],
+        },
+      } as any;
+
+      await expect(
+        d.service.captureFeedback(
+          SESSION_ID,
+          { feedbackType: 'relevance' } as any,
+          scopedElsewhere,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (VEC-01)', () => {
+    const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('abrir una sesión sobre la colección de otro tenant responde 404 y no abre nada', async () => {
+      const d = build();
+      d.catalogRepo.findCollectionById.mockResolvedValue({
+        id: COLLECTION_ID,
+        tenantId: OTHER_TENANT,
+        lifecycleState: 'active',
+        accessPolicyId: POLICY_ID,
+      });
+
+      const error = await failure(d.service.openSession(OPEN_DTO, actor));
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.retrievalRepo.createSession).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('la política de otro tenant enlazada a la colección no gobierna la consulta', async () => {
+      const d = build();
+      d.catalogRepo.findPolicyById.mockResolvedValue(
+        policy({ tenantId: OTHER_TENANT }),
+      );
+
+      const error = await failure(d.service.openSession(OPEN_DTO, actor));
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.retrievalRepo.createSession).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'ranquear',
+        (d: any) =>
+          d.service.rankCandidates(
+            SESSION_ID,
+            { candidates: [{ vectorChunkId: CHUNK_ID, vectorScore: 0.9 }] },
+            actor,
+          ),
+      ],
+      [
+        'citar evidencia',
+        (d: any) =>
+          d.service.materializeEvidence(
+            SESSION_ID,
+            {
+              citations: [{ vectorChunkId: CHUNK_ID, quotedTextRedacted: 'x' }],
+            },
+            actor,
+          ),
+      ],
+      [
+        'dar feedback',
+        (d: any) =>
+          d.service.captureFeedback(
+            SESSION_ID,
+            { feedbackType: 'relevance', safetyIssueCode: 'unsafe' },
+            actor,
+          ),
+      ],
+    ])(
+      'Error: %s sobre la sesión de otro tenant responde 404 y la deja intacta',
+      async (_n, run) => {
+        const d = build();
+        const foreign = session({
+          tenantId: OTHER_TENANT,
+          status: 'completed',
+        });
+        d.retrievalRepo.findSessionForUpdate.mockResolvedValue(foreign);
+
+        const error = await failure(run(d));
+
+        expect(error.getStatus()).toBe(404);
+        expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+        expect(foreign.status).toBe('completed');
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Falla catalogada: la sesión de B y un UUID inexistente responden exactamente igual', async () => {
+      const ajena = build();
+      ajena.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ tenantId: OTHER_TENANT, status: 'completed' }),
+      );
+      const inexistente = build();
+      inexistente.retrievalRepo.findSessionForUpdate.mockResolvedValue(null);
+      const feedback = { feedbackType: 'relevance' } as any;
+
+      const a = await failure(
+        ajena.service.captureFeedback(SESSION_ID, feedback, actor),
+      );
+      const b = await failure(
+        inexistente.service.captureFeedback(SESSION_ID, feedback, actor),
+      );
+
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(a.details).toBeUndefined();
+    });
+
+    it('las lecturas por sesión se piden con el tenant del contexto', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(session());
+
+      await d.service.rankCandidates(
+        SESSION_ID,
+        { candidates: [{ vectorChunkId: CHUNK_ID, vectorScore: 0.9 }] } as any,
+        actor,
+      );
+
+      expect(d.retrievalRepo.findSessionForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        SESSION_ID,
+        TENANT_ID,
+      );
+    });
+
+    it('un candidato cuyo chunk es de una colección de otro tenant se trata como inexistente', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(session());
+      // La colección del documento no existe en el tenant de la sesión.
+      d.catalogRepo.findCollectionById.mockResolvedValue(null);
+
+      const error = await failure(
+        d.service.rankCandidates(
+          SESSION_ID,
+          {
+            candidates: [{ vectorChunkId: CHUNK_ID, vectorScore: 0.9 }],
+          } as any,
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.catalogRepo.findCollectionById).toHaveBeenCalledWith(
+        d.tx,
+        COLLECTION_ID,
+        TENANT_ID,
+      );
+      expect(d.retrievalRepo.createCandidate).not.toHaveBeenCalled();
+    });
+
+    it('un actor sin tenant activo que no es SYSTEM falla cerrado (412)', async () => {
+      const d = build();
+
+      const error = await d.raw
+        .openSession(OPEN_DTO, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findCollectionById).not.toHaveBeenCalled();
     });
   });
 });

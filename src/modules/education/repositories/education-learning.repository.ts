@@ -9,6 +9,7 @@ import {
   CmeCreditRecords,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { PaymentIntents } from '../../payments/entities';
 
 /**
  * Describe el contrato estructural de create enrollment data.
@@ -184,6 +185,38 @@ export class EducationLearningRepository {
     });
   }
 
+  /** Intento de pago citado por una inscripción comprada (lectura de `payments`). */
+  findPaymentIntent(
+    em: EntityManager,
+    id: string,
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(PaymentIntents, { id });
+  }
+
+  /**
+   * Relee el intento de pago con bloqueo de escritura. Serializa dos
+   * inscripciones simultáneas que citan el mismo pago: la segunda espera al
+   * commit de la primera y ya ve su inscripción.
+   */
+  findPaymentIntentForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(
+      PaymentIntents,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Inscripción que ya se apoya en ese intento de pago, de cualquier estado. */
+  findEnrollmentByPaymentIntent(
+    em: EntityManager,
+    paymentIntentId: string,
+  ): Promise<Enrollments | null> {
+    return em.findOne(Enrollments, { paymentIntentId });
+  }
+
   // --- Progreso de lección (UC-47-06) ---
 
   /** Log append-only: el progreso se anota, nunca se corrige. */
@@ -302,6 +335,14 @@ export class EducationLearningRepository {
       },
       { partial: true },
     );
+  }
+
+  /** Intento por id, sin bloqueo: sirve para comprobar su alcance antes de bloquearlo. */
+  findAttemptById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AssessmentAttempts | null> {
+    return em.findOne(AssessmentAttempts, { id });
   }
 
   /**

@@ -4,6 +4,8 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  getCurrentTenantId,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -18,6 +20,13 @@ import {
   TenantDunningResultDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
+import { activeTenantId, assertDocumentInTenant } from '../billing-scope';
+
+/** "No existe" de la factura de un ítem de morosidad; la ajena responde idéntico. */
+const DUNNING_INVOICE_NOT_FOUND = {
+  message: 'Factura no encontrada',
+  reason: BillingErrorReason.DUNNING_INVOICE_NOT_FOUND,
+};
 
 const DEFAULT_DUNNING_DISCOVERY_BATCH = 500;
 const MS_PER_DAY = 86_400_000;
@@ -33,6 +42,11 @@ const DUNNING_ELIGIBLE_INVOICE_STATUSES = [
  * tenant + run_number) y un ítem por factura morosa; opcionalmente marca las
  * facturas como IN_COLLECTION. La corrida se cierra en estado COMPLETED en la
  * misma transacción.
+ *
+ * Alcance: la corrida es del tenant del contexto (el `tenantId` del cuerpo no es
+ * fuente de verdad) y cada factura de un ítem tiene que ser de ese tenant; una
+ * ajena responde igual que una inexistente y no se escribe nada. El barrido
+ * automático de un administrador sólo recorre su propio tenant.
  */
 @Injectable()
 export class DunningService {
@@ -69,16 +83,16 @@ export class DunningService {
     this.logger.info(
       {
         operation: 'billing.dunning.execute',
-        tenantId: dto.tenantId,
         runNumber: dto.runNumber,
         actorId: actor.id,
       },
       'Executing dunning run',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
       const clash = await this.dunningRepo.findRunByNumber(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.runNumber,
       );
       if (clash) {
@@ -91,8 +105,21 @@ export class DunningService {
         );
       }
 
+      // Las facturas se acotan al tenant ANTES de crear la corrida.
+      const invoices = [];
+      for (const item of dto.items) {
+        invoices.push(
+          await assertDocumentInTenant(
+            this.practicesLookupRepo,
+            await this.invoicesRepo.findById(tx, item.invoiceId),
+            tenantId,
+            DUNNING_INVOICE_NOT_FOUND,
+          ),
+        );
+      }
+
       const run = this.dunningRepo.createRun(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         runNumber: dto.runNumber,
         runDate: dto.runDate ? new Date(dto.runDate) : new Date(),
         dunningLevelConceptId:
@@ -103,7 +130,7 @@ export class DunningService {
       // FK planas: la corrida debe existir antes de sus ítems.
       await tx.flush();
 
-      for (const item of dto.items) {
+      for (const [index, item] of dto.items.entries()) {
         this.dunningRepo.createItem(tx, {
           dunningRunId: run.id,
           invoiceId: item.invoiceId,
@@ -114,12 +141,9 @@ export class DunningService {
           statusConceptId: BILL.DUNNING_ITEM_NOTIFIED,
         });
 
-        // Marca opcional de factura en cobranza (si la factura pertenece a billing).
-        const invoice = await this.invoicesRepo.findById(tx, item.invoiceId);
-        if (invoice) {
-          invoice.statusConceptId = BILL.INVOICE_IN_COLLECTION;
-          touch(invoice, actor.id);
-        }
+        const invoice = invoices[index];
+        invoice.statusConceptId = BILL.INVOICE_IN_COLLECTION;
+        touch(invoice, actor.id);
       }
 
       // Cierra la corrida.
@@ -168,9 +192,15 @@ export class DunningService {
     const limit = dto.limit ?? DEFAULT_DUNNING_DISCOVERY_BATCH;
     const runDateKey = now.toISOString().slice(0, 10);
 
-    const practices = await this.practicesLookupRepo.findActive(
-      CONCEPTS.STATE_ACTIVE,
-    );
+    // `SYSTEM` y `SUPERADMIN` sin tenant barren todos; cualquier otro actor
+    // (un `SECURITY_ADMIN`) sólo recorre el tenant de su contexto.
+    const sweepsAllTenants =
+      !getCurrentTenantId() &&
+      actor.roles.some((role) => role === 'SYSTEM' || role === 'SUPERADMIN');
+    const scopedTenantId = sweepsAllTenants ? undefined : requireTenantId();
+    const practices = (
+      await this.practicesLookupRepo.findActive(CONCEPTS.STATE_ACTIVE)
+    ).filter((p) => !scopedTenantId || p.tenantId === scopedTenantId);
     const practiceIdsByTenant = new Map<string, string[]>();
     for (const practice of practices) {
       const list = practiceIdsByTenant.get(practice.tenantId) ?? [];

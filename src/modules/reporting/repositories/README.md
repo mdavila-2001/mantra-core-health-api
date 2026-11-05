@@ -9,10 +9,10 @@ PostgreSQL, schema `reporting`. Entidades generadas por introspección. Las alta
 
 ## Repositorios
 
-| Repositorio | Tablas | Métodos destacados |
-| --- | --- | --- |
-| `ReportingDefinitionsRepository` | `report_data_sources`, `report_definitions`, `report_parameters`, `report_columns`, `report_versions`, `dashboards`, `dashboard_widgets` | `createDataSource`, `findDataSourceByCode`, `createDefinition`, `findDefinitionForUpdate`, `findDefinitionByCode`, `createParameter`, `findParametersByDefinition`, `createColumn`, `createVersion`, `findVersion`, `findActiveVersion`, `createDashboard`, `findDashboardByCode`, `createWidget` |
-| `ReportingRunsRepository` | `report_executions`, `report_snapshots`, `report_schedules`, `report_distributions`, `report_subscriptions` | `createExecution`, `findExecutionForUpdate`, `createSnapshot`, `findSnapshotByExecution`, `findSnapshotByHash`, `createSchedule`, `findDueSchedules`, `findSchedulesByDefinitionForUpdate`, `createDistribution`, `findDistributionsByExecution`, `createSubscription`, `findSubscription`, `findActiveSubscriptions` |
+| Repositorio                      | Tablas                                                                                                                                   | Métodos destacados                                                                                                                                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReportingDefinitionsRepository` | `report_data_sources`, `report_definitions`, `report_parameters`, `report_columns`, `report_versions`, `dashboards`, `dashboard_widgets` | `createDataSource`, `findDataSourceByCode`, `createDefinition`, `findDefinitionForUpdate`, `findDefinitionByCode`, `createParameter`, `findParametersByDefinition`, `createColumn`, `createVersion`, `findVersion`, `findActiveVersion`, `createDashboard`, `findDashboardByCode`, `createWidget`                     |
+| `ReportingRunsRepository`        | `report_executions`, `report_snapshots`, `report_schedules`, `report_distributions`, `report_subscriptions`                              | `createExecution`, `findExecutionForUpdate`, `createSnapshot`, `findSnapshotByExecution`, `findSnapshotByHash`, `createSchedule`, `findDueSchedules`, `findSchedulesByDefinitionForUpdate`, `createDistribution`, `findDistributionsByExecution`, `createSubscription`, `findSubscription`, `findActiveSubscriptions` |
 
 La división separa lo que se **declara** de lo que se **ejecuta**: la primera cambia cuando alguien
 diseña un reporte, la segunda en cada corrida.
@@ -52,7 +52,7 @@ lo que permite al almacén reaprovechar el objeto.
 Consultas por PK, FK, clave natural o hash, todas indexadas. La del tick filtra por `next_run_at`,
 que en el modelo lleva índice, y acota con `limit`. Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real del SKIP LOCKED, de
 los bloqueos y de las UNIQUE llega con las pruebas de integración.

@@ -81,6 +81,21 @@ export class ClinicalAccessGrantsRepository {
     });
   }
 
+  /** Grant activo concreto (paciente, usuario) dentro de un tenant (evita duplicados sin sondear otros tenants). */
+  findActiveInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    grantedUserId: string,
+    tenantId: string,
+  ): Promise<ClinicalAccessGrants | null> {
+    return em.findOne(ClinicalAccessGrants, {
+      patientProfileId,
+      grantedUserId,
+      tenantId,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /** Grants activos de un usuario sobre un paciente (para el PDP). */
   findActiveForUserPatient(
     em: EntityManager,

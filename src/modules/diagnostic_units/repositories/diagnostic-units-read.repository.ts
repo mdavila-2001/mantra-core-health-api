@@ -235,6 +235,39 @@ export class DiagnosticUnitsReadRepository {
   }
 
   /**
+   * Qué conceptos de estudio, de los pedidos, ofrece cada unidad.
+   *
+   * Es la base de la búsqueda por cobertura: solo cuentan las ofertas activas,
+   * y se busca por `study_concept_id` —el concepto que comparten la orden del
+   * paciente y la oferta— y no por el código propio de cada centro.
+   *
+   * @param em - Contexto de persistencia.
+   * @param studyConceptIds - Los conceptos pedidos.
+   * @returns Por unidad, los conceptos pedidos que ofrece.
+   */
+  async findOfferedConcepts(
+    em: EntityManager,
+    studyConceptIds: readonly string[],
+  ): Promise<Map<string, Set<string>>> {
+    const offered = new Map<string, Set<string>>();
+    if (studyConceptIds.length === 0) return offered;
+    const rows = await em.find(
+      DiagnosticStudyOfferings,
+      {
+        studyConceptId: { $in: [...studyConceptIds] },
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+      },
+      { fields: ['diagnosticUnitId', 'studyConceptId'] },
+    );
+    for (const row of rows) {
+      const concepts = offered.get(row.diagnosticUnitId) ?? new Set<string>();
+      concepts.add(row.studyConceptId);
+      offered.set(row.diagnosticUnitId, concepts);
+    }
+    return offered;
+  }
+
+  /**
    * Unidades con convenio vigente con una aseguradora.
    *
    * Un convenio es, en este modelo, un cronograma de precios de tipo

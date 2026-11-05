@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -24,6 +24,16 @@ const PLATFORM_CONCEPT: Readonly<Record<DevicePlatform, string>> = {
   WEB: CONCEPTS.PLATFORM_WEB,
 };
 
+/**
+ * Roles que pueden registrar un dispositivo sobre una cuenta que no es la propia. Son los mismos
+ * que administran el resto de `/iam/users/:id` (todas esas rutas llevan `@Roles('SECURITY_ADMIN')`;
+ * `SUPERADMIN` pasa cualquier `@Roles`, ver `roles.guard.ts`).
+ */
+const ROLES_THAT_MANAGE_DEVICES: readonly string[] = [
+  'SECURITY_ADMIN',
+  'SUPERADMIN',
+];
+
 /** Registro de dispositivos de un usuario (UC-01-05). */
 @Injectable()
 export class IamDevicesService {
@@ -46,12 +56,33 @@ export class IamDevicesService {
     this.logger.setContext(IamDevicesService.name);
   }
 
-  /** UC-01-05: registra un dispositivo, opcionalmente marcándolo de confianza. */
+  /**
+   * UC-01-05: registra un dispositivo, opcionalmente marcándolo de confianza.
+   *
+   * Titularidad: la ruta `POST /iam/users/:id/devices` no lleva `@Roles` (el titular registra los
+   * suyos), de modo que la decide este servicio. Un dispositivo —y su marca de confianza— lo
+   * registra el dueño de la cuenta o un administrador de seguridad; para cualquier otro es 403
+   * genérico, sin confirmar si el id existe.
+   *
+   * @throws ForbiddenException si el actor no es el titular ni un administrador de seguridad.
+   */
   async register(
     userId: string,
     dto: CreateDeviceDto,
     actor: AuthenticatedUser,
   ): Promise<DeviceResponseDto> {
+    if (
+      actor.id !== userId &&
+      !actor.roles.some((role) => ROLES_THAT_MANAGE_DEVICES.includes(role))
+    ) {
+      this.logger.warn(
+        { operation: 'iam.device.forbidden', userId, actorId: actor.id },
+        'Device registration over another account rejected',
+      );
+      throw new ForbiddenException(
+        'No tiene acceso a los dispositivos de esta cuenta',
+      );
+    }
     this.logger.info(
       { operation: 'iam.device.register', userId, trust: dto.trust === true },
       'Registering device',

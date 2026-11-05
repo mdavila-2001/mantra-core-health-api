@@ -97,6 +97,7 @@ código, «nome técnico» de ANVISA, 一般的名称 de la JMDN).
 | `jmdn` | Japanese Medical Device Nomenclature (一般的名称) |
 | `cnd` | Classificazione Nazionale dei Dispositivi (Italia) |
 | `<país>:<esquema>` | Cualquier otra nomenclatura nacional, con el ISO alfa-2 delante: `br:anvisa-nome-tecnico`, `kr:mfds-class`, `cn:nmpa-classification`, … |
+| `who:<esquema>` | Clasificación de la OMS, que no es de un país (p. ej. `who:assay-format` de la precalificación de IVD) |
 
 Si un registro trae **varios** tipos (GUDID: product code y GMDN), el
 principal va en `deviceTypeCode`/`deviceTypeSystem`/`deviceTypeName` y los

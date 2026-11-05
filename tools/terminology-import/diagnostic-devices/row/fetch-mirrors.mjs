@@ -6,8 +6,6 @@
 // `$DX_DEVICES_BUILD_DIR/mirrors/` (fuera de git), verifica cada hash fijado y
 // prepara lo que la etapa 1 lee sin ejecutar nada del espejo:
 //   - `datasets.zip` de Health Canada → `extracted/hc-mdall/*.json` (unzip)
-//   - `MD - Medical Devices.xlsx` de CDSCO → `extracted/cdsco/*.jsonl`
-//     (`xlsx-to-jsonl.py`, python -I, openpyxl en solo lectura)
 //   - pickles de TGA DAEN → `extracted/tga-daen/reports.jsonl` con un
 //     unpickler que rechaza toda clase (`tga-daen-pickles.py`, python -I)
 //
@@ -106,21 +104,6 @@ async function main() {
     join(tgaOut, 'reports.jsonl'),
   ]);
   console.log(`tga-daen convertido en ${join(tgaOut, 'reports.jsonl')}`);
-
-  const cdscoOut = ensureDir(join(EXTRACTED_DIR, 'cdsco'));
-  execFileSync('python3', [
-    '-I',
-    join(ROW_DIR, 'xlsx-to-jsonl.py'),
-    join(
-      mirrorDir('vishnuu-patil/india-meddevice-intelligence'),
-      'Data',
-      'MD - Medical Devices.xlsx',
-    ),
-    join(cdscoOut, 'md-medical-devices.jsonl'),
-  ]);
-  console.log(
-    `cdsco convertido en ${join(cdscoOut, 'md-medical-devices.jsonl')}`,
-  );
 
   writeFileSync(RETRIEVED_PATH, JSON.stringify(retrieved, null, 2) + '\n');
   console.log(`retrieved.json → ${RETRIEVED_PATH}`);

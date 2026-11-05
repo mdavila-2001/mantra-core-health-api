@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import {
   InventoryReservationsService,
   InventorySyncService,
@@ -48,6 +53,10 @@ export class PharmacyInventoryInternalController {
    * pedidos de paciente (FAR-E1) cuyo reloj de 48 h ya pasó — un solo worker,
    * las dos colas.
    */
+  @Audited({
+    action: 'INVENTORY_RESERVATIONS_EXPIRED',
+    entity: 'inventory_reservation',
+  })
   @Post('reservations/expire')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -64,6 +73,11 @@ export class PharmacyInventoryInternalController {
   }
 
   /** Bootstrap: ingresar un lote de sincronización ERP. */
+  @Audited({
+    action: 'INVENTORY_SYNC_BATCH_CREATED',
+    entity: 'pharmacy_inventory_sync_batch',
+    entityId: 'result.id',
+  })
   @Post('inventory-sync-batches')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -76,6 +90,11 @@ export class PharmacyInventoryInternalController {
   }
 
   /** UC-25-12: reconciliar un lote de sincronización. */
+  @Audited({
+    action: 'INVENTORY_SYNC_BATCH_RECONCILED',
+    entity: 'pharmacy_inventory_sync_batch',
+    entityId: 'param:batchId',
+  })
   @Post('inventory-sync/:batchId/reconcile')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

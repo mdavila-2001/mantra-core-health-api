@@ -9,9 +9,11 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopDentalService } from './periop-dental.service';
-import { PreconditionFailedException } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
+import { PreconditionFailedException, runWithTenant } from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { PERIOP } from '../procedures_perioperative.concepts';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
 const actor = {
   id: 'user-1',
@@ -44,14 +46,43 @@ function build() {
     findSitesByProcedures: mockFn().mockResolvedValue([]),
   };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  const receivedServices = {
+    projectProcedure: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PeriopDentalService(
+  // El actor tiene base clínica sobre el paciente, salvo que el test diga otra
+  // cosa (la regla de `clinical.procedures`, #893).
+  const clinicalRead = {
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+  };
+  const raw = new PeriopDentalService(
     em as any,
     dentalRepo as any,
+    clinicalRead as any,
+    receivedServices as any,
     auditTrail as any,
     logger as any,
   );
-  return { service, tx, dentalRepo, auditTrail, logger };
+  // Cada llamada corre con TENANT como tenant activo, como la deja el interceptor.
+  const service = new Proxy(raw, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(TENANT, () => value.apply(target, args));
+    },
+  });
+  return {
+    service,
+    em,
+    tx,
+    dentalRepo,
+    clinicalRead,
+    auditTrail,
+    receivedServices,
+    logger,
+  };
 }
 
 /**
@@ -89,6 +120,16 @@ describe('PeriopDentalService', () => {
           categoryConceptId: PERIOP.DENTAL_PROCEDURE_CATEGORY,
           statusConceptId: CLIN.PROCEDURE_COMPLETED,
         }),
+      );
+    });
+
+    it('proyecta el tratamiento a «Servicios recibidos», porque este camino no pasa por ProceduresService', async () => {
+      const d = build();
+      await d.service.record(dto(), TENANT, actor as any);
+      expect(d.receivedServices.projectProcedure).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'proc-1' }),
+        actor.id,
       );
     });
 
@@ -213,15 +254,83 @@ describe('PeriopDentalService', () => {
     });
   });
 
-  describe('listByPatient', () => {
-    it('filtra por paciente y por categoría odontológica', async () => {
+  describe('#893: paciente sin base clínica del actor', () => {
+    /**
+     * Ajeno o inexistente, la respuesta es la misma: el 403 con el mismo texto
+     * que da `ClinicalReadService` en toda la historia clínica.
+     */
+    it('el alta responde lo mismo que la historia y no escribe nada', async () => {
+      const d = build();
+      const denied = new ForbiddenException('Sin acceso a la historia');
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(denied);
+
+      await expect(d.service.record(dto(), TENANT, actor as any)).rejects.toBe(
+        denied,
+      );
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        PATIENT,
+        actor,
+      );
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.dentalRepo.createProcedure).not.toHaveBeenCalled();
+    });
+
+    it('el histórico responde lo mismo que la historia y no lee nada', async () => {
+      const d = build();
+      const denied = new ForbiddenException('Sin acceso a la historia');
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(denied);
+
+      await expect(
+        d.service.listByPatient(
+          { patientProfileId: PATIENT } as any,
+          actor as any,
+        ),
+      ).rejects.toBe(denied);
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+        PATIENT,
+        actor,
+      );
+      expect(d.dentalRepo.findByPatient).not.toHaveBeenCalled();
+      expect(d.dentalRepo.countByPatient).not.toHaveBeenCalled();
+    });
+
+    it('el histórico sólo trae lo que custodia el tenant activo', async () => {
       const d = build();
 
-      await d.service.listByPatient({ patientProfileId: PATIENT } as any);
+      await d.service.listByPatient(
+        { patientProfileId: PATIENT } as any,
+        actor as any,
+      );
 
       expect(d.dentalRepo.findByPatient).toHaveBeenCalledWith(
         expect.anything(),
         PATIENT,
+        TENANT,
+        PERIOP.DENTAL_PROCEDURE_CATEGORY,
+        50,
+      );
+      expect(d.dentalRepo.countByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        PATIENT,
+        TENANT,
+        PERIOP.DENTAL_PROCEDURE_CATEGORY,
+      );
+    });
+  });
+
+  describe('listByPatient', () => {
+    it('filtra por paciente y por categoría odontológica', async () => {
+      const d = build();
+
+      await d.service.listByPatient(
+        { patientProfileId: PATIENT } as any,
+        actor as any,
+      );
+
+      expect(d.dentalRepo.findByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        PATIENT,
+        TENANT,
         PERIOP.DENTAL_PROCEDURE_CATEGORY,
         50,
       );
@@ -230,14 +339,18 @@ describe('PeriopDentalService', () => {
     it('respeta el tope pedido', async () => {
       const d = build();
 
-      await d.service.listByPatient({
-        patientProfileId: PATIENT,
-        limit: 10,
-      } as any);
+      await d.service.listByPatient(
+        {
+          patientProfileId: PATIENT,
+          limit: 10,
+        } as any,
+        actor as any,
+      );
 
       expect(d.dentalRepo.findByPatient).toHaveBeenCalledWith(
         expect.anything(),
         PATIENT,
+        TENANT,
         PERIOP.DENTAL_PROCEDURE_CATEGORY,
         10,
       );
@@ -270,9 +383,12 @@ describe('PeriopDentalService', () => {
         },
       ]);
 
-      const page = await d.service.listByPatient({
-        patientProfileId: PATIENT,
-      } as any);
+      const page = await d.service.listByPatient(
+        {
+          patientProfileId: PATIENT,
+        } as any,
+        actor as any,
+      );
 
       expect(page.items[0].sites).toHaveLength(1);
       expect(page.items[0].sites[0].bodySiteConceptId).toBe(PERIOP.TOOTH_36);
@@ -289,10 +405,13 @@ describe('PeriopDentalService', () => {
       const d = build();
       d.dentalRepo.countByPatient.mockResolvedValue(120);
 
-      const page = await d.service.listByPatient({
-        patientProfileId: PATIENT,
-        limit: 1,
-      } as any);
+      const page = await d.service.listByPatient(
+        {
+          patientProfileId: PATIENT,
+          limit: 1,
+        } as any,
+        actor as any,
+      );
 
       expect(page.total).toBe(120);
     });
@@ -300,7 +419,10 @@ describe('PeriopDentalService', () => {
     it('sin procedimientos no consulta la tabla de sitios', async () => {
       const d = build();
 
-      await d.service.listByPatient({ patientProfileId: PATIENT } as any);
+      await d.service.listByPatient(
+        { patientProfileId: PATIENT } as any,
+        actor as any,
+      );
 
       expect(d.dentalRepo.findSitesByProcedures).toHaveBeenCalledWith(
         expect.anything(),

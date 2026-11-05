@@ -2,7 +2,7 @@
 
 # Catálogo del schema `crm`
 
-- **Tablas:** 32 · **Columnas:** 470 (106 con descripción: 22.6 %) · **Índices:** 278
+- **Tablas:** 33 · **Columnas:** 479 (109 con descripción: 22.8 %) · **Índices:** 285
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -14,8 +14,8 @@
 | [account_team_members](#account_team_members) | Asigna miembros del equipo a cuentas para definir responsables de gestión comercial. | 10 | 7 | 3 | COINCIDE |
 | [contact_channel_endpoints](#contact_channel_endpoints) | Conserva direcciones o endpoints de canales de contacto para permitir comunicaciones CRM. | 24 | 10 | 2 | COINCIDE |
 | [contact_channels](#contact_channels) | Registra canales de contacto de personas para coordinar comunicaciones comerciales o institucionales. | 12 | 5 | 0 | COINCIDE |
-| [contacts](#contacts) | Cataloga personas de contacto asociadas a cuentas y relaciones comerciales del operador. | 21 | 12 | 2 | COINCIDE |
-| [crm_accounts](#crm_accounts) | Representa empresas y organizaciones con las que el operador mantiene relaciones comerciales, separado de los datos clínicos de pacientes. | 21 | 13 | 3 | COINCIDE |
+| [contacts](#contacts) | Cataloga personas de contacto asociadas a cuentas y relaciones comerciales del operador. | 21 | 12 | 4 | COINCIDE |
+| [crm_accounts](#crm_accounts) | Representa empresas y organizaciones con las que el operador mantiene relaciones comerciales, separado de los datos clínicos de pacientes. | 21 | 13 | 6 | COINCIDE |
 | [crm_activities](#crm_activities) | Registra llamadas, reuniones y otras actividades para mantener una línea de tiempo de relaciones comerciales. | 20 | 13 | 2 | COINCIDE |
 | [crm_activity_assignments](#crm_activity_assignments) | Asigna actividades a responsables para coordinar tareas y seguimientos. | 10 | 7 | 0 | COINCIDE |
 | [crm_activity_relations](#crm_activity_relations) | Vincula actividades CRM con cuentas, contactos, oportunidades y otros objetos relacionados. | 18 | 19 | 0 | COINCIDE |
@@ -24,8 +24,9 @@
 | [crm_case_comments](#crm_case_comments) | Conserva comentarios y actualizaciones asociados a la atención de casos CRM. | 7 | 5 | 1 | COINCIDE |
 | [crm_case_contacts](#crm_case_contacts) | Vincula contactos participantes a casos para identificar solicitantes y personas involucradas. | 7 | 5 | 0 | COINCIDE |
 | [crm_case_milestones](#crm_case_milestones) | Registra hitos y vencimientos de casos para medir compromisos de atención al cliente. | 13 | 7 | 0 | COINCIDE |
+| [crm_case_owner_history](#crm_case_owner_history) | sin propósito | 8 | 6 | 0 | COINCIDE |
 | [crm_case_status_history](#crm_case_status_history) | Preserva transiciones de estado de casos para reconstruir su atención y resolución. | 8 | 6 | 3 | COINCIDE |
-| [crm_cases](#crm_cases) | Gestiona casos de servicio o relación comercial abiertos por cuentas y contactos. | 23 | 18 | 8 | COINCIDE |
+| [crm_cases](#crm_cases) | Gestiona casos de servicio o relación comercial abiertos por cuentas y contactos. | 24 | 19 | 7 | COINCIDE |
 | [crm_email_messages](#crm_email_messages) | Conserva emails asociados a relaciones CRM para documentar comunicaciones comerciales. | 14 | 5 | 0 | COINCIDE |
 | [crm_email_recipients](#crm_email_recipients) | Identifica destinatarios de mensajes CRM para trazar a quién se comunicó cada email. | 11 | 7 | 0 | COINCIDE |
 | [crm_entitlements](#crm_entitlements) | Define niveles o derechos de servicio que determinan qué asistencia corresponde a cada cuenta. | 17 | 10 | 0 | COINCIDE |
@@ -33,21 +34,21 @@
 | [crm_notes](#crm_notes) | Guarda notas internas sobre cuentas, contactos y oportunidades para apoyar continuidad de gestión. | 11 | 5 | 1 | COINCIDE |
 | [crm_recurrence_rules](#crm_recurrence_rules) | Define reglas de repetición para eventos o actividades periódicas de gestión. | 12 | 5 | 0 | COINCIDE |
 | [crm_tasks](#crm_tasks) | Registra tareas de seguimiento y gestión dentro de relaciones comerciales e institucionales. | 16 | 9 | 1 | COINCIDE |
-| [leads](#leads) | Conserva prospectos capturados para calificarlos y convertirlos en oportunidades comerciales. | 21 | 11 | 5 | COINCIDE |
-| [opportunities](#opportunities) | Representa oportunidades comerciales o institucionales que pueden derivar en contratos o acuerdos. | 22 | 15 | 7 | COINCIDE |
+| [leads](#leads) | Conserva prospectos capturados para calificarlos y convertirlos en oportunidades comerciales. | 21 | 11 | 3 | COINCIDE |
+| [opportunities](#opportunities) | Representa oportunidades comerciales o institucionales que pueden derivar en contratos o acuerdos. | 22 | 15 | 5 | COINCIDE |
 | [opportunity_contact_roles](#opportunity_contact_roles) | Asocia contactos con oportunidades y describe su papel en el proceso comercial. | 11 | 6 | 0 | COINCIDE |
 | [opportunity_line_items](#opportunity_line_items) | Detalla productos o servicios considerados en una oportunidad para describir su alcance económico. | 18 | 8 | 0 | COINCIDE |
 | [opportunity_stage_history](#opportunity_stage_history) | Preserva cambios de etapa de oportunidades para reconstruir decisiones y duración del ciclo comercial. | 10 | 7 | 4 | COINCIDE |
 | [partnership_agreements](#partnership_agreements) | Vincula alianzas con acuerdos formales y sus condiciones comerciales. | 16 | 9 | 1 | COINCIDE |
 | [partnerships](#partnerships) | Cataloga alianzas con prestadores, proveedores u organizaciones que colaboran con el ecosistema médico. | 20 | 12 | 1 | COINCIDE |
-| [pipeline_stages](#pipeline_stages) | Cataloga etapas de cada pipeline para seguir el avance de prospectos y oportunidades. | 13 | 4 | 1 | COINCIDE |
-| [pipelines](#pipelines) | Define procesos comerciales por etapas para organizar oportunidades y alianzas del operador médico. | 11 | 8 | 0 | COINCIDE |
+| [pipeline_stages](#pipeline_stages) | Cataloga etapas de cada pipeline para seguir el avance de prospectos y oportunidades. | 13 | 4 | 2 | COINCIDE |
+| [pipelines](#pipelines) | Define procesos comerciales por etapas para organizar oportunidades y alianzas del operador médico. | 11 | 8 | 2 | COINCIDE |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 32 tablas
+### Familia 1 de 1 — 33 tablas
 
 ```mermaid
 erDiagram
@@ -274,6 +275,13 @@ erDiagram
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
+  crm_crm_case_owner_history["crm.crm_case_owner_history"] {
+    uuid id PK
+    uuid crm_case_id FK
+    uuid from_owner_user_id FK
+    uuid to_owner_user_id FK
+    uuid changed_by_user_id FK
+  }
   crm_crm_case_status_history["crm.crm_case_status_history"] {
     uuid id PK
     uuid crm_case_id FK
@@ -376,6 +384,7 @@ erDiagram
   crm_crm_case_comments }o--|| crm_crm_cases : "crm_case_id"
   crm_crm_case_milestones }o--|| crm_crm_cases : "crm_case_id"
   crm_crm_case_milestones }o--o| crm_crm_entitlements : "crm_entitlement_id"
+  crm_crm_case_owner_history }o--|| crm_crm_cases : "crm_case_id"
   crm_crm_case_status_history }o--|| crm_crm_cases : "crm_case_id"
   crm_opportunity_line_items }o--|| crm_opportunities : "opportunity_id"
   crm_opportunity_stage_history }o--|| crm_opportunities : "opportunity_id"
@@ -708,7 +717,7 @@ Cataloga personas de contacto asociadas a cuentas y relaciones comerciales del o
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: contacts`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `Contacts` — `src/modules/crm/entities/contacts.entity.ts`
-- **Resumen:** 21 columnas · 12 índices · 11 FK salientes · 12 entrantes · 2 operaciones
+- **Resumen:** 21 columnas · 12 índices · 11 FK salientes · 12 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -768,7 +777,7 @@ Cataloga personas de contacto asociadas a cuentas y relaciones comerciales del o
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_contacts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_contacts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_contacts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_contacts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_contacts_crm_account_id` | no | crm_account_id | Soporta la clave foránea fk_contacts_crm_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_contacts_contact_type_concept_id` | no | contact_type_concept_id | Soporta la clave foránea fk_contacts_contact_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_contacts_linked_user_id` | no | linked_user_id | Soporta la clave foránea fk_contacts_linked_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -786,6 +795,8 @@ Cataloga personas de contacto asociadas a cuentas y relaciones comerciales del o
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /crm/accounts | CREA | DIRECTA |
+| POST /crm/activities | LEE | DIRECTA |
+| POST /crm/cases | LEE | DIRECTA |
 | PATCH /crm/contacts/{id}/channels/{cid}/opt-in | LEE | DIRECTA |
 
 #### Gobierno
@@ -811,7 +822,7 @@ Representa empresas y organizaciones con las que el operador mantiene relaciones
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: crm_accounts; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `CrmAccounts` — `src/modules/crm/entities/crm_accounts.entity.ts`
-- **Resumen:** 21 columnas · 13 índices · 11 FK salientes · 11 entrantes · 3 operaciones
+- **Resumen:** 21 columnas · 13 índices · 11 FK salientes · 11 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -870,7 +881,7 @@ Representa empresas y organizaciones con las que el operador mantiene relaciones
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_crm_accounts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_accounts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_accounts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_accounts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_crm_accounts_account_type_concept_id` | no | account_type_concept_id | Soporta la clave foránea fk_crm_accounts_account_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_accounts_industry_concept_id` | no | industry_concept_id | Soporta la clave foránea fk_crm_accounts_industry_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_accounts_parent_account_id` | no | parent_account_id | Soporta la clave foránea fk_crm_accounts_parent_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -891,6 +902,9 @@ Representa empresas y organizaciones con las que el operador mantiene relaciones
 | POST /crm/accounts | CREA | DIRECTA |
 | GET /crm/accounts/{id}/360 | LEE | DIRECTA |
 | POST /crm/accounts/{id}/team-members | LEE | DIRECTA |
+| POST /crm/activities | LEE | DIRECTA |
+| POST /crm/cases | LEE | DIRECTA |
+| POST /crm/leads/{id}/convert | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -970,7 +984,7 @@ Registra llamadas, reuniones y otras actividades para mantener una línea de tie
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_crm_activities_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_activities_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_activities_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_activities_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_crm_activities_activity_type_concept_id` | no | activity_type_concept_id | Soporta la clave foránea fk_crm_activities_activity_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_activities_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_crm_activities_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_activities_contact_id` | no | contact_id | Soporta la clave foránea fk_crm_activities_contact_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1514,6 +1528,68 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 ---
 
+### crm_case_owner_history
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
+- **Entidad del ORM:** `CrmCaseOwnerHistory` — `src/modules/crm/entities/crm_case_owner_history.entity.ts`
+- **Resumen:** 8 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/crm/entities/crm_case_owner_history.entity.ts:12`)_ | coincide |
+| 2 | `crm_case_id` | `uuid` | Clave foránea → crm.crm_cases.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `from_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 4 | `to_owner_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 5 | `changed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 6 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `reason_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/crm/entities/crm_case_owner_history.entity.ts:58`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | crm_case_id | crm.crm_cases (id) | fk_crm_case_owner_history_crm_case_id |
+| hacia | from_owner_user_id | iam.users (id) | fk_crm_case_owner_history_from_owner_user_id |
+| hacia | to_owner_user_id | iam.users (id) | fk_crm_case_owner_history_to_owner_user_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_crm_case_owner_history_changed_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_crm_case_owner_history_crm_case_id` | no | crm_case_id | Soporta la clave foránea fk_crm_case_owner_history_crm_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_case_owner_history_from_owner_user_id` | no | from_owner_user_id | Soporta la clave foránea fk_crm_case_owner_history_from_owner_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_case_owner_history_to_owner_user_id` | no | to_owner_user_id | Soporta la clave foránea fk_crm_case_owner_history_to_owner_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_case_owner_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_crm_case_owner_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_crm_case_owner_history_case_changed` | no | crm_case_id, ("changed_at" DESC) | _sin uso detectado estáticamente_ |
+| `brin_crm_case_owner_history_created_at` | no | created_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### crm_case_status_history
 
 #### Vista general
@@ -1589,7 +1665,7 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: crm_cases`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `CrmCases` — `src/modules/crm/entities/crm_cases.entity.ts`
-- **Resumen:** 23 columnas · 18 índices · 14 FK salientes · 6 entrantes · 8 operaciones
+- **Resumen:** 24 columnas · 19 índices · 15 FK salientes · 8 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -1618,6 +1694,7 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/crm/entities/crm_cases.entity.ts:152`)_ | coincide |
+| 24 | `insurance_claim_id` | `uuid` | Clave foránea → insurance.insurance_claims.id; Opcional | + v4.2.49 (INS-INC-001 / INS-INC-008, issue #60): une la gestion (el caso CRM) con la adjudicacion (insurance.insurance_claims). Nullable: la mayoria de los casos no son un siniestro. Un siniestro puede tener varios casos de gestion. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_49_crm.puml:590`)_ | coincide |
 
 #### Relaciones
 
@@ -1637,19 +1714,22 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_crm_cases_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_crm_cases_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_crm_cases_updated_by_user_id |
+| hacia | insurance_claim_id | insurance.insurance_claims (id) | fk_crm_cases_insurance_claim_id |
 | desde | id | crm.crm_activity_relations (case_id) | fk_crm_activity_relations_case_id |
 | desde | id | crm.crm_cases (parent_case_id) | fk_crm_cases_parent_case_id |
 | desde | id | crm.crm_case_contacts (crm_case_id) | fk_crm_case_contacts_crm_case_id |
 | desde | id | crm.crm_case_comments (crm_case_id) | fk_crm_case_comments_crm_case_id |
 | desde | id | crm.crm_case_status_history (crm_case_id) | fk_crm_case_status_history_crm_case_id |
+| desde | id | crm.crm_case_owner_history (crm_case_id) | fk_crm_case_owner_history_crm_case_id |
 | desde | id | crm.crm_case_milestones (crm_case_id) | fk_crm_case_milestones_crm_case_id |
+| desde | id | community.service_reviews (verified_crm_case_id) | fk_service_reviews_verified_crm_case_id |
 
 #### Índices
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_crm_cases_tenant_id_case_number` | sí | tenant_id, case_number | Garantiza que no se repita la combinación (tenant_id, case_number) _(DOCUMENTO)_; Soporta la clave foránea fk_crm_cases_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_crm_cases_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_cases_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_crm_cases_tenant_id_case_number` | sí | tenant_id, case_number | Garantiza que no se repita la combinación (tenant_id, case_number) _(DOCUMENTO)_; Soporta la clave foránea fk_crm_cases_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_crm_cases_tenant_id` | no | tenant_id | Soporta la clave foránea fk_crm_cases_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_crm_cases_crm_account_id` | no | crm_account_id | Soporta la clave foránea fk_crm_cases_crm_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «crm_account_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_crm_cases_primary_contact_id` | no | primary_contact_id | Soporta la clave foránea fk_crm_cases_primary_contact_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_cases_business_partner_id` | no | business_partner_id | Soporta la clave foránea fk_crm_cases_business_partner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1665,6 +1745,7 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 | `ix_crm_cases_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_crm_cases_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_crm_cases_tenant_status_priority_updated` | no | tenant_id, status_concept_id, priority_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
 | `ix_crm_cases_owner_status_updated` | no | owner_user_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_crm_cases_insurance_claim_id` | no | insurance_claim_id | Soporta la clave foránea fk_crm_cases_insurance_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_crm_cases_search` | no | (to_tsvector('simple', (coalesce(case_number, '') ¦¦ ' ' ¦¦ coalesce(subject, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
 
 #### Restricciones
@@ -1678,12 +1759,11 @@ Gestiona casos de servicio o relación comercial abiertos por cuentas y contacto
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /crm/accounts/{id}/360 | LEE | DIRECTA |
+| POST /crm/activities | LEE | DIRECTA |
 | POST /crm/cases | CREA | DIRECTA |
 | POST /crm/cases | LEE | DIRECTA |
 | POST /crm/cases/{id}/comments | LEE | DIRECTA |
-| POST /crm/cases/{id}/resolve | ACTUALIZA | POR_TIPO |
 | POST /crm/cases/{id}/resolve | LEE | DIRECTA |
-| PATCH /crm/cases/{id}/status | ACTUALIZA | POR_TIPO |
 | PATCH /crm/cases/{id}/status | LEE | DIRECTA |
 
 #### Gobierno
@@ -2241,7 +2321,7 @@ Conserva prospectos capturados para calificarlos y convertirlos en oportunidades
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: leads`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `Leads` — `src/modules/crm/entities/leads.entity.ts`
-- **Resumen:** 21 columnas · 11 índices · 10 FK salientes · 5 entrantes · 5 operaciones
+- **Resumen:** 21 columnas · 11 índices · 10 FK salientes · 5 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -2293,7 +2373,7 @@ Conserva prospectos capturados para calificarlos y convertirlos en oportunidades
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_leads_tenant_id` | no | tenant_id | Soporta la clave foránea fk_leads_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_leads_tenant_id` | no | tenant_id | Soporta la clave foránea fk_leads_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_leads_lead_source_concept_id` | no | lead_source_concept_id | Soporta la clave foránea fk_leads_lead_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_leads_contact_id` | no | contact_id | Soporta la clave foránea fk_leads_contact_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_leads_crm_account_id` | no | crm_account_id | Soporta la clave foránea fk_leads_crm_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2310,9 +2390,7 @@ Conserva prospectos capturados para calificarlos y convertirlos en oportunidades
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /crm/leads | CREA | DIRECTA |
-| POST /crm/leads/{id}/convert | ACTUALIZA | POR_TIPO |
 | POST /crm/leads/{id}/convert | LEE | DIRECTA |
-| PATCH /crm/leads/{id}/qualify | ACTUALIZA | POR_TIPO |
 | PATCH /crm/leads/{id}/qualify | LEE | DIRECTA |
 
 #### Gobierno
@@ -2338,7 +2416,7 @@ Representa oportunidades comerciales o institucionales que pueden derivar en con
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: opportunities`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `Opportunities` — `src/modules/crm/entities/opportunities.entity.ts`
-- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 8 entrantes · 7 operaciones
+- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 8 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2397,7 +2475,7 @@ Representa oportunidades comerciales o institucionales que pueden derivar en con
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_opportunities_tenant_id` | no | tenant_id | Soporta la clave foránea fk_opportunities_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_opportunities_tenant_id` | no | tenant_id | Soporta la clave foránea fk_opportunities_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_opportunities_pipeline_id` | no | pipeline_id | Soporta la clave foránea fk_opportunities_pipeline_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_opportunities_stage_id` | no | stage_id | Soporta la clave foránea fk_opportunities_stage_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_opportunities_crm_account_id` | no | crm_account_id | Soporta la clave foránea fk_opportunities_crm_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2417,12 +2495,10 @@ Representa oportunidades comerciales o institucionales que pueden derivar en con
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /crm/activities | LEE | DIRECTA |
 | POST /crm/leads/{id}/convert | CREA | DIRECTA |
-| POST /crm/opportunities/{id}/advance-stage | ACTUALIZA | POR_TIPO |
 | POST /crm/opportunities/{id}/advance-stage | LEE | DIRECTA |
-| POST /crm/opportunities/{id}/lose | ACTUALIZA | POR_TIPO |
 | POST /crm/opportunities/{id}/lose | LEE | DIRECTA |
-| POST /crm/opportunities/{id}/win | ACTUALIZA | POR_TIPO |
 | POST /crm/opportunities/{id}/win | LEE | DIRECTA |
 
 #### Gobierno
@@ -2846,7 +2922,7 @@ Cataloga etapas de cada pipeline para seguir el avance de prospectos y oportunid
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: pipeline_stages`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `PipelineStages` — `src/modules/crm/entities/pipeline_stages.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 3 entrantes · 1 operaciones
+- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 3 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2890,6 +2966,7 @@ Cataloga etapas de cada pipeline para seguir el avance de prospectos y oportunid
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /crm/leads/{id}/convert | LEE | DIRECTA |
 | POST /crm/opportunities/{id}/advance-stage | LEE | DIRECTA |
 
 #### Gobierno
@@ -2915,7 +2992,7 @@ Define procesos comerciales por etapas para organizar oportunidades y alianzas d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_49_crm.puml: pipelines`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_49_crm.puml` · **DDL:** `SQL/49_crm/02_tables.sql`
 - **Entidad del ORM:** `Pipelines` — `src/modules/crm/entities/pipelines.entity.ts`
-- **Resumen:** 11 columnas · 8 índices · 5 FK salientes · 3 entrantes · 0 operaciones
+- **Resumen:** 11 columnas · 8 índices · 5 FK salientes · 3 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2951,7 +3028,7 @@ Define procesos comerciales por etapas para organizar oportunidades y alianzas d
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_pipelines_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
-| `ix_pipelines_tenant_id` | no | tenant_id | Soporta la clave foránea fk_pipelines_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_pipelines_tenant_id` | no | tenant_id | Soporta la clave foránea fk_pipelines_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pipelines_pipeline_type_concept_id` | no | pipeline_type_concept_id | Soporta la clave foránea fk_pipelines_pipeline_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pipelines_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_pipelines_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pipelines_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_pipelines_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2967,7 +3044,10 @@ Define procesos comerciales por etapas para organizar oportunidades y alianzas d
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /crm/leads/{id}/convert | LEE | DIRECTA |
+| POST /crm/opportunities/{id}/advance-stage | LEE | DIRECTA |
 
 #### Gobierno
 

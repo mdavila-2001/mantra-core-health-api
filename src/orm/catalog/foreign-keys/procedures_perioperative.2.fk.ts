@@ -2,11 +2,36 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `procedures_perioperative` (parte 2/2).
- * 40 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 65 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const proceduresPerioperativeForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['procedure_charge_items', 'invoice_line_id', 'billing', 'invoice_lines', 'id'],
+  ['procedure_charge_items', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
+  ['procedure_charge_items', 'procedure_id', 'clinical', 'procedures', 'id'],
+  ['procedure_charge_items', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_charge_items', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['procedure_complications', 'complication_code_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_complications', 'condition_id', 'clinical', 'conditions', 'id'],
+  ['procedure_complications', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_complications', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
+  ['procedure_complications', 'procedure_id', 'clinical', 'procedures', 'id'],
+  ['procedure_complications', 'relatedness_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_complications', 'reported_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['procedure_complications', 'severity_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_devices', 'device_id', 'iam', 'devices', 'id'],
+  ['procedure_devices', 'procedure_id', 'clinical', 'procedures', 'id'],
+  ['procedure_devices', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_devices', 'use_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_implants', 'body_site_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_implants', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['procedure_implants', 'explant_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_implants', 'implant_device_id', 'iam', 'devices', 'id'],
+  ['procedure_implants', 'implant_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_implants', 'laterality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['procedure_implants', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
+  ['procedure_implants', 'procedure_id', 'clinical', 'procedures', 'id'],
   ['procedure_implants', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['procedure_implants', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['procedure_medication_uses', 'medication_administration_id', 'clinical', 'medication_records', 'id'],
@@ -28,8 +53,8 @@ export const proceduresPerioperativeForeignKeys2: readonly ForeignKeyTuple[] = [
   ['procedure_specimens', 'procedure_id', 'clinical', 'procedures', 'id'],
   ['procedure_specimens', 'specimen_id', 'diagnostics', 'specimens', 'id'],
   ['procedure_specimens', 'specimen_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['sterility_verification_checks', 'checked_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['sterility_verification_checks', 'check_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['sterility_verification_checks', 'checked_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['sterility_verification_checks', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
   ['sterility_verification_checks', 'result_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['surgical_safety_checklists', 'checklist_type_concept_id', 'terminology', 'catalog_concepts', 'id'],

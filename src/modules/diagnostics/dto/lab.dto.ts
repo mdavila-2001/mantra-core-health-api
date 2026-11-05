@@ -335,6 +335,12 @@ export class ListWorkOrdersQueryDto {
   @IsUUID()
   assignedProfileId?: string;
 
+  /** F5b: sólo órdenes cuyo punto de toma es este espacio. */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Punto de toma (F5b)' })
+  @IsOptional()
+  @IsUUID()
+  collectionCareSpaceId?: string;
+
   /**
    * Valor de limit mantenido por la instancia.
    */
@@ -377,4 +383,10 @@ export class WorkOrderSummaryDto {
   /** Cuándo se completó. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   completedAt?: Date;
+  /** F5b: punto de toma (sugerido en la orden o el de la toma registrada). */
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Punto de toma {id, code, name} (F5b)',
+  })
+  collectionPoint?: { id: string; code: string; name: string } | null;
 }

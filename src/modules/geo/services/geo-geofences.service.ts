@@ -4,7 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -23,6 +23,11 @@ import {
   SHAPE_TYPE_CONCEPT_BY_CODE,
   EVENT_TYPE_CONCEPT_BY_CODE,
 } from '../geo.concepts';
+import {
+  assertGeofenceInTenant,
+  assertGeofenceSubjectSameTenant,
+  assertSubjectInTenant,
+} from '../geo-scope';
 
 /**
  * Casos de uso sobre geofences: definir/activar geofence (UC-13-04) y registrar
@@ -54,8 +59,11 @@ export class GeoGeofencesService {
     dto: CreateGeofenceDto,
     actor: AuthenticatedUser,
   ): Promise<GeofenceResponseDto> {
+    // El tenant sale del contexto autenticado, nunca del cuerpo: el interceptor
+    // ya rechaza un `dto.tenantId` contradictorio y acá se ignora el declarado.
+    const tenantId = requireTenantId();
     this.logger.info(
-      { operation: 'geo.geofence.define', tenantId: dto.tenantId },
+      { operation: 'geo.geofence.define', tenantId },
       'Defining geofence',
     );
 
@@ -85,7 +93,7 @@ export class GeoGeofencesService {
     return this.em.transactional(async (tx) => {
       const clash = await this.geofencesRepo.findByTenantAndName(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.name,
       );
       if (clash) {
@@ -98,7 +106,7 @@ export class GeoGeofencesService {
       }
 
       const geofence = this.geofencesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         name: dto.name,
         shapeTypeConceptId: SHAPE_TYPE_CONCEPT_BY_CODE[dto.shapeType],
         geometryJson: dto.geometryJson,
@@ -140,25 +148,22 @@ export class GeoGeofencesService {
       },
       'Recording geofence event',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const geofence = await this.geofencesRepo.findById(tx, dto.geofenceId);
-      if (!geofence)
-        throw new ResourceNotFoundException('Geofence no encontrado', {
-          geofenceId: dto.geofenceId,
-        });
+      // Geofence y sujeto se resuelven con la misma regla de alcance: uno ajeno
+      // responde como inexistente (404 uniforme) y no se inserta nada.
+      const geofence = assertGeofenceInTenant(
+        await this.geofencesRepo.findById(tx, dto.geofenceId),
+        tenantId,
+      );
+      const subject = assertSubjectInTenant(
+        await this.subjectsRepo.findById(tx, dto.trackedSubjectId),
+        tenantId,
+      );
+      assertGeofenceSubjectSameTenant(geofence, subject);
       if (geofence.stateConceptId !== GEO.GEOFENCE_ACTIVE) {
         throw new PreconditionFailedException('El geofence no está activo', {
           geofenceId: dto.geofenceId,
-        });
-      }
-
-      const subject = await this.subjectsRepo.findById(
-        tx,
-        dto.trackedSubjectId,
-      );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
-          trackedSubjectId: dto.trackedSubjectId,
         });
       }
 

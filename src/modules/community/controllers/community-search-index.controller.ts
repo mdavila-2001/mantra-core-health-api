@@ -7,7 +7,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Audited, Roles } from '../../../common';
 import { CommunitySearchIndexService } from '../services';
 import {
   ReindexRequestDto,
@@ -44,6 +44,10 @@ export class CommunitySearchIndexController {
    * @param dto - `recreate: false` para reutilizar el índice existente.
    * @returns Conteos del barrido.
    */
+  @Audited({
+    action: 'COMMUNITY_SEARCH_REINDEXED',
+    entity: 'social_post',
+  })
   @Post('reindex')
   @Roles('SYSTEM', 'SECURITY_ADMIN', 'SEARCH_ADMIN')
   @HttpCode(HttpStatus.OK)

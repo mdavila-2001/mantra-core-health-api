@@ -2,9 +2,84 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { TreatmentInformedConsents } from '../entities';
 import { createdBy } from '../../../common';
+import type {
+  InformedConsentChannel,
+  InformedConsentExceptionType,
+  InformedConsentGrantedBy,
+  InformedConsentTargetType,
+} from '../informed-consent.enums';
+
+/**
+ * Campos del consentimiento dirigido (v4266): a qué se consiente, la
+ * información dada, quién otorga y bajo qué excepción. Todos opcionales.
+ */
+export interface TreatmentInformedConsentDetails {
+  /** A qué se consiente. */
+  targetType?: InformedConsentTargetType;
+  /** Objeto consentido. */
+  targetId?: string;
+  /** Instantánea legible de lo consentido. */
+  targetLabel?: string;
+  /** Diagnóstico que lo motiva. */
+  diagnosisText?: string;
+  /** Naturaleza y objetivo. */
+  purposeText?: string;
+  /** Beneficios esperados. */
+  benefitsText?: string;
+  /** Riesgos frecuentes y graves. */
+  risksText?: string;
+  /** Riesgos personalizados. */
+  personalizedRisksText?: string;
+  /** Alternativas. */
+  alternativesText?: string;
+  /** Consecuencias de no aceptar. */
+  refusalConsequencesText?: string;
+  /** Preguntas del paciente y respuestas. */
+  patientQuestionsText?: string;
+  /** Quién otorga. */
+  grantedBy?: InformedConsentGrantedBy;
+  /** Nombre del representante. */
+  representativeName?: string;
+  /** Documento del representante. */
+  representativeDocument?: string;
+  /** Parentesco o calidad del representante. */
+  representativeRelationship?: string;
+  /** Por qué no consiente el titular. */
+  incapacityReason?: string;
+  /** Profesional que informa. */
+  informedByProfileId?: string;
+  /** Canal. */
+  channel?: InformedConsentChannel;
+  /** Excepción legal. */
+  exceptionType?: InformedConsentExceptionType;
+  /** Justificación de la excepción. */
+  exceptionJustification?: string;
+  /** Testigo externo. */
+  witnessName?: string;
+  /** Documento del testigo externo. */
+  witnessDocument?: string;
+  /** Idioma de la información. */
+  informationLanguage?: string;
+  /** Asentimiento del menor o de la persona con discapacidad. */
+  assentObtained?: boolean;
+  /** Notas del asentimiento. */
+  assentNotes?: string;
+  /** Se informó el derecho a revocar. */
+  revocationRightInformed?: boolean;
+}
+
+/** Filtros del listado por paciente (v4266). */
+export interface TreatmentInformedConsentFilters {
+  /** Paciente titular. */
+  patientProfileId: string;
+  /** Tipo de objeto consentido. */
+  targetType?: InformedConsentTargetType;
+  /** Objeto consentido. */
+  targetId?: string;
+}
 
 /** Datos mínimos para capturar un consentimiento informado de tratamiento. */
-export interface CreateTreatmentInformedConsentData {
+export interface CreateTreatmentInformedConsentData extends TreatmentInformedConsentDetails {
   /**
    * Identificador asociado a patient profile.
    */
@@ -69,6 +144,31 @@ export class TreatmentInformedConsentsRepository {
   }
 
   /**
+   * Consentimientos de un paciente, del más reciente al más antiguo,
+   * opcionalmente filtrados por el objeto consentido (v4266).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Paciente y, opcionalmente, tipo e id del objeto.
+   * @param limit - Tope de filas.
+   * @returns Los consentimientos que cumplen el filtro.
+   */
+  findByPatient(
+    em: EntityManager,
+    filters: TreatmentInformedConsentFilters,
+    limit = 100,
+  ): Promise<TreatmentInformedConsents[]> {
+    return em.find(
+      TreatmentInformedConsents,
+      {
+        patientProfileId: filters.patientProfileId,
+        ...(filters.targetType ? { targetType: filters.targetType } : {}),
+        ...(filters.targetId ? { targetId: filters.targetId } : {}),
+      },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -92,6 +192,32 @@ export class TreatmentInformedConsentsRepository {
         decisionConceptId: data.decisionConceptId,
         statusConceptId: data.statusConceptId,
         signedAt: data.signedAt,
+        targetType: data.targetType,
+        targetId: data.targetId,
+        targetLabel: data.targetLabel,
+        diagnosisText: data.diagnosisText,
+        purposeText: data.purposeText,
+        benefitsText: data.benefitsText,
+        risksText: data.risksText,
+        personalizedRisksText: data.personalizedRisksText,
+        alternativesText: data.alternativesText,
+        refusalConsequencesText: data.refusalConsequencesText,
+        patientQuestionsText: data.patientQuestionsText,
+        grantedBy: data.grantedBy,
+        representativeName: data.representativeName,
+        representativeDocument: data.representativeDocument,
+        representativeRelationship: data.representativeRelationship,
+        incapacityReason: data.incapacityReason,
+        informedByProfileId: data.informedByProfileId,
+        channel: data.channel,
+        exceptionType: data.exceptionType,
+        exceptionJustification: data.exceptionJustification,
+        witnessName: data.witnessName,
+        witnessDocument: data.witnessDocument,
+        informationLanguage: data.informationLanguage,
+        assentObtained: data.assentObtained,
+        assentNotes: data.assentNotes,
+        revocationRightInformed: data.revocationRightInformed,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

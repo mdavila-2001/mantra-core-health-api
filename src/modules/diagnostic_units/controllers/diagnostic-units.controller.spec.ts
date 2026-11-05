@@ -29,7 +29,7 @@ function build() {
   const pricingService = { createSchedule: mockFn() };
   const readService = { list: mockFn(), getById: mockFn() };
   const adminReadService = { list: mockFn(), getById: mockFn() };
-  const searchService = { search: mockFn() };
+  const searchService = { search: mockFn(), searchCoverage: mockFn() };
   const controller = new DiagnosticUnitsController(
     unitsService as any,
     studiesService as any,
@@ -169,5 +169,25 @@ describe('DiagnosticUnitsController', () => {
     const d = build();
     await d.controller.reproject('u1', actor);
     expect(d.unitsService.reproject).toHaveBeenCalledWith('u1', actor);
+  });
+
+  it('sin studyConceptIds el buscador responde como siempre', async () => {
+    const d = build();
+    const query = { kind: 'IMAGING' as const, studyCode: 'RX' };
+
+    await d.controller.search(query);
+
+    expect(d.searchService.search).toHaveBeenCalledWith(query);
+    expect(d.searchService.searchCoverage).not.toHaveBeenCalled();
+  });
+
+  it('con studyConceptIds responde por cobertura', async () => {
+    const d = build();
+    const query = { studyConceptIds: ['rx', 'eco'], lat: -17.78, lng: -63.18 };
+
+    await d.controller.search(query);
+
+    expect(d.searchService.searchCoverage).toHaveBeenCalledWith(query);
+    expect(d.searchService.search).not.toHaveBeenCalled();
   });
 });

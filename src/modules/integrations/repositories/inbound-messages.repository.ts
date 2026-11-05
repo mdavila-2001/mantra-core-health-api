@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { InboundMessages } from '../entities';
 import { createdBy } from '../../../common';
@@ -57,6 +58,25 @@ export class InboundMessagesRepository {
     return em.findOne(InboundMessages, { id });
   }
 
+  /**
+   * Obtiene el callback bloqueándolo: dos correlaciones concurrentes del mismo
+   * callback se serializan y sólo la primera lo ve en estado recibido.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del callback.
+   * @returns El callback o `null`.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<InboundMessages | null> {
+    return em.findOne(
+      InboundMessages,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
   /** De-duplica reentregas del proveedor por (connection_id, signature). */
   findByConnectionAndSignature(
     em: EntityManager,
@@ -75,10 +95,14 @@ export class InboundMessagesRepository {
     em: EntityManager,
     receivedStatusConceptId: string,
     limit: number,
+    connectionIds?: string[],
   ): Promise<InboundMessages[]> {
     return em.find(
       InboundMessages,
-      { statusConceptId: receivedStatusConceptId },
+      {
+        statusConceptId: receivedStatusConceptId,
+        ...(connectionIds ? { connectionId: { $in: connectionIds } } : {}),
+      },
       { orderBy: { receivedAt: 'ASC' }, limit },
     );
   }

@@ -16,6 +16,7 @@ import {
   ConceptDesignationsRepository,
   ConceptRelationshipsRepository,
   ValueSetsRepository,
+  type RelationshipEvidenceSummary,
 } from '../repositories';
 import {
   type CreateDesignationDto,
@@ -46,7 +47,21 @@ import {
   SearchConceptsResponseDto,
   DEFAULT_NEIGHBORS_PER_GROUP,
 } from '../dto';
-import type { CatalogConcepts } from '../entities';
+import type { CatalogConcepts, ConceptRelationships } from '../entities';
+import {
+  compareRankedNeighbors,
+  neighborEvidenceFields,
+  parseStrengthScore,
+  strongerEdge,
+  type NeighborEdgeFacts,
+  type NeighborEvidenceFields,
+  type RankedNeighbor,
+} from './glossary-neighbor-evidence';
+import {
+  sourceAgeOf,
+  visibleProperties,
+  type Viewer,
+} from '../pharmacology-audience';
 import {
   LANGUAGE_CONCEPT_BY_CODE,
   definitionPropertyCode,
@@ -76,10 +91,17 @@ import {
 const DEFAULT_PROPERTY_DATA_TYPE = 'string';
 
 /** Un vecino ya resuelto, antes de ponerle categoría. */
-interface SortedNeighbor {
-  readonly conceptId: string;
-  readonly slug: string;
-  readonly display: string;
+type SortedNeighbor = RankedNeighbor;
+
+/** Lo que el vecindario lee de una arista: id y columnas derivadas de F1. */
+function edgeFacts(edge: ConceptRelationships): NeighborEdgeFacts {
+  return {
+    relationshipId: edge.id,
+    strength: parseStrengthScore(edge.strengthScore),
+    frequencyConceptId: edge.frequencyConceptId ?? undefined,
+    evidenceTierConceptId: edge.bestEvidenceTierConceptId ?? undefined,
+    evidenceCount: edge.evidenceCount ?? 0,
+  };
 }
 
 /** Clave de un grupo del vecindario: tipo y sentido. */
@@ -560,10 +582,18 @@ export class ConceptsService {
    * `system` es la URL canónica del sistema de códigos, y el concepto se resuelve
    * contra su versión vigente: una versión borrador todavía no está sellada y sus
    * códigos pueden cambiar.
+   *
+   * Las propiedades con `audience: 'professional'` (las secciones de farmacología
+   * clínica, la posología incluida) solo las ve un sujeto con rol clínico; sin
+   * `actor` no se entrega ninguna. Las secciones llevan además `sourceAge`
+   * (antigüedad del dato) para el estado S7 del front.
+   *
+   * @param actor - Sujeto que consulta; decide qué propiedades puede ver.
    */
   async lookupConcept(
     system: string,
     code: string,
+    actor?: Viewer,
   ): Promise<LookupResponseDto> {
     this.logger.info(
       { operation: 'terminology.concept.lookup', system, code },
@@ -627,11 +657,15 @@ export class ConceptsService {
         languageConceptId: designation.languageConceptId,
         preferred: designation.preferred,
       })),
-      properties: properties.map((property) => ({
-        propertyCode: property.propertyCode,
-        dataType: property.dataType,
-        valueJson: property.valueJson,
-      })),
+      properties: visibleProperties(properties, actor).map((property) => {
+        const sourceAge = sourceAgeOf(property.valueJson);
+        return {
+          propertyCode: property.propertyCode,
+          dataType: property.dataType,
+          valueJson: property.valueJson,
+          ...(sourceAge === undefined ? {} : { sourceAge }),
+        };
+      }),
     };
   }
 
@@ -1067,8 +1101,13 @@ export class ConceptsService {
    * mismo criterio que `resolveGlossaryRelations`: es preferible un vecino de
    * menos que uno que el cliente no puede abrir.
    *
-   * Las aristas del término se traen y se ordenan en memoria por nombre: el
-   * orden no usa `strength_score` ni se resuelve en la base.
+   * Las aristas del término se traen y se ordenan en memoria: primero por
+   * `strength_score` (de mayor a menor, las que no tienen al final) y después
+   * por nombre en castellano (§5, desde F1). Cada vecino suma, sólo si existen,
+   * `strength`, `frequency`, `evidenceTier`, `sourceCodes` y `qualifiers`; una
+   * relación descartada por la fuente (`frequency = EXCLUDED`) se publica con
+   * esa frecuencia, no se esconde: §5 no la excluye y la UI la dice como «la
+   * descarta» (F1.4). El `total` no cambia de semántica.
    *
    * @param conceptId - Término central.
    * @param language - Idioma de los nombres (castellano por omisión).
@@ -1148,11 +1187,13 @@ export class ConceptsService {
     for (const [key, neighbors] of sortedByGroup) {
       pages.set(key, pageOf(neighbors));
     }
-    const categoryByConcept = await this.resolveNeighborCategories(
-      [...pages.values()].flatMap((page) =>
-        page.map((neighbor) => neighbor.conceptId),
+    const pageNeighbors = [...pages.values()].flat();
+    const [categoryByConcept, evidenceOf] = await Promise.all([
+      this.resolveNeighborCategories(
+        pageNeighbors.map((neighbor) => neighbor.conceptId),
       ),
-    );
+      this.resolveNeighborEvidence(pageNeighbors),
+    ]);
 
     const groups: GlossaryNeighborGroupDto[] = [];
     for (const type of GLOSSARY_RELATION_TYPES) {
@@ -1170,6 +1211,7 @@ export class ConceptsService {
               slug: neighbor.slug,
               display: neighbor.display,
               category: categoryByConcept.get(neighbor.conceptId) ?? null,
+              ...evidenceOf(neighbor),
             }),
           ),
         });
@@ -1225,7 +1267,8 @@ export class ConceptsService {
   }
 
   /**
-   * Los vecinos de cada grupo pedido, ya resueltos y en orden alfabético.
+   * Los vecinos de cada grupo pedido, ya resueltos y ordenados por fuerza y
+   * después alfabéticamente (`compareRankedNeighbors`).
    *
    * Lee las aristas de un solo camino por vez que haga falta (`findByTypesForSources`
    * para las salientes, `findByTypesForTargets` para las entrantes), saca los
@@ -1269,6 +1312,7 @@ export class ConceptsService {
     const links: {
       key: string;
       neighborId: string;
+      edge: NeighborEdgeFacts;
     }[] = [];
     const addLinks = (
       edges: typeof outgoing,
@@ -1284,7 +1328,9 @@ export class ConceptsService {
             : edge.sourceConceptId;
         if (!type || neighborId === conceptId) continue;
         const key = neighborGroupKey(type, direction);
-        if (wantedGroups.has(key)) links.push({ key, neighborId });
+        if (wantedGroups.has(key)) {
+          links.push({ key, neighborId, edge: edgeFacts(edge) });
+        }
       }
     };
     addLinks(outgoing, 'outgoing');
@@ -1297,32 +1343,81 @@ export class ConceptsService {
     ]);
 
     const byGroup = new Map<string, Map<string, SortedNeighbor>>();
-    for (const { key, neighborId } of links) {
+    for (const { key, neighborId, edge } of links) {
       const term = terms.get(neighborId);
       if (!term || term.concept.stateConceptId !== CONCEPTS.TERM_ACTIVE) {
         continue;
       }
       const group = byGroup.get(key) ?? new Map<string, SortedNeighbor>();
-      group.set(neighborId, {
-        conceptId: neighborId,
-        slug: term.slug,
-        display: texts.get(neighborId)?.display ?? term.concept.display,
-      });
+      group.set(
+        neighborId,
+        strongerEdge(group.get(neighborId), {
+          ...edge,
+          conceptId: neighborId,
+          slug: term.slug,
+          display: texts.get(neighborId)?.display ?? term.concept.display,
+        }),
+      );
       byGroup.set(key, group);
     }
 
     const sorted = new Map<string, SortedNeighbor[]>();
     for (const [key, group] of byGroup) {
-      sorted.set(
-        key,
-        [...group.values()].sort(
-          (a, b) =>
-            a.display.localeCompare(b.display, 'es') ||
-            a.conceptId.localeCompare(b.conceptId),
-        ),
-      );
+      sorted.set(key, [...group.values()].sort(compareRankedNeighbors));
     }
     return sorted;
+  }
+
+  /**
+   * Los campos de evidencia de los vecinos de una página (TAREA-41 F1.5).
+   *
+   * Sólo consulta lo que hace falta: los códigos de nivel y frecuencia de las
+   * aristas que los tienen, y la evidencia de las que tienen `evidence_count`
+   * mayor que cero. Una página sin evidencia cargada no hace ninguna consulta.
+   *
+   * @returns Función que da los campos opcionales de cada vecino.
+   */
+  private async resolveNeighborEvidence(
+    neighbors: readonly SortedNeighbor[],
+  ): Promise<(neighbor: SortedNeighbor) => NeighborEvidenceFields> {
+    const codeConceptIds = new Set<string>();
+    const evidencedIds = new Set<string>();
+    for (const neighbor of neighbors) {
+      if (neighbor.frequencyConceptId) {
+        codeConceptIds.add(neighbor.frequencyConceptId);
+      }
+      if (neighbor.evidenceTierConceptId) {
+        codeConceptIds.add(neighbor.evidenceTierConceptId);
+      }
+      if (neighbor.relationshipId && neighbor.evidenceCount > 0) {
+        evidencedIds.add(neighbor.relationshipId);
+      }
+    }
+    const [codeConcepts, evidenceRows] = await Promise.all([
+      codeConceptIds.size === 0
+        ? Promise.resolve(new Map<string, CatalogConcepts>())
+        : this.conceptsRepo.findByIds(this.em, [...codeConceptIds]),
+      this.relationshipsRepo.findEvidenceSummaries(this.em, [...evidencedIds]),
+    ]);
+    const evidenceByRelationship = new Map<
+      string,
+      RelationshipEvidenceSummary[]
+    >();
+    for (const row of evidenceRows) {
+      const rows = evidenceByRelationship.get(row.relationshipId) ?? [];
+      rows.push(row);
+      evidenceByRelationship.set(row.relationshipId, rows);
+    }
+    const codeOf = (conceptId: string | undefined): string | undefined =>
+      conceptId === undefined ? undefined : codeConcepts.get(conceptId)?.code;
+    return (neighbor) =>
+      neighborEvidenceFields(
+        neighbor,
+        codeOf,
+        neighbor.relationshipId
+          ? (evidenceByRelationship.get(neighbor.relationshipId) ?? [])
+          : [],
+      );
   }
 
   /** La categoría del glosario de cada vecino, resuelta igual que en la búsqueda. */
@@ -1362,11 +1457,14 @@ export class ConceptsService {
    *
    * @param conceptId - Término a leer.
    * @param language - Idioma preferido de los textos.
+   * @param actor - Sujeto que consulta. Las propiedades `professional` (secciones de
+   * farmacología clínica) se omiten salvo que tenga un rol clínico; sin `actor`, se omiten.
    * @returns La ficha, con sus etiquetas y sinónimos.
    */
   async readConcept(
     conceptId: string,
     language?: DesignationLanguage,
+    actor?: Viewer,
   ): Promise<ConceptDetailDto> {
     this.logger.info(
       { operation: 'terminology.concept.read', conceptId, language },
@@ -1409,7 +1507,10 @@ export class ConceptsService {
     const { category, tags } = splitCategoryAndTags(conceptLabels);
     const glossaryText = glossaryTexts.get(conceptId);
     const propertyList: Record<string, unknown> = Object.fromEntries(
-      properties.map((property) => [property.propertyCode, property.valueJson]),
+      visibleProperties(properties, actor).map((property) => [
+        property.propertyCode,
+        property.valueJson,
+      ]),
     );
     const image = imageFromProperty(
       propertyList[GLOSSARY_IMAGE_PROPERTY_CODE],

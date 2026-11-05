@@ -5,8 +5,8 @@ import pg from 'pg';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as dataCatalogEntities from '../../src/modules/data_catalog/entities';
-import { OpsConsoleRepository } from '../../src/modules/ops_console/ops-console.repository';
-import { OpsConsoleService } from '../../src/modules/ops_console/ops-console.service';
+import { OpsConsoleRepository } from '../../src/modules/ops_console/infrastructure/repositories/ops-console.repository';
+import { OpsConsoleService } from '../../src/modules/ops_console/application/ops-console.service';
 import { SYSOPS } from '../../src/modules/system_ops/system_ops.concepts';
 import { CONCEPTS } from '../../src/common';
 

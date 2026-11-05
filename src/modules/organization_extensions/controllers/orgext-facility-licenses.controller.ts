@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrgextFacilityLicensesService } from '../services';
 import {
   CreateFacilityLicenseDto,
@@ -35,6 +40,11 @@ export class OrgextFacilityLicensesController {
   ) {}
 
   /** UC-22-05. */
+  @Audited({
+    action: 'FACILITY_LICENSE_REGISTERED',
+    entity: 'facility_license',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -47,6 +57,11 @@ export class OrgextFacilityLicensesController {
   }
 
   /** UC-22-06. */
+  @Audited({
+    action: 'FACILITY_LICENSE_VERIFIED',
+    entity: 'facility_license',
+    entityId: 'param:id',
+  })
   @Post(':id/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

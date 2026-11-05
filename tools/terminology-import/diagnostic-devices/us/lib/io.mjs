@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
+import { StringDecoder } from 'node:string_decoder';
 import { gzipSync } from 'node:zlib';
 
 export function ensureDir(p) {
@@ -129,8 +130,11 @@ export async function streamOpenFdaResults(stream, onResult) {
   let metaBuf = '';
   let capturingMeta = false;
   let n = 0;
+  // Un carácter multibyte puede quedar partido entre dos trozos: el decodificador
+  // con estado retiene los bytes incompletos hasta el trozo siguiente.
+  const decoder = new StringDecoder('utf8');
   for await (const chunk of stream) {
-    const s = chunk.toString('utf8');
+    const s = decoder.write(chunk);
     let start = capturing || capturingMeta ? 0 : -1;
     for (let i = 0; i < s.length; i++) {
       const c = s[i];
@@ -232,8 +236,9 @@ export async function streamXmlElements(stream, name, onElement) {
   const close = `</${name}>`;
   let buf = '';
   let n = 0;
+  const decoder = new StringDecoder('utf8');
   for await (const chunk of stream) {
-    buf += chunk.toString('utf8');
+    buf += decoder.write(chunk);
     for (;;) {
       const i = buf.indexOf(open);
       if (i < 0) {

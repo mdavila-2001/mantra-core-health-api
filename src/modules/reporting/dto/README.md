@@ -34,14 +34,14 @@ descarta lo que no reconoce; el DTO no puede validarlo porque los parámetros lo
 
 ## DTO por área
 
-| Área | Entrada | Respuesta |
-| --- | --- | --- |
-| Fuentes | `CreateDataSourceDto` | `DataSourceResponseDto` |
+| Área         | Entrada                                                                                                                | Respuesta                                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Fuentes      | `CreateDataSourceDto`                                                                                                  | `DataSourceResponseDto`                                                               |
 | Definiciones | `CreateDefinitionDto` (+ `ReportParameterDto`, `ReportColumnDto`), `PublishReportVersionDto`, `DeprecateDefinitionDto` | `DefinitionResponseDto`, `ReportVersionResponseDto`, `DeprecateDefinitionResponseDto` |
-| Corridas | `CreateExecutionDto`, `MaterializeSnapshotDto`, `RetryExecutionDto` | `ExecutionResponseDto`, `SnapshotResponseDto`, `RetryExecutionResponseDto` |
-| Programación | `CreateScheduleDto`, `SchedulerTickDto` | `ScheduleResponseDto`, `SchedulerTickResponseDto` |
-| Distribución | `DispatchDistributionDto` (+ `DistributionRecipientDto`), `SubscribeDto` | `DispatchResponseDto`, `SubscriptionResponseDto` |
-| Tableros | `CreateDashboardDto` (+ `DashboardWidgetDto`) | `DashboardResponseDto` |
+| Corridas     | `CreateExecutionDto`, `MaterializeSnapshotDto`, `RetryExecutionDto`                                                    | `ExecutionResponseDto`, `SnapshotResponseDto`, `RetryExecutionResponseDto`            |
+| Programación | `CreateScheduleDto`, `SchedulerTickDto`                                                                                | `ScheduleResponseDto`, `SchedulerTickResponseDto`                                     |
+| Distribución | `DispatchDistributionDto` (+ `DistributionRecipientDto`), `SubscribeDto`                                               | `DispatchResponseDto`, `SubscriptionResponseDto`                                      |
+| Tableros     | `CreateDashboardDto` (+ `DashboardWidgetDto`)                                                                          | `DashboardResponseDto`                                                                |
 
 ## Respuestas con conteos
 

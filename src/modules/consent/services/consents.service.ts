@@ -4,10 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   ResourceNotFoundException,
-  SEED,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import type { Consents } from '../entities';
+import { ConsentScopeService } from './consent-scope.service';
+import { ConsentErrorReason } from '../consent.error-reasons';
 import {
   ConsentsRepository,
   ConsentProvisionsRepository,
@@ -24,6 +28,12 @@ import {
   StatusResultDto,
   WithdrawConsentDto,
 } from '../dto';
+
+/** Cómo se informa un consentimiento inexistente o fuera del alcance. */
+const CONSENT_NOT_FOUND = {
+  message: 'Consentimiento no encontrado',
+  reason: ConsentErrorReason.CONSENT_NOT_FOUND,
+} as const;
 
 /**
  * Casos de uso sobre `consent.consents`: captura de consentimiento (UC-07-01),
@@ -43,6 +53,9 @@ export class ConsentsService {
    * @param consentsRepo - Valor de consents repo requerido por la operación.
    * @param provisionsRepo - Valor de provisions repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param clinicalGrantsRepo - Accesos clínicos que se apoyan en el consentimiento.
+   * @param auditTrail - Cadena de auditoría WORM.
+   * @param scope - Política común de tenant y referencias de la decisión.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -52,6 +65,7 @@ export class ConsentsService {
     private readonly eventsRepo: ConsentEventsRepository,
     private readonly clinicalGrantsRepo: ClinicalAccessGrantsRepository,
     private readonly auditTrail: AuditTrailService,
+    private readonly scope: ConsentScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConsentsService.name);
@@ -69,7 +83,16 @@ export class ConsentsService {
       },
       'Capturing consent',
     );
+    // El tenant sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.resolveTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
+      await this.scope.assertPatientExists(tx, dto.patientProfileId);
+      await this.scope.assertPurposeScope(
+        tx,
+        tenantId,
+        dto.processingPurposeId,
+        dto.processingLegalBasisId,
+      );
       const clash = await this.consentsRepo.findActiveByPurpose(
         tx,
         dto.patientProfileId,
@@ -97,7 +120,7 @@ export class ConsentsService {
         processingPurposeId: dto.processingPurposeId,
         processingLegalBasisId: dto.processingLegalBasisId,
         statusConceptId: CONS.CONSENT_ACTIVE,
-        tenantId: dto.tenantId ?? SEED.tenantId,
+        tenantId,
         grantedByUserId: dto.grantedByUserId ?? actor.id,
         grantedByRelatedPersonId: dto.grantedByRelatedPersonId,
         policyUri: dto.policyUri,
@@ -130,22 +153,66 @@ export class ConsentsService {
     });
   }
 
-  /** UC-07-02: retira un consentimiento activo y emite el evento que dispara la re-evaluación. */
+  /**
+   * UC-07-02: retira un consentimiento activo y emite el evento que dispara la re-evaluación.
+   *
+   * Ruta administrativa: el consentimiento se carga por `(id, tenant activo)`.
+   * Uno de otro tenant responde igual que uno inexistente (404, mismo mensaje y
+   * `reason`, sin `details`).
+   */
   async withdraw(
     id: string,
     dto: WithdrawConsentDto,
     actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    const tenantId = requireTenantId();
+    return this.withdrawScoped(id, dto, actor, (consent) =>
+      this.inTenantOrDeny(consent, tenantId, 'consent.consent.withdraw', id),
+    );
+  }
+
+  /**
+   * UC-07-02 desde el titular: retira un consentimiento propio.
+   *
+   * El alcance no es el tenant sino la titularidad: el consentimiento se carga
+   * por `(id, patientProfileId)` del propio paciente, resuelto por la sesión.
+   * Un consentimiento de otra persona responde igual que uno inexistente.
+   */
+  async withdrawAsOwner(
+    id: string,
+    patientProfileId: string,
+    dto: WithdrawConsentDto,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    return this.withdrawScoped(id, dto, actor, (consent) => {
+      if (!consent || consent.patientProfileId !== patientProfileId) {
+        this.logScopeDenied('consent.consent.withdraw-own', id);
+        throw new ResourceNotFoundException(
+          CONSENT_NOT_FOUND.message,
+          undefined,
+          CONSENT_NOT_FOUND.reason,
+        );
+      }
+      return consent;
+    });
+  }
+
+  /**
+   * Cuerpo común del retiro. `authorize` decide el alcance con el que se cargó
+   * el consentimiento y lanza el 404 uniforme si no corresponde.
+   */
+  private async withdrawScoped(
+    id: string,
+    dto: WithdrawConsentDto,
+    actor: AuthenticatedUser,
+    authorize: (consent: Consents | null) => Consents,
   ): Promise<StatusResultDto> {
     this.logger.info(
       { operation: 'consent.consent.withdraw', consentId: id },
       'Withdrawing consent',
     );
     return this.em.transactional(async (tx) => {
-      const consent = await this.consentsRepo.findById(tx, id);
-      if (!consent)
-        throw new ResourceNotFoundException('Consentimiento no encontrado', {
-          id,
-        });
+      const consent = authorize(await this.consentsRepo.findById(tx, id));
       if (consent.statusConceptId !== CONS.CONSENT_ACTIVE) {
         throw new ConflictException('El consentimiento no está activo', {
           id,
@@ -213,12 +280,14 @@ export class ConsentsService {
       { operation: 'consent.consent.amend-provisions', consentId: id },
       'Amending consent provisions',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const consent = await this.consentsRepo.findById(tx, id);
-      if (!consent)
-        throw new ResourceNotFoundException('Consentimiento no encontrado', {
-          id,
-        });
+      const consent = this.inTenantOrDeny(
+        await this.consentsRepo.findById(tx, id),
+        tenantId,
+        'consent.consent.amend-provisions',
+        id,
+      );
       if (consent.statusConceptId !== CONS.CONSENT_ACTIVE) {
         throw new ConflictException('El consentimiento no está activo', {
           id,
@@ -250,6 +319,50 @@ export class ConsentsService {
 
       return { ok: true };
     });
+  }
+
+  /**
+   * Exige que el consentimiento cargado sea del tenant activo; si no, registra
+   * la denegación y responde el 404 uniforme.
+   *
+   * @param consent - Consentimiento cargado por id, o `null`.
+   * @param tenantId - Tenant activo.
+   * @param operation - Operación que se intentó.
+   * @param id - Id pedido.
+   * @returns El consentimiento, ya acotado al tenant.
+   */
+  private inTenantOrDeny(
+    consent: Consents | null,
+    tenantId: string,
+    operation: string,
+    id: string,
+  ): Consents {
+    try {
+      return assertResourceInTenant(
+        consent,
+        consent?.tenantId,
+        tenantId,
+        CONSENT_NOT_FOUND,
+      );
+    } catch (error) {
+      if (error instanceof ResourceNotFoundException) {
+        this.logScopeDenied(operation, id);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Registra la denegación por alcance. Sólo ids y operación: nunca el contenido.
+   *
+   * @param operation - Operación que se intentó.
+   * @param consentId - Id pedido, que puede no existir o ser de otro tenant.
+   */
+  private logScopeDenied(operation: string, consentId: string): void {
+    this.logger.warn(
+      { operation, consentId, reason: 'out-of-scope' },
+      'Consentimiento inexistente o fuera del alcance del actor',
+    );
   }
 
   /**

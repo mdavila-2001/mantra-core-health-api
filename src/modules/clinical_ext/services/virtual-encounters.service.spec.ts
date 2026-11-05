@@ -29,7 +29,10 @@ const actor = {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    execute: mockFn().mockResolvedValue(undefined),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const encountersRepo = {
     findById: mockFn(),
@@ -53,7 +56,7 @@ function build() {
     clinicalEncountersRepo as any,
     logger as any,
   );
-  return { service, encountersRepo, clinicalEncountersRepo };
+  return { service, tx, encountersRepo, clinicalEncountersRepo };
 }
 
 describe('VirtualEncountersService (UC-18-12)', () => {
@@ -75,6 +78,20 @@ describe('VirtualEncountersService (UC-18-12)', () => {
     await expect(
       d.service.create({ encounterId: 'e1' } as any, actor),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('serializa la creación por encuentro antes de buscar la sesión existente y cataloga el conflicto (CE-04)', async () => {
+    const d = build();
+    d.encountersRepo.findByEncounter.mockResolvedValue({ id: 've0' });
+    const err: any = await d.service
+      .create({ encounterId: 'e1' } as any, actor)
+      .catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(ConflictException);
+    expect(err.reason).toBe('VIRTUAL_ENCOUNTER_ALREADY_EXISTS');
+    expect(d.tx.execute).toHaveBeenCalledTimes(1);
+    expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+      d.encountersRepo.findByEncounter.mock.invocationCallOrder[0],
+    );
   });
 
   it('un tercero no crea una sesión sobre un encuentro ajeno', async () => {

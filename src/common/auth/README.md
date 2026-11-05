@@ -1,10 +1,10 @@
 # src / common / auth
 
-Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **auth**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -13,6 +13,7 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 | `auth.module.ts` | Composición del módulo; registra los `APP_GUARD` en orden (ver abajo). |
 | `authenticated-user.interface.ts` | `AuthenticatedUser` y `AuthenticatedRequest`: el contrato que ven controladores y servicios. |
 | `current-user.decorator.ts` | `@CurrentUser()`: inyecta `request.user`. |
+| `governance-read.roles.ts` | Roles de lectura del gobierno de datos (matriz §3.12); los comparten `system_ops` y `data_catalog`. |
 | `jwt-auth.guard.ts` | Guard global de autenticación; deja pasar `@Public()` sin verificar token. |
 | `jwt-payload.interface.ts` | Claims firmados dentro del access token (`JwtPayload`). |
 | `jwt.strategy.ts` | Verifica firma, expiración y tipo del access token, exige sesión viva y reconstruye `AuthenticatedUser`. |
@@ -40,11 +41,11 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 cortan también el access token ya emitido, sin esperar a que expire
 (`JWT_ACCESS_TTL`, 15 minutos por defecto). No hay caché a propósito.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 
 ## Entrega del refresh token: cuerpo o cookie httpOnly
 
@@ -64,12 +65,12 @@ decisión coordinada con el front, no el efecto colateral de un despliegue.
 | `AUTH_REFRESH_COOKIE_ENABLED` | `false` | `true` entrega el refresh token como cookie httpOnly y deja de devolverlo en el cuerpo. |
 | `AUTH_REFRESH_COOKIE_NAME` | `redesa_refresh` | Nombre de la cookie. El default es el nombre que ya tenía (TX-28); declarar `mch_refresh` lo cambia y el refresh la lee con ese nombre. |
 | `AUTH_REFRESH_COOKIE_PATH` | `/iam/auth/token/refresh` | `Path` de la cookie. Detrás de un prefijo de proxy (`/api/...`) hay que declararlo igual. |
-| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | `strict`, `lax` o `none`. |
+| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | En modo cookie se fuerza `strict`. |
 | `AUTH_MFA_CHALLENGE_ENABLED` | `false` | Con `true`, el login de una cuenta con factor MFA verificado exige `mfaCode`: sin él, `401 details.reason = MFA_REQUIRED`; con uno que no valida, `MFA_INVALID` (TX-29). |
-| `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | Fuerza o quita el atributo `Secure`. Sólo hace falta declararlo en pruebas o tras un proxy que termina TLS. |
+| `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | En modo cookie se fuerza `Secure`. |
 
-Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
-`Path=/iam/auth/token/refresh` (los tres se pueden declarar, ver arriba) y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
+Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `Secure`,
+`SameSite=Strict`, `Path=/iam/auth/token/refresh` y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
 El `Path` acotado es deliberado: la cookie no viaja en ninguna otra petición del
 API.
 

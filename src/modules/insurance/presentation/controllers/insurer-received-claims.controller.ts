@@ -19,6 +19,7 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   type AuthenticatedUser,
   AccessLogged,
@@ -92,6 +93,11 @@ export class InsurerReceivedClaimsController {
    * @param actor - La sesión que dictamina.
    * @returns La solicitud completa, con su dictamen.
    */
+  @Audited({
+    action: 'INSURANCE_RECEIVED_CLAIM_DECIDED',
+    entity: 'insurance_claim',
+    entityId: 'param:id',
+  })
   @Post(':id/decision')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

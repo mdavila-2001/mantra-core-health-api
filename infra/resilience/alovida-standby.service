@@ -1,0 +1,15 @@
+[Unit]
+Description=ALOVIDA: alias estables y standby «última versión sana» para el failover de Traefik
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/alovida-standby --loop
+Environment=INTERVAL=5
+Restart=always
+RestartSec=10
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

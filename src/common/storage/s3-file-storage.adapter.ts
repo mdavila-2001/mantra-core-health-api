@@ -5,10 +5,14 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException } from '../errors/domain.exception';
+import { ErrorCode } from '../errors/error-codes';
+import {
+  DomainException,
+  ResourceNotFoundException,
+} from '../errors/domain.exception';
 import type {
   FileStorageAdapter,
   StoredFile,
@@ -306,9 +310,16 @@ export class S3FileStorageAdapter implements FileStorageAdapter {
     }
   }
   private assertConfigured(): void {
+    // Red de seguridad: el arranque ya aborta con esta misma regla
+    // (`assertStorageEnvConfigured`). Si algo la esquiva, el cliente recibe un
+    // 503 catalogado y sin detalle de infraestructura, no un 500 genérico.
     if (!this.env.s3.bucket)
-      throw new Error(
-        'FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3',
+      throw new DomainException(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        ErrorCode.DEPENDENCY_UNAVAILABLE,
+        'El almacenamiento de archivos no está disponible',
+        undefined,
+        'STORAGE_NOT_CONFIGURED',
       );
   }
   private objectKey(contentHash: string): string {

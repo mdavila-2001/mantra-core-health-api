@@ -195,6 +195,31 @@ export class PractitionerSpecialtiesRepository {
   }
 
   /**
+   * Los perfiles que ejercen HOY alguna de estas especialidades.
+   *
+   * Es la pregunta inversa de «qué especialidades tiene este profesional»: el
+   * filtro de la historia por alcance parte de las especialidades que el
+   * paciente autorizó y necesita saber de quién son los registros. Vigente =
+   * sin `validTo`, igual que {@link findProfileIdsBySpecialty}.
+   *
+   * @param em - Contexto de persistencia.
+   * @param specialtyConceptIds - Especialidades autorizadas.
+   * @returns Ids de perfil, sin duplicados.
+   */
+  async findProfileIdsBySpecialties(
+    em: EntityManager,
+    specialtyConceptIds: readonly string[],
+  ): Promise<string[]> {
+    if (specialtyConceptIds.length === 0) return [];
+    const rows = await em.find(
+      PractitionerSpecialties,
+      { specialtyConceptId: { $in: [...specialtyConceptIds] }, validTo: null },
+      { fields: ['practitionerProfileId'] },
+    );
+    return [...new Set(rows.map((row) => row.practitionerProfileId))];
+  }
+
+  /**
    * Los pares perfil↔especialidad **vigentes**, para contar por especialidad.
    *
    * Devuelve los pares y no el conteo ya hecho porque quién es visible lo

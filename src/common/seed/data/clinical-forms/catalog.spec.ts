@@ -77,6 +77,7 @@ describe('catálogo v2 — contenido', () => {
         .sort(),
     ).toEqual([
       'TRANSV_ANAMNESIS_GENERAL',
+      'TRANSV_CITA_MEDICA',
       'TRANSV_CONSENTIMIENTO_INFORMADO',
       'TRANSV_EPICRISIS',
       'TRANSV_EXAMEN_FISICO',
@@ -392,6 +393,69 @@ describe('ampliación internacional del catálogo', () => {
       'PATOL_INFORME_BIOPSIA_PROSTATA',
     ])
       expect(codes.has(code)).toBe(true);
-    expect(STANDARD_FORMS).toHaveLength(374);
+    // 374 de la ampliación + la ficha por defecto de la cita (2026-10-29).
+    expect(STANDARD_FORMS).toHaveLength(375);
+  });
+});
+
+describe('ficha por defecto de la cita médica (2026-10-29)', () => {
+  const cita = STANDARD_FORMS.find((f) => f.code === 'TRANSV_CITA_MEDICA');
+  const campo = (code: string) => cita?.fields.find((f) => f.code === code);
+
+  it('es transversal: sirve para cualquier especialidad', () => {
+    expect(cita?.kind).toBe('GENERAL');
+    expect(cita?.specialty.code).toBe('TRANSVERSAL');
+  });
+
+  it('recorre la consulta en el orden SOAP, de la cita al plan', () => {
+    const secciones = [...new Set(cita?.fields.map((f) => f.section))];
+    expect(secciones).toEqual([
+      'Datos de la cita',
+      'Motivo de consulta',
+      'Antecedentes relevantes',
+      'Signos vitales',
+      'Examen físico',
+      'Diagnóstico',
+      'Plan e indicaciones',
+    ]);
+  });
+
+  it('exige lo mínimo de toda cita: motivo, examen, diagnóstico, signos de alarma y destino', () => {
+    for (const code of [
+      'tipo_de_consulta',
+      'motivo_consulta',
+      'presion_arterial_sistolica',
+      'presion_arterial_diastolica',
+      'frecuencia_cardiaca',
+      'examen_fisico_dirigido',
+      'diagnostico',
+      'tipo_de_diagnostico',
+      'signos_de_alarma_explicados',
+      'destino',
+    ])
+      expect({ code, required: campo(code)?.required }).toEqual({
+        code,
+        required: true,
+      });
+  });
+
+  it('pregunta lo que evita dañar antes de indicar: alergias, medicación y embarazo', () => {
+    expect(campo('tiene_alergias')?.dataType).toBe('boolean');
+    expect(campo('toma_medicacion')?.dataType).toBe('boolean');
+    expect(campo('embarazo_posible')?.options).toEqual([
+      'No',
+      'Sí',
+      'No sabe',
+      'No corresponde',
+    ]);
+  });
+
+  it('un control programado pide la fecha, y una referencia su motivo', () => {
+    expect(campo('fecha_de_control')?.showWhen).toEqual({
+      field: 'destino',
+      equals: 'Control programado',
+    });
+    expect(campo('fecha_de_control')?.dataType).toBe('date');
+    expect(campo('motivo_de_referencia')?.showWhen?.field).toBe('destino');
   });
 });

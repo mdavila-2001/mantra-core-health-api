@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { MockProviderClient } from '../../mock-provider-client.service';
+import { declareProviderCapability } from '../../provider-capability';
 import { EmbeddingDrainJob } from './embedding-drain.job';
 import { createMockEmbeddingProviderAdapter } from './mock-embedding-provider.adapter';
 
@@ -20,7 +21,11 @@ export class MockProviderWiringService implements OnModuleInit {
   }
 
   onModuleInit(): void {
-    if (!this.client.isConfigured()) return;
+    if (!this.client.isConfigured()) {
+      declareProviderCapability(this.logger, 'vector_rag.embeddings', 'none');
+      return;
+    }
+    declareProviderCapability(this.logger, 'vector_rag.embeddings', 'mock');
 
     this.job.providerAdapter = createMockEmbeddingProviderAdapter(this.client);
     this.logger.info(

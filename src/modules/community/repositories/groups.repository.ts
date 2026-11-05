@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { LockMode, type EntityManager } from '@mikro-orm/postgresql';
 import { Groups, GroupMembers, Topics } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import { TenantMemberships, Tenants } from '../../directory/entities';
+import { DIR } from '../../directory/directory.concepts';
+import { Encounters } from '../../clinical/entities';
+import { CLIN } from '../../clinical/clinical.concepts';
 
 /** Filtros opcionales del directorio de grupos (P7). */
 export interface GroupSearchFilters {
@@ -9,6 +13,11 @@ export interface GroupSearchFilters {
   topicId?: string;
   /** Texto libre que se busca en nombre y descripcion. */
   query?: string;
+  /**
+   * Visibilidades de público autorizado que el lector no cumple (API#837):
+   * esos foros no se listan, porque para él no existen.
+   */
+  hiddenVisibilityConceptIds?: readonly string[];
 }
 
 /**
@@ -130,7 +139,14 @@ export class GroupsRepository {
       Groups,
       {
         tenantId,
-        visibilityConceptId: { $ne: secretVisibilityConceptId },
+        visibilityConceptId: filters?.hiddenVisibilityConceptIds?.length
+          ? {
+              $nin: [
+                secretVisibilityConceptId,
+                ...filters.hiddenVisibilityConceptIds,
+              ],
+            }
+          : { $ne: secretVisibilityConceptId },
         // TP-3 · regla 08: los grupos disueltos salen del directorio. Sin este
         // filtro, un grupo sin nadie adentro seguía apareciendo en la búsqueda
         // y se podía «entrar» a él — que es la mitad del problema que
@@ -377,6 +393,67 @@ export class GroupsRepository {
       },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },
     );
+  }
+
+  /**
+   * El tipo de organización de un tenant, o `null` si el tenant no existe.
+   *
+   * Lo decide la base y no el claim `tenantTypes` del token, que es sólo
+   * presentación.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización consultada.
+   * @returns El concepto de tipo de organización, o `null`.
+   */
+  async findTenantTypeConceptId(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string | null> {
+    const tenant = await em.findOne(Tenants, { id: tenantId });
+    return tenant?.tenantTypeConceptId ?? null;
+  }
+
+  /**
+   * `true` si el usuario es miembro activo de la organización.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Cuenta consultada.
+   * @param tenantId - Organización consultada.
+   */
+  async isActiveTenantMember(
+    em: EntityManager,
+    userId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    const count = await em.count(TenantMemberships, {
+      userId,
+      tenantId,
+      statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+    });
+    return count > 0;
+  }
+
+  /**
+   * `true` si la organización terminó al menos una atención de ese paciente.
+   *
+   * «Paciente atendido» es una atención **terminada**: un encuentro abierto o
+   * cancelado no hace de nadie un paciente de la organización.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente consultado.
+   * @param tenantId - Organización que atendió.
+   */
+  async hasFinishedEncounter(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    const count = await em.count(Encounters, {
+      patientProfileId,
+      tenantId,
+      statusConceptId: CLIN.ENCOUNTER_FINISHED,
+    });
+    return count > 0;
   }
 
   /**

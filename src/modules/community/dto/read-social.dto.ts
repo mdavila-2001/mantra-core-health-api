@@ -538,3 +538,43 @@ export class BlockPageDto {
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
 }
+
+/**
+ * Una vitrina de organización con la que la sesión puede atender la
+ * mensajería (`GET /community/profiles/organization-showcases/me`).
+ *
+ * Es el ancla mínima que necesita el selector «Escribiendo como»: con qué
+ * `profileId` actuar y cómo se llama. No es la ficha: para eso está
+ * `GET /community/profiles/:profileId`.
+ */
+export class OrganizationShowcaseDto {
+  /** Identificador de la vitrina: el `profileId` con el que se actúa. */
+  @ApiProperty({ format: 'uuid' })
+  profileId!: string;
+
+  /** Ruta pública de la vitrina. */
+  @ApiProperty()
+  slug!: string;
+
+  /** Nombre visible. */
+  @ApiProperty()
+  displayName!: string;
+
+  /** Archivo del avatar, si tiene. */
+  @ApiProperty({ format: 'uuid', nullable: true })
+  avatarFileId!: string | null;
+
+  /** Concept id del tipo de sujeto (organización o farmacia). */
+  @ApiProperty({ format: 'uuid' })
+  targetTypeConceptId!: string;
+
+  /** La vertical en claro (`PHARMACY`, `ORGANIZATION`). */
+  @ApiProperty({ enum: ['ORGANIZATION', 'PHARMACY'] })
+  kind!: PublicResultKind;
+}
+
+/** Las vitrinas de organización que la sesión puede atender. */
+export class OrganizationShowcasesDto {
+  @ApiProperty({ type: [OrganizationShowcaseDto] })
+  items!: OrganizationShowcaseDto[];
+}

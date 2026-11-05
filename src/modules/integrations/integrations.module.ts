@@ -13,6 +13,7 @@ import {
   IntegrationsConnectionsService,
   IntegrationsMessagingService,
   IntegrationsWebhooksService,
+  IntegrationsSecretsService,
 } from './services';
 import {
   ExternalProvidersRepository,
@@ -59,6 +60,7 @@ import {
     IntegrationsConnectionsService,
     IntegrationsMessagingService,
     IntegrationsWebhooksService,
+    IntegrationsSecretsService,
   ],
 })
 export class IntegrationsModule {}

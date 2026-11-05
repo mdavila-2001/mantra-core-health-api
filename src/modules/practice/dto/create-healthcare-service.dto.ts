@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /practices/{practiceId}/healthcare-services` (UC-14-06). */
@@ -6,10 +6,9 @@ export class CreateHealthcareServiceDto {
   /**
    * Identificador asociado a practice site.
    */
-  @ApiPropertyOptional({ description: 'Sitio donde se presta', format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ description: 'Sitio donde se presta', format: 'uuid' })
   @IsUUID()
-  practiceSiteId?: string;
+  practiceSiteId!: string;
 
   /**
    * Identificador asociado a clinical unit.
@@ -25,10 +24,24 @@ export class CreateHealthcareServiceDto {
   /**
    * Identificador asociado a service concept.
    */
-  @ApiPropertyOptional({ description: 'Concepto de servicio', format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({
+    description:
+      'Procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) que se ofrece',
+    format: 'uuid',
+  })
   @IsUUID()
-  serviceConceptId?: string;
+  serviceConceptId!: string;
+
+  /**
+   * Ítem de `billing.service_catalog` de esa práctica que fija el precio de este procedimiento en esta sede.
+   */
+  @ApiProperty({
+    description:
+      'Ítem del catálogo de precios de la práctica; su concepto debe ser el mismo `serviceConceptId`',
+    format: 'uuid',
+  })
+  @IsUUID()
+  serviceCatalogId!: string;
 
   /**
    * Identificador asociado a specialty concept.

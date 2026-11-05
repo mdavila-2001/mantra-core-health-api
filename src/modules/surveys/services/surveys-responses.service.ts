@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -14,6 +15,7 @@ import {
   ResponsesRepository,
   TemplatesRepository,
 } from '../repositories';
+import type { InvitationCardContext } from '../repositories';
 import {
   AnswerDto,
   AnswerInputDto,
@@ -24,13 +26,39 @@ import {
   SubmitResponseDto,
   SurveyResponseDto,
 } from '../dto';
-import { ANSWER_TYPE_CODE_BY_ID, SURVEYS } from '../surveys.concepts';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import {
+  ANSWER_TYPE_CODE_BY_ID,
+  isSystemOwnerType,
+  SURVEYS,
+  type QuestionSource,
+} from '../surveys.concepts';
+import { SurveysErrorReason } from '../surveys.error-reasons';
+import { assertNotSystemTemplate } from '../surveys.system-guard';
 import type {
   SurveyInvitations,
   SurveyQuestions,
   SurveyTemplates,
 } from '../entities';
 import type { AnswerTypeCode } from '../surveys.concepts';
+
+/**
+ * Una pregunta del cuestionario que ve el paciente, con quién la escribió y si
+ * esta vez hay que contestarla.
+ *
+ * Una invitación se responde sobre la **unión** de la versión principal (la
+ * base del sistema, cuando la hay) y la extensión del profesional: la
+ * obligatoriedad de una pregunta de la extensión es siempre falsa, aunque una
+ * versión anterior la guarde como obligatoria.
+ */
+interface QuestionnaireItem {
+  /** La pregunta. */
+  question: SurveyQuestions;
+  /** Quién la escribió. */
+  source: QuestionSource;
+  /** Si hay que contestarla para poder enviar. */
+  required: boolean;
+}
 
 /**
  * El lado de las respuestas: el paciente contesta, el profesional dueño lee.
@@ -42,6 +70,10 @@ import type { AnswerTypeCode } from '../surveys.concepts';
  * no tienen excepción: un paciente solo alcanza sus propias invitaciones, y una
  * respuesta solo la lee el profesional dueño del instrumento. No hay ninguna
  * lectura sin uno de esos dos filtros.
+ *
+ * El perfil de paciente es global (no lleva `tenant_id`), así que el autoservicio
+ * se acota además al tenant activo: un paciente con atenciones en dos
+ * organizaciones ve, en el contexto de una, solo los cuestionarios de esa.
  */
 @Injectable()
 export class SurveysResponsesService {
@@ -69,14 +101,25 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientInvitationDto[]> {
     const patientProfileId = this.requirePatientProfile(actor);
-    const invitations = await this.listInvitationsOf(patientProfileId);
+    const tenantId = requireTenantId();
+    const invitations = await this.listInvitationsOf(
+      patientProfileId,
+      tenantId,
+    );
+
+    // Una sola consulta agregada trae título y contexto de la atención de todas
+    // las tarjetas: la lista no hace una lectura por invitación.
+    const context = await this.invitationsRepo.listCardContext(
+      this.em,
+      invitations.map((invitation) => invitation.id),
+    );
 
     const now = new Date();
     const result: PatientInvitationDto[] = [];
     for (const invitation of invitations) {
-      const template = await this.loadTemplateOfInvitation(invitation);
-      if (!template) continue;
-      result.push(this.toInvitationDto(invitation, template, now));
+      const card = context.get(invitation.id);
+      if (!card) continue;
+      result.push(this.toInvitationDto(invitation, card, now));
     }
     return result;
   }
@@ -87,9 +130,12 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientQuestionnaireDto> {
     const patientProfileId = this.requirePatientProfile(actor);
+    // Primero la invitación acotada a paciente y tenant: nada de plantilla ni
+    // preguntas se lee antes de saber que es del contexto activo.
     const invitation = await this.loadOwnInvitation(
       invitationId,
       patientProfileId,
+      requireTenantId(),
     );
     const template = await this.loadTemplateOfInvitation(invitation);
     if (!template) {
@@ -97,14 +143,36 @@ export class SurveysResponsesService {
         invitationId,
       });
     }
-    const questions = await this.templatesRepo.listQuestions(
+    const items = await this.loadQuestionnaire(
       this.em,
-      invitation.surveyVersionId,
+      invitation,
+      isSystemOwnerType(template.ownerTypeConceptId)
+        ? 'SYSTEM'
+        : 'PRACTITIONER',
     );
 
+    const card = (
+      await this.invitationsRepo.listCardContext(this.em, [invitation.id])
+    ).get(invitation.id);
+
     return {
-      ...this.toInvitationDto(invitation, template, new Date()),
-      questions: questions.map((q) => this.toQuestionDto(q)),
+      ...this.toInvitationDto(
+        invitation,
+        card ?? {
+          invitationId: invitation.id,
+          title: template.title,
+          description: template.description ?? null,
+          kind: 'CONSULTATION',
+          serviceName: null,
+          practitionerDisplayName: null,
+          attendedAt: null,
+        },
+        new Date(),
+      ),
+      // Posiciones corridas sobre la unión: la base primero, el profesional después.
+      questions: items.map((item, index) =>
+        this.toQuestionDto(item, index + 1),
+      ),
     };
   }
 
@@ -117,75 +185,99 @@ export class SurveysResponsesService {
     const patientProfileId = this.requirePatientProfile(actor);
     const tenantId = requireTenantId();
 
-    const outcome = await this.em.transactional(async (tx) => {
-      const invitation = await this.loadOwnInvitation(
-        invitationId,
-        patientProfileId,
-        tx,
-      );
-
-      if (invitation.statusConceptId === SURVEYS.INVITATION_ANSWERED) {
-        throw new ConflictException('Este cuestionario ya fue respondido', {
+    const outcome = await this.em
+      .transactional(async (tx) => {
+        const invitation = await this.loadOwnInvitation(
           invitationId,
-        });
-      }
-      const now = new Date();
-      if (now > invitation.expiresAt) {
-        // Se persiste el vencimiento en vez de solo rechazarlo: si no, la
-        // invitación seguiría figurando como pendiente en la lista del
-        // paciente para siempre. Por eso NO se lanza acá: `transactional`
-        // revierte ante cualquier excepción y el vencimiento se perdería. La
-        // transacción confirma y el rechazo sale después.
-        invitation.statusConceptId = SURVEYS.INVITATION_EXPIRED;
-        touch(invitation, actor.id);
-        await tx.flush();
-        return { expiredAt: invitation.expiresAt };
-      }
+          patientProfileId,
+          tenantId,
+          tx,
+          true,
+        );
 
-      const questions = await this.templatesRepo.listQuestions(
-        tx,
-        invitation.surveyVersionId,
-      );
-      const byId = new Map(questions.map((q) => [q.id, q]));
-      this.validateAnswers(dto.answers, questions, byId);
+        if (invitation.statusConceptId === SURVEYS.INVITATION_ANSWERED) {
+          throw new ConflictException(
+            'Este cuestionario ya fue respondido',
+            { invitationId },
+            SurveysErrorReason.RESPONSE_ALREADY_SUBMITTED,
+          );
+        }
+        const now = new Date();
+        if (now > invitation.expiresAt) {
+          // Se persiste el vencimiento en vez de solo rechazarlo: si no, la
+          // invitación seguiría figurando como pendiente en la lista del
+          // paciente para siempre. Por eso NO se lanza acá: `transactional`
+          // revierte ante cualquier excepción y el vencimiento se perdería. La
+          // transacción confirma y el rechazo sale después.
+          invitation.statusConceptId = SURVEYS.INVITATION_EXPIRED;
+          touch(invitation, actor.id);
+          await tx.flush();
+          return { expiredAt: invitation.expiresAt };
+        }
 
-      const response = this.responsesRepo.createResponse(tx, {
-        surveyInvitationId: invitation.id,
-        surveyVersionId: invitation.surveyVersionId,
-        tenantId,
-        patientProfileId,
-        submittedAt: now,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        const items = await this.loadQuestionnaire(
+          tx,
+          invitation,
+          'PRACTITIONER',
+        );
+        const byId = new Map(items.map((item) => [item.question.id, item]));
+        // Un texto en blanco en una pregunta opcional es «no contestó», no un
+        // error: el comentario libre del final llega vacío cuando el paciente
+        // no tiene nada que decir.
+        const answers = this.withoutBlankOptionalText(dto.answers, byId);
+        this.validateAnswers(answers, items, byId);
 
-      for (const answer of dto.answers) {
-        const question = byId.get(answer.questionId)!;
-        this.responsesRepo.createAnswer(tx, {
-          surveyResponseId: response.id,
-          surveyQuestionId: question.id,
-          ...this.normalizeAnswerValue(answer, question),
+        const response = this.responsesRepo.createResponse(tx, {
+          surveyInvitationId: invitation.id,
+          surveyVersionId: invitation.surveyVersionId,
+          // El tenant de la respuesta es el de la invitación ya comprobada, no
+          // el que el cliente pueda sugerir.
+          tenantId: invitation.tenantId,
+          patientProfileId,
+          submittedAt: now,
           actorUserId: actor.id,
         });
-      }
+        await tx.flush();
 
-      invitation.statusConceptId = SURVEYS.INVITATION_ANSWERED;
-      invitation.answeredAt = now;
-      touch(invitation, actor.id);
+        for (const answer of answers) {
+          const question = byId.get(answer.questionId)!.question;
+          this.responsesRepo.createAnswer(tx, {
+            surveyResponseId: response.id,
+            surveyQuestionId: question.id,
+            ...this.normalizeAnswerValue(answer, question),
+            actorUserId: actor.id,
+          });
+        }
 
-      await tx.flush();
+        invitation.statusConceptId = SURVEYS.INVITATION_ANSWERED;
+        invitation.answeredAt = now;
+        touch(invitation, actor.id);
 
-      this.logger.info(
-        {
-          operation: 'surveys.response.submit',
-          invitationId,
-          responseId: response.id,
-          answers: dto.answers.length,
-        },
-        'Survey response submitted',
-      );
-      return { id: response.id };
-    });
+        await tx.flush();
+
+        this.logger.info(
+          {
+            operation: 'surveys.response.submit',
+            invitationId,
+            responseId: response.id,
+            answers: answers.length,
+          },
+          'Survey response submitted',
+        );
+        return { id: response.id };
+      })
+      .catch((error: unknown) => {
+        // Si el modelo respalda la unicidad (una respuesta por invitación, una
+        // por pregunta), la violación es un duplicado, no un error del servidor.
+        if (error instanceof UniqueConstraintViolationException) {
+          throw new ConflictException(
+            'La respuesta ya fue registrada para este cuestionario',
+            { invitationId },
+            SurveysErrorReason.ANSWER_DUPLICATE,
+          );
+        }
+        throw error;
+      });
 
     if ('expiredAt' in outcome) {
       throw new PreconditionFailedException(
@@ -209,12 +301,16 @@ export class SurveysResponsesService {
     );
     if (!version) return [];
 
-    const invitations = await this.invitationsRepo.listByVersions(this.em, [
-      version.id,
-    ]);
+    // Las invitaciones sueltas de la versión y las que la llevan detrás de la
+    // base del sistema.
+    const invitations = [
+      ...(await this.invitationsRepo.listByVersions(this.em, [version.id])),
+      ...(await this.invitationsRepo.listByExtensionVersions(this.em, [
+        version.id,
+      ])),
+    ];
     if (invitations.length === 0) return [];
 
-    const invitationById = new Map(invitations.map((i) => [i.id, i]));
     const responses = await this.responsesRepo.listByInvitations(
       this.em,
       invitations.map((i) => i.id),
@@ -231,18 +327,27 @@ export class SurveysResponsesService {
     );
     const questionById = new Map(questions.map((q) => [q.id, q]));
 
-    return responses.map((response) => ({
-      id: response.id,
-      invitationId: response.surveyInvitationId,
-      appointmentBookingId:
-        invitationById.get(response.surveyInvitationId)?.appointmentBookingId ??
-        '',
-      submittedAt: response.submittedAt,
-      answers: answers
-        .filter((a) => a.surveyResponseId === response.id)
-        .map((a) => this.toAnswerDto(a, questionById.get(a.surveyQuestionId)))
-        .sort((a, b) => a.questionText.localeCompare(b.questionText)),
-    }));
+    // Sólo las respuestas a SUS preguntas. Cuando la invitación lleva la base
+    // del sistema, esas respuestas no se leen una por una: el médico las ve
+    // agregadas, sin paciente ni reserva. Y una respuesta en la que no contestó
+    // ninguna pregunta suya no se lista: sólo diría que ese paciente respondió.
+    return responses
+      .map((response) => ({
+        id: response.id,
+        invitationId: response.surveyInvitationId,
+        // Sólo el día, no la hora: la hora exacta se cruzaría con la agenda del
+        // profesional (cuándo cerró cada consulta) para saber quién respondió.
+        submittedAt: startOfUtcDay(response.submittedAt),
+        answers: answers
+          .filter(
+            (a) =>
+              a.surveyResponseId === response.id &&
+              questionById.has(a.surveyQuestionId),
+          )
+          .map((a) => this.toAnswerDto(a, questionById.get(a.surveyQuestionId)))
+          .sort((a, b) => a.questionText.localeCompare(b.questionText)),
+      }))
+      .filter((response) => response.answers.length > 0);
   }
 
   /**
@@ -282,29 +387,45 @@ export class SurveysResponsesService {
    * justamente el error que costó descubrir la primera vez.
    *
    * @param patientProfileId - Paciente de la sesión.
-   * @returns Sus invitaciones.
+   * @param tenantId - Tenant activo de la petición.
+   * @returns Sus invitaciones en ese tenant.
    */
   private async listInvitationsOf(
     patientProfileId: string,
+    tenantId: string,
   ): Promise<SurveyInvitations[]> {
-    return this.invitationsRepo.listByPatient(this.em, patientProfileId);
+    return this.invitationsRepo.listByPatient(
+      this.em,
+      patientProfileId,
+      tenantId,
+    );
   }
 
-  /** Carga la invitación comprobando que sea del paciente de la sesión. */
+  /**
+   * Carga la invitación comprobando paciente **y tenant activo**.
+   *
+   * Una invitación inexistente, de otra persona o de otro tenant responde igual:
+   * 404, mismo mensaje y mismo `reason`, sin `details`. Un 403, o un detalle que
+   * nombre el UUID, le confirmaría a alguien que la invitación existe y que esa
+   * persona tuvo una atención.
+   *
+   * @param lock - Bloquea la fila hasta el fin de la transacción (envío).
+   */
   private async loadOwnInvitation(
     invitationId: string,
     patientProfileId: string,
+    tenantId: string,
     em: EntityManager = this.em,
+    lock = false,
   ): Promise<SurveyInvitations> {
-    const invitation = await this.invitationsRepo.findById(em, invitationId);
-    // 404 y no 403: confirmarle a alguien que la invitación existe pero es de
-    // otra persona ya filtra que esa persona tuvo una atención.
-    if (!invitation || invitation.patientProfileId !== patientProfileId) {
-      throw new ResourceNotFoundException('Cuestionario no encontrado', {
-        invitationId,
-      });
-    }
-    return invitation;
+    const found = lock
+      ? await this.invitationsRepo.findByIdForUpdate(em, invitationId)
+      : await this.invitationsRepo.findById(em, invitationId);
+    const own = found?.patientProfileId === patientProfileId ? found : null;
+    return assertResourceInTenant(own, own?.tenantId, tenantId, {
+      message: 'Cuestionario no encontrado',
+      reason: SurveysErrorReason.INVITATION_OUT_OF_SCOPE,
+    });
   }
 
   /** Carga la plantilla comprobando organización y profesional dueño. */
@@ -316,6 +437,10 @@ export class SurveysResponsesService {
       this.em,
       templateId,
     );
+    if (template && template.tenantId === requireTenantId()) {
+      // Las respuestas a la base del sistema se leen agregadas, no por plantilla.
+      assertNotSystemTemplate(template, templateId);
+    }
     if (
       !template ||
       template.tenantId !== requireTenantId() ||
@@ -344,13 +469,73 @@ export class SurveysResponsesService {
   }
 
   /**
+   * Las preguntas de una invitación: las de la versión principal y, detrás, las
+   * de la extensión del profesional si la lleva. Las de la extensión nunca son
+   * obligatorias.
+   *
+   * @param mainSource - Quién escribió la versión principal (la base del
+   *   sistema, o el profesional en una invitación suelta). Si la invitación
+   *   lleva extensión, la principal es siempre la base.
+   */
+  private async loadQuestionnaire(
+    em: EntityManager,
+    invitation: SurveyInvitations,
+    mainSource: QuestionSource,
+  ): Promise<QuestionnaireItem[]> {
+    const main = await this.templatesRepo.listQuestions(
+      em,
+      invitation.surveyVersionId,
+    );
+    const hasExtension = Boolean(invitation.extensionSurveyVersionId);
+    const items: QuestionnaireItem[] = main.map((question) => ({
+      question,
+      source: hasExtension ? 'SYSTEM' : mainSource,
+      required: question.required,
+    }));
+    if (invitation.extensionSurveyVersionId) {
+      const extension = await this.templatesRepo.listQuestions(
+        em,
+        invitation.extensionSurveyVersionId,
+      );
+      items.push(
+        ...extension.map((question) => ({
+          question,
+          source: 'PRACTITIONER' as const,
+          required: false,
+        })),
+      );
+    }
+    return items;
+  }
+
+  /**
+   * Quita las respuestas de texto vacías o en blanco a preguntas NO obligatorias:
+   * se tratan como ausentes (no se validan ni se guardan). En una obligatoria el
+   * texto en blanco se deja pasar a la validación, que lo rechaza con 422.
+   */
+  private withoutBlankOptionalText(
+    answers: AnswerInputDto[],
+    byId: Map<string, QuestionnaireItem>,
+  ): AnswerInputDto[] {
+    return answers.filter((answer) => {
+      const item = byId.get(answer.questionId);
+      if (!item || item.required) return true;
+      if (ANSWER_TYPE_CODE_BY_ID[item.question.answerTypeConceptId] !== 'TEXT')
+        return true;
+      return !(
+        typeof answer.valueText === 'string' && answer.valueText.trim() === ''
+      );
+    });
+  }
+
+  /**
    * Comprueba que el envío sea contestable: obligatorias presentes, sin
    * preguntas ajenas, sin repetidas y con el valor del tipo correcto.
    */
   private validateAnswers(
     answers: AnswerInputDto[],
-    questions: SurveyQuestions[],
-    byId: Map<string, SurveyQuestions>,
+    items: QuestionnaireItem[],
+    byId: Map<string, QuestionnaireItem>,
   ): void {
     const seen = new Set<string>();
     for (const answer of answers) {
@@ -362,21 +547,21 @@ export class SurveysResponsesService {
       }
       seen.add(answer.questionId);
 
-      const question = byId.get(answer.questionId);
-      if (!question) {
+      const item = byId.get(answer.questionId);
+      if (!item) {
         throw new PreconditionFailedException(
           'La respuesta no corresponde a una pregunta de este cuestionario',
           { questionId: answer.questionId },
         );
       }
-      this.validateAnswerValue(answer, question);
+      this.validateAnswerValue(answer, item.question);
     }
 
-    const missing = questions.filter((q) => q.required && !seen.has(q.id));
+    const missing = items.filter((i) => i.required && !seen.has(i.question.id));
     if (missing.length > 0) {
       throw new PreconditionFailedException(
         'Faltan respuestas a preguntas obligatorias',
-        { questionIds: missing.map((q) => q.id) },
+        { questionIds: missing.map((i) => i.question.id) },
       );
     }
   }
@@ -503,18 +688,22 @@ export class SurveysResponsesService {
   /** Proyecta la invitación al contrato del paciente. */
   private toInvitationDto(
     invitation: SurveyInvitations,
-    template: SurveyTemplates,
+    card: InvitationCardContext,
     now: Date,
   ): PatientInvitationDto {
     return {
       id: invitation.id,
-      title: template.title,
-      description: template.description,
+      title: card.title,
+      description: card.description ?? undefined,
       status: this.invitationStatus(invitation, now),
       issuedAt: invitation.issuedAt,
       expiresAt: invitation.expiresAt,
       answeredAt: invitation.answeredAt,
-      appointmentBookingId: invitation.appointmentBookingId,
+      appointmentBookingId: invitation.appointmentBookingId ?? '',
+      kind: card.kind,
+      serviceName: card.serviceName,
+      practitionerDisplayName: card.practitionerDisplayName,
+      attendedAt: card.attendedAt,
     };
   }
 
@@ -536,14 +725,19 @@ export class SurveysResponsesService {
     return now > invitation.expiresAt ? 'EXPIRED' : 'PENDING';
   }
 
-  /** Proyecta la entidad de pregunta al contrato HTTP. */
-  private toQuestionDto(question: SurveyQuestions): QuestionDto {
+  /** Proyecta la pregunta del cuestionario al contrato HTTP del paciente. */
+  private toQuestionDto(
+    item: QuestionnaireItem,
+    position: number,
+  ): QuestionDto {
+    const { question } = item;
     return {
       id: question.id,
-      position: question.position,
+      position,
       questionText: question.questionText,
       answerType: ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId],
-      required: question.required,
+      required: item.required,
+      source: item.source,
       options: question.options,
       scaleMin: question.scaleMin,
       scaleMax: question.scaleMax,
@@ -589,4 +783,11 @@ export class SurveysResponsesService {
       valueChoices: answer.valueChoices,
     };
   }
+}
+
+/** Medianoche UTC del día de `value`: la resolución más fina que se le da al profesional. */
+function startOfUtcDay(value: Date): Date {
+  return new Date(
+    Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+  );
 }

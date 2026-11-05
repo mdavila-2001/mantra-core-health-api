@@ -57,7 +57,8 @@ export const EXCLUDED_CATEGORIES = {
 
 /**
  * Tipos fuera de W incluidos explícitamente, decididos tipo por tipo leyendo
- * el nombre oficial en la EMDN V2. Cada entrada incluye el código y toda su
+ * el nombre oficial en la EMDN V2 y revisados contra la v2026 oficial (la
+ * telemetría de signos vitales Z120306 pasó a Z12030206, dentro de Z120302). Cada entrada incluye el código y toda su
  * descendencia. Lo que NO está acá dentro de C, G, N, Q, R, U, V y Z queda
  * excluido por terapéutico, quirúrgico o mixto. Exclusiones notables: Z1101
  * (radioterapia), Z119002/Z119005 (dosimetría), los «accesorios / software /
@@ -68,7 +69,8 @@ export const EXCLUDED_CATEGORIES = {
  * (electroestimuladores), R070102/R070103 (hemostasia y lavado bronquial),
  * V9015 (geles conductores, compartidos con terapia).
  */
-const VERIFIED = 'EMDN V2 (BatirMedical/nomenclature-emdn@e0131762)';
+const VERIFIED =
+  'EMDN v2026 (Comisión Europea, webgate.ec.europa.eu/dyna2/emdn/build/EMDN v2026_EN..xlsx)';
 export const INCLUDED_TYPE_PREFIXES = [
   {
     prefix: 'Z1102',
@@ -166,12 +168,6 @@ export const INCLUDED_TYPE_PREFIXES = [
   {
     prefix: 'Z120302',
     motive: 'Monitorización de signos vitales.',
-    verifiedAgainst: VERIFIED,
-  },
-  {
-    prefix: 'Z120306',
-    motive:
-      'Telemetría de signos vitales (ECG, PNI, EtCO2, SpO2, respiración).',
     verifiedAgainst: VERIFIED,
   },
   {
@@ -349,6 +345,18 @@ export const INCLUDED_TYPE_PREFIXES = [
     prefix: 'C01040201',
     motive:
       'Dispositivos diagnósticos de angiografía periférica (catéteres diagnósticos, ecografía intravascular).',
+    verifiedAgainst: VERIFIED,
+  },
+  {
+    prefix: 'C01040401',
+    motive:
+      'Dispositivos diagnósticos de angiografía neurovascular (nuevo en v2026).',
+    verifiedAgainst: VERIFIED,
+  },
+  {
+    prefix: 'C040401',
+    motive:
+      'Guías neurovasculares diagnósticas (así las nombra la EMDN v2026; las guías sin calificativo diagnóstico quedan fuera).',
     verifiedAgainst: VERIFIED,
   },
   {

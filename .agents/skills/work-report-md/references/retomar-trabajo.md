@@ -1,4 +1,4 @@
-# Retomar un trabajo desde un reporte ajeno
+# Retomar un trabajo desde un PR ajeno
 
 Abrilo cuando llegues a un trabajo que empezó otra persona u otra sesión.
 
@@ -9,6 +9,7 @@ Cuando llegás a un trabajo ajeno, leé en este orden:
 3. **Dónde quedó** de cada ítem — decide si podés correr algo ya o hay que arreglar primero.
 4. **No cubierto** — lo que parece hecho pero nadie verificó; suele ser el origen de la próxima sorpresa.
 5. **Decisiones y ambigüedades** — supuestos que quizá haya que confirmar antes de seguir.
-6. Recién después, el `PLAN.md` para el contexto completo.
+6. **Los issues enlazados** — lo que quedó a medias o bloqueado, con sus cuatro respuestas.
+7. Recién después, el plan (en el issue de origen o en el PR) para el contexto completo.
 
 Si el reporte no te alcanza para arrancar, eso es un defecto del reporte: anotalo.

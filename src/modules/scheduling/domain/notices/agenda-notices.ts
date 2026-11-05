@@ -413,3 +413,87 @@ export function scheduleMovedNotice(
     debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutes}`,
   };
 }
+
+/**
+ * El paciente subió un comprobante de pago — el aviso para **el médico**.
+ *
+ * Lleva a la agenda del profesional, que es donde está «Estado del pago» con
+ * la lista de comprobantes para confirmar o rechazar. No dice el monto: el
+ * aviso puede salir por correo, y el monto lo lee el médico en el comprobante.
+ *
+ * @param booking - La cita del comprobante.
+ * @param patient - Cómo se llama quien lo subió; `undefined` si no se resolvió.
+ * @param recipientUserId - Cuenta del profesional.
+ * @param receiptId - El comprobante subido.
+ */
+export function receiptUploadedNotice(
+  booking: BookingNoticeSnapshot,
+  patient: string | undefined,
+  recipientUserId: string,
+  receiptId: string,
+): AgendaNotice {
+  const who = patient ?? 'Un paciente';
+  return {
+    kind: 'PAYMENT_RECEIPT_UPLOADED',
+    recipient: { userId: recipientUserId },
+    tenantId: booking.tenantId,
+    subject: 'Recibió un comprobante de pago',
+    bodyText:
+      `${who} subió el comprobante de pago de la cita del ` +
+      `${whenText(booking.startAt)}${atPlace(booking)}. ` +
+      'Puede confirmarlo o rechazarlo desde su agenda.',
+    relatedResourceType: BOOKING_RESOURCE,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: PRACTITIONER_AGENDA_ROUTE,
+      bookingId: booking.bookingId,
+      receiptId,
+      change: 'PAYMENT_RECEIPT_UPLOADED',
+    },
+    // Un comprobante, un aviso: el reintento de la misma subida no duplica.
+    debounceKey: `payment-receipt:uploaded:${receiptId}`,
+  };
+}
+
+/**
+ * El médico revisó un comprobante — el aviso para **el paciente**.
+ *
+ * Dice si se confirmó o se rechazó y, si se rechazó, por qué: un rechazo sin
+ * motivo deja al paciente sin saber qué volver a subir.
+ *
+ * @param booking - La cita del comprobante.
+ * @param receiptId - El comprobante revisado.
+ * @param confirmed - `true` si se confirmó; `false` si se rechazó.
+ * @param reason - El motivo del rechazo; no aplica al confirmar.
+ */
+export function receiptReviewedNotice(
+  booking: BookingNoticeSnapshot,
+  receiptId: string,
+  confirmed: boolean,
+  reason?: string,
+): AgendaNotice {
+  const when = `${whenText(booking.startAt)}${atPlace(booking)}`;
+  return {
+    kind: 'PAYMENT_RECEIPT_REVIEWED',
+    recipient: { patientProfileId: booking.patientProfileId },
+    tenantId: booking.tenantId,
+    subject: confirmed
+      ? 'Confirmaron su pago'
+      : 'Rechazaron su comprobante de pago',
+    bodyText: confirmed
+      ? `${booking.resourceLabel} confirmó el pago de su cita del ${when}.`
+      : `${booking.resourceLabel} rechazó el comprobante de su cita del ${when}. ` +
+        `Motivo: ${reason ?? 'sin motivo'}. Puede subir otro desde su cita.`,
+    relatedResourceType: BOOKING_RESOURCE,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: appointmentRoute(booking.bookingId),
+      bookingId: booking.bookingId,
+      receiptId,
+      change: confirmed
+        ? 'PAYMENT_RECEIPT_CONFIRMED'
+        : 'PAYMENT_RECEIPT_REJECTED',
+    },
+    debounceKey: `payment-receipt:reviewed:${receiptId}`,
+  };
+}

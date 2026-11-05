@@ -104,6 +104,24 @@ describe('PharmaLabOrganizationService.listLabs · alcance', () => {
     expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), null);
   });
 
+  it('SUPERADMIN concedido dentro de un tenant (MCH-001) no ve la red entera ni administra un laboratorio ajeno (#1241)', async () => {
+    const { service, repo } = build();
+    const scopedSuper = {
+      id: 'u1',
+      roles: ['SUPERADMIN'],
+      scopedRoles: { [TENANT_A]: ['SUPERADMIN'] },
+      tenantIds: [TENANT_A],
+    };
+    await service.listLabs(scopedSuper);
+    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), {
+      tenantIds: [TENANT_A],
+      labIds: [],
+    });
+    await expect(service.getLab(LAB_B, scopedSuper as any)).rejects.toThrow(
+      'Laboratorio no encontrado',
+    );
+  });
+
   it('BUSINESS_ADMIN concedido dentro de un tenant (MCH-001) no ve la red entera', async () => {
     const { service, repo } = build();
     await service.listLabs({

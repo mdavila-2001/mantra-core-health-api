@@ -8,8 +8,6 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   UPLOAD_MIME_ALLOWLIST,
-  decodeKeysetCursor,
-  encodeKeysetCursor,
   touch,
   SEED,
   type AuthenticatedUser,
@@ -20,9 +18,13 @@ import {
 } from '../ports/attachable-files.port';
 import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
 import {
-  searchRequiresCriterion,
-  resolvePatientSearchScope,
-} from './patient-search-scope';
+  MergePatientsUseCase,
+  toMergeEventDto,
+} from '../use-cases/patients/merge-patients.use-case';
+import {
+  SearchPatientsUseCase,
+  type SearchPatientsOptions,
+} from '../use-cases/patients/search-patients.use-case';
 import {
   BIRTH_SEX_CODE_BY_CONCEPT,
   BIRTH_SEX_CONCEPT_BY_CODE,
@@ -78,6 +80,7 @@ import {
   DependentSummaryDto,
 } from '../../presentation/dto';
 import { createGuardianRelatedPerson } from './guardian-related-person';
+import { assertNoHomonymPatient } from './homonym-guard';
 import type { InsuranceSector } from '../../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import {
@@ -102,6 +105,7 @@ interface PatientAddressRecord {
   readonly lines?: string;
   readonly city?: string;
   readonly municipalityConceptId?: string;
+  readonly districtText?: string | null;
   readonly latitude?: number | string | null;
   readonly longitude?: number | string | null;
 }
@@ -252,6 +256,8 @@ function toAddress(
     lines?: string;
     city?: string;
     municipalityConceptId?: string;
+    administrativeArea2ConceptId?: string | null;
+    districtText?: string | null;
     latitude?: number | string | null;
     longitude?: number | string | null;
   } | null,
@@ -263,6 +269,10 @@ function toAddress(
     ...(row.municipalityConceptId === undefined
       ? {}
       : { municipalityConceptId: row.municipalityConceptId }),
+    ...(row.administrativeArea2ConceptId == null
+      ? {}
+      : { administrativeArea2ConceptId: row.administrativeArea2ConceptId }),
+    ...(row.districtText == null ? {} : { district: row.districtText }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
     //
     // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
@@ -384,6 +394,11 @@ export class ProfilesPatientsService {
           ProfilesErrorReason.PATIENT_CODE_ALREADY_IN_USE,
         );
       }
+      await assertNoHomonymPatient(tx, this.patientProfilesRepo, {
+        displayName: dto.displayName,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+        allowHomonym: dto.allowHomonym,
+      });
 
       const person = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
@@ -702,6 +717,7 @@ export class ProfilesPatientsService {
       if (
         dto.residenceMunicipalityConceptId !== undefined ||
         dto.homeAddressLines !== undefined ||
+        dto.homeDistrict !== undefined ||
         // `null` también cuenta: quitar el punto es un cambio.
         dto.homeLatitude !== undefined ||
         dto.homeLongitude !== undefined
@@ -713,6 +729,7 @@ export class ProfilesPatientsService {
           {
             municipio: dto.residenceMunicipalityConceptId,
             lines: dto.homeAddressLines,
+            district: dto.homeDistrict,
             latitude: dto.homeLatitude,
             longitude: dto.homeLongitude,
           },
@@ -724,6 +741,7 @@ export class ProfilesPatientsService {
       if (
         dto.workMunicipalityConceptId !== undefined ||
         dto.workAddressLines !== undefined ||
+        dto.workDistrict !== undefined ||
         dto.workLatitude !== undefined ||
         dto.workLongitude !== undefined
       ) {
@@ -734,6 +752,7 @@ export class ProfilesPatientsService {
           {
             municipio: dto.workMunicipalityConceptId,
             lines: dto.workAddressLines,
+            district: dto.workDistrict,
             latitude: dto.workLatitude,
             longitude: dto.workLongitude,
           },
@@ -1457,6 +1476,8 @@ export class ProfilesPatientsService {
     changes: {
       municipio?: string;
       lines?: string;
+      /** Distrito o zona; mismos tres estados que `lines` (`''` lo borra). */
+      district?: string;
       /**
        * `undefined` no toca el punto; `null` en los dos lo **quita**.
        *
@@ -1485,6 +1506,12 @@ export class ProfilesPatientsService {
         : changes.lines.trim() === ''
           ? undefined
           : changes.lines.trim();
+    const district =
+      changes.district === undefined
+        ? (current?.districtText ?? undefined)
+        : changes.district.trim() === ''
+          ? undefined
+          : changes.district.trim();
     // Quitar el punto: los dos extremos en `null`. `undefined` a undefined
     // porque la columna es nullable y es lo que la escritura espera para
     // «sin dato»; el DTO ya rechazó los `null` a medias.
@@ -1507,6 +1534,7 @@ export class ProfilesPatientsService {
     const withoutChanges =
       (current?.municipalityConceptId ?? undefined) === municipality &&
       (current?.lines ?? undefined) === lines &&
+      (current?.districtText ?? undefined) === district &&
       columnNumber(current?.latitude) === latitude &&
       columnNumber(current?.longitude) === longitude;
     if (withoutChanges) return;
@@ -1520,6 +1548,7 @@ export class ProfilesPatientsService {
       useConceptId: usageConceptId,
       municipalityConceptId: municipality,
       lines,
+      district,
       latitude,
       longitude,
       actorUserId,
@@ -1772,118 +1801,17 @@ export class ProfilesPatientsService {
     });
   }
 
-  /**
-   * UC-05-13: listado paginado de pacientes para el personal administrativo.
-   *
-   * Es la cara de lectura que faltaba del módulo: hasta ahora sólo se podían
-   * dar de alta pacientes y consultarse a sí mismo el titular, así que ninguna
-   * pantalla podía mostrar "los pacientes" ni encontrar el `profileId` que el
-   * resto del contrato exige. Sin esto, dar de alta un paciente y después
-   * agendarle una cita eran dos operaciones que sólo se podían encadenar si
-   * quien las hacía se guardaba el id devuelto en el momento del alta.
-   *
-   * Devuelve datos de filiación, nunca clínicos.
-   *
-   * @param options - Texto de búsqueda, cursor de continuación y tope de página.
-   * @returns Página de pacientes con el cursor de la siguiente.
-   */
-  async searchPatients(
-    options: {
-      /** Texto libre sobre código de paciente y nombre. */
-      query?: string;
-      /**
-       * Documento de identidad exacto. Junto con
-       * {@link issuerAdministrativeAreaConceptId} es el camino que abre
-       * AC-07-1/AC-07-2: encontrar a alguien aunque su código o su nombre no
-       * contengan el texto buscado.
-       */
-      nationalId?: string;
-      /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
-      issuerAdministrativeAreaConceptId?: string;
-      /** Cursor opaco devuelto por la página anterior. */
-      cursor?: string;
-      /** Tope de filas de la página. */
-      limit: number;
-    },
+  /** UC-05-13: paginated patient search; see {@link SearchPatientsUseCase}. */
+  searchPatients(
+    options: SearchPatientsOptions,
     actor: AuthenticatedUser,
   ): Promise<SearchPatientsResponseDto> {
-    // P-07-10: el padrón ya no está acotado por actividad (ver
-    // `patient-search-scope.ts`), así que sin este freno un rol clínico sin
-    // texto ni documento recibiría la primera página del padrón entero — es
-    // enumeración, no búsqueda. `SECURITY_ADMIN`/`SUPERADMIN` administran el
-    // padrón y siguen listando sin criterio, como siempre.
-    if (
-      searchRequiresCriterion(actor) &&
-      !options.query &&
-      !options.nationalId
-    ) {
-      throw new PreconditionFailedException(
-        'Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes',
-        {},
-        ProfilesErrorReason.PATIENT_SEARCH_CRITERIA_REQUIRED,
-      );
-    }
-
-    const em = this.em.fork();
-
-    if (options.issuerAdministrativeAreaConceptId) {
-      await this.administrativeAreas.assertIsAdministrativeArea(
-        em,
-        options.issuerAdministrativeAreaConceptId,
-      );
-    }
-
-    const after = options.cursor
-      ? decodeKeysetCursor(options.cursor)
-      : undefined;
-    const afterPatientCode =
-      typeof after?.patientCode === 'string' ? after.patientCode : undefined;
-
-    // Se pide una fila de más para saber si hay página siguiente sin pagar un
-    // COUNT sobre toda la tabla en cada página.
-    const rows = await this.patientProfilesRepo.searchPage(
-      em,
-      {
-        query: options.query,
-        nationalId: options.nationalId,
-        issuerAdministrativeAreaConceptId:
-          options.issuerAdministrativeAreaConceptId,
-        scope: resolvePatientSearchScope(actor),
-        afterPatientCode,
-      },
-      options.limit + 1,
-    );
-    const hasMore = rows.length > options.limit;
-    const page = hasMore ? rows.slice(0, options.limit) : rows;
-
-    const persons = await this.personsRepo.findByIds(
-      em,
-      page.map((row) => row.profileId),
-    );
-
-    const items = page.map((row) => {
-      const person = persons.get(row.profileId);
-      return {
-        profileId: row.profileId,
-        personId: row.profileId,
-        patientCode: row.patientCode,
-        displayName: person?.displayName,
-        birthDate: person?.birthDate,
-        personStatusConceptId: person?.personStatusConceptId,
-        deceased: Boolean(person?.deceasedAt),
-      };
-    });
-
-    const last = page.at(-1);
-    return {
-      items,
-      count: items.length,
-      limit: options.limit,
-      nextCursor:
-        hasMore && last
-          ? encodeKeysetCursor({ patientCode: last.patientCode })
-          : null,
-    };
+    return new SearchPatientsUseCase(
+      this.em,
+      this.personsRepo,
+      this.patientProfilesRepo,
+      this.administrativeAreas,
+    ).execute(options, actor);
   }
 
   /**
@@ -2102,8 +2030,8 @@ export class ProfilesPatientsService {
     });
   }
 
-  /** UC-05-08: fusiona un paciente perdedor sobre el sobreviviente (evento IMMUTABLE + reasignación). */
-  async mergePatients(
+  /** UC-05-08: merges a loser patient; see {@link MergePatientsUseCase}. */
+  mergePatients(
     dto: MergePatientsDto,
     actor: AuthenticatedUser,
   ): Promise<MergeEventResponseDto> {
@@ -2115,103 +2043,15 @@ export class ProfilesPatientsService {
       },
       'Merging patients',
     );
-    return this.em.transactional(async (tx) => {
-      if (dto.survivingPatientProfileId === dto.mergedPatientProfileId) {
-        throw new PreconditionFailedException(
-          'No se puede fusionar un paciente consigo mismo',
-          {
-            profileId: dto.survivingPatientProfileId,
-          },
-          ProfilesErrorReason.MERGE_SAME_PATIENT,
-        );
-      }
-      const surviving = await this.patientProfilesRepo.findById(
-        tx,
-        dto.survivingPatientProfileId,
-      );
-      if (!surviving) {
-        throw new ResourceNotFoundException(
-          'Paciente sobreviviente no encontrado',
-          {
-            profileId: dto.survivingPatientProfileId,
-          },
-          ProfilesErrorReason.MERGE_SURVIVING_PATIENT_NOT_FOUND,
-        );
-      }
-      const merged = await this.patientProfilesRepo.findById(
-        tx,
-        dto.mergedPatientProfileId,
-      );
-      if (!merged) {
-        throw new ResourceNotFoundException(
-          'Paciente a fusionar no encontrado',
-          {
-            profileId: dto.mergedPatientProfileId,
-          },
-          ProfilesErrorReason.MERGE_TARGET_PATIENT_NOT_FOUND,
-        );
-      }
-      if (merged.recordLinkageStatusConceptId === PROF.LINKAGE_MERGED) {
-        throw new ConflictException(
-          'El paciente ya fue fusionado',
-          {
-            profileId: dto.mergedPatientProfileId,
-          },
-          ProfilesErrorReason.PATIENT_ALREADY_MERGED,
-        );
-      }
-
-      const now = new Date();
-      const event = this.mergeEventsRepo.create(tx, {
-        survivingPatientProfileId: dto.survivingPatientProfileId,
-        mergedPatientProfileId: dto.mergedPatientProfileId,
-        reasonConceptId: dto.reasonConceptId ?? PROF.MERGE_REASON_DUPLICATE,
-        decisionStatusConceptId: PROF.MERGE_APPROVED,
-        approvedByUserId: actor.id,
-        recordedAt: now,
-        recordedByUserId: actor.id,
-      });
-      await tx.flush();
-
-      // Estado del paciente perdedor.
-      merged.recordLinkageStatusConceptId = PROF.LINKAGE_MERGED;
-      touch(merged, actor.id);
-
-      // patient_profiles.profile_id ES persons.id (FK a profiles.persons), así que
-      // el id de perfil del perdedor identifica directamente a su persona.
-      const mergedPerson = await this.personsRepo.findById(
-        tx,
-        merged.profileId,
-      );
-      if (mergedPerson) {
-        mergedPerson.mergeSurvivorPersonId = surviving.profileId;
-        mergedPerson.personStatusConceptId = PROF.PERSON_MERGED;
-        touch(mergedPerson, actor.id);
-      }
-
-      // Reasigna referencias del perdedor al sobreviviente.
-      await this.identityLinksRepo.reassignPatientProfile(
-        tx,
-        merged.profileId,
-        surviving.profileId,
-        now,
-      );
-      await this.relatedPersonsRepo.reassignPatientProfile(
-        tx,
-        merged.profileId,
-        surviving.profileId,
-        now,
-      );
-      await this.portalProxiesRepo.reassignPatientProfile(
-        tx,
-        merged.profileId,
-        surviving.profileId,
-        now,
-      );
-      await tx.flush();
-
-      return this.toEventDto(event);
-    });
+    return new MergePatientsUseCase(this.em, {
+      patientProfiles: this.patientProfilesRepo,
+      persons: this.personsRepo,
+      mergeEvents: this.mergeEventsRepo,
+      identityLinks: this.identityLinksRepo,
+      relatedPersons: this.relatedPersonsRepo,
+      portalProxies: this.portalProxiesRepo,
+      accountLinks: this.accountLinksRepo,
+    }).execute(dto, actor);
   }
 
   /**
@@ -2329,7 +2169,7 @@ export class ProfilesPatientsService {
       }
       await tx.flush();
 
-      return this.toEventDto(reversal);
+      return toMergeEventDto(reversal);
     });
   }
 
@@ -2537,47 +2377,5 @@ export class ProfilesPatientsService {
         revokedProxies,
       };
     });
-  }
-
-  /**
-   * Transforma to event dto.
-   *
-   * @param event - Valor de event requerido por la operación.
-   * @returns Resultado de to event dto conforme al contrato `MergeEventResponseDto`.
-   */
-  private toEventDto(event: {
-    /**
-     * Identificador único de la instancia.
-     */
-    id: string;
-    /**
-     * Identificador asociado a surviving patient profile.
-     */
-    survivingPatientProfileId: string;
-    /**
-     * Identificador asociado a merged patient profile.
-     */
-    mergedPatientProfileId: string;
-    /**
-     * Identificador asociado a decision status concept.
-     */
-    decisionStatusConceptId: string;
-    /**
-     * Identificador asociado a reversal of event.
-     */
-    reversalOfEventId?: string;
-    /**
-     * Valor de recorded at mantenido por la instancia.
-     */
-    recordedAt: Date;
-  }): MergeEventResponseDto {
-    return {
-      id: event.id,
-      survivingPatientProfileId: event.survivingPatientProfileId,
-      mergedPatientProfileId: event.mergedPatientProfileId,
-      decisionStatus: event.decisionStatusConceptId,
-      reversalOfEventId: event.reversalOfEventId,
-      recordedAt: event.recordedAt,
-    };
   }
 }

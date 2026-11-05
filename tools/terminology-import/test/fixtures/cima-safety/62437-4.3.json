@@ -1,0 +1,21 @@
+{
+ "sourceUrl": "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=62437&seccion=4.3",
+ "retrievedAt": "2026-10-25",
+ "nregistro": "62437",
+ "productName": "AMOXICILINA NORMON 500 MG CÁPSULAS DURAS EFG",
+ "vtm": {
+  "id": 27658006,
+  "nombre": "amoxicilina"
+ },
+ "fichaTecnicaDate": "2026-05-12",
+ "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/62437/FT_62437.html",
+ "note": "Respuesta literal de la API REST de CIMA (AEMPS), sin recortar. Reutilización autorizada citando el origen y la fecha de la última actualización (https://www.aemps.gob.es/aviso-legal/).",
+ "response": [
+  {
+   "seccion": "4.3",
+   "titulo": "Contraindicaciones",
+   "contenido": "<div>\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Hipersensibilidad al principio activo, a cualquiera de las penicilinas o a alguno de los excipientes incluidos en la secci&#243;n 6.1.</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-indent:14.2pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt 0pt 6pt; text-align:justify; line-height:150%; widows:0; orphans:0; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Antecedentes de una reacci&#243;n de hipersensibilidad inmediata grave (ej. anafilaxis) a otro agente beta-lact&#225;mico (p. ej. una cefalosporina, carbapenem o monobactam).</span></p>\r\n\r\n    <p style=\"margin:0pt; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n  </div>",
+   "orden": 6
+  }
+ ]
+}

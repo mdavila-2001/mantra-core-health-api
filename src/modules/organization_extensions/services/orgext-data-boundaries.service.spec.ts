@@ -10,7 +10,11 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { OrgextDataBoundariesService } from './orgext-data-boundaries.service';
 import { ORGEXT } from '../organization_extensions.concepts';
-import { ConflictException } from '../../../common';
+import { ConflictException, runWithTenant } from '../../../common';
+import { OrganizationExtensionsErrorReason } from '../organization_extensions.error-reasons';
+
+const inTenant = <T>(fn: () => Promise<T>, tenantId = 't1'): Promise<T> =>
+  runWithTenant(tenantId, fn);
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -51,7 +55,7 @@ describe('OrgextDataBoundariesService', () => {
       };
       d.boundariesRepo.create.mockReturnValue(boundary);
 
-      const res = await d.service.define(baseDto, actor);
+      const res = await inTenant(() => d.service.define(baseDto, actor));
 
       expect(res.status).toBe(ORGEXT.BOUNDARY_ACTIVE);
       expect(d.tx.flush).toHaveBeenCalled();
@@ -63,9 +67,47 @@ describe('OrgextDataBoundariesService', () => {
         id: 'b0',
       });
       await expect(
-        d.service.define(baseDto as any, actor),
+        inTenant(() => d.service.define(baseDto as any, actor)),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.boundariesRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alcance de tenant (ORGEXT-01)', () => {
+    it('rechaza una frontera cuyo cuerpo declara el tenant de otra organización', async () => {
+      const d = build();
+
+      await expect(
+        inTenant(() =>
+          d.service.define(
+            { tenantId: 't2', dataControllerTenantId: 't2' },
+            actor,
+          ),
+        ),
+      ).rejects.toMatchObject({
+        reason: OrganizationExtensionsErrorReason.ORGEXT_RESOURCE_NOT_AVAILABLE,
+      });
+      expect(d.boundariesRepo.findActiveByTenantAndType).not.toHaveBeenCalled();
+      expect(d.boundariesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('persiste la frontera con el tenant del contexto', async () => {
+      const d = build();
+      d.boundariesRepo.findActiveByTenantAndType.mockResolvedValue(null);
+      d.boundariesRepo.create.mockReturnValue({
+        id: 'b1',
+        tenantId: 't1',
+        statusConceptId: ORGEXT.BOUNDARY_ACTIVE,
+        effectiveFrom: new Date(),
+        createdAt: new Date(),
+      });
+
+      await inTenant(() => d.service.define(baseDto, actor));
+
+      expect(d.boundariesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: 't1' }),
+      );
     });
   });
 });

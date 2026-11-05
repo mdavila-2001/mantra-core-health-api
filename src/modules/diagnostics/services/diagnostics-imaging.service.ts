@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   ConflictException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ImagingRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
+import { DiagnosticsPatientAccessService } from './diagnostics-patient-access.service';
 import {
   CreateImagingEndpointDto,
   StoreImagingStudyDto,
@@ -31,11 +32,15 @@ export class DiagnosticsImagingService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
+   * @param patientAccess - Política clínica profesional–paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: ImagingRepository,
+    private readonly scope: DiagnosticsScopeService,
+    private readonly patientAccess: DiagnosticsPatientAccessService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsImagingService.name);
@@ -51,6 +56,7 @@ export class DiagnosticsImagingService {
    *
    * @param tenantId - Tenant custodio (del contexto de la petición).
    * @param patientProfileId - Paciente consultado.
+   * @param actor - Profesional que lee: necesita vínculo vigente con el paciente.
    * @param limit - Tamaño de página.
    * @param offset - Desplazamiento.
    * @returns Sus estudios, del más reciente al más antiguo.
@@ -58,9 +64,11 @@ export class DiagnosticsImagingService {
   async listStudiesByPatient(
     tenantId: string,
     patientProfileId: string,
+    actor: AuthenticatedUser,
     limit = 50,
     offset = 0,
   ): Promise<ImagingStudySummaryDto[]> {
+    await this.patientAccess.assertCanReadPatient(patientProfileId, actor);
     const studies = await this.repo.findStudiesByPatient(
       this.em,
       tenantId,
@@ -85,15 +93,11 @@ export class DiagnosticsImagingService {
       { operation: 'diagnostics.imagingEndpoint.create', actorId: actor.id },
       'Creating imaging endpoint',
     );
+    // El propietario sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.activeTenantFor(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      if (!dto.tenantId) {
-        throw new ConflictException(
-          'Falta el tenant del endpoint de imagen',
-          {},
-        );
-      }
       const endpoint = this.repo.createEndpoint(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         endpointTypeConceptId:
           dto.endpointTypeConceptId ?? DIAG.IMAGING_ENDPOINT_STOW,
         baseUri: dto.baseUri,
@@ -119,13 +123,19 @@ export class DiagnosticsImagingService {
       'Storing DICOM study',
     );
     return this.em.transactional(async (tx) => {
-      const endpoint = await this.repo.findEndpoint(tx, dto.imagingEndpointId);
-      if (!endpoint) {
-        throw new ResourceNotFoundException(
-          'Endpoint de imagen no encontrado',
-          {
-            imagingEndpointId: dto.imagingEndpointId,
-          },
+      // Toda la cadena se resuelve dentro del tenant antes de escribir nada.
+      const custodianTenantId = this.scope.activeTenantFor(
+        dto.custodianTenantId,
+      );
+      const endpoint = await this.scope.endpoint(tx, dto.imagingEndpointId);
+      if (dto.encounterId) {
+        await this.scope.encounter(tx, dto.encounterId, dto.patientProfileId);
+      }
+      if (dto.serviceRequestId) {
+        await this.scope.serviceRequest(
+          tx,
+          dto.serviceRequestId,
+          dto.patientProfileId,
         );
       }
       // Reenvío idempotente: un mismo Study UID no se duplica.
@@ -147,7 +157,7 @@ export class DiagnosticsImagingService {
         imagingEndpointId: endpoint.id,
         dicomStudyInstanceUid: dto.dicomStudyInstanceUid,
         statusConceptId: DIAG.IMAGING_STUDY_STORED,
-        custodianTenantId: dto.custodianTenantId ?? endpoint.tenantId,
+        custodianTenantId,
         accessionNumber: dto.accessionNumber,
         encounterId: dto.encounterId,
         serviceRequestId: dto.serviceRequestId,
@@ -214,11 +224,10 @@ export class DiagnosticsImagingService {
       'Recording radiation dose event',
     );
     return this.em.transactional(async (tx) => {
-      const study = await this.repo.findStudy(tx, imagingStudyId);
-      if (!study)
-        throw new ResourceNotFoundException('Estudio de imagen no encontrado', {
-          imagingStudyId,
-        });
+      const study = await this.scope.study(tx, imagingStudyId);
+      if (dto.imagingSeriesId) {
+        await this.scope.seriesOfStudy(tx, study, dto.imagingSeriesId);
+      }
 
       const event = this.repo.recordDoseEvent(tx, {
         custodianTenantId: study.custodianTenantId,

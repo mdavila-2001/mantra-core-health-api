@@ -200,5 +200,6 @@ export const { seeds: ACCOUNTING_CONCEPT_SEEDS, ids: ACCT } =
 
     // --- Monedas (currency_concept_id / exchange_rates) ---
     CURRENCY_PEN: { code: 'ACCT_CUR_PEN', display: 'Peruvian Sol' },
+    CURRENCY_BOB: { code: 'ACCT_CUR_BOB', display: 'Boliviano' },
     CURRENCY_USD: { code: 'ACCT_CUR_USD', display: 'US Dollar' },
   });

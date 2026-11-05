@@ -91,7 +91,12 @@ export class SchedulingServiceAgendaService {
     const wideFrom = new Date(from.getTime() - BUFFER_MARGIN_MS);
     const wideTo = new Date(to.getTime() + BUFFER_MARGIN_MS);
 
-    const [commitments, holds, services] = await Promise.all([
+    const liveSlotIds = {
+      bookedStatusConceptId: CONCEPTS.SLOT_BOOKED,
+      heldStatusConceptId: CONCEPTS.SLOT_HELD,
+      activeHoldStatusConceptId: CONCEPTS.HOLD_ACTIVE,
+    };
+    const [commitments, holds, services, flexibles] = await Promise.all([
       this.professionalTime.commitments(
         em,
         practitionerProfileId,
@@ -111,11 +116,18 @@ export class SchedulingServiceAgendaService {
         practitionerProfileId,
         wideFrom,
         wideTo,
-        {
-          bookedStatusConceptId: CONCEPTS.SLOT_BOOKED,
-          heldStatusConceptId: CONCEPTS.SLOT_HELD,
-          activeHoldStatusConceptId: CONCEPTS.HOLD_ACTIVE,
-        },
+        liveSlotIds,
+        now,
+      ),
+      // P36 · el turno flexible pedido y todavía no aceptado también ocupa: la
+      // regla madre sólo cuenta las citas confirmadas, y sin esto dos pacientes
+      // podrían pedir la misma hora de un horario sin grilla.
+      this.offeringsRepo.findLiveFlexibleSlotsOfProfessional(
+        em,
+        practitionerProfileId,
+        wideFrom,
+        wideTo,
+        liveSlotIds,
         now,
       ),
     ]);
@@ -124,6 +136,7 @@ export class SchedulingServiceAgendaService {
       ...commitments.map((c) => ({ startAt: c.startAt, endAt: c.endAt })),
       ...holds.map((r) => ({ startAt: r.startAt, endAt: r.endAt })),
       ...services.map((s) => busySpan(s.startAt, s.endAt, s)),
+      ...flexibles.map((f) => ({ startAt: f.startAt, endAt: f.endAt })),
     ];
   }
 

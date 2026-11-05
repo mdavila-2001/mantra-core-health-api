@@ -1,4 +1,5 @@
 import {
+  detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   sniffMimeType,
 } from './upload-content-type';
@@ -130,5 +131,39 @@ describe('isMimeTypeAllowedForCategory', () => {
 
   it('rechaza los formatos de oficina en IMAGE', () => {
     expect(isMimeTypeAllowedForCategory('IMAGE', 'text/plain')).toBe(false);
+  });
+});
+
+describe('detectUnsupportedImageFormat', () => {
+  /** Caja `ftyp` de ISO BMFF con la marca mayor dada. */
+  const ftyp = (brand: string): Buffer =>
+    Buffer.concat([
+      Buffer.from([0x00, 0x00, 0x00, 0x18]),
+      Buffer.from(`ftyp${brand}`),
+      Buffer.from([0x00, 0x00, 0x00, 0x00]),
+    ]);
+
+  it('reconoce HEIC, HEIF y AVIF por la marca de la caja ftyp', () => {
+    expect(detectUnsupportedImageFormat(ftyp('heic'))).toBe('image/heic');
+    expect(detectUnsupportedImageFormat(ftyp('heix'))).toBe('image/heic');
+    expect(detectUnsupportedImageFormat(ftyp('mif1'))).toBe('image/heif');
+    expect(detectUnsupportedImageFormat(ftyp('avif'))).toBe('image/avif');
+  });
+
+  it('sigue sin aceptarlos: sniffMimeType no les atribuye tipo', () => {
+    expect(sniffMimeType(ftyp('heic'))).toBeUndefined();
+    expect(sniffMimeType(ftyp('avif'))).toBeUndefined();
+  });
+
+  it('no confunde un vídeo MP4 o MOV con una foto', () => {
+    expect(detectUnsupportedImageFormat(ftyp('isom'))).toBeUndefined();
+    expect(detectUnsupportedImageFormat(ftyp('qt  '))).toBeUndefined();
+  });
+
+  it('no desborda con contenido corto ni reconoce otros formatos', () => {
+    expect(detectUnsupportedImageFormat(Buffer.from('ftyp'))).toBeUndefined();
+    expect(
+      detectUnsupportedImageFormat(Buffer.from([0xff, 0xd8, 0xff, 0xdb])),
+    ).toBeUndefined();
   });
 });

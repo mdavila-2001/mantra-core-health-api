@@ -246,6 +246,58 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * La vinculación de un profesional, por uuid.
+   *
+   * Filtra por el profesional en la misma consulta: una vinculación ajena
+   * responde igual que una inexistente y quien la pide no puede distinguirlas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Vinculación pedida.
+   * @param practitionerProfileId - Profesional autenticado.
+   * @returns La vinculación, o `null` si no existe o es de otro profesional.
+   */
+  findByIdForPractitioner(
+    em: EntityManager,
+    id: string,
+    practitionerProfileId: string,
+  ): Promise<PractitionerRoleAssignments | null> {
+    return em.findOne(PractitionerRoleAssignments, {
+      id,
+      practitionerProfileId,
+    });
+  }
+
+  /**
+   * Vinculaciones en curso de un profesional para un lote de servicios de una sede.
+   *
+   * «En curso» es cualquier estado que no cerró la relación: invitada, pendiente,
+   * activa o suspendida. Sirve para no abrir una segunda fila sobre el mismo
+   * procedimiento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional.
+   * @param practiceSiteId - Sede.
+   * @param healthcareServiceIds - Servicios consultados.
+   * @param openStatusConceptIds - Estados que cuentan como «en curso».
+   * @returns Las vinculaciones en curso sobre esos servicios.
+   */
+  findOpenForServices(
+    em: EntityManager,
+    practitionerProfileId: string,
+    practiceSiteId: string,
+    healthcareServiceIds: readonly string[],
+    openStatusConceptIds: readonly string[],
+  ): Promise<PractitionerRoleAssignments[]> {
+    if (healthcareServiceIds.length === 0) return Promise.resolve([]);
+    return em.find(PractitionerRoleAssignments, {
+      practitionerProfileId,
+      practiceSiteId,
+      healthcareServiceId: { $in: [...healthcareServiceIds] },
+      statusConceptId: { $in: [...openStatusConceptIds] },
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

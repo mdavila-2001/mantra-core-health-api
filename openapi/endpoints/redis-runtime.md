@@ -103,6 +103,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CacheWriteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CacheWriteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CacheWriteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CacheWriteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheWriteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -216,6 +217,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CacheDeleteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CacheDeleteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CacheDeleteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CacheDeleteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheDeleteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -326,6 +328,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<CacheReadResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CacheReadResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CacheReadResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CacheReadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheReadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -454,6 +457,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LockAcquireResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LockAcquireResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LockAcquireResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LockAcquireResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LockAcquireResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -570,6 +574,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LockReleaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LockReleaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LockReleaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LockReleaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LockReleaseResponseDto`. Ejemplo completo derivado de ese DTO:
 

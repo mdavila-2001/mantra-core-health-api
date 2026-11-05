@@ -14,7 +14,7 @@
 | [eta_estimates](#eta_estimates) | Conserva estimaciones de llegada de envíos para coordinar recepción y procesos dependientes. | 9 | 5 | 2 | COINCIDE |
 | [milestone_definitions](#milestone_definitions) | Define hitos que describen etapas esperadas en el seguimiento de envíos o procesos. | 15 | 7 | 5 | COINCIDE |
 | [shipment_handoffs](#shipment_handoffs) | Documenta traspasos de custodia entre transportistas o puntos logísticos durante un envío. | 11 | 4 | 1 | COINCIDE |
-| [shipments](#shipments) | Representa envíos físicos —por ejemplo, insumos o muestras— y su ciclo de transporte. | 20 | 12 | 16 | COINCIDE |
+| [shipments](#shipments) | Representa envíos físicos —por ejemplo, insumos o muestras— y su ciclo de transporte. | 20 | 12 | 17 | COINCIDE |
 | [trackable_subjects](#trackable_subjects) | Registra sujetos y objetos a los que se les puede seguir hitos o entregas dentro de procesos médicos y logísticos. | 17 | 10 | 17 | COINCIDE |
 | [tracking_carriers](#tracking_carriers) | Cataloga transportistas que reportan movimiento de envíos del sistema médico. | 13 | 8 | 3 | COINCIDE |
 | [tracking_events](#tracking_events) | Conserva eventos de seguimiento para reconstruir ubicación y estado de entregas o sujetos rastreables. | 14 | 8 | 9 | COINCIDE |
@@ -406,7 +406,7 @@ Representa envíos físicos —por ejemplo, insumos o muestras— y su ciclo de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_37_tracking.puml: shipments`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_37_tracking.puml` · **DDL:** `SQL/37_tracking/02_tables.sql`
 - **Entidad del ORM:** `Shipments` — `src/modules/tracking/entities/shipments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 10 FK salientes · 4 entrantes · 16 operaciones
+- **Resumen:** 20 columnas · 12 índices · 10 FK salientes · 4 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -457,9 +457,9 @@ Representa envíos físicos —por ejemplo, insumos o muestras— y su ciclo de 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_shipments_shipment_number` | sí | shipment_number | Garantiza que no se repita la combinación (shipment_number) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «shipment_number», la primera columna del índice _(CONSULTA)_ |
-| `ix_shipments_trackable_subject_id` | no | trackable_subject_id | Soporta la clave foránea fk_shipments_trackable_subject_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «trackable_subject_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_shipments_trackable_subject_id` | no | trackable_subject_id | Soporta la clave foránea fk_shipments_trackable_subject_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «trackable_subject_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_shipments_carrier_id` | no | carrier_id | Soporta la clave foránea fk_shipments_carrier_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_shipments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_shipments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_shipments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_shipments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_shipments_origin_address_id` | no | origin_address_id | Soporta la clave foránea fk_shipments_origin_address_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_shipments_destination_address_id` | no | destination_address_id | Soporta la clave foránea fk_shipments_destination_address_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_shipments_assigned_courier_user_id` | no | assigned_courier_user_id | Soporta la clave foránea fk_shipments_assigned_courier_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -493,6 +493,7 @@ Representa envíos físicos —por ejemplo, insumos o muestras— y su ciclo de 
 | POST /tracking/shipments/{id}/handoffs | LEE | DIRECTA |
 | POST /tracking/trackable-subjects | CREA | DIRECTA |
 | POST /tracking/trackable-subjects | LEE | DIRECTA |
+| POST /tracking/trackable-subjects/{id}/events | LEE | DIRECTA |
 | POST /tracking/webhooks/carriers/{carrierCode} | ACTUALIZA | POR_TIPO |
 | POST /tracking/webhooks/carriers/{carrierCode} | LEE | DIRECTA |
 
@@ -565,7 +566,7 @@ Registra sujetos y objetos a los que se les puede seguir hitos o entregas dentro
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_trackable_subjects_tracking_number` | sí | tracking_number | Garantiza que no se repita la combinación (tracking_number) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tracking_number», la primera columna del índice _(CONSULTA)_ |
-| `ix_trackable_subjects_tenant_id` | no | tenant_id | Soporta la clave foránea fk_trackable_subjects_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_trackable_subjects_tenant_id` | no | tenant_id | Soporta la clave foránea fk_trackable_subjects_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_trackable_subjects_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_trackable_subjects_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_trackable_subjects_current_status_concept_id` | no | current_status_concept_id | Soporta la clave foránea fk_trackable_subjects_current_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_trackable_subjects_current_milestone_id` | no | current_milestone_id | Soporta la clave foránea fk_trackable_subjects_current_milestone_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

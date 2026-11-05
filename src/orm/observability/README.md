@@ -6,6 +6,7 @@ Dos archivos con una responsabilidad clara cada uno.
 |---|---|
 | `orm.logger.ts` | Enruta el logger interno de MikroORM al de NestJS y clasifica las consultas lentas |
 | `query-metrics.ts` | Contadores acumulados por proceso: volumen, latencia, fallos |
+| `sql-redaction.ts` | ORMN-02: clase de sentencia, hash de la forma y redacción de mensajes del driver; el SQL literal nunca llega al log en producción |
 
 ## El problema de partida
 

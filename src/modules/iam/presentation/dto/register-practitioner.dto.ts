@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsEmail,
@@ -33,7 +34,13 @@ import {
 // la clase en runtime para instanciar el anidado antes de validarlo. Se
 // importa el archivo hoja, no el barrel de `practice/dto`, para no arrastrar
 // DTOs ajenos a este alta.
-import { CreateOwnSiteDto } from '../../../practice/dto/create-own-site.dto';
+import { CreateOwnSiteDto } from '../../../../common/dto/create-own-site.dto';
+
+/** Cuántas instituciones se pueden elegir en el alta. */
+export const MAX_REGISTRATION_INSTITUTIONS = 10;
+
+/** Cuántas aseguradoras se pueden elegir en el alta. */
+export const MAX_REGISTRATION_INSURERS = 20;
 
 /** Formato aceptado por los cuatro campos telefónicos del alta. */
 const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
@@ -248,6 +255,111 @@ export class RegisterPractitionerDto {
   licenseIssueDate?: string;
 
   /**
+   * El respaldo de la matrícula —el PDF del carnet del colegio—, precargado
+   * por `POST /iam/auth/upload-registration-document`.
+   *
+   * P29: el formulario del alta ya ofrecía el selector y el archivo se tiraba
+   * en silencio al crear la cuenta, porque este cuerpo no tenía dónde llevarlo.
+   * Va como referencia, igual que `fileId` de cada título: el alta lo reclama
+   * para el usuario recién creado en la misma transacción y lo deja en
+   * `profiles.jurisdiction_authorizations.file_id` (modelo v4.2.12).
+   *
+   * Opcional: el padrón se declara, no se prueba.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  licenseFileId?: string;
+
+  /**
+   * El respaldo del registro del SEDES, con las mismas reglas que
+   * {@link licenseFileId}. Exige {@link sedesLicenseNumber}: sin la
+   * habilitación no hay fila donde dejar el archivo, y aceptarlo igual sería
+   * volver a tirarlo en silencio (422).
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  sedesLicenseFileId?: string;
+
+  /**
+   * Fecha de inscripción en el SEDES (ISO `YYYY-MM-DD`): el `valid_from` de SU
+   * fila. Cada habilitación tiene la suya; antes sólo la matrícula llevaba
+   * fecha y la del SEDES nacía sin saber desde cuándo vale. Exige
+   * {@link sedesLicenseNumber}.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción en el SEDES (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  sedesLicenseIssueDate?: string;
+
+  /**
+   * Registro en el colegio profesional que corresponde a la profesión: el
+   * Colegio Médico para un médico, el de Odontólogos para un odontólogo.
+   *
+   * Es la tercera habilitación, al lado de la matrícula del Ministerio y del
+   * registro del SEDES. Nace como otra fila de
+   * `profiles.jurisdiction_authorizations`, con jurisdicción
+   * `JURISDICTION_PROFESSIONAL_COLLEGE` y el nombre del colegio en
+   * `regulatory_authority`. Opcional en el contrato para no romper a quien ya
+   * integró; el alta web lo pide.
+   */
+  @ApiPropertyOptional({
+    description: 'Número de registro en el colegio profesional',
+    maxLength: 100,
+    example: 'CMB-12345',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  collegeLicenseNumber?: string;
+
+  /** Nombre del colegio que emitió el registro. Exige {@link collegeLicenseNumber}. */
+  @ApiPropertyOptional({
+    description: 'Colegio profesional que emitió el registro',
+    maxLength: 200,
+    example: 'Colegio Médico de Bolivia',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  collegeName?: string;
+
+  /** Fecha de inscripción en el colegio (ISO). Exige {@link collegeLicenseNumber}. */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción en el colegio profesional (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  collegeLicenseIssueDate?: string;
+
+  /**
+   * El respaldo del registro del colegio, con las mismas reglas que
+   * {@link licenseFileId}. Exige {@link collegeLicenseNumber}.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  collegeLicenseFileId?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -354,6 +466,19 @@ export class RegisterPractitionerDto {
   @MinLength(1)
   @MaxLength(500)
   homeAddressLines?: string;
+
+  /**
+   * Distrito o zona del domicilio, tal como lo da el mapa (ADR-0028). Va en
+   * `common.addresses.district_text`. Mismo campo que en `RegisterPatientDto`.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del domicilio particular',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  homeDistrict?: string;
 
   /**
    * Latitud del domicilio personal.
@@ -682,6 +807,75 @@ export class RegisterPractitionerDto {
   @ValidateNested({ each: true })
   @Type(() => RegisterPractitionerCredentialDto)
   credentials?: RegisterPractitionerCredentialDto[];
+
+  /**
+   * Las instituciones de la plataforma con las que dice trabajar (propietario,
+   * 2026-10-28), por el slug con que aparecen en el buscador público
+   * (`GET /public/search/organizations`).
+   *
+   * Cada una crea un vínculo atado a la sede de esa organización, con el mismo
+   * estado inicial que `POST /profiles/practitioners/me/affiliations`:
+   * **pendiente** hasta que la organización lo apruebe —ése es su sello
+   * oficial—, o declarado si no tiene quién decida. Viaja en el alta por lo
+   * mismo que {@link ownSite}: aquella ruta exige sesión.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    maxItems: MAX_REGISTRATION_INSTITUTIONS,
+    description:
+      'Slugs públicos de organizaciones; cada una recibe un pedido de vínculo pendiente de su aprobación',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_REGISTRATION_INSTITUTIONS)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MaxLength(200, { each: true })
+  institutionSlugs?: string[];
+
+  /**
+   * Las aseguradoras con las que dice trabajar, del catálogo público
+   * (`GET /insurance-carrier-catalog`). Cada una recibe una solicitud
+   * pendiente (`insurance.practitioner_insurer_requests`) que aprueba o rechaza
+   * desde su bandeja.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    maxItems: MAX_REGISTRATION_INSURERS,
+    description:
+      'Aseguradoras del catálogo público; cada una recibe una solicitud pendiente de su aprobación',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_REGISTRATION_INSURERS)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  insurerCarrierIds?: string[];
+
+  /**
+   * Atestación del solicitante: declara que lo que envía es verdadero y que
+   * autoriza a la plataforma a verificarlo contra los documentos y registros
+   * que corresponda. Se guarda con la fecha y la versión del texto que aceptó
+   * en la solicitud de verificación (`attested_at`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'true si aceptó la declaración de veracidad y la verificación de sus datos',
+  })
+  @IsOptional()
+  @IsBoolean()
+  attestationAccepted?: boolean;
+
+  /**
+   * Versión del texto de la declaración que el cliente mostró. Obligatoria si
+   * `attestationAccepted` es true.
+   */
+  @ApiPropertyOptional({ maxLength: 40, example: '2026-10-29' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  attestationTextVersion?: string;
 }
 
 /**
@@ -851,6 +1045,13 @@ export class RegisterPractitionerResponseDto {
   sedesLicenseId?: string;
 
   /**
+   * Registro del colegio profesional creado, pendiente de verificación.
+   * Ausente cuando el alta no declara `collegeLicenseNumber`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  collegeLicenseId?: string;
+
+  /**
    * Estado de verificación del perfil al terminar el alta. Siempre PENDING:
    * registrarse no habilita a ejercer.
    */
@@ -894,6 +1095,21 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   ownSiteId?: string;
+
+  /**
+   * Los vínculos pedidos a {@link RegisterPractitionerDto.institutionSlugs},
+   * en el mismo orden. Ausente si no eligió ninguna.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  affiliationIds?: string[];
+
+  /**
+   * Las solicitudes creadas para
+   * {@link RegisterPractitionerDto.insurerCarrierIds}. Ausente si no eligió
+   * ninguna.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  insurerRequestIds?: string[];
 }
 
 /**

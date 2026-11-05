@@ -14,7 +14,7 @@ import {
   type FlowDefinition,
   type FlowHttpMethod,
 } from '../../modules/qa_lab/domain/flow-catalog';
-import { FLOW_CATALOG } from '../../modules/qa_lab/flows';
+import { FLOW_CATALOG } from '../../modules/qa_lab/domain/flows';
 import { CONCEPTS, SEED } from '../constants/concepts';
 import { createdBy } from '../persistence/audit-fields';
 
@@ -161,7 +161,9 @@ export class QaFlowsSeedService {
       ...EMPTY,
       changed: { ...EMPTY.changed },
     };
-    await this.orm.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.orm.em.fork({ keepTransactionContext: false });
+    await ownFork.transactional(async (tx) => {
       if (this.enforceRls) {
         await tx.execute(
           "select set_config('app.system_context', 'false', true)",

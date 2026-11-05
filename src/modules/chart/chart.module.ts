@@ -20,11 +20,13 @@ import {
   ChartNotesReadService,
   EncounterPdfService,
   ChartMeReadService,
+  ChartEncounterScopeService,
 } from './services';
 import {
   ClinicalNotesRepository,
   CarePlansRepository,
   DocumentsRepository,
+  ChartScopeRepository,
   ChartTemplatesRepository,
 } from './repositories';
 // FT-07-R08: `ChartReadController` necesita el mismo guard que
@@ -98,6 +100,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalNotesRepository,
     CarePlansRepository,
     DocumentsRepository,
+    ChartScopeRepository,
     ChartTemplatesRepository,
     ConditionsRepository,
     EncountersRepository,
@@ -116,6 +119,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ChartNotesReadService,
     EncounterPdfService,
     ChartMeReadService,
+    ChartEncounterScopeService,
   ],
 })
 export class ChartModule {}

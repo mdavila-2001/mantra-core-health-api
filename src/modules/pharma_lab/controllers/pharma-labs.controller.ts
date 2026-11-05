@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CreatePharmaLabDto,
   CreatedResourceDto,
@@ -44,6 +49,11 @@ export class PharmaLabsController {
   constructor(private readonly service: PharmaLabOrganizationService) {}
 
   /** UC-17-01. */
+  @Audited({
+    action: 'PHARMA_LAB_CREATED',
+    entity: 'pharma_lab',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -74,6 +84,11 @@ export class PharmaLabsController {
   }
 
   /** UC-17-02. */
+  @Audited({
+    action: 'PHARMA_LAB_UPDATED',
+    entity: 'pharma_lab',
+    entityId: 'param:pharmaLabId',
+  })
   @Patch(':pharmaLabId')
   @ApiOperation({ summary: 'Actualizar el perfil institucional' })
   update(
@@ -85,6 +100,11 @@ export class PharmaLabsController {
   }
 
   /** UC-17-03. */
+  @Audited({
+    action: 'PHARMA_LAB_STAFF_LINKED',
+    entity: 'pharma_lab_staff',
+    entityId: 'result.id',
+  })
   @Post(':pharmaLabId/staff')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Vincular personal al laboratorio' })
@@ -107,6 +127,11 @@ export class PharmaLabsController {
   }
 
   /** UC-17-04. */
+  @Audited({
+    action: 'PHARMA_LAB_STAFF_PERMISSIONS_CHANGED',
+    entity: 'pharma_lab_staff',
+    entityId: 'param:staffId',
+  })
   @Patch(':pharmaLabId/staff/:staffId/permissions')
   @ApiOperation({ summary: 'Cambiar los permisos de un colaborador' })
   updatePermissions(
@@ -124,6 +149,11 @@ export class PharmaLabsController {
   }
 
   /** UC-17-05. */
+  @Audited({
+    action: 'PHARMA_LAB_STAFF_UNLINKED',
+    entity: 'pharma_lab_staff',
+    entityId: 'param:staffId',
+  })
   @Post(':pharmaLabId/staff/:staffId/unlink')
   @ApiOperation({ summary: 'Desvincular a un colaborador' })
   unlinkStaff(

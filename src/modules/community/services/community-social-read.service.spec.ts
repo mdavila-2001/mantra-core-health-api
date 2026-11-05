@@ -11,6 +11,9 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunitySocialReadService } from './community-social-read.service';
 import { ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
+import { CONCEPTS } from '../../../common';
+import { DIR } from '../../directory/directory.concepts';
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
 
@@ -23,6 +26,7 @@ function build() {
   const profilesRepo = {
     findById: mockFn(),
     listBadgesBySubject: mockFn().mockResolvedValue([]),
+    listByTargetsTypesAndStatus: mockFn().mockResolvedValue([]),
   };
   const postsRepo = {
     findById: mockFn(),
@@ -67,6 +71,12 @@ function build() {
   // verlos; el propio doble no vuelve a decidir nada.
   const files = { downloadPublicMedia: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El servicio real: la regla de quién atiende una vitrina es la que se
+  // prueba, no un doble que la repita. Sólo las membresías son dobles.
+  const membershipsRepo = { findActiveByUser: mockFn().mockResolvedValue([]) };
+  const organizationStaff = new CommunityOrganizationStaffService(
+    membershipsRepo as any,
+  );
 
   const service = new CommunitySocialReadService(
     em as any,
@@ -82,9 +92,11 @@ function build() {
     engagement as any,
     files as any,
     logger as any,
+    organizationStaff,
   );
   return {
     service,
+    membershipsRepo,
     engagement,
     profilesRepo,
     postsRepo,
@@ -392,6 +404,113 @@ describe('CommunitySocialReadService', () => {
         d.service.listBookmarks('p-ajeno', actor, { limit: 10 }),
       ).rejects.toThrow('prohibido');
       expect(d.bookmarksRepo.listByProfilePage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listAttendableOrganizationShowcases', () => {
+    const staff = { id: 'staff-1', roles: ['USER', 'PHARMACY_STAFF'] } as any;
+    const membership = (tenantId: string, role: string) => ({
+      tenantId,
+      tenantRoleConceptId: role,
+    });
+    const showcase = (id: string, type = COMM.PROFILE_TARGET_PHARMACY) => ({
+      id,
+      tenantId: 't-plataforma',
+      targetId: `tenant-${id}`,
+      targetTypeConceptId: type,
+      slug: `farmacia-${id}`,
+      displayName: `Farmacia ${id}`,
+      avatarFileId: undefined,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+
+    it('busca las vitrinas activas de los tenants donde atiende, en dos consultas', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        membership('tenant-a', DIR.ROLE_STAFF),
+        membership('tenant-b', DIR.ROLE_OWNER),
+        membership('tenant-b', DIR.ROLE_ADMIN),
+      ]);
+      d.profilesRepo.listByTargetsTypesAndStatus.mockResolvedValue([
+        showcase('a'),
+        showcase('b', COMM.PROFILE_TARGET_ORGANIZATION),
+      ]);
+
+      const result = await d.service.listAttendableOrganizationShowcases(staff);
+
+      expect(d.membershipsRepo.findActiveByUser).toHaveBeenCalledTimes(1);
+      expect(d.membershipsRepo.findActiveByUser).toHaveBeenCalledWith(
+        expect.anything(),
+        'staff-1',
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+      expect(d.profilesRepo.listByTargetsTypesAndStatus).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(d.profilesRepo.listByTargetsTypesAndStatus).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          targetIds: ['tenant-a', 'tenant-b'],
+          targetTypeConceptIds: [
+            COMM.PROFILE_TARGET_ORGANIZATION,
+            COMM.PROFILE_TARGET_PHARMACY,
+          ],
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        },
+      );
+      expect(result).toEqual({
+        items: [
+          {
+            profileId: 'a',
+            slug: 'farmacia-a',
+            displayName: 'Farmacia a',
+            avatarFileId: null,
+            targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
+            kind: 'PHARMACY',
+          },
+          {
+            profileId: 'b',
+            slug: 'farmacia-b',
+            displayName: 'Farmacia b',
+            avatarFileId: null,
+            targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+            kind: 'ORGANIZATION',
+          },
+        ],
+      });
+    });
+
+    it('el vínculo de profesional (PRACTITIONER) no atiende la bandeja', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        membership('tenant-clinica', DIR.ROLE_PRACTITIONER),
+        membership('tenant-a', DIR.ROLE_STAFF),
+      ]);
+      await d.service.listAttendableOrganizationShowcases(staff);
+      expect(
+        d.profilesRepo.listByTargetsTypesAndStatus.mock.calls[0][1].targetIds,
+      ).toEqual(['tenant-a']);
+    });
+
+    it('sin PHARMACY_STAFF no se ofrecen vitrinas de farmacia, sólo de organización', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        membership('tenant-a', DIR.ROLE_ADMIN),
+      ]);
+      await d.service.listAttendableOrganizationShowcases({
+        id: 'admin-1',
+        roles: ['USER'],
+      } as any);
+      expect(
+        d.profilesRepo.listByTargetsTypesAndStatus.mock.calls[0][1]
+          .targetTypeConceptIds,
+      ).toEqual([COMM.PROFILE_TARGET_ORGANIZATION]);
+    });
+
+    it('sin membresías que atiendan, lista vacía', async () => {
+      const d = build();
+      const result = await d.service.listAttendableOrganizationShowcases(staff);
+      expect(result).toEqual({ items: [] });
     });
   });
 });

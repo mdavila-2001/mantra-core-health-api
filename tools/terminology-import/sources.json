@@ -1,0 +1,105 @@
+{
+  "$comment": "Condiciones de reutilización y límites de petición verificados ANTES de descargar (TAREA-41 F4.1). Una entrada por fuente de la fase F4. Las citas son literales; `checkedAt` es la fecha en que se leyeron.",
+  "sources": {
+    "aemps-cima": {
+      "name": "CIMA — Centro de Información online de Medicamentos de la AEMPS",
+      "owner": "Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)",
+      "apiBase": "https://cima.aemps.es/cima/rest",
+      "apiDocumentation": "https://sede.aemps.gob.es/docs/CIMA-REST-API_1_19.pdf",
+      "evidenceTier": "CURATED_REFERENCE",
+      "reuseTerms": {
+        "url": "https://www.aemps.gob.es/aviso-legal/",
+        "checkedAt": "2026-10-26",
+        "quote": "Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen. El usuario queda obligado a mencionar la fecha de la última actualización de los documentos objeto de la reutilización.",
+        "obligations": [
+          "Citar expresamente el origen (AEMPS · CIMA, producto y nº de registro, sección, enlace).",
+          "Mencionar la fecha de la última actualización de la ficha técnica; si CIMA no la publica, decirlo y dar la fecha de consulta."
+        ]
+      },
+      "rateLimit": {
+        "checkedAt": "2026-10-26",
+        "published": false,
+        "evidence": "El manual oficial «CIMA REST API v1.19» (https://sede.aemps.gob.es/docs/CIMA-REST-API_1_19.pdf, leído el 2026-10-26) no menciona límite de peticiones, cuota ni código 429; las respuestas de `docSegmentado/contenido/1` (GET del 2026-10-26) no traen cabeceras RateLimit-* ni Retry-After.",
+        "policy": {
+          "concurrency": 1,
+          "minIntervalMs": 1000,
+          "retry": "retroceso exponencial ante 429, 5xx o red caída (HttpClient de lib/glossary-es/common.mjs)",
+          "reason": "Sin límite publicado se aplica el mismo criterio cortés del corte S3 (encyclopedia/s3-farmacos, §12.6 de la ficha): una petición a la vez y al menos 1 s entre peticiones."
+        }
+      },
+      "sections": {
+        "allowed": [
+          "4.1",
+          "4.3",
+          "4.4",
+          "4.5",
+          "4.6",
+          "4.8",
+          "5.1"
+        ],
+        "safety": [
+          "4.3",
+          "4.5",
+          "4.6",
+          "4.8"
+        ],
+        "forbidden": [
+          "4.2"
+        ],
+        "forbiddenReason": "TAREA-41 F4.5 «Dosis: nunca»: la posología no se pide, no se lee de la caché y no se procesa."
+      }
+    },
+    "nlm-lactmed": {
+      "name": "LactMed — Drugs and Lactation Database (NICHD/NLM)",
+      "owner": "National Institute of Child Health and Human Development / U.S. National Library of Medicine",
+      "bookUrl": "https://www.ncbi.nlm.nih.gov/books/NBK501922/",
+      "evidenceTier": "CURATED_REFERENCE",
+      "input": "Corpus ya versionado `clinical-pharmacology/data/monographs.part-*.ndjson.gz` (paquete oficial `lactmed_NBK501922.tar.gz`, sha256 7ede21f401ed149689e23636e4ba85ac239bb632829c50db78c1cb66ecca956a, actualizado en el archivo de NCBI el 2026-10-22, ver `lactmed__fetch.meta.json.gz`). Enlace al ATC por UNII (GSRS + RxNav), nunca por nombre.",
+      "reuseTerms": {
+        "checkedAt": "2026-10-26",
+        "quotes": [
+          {
+            "url": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+            "quote": "Information that is created by or for the US government on this site is within the public domain."
+          },
+          {
+            "url": "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html",
+            "quote": "acknowledge NLM as the source of the data by including the phrase \"Courtesy of the U.S. National Library of Medicine\" in a clear and conspicuous manner, not indicate or imply that NLM has endorsed its products/services/applications. Users who republish or redistribute the data (services, products or raw data) agree to: maintain the most current version of all distributed data"
+          }
+        ],
+        "obligations": [
+          "«Courtesy of the U.S. National Library of Medicine» en cada cita (va en `citationLocator`).",
+          "No sugerir respaldo de la NLM.",
+          "Fecha de revisión del registro en la cita y vigencia (`validFrom`)."
+        ]
+      },
+      "rateLimit": {
+        "requests": 0,
+        "note": "F4.3 no hace pedidos: lee el corpus ya descargado. La descarga del paquete la hace `clinical-pharmacology/fetch-ncbi-books.mjs` con su propia política."
+      },
+      "sections": {
+        "cited": [
+          "Summary of Use during Lactation"
+        ],
+        "rule": "Resumen literal completo; si cita una cantidad o pauta (guardia de dosis del corte S3) va a la cola y no se carga."
+      }
+    },
+    "liname-bo": {
+      "name": "LINAME — Lista Nacional de Medicamentos Esenciales (Bolivia)",
+      "status": "BLOCKED",
+      "checkedAt": "2026-10-26",
+      "searched": {
+        "site": "https://www.minsalud.gob.bo/",
+        "queries": [
+          "index.php?option=com_finder&view=search&q=LINAME",
+          "…&q=LINAME 2022",
+          "…&q=LINAME 2024",
+          "…&q=LINAME 2025"
+        ],
+        "result": "La única edición publicada en minsalud.gob.bo es «Lista Nacional de Medicamentos Esenciales LINAME 2018-2020» (publicada el 27-02-2019, https://www.minsalud.gob.bo/3670-lista-nacional-de-medicamentos-esenciales-liname-2018-2020), vencida. Las búsquedas de 2022, 2024 y 2025 responden «No se han encontrado resultados de búsqueda»."
+      },
+      "seenOutsideScope": "AGEMED publica un PDF de la edición 2022-2024 (https://www.agemed.gob.bo/reg-far/doc_reg_far/liname.pdf, 10 256 404 bytes, Last-Modified 2022-04-19); tampoco está vigente en 2026 y no está en minsalud.gob.bo. No se descargó ni se usó.",
+      "rule": "No se reconstruye desde terceros (TAREA-41 F4.4). Se destraba cuando minsalud.gob.bo publique la edición vigente."
+    }
+  }
+}

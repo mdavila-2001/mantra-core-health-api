@@ -19,7 +19,7 @@ solapamientos y estados imposibles". Un charter acotado > "probar la agenda".
 ## Sesiones (SBTM)
 - Bloques cronometrados (p. ej. 60–90 min) sin interrupción, un charter por sesión.
 - Registrá durante la sesión: qué probaste, qué observaste, bugs, preguntas, ideas de casos.
-- Al cerrar: resumen corto (cobertura lograda, hallazgos, qué quedó pendiente para otra sesión).
+- Al cerrar: resumen corto (cobertura lograda, hallazgos, qué no se cubrió); lo que queda para otra sesión, a un issue.
 
 ## Heurísticas de recorrido
 **SFDIPOT** (el modelo "San Francisco Depot" de James Bach) — recorré el producto por:
@@ -61,4 +61,4 @@ Todo lo que encontrás se convierte en algo durable:
 - [ ] Al menos una heurística de recorrido aplicada.
 - [ ] Datos límite inyectados; consola/red observadas.
 - [ ] Hallazgos convertidos en bugs y/o casos automatizados.
-- [ ] Resumen de sesión: cobertura, hallazgos, pendiente.
+- [ ] Resumen de sesión: cobertura, hallazgos, no cubierto; lo que queda, en issues.

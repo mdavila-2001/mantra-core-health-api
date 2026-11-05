@@ -71,17 +71,19 @@ export class CareTeamsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Paciente.
+   * @param tenantId - Tenant activo: sólo se listan los equipos de ese tenant.
    * @param limit - Tope de filas.
    * @returns Los equipos, del más reciente al más antiguo.
    */
   findByPatient(
     em: EntityManager,
     patientProfileId: string,
+    tenantId: string,
     limit: number,
   ): Promise<CareTeams[]> {
     return em.find(
       CareTeams,
-      { patientProfileId },
+      { patientProfileId, tenantId },
       { orderBy: { createdAt: 'DESC' }, limit },
     );
   }

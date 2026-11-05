@@ -170,3 +170,58 @@ export function isMimeTypeAllowedForCategory(
 ): boolean {
   return UPLOAD_MIME_ALLOWLIST[category].includes(mimeType);
 }
+
+/**
+ * Formatos de imagen que se **reconocen para rechazarlos con nombre propio**.
+ *
+ * Una foto de iPhone llega como HEIC (o HEIF/AVIF desde otros móviles). El
+ * resto del sistema no los sabe mostrar —ni los navegadores de escritorio sin
+ * Safari, ni los derivados de imagen— así que no se aceptan. Pero caían en el
+ * mismo «el contenido no corresponde a ningún formato permitido» que un
+ * ejecutable, y quien subía una foto normal no tenía cómo saber qué hacer.
+ * Detectarlos permite decir exactamente eso: «es HEIC; mandala como JPEG».
+ */
+export type UnsupportedImageFormat = 'image/heic' | 'image/heif' | 'image/avif';
+
+/**
+ * Marcas mayores (`major_brand`) de la caja `ftyp` de ISO BMFF que delatan
+ * cada formato. Lista cerrada: un MP4 o un MOV también empiezan con `ftyp`,
+ * con otras marcas, y no deben confundirse con una foto.
+ */
+const ISO_BMFF_IMAGE_BRANDS: Readonly<Record<string, UnsupportedImageFormat>> =
+  {
+    heic: 'image/heic',
+    heix: 'image/heic',
+    heim: 'image/heic',
+    heis: 'image/heic',
+    hevc: 'image/heic',
+    hevx: 'image/heic',
+    mif1: 'image/heif',
+    msf1: 'image/heif',
+    heif: 'image/heif',
+    avif: 'image/avif',
+    avis: 'image/avif',
+  };
+
+/**
+ * Reconoce una imagen HEIC/HEIF/AVIF por su caja `ftyp` (bytes 4–12).
+ *
+ * No la acepta: sólo la nombra, para que el rechazo diga qué formato es.
+ *
+ * @param buffer - Contenido efectivamente recibido.
+ * @returns El formato reconocido, o `undefined` si no es ninguno de ésos.
+ */
+export function detectUnsupportedImageFormat(
+  buffer: Buffer,
+): UnsupportedImageFormat | undefined {
+  if (buffer.byteLength < 12) return undefined;
+  if (buffer.subarray(4, 8).toString('latin1') !== 'ftyp') return undefined;
+  return ISO_BMFF_IMAGE_BRANDS[buffer.subarray(8, 12).toString('latin1')];
+}
+
+/**
+ * `reason` estable del rechazo de una foto HEIC/HEIF/AVIF (422
+ * `PRECONDITION_FAILED`), para que el cliente lo explique sin parsear el
+ * mensaje.
+ */
+export const UNSUPPORTED_IMAGE_FORMAT_REASON = 'UNSUPPORTED_IMAGE_FORMAT';

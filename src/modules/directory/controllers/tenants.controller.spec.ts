@@ -32,14 +32,26 @@ function build() {
     listMemberships: mockFn(),
     listBranchAssignments: mockFn(),
   };
+  const documentCompletion = {
+    complete: mockFn().mockResolvedValue({
+      registered: 1,
+      documentIds: ['d1'],
+    }),
+    pharmacyReadiness: mockFn().mockResolvedValue({
+      ready: false,
+      missing: [],
+    }),
+  };
   const controller = new TenantsController(
     tenantsService as any,
     branchesService as any,
     membershipsService as any,
     readService as any,
+    documentCompletion as any,
   );
   return {
     controller,
+    documentCompletion,
     tenantsService,
     branchesService,
     membershipsService,
@@ -48,6 +60,25 @@ function build() {
 }
 
 describe('TenantsController', () => {
+  it('delegates completeAffiliationDocuments and getPharmacyReadiness (P50)', async () => {
+    const d = build();
+    const actor = { id: 'u1' } as any;
+    const dto = { healthAuthorityCertificateFileId: 'f1' };
+
+    await d.controller.completeAffiliationDocuments('t1', dto, actor);
+    await d.controller.getPharmacyReadiness('t1', actor);
+
+    expect(d.documentCompletion.complete).toHaveBeenCalledWith(
+      't1',
+      dto,
+      actor,
+    );
+    expect(d.documentCompletion.pharmacyReadiness).toHaveBeenCalledWith(
+      't1',
+      actor,
+    );
+  });
+
   it('delegates createChild (UC-04-03)', async () => {
     const d = build();
     const dto = {

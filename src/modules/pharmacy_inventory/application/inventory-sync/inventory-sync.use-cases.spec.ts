@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { PreconditionFailedException } from '../../../../common';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { reconcileSyncItem } from '../../domain/sync/reconciliation';
+import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';
 import { CreateInventorySyncBatchUseCase } from './create-inventory-sync-batch.use-case';
 import { ReconcileInventorySyncBatchUseCase } from './reconcile-inventory-sync-batch.use-case';
 
@@ -20,10 +21,15 @@ describe('Inventory sync use cases', () => {
         .mockResolvedValueOnce({ id: 'item-existing' })
         .mockResolvedValueOnce(null),
       createItem: jest.fn(() => ({ id: 'item-new' })),
+      findBatchById: jest.fn(async () => ({
+        id: 'batch-0',
+        pharmacyIntegrationConnectionId: 'connection-1',
+      })),
     };
     const useCase = new CreateInventorySyncBatchUseCase(
       em as any,
       sync as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -92,6 +98,7 @@ describe('Inventory sync use cases', () => {
         transactional: jest.fn(async (work: (tx: any) => unknown) => work(tx)),
       } as any,
       sync as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -130,6 +137,7 @@ describe('Inventory sync use cases', () => {
           statusConceptId: PINV.BATCH_COMPLETED,
         })),
       } as any,
+      allowAllScope(),
       logger as any,
     );
 

@@ -72,6 +72,6 @@ Todas las rutas reciben `@CurrentUser()`. En `/dataset-releases` el actor **es**
 (`requestedByUserId`): no se acepta por el cuerpo, porque dejaría pedir un release a nombre de otro
 investigador.
 
-## Pruebas
+## Tests
 
 11 pruebas de delegación en `lakehouse-controllers.spec.ts`.

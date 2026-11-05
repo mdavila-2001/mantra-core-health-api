@@ -87,7 +87,7 @@ INSTANCIAS
   instances/sweep-timeouts > vencidas → ESCALATED (instancia y tareas), SKIP LOCKED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La definición nace en borrador.** Una máquina recién declarada no tiene estados ni transiciones:
   activarla permitiría disparar comandos contra un grafo vacío y dejar al agregado en un estado del
@@ -155,7 +155,7 @@ observable —evaluar en orden y devolver el `failure_code` estable— aunque no
 
 Cualquier otra forma —u otro tipo de guarda— **falla cerrado**.
 
-## Permisos
+## Permissions
 
 `WORKFLOW_ARCHITECT` y `GOVERNANCE_ADMIN` definen y publican. Los actores de dominio (`CLINICIAN`,
 `BILLING_AGENT`, `SCHEDULER`) disparan transiciones, crean instancias y completan tareas. `SYSTEM`
@@ -164,7 +164,7 @@ historial. `PLATFORM_ADMIN` cubre todo.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la definición al declarar estados/transiciones y al publicar, sobre la versión
 activa que se retira, sobre el agregado antes de moverlo, sobre la instancia y sobre la tarea.
@@ -179,7 +179,7 @@ lleva `and row_version = ?` y cero filas afectadas se traduce en `409`.
 vencimiento —los tres momentos en que algo no salió como se esperaba—. No se loguean expresiones de
 guarda ni el contenido de `payloadJson`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
 aprobadas durante la revisión.
@@ -209,10 +209,15 @@ aprobadas durante la revisión.
   transición.
 - **Tablas `*_history`**: el caso de uso las declara junto a `audit.audit_events`. El registro de
   auditoría es del módulo 06; las tablas de historial por entidad no están generadas en este esquema.
-- **`purpose_of_use_concept_id`**: se guarda en la definición de la transición y se exige que exista,
-  pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
-  (`access_policies`).
+- **`purpose_of_use_concept_id`**: `POST .../transitions/:commandCode` exige que el comando declare
+  `purposeOfUseConceptId` y que coincida con el de la transición; si falta o difiere responde
+  `403 FORBIDDEN / WORKFLOW_PURPOSE_NOT_ALLOWED` (igual en ambos casos, sin `details`) antes de la
+  idempotencia, las guardas y cualquier mutación. Lo que sigue pendiente de `authz` es **qué
+  propósitos puede declarar cada actor** (el módulo no tiene una fuente de propósitos autorizados
+  por actor para esta ruta): hoy el propósito declarado se compara con la definición, no con una
+  autorización por actor. `compensate` y `retry` no piden propósito.
 
 ## Revisión ALOVIDA
 
-El propósito de uso configurado en una transición no se comprueba contra la política del actor.
+El propósito de uso del comando se compara con el de la transición (WF-02); la autorización del
+propósito por actor depende de `authz` (ver arriba).

@@ -27,6 +27,7 @@ import {
   IdentityAssertionsService,
   IdentityVerificationEffectsService,
   IdentitySelfServiceService,
+  IdentityCaseScope,
 } from './services';
 import {
   IdentityAuthoritiesRepository,
@@ -99,6 +100,7 @@ import {
     IdentityAssertionsService,
     IdentityVerificationEffectsService,
     IdentitySelfServiceService,
+    IdentityCaseScope,
   ],
 })
 export class IdentityAssuranceModule {}

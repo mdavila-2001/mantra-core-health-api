@@ -1,0 +1,148 @@
+00001 001     0 Central Nervous System and Cranial Nerves, Bypass            Central Nervous System and Cranial Nerves, Bypass
+00002 0016070 1 Bypass Cereb Vent to Nasophar with Autol Sub, Open Approach  Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Open Approach
+00003 0016071 1 Bypass Cereb Vent to Mastoid Sinus w Autol Sub, Open         Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Open Approach
+00004 0016072 1 Bypass Cereb Vent to Atrium with Autol Sub, Open Approach    Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Open Approach
+00005 0016073 1 Bypass Cereb Vent to Blood Vess w Autol Sub, Open            Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Open Approach
+00006 0016074 1 Bypass Cereb Vent to Pleural Cav w Autol Sub, Open           Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Open Approach
+00007 0016075 1 Bypass Cereb Vent to Intestine with Autol Sub, Open Approach Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Open Approach
+00008 0016076 1 Bypass Cereb Vent to Periton Cav w Autol Sub, Open           Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Open Approach
+00009 0016077 1 Bypass Cereb Vent to Urinary Tract w Autol Sub, Open         Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Open Approach
+00010 0016078 1 Bypass Cereb Vent to Bone Mar with Autol Sub, Open Approach  Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Open Approach
+00011 001607A 1 Bypass Cereb Vent to Subgaleal with Autol Sub, Open Approach Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Open Approach
+00012 001607B 1 Bypass Cereb Vent to Cereb Cistern w Autol Sub, Open         Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Open Approach
+00013 00160J0 1 Bypass Cereb Vent to Nasophar with Synth Sub, Open Approach  Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Open Approach
+00014 00160J1 1 Bypass Cereb Vent to Mastoid Sinus w Synth Sub, Open         Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Open Approach
+00015 00160J2 1 Bypass Cereb Vent to Atrium with Synth Sub, Open Approach    Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Open Approach
+00016 00160J3 1 Bypass Cereb Vent to Blood Vess w Synth Sub, Open            Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Open Approach
+00017 00160J4 1 Bypass Cereb Vent to Pleural Cav w Synth Sub, Open           Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Open Approach
+00018 00160J5 1 Bypass Cereb Vent to Intestine with Synth Sub, Open Approach Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Open Approach
+00019 00160J6 1 Bypass Cereb Vent to Periton Cav w Synth Sub, Open           Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Open Approach
+00020 00160J7 1 Bypass Cereb Vent to Urinary Tract w Synth Sub, Open         Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Open Approach
+00021 00160J8 1 Bypass Cereb Vent to Bone Mar with Synth Sub, Open Approach  Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Open Approach
+00022 00160JA 1 Bypass Cereb Vent to Subgaleal with Synth Sub, Open Approach Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Open Approach
+00023 00160JB 1 Bypass Cereb Vent to Cereb Cistern w Synth Sub, Open         Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Open Approach
+00024 00160K0 1 Bypass Cereb Vent to Nasophar with Nonaut Sub, Open Approach Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Open Approach
+00025 00160K1 1 Bypass Cereb Vent to Mastoid Sinus w Nonaut Sub, Open        Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Open Approach
+00026 00160K2 1 Bypass Cereb Vent to Atrium with Nonaut Sub, Open Approach   Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Open Approach
+00027 00160K3 1 Bypass Cereb Vent to Blood Vess w Nonaut Sub, Open           Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Open Approach
+00028 00160K4 1 Bypass Cereb Vent to Pleural Cav w Nonaut Sub, Open          Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Open Approach
+00029 00160K5 1 Bypass Cereb Vent to Intestine w Nonaut Sub, Open            Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Open Approach
+00030 00160K6 1 Bypass Cereb Vent to Periton Cav w Nonaut Sub, Open          Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Open Approach
+00031 00160K7 1 Bypass Cereb Vent to Urinary Tract w Nonaut Sub, Open        Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Open Approach
+00032 00160K8 1 Bypass Cereb Vent to Bone Mar with Nonaut Sub, Open Approach Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Open Approach
+00033 00160KA 1 Bypass Cereb Vent to Subgaleal w Nonaut Sub, Open            Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Open Approach
+00034 00160KB 1 Bypass Cereb Vent to Cereb Cistern w Nonaut Sub, Open        Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Open Approach
+00035 00160ZB 1 Bypass Cerebral Ventricle to Cereb Cistern, Open Approach    Bypass Cerebral Ventricle to Cerebral Cisterns, Open Approach
+00036 0016370 1 Bypass Cereb Vent to Nasophar with Autol Sub, Perc Approach  Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Percutaneous Approach
+00037 0016371 1 Bypass Cereb Vent to Mastoid Sinus w Autol Sub, Perc         Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Percutaneous Approach
+00038 0016372 1 Bypass Cereb Vent to Atrium with Autol Sub, Perc Approach    Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Percutaneous Approach
+00039 0016373 1 Bypass Cereb Vent to Blood Vess w Autol Sub, Perc            Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Percutaneous Approach
+00040 0016374 1 Bypass Cereb Vent to Pleural Cav w Autol Sub, Perc           Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Approach
+00041 0016375 1 Bypass Cereb Vent to Intestine with Autol Sub, Perc Approach Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Percutaneous Approach
+00042 0016376 1 Bypass Cereb Vent to Periton Cav w Autol Sub, Perc           Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Approach
+00043 0016377 1 Bypass Cereb Vent to Urinary Tract w Autol Sub, Perc         Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Percutaneous Approach
+00044 0016378 1 Bypass Cereb Vent to Bone Mar with Autol Sub, Perc Approach  Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Percutaneous Approach
+00045 001637A 1 Bypass Cereb Vent to Subgaleal with Autol Sub, Perc Approach Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Percutaneous Approach
+00046 001637B 1 Bypass Cereb Vent to Cereb Cistern w Autol Sub, Perc         Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Percutaneous Approach
+00047 00163J0 1 Bypass Cereb Vent to Nasophar with Synth Sub, Perc Approach  Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Percutaneous Approach
+00048 00163J1 1 Bypass Cereb Vent to Mastoid Sinus w Synth Sub, Perc         Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Percutaneous Approach
+00049 00163J2 1 Bypass Cereb Vent to Atrium with Synth Sub, Perc Approach    Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Percutaneous Approach
+00050 00163J3 1 Bypass Cereb Vent to Blood Vess w Synth Sub, Perc            Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Percutaneous Approach
+00051 00163J4 1 Bypass Cereb Vent to Pleural Cav w Synth Sub, Perc           Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Percutaneous Approach
+00052 00163J5 1 Bypass Cereb Vent to Intestine with Synth Sub, Perc Approach Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Percutaneous Approach
+00053 00163J6 1 Bypass Cereb Vent to Periton Cav w Synth Sub, Perc           Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Percutaneous Approach
+00054 00163J7 1 Bypass Cereb Vent to Urinary Tract w Synth Sub, Perc         Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Percutaneous Approach
+00055 00163J8 1 Bypass Cereb Vent to Bone Mar with Synth Sub, Perc Approach  Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Percutaneous Approach
+00056 00163JA 1 Bypass Cereb Vent to Subgaleal with Synth Sub, Perc Approach Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Percutaneous Approach
+00057 00163JB 1 Bypass Cereb Vent to Cereb Cistern w Synth Sub, Perc         Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Percutaneous Approach
+00058 00163K0 1 Bypass Cereb Vent to Nasophar with Nonaut Sub, Perc Approach Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Percutaneous Approach
+00059 00163K1 1 Bypass Cereb Vent to Mastoid Sinus w Nonaut Sub, Perc        Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Percutaneous Approach
+00060 00163K2 1 Bypass Cereb Vent to Atrium with Nonaut Sub, Perc Approach   Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Percutaneous Approach
+00061 00163K3 1 Bypass Cereb Vent to Blood Vess w Nonaut Sub, Perc           Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Percutaneous Approach
+00062 00163K4 1 Bypass Cereb Vent to Pleural Cav w Nonaut Sub, Perc          Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00063 00163K5 1 Bypass Cereb Vent to Intestine w Nonaut Sub, Perc            Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Percutaneous Approach
+00064 00163K6 1 Bypass Cereb Vent to Periton Cav w Nonaut Sub, Perc          Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00065 00163K7 1 Bypass Cereb Vent to Urinary Tract w Nonaut Sub, Perc        Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Approach
+00066 00163K8 1 Bypass Cereb Vent to Bone Mar with Nonaut Sub, Perc Approach Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Percutaneous Approach
+00067 00163KA 1 Bypass Cereb Vent to Subgaleal w Nonaut Sub, Perc            Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Percutaneous Approach
+00068 00163KB 1 Bypass Cereb Vent to Cereb Cistern w Nonaut Sub, Perc        Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Percutaneous Approach
+00069 00163ZB 1 Bypass Cerebral Ventricle to Cereb Cistern, Perc Approach    Bypass Cerebral Ventricle to Cerebral Cisterns, Percutaneous Approach
+00070 0016470 1 Bypass Cereb Vent to Nasophar w Autol Sub, Perc Endo         Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00071 0016471 1 Bypass Cereb Vent to Mastoid Sinus w Autol Sub, Perc Endo    Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00072 0016472 1 Bypass Cereb Vent to Atrium w Autol Sub, Perc Endo           Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00073 0016473 1 Bypass Cereb Vent to Blood Vess w Autol Sub, Perc Endo       Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00074 0016474 1 Bypass Cereb Vent to Pleural Cav w Autol Sub, Perc Endo      Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00075 0016475 1 Bypass Cereb Vent to Intestine w Autol Sub, Perc Endo        Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00076 0016476 1 Bypass Cereb Vent to Periton Cav w Autol Sub, Perc Endo      Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00077 0016477 1 Bypass Cereb Vent to Urinary Tract w Autol Sub, Perc Endo    Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00078 0016478 1 Bypass Cereb Vent to Bone Mar w Autol Sub, Perc Endo         Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00079 001647A 1 Bypass Cereb Vent to Subgaleal w Autol Sub, Perc Endo        Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00080 001647B 1 Bypass Cereb Vent to Cereb Cistern w Autol Sub, Perc Endo    Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00081 00164J0 1 Bypass Cereb Vent to Nasophar w Synth Sub, Perc Endo         Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Percutaneous Endoscopic Approach
+00082 00164J1 1 Bypass Cereb Vent to Mastoid Sinus w Synth Sub, Perc Endo    Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Percutaneous Endoscopic Approach
+00083 00164J2 1 Bypass Cereb Vent to Atrium w Synth Sub, Perc Endo           Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Percutaneous Endoscopic Approach
+00084 00164J3 1 Bypass Cereb Vent to Blood Vess w Synth Sub, Perc Endo       Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Percutaneous Endoscopic Approach
+00085 00164J4 1 Bypass Cereb Vent to Pleural Cav w Synth Sub, Perc Endo      Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00086 00164J5 1 Bypass Cereb Vent to Intestine w Synth Sub, Perc Endo        Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Percutaneous Endoscopic Approach
+00087 00164J6 1 Bypass Cereb Vent to Periton Cav w Synth Sub, Perc Endo      Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00088 00164J7 1 Bypass Cereb Vent to Urinary Tract w Synth Sub, Perc Endo    Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Percutaneous Endoscopic Approach
+00089 00164J8 1 Bypass Cereb Vent to Bone Mar w Synth Sub, Perc Endo         Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Percutaneous Endoscopic Approach
+00090 00164JA 1 Bypass Cereb Vent to Subgaleal w Synth Sub, Perc Endo        Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Percutaneous Endoscopic Approach
+00091 00164JB 1 Bypass Cereb Vent to Cereb Cistern w Synth Sub, Perc Endo    Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Percutaneous Endoscopic Approach
+00092 00164K0 1 Bypass Cereb Vent to Nasophar w Nonaut Sub, Perc Endo        Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00093 00164K1 1 Bypass Cereb Vent to Mastoid Sinus w Nonaut Sub, Perc Endo   Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00094 00164K2 1 Bypass Cereb Vent to Atrium w Nonaut Sub, Perc Endo          Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00095 00164K3 1 Bypass Cereb Vent to Blood Vess w Nonaut Sub, Perc Endo      Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00096 00164K4 1 Bypass Cereb Vent to Pleural Cav w Nonaut Sub, Perc Endo     Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00097 00164K5 1 Bypass Cereb Vent to Intestine w Nonaut Sub, Perc Endo       Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00098 00164K6 1 Bypass Cereb Vent to Periton Cav w Nonaut Sub, Perc Endo     Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00099 00164K7 1 Bypass Cereb Vent to Urinary Tract w Nonaut Sub, Perc Endo   Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00100 00164K8 1 Bypass Cereb Vent to Bone Mar w Nonaut Sub, Perc Endo        Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00101 00164KA 1 Bypass Cereb Vent to Subgaleal w Nonaut Sub, Perc Endo       Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00102 00164KB 1 Bypass Cereb Vent to Cereb Cistern w Nonaut Sub, Perc Endo   Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00103 00164ZB 1 Bypass Cereb Vent to Cereb Cistern, Perc Endo Approach       Bypass Cerebral Ventricle to Cerebral Cisterns, Percutaneous Endoscopic Approach
+00104 001U072 1 Bypass Spinal Canal to Atrium with Autol Sub, Open Approach  Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Open Approach
+00105 001U074 1 Bypass Spinal Canal to Pleural Cav w Autol Sub, Open         Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Open Approach
+00106 001U076 1 Bypass Spinal Canal to Periton Cav w Autol Sub, Open         Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Open Approach
+00107 001U077 1 Bypass Spinal Canal to Urinary Tract w Autol Sub, Open       Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Open Approach
+00108 001U079 1 Bypass Spinal Canal to Fallopian w Autol Sub, Open           Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Open Approach
+00109 001U0J2 1 Bypass Spinal Canal to Atrium with Synth Sub, Open Approach  Bypass Spinal Canal to Atrium with Synthetic Substitute, Open Approach
+00110 001U0J4 1 Bypass Spinal Canal to Pleural Cav w Synth Sub, Open         Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Open Approach
+00111 001U0J6 1 Bypass Spinal Canal to Periton Cav w Synth Sub, Open         Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Open Approach
+00112 001U0J7 1 Bypass Spinal Canal to Urinary Tract w Synth Sub, Open       Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Open Approach
+00113 001U0J9 1 Bypass Spinal Canal to Fallopian w Synth Sub, Open           Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Open Approach
+00114 001U0K2 1 Bypass Spinal Canal to Atrium with Nonaut Sub, Open Approach Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Open Approach
+00115 001U0K4 1 Bypass Spinal Canal to Pleural Cav w Nonaut Sub, Open        Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Open Approach
+00116 001U0K6 1 Bypass Spinal Canal to Periton Cav w Nonaut Sub, Open        Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Open Approach
+00117 001U0K7 1 Bypass Spinal Canal to Urinary Tract w Nonaut Sub, Open      Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Open Approach
+00118 001U0K9 1 Bypass Spinal Canal to Fallopian w Nonaut Sub, Open          Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Open Approach
+00119 001U372 1 Bypass Spinal Canal to Atrium with Autol Sub, Perc Approach  Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Percutaneous Approach
+00120 001U374 1 Bypass Spinal Canal to Pleural Cav w Autol Sub, Perc         Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Approach
+00121 001U376 1 Bypass Spinal Canal to Periton Cav w Autol Sub, Perc         Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Approach
+00122 001U377 1 Bypass Spinal Canal to Urinary Tract w Autol Sub, Perc       Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Percutaneous Approach
+00123 001U379 1 Bypass Spinal Canal to Fallopian w Autol Sub, Perc           Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Percutaneous Approach
+00124 001U3J2 1 Bypass Spinal Canal to Atrium with Synth Sub, Perc Approach  Bypass Spinal Canal to Atrium with Synthetic Substitute, Percutaneous Approach
+00125 001U3J4 1 Bypass Spinal Canal to Pleural Cav w Synth Sub, Perc         Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Percutaneous Approach
+00126 001U3J6 1 Bypass Spinal Canal to Periton Cav w Synth Sub, Perc         Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Percutaneous Approach
+00127 001U3J7 1 Bypass Spinal Canal to Urinary Tract w Synth Sub, Perc       Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Percutaneous Approach
+00128 001U3J9 1 Bypass Spinal Canal to Fallopian w Synth Sub, Perc           Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Percutaneous Approach
+00129 001U3K2 1 Bypass Spinal Canal to Atrium with Nonaut Sub, Perc Approach Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Percutaneous Approach
+00130 001U3K4 1 Bypass Spinal Canal to Pleural Cav w Nonaut Sub, Perc        Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00131 001U3K6 1 Bypass Spinal Canal to Periton Cav w Nonaut Sub, Perc        Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00132 001U3K7 1 Bypass Spinal Canal to Urinary Tract w Nonaut Sub, Perc      Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Approach
+00133 001U3K9 1 Bypass Spinal Canal to Fallopian w Nonaut Sub, Perc          Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Percutaneous Approach
+00134 001U472 1 Bypass Spinal Canal to Atrium w Autol Sub, Perc Endo         Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00135 001U474 1 Bypass Spinal Canal to Pleural Cav w Autol Sub, Perc Endo    Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00136 001U476 1 Bypass Spinal Canal to Periton Cav w Autol Sub, Perc Endo    Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00137 001U477 1 Bypass Spinal Canal to Urinary Tract w Autol Sub, Perc Endo  Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00138 001U479 1 Bypass Spinal Canal to Fallopian w Autol Sub, Perc Endo      Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00139 001U4J2 1 Bypass Spinal Canal to Atrium w Synth Sub, Perc Endo         Bypass Spinal Canal to Atrium with Synthetic Substitute, Percutaneous Endoscopic Approach
+00140 001U4J4 1 Bypass Spinal Canal to Pleural Cav w Synth Sub, Perc Endo    Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00141 001U4J6 1 Bypass Spinal Canal to Periton Cav w Synth Sub, Perc Endo    Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00142 001U4J7 1 Bypass Spinal Canal to Urinary Tract w Synth Sub, Perc Endo  Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Percutaneous Endoscopic Approach
+00143 001U4J9 1 Bypass Spinal Canal to Fallopian w Synth Sub, Perc Endo      Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Percutaneous Endoscopic Approach
+00144 001U4K2 1 Bypass Spinal Canal to Atrium w Nonaut Sub, Perc Endo        Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00145 001U4K4 1 Bypass Spinal Canal to Pleural Cav w Nonaut Sub, Perc Endo   Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00146 001U4K6 1 Bypass Spinal Canal to Periton Cav w Nonaut Sub, Perc Endo   Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00147 001U4K7 1 Bypass Spinal Canal to Urinary Tract w Nonaut Sub, Perc Endo Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00148 001U4K9 1 Bypass Spinal Canal to Fallopian w Nonaut Sub, Perc Endo     Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach

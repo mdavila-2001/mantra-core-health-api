@@ -8,7 +8,8 @@
 //   - Inventario de endpoints y `ORPHAN_ENDPOINT` heurístico (mutante sin @Roles
 //     ni @Public → sin actor/autorización declarada).
 //   - `DIRECT_CROSS_DOMAIN_ACCESS`: repositorio que importa entidades de OTRO módulo.
-// No arranca la app ni toca la BD. Uso: `node tools/alovida/coverage-report.mjs`.
+// No arranca la app ni toca la BD. Uso: `node tools/alovida/coverage-report.mjs`;
+// con `--fail-on-orphan` sale con código 1 si queda algún ORPHAN_ENDPOINT.
 //
 // MCH-033: el informe dice de qué commit sale y qué mide cada cifra. Las tres
 // capas no se mezclan: «declarado» son decoradores en el código; «registrado»
@@ -26,8 +27,15 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import {
+  HUERFANAS_DOCUMENTADAS,
+  cruceDominioDocumentado,
+  sinRolesAutorizado,
+} from './exenciones.mjs';
 
 const ROOT = process.cwd();
+/** `--fail-on-orphan`: sale con código 1 si queda algún ORPHAN_ENDPOINT. */
+const FAIL_ON_ORPHAN = process.argv.includes('--fail-on-orphan');
 const MODULES = join(ROOT, 'src', 'modules');
 const rel = (p) => p.replace(ROOT + '/', '');
 
@@ -51,7 +59,7 @@ const moduleOf = (p) => p.match(/modules\/([^/]+)\//)?.[1] ?? '';
  * el triage 2026-07). Ver comentario equivalente en `guardrails.mjs`.
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts/;
+  /modules\/telemetry\/presentation\/controllers\/|modules\/(community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/presentation\/controllers\/audio-assets\.controller\.ts/;
 const GLOBAL_JWT_GUARD = (() => {
   try {
     const m = readFileSync(
@@ -94,17 +102,34 @@ const historyMirrorPresent = existsSync(
 const isMirroredHistory = (e) =>
   historyMirrorPresent && e.module === 'audit' && /History$/.test(e.cls);
 
+// Consumo por SQL crudo: hay módulos (data_catalog) que leen y escriben sus
+// tablas con `schema.tabla` en una cadena SQL y jamás nombran la clase de la
+// entidad. Sólo cuenta código: las líneas de comentario no son consumo.
+const sqlText = nonEntityText.map(({ text }) =>
+  text
+    .split(/\r?\n/)
+    .filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l))
+    .join('\n'),
+);
+const usedBySql = (tableKey) =>
+  sqlText.some(
+    (text) =>
+      text.includes(tableKey) &&
+      new RegExp(`(?<![\\w.])${tableKey.replace('.', '\\.')}\\b`).test(text),
+  );
+
 // Consumo DIRECTO: la clase de la entidad se referencia en código no-entidad
-// (repositorio/servicio/job/seed/etc.) o la cubre el mirror de historial.
+// (repositorio/servicio/job/seed/etc.), su tabla se nombra en SQL crudo o la
+// cubre el mirror de historial.
 const directlyConsumed = new Set();
 for (const e of entities) {
   if (isMirroredHistory(e)) {
     if (e.tableKey) directlyConsumed.add(e.tableKey);
     continue;
   }
-  const used = nonEntityText.some(({ text }) =>
-    new RegExp(`\\b${e.cls}\\b`).test(text),
-  );
+  const used =
+    nonEntityText.some(({ text }) => new RegExp(`\\b${e.cls}\\b`).test(text)) ||
+    (e.tableKey !== null && usedBySql(e.tableKey));
   if (used && e.tableKey) directlyConsumed.add(e.tableKey);
 }
 
@@ -171,54 +196,180 @@ for (const e of entities) {
 }
 
 // --- 2. Endpoints y ORPHAN_ENDPOINT (mutante sin @Roles ni @Public) ----------
+// Se lee el bloque de decoradores de CADA handler (los de arriba y los de abajo
+// del `@Post`, hasta la firma del método) y el de su clase (los que preceden a
+// `export class`). Antes bastaba con que el archivo nombrara `@Roles(` en
+// cualquier método para eximir a todos los demás, y un `@Roles` que quedaba
+// debajo del verbo de un handler se le acreditaba al siguiente.
+const HTTP_VERB = /^@(Get|Post|Put|Patch|Delete)\(([^)]*)\)/;
+const CLASS_LINE = /^export\s+(?:default\s+)?(?:abstract\s+)?class\s/;
+// Firma de un miembro: `nombre(` o `async nombre(` sin `@` delante. Cierra el
+// bloque de decoradores del handler.
+const MEMBER_SIGNATURE =
+  /^(?:(?:public|private|protected|static|async)\s+)*[A-Za-z_$][\w$]*\s*\(/;
+/**
+ * Guards de autorización que, puestos con `@UseGuards` en la clase o en el
+ * handler, deciden quién entra (403 si no). Sólo se listan los verificados en
+ * el código: un `@UseGuards` cualquiera (throttle, validación) no autoriza.
+ *   - LabStaffGuard (`diagnostics/guards/lab-staff.guard.ts`): SUPERADMIN, rol
+ *     clínico en el tenant activo o membresía activa de un DIAGNOSTIC_CENTER.
+ */
+const AUTHZ_GUARD = /@UseGuards\([^)]*\bLabStaffGuard\b/;
+
+/**
+ * Rutas sin `@Roles` cuya autorización ya se revisó, con motivo y evidencia,
+ * en `tools/catalog/permission-drift-allowlist.json` (`reviewed`). Ese archivo
+ * lo hace cumplir `permission-drift-gate.mjs` contra las rutas que Nest
+ * registra; leerlo acá evita una segunda lista con el mismo contenido. Las
+ * `routes` sin revisar de ese archivo NO eximen.
+ */
+const REVIEWED_ROUTES = (() => {
+  const file = join(
+    ROOT,
+    'tools',
+    'catalog',
+    'permission-drift-allowlist.json',
+  );
+  if (!existsSync(file)) return new Set();
+  const { reviewed = [] } = JSON.parse(readFileSync(file, 'utf8'));
+  return new Set(reviewed.flatMap((g) => g.routes ?? []));
+})();
+
+/** Literales de cadena de los argumentos de un decorador, sin comillas. */
+const stringArgs = (raw) =>
+  [...raw.matchAll(/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|`([^`]*)`/g)].map(
+    (m) => (m[1] ?? m[2] ?? m[3]).replace(/\\\\/g, '\\'),
+  );
+
+/** Plantilla de ruta como la registra Nest: `/prefijo/ruta`, sin `/` final. */
+const routeTemplate = (prefix, path) =>
+  `/${[prefix, path].filter(Boolean).join('/')}`
+    .replace(/\/{2,}/g, '/')
+    .replace(/(.)\/$/, '$1');
+
 const controllers = allFiles.filter((f) => f.endsWith('.controller.ts'));
 let endpointCount = 0;
+let reviewedExempt = 0;
 const orphanEndpoints = [];
 for (const f of controllers) {
-  const text = readFileSync(f, 'utf8');
-  const lines = text.split(/\r?\n/);
-  const classHasRoles = /@Roles\(/.test(text);
-  let deco = [];
+  const lines = readFileSync(f, 'utf8').split(/\r?\n/);
+  let classDeco = [];
+  let block = [];
+  let endpoint = null;
+  const closeBlock = () => {
+    if (endpoint) {
+      const all = [...block, ...classDeco];
+      const pub = all.some((d) => /@Public\(/.test(d));
+      const roles = all.some((d) => /@Roles\(/.test(d));
+      const guarded = all.some((d) => AUTHZ_GUARD.test(d));
+      const { verb, path, line } = endpoint;
+      const controllerDeco = classDeco.find((d) =>
+        d.startsWith('@Controller('),
+      );
+      const prefixes = controllerDeco ? stringArgs(controllerDeco) : [];
+      const methodPaths = stringArgs(path);
+      const routes = (prefixes.length ? prefixes : ['']).flatMap((prefix) =>
+        (methodPaths.length ? methodPaths : ['']).map(
+          (mp) => `${verb.toUpperCase()} ${routeTemplate(prefix, mp)}`,
+        ),
+      );
+      const reviewed = routes.some((r) => REVIEWED_ROUTES.has(r));
+      const mutating = ['Post', 'Put', 'Patch', 'Delete'].includes(verb);
+      if (mutating && !roles && !pub && GLOBAL_JWT_GUARD && reviewed)
+        reviewedExempt++;
+      if (
+        mutating &&
+        !roles &&
+        !pub &&
+        !(GLOBAL_JWT_GUARD && guarded) &&
+        !(GLOBAL_JWT_GUARD && reviewed) &&
+        !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f)) &&
+        !(GLOBAL_JWT_GUARD && sinRolesAutorizado(rel(f), verb, path))
+      ) {
+        orphanEndpoints.push({ file: rel(f), line, verb, path, routes });
+      }
+    }
+    block = [];
+    endpoint = null;
+  };
   lines.forEach((raw, i) => {
     const l = raw.trim();
-    if (l.startsWith('@')) deco.push(l);
-    const m = l.match(/@(Get|Post|Put|Patch|Delete)\(([^)]*)\)/);
-    if (!m) return;
-    endpointCount++;
-    const verb = m[1];
-    const near = lines.slice(i, i + 6).join(' ');
-    const pub = deco.some((d) => /@Public\(/.test(d)) || /@Public\(/.test(near);
-    const roles =
-      classHasRoles ||
-      deco.some((d) => /@Roles\(/.test(d)) ||
-      /@Roles\(/.test(near);
-    if (
-      ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
-      !roles &&
-      !pub &&
-      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f))
-    ) {
-      orphanEndpoints.push({ file: rel(f), line: i + 1, verb, path: m[2] });
+    if (CLASS_LINE.test(l)) {
+      if (endpoint) closeBlock();
+      // Sin handler abierto, lo acumulado son los decoradores de la clase.
+      classDeco = block;
+      block = [];
+      return;
     }
-    deco = [];
+    if (l.startsWith('@')) {
+      block.push(l);
+      const m = l.match(HTTP_VERB);
+      if (m) {
+        endpointCount++;
+        endpoint = { verb: m[1], path: m[2], line: i + 1 };
+      }
+      return;
+    }
+    if (endpoint && MEMBER_SIGNATURE.test(l)) {
+      closeBlock();
+      return;
+    }
+    // Firma de un miembro sin verbo HTTP (constructor, helper): sus decoradores
+    // no pasan al handler siguiente.
+    if (!endpoint && MEMBER_SIGNATURE.test(l)) block = [];
   });
+  closeBlock();
 }
 
 // --- 3. DIRECT_CROSS_DOMAIN_ACCESS: repo que importa entidades de otro módulo -
+// Cada arista se clasifica por lo que el repositorio hace con la entidad ajena:
+// los que sólo la LEEN pueden ser legítimos (join de proyección, dato de
+// referencia); los que la ESCRIBEN tienen que pasar por el contrato del otro
+// módulo (#839). La clasificación es textual —busca `create(Entidad`,
+// `nativeUpdate(Entidad`, `new Entidad`…— y por eso un «lee» no prueba que no
+// escriba por otra vía: ordena la revisión, no la cierra.
+const WRITE_CALL = (name) =>
+  new RegExp(
+    `(create|persist|remove|nativeDelete|nativeUpdate|upsert|insert|assign|persistAndFlush)\\w*\\(\\s*${name}\\b|new\\s+${name}\\b|getReference\\(${name}\\b`,
+  );
 const crossDomain = [];
 for (const f of allFiles.filter((f) => /\/repositories\//.test(f))) {
   const mod = moduleOf(f);
   const text = readFileSync(f, 'utf8');
-  for (const m of text.matchAll(/from '(\.\.\/)+modules\/([^/]+)\/entities/g)) {
-    if (m[2] !== mod)
-      crossDomain.push({ file: rel(f), from: mod, imports: m[2] });
-  }
-  // import relativo a ../../<otro_modulo>/entities
-  for (const m of text.matchAll(/from '\.\.\/\.\.\/([a-z_]+)\/entities/g)) {
-    if (m[1] !== mod && m[1] !== 'common')
-      crossDomain.push({ file: rel(f), from: mod, imports: m[1] });
+  for (const m of text.matchAll(
+    /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'([^']*)'/g,
+  )) {
+    const target =
+      m[2].match(/^(?:\.\.\/)+modules\/([a-z_]+)\/entities/) ??
+      m[2].match(/^\.\.\/\.\.\/([a-z_]+)\/entities/);
+    if (!target || target[1] === mod || target[1] === 'common') continue;
+    const names = m[1]
+      .split(',')
+      .map((n) =>
+        n
+          .trim()
+          .replace(/^type\s+/, '')
+          .split(/\s+as\s+/)
+          .pop(),
+      )
+      .filter(Boolean);
+    const writes = names.filter((n) => WRITE_CALL(n).test(text));
+    const documented = names
+      .map((n) => cruceDominioDocumentado(rel(f), n))
+      .filter(Boolean);
+    crossDomain.push({
+      file: rel(f),
+      from: mod,
+      imports: target[1],
+      names,
+      writes,
+      why: documented.length === names.length ? documented[0] : undefined,
+    });
   }
 }
+const crossWrites = crossDomain.filter((c) => c.writes.length > 0 && !c.why);
+const crossDocumented = crossDomain.filter((c) => c.why);
+const crossReads = crossDomain.filter((c) => c.writes.length === 0 && !c.why);
 
 // --- Procedencia y denominadores (MCH-033) -----------------------------------
 const git = (...args) =>
@@ -293,26 +444,64 @@ p(
 p(
   '> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.',
 );
-for (const e of orphanTables.slice(0, 60))
+for (const e of orphanTables.slice(0, 60)) {
   p(`- \`${e.module}\` · ${e.cls} (${rel(e.file)})`);
+  const why = HUERFANAS_DOCUMENTADAS.get(e.cls);
+  if (why) p(`  - Por qué está: ${why}`);
+}
 if (orphanTables.length > 60) p(`- … +${orphanTables.length - 60} más`);
 p('');
 p(
   `## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (${orphanEndpoints.length})`,
 );
+p(
+  `> Cuenta un @Post/@Put/@Patch/@Delete sin \`@Roles\` ni \`@Public\` en su handler ni en su clase. No cuentan: \`@UseGuards(LabStaffGuard)\`, las rutas revisadas en \`tools/catalog/permission-drift-allowlist.json\` (${reviewedExempt} eximidas así), las de \`tools/alovida/exenciones.mjs\` y los controladores de \`AUTHN_NON_ROLE_ALLOWLIST\`. \`--fail-on-orphan\` hace fallar el proceso si queda alguno.`,
+);
 for (const e of orphanEndpoints.slice(0, 60))
-  p(`- ${e.file}:${e.line} — @${e.verb} ${e.path}`);
+  p(
+    `- ${e.file}:${e.line} — @${e.verb} ${e.path} (\`${e.routes.join('`, `')}\`)`,
+  );
 if (orphanEndpoints.length > 60) p(`- … +${orphanEndpoints.length - 60} más`);
 p('');
 p(
-  `## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length})`,
+  `## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length} aristas en ${new Set(crossDomain.map((c) => c.file)).size} repositorios)`,
 );
-for (const c of crossDomain.slice(0, 60)) p(`- ${c.file} → \`${c.imports}\``);
-if (crossDomain.length > 60) p(`- … +${crossDomain.length - 60} más`);
+p(
+  `> Escriben la entidad ajena: ${crossWrites.length} · solo leen: ${crossReads.length} · documentadas: ${crossDocumented.length}. La clasificación es textual (ver el script): ordena la revisión, no la cierra.`,
+);
+const crossLine = (c) =>
+  `- ${c.file} → \`${c.imports}\` (${c.names.join(', ')})`;
+p('');
+p(`### Escriben la entidad de otro dominio (${crossWrites.length})`);
+p('> Tienen que pasar por el contrato del otro módulo.');
+for (const c of crossWrites)
+  p(`${crossLine(c)} — escribe ${c.writes.join(', ')}`);
+p('');
+p(`### Solo leen (${crossReads.length})`);
+for (const c of crossReads) p(crossLine(c));
+p('');
+p(`### Documentadas (${crossDocumented.length})`);
+for (const c of crossDocumented) {
+  p(crossLine(c));
+  p(`  - Por qué está: ${c.why}`);
+}
 
 const report = lines.join('\n') + '\n';
 writeFileSync(join(ROOT, 'docs/reports/ALOVIDA-COBERTURA.md'), report);
 console.log(report);
 console.log(
-  `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length}`,
+  `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length} (escriben=${crossWrites.length} leen=${crossReads.length} documentadas=${crossDocumented.length})`,
 );
+
+// Puerta (O3-3): con `--fail-on-orphan`, un ORPHAN_ENDPOINT hace fallar el
+// proceso. Sin el flag el informe sigue siendo informativo (exit 0).
+if (FAIL_ON_ORPHAN && orphanEndpoints.length > 0) {
+  console.error(
+    `\n✗ ORPHAN_ENDPOINT: ${orphanEndpoints.length} endpoint(s) mutante(s) sin @Roles, sin @Public y sin revisión documentada (tools/catalog/permission-drift-allowlist.json «reviewed» o tools/alovida/exenciones.mjs):`,
+  );
+  for (const e of orphanEndpoints)
+    console.error(
+      `  - ${e.file}:${e.line} — @${e.verb} ${e.path} (${e.routes.join(', ')})`,
+    );
+  process.exitCode = 1;
+}

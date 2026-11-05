@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { CommunityPollsService } from './community-polls.service';
 import {
   ConflictException,
@@ -34,15 +35,23 @@ function build() {
     createVote: mockFn(),
   };
   const postsRepo = { findById: mockFn() };
+  const visibility = {
+    assertActsAsProfile: mockFn().mockResolvedValue(undefined),
+    canViewPost: mockFn().mockResolvedValue(true),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityPollsService(
     em as any,
     pollsRepo as any,
     postsRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, tx, pollsRepo, postsRepo };
+  return { service, tx, pollsRepo, postsRepo, visibility };
 }
+
+/** Publicación visible a la que se le cuelga o en la que se vota. */
+const visiblePost = { id: 'post1', authorPublicProfileId: 'author1' };
 
 describe('CommunityPollsService', () => {
   describe('createPoll (bootstrap)', () => {
@@ -58,9 +67,30 @@ describe('CommunityPollsService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
+    it('rechaza que otra sesión le cuelgue una encuesta a una publicación ajena', async () => {
+      const d = build();
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+      await expect(
+        d.service.createPoll(
+          'post1',
+          { question: 'q', options: ['a', 'b'] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        d.tx,
+        'author1',
+        actor,
+      );
+      expect(d.pollsRepo.createPoll).not.toHaveBeenCalled();
+    });
+
     it('creates the poll with its options', async () => {
       const d = build();
-      d.postsRepo.findById.mockResolvedValue({ id: 'post1' });
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
       d.pollsRepo.createPoll.mockReturnValue({ id: 'poll1' });
       d.pollsRepo.createOption
         .mockReturnValueOnce({ id: 'o1' })
@@ -87,8 +117,53 @@ describe('CommunityPollsService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
+    it('rechaza votar con el perfil de otra persona', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+      await expect(
+        d.service.vote(
+          'poll1',
+          { pollOptionId: 'o1', voterProfileId: 'ajeno' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        d.tx,
+        'ajeno',
+        actor,
+      );
+      expect(d.pollsRepo.createVote).not.toHaveBeenCalled();
+    });
+
+    it('responde 404 si la publicación de la encuesta no es visible para el votante', async () => {
+      const d = build();
+      d.pollsRepo.findPollById.mockResolvedValue({
+        id: 'poll1',
+        postId: 'post1',
+        statusConceptId: COMM.POLL_OPEN,
+      });
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
+      d.visibility.canViewPost.mockResolvedValue(false);
+      await expect(
+        d.service.vote(
+          'poll1',
+          { pollOptionId: 'o1', voterProfileId: 'p1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.visibility.canViewPost).toHaveBeenCalledWith(
+        d.tx,
+        visiblePost,
+        'p1',
+      );
+      expect(d.pollsRepo.createVote).not.toHaveBeenCalled();
+    });
+
     it('rejects voting on a closed poll', async () => {
       const d = build();
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
       d.pollsRepo.findPollById.mockResolvedValue({
         id: 'poll1',
         statusConceptId: COMM.POLL_CLOSED,
@@ -104,6 +179,7 @@ describe('CommunityPollsService', () => {
 
     it('rejects a second vote in a single-choice poll', async () => {
       const d = build();
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
       d.pollsRepo.findPollById.mockResolvedValue({
         id: 'poll1',
         statusConceptId: COMM.POLL_OPEN,
@@ -126,6 +202,7 @@ describe('CommunityPollsService', () => {
 
     it('records the vote and bumps counters', async () => {
       const d = build();
+      d.postsRepo.findById.mockResolvedValue(visiblePost);
       const poll = {
         id: 'poll1',
         statusConceptId: COMM.POLL_OPEN,

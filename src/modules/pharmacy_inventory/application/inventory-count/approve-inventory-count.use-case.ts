@@ -21,6 +21,7 @@ import {
   numericQuantity,
   recomputeAvailableQuantity,
 } from '../../domain/counting/stock-quantity';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Aprueba un conteo, registra varianzas y ajusta el ledger y stock. */
 @Injectable()
@@ -30,6 +31,7 @@ export class ApproveInventoryCountUseCase {
     private readonly countRepo: CountSessionsRepository,
     private readonly stockRepo: StockPositionsRepository,
     private readonly ledgerRepo: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -44,11 +46,17 @@ export class ApproveInventoryCountUseCase {
     );
     return this.em.transactional(async (tx) => {
       const session = await this.countRepo.findById(tx, id);
-      if (!session) {
-        throw new ResourceNotFoundException('Sesión de conteo no encontrada', {
-          sessionId: id,
-        });
-      }
+      if (!session) throw this.scope.notAvailable();
+      // La sesión sólo guarda la sede: la farmacia verdadera sale de la sede, y
+      // es la que va al ledger. La ubicación contada debe ser de esa sede.
+      const site = await this.scope.requireManagedSite(
+        tx,
+        session.pharmacySiteId,
+        actor,
+      );
+      await this.scope.assertStoredStockKey(tx, site, {
+        inventoryLocationId: session.inventoryLocationId,
+      });
       const approvable = [
         PINV.COUNT_OPEN,
         PINV.COUNT_FROZEN,
@@ -74,6 +82,12 @@ export class ApproveInventoryCountUseCase {
             lineId,
           });
         }
+        // El producto y el lote contados deben ser de la farmacia de la sede.
+        await this.scope.assertStoredStockKey(tx, site, {
+          inventoryLocationId: session.inventoryLocationId,
+          pharmacyProductId: line.pharmacyProductId,
+          inventoryLotId: line.inventoryLotId,
+        });
         lineIds.push(line.id);
         const variance = counted - numericQuantity(line.expectedQuantity);
         line.countedQuantity = String(counted);
@@ -83,11 +97,11 @@ export class ApproveInventoryCountUseCase {
           line.varianceReasonConceptId = PINV.VARIANCE_REASON_ADJUSTMENT;
           const sequence = await this.ledgerRepo.nextSequence(
             tx,
-            session.pharmacySiteId,
+            site.pharmacyId,
           );
           this.ledgerRepo.append(tx, {
-            pharmacyId: session.pharmacySiteId,
-            pharmacySiteId: session.pharmacySiteId,
+            pharmacyId: site.pharmacyId,
+            pharmacySiteId: site.siteId,
             inventoryLocationId: session.inventoryLocationId,
             pharmacyProductId: line.pharmacyProductId,
             inventoryLotId: line.inventoryLotId,

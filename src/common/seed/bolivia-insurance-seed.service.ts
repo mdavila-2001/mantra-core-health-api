@@ -4,6 +4,9 @@ import { PinoLogger } from 'nestjs-pino';
 
 import { DIR } from '../../modules/directory/directory.concepts';
 import { Tenants } from '../../modules/directory/entities';
+import { PublicProfiles } from '../../modules/community/entities';
+import { COMM } from '../../modules/community/community.concepts';
+import { PublicProfileProjectionService } from '../../modules/community/services';
 import {
   InsuranceCarriers,
   InsurancePlans,
@@ -13,6 +16,7 @@ import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { CONCEPTS, deterministicId } from '../constants/concepts';
 import {
   BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
   BOLIVIA_HEALTH_PLANS,
   BOLIVIA_PUBLIC_INSURERS,
   carrierId,
@@ -20,6 +24,7 @@ import {
   carrierProductId,
   contactChannelsOf,
 } from './bolivia-insurance.catalog';
+import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 
 /**
  * Id determinista del tenant de una aseguradora.
@@ -29,7 +34,7 @@ import {
  * de una organización, no un registro suelto. Sin tenant propio, la segunda
  * compañía que se intenta sembrar viola `uq_insurance_carriers_tenant_id`.
  */
-const carrierTenantId = (code: string): string =>
+export const carrierTenantId = (code: string): string =>
   deterministicId(`seed:tenant:bo-carrier:${code}`);
 
 /** Cuántas filas dejó cada nivel. */
@@ -42,6 +47,8 @@ export interface BoliviaInsuranceResult {
   products: number;
   /** Planes creados. */
   plans: number;
+  /** Vitrinas públicas proyectadas en esta pasada. */
+  showcases: number;
 }
 
 /**
@@ -90,10 +97,12 @@ export class BoliviaInsuranceSeedService {
    *
    * @param orm - Acceso al `EntityManager` de la aplicación.
    * @param logger - Registro con el contexto de este servicio.
+   * @param projection - Vitrina pública de una organización.
    */
   constructor(
     private readonly orm: MikroORM,
     private readonly logger: PinoLogger,
+    private readonly projection: PublicProfileProjectionService,
   ) {
     this.logger.setContext(BoliviaInsuranceSeedService.name);
   }
@@ -101,9 +110,15 @@ export class BoliviaInsuranceSeedService {
   /**
    * Ejecuta el seed.
    *
+   * @param showcasesEnabled - Si proyecta la vitrina pública de cada
+   *   aseguradora. Es parte de la carga del padrón y comparte su interruptor
+   *   (`SEED_PADRON_ORGANIZATIONS_ENABLED`): con él apagado, un despliegue no
+   *   crea ni cambia nada nuevo.
    * @returns Cuántas filas se insertaron en cada nivel.
    */
-  async run(): Promise<BoliviaInsuranceResult> {
+  async run(
+    showcasesEnabled = process.env.SEED_PADRON_ORGANIZATIONS_ENABLED === 'true',
+  ): Promise<BoliviaInsuranceResult> {
     this.assertUniqueCodes();
 
     const em = this.orm.em.fork();
@@ -113,8 +128,9 @@ export class BoliviaInsuranceSeedService {
     const carriers = await this.seedCarriers(em, now);
     const products = await this.seedProducts(em, now);
     const plans = await this.seedPlans(em, now);
+    const showcases = showcasesEnabled ? await this.seedShowcases(em) : 0;
 
-    const total = tenants + carriers + products + plans;
+    const total = tenants + carriers + products + plans + showcases;
     if (total > 0) {
       this.logger.info(
         {
@@ -123,11 +139,12 @@ export class BoliviaInsuranceSeedService {
           carriers,
           products,
           plans,
+          showcases,
         },
         'Aseguradoras de Bolivia materializadas',
       );
     }
-    return { tenants, carriers, products, plans };
+    return { tenants, carriers, products, plans, showcases };
   }
 
   /**
@@ -148,7 +165,7 @@ export class BoliviaInsuranceSeedService {
     }
   }
 
-  /** Privadas y públicas en una sola lista, que es como se siembran. */
+  /** Privadas (listado y curadas) y públicas en una sola lista, que es como se siembran. */
   private allCarriers(): {
     code: string;
     legalName: string;
@@ -163,6 +180,13 @@ export class BoliviaInsuranceSeedService {
         sigla: c.sigla,
         address: c.direccion,
         nit: c.nit,
+      })),
+      // Privadas reales que el listado del stakeholder no trae (curadas, sin
+      // NIT ni dirección inventados).
+      ...BOLIVIA_CURATED_CARRIERS.map((c) => ({
+        code: c.code,
+        legalName: c.razonSocial,
+        sigla: c.sigla,
       })),
       ...BOLIVIA_PUBLIC_INSURERS.map((c) => ({
         code: c.code,
@@ -229,6 +253,57 @@ export class BoliviaInsuranceSeedService {
     }
     await em.flush();
     return created;
+  }
+
+  /**
+   * La vitrina pública de cada aseguradora.
+   *
+   * Sin ella la aseguradora existe pero el directorio público no la muestra: la
+   * vitrina se proyecta al verificar una organización, y `verify` exige que el
+   * tenant esté PENDIENTE mientras estos nacen ACTIVOS. En vez de forzar un
+   * estado, se proyecta lo mismo que proyectaría la verificación —nombre y slug
+   * por id, como `INSURER`— y se deja el estado de verificación como está:
+   * publicar la ficha no es afirmar que la compañía fue verificada, y la
+   * presentación lo dice.
+   *
+   * Converge: completa las que ya existen sin vitrina y no toca las que sí
+   * tienen una.
+   */
+  private async seedShowcases(em: EntityManager): Promise<number> {
+    const todas = this.allCarriers();
+    const targetIds = todas.map((c) => carrierTenantId(c.code));
+    const existing = new Set(
+      (await em.find(PublicProfiles, { targetId: { $in: targetIds } })).map(
+        (profile) => profile.targetId,
+      ),
+    );
+    const pending = todas.filter((c) => !existing.has(carrierTenantId(c.code)));
+    if (pending.length === 0) return 0;
+
+    // La vitrina escribe `created_by_user_id`, que es FK a `iam.users`.
+    await ensureSeedActor(em);
+    for (const carrier of pending) {
+      const tenantId = carrierTenantId(carrier.code);
+      await em.fork().transactional(async (tx) => {
+        await this.projection.projectOrganization(tx, {
+          tenantId,
+          targetId: tenantId,
+          slug: `organization-${tenantId}`,
+          displayName: carrier.sigla || carrier.legalName,
+          actorUserId: SEED_ACTOR_ID,
+          targetTypeConceptId: COMM.PROFILE_TARGET_INSURER,
+        });
+        await this.projection.updateOrganizationShowcase(tx, {
+          targetId: tenantId,
+          headline: 'Aseguradora',
+          biography:
+            'Ficha del padrón público de aseguradoras. ' +
+            'La información no fue verificada por la compañía.',
+          actorUserId: SEED_ACTOR_ID,
+        });
+      });
+    }
+    return pending.length;
   }
 
   /** Las aseguradoras. */

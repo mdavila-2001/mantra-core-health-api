@@ -1,5 +1,18 @@
 {
   "_nota": "Establecimientos de salud de Santa Cruz. Origen: LISTA_DE_CLINICAS_PRIVADAS_1.md, LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1.md y LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1.md. Los de naturaleza RED_ASEGURADORA salen de las redes de Alianza y Nacional: son consultorios que el padrón oficial no lista y sin los cuales un médico no puede declarar dónde atiende.",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown-institutions/pharmacies-and-labs.json": "560b8d552ca605b50a1a71c77affff9b621827ddfd8ac5bb4bdcd5903ae71ced",
+      "markdown-institutions/primary-care.json": "9e6ded1837897b6cc0c2ac37b1f01d9e134d15119cc428783eab9a7efcd77682",
+      "markdown_convertidos/Alianza_Medicos_Habilitados.md": "425bbcadd7b177638f08fecc8aad39299746794e06ecd270617ab483fcaf5727",
+      "markdown_convertidos/LISTA_DE_CLINICAS_PRIVADAS_1.md": "01c51cb3f2fe6c40dda9dde41a708afe055909898b80215decc727f34b8d9a00",
+      "markdown_convertidos/LISTA_DE_FARMACIAS__LABORATORIOS_Y_ANALISIS_MEDICOS.md": "e3358a6f4310c63c00707671cf890948191411dfbad25d4983d29e3f50961dfd",
+      "markdown_convertidos/LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1.md": "3a451f6abea0230d40de630d863ef3e22f6e9f54c9d1a852c72a2541de5764d1",
+      "markdown_convertidos/LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1.md": "d00fe9d4acd5224a658bfb01b037d8535c6f6963369d8435bf282e50ff1cb049",
+      "markdown_convertidos/Nacional_Seguros_Red_Medica_Bolivia.md": "bfcd40c8bb0019b50f466e0bd2502ba521953a0cda1ef7a133bad308a7713a72"
+    }
+  },
   "datos": [
     {
       "code": "BO_EST_CLINICA_LAS_AMERICAS",

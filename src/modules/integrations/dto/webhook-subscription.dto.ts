@@ -15,7 +15,8 @@ export class CreateWebhookSubscriptionDto {
    * Identificador asociado a tenant.
    */
   @ApiPropertyOptional({
-    description: 'Tenant al que aplica la suscripción',
+    description:
+      'Opcional: la suscripción pertenece al tenant del contexto autenticado; si se envía debe coincidir con él',
     format: 'uuid',
   })
   @IsOptional()

@@ -8,15 +8,23 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { PlatformAdminScopeGuard } from '../../../../common/auth/platform-admin-scope.guard';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiPreconditionFailedResponse,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
+  NotAudited,
   ParseOptionalLimitPipe,
   Roles,
   type AuthenticatedUser,
@@ -46,6 +54,7 @@ import {
   AssistedPractitionerRegistrationResponseDto,
   AssistedRegistrationDto,
   AssistedRegistrationResponseDto,
+  SearchUsersBodyDto,
   SearchUsersResponseDto,
   UserDetailResponseDto,
   ListCredentialsResponseDto,
@@ -53,6 +62,10 @@ import {
   ListMfaFactorsResponseDto,
   ListSessionsResponseDto,
   ListGlobalRolesResponseDto,
+  UserLifecycleReasonDto,
+  UserLifecycleResultDto,
+  UserLifecycleViewDto,
+  UserLifecycleHistoryQueryDto,
 } from '../dto';
 
 /** Tope de usuarios por página cuando el cliente no pide uno. */
@@ -61,6 +74,23 @@ const DEFAULT_USERS_PAGE_SIZE = 50;
 /**
  * Endpoints administrativos y de auto-servicio sobre `/iam/users`. Es una capa
  * fina: valida parámetros y delega en el servicio de dominio correspondiente.
+ *
+ * ## Contrato H5: ciclo de vida de la cuenta (todo `SECURITY_ADMIN`)
+ *
+ * | Ruta | Cuerpo / query | Respuesta |
+ * |---|---|---|
+ * | `POST /iam/users/:id/suspend` | `{ reason }` (obligatorio, ≤ 500) | 200 `{ id, state, changed, revokedSessions }` |
+ * | `POST /iam/users/:id/reactivate` | `{ reason }` | 200 igual |
+ * | `POST /iam/users/:id/deactivate` | `{ reason }` | 200 igual (la baja no borra; no se reactiva) |
+ * | `GET /iam/users/:id/lifecycle` | `?limit=1..100&cursor=` | 200 `{ userId, state, items[], nextCursor, limit }` |
+ *
+ * `state`: `ACTIVE | SUSPENDED | DEACTIVATED | ANONYMIZED`. Idempotentes: repetir la acción sobre
+ * la cuenta que ya está en ese estado responde 200 con `changed: false` y no escribe. Errores:
+ * 400 (`reason` ausente o vacío, clave no declarada), 404 `USER_NOT_FOUND`, 409
+ * `USER_LIFECYCLE_TRANSITION_INVALID`, 412 `USER_SELF_LIFECYCLE_FORBIDDEN` /
+ * `USER_LAST_SECURITY_ADMIN`, 401 sin token, 403 `ROLE_INSUFFICIENT` /
+ * `USER_SUPERADMIN_LIFECYCLE_FORBIDDEN` (sólo SUPERADMIN global modifica otro SUPERADMIN).
+ * Contrato completo: `docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H5-permisos-y-usuarios.md`.
  */
 @ApiTags('iam-users')
 @ApiBearerAuth()
@@ -93,6 +123,10 @@ export class IamUsersController {
    * Se declara antes que las rutas con parámetro para que ninguna de ellas capture
    * un segmento fijo.
    *
+   * Obsoleto: el cliente usa `POST /iam/users/search`, que lleva el texto en el
+   * cuerpo. Se conserva sólo por compatibilidad, con los mismos roles, filtros
+   * y respuesta.
+   *
    * @param query - Texto sobre el nombre visible o el sujeto de la credencial.
    * @param statusConceptId - Estado al que acotar.
    * @param cursor - Cursor opaco de la página anterior.
@@ -101,7 +135,12 @@ export class IamUsersController {
    */
   @Get()
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Listado paginado de usuarios' })
+  @ApiOperation({
+    summary: 'Listado paginado de usuarios (obsoleto)',
+    description:
+      'Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.',
+    deprecated: true,
+  })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -134,6 +173,47 @@ export class IamUsersController {
       statusConceptId,
       cursor,
       limit: limit ?? DEFAULT_USERS_PAGE_SIZE,
+    });
+  }
+
+  /**
+   * UC-01-01 (cara de lectura): listado paginado de usuarios, con los filtros
+   * en el cuerpo.
+   *
+   * Existe porque el texto de búsqueda es un nombre o un correo, y los
+   * parámetros de la URL quedan en los logs de acceso de cualquier proxy, en el
+   * historial del navegador y en el `Referer`. Es el camino que usa el cliente
+   * (por ejemplo, para elegir al owner en el alta administrativa de una
+   * organización); el `GET /iam/users` sigue vivo, obsoleto.
+   *
+   * Responde `200` y no `201`: no crea nada. Va declarada antes que cualquier
+   * ruta `:id`: Nest las resuelve por orden de declaración. Los filtros, los
+   * límites y el tope por defecto son los del `GET`; una clave de más responde
+   * `400`.
+   *
+   * @param body - Filtros de la búsqueda.
+   * @returns Página de usuarios.
+   */
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  @Roles('SECURITY_ADMIN')
+  @NotAudited(
+    'Listado de sólo lectura, sin efectos: es el mismo listado que `GET /iam/users` (que no muta), con los filtros en el cuerpo para que no queden en la URL. No hay estado que sellar.',
+  )
+  @ApiOperation({
+    summary: 'Listado paginado de usuarios, con los filtros en el cuerpo',
+    description:
+      'Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.',
+  })
+  @ApiOkResponse({ type: SearchUsersResponseDto })
+  searchUsersByBody(
+    @Body() body: SearchUsersBodyDto,
+  ): Promise<SearchUsersResponseDto> {
+    return this.usersReadService.searchUsers({
+      query: body.q,
+      statusConceptId: body.status,
+      cursor: body.cursor,
+      limit: body.limit ?? DEFAULT_USERS_PAGE_SIZE,
     });
   }
 
@@ -214,11 +294,32 @@ export class IamUsersController {
     return this.usersReadService.listGlobalRoles(id);
   }
 
+  /** Estado de ciclo de vida de la cuenta y su historia (suspensiones, reactivaciones, bajas). */
+  @Get(':id/lifecycle')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @ApiOperation({
+    summary: 'Estado de ciclo de vida de la cuenta y su historia, paginada',
+  })
+  @ApiOkResponse({ type: UserLifecycleViewDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  lifecycle(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: UserLifecycleHistoryQueryDto,
+  ): Promise<UserLifecycleViewDto> {
+    return this.usersService.lifecycleOf(id, query);
+  }
+
   /**
    * C-18 / CAN-IDENT: registro asistido de un paciente. Devuelve el token de
    * activación de un solo uso para entregar al titular por canal seguro — NUNCA
    * una contraseña.
    */
+  @Audited({
+    action: 'USER_ASSISTED_REGISTERED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post('assisted-registration')
   @Roles('CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -245,6 +346,11 @@ export class IamUsersController {
    * Devuelve el token de activación de un solo uso para entregar al titular por
    * canal seguro — **NUNCA** una contraseña.
    */
+  @Audited({
+    action: 'PRACTITIONER_ASSISTED_REGISTERED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post('assisted-practitioner-registration')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -263,6 +369,11 @@ export class IamUsersController {
   }
 
   /** UC-01-01. */
+  @Audited({
+    action: 'USER_CREATED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -277,6 +388,11 @@ export class IamUsersController {
   }
 
   /** UC-01-02. */
+  @Audited({
+    action: 'FEDERATED_CREDENTIAL_LINKED',
+    entity: 'authentication_credential',
+    entityId: 'result.id',
+  })
   @Post(':id/credentials/federated')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -290,6 +406,11 @@ export class IamUsersController {
   }
 
   /** UC-01-09. */
+  @Audited({
+    action: 'CREDENTIAL_REVOKED',
+    entity: 'authentication_credential',
+    entityId: 'param:cid',
+  })
   @Post(':id/credentials/:cid/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -303,6 +424,11 @@ export class IamUsersController {
   }
 
   /** UC-01-03. */
+  @Audited({
+    action: 'MFA_FACTOR_ENROLLED',
+    entity: 'mfa_factor',
+    entityId: 'result.id',
+  })
   @Post(':id/mfa-factors')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enrolar o verificar un factor MFA' })
@@ -315,6 +441,11 @@ export class IamUsersController {
   }
 
   /** UC-01-05. */
+  @Audited({
+    action: 'DEVICE_REGISTERED',
+    entity: 'device',
+    entityId: 'result.id',
+  })
   @Post(':id/devices')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un dispositivo del usuario' })
@@ -327,6 +458,11 @@ export class IamUsersController {
   }
 
   /** UC-01-07. */
+  @Audited({
+    action: 'USER_LOCKED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/lock')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -339,7 +475,94 @@ export class IamUsersController {
     return this.usersService.lock(id, dto, actor);
   }
 
+  /** Suspende la cuenta (reversible): bloquea el acceso y cierra sus sesiones. */
+  @Audited({
+    action: 'USER_SUSPENDED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/suspend')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Suspender la cuenta con motivo (idempotente, cierra sus sesiones)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({ description: 'Transición inválida desde ese estado' })
+  @ApiPreconditionFailedResponse({
+    description: 'Cuenta propia o última cuenta administradora',
+  })
+  suspend(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.suspend(id, dto.reason, actor);
+  }
+
+  /** Reactiva una cuenta suspendida. */
+  @Audited({
+    action: 'USER_REACTIVATED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/reactivate')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reactivar una cuenta suspendida con motivo (idempotente)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({
+    description: 'Una baja o una cuenta anonimizada no se reactiva',
+  })
+  reactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.reactivate(id, dto.reason, actor);
+  }
+
+  /** Da de baja la cuenta: no borra nada; revoca credenciales, roles globales y sesiones. */
+  @Audited({
+    action: 'USER_DEACTIVATED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/deactivate')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Dar de baja la cuenta con motivo (sin borrado físico; idempotente)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({ description: 'Transición inválida desde ese estado' })
+  @ApiPreconditionFailedResponse({
+    description: 'Cuenta propia o última cuenta administradora',
+  })
+  deactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.deactivate(id, dto.reason, actor);
+  }
+
   /** UC-01-10. */
+  @Audited({
+    action: 'USER_GLOBAL_ROLE_CHANGED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/global-roles')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -353,6 +576,11 @@ export class IamUsersController {
   }
 
   /** UC-01-12. */
+  @Audited({
+    action: 'USER_ANONYMIZED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/anonymize')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

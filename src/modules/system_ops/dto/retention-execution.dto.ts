@@ -31,6 +31,18 @@ export class RunRetentionDto {
   @IsInt()
   @Min(1)
   maxBatchSize?: number;
+
+  /**
+   * Cursor de la corrida anterior (`nextCursor`) para continuar el barrido.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Cursor devuelto por la corrida anterior (`nextCursor`); continúa tras esa fila',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  cursor?: string;
 }
 
 /** Respuesta del barrido de retención. */
@@ -78,4 +90,30 @@ export class RetentionExecutionResponseDto {
     description: 'true si se detuvo por legal hold activo',
   })
   blockedByLegalHold?: boolean;
+
+  /**
+   * Filas vencidas que se conservaron por estar bajo legal hold.
+   */
+  @ApiPropertyOptional({
+    description: 'Filas vencidas conservadas por legal hold activo',
+  })
+  totalHeld?: number;
+
+  /**
+   * Valor de has more mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'true si el lote se llenó y quedan filas vencidas sin examinar; repetir con `cursor`',
+  })
+  hasMore?: boolean;
+
+  /**
+   * Valor de next cursor mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Cursor para continuar el barrido cuando `hasMore` es true',
+    format: 'uuid',
+  })
+  nextCursor?: string;
 }

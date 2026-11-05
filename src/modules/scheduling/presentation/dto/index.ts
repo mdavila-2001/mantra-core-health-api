@@ -13,6 +13,9 @@ export {
   TemplateDetailDto,
   TemplateListDto,
   RetireTemplateResponseDto,
+  RetireTemplateQueryDto,
+  AffectedBookingDto,
+  TemplateLiveBookingsResponseDto,
   ReactivateTemplateResponseDto,
   AvailabilityExceptionDto,
   AvailabilityExceptionListDto,
@@ -48,8 +51,17 @@ export {
   RejectBookingDto,
   SetPaymentStateDto,
   PaymentStateDto,
+  SetPaymentStateResponseDto,
   PAYMENT_STATES,
   type PaymentState,
+  UploadPaymentReceiptDto,
+  RejectPaymentReceiptDto,
+  PaymentReceiptActorDto,
+  PaymentReceiptDto,
+  ConfirmPaymentReceiptResponseDto,
+  PAYMENT_RECEIPT_STATUSES,
+  MIN_RECEIPT_REJECTION_LENGTH,
+  MAX_RECEIPT_TEXT_LENGTH,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -121,8 +133,13 @@ export {
   ListResourcesResponseDto,
   ListSlotsQueryDto,
   SlotListItemDto,
+  SlotPriceDto,
   ListSlotsResponseDto,
+  BookableOrganizationDto,
+  BookableOrganizationsResponseDto,
 } from './scheduling-agenda.dto';
+export * from './bookable-resources-query.dto';
+export * from './bookable-resources.dto';
 export * from './tenant-agenda.dto';
 
 export {
@@ -132,3 +149,10 @@ export {
 } from './scheduling-walk-in.dto';
 
 export * from './scheduling-service-offerings.dto';
+
+export * from './scheduling-flexible.dto';
+export {
+  BOOKING_BILLING_REASONS,
+  BookingBillingLinkDto,
+  type BookingBillingReason,
+} from './booking-billing-link.dto';

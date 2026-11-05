@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   type AuthenticatedUser,
@@ -92,6 +93,11 @@ export class PriorAuthController {
   }
 
   /** UC-26-04. El servicio autoriza por membresía del prestador; mantiene el guard histórico para solicitudes genéricas. */
+  @Audited({
+    action: 'PRIOR_AUTHORIZATION_SUBMITTED',
+    entity: 'prior_authorization_request',
+    entityId: 'result.id',
+  })
   @Post('prior-authorization-requests')
   @Roles()
   @HttpCode(HttpStatus.CREATED)
@@ -107,6 +113,11 @@ export class PriorAuthController {
    * UC-26-05. Con `items`, la aseguradora decide APROBADO / NO APROBADO por
    * ítem (cláusula obligatoria al no aprobar) y la global se deriva.
    */
+  @Audited({
+    action: 'PRIOR_AUTHORIZATION_DETERMINED',
+    entity: 'prior_authorization_determination',
+    entityId: 'result.id',
+  })
   @Post('prior-authorization-requests/:id/determinations')
   @Roles()
   @HttpCode(HttpStatus.CREATED)

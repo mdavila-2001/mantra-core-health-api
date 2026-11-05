@@ -1,0 +1,1616 @@
+{
+ "codes": [
+  {
+   "uuid": "ab16e3f1-3fc8-4207-b668-80d030a256b3",
+   "code": "A10BF01",
+   "comments": "ATC|ALIMENTARY TRACT AND METABOLISM|DRUGS USED IN DIABETES|BLOOD GLUCOSE LOWERING DRUGS, EXCL. INSULINS|Alpha glucosidase inhibitors|acarbose",
+   "type": "PRIMARY",
+   "url": "http://www.whocc.no/atc_ddd_index/?code=A10BF01&showdescription=yes",
+   "code_system": "WHO-ATC",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "42f0e0fc-d1ff-4449-a372-a23644ef62b8",
+   "code": "N0000000166",
+   "comments": "Cellular or Molecular Interactions [MoA]|Enzyme Interactions [MoA]|Enzyme Inhibitors [MoA]|alpha Glucosidase Inhibitors [MoA]",
+   "type": "PRIMARY",
+   "url": "https://nciterms.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=VA_NDFRT&code=N0000000166",
+   "code_system": "NDF-RT",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "b8093a62-58a1-450b-9c98-cc35f333759d",
+   "code": "N0000175559",
+   "comments": "Established Pharmacologic Class [EPC]|alpha-Glucosidase Inhibitor [EPC]",
+   "type": "PRIMARY",
+   "url": "https://nciterms.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=VA_NDFRT&code=N0000175559",
+   "code_system": "NDF-RT",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "4a4c1b10-24ac-41cf-a5ae-fb076a35e8d7",
+   "code": "QA10BF01",
+   "comments": "VATC|DRUGS USED IN DIABETES|BLOOD GLUCOSE LOWERING DRUGS, EXCL. INSULINS|Alpha glucosidase inhibitors|acarbose",
+   "type": "PRIMARY",
+   "url": "http://www.whocc.no/atcvet/atcvet_index/?code=QA10BF01&showdescription=yes",
+   "code_system": "WHO-VATC",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "6f2e02d8-ce8f-4ef0-9309-e463179dcbd9",
+   "code": "56180-94-0",
+   "type": "PRIMARY",
+   "url": "https://commonchemistry.cas.org/detail?cas_rn=56180-94-0",
+   "code_system": "CAS",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8",
+    "c4204039-4f36-43c3-ab75-5567639fb954"
+   ]
+  },
+  {
+   "uuid": "a0acbe39-4612-4053-b7ba-7d4606a1d016",
+   "code": "CHEMBL1566",
+   "type": "PRIMARY",
+   "url": "https://www.ebi.ac.uk/chembl/compound/inspect/CHEMBL1566",
+   "code_system": "ChEMBL",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "f89a8454-684c-49ae-bf3f-f59877933c78",
+   "code": "A10BD17",
+   "comments": "ATC|ALIMENTARY TRACT AND METABOLISM|DRUGS USED IN DIABETES|BLOOD GLUCOSE LOWERING DRUGS, EXCL. INSULINS|Combinations of oral blood glucose lowering drugs|metformin and acarbose",
+   "type": "PRIMARY",
+   "url": "http://www.whocc.no/atc_ddd_index/?code=A10BD17&showdescription=yes",
+   "code_system": "WHO-ATC",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "e7a37ce2-dd78-42ad-95eb-a50560e39f2a",
+   "code": "9811704",
+   "type": "PRIMARY",
+   "url": "https://pubchem.ncbi.nlm.nih.gov/compound/9811704",
+   "code_system": "PUBCHEM",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "2c8b6cc6-c6aa-4b1d-b2e4-e8588468b0fa",
+   "code": "C983",
+   "type": "PRIMARY",
+   "url": "https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C983",
+   "code_system": "NCI_THESAURUS",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "880630f7-6bfc-406a-8f83-fb068820dc4d",
+   "code": "NBK548181",
+   "comments": "LiverTox|Endocrine|Diabetes|Alpha-glucosidase inhibitor",
+   "type": "PRIMARY",
+   "url": "https://www.ncbi.nlm.nih.gov/books/NBK548181/",
+   "code_system": "LIVERTOX",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "2a7df6ce-eb33-4134-9efc-248a96caffce",
+   "code": "D020909",
+   "type": "PRIMARY",
+   "url": "http://www.ncbi.nlm.nih.gov/mesh/68020909",
+   "code_system": "MESH",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "286ab0df-4798-4147-9373-ca0388121d0d",
+   "code": "ACARBOSE",
+   "type": "PRIMARY",
+   "url": "https://en.wikipedia.org/wiki/Acarbose",
+   "code_system": "WIKIPEDIA",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "122f658f-bc26-4f43-865e-8d0cae59e450",
+   "code": "4527",
+   "type": "PRIMARY",
+   "url": "https://extranet.who.int/soinn/mod/page/view.php?id=137&inn_n=4527",
+   "code_system": "INN",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "8723af7e-163e-46de-bc81-22c9683095ef",
+   "code": "260-030-7",
+   "type": "PRIMARY",
+   "url": "https://echa.europa.eu/substance-information/-/substanceinfo/100.054.555",
+   "code_system": "ECHA (EC/EINECS)",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "8f7fe475-633b-4067-be9e-35cb8d38cc50",
+   "code": "6791",
+   "type": "PRIMARY",
+   "url": "http://www.guidetopharmacology.org/GRAC/LigandDisplayForward?ligandId=6791",
+   "code_system": "IUPHAR",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "f44fc9d2-b2e3-459d-b019-132b0228c214",
+   "code": "16681",
+   "comments": "RxNorm",
+   "type": "PRIMARY",
+   "url": "https://rxnav.nlm.nih.gov/REST/rxcui/16681/allProperties.xml?prop=all",
+   "code_system": "RXCUI",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "0f761220-2ec9-4d58-91ab-08bda63cbbe9",
+   "code": "m1289",
+   "comments": "Merck Index",
+   "type": "PRIMARY",
+   "url": "https://merckindex.rsc.org/monographs/m1289?q=authorize",
+   "code_system": "MERCK INDEX",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "b330e400-ace3-4697-ad88-6bf0f04baa83",
+   "code": "DB00284",
+   "type": "PRIMARY",
+   "url": "http://www.drugbank.ca/drugs/DB00284",
+   "code_system": "DRUG BANK",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "9b091f24-164d-4c08-b3e6-8e98f48206c5",
+   "code": "SUB07368MIG",
+   "type": "PRIMARY",
+   "code_system": "EVMPD",
+   "references": [
+    "489d0a8d-3cab-4c27-98fc-73f4a61294a8"
+   ]
+  },
+  {
+   "uuid": "ebcdace2-9159-7d19-5492-4fb7999fee6b",
+   "code": "56180-94-0",
+   "type": "PRIMARY",
+   "url": "https://toxnet.nlm.nih.gov/cgi-bin/sis/search2/r?dbs+hsdb:@term+@rn+@rel+56180-94-0",
+   "code_system": "HSDB",
+   "references": [
+    "53ab954a-2ebe-9485-2e55-9b11ae7613c4"
+   ]
+  },
+  {
+   "uuid": "1bc36be3-22e8-b9d4-c1c6-5a76e002b6e5",
+   "code": "DTXSID8046034",
+   "type": "PRIMARY",
+   "url": "https://comptox.epa.gov/dashboard/chemical/details/DTXSID8046034",
+   "code_system": "EPA CompTox",
+   "references": [
+    "012f5dcc-8bcd-5280-d3f3-d1a488765c2a"
+   ]
+  },
+  {
+   "uuid": "99d2fae9-eb7b-1ca8-870b-8b258cc8b57e",
+   "code": "Acarbose",
+   "type": "PRIMARY",
+   "url": "https://www.ncbi.nlm.nih.gov/books/n/lactmed/LM1/",
+   "code_system": "LACTMED",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "125b7752-5849-1dc5-b102-f0b245f30206",
+   "code": "C2846",
+   "comments": "Pharmacologic Substance[C1909]|Enzyme Inhibitor[C471]|Glucosidase Inhibitor",
+   "type": "CONCEPT",
+   "url": "https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C2846",
+   "code_system": "NCI_THESAURUS",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "5365042f-c10c-45b2-f6a2-fc2b914a386e",
+   "code": "C29711",
+   "comments": "Pharmacologic Substance[C1909]|Agent Affecting Digestive System or Metabolism[C78276]|Anti-diabetic Agent",
+   "type": "CONCEPT",
+   "url": "https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C29711",
+   "code_system": "NCI_THESAURUS",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "3c1fd54d-3aeb-47ca-8daf-975fd2b34f2c",
+   "code": "T58MSI464G",
+   "type": "PRIMARY",
+   "code_system": "FDA UNII"
+  },
+  {
+   "uuid": "26a49c69-90b9-ec65-3535-317f6cbbad3b",
+   "code": "39",
+   "type": "PRIMARY",
+   "url": "https://drugcentral.org/drugcard/39",
+   "code_system": "DRUG CENTRAL",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "f1d2c6c8-54dc-d2a1-658b-623fc9bc623c",
+   "code": "2376",
+   "type": "PRIMARY",
+   "url": "https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:2376",
+   "code_system": "CHEBI",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "113bef9e-3c44-d18b-808e-60435007e86f",
+   "code": "84363",
+   "type": "PRIMARY",
+   "url": "https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:84363",
+   "code_system": "CHEBI",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "7a95c1e8-6a5d-b381-a953-4bd99f11d245",
+   "code": "T-9",
+   "type": "PRIMARY",
+   "url": "https://searchusan.ama-assn.org/finder/usan/search/T-9/relevant/1/",
+   "code_system": "USAN",
+   "references": [
+    "a1f82898-a122-89c7-5740-73b2db314374"
+   ]
+  },
+  {
+   "uuid": "5317a7c0-fdbe-a351-fee7-9ab60e22c452",
+   "code": "1000521",
+   "type": "PRIMARY",
+   "url": "https://store.usp.org/product/1000521",
+   "code_system": "RS_ITEM_NUM",
+   "references": [
+    "41dcf417-958a-a996-d2c0-a1ceb2494c71"
+   ]
+  },
+  {
+   "uuid": "f5dc5dd1-2301-cbbc-a720-3d22e000aa8d",
+   "code": "T58MSI464G",
+   "type": "PRIMARY",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/search.cfm?adv=1&query=T58MSI464G",
+   "code_system": "DAILYMED",
+   "references": [
+    "166aa4b7-a342-949f-92e5-5df6e39bb972"
+   ]
+  },
+  {
+   "uuid": "f5ef0681-a6dc-e282-2b50-03daf60fbcb1",
+   "code": "758915",
+   "type": "PRIMARY",
+   "url": "https://dtp.cancer.gov/dtpstandard/servlet/dwindex?searchtype=NSC&outputformat=html&searchlist=758915",
+   "code_system": "NSC",
+   "references": [
+    "b900d2bb-e7c1-2246-4fce-35b7d9619eee"
+   ]
+  },
+  {
+   "uuid": "cba83cbc-62c3-dff9-107d-69b19b5468ad",
+   "code": "100000092276",
+   "type": "PRIMARY",
+   "code_system": "SMS_ID",
+   "references": [
+    "c2679d52-adb5-5d5f-7132-9550245b500f"
+   ]
+  }
+ ],
+ "substance_class": "chemical",
+ "references": [
+  {
+   "uuid": "7d37c76d-3681-4a7f-9d4f-8b3a85e589cf",
+   "citation": "USP Dictionary 2008",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN",
+    "PUBLIC_DOMAIN_RELEASE",
+    "AUTO_SELECTED"
+   ]
+  },
+  {
+   "uuid": "9a58b920-7d0a-4e4d-91fc-cbfd7e1473bf",
+   "citation": "USP DICTIONARY 2008",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "9971d812-6f2f-42dc-b31f-b57d0e04fffd",
+   "citation": "USP DICTIONARY 2010",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "6695cf92-251d-4e09-95c8-e6f63a3c6464",
+   "citation": "FDA_SRS 2010",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "dc5cc136-16ef-439d-9db4-ed0bc2923ae3",
+   "citation": "INN Proposed List 40",
+   "url": "https://www.who.int/medicines/publications/druginformation/innlists/PL40.pdf",
+   "doc_type": "INN_LIST",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "d1c7412a-7efc-4e41-9e8a-1ab947eb4a03",
+   "citation": "USP DICTIONARY 2011",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "54586061-f0d0-4302-82aa-9159697eeece",
+   "citation": "EP 7.2",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "5c01cc22-3bc9-474e-ab85-9ce8a6b20523",
+   "citation": "USP 33",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "38726fbc-d9c8-452f-ab41-f284b736406f",
+   "citation": "KEGG 2011",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "71135f37-1a5c-4eea-8564-3454aeb089a7",
+   "citation": "ORANGE BOOK 2011",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "86fab6af-3f2b-476f-8059-23a3c79836f2",
+   "citation": "MARTINDALE 2011",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "5dc24459-d0e9-4863-91e3-884c26b8bcc6",
+   "citation": "MERCK INDEX",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "68ad096b-5018-4fd9-8dab-246e855b3177",
+   "citation": "USP/NF",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "2ac85f2b-0318-4b79-8c4a-63281e2ed78d",
+   "citation": "WHO-DD",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "a96b209f-dcd7-42b7-8eec-32364ecb7626",
+   "citation": "NDF-RT",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "489d0a8d-3cab-4c27-98fc-73f4a61294a8",
+   "citation": "SRS CODE IMPORT",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "document_date": 1493390692000,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "ea3b5795-91f6-47b0-9ef9-b91517a4c5af",
+   "citation": "JOURNAL OF CHROMATOGRAPHY B: BIOMEDICAL SCIENCES AND APPLICATIONS, VOLUME 700, ISSUES 1?2, 24 OCTOBER 1997, PAGES 249?253",
+   "url": "http://www.sciencedirect.com/science/article/pii/S0378434797003332",
+   "doc_type": "WEBSITE",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "dcdf1ee9-a086-4086-b60f-956c25c99ff6",
+   "citation": "JOURNAL OF SEPARATION SCIENCE, VOLUME 25, ISSUE 5-6, PAGES 280?284, APRIL 2002",
+   "url": "http://onlinelibrary.wiley.com/doi/10.1002/1615-9314%2820020401%2925:5/6%3C280::AID-JSSC280%3E3.0.CO;2-D/epdf",
+   "doc_type": "JOURNAL ARTICLE",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "5a0e2b08-e2e7-4afc-865e-ed4a5881f388",
+   "citation": "SRS import [T58MSI464G]",
+   "url": "http://fdasis.nlm.nih.gov/srs/srsdirect.jsp?regno=T58MSI464G",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "document_date": 1493390692000,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "16818988-23a1-4d4f-a5aa-8d1f6c564fd1",
+   "citation": "USP Dictionary 2009",
+   "doc_type": "SRS",
+   "public_domain": true,
+   "tags": [
+    "NOMEN"
+   ]
+  },
+  {
+   "uuid": "f3dacddc-24e8-41f8-bb96-0f27b44cb5af",
+   "citation": "ACARBOSE [INN]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "06b2ab34-cc41-4031-9c20-2e33c9ab6ded",
+   "citation": "ACARBOSE [USAN]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "40958ce9-609a-41f1-8f4e-55b5bec89584",
+   "citation": "ACARBOSE [EP]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "6c437080-fbf5-469d-8197-4ff50fd93845",
+   "citation": "ACARBOSE [USP]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "c86091c1-3f29-456f-b05c-ee22f8125d4c",
+   "citation": "ACARBOSE [JAN]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "d0bb59f2-91a3-4b4c-a7da-a5a2a16d9388",
+   "citation": "ACARBOSE [ORANGE BOOK]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "80d5bd15-ab0b-4ad9-9ee3-3b6d32ffd827",
+   "citation": "ACARBOSE [MART.]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "be3fbe20-9a83-47b0-912d-1b014391c6c8",
+   "citation": "ACARBOSE [MI]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "831509c1-9508-43c6-85ee-9b5c047dc863",
+   "citation": "ACARBOSE [USP-RS]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "cca67aad-c41f-4843-8a2a-1443c9adbf58",
+   "citation": "ACARBOSE [WHO-DD]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "2cd04ff0-a6fa-431d-8043-19c1432e3d52",
+   "citation": "ACARBOSE [VANDF]",
+   "doc_type": "SRS_LOCATOR",
+   "public_domain": true
+  },
+  {
+   "uuid": "53ab954a-2ebe-9485-2e55-9b11ae7613c4",
+   "citation": "WEBSITE",
+   "url": "https://toxnet.nlm.nih.gov/cgi-bin/sis/search2/r?dbs+hsdb:@term+@rn+@rel+56180-94-0",
+   "doc_type": "WEBSITE",
+   "public_domain": true,
+   "tags": [
+    "NOMEN",
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "012f5dcc-8bcd-5280-d3f3-d1a488765c2a",
+   "citation": "WEBSITE",
+   "url": "https://comptox.epa.gov/dashboard/dsstoxdb/results?utf8=%E2%9C%93&search=56180-94-0",
+   "doc_type": "WEBSITE",
+   "public_domain": true,
+   "tags": [
+    "NOMEN",
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "6b4d7ec5-fc0a-623e-877e-047876c81dab",
+   "citation": "WEBSITE",
+   "url": "https://toxnet.nlm.nih.gov/cgi-bin/sis/search/r?dbs+lactmed:@term+@rel+@rn+56180-94-0",
+   "doc_type": "WEBSITE",
+   "public_domain": true,
+   "tags": [
+    "NOMEN",
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "4593cf00-cb91-c1c8-c713-f288308bac92",
+   "citation": "https://www.clinicalkey.com/pharmacology/monograph/2?sec=monphar",
+   "doc_type": "LEXI-COMP",
+   "public_domain": true
+  },
+  {
+   "uuid": "41dcf417-958a-a996-d2c0-a1ceb2494c71",
+   "doc_type": "SYSTEM",
+   "public_domain": true
+  },
+  {
+   "uuid": "042b2f88-8ab6-4cfd-8c07-ee91038725af",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "03dcaead-0e65-41f3-8ec7-4aa2f04a63c7",
+   "citation": "USP41-NF36 Acarbose monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "bda7fe2f-1dcc-4c93-950f-b7ca40c5aa7b",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "92834893-2e9b-4b3b-99f3-316cba18be60",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "c4204039-4f36-43c3-ab75-5567639fb954",
+   "citation": "STN",
+   "doc_type": "STN (SCIFINDER)",
+   "public_domain": true
+  },
+  {
+   "uuid": "e8e32d95-9f58-4bed-a6e9-fc1cd6721e5b",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "71c18ed8-b29b-4153-a1ca-c416f6f23a6b",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "83866d76-d2e3-4e8d-93c3-9ba3027734df",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "a1f82898-a122-89c7-5740-73b2db314374",
+   "citation": "USAD COUN",
+   "doc_type": "USANCOUN",
+   "public_domain": true
+  },
+  {
+   "uuid": "f4f6b087-47dd-4432-b7e8-a04e69b3b782",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "ff3ffe07-ebdd-490c-a171-9dbe543ab5e6",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "df30c888-6bf9-4bec-bc0e-51d94ac1779f",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose Monograph",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "03666299-054b-44fe-9c63-45d16c0901ad",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "a239885b-158d-459c-aa44-45a93822b4df",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose Monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "f10c21b3-0458-475f-8359-dcab3a2674bd",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "ffaa07cb-619b-4479-96de-aeefff4d2754",
+   "citation": "USP41-NF36 Acarbose monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "5b854126-d3ad-4b81-bba1-90140c17226a",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose Monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "aa0087e9-734e-423f-ac88-ff88a665d179",
+   "citation": "USP42-NF37 - 32, Acarbose Monograph",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "c0c621a0-4883-42b1-bf2c-ff628f24155e",
+   "citation": "USP42-NF37 – 32, Acarbose Monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "c8ed0ca8-b024-4d75-b636-05ab770f429c",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "e7d2d968-5600-4efd-8469-acbb7228946f",
+   "citation": "USP41-NF36 Acarbose monograph",
+   "url": "https://online.uspnf.com/uspnf/document/GUID-3ED89AF2-51AF-4471-BACE-94AD0510DE2A_3_en-US",
+   "doc_type": "USPNF",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "bd2b4baa-1cd0-4971-be5d-7c23c54ec7ae",
+   "citation": "European Pharmacopoeia Online 9.8, Acarbose monograph",
+   "url": "http://online6.edqm.eu/ep908/",
+   "doc_type": "EP",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "796e6cc2-9c01-8d3b-ca24-60f75214935e",
+   "citation": "USP 10/2020",
+   "doc_type": "USPNF",
+   "public_domain": true
+  },
+  {
+   "uuid": "bbb0e377-2747-709f-b41e-a722f990e5ab",
+   "citation": "EP 10.5",
+   "doc_type": "EP",
+   "public_domain": true
+  },
+  {
+   "uuid": "b900d2bb-e7c1-2246-4fce-35b7d9619eee",
+   "citation": "NCI",
+   "doc_type": "NCI DRUG DICTIONARY",
+   "public_domain": true
+  },
+  {
+   "uuid": "166aa4b7-a342-949f-92e5-5df6e39bb972",
+   "citation": "DailyMed",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=29939129-7d09-4c22-bf3e-491a8a97f4c4",
+   "doc_type": "DAILYMED",
+   "public_domain": true
+  },
+  {
+   "uuid": "aadcafbd-ffff-4a07-b10f-030ef92a4ada",
+   "citation": "Adisakwattana, Sirichai, et al. \"Inhibitory activity of cinnamon bark species and their combination effect with acarbose against intestinal α-glucosidase and pancreatic α-amylase.\" Plant Foods for Human Nutrition 66.2 (2011): 143-148.",
+   "url": "https://link.springer.com/article/10.1007/s11130-011-0226-4",
+   "doc_type": "JA",
+   "public_domain": true
+  },
+  {
+   "uuid": "6adeb3f5-2a24-423b-9398-bbbfac445dfe",
+   "citation": "Dalsgaard, Niels B., et al. \"The role of GLP-1 in the postprandial effects of acarbose in type 2 diabetes.\" European Journal of Endocrinology 184.3 (2021): 383-394.",
+   "url": "https://eje.bioscientifica.com/view/journals/eje/184/3/EJE-20-1121.xml",
+   "doc_type": "JA",
+   "public_domain": true
+  },
+  {
+   "uuid": "b99a1064-9373-c2d2-5895-b8261ea92e28",
+   "citation": "WHO-DD",
+   "doc_type": "WHO DRUG DICTIONARY",
+   "public_domain": true
+  },
+  {
+   "uuid": "c2679d52-adb5-5d5f-7132-9550245b500f",
+   "citation": "EMA 2023",
+   "doc_type": "EMA LIST",
+   "public_domain": true
+  },
+  {
+   "uuid": "0cc76a0c-b0e1-4993-8a62-516af8d178d3",
+   "citation": "Updated Information | Recommended Acceptable Intake Limits for Nitrosamine Drug Substance-Related Impurities (NDSRIs); Table 1",
+   "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/updated-information-recommended-acceptable-intake-limits-nitrosamine-drug-substance-related",
+   "doc_type": "WEB PAGE",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  },
+  {
+   "uuid": "a2514979-badb-469b-b18b-1443bc2d57ff",
+   "citation": "Updated Information | Recommended Acceptable Intake Limits for Nitrosamine Drug Substance-Related Impurities (NDSRIs); Table 1",
+   "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/updated-information-recommended-acceptable-intake-limits-nitrosamine-drug-substance-related",
+   "doc_type": "WEB PAGE",
+   "public_domain": true,
+   "tags": [
+    "PUBLIC_DOMAIN_RELEASE"
+   ]
+  }
+ ],
+ "definition_type": "PRIMARY",
+ "moieties": [
+  {
+   "uuid": "d694799f-2857-4439-9d68-804f30d640d5",
+   "id": "d694799f-2857-4439-9d68-804f30d640d5",
+   "molfile": "\n  Marvin  01132111072D          \n\n 44 46  0  0  1  0            999 V2000\n   11.3951   -3.7544    0.0000 C   0  0  2  0  0  0  0  0  0  1  0  0\n   12.1895   -3.9949    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.2180   -2.9497    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   10.3996   -2.8494    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   10.7891   -4.3142    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n   10.0060   -4.0691    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    9.1894   -3.9826    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n    8.8589   -3.2206    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    8.0338   -3.1267    0.0000 C   0  0  2  0  0  0  0  0  0  1  0  0\n    7.7108   -2.3704    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    6.8873   -2.4249    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    7.5430   -3.7928    0.0000 C   0  0  1  0  0  0  0  0  0  2  0  0\n    6.4068   -3.8706    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    5.6151   -3.6291    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n    5.4317   -2.8174    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    4.6419   -2.5769    0.0000 C   0  0  2  0  0  0  0  0  0  1  0  0\n    4.4649   -1.7722    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    4.0359   -3.1367    0.0000 C   0  0  1  0  0  0  0  0  0  2  0  0\n    3.2545   -2.8952    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n    2.4679   -2.6578    0.0000 C   0  0  1  0  0  0  0  0  0  2  0  0\n    2.2845   -1.8463    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.4948   -1.6057    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.3129   -0.8009    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.4948   -0.6960    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    0.8888   -2.1654    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n    0.1011   -1.9203    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    1.0725   -2.9657    0.0000 C   0  0  2  0  0  0  0  0  0  2  0  0\n    0.4665   -3.5303    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    1.8620   -3.2177    0.0000 C   0  0  1  0  0  0  0  0  0  2  0  0\n    2.0425   -4.0192    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    4.2196   -3.9416    0.0000 C   0  0  2  0  0  0  0  0  0  2  0  0\n    3.6137   -4.5015    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    5.0091   -4.1889    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n    5.1943   -4.9905    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    7.8770   -4.5481    0.0000 C   0  0  2  0  0  0  0  0  0  1  0  0\n    7.3863   -5.2097    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    8.6985   -4.6440    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n    9.0242   -5.3966    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   10.9774   -5.1144    0.0000 C   0  0  2  0  0  0  0  0  0  1  0  0\n   10.3715   -5.6789    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.7669   -5.3664    0.0000 C   0  0  1  0  0  0  0  0  0  1  0  0\n   11.9474   -6.1679    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   12.3729   -4.8066    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   13.1595   -5.0439    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  1  0  0  0\n  1  3  1  0  0  0  0\n  5  1  1  0  0  0  0\n  4  3  1  0  0  0  0\n  5  6  1  6  0  0  0\n 39  5  1  0  0  0  0\n  7  6  1  6  0  0  0\n  7  8  1  0  0  0  0\n 37  7  1  0  0  0  0\n  9  8  1  0  0  0  0\n  9 10  1  1  0  0  0\n 12  9  1  0  0  0  0\n 11 10  1  0  0  0  0\n 12 13  1  6  0  0  0\n 12 35  1  0  0  0  0\n 14 13  1  6  0  0  0\n 14 15  1  0  0  0  0\n 33 14  1  0  0  0  0\n 16 15  1  0  0  0  0\n 16 17  1  1  0  0  0\n 18 16  1  0  0  0  0\n 18 19  1  6  0  0  0\n 18 31  1  0  0  0  0\n 20 19  1  6  0  0  0\n 20 21  1  0  0  0  0\n 20 29  1  0  0  0  0\n 22 21  2  0  0  0  0\n 22 23  1  0  0  0  0\n 25 22  1  0  0  0  0\n 24 23  1  0  0  0  0\n 25 26  1  6  0  0  0\n 27 25  1  0  0  0  0\n 27 28  1  1  0  0  0\n 29 27  1  0  0  0  0\n 29 30  1  6  0  0  0\n 31 32  1  1  0  0  0\n 31 33  1  0  0  0  0\n 33 34  1  6  0  0  0\n 35 36  1  1  0  0  0\n 35 37  1  0  0  0  0\n 37 38  1  6  0  0  0\n 39 40  1  1  0  0  0\n 41 39  1  0  0  0  0\n 41 42  1  6  0  0  0\n 41 43  1  0  0  0  0\n 43 44  2  0  0  0  0\nM  END",
+   "smiles": "C[C@@H]1[C@H]([C@@H]([C@H]([C@H](O1)O[C@@H]2[C@@H](CO)O[C@@H]([C@@H]([C@H]2O)O)O[C@H]([C@@H](CO)O)[C@@H]([C@H](C=O)O)O)O)O)N[C@H]3C=C(CO)[C@H]([C@@H]([C@H]3O)O)O",
+   "formula": "C25H43NO18",
+   "atropisomerism": "No",
+   "charge": 0,
+   "count": 1,
+   "stereochemistry": "ABSOLUTE",
+   "count_amount": {
+    "type": "MOL RATIO",
+    "average": 1,
+    "units": "MOL RATIO",
+    "uuid": "2dc02266-177a-4963-93d9-3440042d4671"
+   },
+   "defined_stereo": 18,
+   "ez_centers": 0,
+   "molecular_weight": "645.6058",
+   "optical_activity": "UNSPECIFIED",
+   "stereo_centers": 18
+  }
+ ],
+ "definition_level": "COMPLETE",
+ "uuid": "d8b9335f-cc1b-4fe1-901a-c8f56d827450",
+ "version": "65",
+ "structure": {
+  "id": "44115151-fd9e-4628-9961-b75351f2e0c0",
+  "molfile": "\n  Marvin  01132103352D          \n\n 47 49  0  0  1  0            999 V2000\n    3.2545   -2.8952    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n    2.4679   -2.6578    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    2.2845   -1.8463    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.4948   -1.6057    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.8888   -2.1654    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    1.0725   -2.9657    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    1.8620   -3.2177    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    2.0425   -4.0192    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    0.4665   -3.5303    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    0.1011   -1.9203    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    1.3129   -0.8009    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.4948   -0.6960    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    2.6750   -3.4473    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n    4.0359   -3.1367    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    4.2196   -3.9416    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    5.0091   -4.1889    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    5.6151   -3.6291    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    5.4317   -2.8174    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    4.6419   -2.5769    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    4.4649   -1.7722    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    6.4068   -3.8706    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    7.5430   -3.7928    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    7.8770   -4.5481    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n    8.6985   -4.6440    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    9.1894   -3.9826    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    8.8589   -3.2206    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    8.0338   -3.1267    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n    7.7108   -2.3704    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    6.8873   -2.4249    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   10.0060   -4.0691    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   10.7891   -4.3142    0.0000 C   0  0  1  0  0  0  0  0  0  0  0  0\n   10.9774   -5.1144    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n   10.3715   -5.6789    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.7669   -5.3664    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n   12.3729   -4.8066    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   13.1595   -5.0439    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.9474   -6.1679    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.3951   -3.7544    0.0000 C   0  0  2  0  0  0  0  0  0  0  0  0\n   12.1895   -3.9949    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n   11.2180   -2.9497    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   10.3996   -2.8494    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    9.6883   -4.8154    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n    9.0242   -5.3966    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    7.3863   -5.2097    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    5.8268   -4.4185    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n    5.1943   -4.9905    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n    3.6137   -4.5015    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n  2  1  1  0  0  0  0\n  3  2  1  0  0  0  0\n  4  3  2  0  0  0  0\n  5  4  1  0  0  0  0\n  6  5  1  0  0  0  0\n  7  6  1  0  0  0  0\n  2  7  1  0  0  0  0\n  7  8  1  6  0  0  0\n  6  9  1  1  0  0  0\n  5 10  1  6  0  0  0\n  4 11  1  0  0  0  0\n 12 11  1  0  0  0  0\n  2 13  1  1  0  0  0\n 14  1  1  6  0  0  0\n 15 14  1  0  0  0  0\n 16 15  1  0  0  0  0\n 17 16  1  0  0  0  0\n 18 17  1  0  0  0  0\n 19 18  1  0  0  0  0\n 14 19  1  0  0  0  0\n 19 20  1  1  0  0  0\n 17 21  1  0  0  0  0\n 22 21  1  6  0  0  0\n 23 22  1  0  0  0  0\n 24 23  1  0  0  0  0\n 25 24  1  0  0  0  0\n 26 25  1  0  0  0  0\n 27 26  1  0  0  0  0\n 22 27  1  0  0  0  0\n 27 28  1  1  0  0  0\n 29 28  1  0  0  0  0\n 25 30  1  0  0  0  0\n 31 30  1  6  0  0  0\n 32 31  1  0  0  0  0\n 32 33  1  1  0  0  0\n 34 32  1  0  0  0  0\n 35 34  1  0  0  0  0\n 35 36  2  0  0  0  0\n 34 37  1  6  0  0  0\n 31 38  1  0  0  0  0\n 38 39  1  0  0  0  0\n 38 40  1  1  0  0  0\n 41 40  1  0  0  0  0\n 25 42  1  1  0  0  0\n 24 43  1  6  0  0  0\n 23 44  1  1  0  0  0\n 17 45  1  1  0  0  0\n 16 46  1  6  0  0  0\n 15 47  1  1  0  0  0\nM  END",
+  "smiles": "C[C@@H]1[C@H]([C@@H]([C@H]([C@]([H])(O1)O[C@@H]2[C@@H](CO)O[C@@]([H])([C@@H]([C@H]2O)O)O[C@H]([C@@H](CO)O)[C@@H]([C@H](C=O)O)O)O)O)N[C@@]3([H])C=C(CO)[C@H]([C@@H]([C@H]3O)O)O",
+  "formula": "C25H43NO18",
+  "atropisomerism": "No",
+  "charge": 0,
+  "count": 1,
+  "stereochemistry": "ABSOLUTE",
+  "defined_stereo": 18,
+  "ez_centers": 0,
+  "molecular_weight": "645.6058",
+  "optical_activity": "UNSPECIFIED",
+  "references": [
+   "16818988-23a1-4d4f-a5aa-8d1f6c564fd1",
+   "5a0e2b08-e2e7-4afc-865e-ed4a5881f388",
+   "dc5cc136-16ef-439d-9db4-ed0bc2923ae3"
+  ],
+  "stereo_centers": 18
+ },
+ "unii": "T58MSI464G",
+ "relationships": [
+  {
+   "uuid": "2671ae3d-578a-4df8-96a0-c87ec98559b4",
+   "amount": {
+    "uuid": "067c87e4-116c-4589-bf14-1b5ed0e6ce5a"
+   },
+   "type": "ACTIVE MOIETY",
+   "references": [
+    "4593cf00-cb91-c1c8-c713-f288308bac92"
+   ],
+   "related_substance": {
+    "uuid": "94ae6cef-fa96-4bd9-aced-6b39caeb86ee",
+    "refuuid": "d8b9335f-cc1b-4fe1-901a-c8f56d827450",
+    "name": "ACARBOSE",
+    "unii": "T58MSI464G",
+    "linking_id": "T58MSI464G",
+    "ref_pname": "ACARBOSE",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "ba21dc6e-f245-4840-9e97-e27860f45590",
+   "amount": {
+    "uuid": "b8128d7e-2146-4aa4-a5d0-85fe00fe6189"
+   },
+   "comments": "Acarbose is exclusively metabolized within the gastrointestinal tract, principally by intestinal bacteria.",
+   "qualification": "URINE",
+   "type": "METABOLITE ACTIVE->PARENT",
+   "interaction_type": "MAJOR",
+   "references": [
+    "dcdf1ee9-a086-4086-b60f-956c25c99ff6"
+   ],
+   "related_substance": {
+    "uuid": "ab4ec943-782b-402e-a006-ccbe4a4201a4",
+    "refuuid": "a8fbe50f-fba8-46be-9669-dd2f0b331d19",
+    "name": "ACARVIOSINE-GLUCOSE",
+    "unii": "050YDH9X9C",
+    "linking_id": "050YDH9X9C",
+    "ref_pname": "ACARVIOSINE-GLUCOSE",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "6a670a60-94aa-45d9-8d38-d842d39c5629",
+   "amount": {
+    "uuid": "826790aa-24ad-43b7-a05f-b00259d90fc8",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.5
+   },
+   "qualification": "Other",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "c0c621a0-4883-42b1-bf2c-ff628f24155e",
+    "c8ed0ca8-b024-4d75-b636-05ab770f429c"
+   ],
+   "related_substance": {
+    "uuid": "897164b0-9862-4e87-b1af-9d16c4071e09",
+    "refuuid": "14164d42-c1b9-453e-844f-ff6823f5cee9",
+    "name": "(1R,4R,5S,6R)-4,5,6-TRIHYDROXY-2-(HYDROXYMETHYL)CYCLOHEX-2-ENYL 4-O-(4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL)-.ALPHA.-D-GLUCOPYRANOSIDE",
+    "unii": "N5Z9NCF3ZG",
+    "linking_id": "N5Z9NCF3ZG",
+    "ref_pname": "(1R,4R,5S,6R)-4,5,6-TRIHYDROXY-2-(HYDROXYMETHYL)CYCLOHEX-2-ENYL 4-O-(4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL)-.ALPHA.-D-GLUCOPYRANOSIDE"
+   }
+  },
+  {
+   "uuid": "da9bc098-b91d-4569-9a85-c23713fe4c7c",
+   "amount": {
+    "uuid": "b0796360-36a0-45ce-9a7a-861a2fbf1684",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.2
+   },
+   "qualification": "EP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "bda7fe2f-1dcc-4c93-950f-b7ca40c5aa7b",
+    "92834893-2e9b-4b3b-99f3-316cba18be60"
+   ],
+   "related_substance": {
+    "uuid": "4b1bdad0-6432-463c-9ced-af9b7ec8f659",
+    "refuuid": "87a46950-c9e4-4012-b262-da467ad41830",
+    "name": "PSEUDOACARBOSE",
+    "unii": "SQZ0LXX062",
+    "linking_id": "SQZ0LXX062",
+    "ref_pname": "PSEUDOACARBOSE"
+   }
+  },
+  {
+   "uuid": "77e782a1-eaa0-4538-b24a-e9b394790c47",
+   "amount": {
+    "uuid": "b0b3276b-03b1-482e-a394-bc0ddc72e535",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 1.5
+   },
+   "qualification": "EP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "f10c21b3-0458-475f-8359-dcab3a2674bd",
+    "ffaa07cb-619b-4479-96de-aeefff4d2754"
+   ],
+   "related_substance": {
+    "uuid": "951b6277-9eec-4955-9e67-e10b8e8d680e",
+    "refuuid": "7ee3f5bb-4e73-4a2e-a4fb-3d494993d516",
+    "name": ".ALPHA.-D-GLUCOPYRANOSYL O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-.ALPHA.-D-GLUCOPYRANOSIDE",
+    "unii": "76SAM6XG5P",
+    "linking_id": "76SAM6XG5P",
+    "ref_pname": ".ALPHA.-D-GLUCOPYRANOSYL O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-.ALPHA.-D-GLUCOPYRANOSIDE"
+   }
+  },
+  {
+   "uuid": "5512a64d-04da-48f6-921c-a00c108633c8",
+   "amount": {
+    "uuid": "9c9237ae-0ae1-40ae-b563-051ea9d4a983",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.3
+   },
+   "qualification": "Ph.Eur.; USP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "5b854126-d3ad-4b81-bba1-90140c17226a",
+    "aa0087e9-734e-423f-ac88-ff88a665d179"
+   ],
+   "related_substance": {
+    "uuid": "a20b7821-d661-47e1-9f62-848a3a064f5e",
+    "refuuid": "e337cf81-f881-4297-bbd8-70609e2ba0a0",
+    "name": "ACARBOSE IMPURITY F",
+    "unii": "K48LU8EVD5",
+    "linking_id": "K48LU8EVD5",
+    "ref_pname": "ACARBOSE IMPURITY F"
+   }
+  },
+  {
+   "uuid": "63cd17cc-d475-468c-9001-1c7c818804f1",
+   "amount": {
+    "uuid": "6dad94c4-0570-40c4-8cc8-2936abb433bb",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.3
+   },
+   "qualification": "Ph.Eur.; USP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "ff3ffe07-ebdd-490c-a171-9dbe543ab5e6",
+    "df30c888-6bf9-4bec-bc0e-51d94ac1779f"
+   ],
+   "related_substance": {
+    "uuid": "14714e36-0af5-4849-b5af-a110d0cabfb5",
+    "refuuid": "d5c30e78-9f01-4360-a243-0b466f515725",
+    "name": "D-GLUCOPYRANOSYL O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-D-GLUCOPYRANOSYL-(1-&gt;4)-O-D-GLUCOPYRANOSYL-(1-&gt;4)-O-D-GLUCOPYRANOSIDE (D-GLUCOPYRANOSYL-ACARBOSIDE)",
+    "unii": "7OM0KU6XRP",
+    "linking_id": "7OM0KU6XRP",
+    "ref_pname": "D-GLUCOPYRANOSYL O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-D-GLUCOPYRANOSYL-(1->4)-O-D-GLUCOPYRANOSYL-(1->4)-O-D-GLUCOPYRANOSIDE (D-GLUCOPYRANOSYL-ACARBOSIDE)"
+   }
+  },
+  {
+   "uuid": "b31c3e46-c42e-4f2b-9277-3e92e1363417",
+   "amount": {
+    "uuid": "7fe4a937-5fa1-49d2-9fe6-4516a24cf1fa",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 1
+   },
+   "qualification": "Ph.Eur.; USP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "71c18ed8-b29b-4153-a1ca-c416f6f23a6b",
+    "f4f6b087-47dd-4432-b7e8-a04e69b3b782"
+   ],
+   "related_substance": {
+    "uuid": "2d497b40-6f22-4205-bf5c-3c8e8b00ddb9",
+    "refuuid": "a8fbe50f-fba8-46be-9669-dd2f0b331d19",
+    "name": "ACARVIOSINE-GLUCOSE",
+    "unii": "050YDH9X9C",
+    "linking_id": "050YDH9X9C",
+    "ref_pname": "ACARVIOSINE-GLUCOSE"
+   }
+  },
+  {
+   "uuid": "04eb13c3-9d23-4633-84ff-cec43afa17de",
+   "amount": {
+    "uuid": "758d7603-bcad-4a97-a004-fe92973cb981",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.2
+   },
+   "qualification": "Ph.Eur.; USP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "03666299-054b-44fe-9c63-45d16c0901ad",
+    "a239885b-158d-459c-aa44-45a93822b4df"
+   ],
+   "related_substance": {
+    "uuid": "b3764b08-45f2-4831-b1cd-8b035f12b775",
+    "refuuid": "fec63a55-71f5-425a-8a5b-846aa688edda",
+    "name": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-D-FRUCTOSE",
+    "unii": "R59T36P3BA",
+    "linking_id": "R59T36P3BA",
+    "ref_pname": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-FRUCTOSE"
+   }
+  },
+  {
+   "uuid": "2d245e86-a4d6-431a-907f-7c1a8868bafa",
+   "amount": {
+    "uuid": "839112e9-0560-4a2c-ad26-cf4b9dca0796",
+    "type": "MOLE PERCENT",
+    "units": "PERCENT PEAK AREA",
+    "high_limit": 0.6
+   },
+   "qualification": "Ph.Eur.; USP",
+   "type": "IMPURITY->PARENT",
+   "interaction_type": "CHROMATOGRAPHIC PURITY (HPLC/UV)",
+   "references": [
+    "e7d2d968-5600-4efd-8469-acbb7228946f",
+    "bd2b4baa-1cd0-4971-be5d-7c23c54ec7ae"
+   ],
+   "related_substance": {
+    "uuid": "3c5b9932-3002-4804-a399-4b725fa74611",
+    "refuuid": "e6b0570a-30c6-47f9-9c1b-0cb822d4b150",
+    "name": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1-&gt;4)-D-ARABINO-HEX-2-ULOPYRANOSE",
+    "unii": "3NR79GK5MO",
+    "linking_id": "3NR79GK5MO",
+    "ref_pname": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)CYCLOHEX-2-ENYL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-ARABINO-HEX-2-ULOPYRANOSE"
+   }
+  },
+  {
+   "uuid": "1b71cc2f-7cc1-4a18-b621-9a57e8380906",
+   "amount": {
+    "uuid": "b2ecd525-771b-4b60-953a-ab5547859e93",
+    "average": 98,
+    "high": 101,
+    "low": 95,
+    "units": "ng/mL"
+   },
+   "comments": "Acarbose acts locally within the gastrointestinal tract, this low systemic bioavailability of parent compound.",
+   "qualification": "IC50",
+   "type": "TARGET->INHIBITOR",
+   "references": [
+    "aadcafbd-ffff-4a07-b10f-030ef92a4ada",
+    "166aa4b7-a342-949f-92e5-5df6e39bb972"
+   ],
+   "related_substance": {
+    "uuid": "18d338bf-447c-46b1-b012-af3f23d4c630",
+    "refuuid": "ae6c9134-bd3d-48cf-b854-12e83f45ae38",
+    "name": "PANCREATIC ALPHA-AMYLASE",
+    "unii": "CIK15T34RB",
+    "linking_id": "CIK15T34RB",
+    "ref_pname": "PANCREATIC ALPHA-AMYLASE",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "6f1d5ef0-050f-488e-89b8-7c4032931eaf",
+   "amount": {
+    "uuid": "af4b5355-7505-4d9b-ac87-03f3a4f83321",
+    "average": 6,
+    "high": 7,
+    "low": 5,
+    "units": "ng/mL"
+   },
+   "type": "TARGET->INHIBITOR",
+   "references": [
+    "aadcafbd-ffff-4a07-b10f-030ef92a4ada"
+   ],
+   "related_substance": {
+    "uuid": "4ede7b01-84ab-42fd-aef8-f0d3471fbd8a",
+    "refuuid": "2fca9e05-efbf-4d49-b9e9-fe00d6635b11",
+    "name": "Isomaltase, human intestinal",
+    "unii": "3RD33D7E9K",
+    "linking_id": "3RD33D7E9K",
+    "ref_pname": "Isomaltase, human intestinal",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "cc5da423-225c-405e-8a83-bbf33c5e14b3",
+   "amount": {
+    "uuid": "3b35fe29-3e75-41fb-8c7f-c8e80d7f0118",
+    "average": 75,
+    "low": 72,
+    "units": "ng/mL",
+    "low_limit": 78
+   },
+   "type": "TARGET->INHIBITOR",
+   "related_substance": {
+    "uuid": "1e6ebdb1-3405-4059-8df0-e0d90388f54a",
+    "refuuid": "f716d6e9-4dbb-43d4-a71a-6253eae2c2f1",
+    "name": "Sucrase, human intestinal",
+    "unii": "77F7JH8MWQ",
+    "linking_id": "77F7JH8MWQ",
+    "ref_pname": "Sucrase, human intestinal",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "4c77e453-d236-4c62-8b13-07a9eea70498",
+   "amount": {
+    "uuid": "5c8896de-a608-4e2c-b3e9-f662b34a8ab9"
+   },
+   "comments": "Acarbose treatment stimulates postprandial GLP-1 secretion in patients with type 2 diabetes. Dependent on dose and saccharide or polysaccharide present.  A single dose of 100 mg acarbose during an oral sucrose (disaccharide) load resulted in elevated GLP-1 levels compared to placebo (8, 10, 28, 29) whereas no effect was seen during oral glucose tolerance test (24), emphasizing that acarbose needs relevant carbohydrates to ‘act on’ in order to increase GLP-1 secretion.  A single dose of 100 mg acarbose during an oral sucrose (disaccharide) load resulted in elevated GLP-1 levels compared to placebo (8, 10, 28, 29) whereas no effect was seen during oral glucose tolerance test (24), emphasizing that acarbose needs relevant carbohydrates to ‘act on’ in order to increase GLP-1 secretion.",
+   "type": "TARGET->ACTIVATOR OF EXPRESSION",
+   "references": [
+    "6adeb3f5-2a24-423b-9398-bbbfac445dfe"
+   ],
+   "related_substance": {
+    "uuid": "9c077bea-7d40-4a08-9efd-adf679c82ba9",
+    "refuuid": "77ef11d4-d59d-4da6-a694-63147442df46",
+    "name": "GLUCAGON-LIKE PEPTIDE 1",
+    "unii": "SQ6SA9L9XQ",
+    "linking_id": "SQ6SA9L9XQ",
+    "ref_pname": "GLUCAGON-LIKE PEPTIDE 1",
+    "substance_class": "reference"
+   }
+  },
+  {
+   "uuid": "f999e75e-320b-4f40-8bb8-4fa2c74c105d",
+   "amount": {
+    "uuid": "a4acd04e-9a15-4c76-8791-b69fbb2da916"
+   },
+   "type": "IMPURITY->PARENT",
+   "references": [
+    "0cc76a0c-b0e1-4993-8a62-516af8d178d3"
+   ],
+   "related_substance": {
+    "uuid": "39793890-7c3a-41ea-ac67-c51edaaafcb0",
+    "refuuid": "09b1211a-5fee-464e-82f2-b8ca559e7241",
+    "name": "N-nitroso-acarbose",
+    "unii": "8GCY4M93YY",
+    "linking_id": "8GCY4M93YY",
+    "ref_pname": "N-nitroso-acarbose",
+    "substance_class": "reference"
+   }
+  }
+ ],
+ "names": [
+  {
+   "uuid": "9b74533c-9f5e-4510-bf9b-d0bf21b37a9f",
+   "name": "ACARBOSE",
+   "stdName": "ACARBOSE",
+   "type": "of",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "03dcaead-0e65-41f3-8ec7-4aa2f04a63c7",
+    "042b2f88-8ab6-4cfd-8c07-ee91038725af"
+   ],
+   "display_name": true,
+   "name_orgs": [
+    {
+     "uuid": "b4ebeac0-3cb1-47a9-af0a-e53fd7540f18",
+     "name_org": "USAN"
+    }
+   ]
+  },
+  {
+   "uuid": "931d05bf-b8f9-e591-a9a9-58c5f953a61b",
+   "name": "ACARBOSE [EP IMPURITY]",
+   "stdName": "ACARBOSE [EP IMPURITY]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "54586061-f0d0-4302-82aa-9159697eeece"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "913b2068-e228-372f-0b0d-8e566745c5c5",
+   "name": "ACARBOSE [EP MONOGRAPH]",
+   "stdName": "ACARBOSE [EP MONOGRAPH]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "bbb0e377-2747-709f-b41e-a722f990e5ab"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "ab22439e-a92c-4d5a-b7b4-e508c8761f81",
+   "name": "ACARBOSE [JAN]",
+   "stdName": "ACARBOSE [JAN]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "38726fbc-d9c8-452f-ab41-f284b736406f"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "5094efbe-72a8-4215-8e59-c02fa5cdcd29",
+   "name": "ACARBOSE [MART.]",
+   "stdName": "ACARBOSE [MART.]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "86fab6af-3f2b-476f-8059-23a3c79836f2"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "21bbda98-eec6-41e9-ba62-c5ee962ff10e",
+   "name": "ACARBOSE [MI]",
+   "stdName": "ACARBOSE [MI]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "5dc24459-d0e9-4863-91e3-884c26b8bcc6"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "26cc14bb-62d9-4299-9548-bf839ca43e4e",
+   "name": "ACARBOSE [ORANGE BOOK]",
+   "stdName": "ACARBOSE [ORANGE BOOK]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "71135f37-1a5c-4eea-8564-3454aeb089a7"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "68c8f71f-c2b8-4dee-b6e5-eac03893f11c",
+   "name": "ACARBOSE [USAN]",
+   "stdName": "ACARBOSE [USAN]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "d1c7412a-7efc-4e41-9e8a-1ab947eb4a03"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "56029d96-0e7b-5103-b484-62b0c19aa7a3",
+   "name": "ACARBOSE [USP MONOGRAPH]",
+   "stdName": "ACARBOSE [USP MONOGRAPH]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "796e6cc2-9c01-8d3b-ca24-60f75214935e"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "a1f3998c-75b4-4964-8628-e9ec9ba4c4f3",
+   "name": "ACARBOSE [USP-RS]",
+   "stdName": "ACARBOSE [USP-RS]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "68ad096b-5018-4fd9-8dab-246e855b3177"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "52330e4c-8289-46cf-8e6b-da75f08125e2",
+   "name": "ACARBOSE [VANDF]",
+   "stdName": "ACARBOSE [VANDF]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "a96b209f-dcd7-42b7-8eec-32364ecb7626"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "d8c0c22d-c95b-e66b-ae0b-145947e44ce4",
+   "name": "Acarbose [WHO-DD]",
+   "stdName": "ACARBOSE [WHO-DD]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "b99a1064-9373-c2d2-5895-b8261ea92e28"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "a686e5b2-a320-485f-9653-668a590c342c",
+   "name": "BAY G 5421",
+   "stdName": "BAY G 5421",
+   "type": "cd",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "9a58b920-7d0a-4e4d-91fc-cbfd7e1473bf"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "e7aabc35-0211-45e8-8d2e-747bc3be446f",
+   "name": "BAY-G-5421",
+   "stdName": "BAY-G-5421",
+   "type": "cd",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "6695cf92-251d-4e09-95c8-e6f63a3c6464"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "b635314c-2582-45a7-a5d1-a7ff11cb6945",
+   "name": "D-GLUCOSE, O-4,6-DIDEOXY-4-(((1S-(1.ALPHA.,4.ALPHA.,5.BETA.,6.ALPHA.))-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-",
+   "stdName": "D-GLUCOSE, O-4,6-DIDEOXY-4-(((1S-(1.ALPHA.,4.ALPHA.,5.BETA.,6.ALPHA.))-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "9a58b920-7d0a-4e4d-91fc-cbfd7e1473bf"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "98fcf75e-85bd-56f4-9085-dd9298c90fd4",
+   "name": "NSC-758915",
+   "stdName": "NSC-758915",
+   "type": "cd",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "b900d2bb-e7c1-2246-4fce-35b7d9619eee"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "fd42a144-6c67-4d74-a32a-1d370b8dcbee",
+   "name": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-GLUCOSE",
+   "stdName": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO)-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-GLUCOSE",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "9971d812-6f2f-42dc-b31f-b57d0e04fffd"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "561858d0-b627-44fa-bd18-a7505c77d911",
+   "name": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO).ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-GLUCOPYRANOSE",
+   "stdName": "O-4,6-DIDEOXY-4-(((1S,4R,5S,6S)-4,5,6-TRIHYDROXY-3-(HYDROXYMETHYL)-2-CYCLOHEXEN-1-YL)AMINO).ALPHA.-D-GLUCOPYRANOSYL-(1->4)-O-.ALPHA.-D-GLUCOPYRANOSYL-(1->4)-D-GLUCOPYRANOSE",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "9a58b920-7d0a-4e4d-91fc-cbfd7e1473bf"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "fd8578a5-56f6-4388-944d-aaba195ce998",
+   "name": "PRECOSE",
+   "stdName": "PRECOSE",
+   "type": "bn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "9971d812-6f2f-42dc-b31f-b57d0e04fffd"
+   ],
+   "display_name": false
+  },
+  {
+   "uuid": "e1f46086-fbf6-4cb0-9cd7-fbaeb230672b",
+   "name": "acarbose [INN]",
+   "stdName": "ACARBOSE [INN]",
+   "type": "cn",
+   "languages": [
+    "en"
+   ],
+   "preferred": false,
+   "references": [
+    "dc5cc136-16ef-439d-9db4-ed0bc2923ae3"
+   ],
+   "display_name": false
+  }
+ ],
+ "properties": [
+  {
+   "uuid": "35fba5c4-4e3d-47ea-8522-c390a6818751",
+   "name": "Biological Half-life",
+   "value": {
+    "uuid": "8c7ce772-1897-4178-970a-f1c7e2d8b58a",
+    "average": 2,
+    "units": "hours"
+   },
+   "defining": false,
+   "property_type": "PHARMACOKINETIC",
+   "references": [
+    "4593cf00-cb91-c1c8-c713-f288308bac92"
+   ]
+  }
+ ],
+ "modifications": {
+  "uuid": "e75f8dae-f8d7-40bb-bb39-0f3817f19c78"
+ }
+}

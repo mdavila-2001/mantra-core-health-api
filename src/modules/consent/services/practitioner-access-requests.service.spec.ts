@@ -1,4 +1,6 @@
 import { jest } from '@jest/globals';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 /**
  * Ejecuta la operación mock fn.
@@ -15,6 +17,13 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { CONS } from '../consent.concepts';
+import {
+  DecidePractitionerAccessRequestDto,
+  RequestPractitionerAccessDto,
+} from '../dto';
+
+// Specialties of VS_MEDICAL_SPECIALTY come from a deterministic UUID v5.
+const SPECIALTY_V5 = '3b9c1e5e-7c2b-5d3a-8f6e-1a2b3c4d5e6f';
 
 /**
  * MCH-024 — este servicio no tenía spec propio: `collectCoverageFrom` sólo
@@ -46,6 +55,7 @@ function build() {
   const eventsRepo = { record: mockFn() };
   const clinicalGrantsRepo = {
     findActive: mockFn().mockResolvedValue(null),
+    findActiveByConsent: mockFn().mockResolvedValue([{ id: 'grant-vivo' }]),
     create: mockFn(),
   };
   const accountLinksRepo = {
@@ -56,6 +66,9 @@ function build() {
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const notices = { emit: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const specialtyCatalog = {
+    assertAllAreSpecialties: mockFn().mockResolvedValue(undefined),
+  };
 
   const service = new PractitionerAccessRequestsService(
     em as any,
@@ -68,6 +81,7 @@ function build() {
     auditTrail as any,
     notices as any,
     logger as any,
+    specialtyCatalog as any,
   );
   return {
     service,
@@ -81,6 +95,7 @@ function build() {
     patientProfilesRepo,
     auditTrail,
     notices,
+    specialtyCatalog,
   };
 }
 
@@ -98,6 +113,25 @@ describe('PractitionerAccessRequestsService', () => {
           actorProfessional,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.consentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza pedir una especialidad que no es del catálogo y no crea nada', async () => {
+      const d = build();
+      d.specialtyCatalog.assertAllAreSpecialties.mockRejectedValue(
+        new PreconditionFailedException('fuera del catálogo'),
+      );
+
+      await expect(
+        d.service.request(
+          { patientProfileId: 'pac-1', specialtyConceptIds: ['no-esp'] } as any,
+          actorProfessional,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtyCatalog.assertAllAreSpecialties).toHaveBeenCalledWith(
+        d.tx,
+        ['no-esp'],
+      );
       expect(d.consentsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -126,6 +160,100 @@ describe('PractitionerAccessRequestsService', () => {
           recipientUserId: 'pac-user-1',
         }),
       );
+    });
+  });
+
+  describe('request — vínculo ya revocado', () => {
+    const body = {
+      patientProfileId: 'pac-1',
+      specialtyConceptIds: ['esp-1'],
+    } as any;
+
+    function withCreated(d: ReturnType<typeof build>) {
+      d.consentsRepo.create.mockReturnValue({
+        id: 'c-nuevo',
+        patientProfileId: 'pac-1',
+        createdAt: new Date(),
+      });
+    }
+
+    it('un vínculo activo sin ningún grant activo ya no cuenta como en curso: se retira y se puede volver a pedir', async () => {
+      const d = build();
+      withCreated(d);
+      const stale: any = {
+        id: 'c-viejo',
+        statusConceptId: CONS.CONSENT_ACTIVE,
+        updatedAt: new Date(),
+      };
+      d.consentsRepo.findByPatientCreatorCategory.mockResolvedValue([stale]);
+      d.clinicalGrantsRepo.findActiveByConsent.mockResolvedValue([]);
+
+      const res = await d.service.request(body, actorProfessional);
+
+      expect(res.id).toBe('c-nuevo');
+      expect(stale.statusConceptId).toBe(CONS.CONSENT_WITHDRAWN);
+      expect(stale.validTo).toBeInstanceOf(Date);
+      expect(d.eventsRepo.record).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          subjectId: 'c-viejo',
+          eventTypeConceptId: CONS.EVENT_WITHDRAWN,
+          newStatusConceptId: CONS.CONSENT_WITHDRAWN,
+        }),
+      );
+    });
+
+    it('un vínculo activo con su grant activo sigue dando 409', async () => {
+      const d = build();
+      d.consentsRepo.findByPatientCreatorCategory.mockResolvedValue([
+        { id: 'c-vivo', statusConceptId: CONS.CONSENT_ACTIVE },
+      ]);
+
+      await expect(
+        d.service.request(body, actorProfessional),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.clinicalGrantsRepo.findActiveByConsent).toHaveBeenCalledWith(
+        d.tx,
+        'c-vivo',
+      );
+      expect(d.consentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un vínculo ya retirado o rechazado no bloquea y no se consulta su grant', async () => {
+      const d = build();
+      withCreated(d);
+      d.consentsRepo.findByPatientCreatorCategory.mockResolvedValue([
+        { id: 'c-1', statusConceptId: CONS.CONSENT_WITHDRAWN },
+        { id: 'c-2', statusConceptId: CONS.ACCESS_REQUEST_DECLINED },
+      ]);
+
+      await d.service.request(body, actorProfessional);
+
+      expect(d.clinicalGrantsRepo.findActiveByConsent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('DTO — especialidades reales (UUID v5)', () => {
+    it('la solicitud acepta una especialidad UUID v5', async () => {
+      const dto = plainToInstance(RequestPractitionerAccessDto, {
+        patientProfileId: '9f1c2b3a-4d5e-4f60-8a7b-0c1d2e3f4a5b',
+        specialtyConceptIds: [SPECIALTY_V5],
+      });
+      expect(await validate(dto)).toEqual([]);
+    });
+
+    it('la decisión acepta una especialidad UUID v5 y sigue rechazando lo que no es UUID', async () => {
+      const ok = plainToInstance(DecidePractitionerAccessRequestDto, {
+        decision: 'ACCEPTED',
+        authorizedSpecialtyConceptIds: [SPECIALTY_V5],
+      });
+      expect(await validate(ok)).toEqual([]);
+
+      const bad = plainToInstance(DecidePractitionerAccessRequestDto, {
+        decision: 'ACCEPTED',
+        authorizedSpecialtyConceptIds: ['no-es-uuid'],
+      });
+      expect((await validate(bad)).length).toBeGreaterThan(0);
     });
   });
 
@@ -266,6 +394,30 @@ describe('PractitionerAccessRequestsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    it('rechaza autorizar una especialidad pedida que ya no es del catálogo', async () => {
+      const d = build();
+      asHolder(d);
+      d.specialtyCatalog.assertAllAreSpecialties.mockRejectedValue(
+        new PreconditionFailedException('fuera del catálogo'),
+      );
+
+      await expect(
+        d.service.decide(
+          'c-1',
+          {
+            decision: 'ACCEPTED',
+            authorizedSpecialtyConceptIds: ['esp-1'],
+          } as any,
+          actorPatient,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtyCatalog.assertAllAreSpecialties).toHaveBeenCalledWith(
+        d.tx,
+        ['esp-1'],
+      );
+      expect(d.clinicalGrantsRepo.create).not.toHaveBeenCalled();
+    });
+
     it('rechaza aceptar sin autorizar ninguna especialidad', async () => {
       const d = build();
       asHolder(d);
@@ -302,9 +454,11 @@ describe('PractitionerAccessRequestsService', () => {
       );
     });
 
-    it('no duplica el grant clínico si ya hay uno activo', async () => {
+    it('crea un grant propio, ligado al consent, aunque el par ya tenga otro activo', async () => {
       const d = build();
       asHolder(d);
+      // Another active grant of the pair (emergency, administrative) must not be
+      // reused: revoking this consent would not find it.
       d.clinicalGrantsRepo.findActive.mockResolvedValue({ id: 'grant-ya' });
 
       await d.service.decide(
@@ -316,7 +470,14 @@ describe('PractitionerAccessRequestsService', () => {
         actorPatient,
       );
 
-      expect(d.clinicalGrantsRepo.create).not.toHaveBeenCalled();
+      expect(d.clinicalGrantsRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.clinicalGrantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          consentId: 'c-1',
+          grantedUserId: 'prof-1',
+        }),
+      );
     });
   });
 

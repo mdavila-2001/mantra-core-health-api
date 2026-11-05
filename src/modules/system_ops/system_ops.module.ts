@@ -1,3 +1,4 @@
+import { MutabilityModule } from './mutability/mutability.module';
 import { Module } from '@nestjs/common';
 import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { IdentityEvidenceLifecycleModule } from '../identity_assurance/identity-evidence-lifecycle.module';
@@ -5,6 +6,8 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
   GovernanceCatalogController,
+  GovernanceReadController,
+  GovernanceOperationsReadController,
   RetentionExecutionController,
   ResidencyController,
   LegalHoldController,
@@ -15,15 +18,20 @@ import {
 } from './controllers';
 import {
   GovernanceCatalogService,
+  GovernanceReadService,
+  GovernanceOperationsReadService,
   RetentionExecutionService,
   ResidencyService,
   LegalHoldService,
   BackupService,
   AssessmentService,
   DraftService,
+  RETENTION_DISPOSITION_EXECUTORS,
 } from './services';
 import {
   GovernanceRepository,
+  GovernanceReadRepository,
+  GovernanceOperationsReadRepository,
   RetentionExecutionRepository,
   ResidencyRepository,
   LegalHoldRepository,
@@ -42,12 +50,15 @@ import {
  */
 @Module({
   imports: [
+    MutabilityModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     StorageLifecycleModule,
     IdentityEvidenceLifecycleModule,
   ],
   controllers: [
     GovernanceCatalogController,
+    GovernanceReadController,
+    GovernanceOperationsReadController,
     RetentionExecutionController,
     ResidencyController,
     LegalHoldController,
@@ -59,6 +70,8 @@ import {
   providers: [
     // Repositorios
     GovernanceRepository,
+    GovernanceReadRepository,
+    GovernanceOperationsReadRepository,
     RetentionExecutionRepository,
     ResidencyRepository,
     LegalHoldRepository,
@@ -66,8 +79,15 @@ import {
     AssessmentRepository,
     DraftRepository,
     SystemOpsSecurityRepository,
+    // Adaptadores de disposición de retención por entidad registrada. Hoy ninguna
+    // entidad de negocio tiene uno (la identidad usa su camino especializado):
+    // el barrido rechaza lo que no tiene adaptador. Cada adaptador nuevo se
+    // añade aquí como `useClass` con `multi` o se concentra en esta lista.
+    { provide: RETENTION_DISPOSITION_EXECUTORS, useValue: [] },
     // Servicios
     GovernanceCatalogService,
+    GovernanceReadService,
+    GovernanceOperationsReadService,
     RetentionExecutionService,
     ResidencyService,
     LegalHoldService,

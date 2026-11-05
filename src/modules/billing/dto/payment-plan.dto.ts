@@ -4,11 +4,15 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
-  IsNumberString,
   IsOptional,
   IsUUID,
+  Matches,
   ValidateNested,
 } from 'class-validator';
+import { MONEY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
 
 /** Cuota del plan de pagos (UC-17-11). */
 export class InstallmentInputDto {
@@ -23,7 +27,7 @@ export class InstallmentInputDto {
    * Valor de amount mantenido por la instancia.
    */
   @ApiProperty({ description: 'Importe de la cuota', example: '25.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   amount!: string;
 }
 

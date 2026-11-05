@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   IntegrationsProvidersService,
   IntegrationsConnectionsService,
@@ -45,6 +50,11 @@ export class IntegrationsProvidersController {
   ) {}
 
   /** UC-12-01. */
+  @Audited({
+    action: 'EXTERNAL_PROVIDER_REGISTERED',
+    entity: 'external_provider',
+    entityId: 'result.id',
+  })
   @Post('providers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -57,6 +67,11 @@ export class IntegrationsProvidersController {
   }
 
   /** UC-12-02. */
+  @Audited({
+    action: 'PROVIDER_CONNECTION_PROVISIONED',
+    entity: 'provider_connection',
+    entityId: 'result.id',
+  })
   @Post('providers/:id/connections')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +87,11 @@ export class IntegrationsProvidersController {
   }
 
   /** UC-12-04. */
+  @Audited({
+    action: 'INTEGRATION_ENDPOINT_PUBLISHED',
+    entity: 'integration_endpoint',
+    entityId: 'result.id',
+  })
   @Post('providers/:id/endpoints')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -87,6 +107,11 @@ export class IntegrationsProvidersController {
   }
 
   /** UC-12-11. */
+  @Audited({
+    action: 'PROVIDER_WEBHOOK_SUBSCRIPTION_CREATED',
+    entity: 'webhook_subscription',
+    entityId: 'result.id',
+  })
   @Post('providers/:id/webhook-subscriptions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

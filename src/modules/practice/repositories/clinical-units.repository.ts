@@ -41,6 +41,14 @@ export interface CreateClinicalUnitData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Tenant de la sede (F1): todo alta lo escribe (RLS). */
+  tenantId: string;
+  /** Descripción libre (F1). */
+  description?: string;
+  /** Inicio de vigencia (F1). */
+  validFrom?: Date;
+  /** Responsable de la unidad. */
+  responsibleUserId?: string;
 }
 
 /** Acceso a datos de `practice.clinical_units` (stateless). */
@@ -72,6 +80,20 @@ export class ClinicalUnitsRepository {
   }
 
   /**
+   * Hijas directas de una unidad.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param parentUnitId - Unidad padre.
+   * @returns Sus hijas, en cualquier estado.
+   */
+  findChildren(
+    em: EntityManager,
+    parentUnitId: string,
+  ): Promise<ClinicalUnits[]> {
+    return em.find(ClinicalUnits, { parentUnitId });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -90,6 +112,10 @@ export class ClinicalUnitsRepository {
         specialtyConceptId: data.specialtyConceptId,
         serviceModeConceptId: data.serviceModeConceptId,
         statusConceptId: data.statusConceptId,
+        tenantId: data.tenantId,
+        description: data.description,
+        validFrom: data.validFrom,
+        responsibleUserId: data.responsibleUserId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

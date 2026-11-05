@@ -9,6 +9,35 @@ export interface AmortizationInstallment {
 }
 
 /**
+ * La fecha `months` meses después de `date`, en UTC y sin desbordar el mes.
+ *
+ * `startDate` llega de un `YYYY-MM-DD` (`new Date('2026-10-01')` = medianoche
+ * UTC). Sumar con `setMonth` —hora local— corría el vencimiento un día hacia
+ * atrás en cualquier huso al oeste de Greenwich (en La Paz, UTC-4, la cuota 1
+ * de un alta del 1 de octubre vencía el 31) y, encima, un día 31 saltaba al
+ * mes siguiente. Acá se suma en UTC y el día se recorta al último del mes de
+ * destino: un alta del 31 de enero vence el 28 de febrero, el 31 de marzo…
+ */
+export function addMonthsUtc(date: Date, months: number): Date {
+  const year = date.getUTCFullYear();
+  const targetMonth = date.getUTCMonth() + months;
+  const lastDayOfTarget = new Date(
+    Date.UTC(year, targetMonth + 1, 0),
+  ).getUTCDate();
+  return new Date(
+    Date.UTC(
+      year,
+      targetMonth,
+      Math.min(date.getUTCDate(), lastDayOfTarget),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds(),
+    ),
+  );
+}
+
+/**
  * Genera el cronograma de amortización de un pasivo (FT-26).
  *
  * ## Por qué "cuota de principal fija" y no francés/alemán a elegir
@@ -67,8 +96,7 @@ export function buildAmortizationSchedule(params: {
     const principalDueCents = isLast ? outstandingCents : baseInstallmentCents;
     const interestDueCents = Math.round(outstandingCents * monthlyRate);
 
-    const dueDate = new Date(startDate);
-    dueDate.setMonth(dueDate.getMonth() + n);
+    const dueDate = addMonthsUtc(startDate, n);
 
     rows.push({
       installmentNumber: n,

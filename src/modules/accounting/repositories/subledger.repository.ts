@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  CompanyBankAccounts,
   SubledgerAccounts,
   OpenItems,
   ClearingDocuments,
@@ -31,6 +32,21 @@ export class SubledgerRepository {
     id: string,
   ): Promise<SubledgerAccounts | null> {
     return em.findOne(SubledgerAccounts, { id });
+  }
+
+  /**
+   * Una cuenta bancaria de la empresa por id, sin acotar: quien la usa contrasta
+   * su tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la cuenta bancaria.
+   * @returns La cuenta, o `null` si no existe.
+   */
+  findCompanyBankAccountById(
+    em: EntityManager,
+    id: string,
+  ): Promise<CompanyBankAccounts | null> {
+    return em.findOne(CompanyBankAccounts, { id });
   }
 
   /**

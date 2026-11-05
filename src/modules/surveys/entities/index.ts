@@ -1,7 +1,8 @@
-export { SurveyTemplates } from './survey_templates.entity';
-export { SurveyVersions } from './survey_versions.entity';
-export { SurveyQuestions } from './survey_questions.entity';
-export { SurveyAssignments } from './survey_assignments.entity';
-export { SurveyInvitations } from './survey_invitations.entity';
-export { SurveyResponses } from './survey_responses.entity';
-export { SurveyAnswers } from './survey_answers.entity';
+export * from './survey_answers.entity';
+export * from './survey_assignments.entity';
+export * from './survey_invitation_reminders.entity';
+export * from './survey_invitations.entity';
+export * from './survey_questions.entity';
+export * from './survey_responses.entity';
+export * from './survey_templates.entity';
+export * from './survey_versions.entity';

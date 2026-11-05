@@ -23,11 +23,15 @@
     ========================================================================== */
 
 import { CONCEPTS } from '../../common';
+// Sólo el concepto (terminología compartida): la categoría de admisión ya existía
+// como concepto de `profiles` cuando se registró en este enum, y reutilizarlo
+// conserva las filas ya emitidas en vez de partir la categoría en dos.
+import { PROF } from '../profiles/profiles.concepts';
 
 /**
- * Las cuatro familias de aviso del producto.
+ * Las familias de aviso del producto.
  *
- * Son cuatro y no una por disparador porque quien configura sus preferencias
+ * Son pocas y no una por disparador porque quien configura sus preferencias
  * razona en estos términos —«no me avises de lo social»—, no en «no me avises
  * de reacciones a comentarios en publicaciones de grupos».
  */
@@ -39,14 +43,29 @@ export type NotificationCategory =
   /** Mensajería directa entre personas. */
   | 'MESSAGES'
   /** Muro, reacciones, comentarios, grupos. */
-  | 'SOCIAL';
+  | 'SOCIAL'
+  /**
+   * Verificación del alta de un profesional: recibida, información pedida,
+   * verificada, rechazada, suspendida, vencida…
+   *
+   * **Se puede silenciar, salvo lo crítico.** Quien silencia `ADMISSION` deja de
+   * recibir los avisos informativos (`RECEIVED`, `VERIFIED`, `REINSTATED`,
+   * `WITHDRAWN`), pero los que cambian lo que el profesional puede hacer o
+   * vencen con un plazo (`INFO_REQUIRED`, `REJECTED`, `SUSPENDED`, `EXPIRED`,
+   * `ABANDONED`) se entregan igual: callar «su cuenta fue suspendida» no es una
+   * preferencia sino quedar sin enterarse. La excepción la aplica el servidor
+   * (`mandatory` en `createRequest`, que ninguna ruta HTTP puede pedir) y
+   * respeta el opt-out del canal entero. Ver `isCriticalAdmissionNotice`.
+   */
+  | 'ADMISSION';
 
-/** Las cuatro categorías, para iterar sin repetir la lista. */
+/** Las categorías, para iterar sin repetir la lista. */
 export const NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
   'CLINICAL',
   'SCHEDULING',
   'MESSAGES',
   'SOCIAL',
+  'ADMISSION',
 ];
 
 /** Concepto de terminología que respalda cada categoría. */
@@ -57,6 +76,7 @@ export const NOTIFICATION_CATEGORY_CONCEPT: Readonly<
   SCHEDULING: CONCEPTS.NOTIF_CATEGORY_SCHEDULING,
   MESSAGES: CONCEPTS.NOTIF_CATEGORY_MESSAGES,
   SOCIAL: CONCEPTS.NOTIF_CATEGORY_SOCIAL,
+  ADMISSION: PROF.NOTICE_ADMISSION,
 };
 
 /** El camino de vuelta: del concepto al nombre de la categoría. */
@@ -129,7 +149,22 @@ export type NotificationDestinationType =
    * `scheduling-agenda-notices.service.ts` vía `RECURSO_CUPO` cuando
    * `scheduling-waitlist.service.ts` promueve la lista de espera.
    */
-  | 'scheduling.bookable_slots';
+  | 'scheduling.bookable_slots'
+  /**
+   * Un reclamo a la aseguradora (carril 16, REQ-16-032): el cobro que se le
+   * emitió al paciente por un servicio con seguro. El `id` es el del reclamo.
+   * Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su
+   * ruta al conectar.
+   */
+  | 'INSURANCE_CLAIM'
+  /**
+   * Una receta próxima a vencer (PAC-REC-002). El `id` es el de la receta, el
+   * mismo que `PRESCRIPTION`; es otro literal para que el rebote por «aviso sin
+   * leer sobre el mismo objeto» no confunda este aviso con el de «receta
+   * lista». Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front
+   * lo enruta a la misma pantalla que `PRESCRIPTION`.
+   */
+  | 'PRESCRIPTION_EXPIRING';
 
 /**
  * A dónde lleva la notificación al abrirla.

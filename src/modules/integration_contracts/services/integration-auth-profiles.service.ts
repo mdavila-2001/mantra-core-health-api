@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import {
+  assertContractInTenant,
+  integrationResourceOutOfScope,
+} from '../integration_contracts.tenant-scope';
 import { ICON } from '../integration_contracts.concepts';
 import { AuthProfilesRepository, ContractsRepository } from '../repositories';
 import {
@@ -53,13 +57,12 @@ export class IntegrationAuthProfilesService {
       },
       'Configuring auth profile',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      assertContractInTenant(
+        await this.contractsRepo.findByIdInTenant(tx, tenantId, contractId),
+        tenantId,
+      );
 
       const profile = this.authProfilesRepo.create(tx, {
         integrationContractId: contractId,
@@ -110,15 +113,19 @@ export class IntegrationAuthProfilesService {
       },
       'Rotating auth profile credentials',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
+      // Perfil → contrato → tenant: el contrato de la ruta debe ser del tenant
+      // activo y el perfil debe colgar de él antes de tocar el secreto.
+      const contract = assertContractInTenant(
+        await this.contractsRepo.findByIdInTenant(tx, tenantId, contractId),
+        tenantId,
+        'Perfil de autenticación no encontrado',
+      );
       const profile = await this.authProfilesRepo.findById(tx, profileId);
-      if (!profile || profile.integrationContractId !== contractId) {
-        throw new ResourceNotFoundException(
+      if (!profile || profile.integrationContractId !== contract.id) {
+        throw integrationResourceOutOfScope(
           'Perfil de autenticación no encontrado',
-          {
-            contractId,
-            profileId,
-          },
         );
       }
 

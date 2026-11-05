@@ -1,5 +1,11 @@
 {
   "_nota": "Aseguradoras de Bolivia. Origen: LISTADO_DE_ASEGURADORAS_1.md. Regenerar con tools/bolivia-datasets/extract_datasets.py.",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown_convertidos/LISTADO_DE_ASEGURADORAS_1.md": "fb18f98cee35899bd903b738b059228bfb4ed88e07931e1c8d94d0013e6984a2"
+    }
+  },
   "datos": [
     {
       "code": "BO_ASEG_ALIANZA_VIDA_S_A",

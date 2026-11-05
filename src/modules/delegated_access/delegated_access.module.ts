@@ -1,12 +1,23 @@
+import { MessagingModule } from '../messaging/messaging.module';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { ClinicalModule } from '../clinical/clinical.module';
+import { IamModule } from '../iam/iam.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import {
   OrgUserAssignmentsController,
   DelegatedPermissionSetsController,
   PractitionerDelegatesController,
   AccessRequestsController,
   DelegatedAccessAuthzController,
+  PrescriptionSharesController,
+  PrescriptionSharesPublicController,
+  SupportStaffController,
+  PractitionerSupportController,
+  PractitionerGovernanceController,
+  OrgSupportStaffProvisioningController,
+  AffiliationInvitationsController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -14,6 +25,13 @@ import {
   PractitionerDelegatesService,
   AccessRequestsService,
   DelegatedAccessEvaluationService,
+  DelegationScopeService,
+  PrescriptionSharesService,
+  SupportStaffService,
+  SupportStaffProvisioningService,
+  PractitionerGovernanceService,
+  AffiliationInvitationsService,
+  RedeemAffiliationInvitationService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -23,6 +41,12 @@ import {
   DelegatedAccessApprovalRequestsRepository,
   DelegatedAccessGrantsRepository,
   DelegationEventsRepository,
+  DelegationScopeRepository,
+  SharedAccessLinksRepository,
+  SupportLinksRepository,
+  SupportStaffProvisioningRepository,
+  PractitionerGovernanceRepository,
+  AffiliationInvitationsRepository,
 } from './repositories';
 
 /**
@@ -33,13 +57,28 @@ import {
  * efectivo. Auth vía guard global; `TokenService` llega por `AuthModule` (global).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  // `ClinicalModule` da el lector del prescriptor del enlace de receta.
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    ClinicalModule,
+    MessagingModule,
+    IamModule,
+    // Practitioner affiliation requests left by redeeming an affiliation code.
+    ProfilesModule,
+  ],
   controllers: [
     OrgUserAssignmentsController,
     DelegatedPermissionSetsController,
     PractitionerDelegatesController,
     AccessRequestsController,
     DelegatedAccessAuthzController,
+    PrescriptionSharesController,
+    PrescriptionSharesPublicController,
+    SupportStaffController,
+    PractitionerSupportController,
+    PractitionerGovernanceController,
+    OrgSupportStaffProvisioningController,
+    AffiliationInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -50,12 +89,27 @@ import {
     DelegatedAccessApprovalRequestsRepository,
     DelegatedAccessGrantsRepository,
     DelegationEventsRepository,
+    DelegationScopeRepository,
+    SharedAccessLinksRepository,
+    SupportLinksRepository,
+    SupportStaffProvisioningRepository,
+    PractitionerGovernanceRepository,
+    AffiliationInvitationsRepository,
     // Servicios
+    DelegationScopeService,
     OrgUserAssignmentsService,
     PermissionSetsService,
     PractitionerDelegatesService,
     AccessRequestsService,
     DelegatedAccessEvaluationService,
+    PrescriptionSharesService,
+    SupportStaffService,
+    SupportStaffProvisioningService,
+    PractitionerGovernanceService,
+    AffiliationInvitationsService,
+    RedeemAffiliationInvitationService,
   ],
+  // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
+  exports: [PrescriptionSharesService, SupportStaffProvisioningService],
 })
 export class DelegatedAccessModule {}

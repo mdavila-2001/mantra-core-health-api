@@ -33,7 +33,9 @@ seeds). Eso fija el alcance de ramas y PRs — ver `git-workflow-multirepo`.
 
 ## 3. Estructura documental
 
-Un carril se documenta con estos artefactos (un archivo por tema o secciones de uno solo):
+Un carril se documenta en su **issue padre** (y sus sub-issues por slice, ver
+`github-issues-projects`), con estos artefactos como secciones. No se versiona en el repo: el
+repo describe lo que existe, no el plan de un carril (regla 40).
 
 | Artefacto | Contenido |
 |---|---|

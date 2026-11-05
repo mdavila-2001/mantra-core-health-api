@@ -1,0 +1,19 @@
+{
+  "source": "wikidata-p924",
+  "name": "Wikidata — P924 «possible treatment» con referencia (fuente colaborativa)",
+  "publisher": "Comunidad de Wikidata / Wikimedia Foundation",
+  "license": "CC0 1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "homepage": "https://www.wikidata.org/",
+  "retrievedAt": "2026-10-24T16:49:06.411Z",
+  "queriedAt": "2026-10-24T16:49:06.411Z",
+  "files": {
+    "p924.json": {
+      "url": "https://query.wikidata.org/sparql",
+      "fileUrl": "https://query.wikidata.org/sparql",
+      "query": "SELECT ?d ?s ?t ?tm ?dm ?dmondo\n  (GROUP_CONCAT(DISTINCT ?refUrl; separator=\"|\") AS ?urls)\n  (GROUP_CONCAT(DISTINCT ?statedIn; separator=\"|\") AS ?stated)\nWHERE {\n  ?d p:P924 ?s . ?s ps:P924 ?t . ?t wdt:P486 ?tm .\n  OPTIONAL { ?d wdt:P486 ?dm }\n  OPTIONAL { ?d wdt:P5270 ?dmondo }\n  FILTER(BOUND(?dm) || BOUND(?dmondo))\n  ?s prov:wasDerivedFrom ?ref .\n  OPTIONAL { ?ref pr:P854 ?refUrl }\n  OPTIONAL { ?ref pr:P248 ?statedIn }\n}\nGROUP BY ?d ?s ?t ?tm ?dm ?dmondo",
+      "sha256": "f230c469aa47fe1c41cffb8ef9a62f6b25136f6c7a42f4b95420e400c2e2b32f",
+      "bytes": 134434
+    }
+  }
+}

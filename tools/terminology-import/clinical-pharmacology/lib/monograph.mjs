@@ -10,7 +10,7 @@
 // =============================================================================
 
 import { atcAncestors, atcLevel, cimaFormsAndRoutes } from './cima.mjs';
-import { requiredCoverage } from './sections.mjs';
+import { AUDIENCE_PROFESSIONAL, requiredCoverage } from './sections.mjs';
 
 /**
  * Nombres ATC por código, con su fuente. Prioridad: maestra ATC de CIMA, luego
@@ -48,13 +48,14 @@ export function atcPath(code5, names) {
  * @param {object[]} [input.safetyNotes]
  * @param {object|null} [input.rxnorm]        de `atcBridge`
  * @param {object[]} [input.fdaPharmClasses]
- * @param {{display:string,source:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME) si CIMA no lo nombra
+ * @param {{display:string,source:string,language?:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME en castellano; sustancia GSRS en inglés) si CIMA no lo nombra
  */
-export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null }) {
+export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null, externalDocuments = [] }) {
   const path = atcPath(code, names);
   const own = path[4];
   const display = own.name ?? fallbackName?.display ?? null;
   const displaySource = own.name ? own.nameSource : (fallbackName?.source ?? null);
+  const displayLanguage = own.name ? 'es' : (fallbackName?.language ?? (fallbackName ? 'es' : null));
   const vtms = new Map();
   for (const p of cimaProducts) if (p.vtm) vtms.set(p.vtm.id, p.vtm);
   const bySource = {};
@@ -72,6 +73,7 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
     code,
     display,
     displaySource,
+    displayLanguage,
     atcPath: path,
     nameVariants: names.get(code)?.variants ?? [],
     cima: cimaProducts.length
@@ -86,6 +88,7 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
     sections: sortedSections,
     safetyNotes,
     fdaPharmClasses,
+    externalDocuments,
     coverage: Object.fromEntries(Object.entries(bySource).map(([src, keys]) => [src, requiredCoverage(keys)])),
   };
 }
@@ -94,11 +97,17 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
 export function assertSection(s) {
   const need = ['key', 'source', 'language', 'text', 'textSha256', 'retrievedAt', 'license', 'citation'];
   for (const k of need) if (s[k] == null || s[k] === '') throw new Error(`Sección sin «${k}»: ${s.source}/${s.document?.id}/${s.section?.number}`);
+  // Posología incluida: sólo `professional` (decisión del propietario, 2026-10-26, issue 824). Sin audiencia no se publica.
+  if (s.audience !== AUDIENCE_PROFESSIONAL) throw new Error(`Sección sin audiencia «${AUDIENCE_PROFESSIONAL}»: ${s.source}/${s.document?.id}/${s.section?.number}`);
   if (!s.document?.id || !s.document?.url) throw new Error(`Sección sin documento: ${s.source}/${s.section?.number}`);
   if (!s.section?.number) throw new Error(`Sección sin número oficial: ${s.source}/${s.document.id}`);
   if (!hasVersion(s)) throw new Error(`Sección sin versión ni fecha del documento: ${s.source}/${s.document.id}/${s.section.number}`);
   return s;
 }
 
-/** Versión y fecha son parte de la cita: sin ninguna de las dos la sección no se publica (se cuenta como hueco). */
-export const hasVersion = (s) => Boolean(s.document?.version || s.document?.revisionDateInText || s.document?.effectiveDate);
+/**
+ * Versión y fecha son parte de la cita: sin ninguna de las dos la sección no se publica. Excepción
+ * explícita: la fuente declara no publicar versión (`versionUnpublished`); entonces vale la fecha de consulta.
+ */
+export const hasVersion = (s) =>
+  Boolean(s.document?.version || s.document?.revisionDateInText || s.document?.effectiveDate || (s.document?.versionUnpublished && s.retrievedAt));

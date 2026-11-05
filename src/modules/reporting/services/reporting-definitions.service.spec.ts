@@ -14,7 +14,31 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ReportingErrorReason } from '../reporting.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['REPORTING_ADMIN'] };
 const SOURCE = '11111111-1111-1111-1111-111111111111';
@@ -57,7 +81,13 @@ function build() {
     runsRepo as any,
     logger as any,
   );
-  return { service, tx, definitionsRepo, runsRepo };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    tx,
+    definitionsRepo,
+    runsRepo,
+  };
 }
 
 describe('ReportingDefinitionsService', () => {
@@ -149,6 +179,7 @@ describe('ReportingDefinitionsService', () => {
       d.definitionsRepo.findDefinitionByCode.mockResolvedValue(null);
       d.definitionsRepo.findDataSourceById.mockResolvedValue({
         id: SOURCE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       d.definitionsRepo.createDefinition.mockReturnValue({ id: DEFINITION });
@@ -237,6 +268,7 @@ describe('ReportingDefinitionsService', () => {
       wire(d);
       d.definitionsRepo.findDataSourceById.mockResolvedValue({
         id: SOURCE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.STATE_REVOKED,
       });
 
@@ -270,6 +302,7 @@ describe('ReportingDefinitionsService', () => {
     ) {
       const def: any = {
         id: DEFINITION,
+        tenantId: TENANT_A,
         currentVersion: 1,
         stateConceptId: CONCEPTS.REPORT_DRAFT,
         querySpecJson: { select: '*' },
@@ -393,6 +426,7 @@ describe('ReportingDefinitionsService', () => {
       d.definitionsRepo.findDashboardByCode.mockResolvedValue(null);
       d.definitionsRepo.findDefinitionById.mockResolvedValue({
         id: DEFINITION,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.REPORT_DEPRECATED,
       });
 
@@ -429,6 +463,7 @@ describe('ReportingDefinitionsService', () => {
       const d = build();
       const definition: any = {
         id: DEFINITION,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.REPORT_STATE_ACTIVE,
       };
       d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(definition);
@@ -456,6 +491,7 @@ describe('ReportingDefinitionsService', () => {
       const d = build();
       d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue({
         id: DEFINITION,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.REPORT_STATE_ACTIVE,
       });
       d.runsRepo.findSchedulesByDefinitionForUpdate.mockResolvedValue([
@@ -471,6 +507,7 @@ describe('ReportingDefinitionsService', () => {
       const d = build();
       d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue({
         id: DEFINITION,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.REPORT_DEPRECATED,
       });
 
@@ -486,6 +523,261 @@ describe('ReportingDefinitionsService', () => {
       await expect(
         d.service.deprecateDefinition(DEFINITION, dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de REP-01. */
+async function expectOutOfScope(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(
+    ReportingErrorReason.REPORTING_RESOURCE_OUT_OF_SCOPE,
+  );
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('ReportingDefinitionsService · alcance de tenant (REP-01)', () => {
+  const foreignDefinition = (overrides: Record<string, unknown> = {}) => ({
+    id: DEFINITION,
+    tenantId: TENANT_B,
+    currentVersion: 1,
+    stateConceptId: CONCEPTS.REPORT_STATE_ACTIVE,
+    ...overrides,
+  });
+
+  describe('altas: el tenant sale del contexto, no del cuerpo', () => {
+    it('createDataSource persiste el tenant activo e ignora el del cuerpo', async () => {
+      const d = build();
+      d.definitionsRepo.findDataSourceByCode.mockResolvedValue(null);
+      d.definitionsRepo.createDataSource.mockReturnValue({ id: SOURCE });
+
+      await d.service.createDataSource(
+        {
+          code: 'DS-1',
+          name: 'Citas',
+          sourceType: 'READ_MODEL' as const,
+          readModelDefinitionId: READ_MODEL,
+          tenantId: TENANT_B,
+        },
+        actor,
+      );
+
+      expect(d.definitionsRepo.createDataSource.mock.calls[0][1]).toMatchObject(
+        { tenantId: TENANT_A },
+      );
+    });
+
+    it('createDataSource sin tenant en el contexto se rechaza (TENANT_REQUIRED) y no persiste', async () => {
+      const d = build();
+
+      await expect(
+        d.raw.createDataSource(
+          {
+            code: 'DS-1',
+            name: 'Citas',
+            sourceType: 'VIEW' as const,
+            viewName: 'v',
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.definitionsRepo.createDataSource).not.toHaveBeenCalled();
+    });
+
+    it('createDefinition persiste el tenant activo e ignora el del cuerpo', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionByCode.mockResolvedValue(null);
+      d.definitionsRepo.findDataSourceById.mockResolvedValue({
+        id: SOURCE,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.definitionsRepo.createDefinition.mockReturnValue({ id: DEFINITION });
+      d.definitionsRepo.createColumn.mockReturnValue({ id: 'col-1' });
+
+      await d.service.createDefinition(
+        {
+          code: 'REP-X',
+          name: 'X',
+          dataSourceId: SOURCE,
+          requiredPermissionId: PERMISSION,
+          columns: [{ code: 'mes', label: 'Mes' }],
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+
+      expect(d.definitionsRepo.createDefinition.mock.calls[0][1]).toMatchObject(
+        { tenantId: TENANT_A },
+      );
+    });
+
+    it('createDefinition con una fuente de otro tenant: 404 uniforme, igual que una inexistente, y no crea nada', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionByCode.mockResolvedValue(null);
+      const input: any = {
+        code: 'REP-X',
+        name: 'X',
+        dataSourceId: SOURCE,
+        requiredPermissionId: PERMISSION,
+        columns: [{ code: 'mes', label: 'Mes' }],
+      };
+
+      d.definitionsRepo.findDataSourceById.mockResolvedValue({
+        id: SOURCE,
+        tenantId: TENANT_B,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      const foreign = await expectOutOfScope(
+        d.service.createDefinition(input, actor),
+        'Fuente de datos no encontrada',
+      );
+
+      d.definitionsRepo.findDataSourceById.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.createDefinition(input, actor),
+        'Fuente de datos no encontrada',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.definitionsRepo.createDefinition).not.toHaveBeenCalled();
+      expect(d.definitionsRepo.createColumn).not.toHaveBeenCalled();
+    });
+
+    it('createDashboard persiste el tenant activo y rechaza un widget con la definición de otro tenant', async () => {
+      const d = build();
+      d.definitionsRepo.findDashboardByCode.mockResolvedValue(null);
+      d.definitionsRepo.createDashboard.mockReturnValue({ id: 'dash-1' });
+      d.definitionsRepo.createWidget.mockReturnValue({ id: 'w-1' });
+
+      await d.service.createDashboard(
+        {
+          code: 'DASH-1',
+          name: 'Operación',
+          widgets: [{ widgetType: 'TABLE' as const, title: 'Citas' }],
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+      expect(d.definitionsRepo.createDashboard.mock.calls[0][1]).toMatchObject({
+        tenantId: TENANT_A,
+      });
+
+      d.definitionsRepo.createDashboard.mockClear();
+      d.definitionsRepo.createWidget.mockClear();
+      d.definitionsRepo.findDefinitionById.mockResolvedValue(
+        foreignDefinition(),
+      );
+      await expectOutOfScope(
+        d.service.createDashboard(
+          {
+            code: 'DASH-2',
+            name: 'Operación',
+            widgets: [
+              {
+                widgetType: 'TABLE' as const,
+                title: 'Citas',
+                reportDefinitionId: DEFINITION,
+              },
+            ],
+          } as any,
+          actor,
+        ),
+        'Definición del widget no encontrada',
+      );
+      expect(d.definitionsRepo.createDashboard).not.toHaveBeenCalled();
+      expect(d.definitionsRepo.createWidget).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('publishVersion y deprecateDefinition por UUID', () => {
+    it('publicar una definición de otro tenant: 404 uniforme, igual que inexistente; no crea versión ni cambia estado', async () => {
+      const d = build();
+      const foreign = foreignDefinition();
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(foreign);
+
+      const foreignError = await expectOutOfScope(
+        d.service.publishVersion(DEFINITION, {}, actor),
+        'Definición no encontrada',
+      );
+
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(null);
+      const missingError = await expectOutOfScope(
+        d.service.publishVersion(DEFINITION, {}, actor),
+        'Definición no encontrada',
+      );
+
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(d.definitionsRepo.createVersion).not.toHaveBeenCalled();
+      expect(foreign.currentVersion).toBe(1);
+      expect(foreign.stateConceptId).toBe(CONCEPTS.REPORT_STATE_ACTIVE);
+    });
+
+    it('el tenant activo viaja a la consulta que bloquea la cabecera', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(null);
+
+      await expect(
+        d.service.publishVersion(DEFINITION, {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      expect(d.definitionsRepo.findDefinitionForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        DEFINITION,
+        TENANT_A,
+      );
+    });
+
+    it('una definición sin tenant (huérfana) también es «no encontrada» para un tenant', async () => {
+      const d = build();
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(
+        foreignDefinition({ tenantId: undefined }),
+      );
+
+      await expectOutOfScope(
+        d.service.publishVersion(DEFINITION, {}, actor),
+        'Definición no encontrada',
+      );
+    });
+
+    it('deprecar una definición de otro tenant: 404 uniforme; no suspende sus programaciones', async () => {
+      const d = build();
+      const foreign = foreignDefinition();
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(foreign);
+
+      await expectOutOfScope(
+        d.service.deprecateDefinition(DEFINITION, { reason: 'x' }, actor),
+        'Definición no encontrada',
+      );
+
+      expect(
+        d.runsRepo.findSchedulesByDefinitionForUpdate,
+      ).not.toHaveBeenCalled();
+      expect(foreign.stateConceptId).toBe(CONCEPTS.REPORT_STATE_ACTIVE);
+    });
+
+    it('un administrador de B sí opera sobre la definición de B (el 404 no es general)', async () => {
+      const d = build();
+      const own = foreignDefinition();
+      d.definitionsRepo.findDefinitionForUpdate.mockResolvedValue(own);
+      d.runsRepo.findSchedulesByDefinitionForUpdate.mockResolvedValue([]);
+      const serviceOfB = inTenant(d.raw, TENANT_B);
+
+      const res = await serviceOfB.deprecateDefinition(
+        DEFINITION,
+        { reason: 'x' },
+        actor,
+      );
+
+      expect(res.stateConceptId).toBe(CONCEPTS.REPORT_DEPRECATED);
     });
   });
 });
