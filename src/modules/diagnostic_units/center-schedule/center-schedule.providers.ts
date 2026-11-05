@@ -9,6 +9,7 @@ import { GetStudyAvailabilityUseCase } from './application/get-study-availabilit
 import { ListCenterBookingsUseCase } from './application/list-center-bookings.use-case';
 import { ManageCenterEquipmentUseCase } from './application/manage-center-equipment.use-case';
 import { OrderBookingAccessService } from './application/order-booking-access.service';
+import { OrderQuoteService } from './application/order-quote.service';
 import { SaveCenterScheduleUseCase } from './application/save-center-schedule.use-case';
 import { SetEquipmentStatusUseCase } from './application/set-equipment-status.use-case';
 import { CenterBookingsRepository } from './infrastructure/center-bookings.repository';
@@ -38,6 +39,7 @@ export const CENTER_SCHEDULE_PROVIDERS: Provider[] = [
   CenterContextService,
   CenterAvailabilityService,
   OrderBookingAccessService,
+  OrderQuoteService,
   GetCenterScheduleUseCase,
   SaveCenterScheduleUseCase,
   SetEquipmentStatusUseCase,

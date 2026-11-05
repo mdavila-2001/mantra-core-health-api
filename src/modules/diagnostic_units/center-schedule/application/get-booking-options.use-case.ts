@@ -23,6 +23,7 @@ import type {
 import { CenterAvailabilityService } from './center-availability.service';
 import { CenterContextService, studyModality } from './center-context.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { OrderQuoteService } from './order-quote.service';
 import { inPatientCustodyContext } from './patient-custody-context';
 
 /**
@@ -40,6 +41,7 @@ export class GetBookingOptionsUseCase {
     private readonly patients: OrderPatientRepository,
     private readonly context: CenterContextService,
     private readonly availability: CenterAvailabilityService,
+    private readonly quotes: OrderQuoteService,
   ) {}
 
   execute(
@@ -66,6 +68,7 @@ export class GetBookingOptionsUseCase {
       order.code_concept_id,
     );
     const home = await this.patients.homeOf(em, patientProfileId);
+    const priceOf = await this.quotes.pricerFor(em, order.id);
     const from = new Date();
     const to = new Date(from.getTime() + AVAILABILITY_DAYS * 86_400_000);
 
@@ -102,7 +105,7 @@ export class GetBookingOptionsUseCase {
         unitId: unit.id,
         unitName: unit.name,
         addressText: ctx.site?.address_text ?? null,
-        price: study?.price ?? null,
+        price: await priceOf(offering.id, study?.price ?? null),
         currency: study?.currency ?? null,
         distanceKm:
           home && lat !== null && lng !== null

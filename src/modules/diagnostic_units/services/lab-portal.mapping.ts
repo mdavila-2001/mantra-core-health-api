@@ -53,6 +53,19 @@ export function isModalityOffering(
   );
 }
 
+/** Panel offering that `offeringId` is a component of, if any. */
+export function parentOf(
+  ctx: {
+    links: readonly { parentOfferingId: string; componentOfferingId: string }[];
+  },
+  offeringId: string,
+): string | null {
+  return (
+    ctx.links.find((l) => l.componentOfferingId === offeringId)
+      ?.parentOfferingId ?? null
+  );
+}
+
 /** A decimal amount with exactly two decimals ('45' -> '45.00'). */
 export function money(amount: string): string {
   return multiplyDecimalsToMoney(amount, '1');
@@ -114,12 +127,15 @@ export function cleanText(
  *
  * An offering with no current price answers `price: null` (never a made-up
  * `0.00`): "not priced yet" and "free" are different facts.
+ * `parentId` is the panel a component belongs to; `hasPrice` is false until a
+ * price version exists (a catalog item imported without suggestion).
  */
 export function toLabService(
   offering: DiagnosticStudyOfferings,
   price: DiagnosticStudyPrices | undefined,
   specimenDisplay: string | null,
   categoryName: string | null,
+  parentId: string | null = null,
 ): LabServiceDto {
   const listPrice = price ? money(price.baseAmount) : null;
   const percent = percentOf(price?.discountFactor);
@@ -127,6 +143,12 @@ export function toLabService(
     id: offering.id,
     code: offering.studyCode,
     name: offering.displayName,
+    parentId,
+    catalogConceptId:
+      offering.studyConceptId && offering.studyConceptId !== DUNIT.STUDY_GENERIC
+        ? offering.studyConceptId
+        : null,
+    hasPrice: price !== undefined,
     kind: isModalityOffering(offering) ? 'MODALITY' : 'SERVICE',
     categoryId: offering.serviceCategoryId ?? null,
     categoryName: offering.serviceCategoryId ? categoryName : null,

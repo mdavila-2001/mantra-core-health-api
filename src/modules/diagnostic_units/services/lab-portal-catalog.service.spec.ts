@@ -7,6 +7,7 @@ import { DUNIT } from '../diagnostic_units.concepts';
 import {
   DiagnosticPriceSchedules,
   DiagnosticServiceCategories,
+  DiagnosticStudyComponents,
   DiagnosticStudyOfferings,
   DiagnosticStudyPrices,
   DiagnosticUnits,
@@ -15,12 +16,17 @@ import {
   T1,
   T2,
   T3,
+  HB,
+  HEMO,
+  ODD,
   actor,
   build,
   draft,
   inT,
   type Row,
 } from './lab-portal.testing';
+import { LabPortalStudyCatalogService } from './lab-portal-study-catalog.service';
+import { labReferencePrice } from '../../study_catalog/lab-reference-prices';
 
 describe('LabPortalCatalogService', () => {
   it('creates a published offering with its first price on a public BOB list', async () => {
@@ -294,5 +300,116 @@ describe('LabPortalCatalogService', () => {
     expect(await list({ categoryId: lab.id })).toEqual(['A']);
     expect(await list({ available: false })).toEqual(['B']);
     expect(await list({ available: true })).toEqual(['A']);
+  });
+});
+
+describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
+  it('lists catalog análisis by section with components and suggested prices', async () => {
+    const { studyCatalog } = build();
+    const res = await inT(T1, () => studyCatalog.catalog());
+    expect(res.count).toBe(1);
+    const [section] = res.sections;
+    expect(section).toMatchObject({ code: 'HEMATO', name: 'Hematología' });
+    expect(section.items[0]).toMatchObject({
+      conceptId: HEMO,
+      code: 'HEMOGRAMA',
+      offeredServiceId: null,
+      suggestedPrice: labReferencePrice('HEMOGRAMA'),
+    });
+    expect(section.items[0].components.map((c) => c.code)).toEqual([
+      'HEMOGRAMA.HB',
+      'HEMOGRAMA.SIN_ARANCEL',
+    ]);
+    // A component is priced only from an equivalence reviewed for it.
+    expect(section.items[0].components[0].suggestedPrice).toEqual(
+      labReferencePrice('HEMOGRAMA.HB'),
+    );
+    expect(section.items[0].components[1].suggestedPrice).toBeNull();
+  });
+
+  it('imports a panel with one offering per component, linked and priced', async () => {
+    const { em, catalog, studyCatalog } = build();
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO, HEMO] }, actor),
+    );
+    expect(res).toMatchObject({ created: 1, skipped: 0, rejected: 0 });
+    const offerings = em.rows(DiagnosticStudyOfferings);
+    expect(offerings.map((o) => [o.studyCode, o.studyConceptId])).toEqual([
+      ['HEMOGRAMA', HEMO],
+      ['HEMOGRAMA.HB', HB],
+      ['HEMOGRAMA.SIN_ARANCEL', ODD],
+    ]);
+    const links = em.rows(DiagnosticStudyComponents);
+    expect(links.map((l) => l.ordinal)).toEqual([1, 2]);
+    expect(links.every((l) => l.parentOfferingId === offerings[0].id)).toBe(
+      true,
+    );
+    // Without a suggestion the component waits as DRAFT, with no price row.
+    const odd = offerings[2];
+    expect(odd.statusConceptId).toBe(DUNIT.OFFERING_DRAFT);
+    const list = await inT(T1, () => catalog.list({}));
+    const oddView = list.items.find((i) => i.id === odd.id)!;
+    expect(oddView).toMatchObject({
+      parentId: offerings[0].id,
+      hasPrice: false,
+      status: 'DRAFT',
+    });
+    // Its first price publishes it.
+    const priced = await inT(T1, () =>
+      catalog.update(String(odd.id), { price: '12' } as any, actor),
+    );
+    expect(priced).toMatchObject({
+      price: '12.00',
+      hasPrice: true,
+      status: 'PUBLISHED',
+    });
+    // Withdrawn, it can be chosen again and comes back published.
+    await inT(T1, () => catalog.withdraw(String(offerings[0].id), actor));
+    // Its components go with it: none stays published on its own.
+    expect(
+      em
+        .rows(DiagnosticStudyOfferings)
+        .slice(1)
+        .every((o) => o.statusConceptId === DUNIT.OFFERING_RETIRED),
+    ).toBe(true);
+    const listed = await inT(T1, () => studyCatalog.catalog());
+    expect(listed.sections[0].items[0].offeredServiceId).toBeNull();
+    const back = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(back.rows[0]).toMatchObject({ outcome: 'REPUBLISHED' });
+    // A second import of the same análisis is a no-op.
+    const again = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(again.rows[0]).toMatchObject({
+      outcome: 'SKIPPED',
+      serviceId: offerings[0].id,
+    });
+  });
+
+  it('rejects an id outside the lab catalog', async () => {
+    const { studyCatalog } = build();
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [T3] }, actor),
+    );
+    expect(res.rows.map((r) => r.outcome)).toEqual(['REJECTED']);
+  });
+
+  it('links a free-form service of the same code, keeping its price', async () => {
+    const { em, catalog, studyCatalog } = build();
+    const own = await inT(T1, () => catalog.create(draft('HEMOGRAMA'), actor));
+    const res = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(res).toMatchObject({ linked: 1, created: 0 });
+    expect(res.rows[0]).toMatchObject({ outcome: 'LINKED', serviceId: own.id });
+    const list = await inT(T1, () => catalog.list({}));
+    expect(list.items.find((i) => i.id === own.id)).toMatchObject({
+      catalogConceptId: HEMO,
+      price: '45.00',
+    });
+    expect(list.items.filter((i) => i.parentId === own.id)).toHaveLength(2);
+    expect(em.rows(DiagnosticStudyComponents)).toHaveLength(2);
   });
 });

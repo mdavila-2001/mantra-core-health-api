@@ -22,6 +22,7 @@ import { LabPortalCategoriesService } from './lab-portal-categories.service';
 import { LabPortalContextService } from './lab-portal-context.service';
 import { LabPortalImportService } from './lab-portal-import.service';
 import { LabPortalPricingService } from './lab-portal-pricing.service';
+import { LabPortalStudyCatalogService } from './lab-portal-study-catalog.service';
 import { LabPortalWriterService } from './lab-portal-writer.service';
 
 export const T1 = '11111111-1111-4111-8111-111111111111';
@@ -149,6 +150,17 @@ export function build(concepts: { id: string; display: string }[] = []) {
     writer,
     logger as never,
   );
+  const studyCatalog = new LabPortalStudyCatalogService(
+    em as never,
+    { findPage: jest.fn(async () => STUDY_ROWS) } as never,
+    { findDirectComponents: jest.fn(async () => PART_ROWS) } as never,
+    context,
+    writer,
+    offeringsRepo,
+    new DiagnosticStudyComponentsRepository(),
+    pricing,
+    logger as never,
+  );
   for (const [tenantId, code] of [
     [T1, 'LAB1'],
     [T2, 'LAB2'],
@@ -160,8 +172,43 @@ export function build(concepts: { id: string; display: string }[] = []) {
       createdAt: new Date(),
     });
   }
-  return { em, catalog, categories, importer };
+  return { em, catalog, categories, importer, studyCatalog };
 }
+
+export const HEMO = 'aaaaaaaa-0000-4000-8000-000000000001';
+export const HB = 'aaaaaaaa-0000-4000-8000-000000000002';
+export const ODD = 'aaaaaaaa-0000-4000-8000-000000000003';
+const STUDY_ROWS = [
+  {
+    id: HEMO,
+    code: 'HEMOGRAMA',
+    name: 'Hemograma completo',
+    family: 'LAB',
+    props: {
+      study_catalog_code: 'HEMOGRAMA',
+      loinc_code: '57021-8',
+      section: { codigo: 'HEMATO', nombre: 'Hematología' },
+    },
+  },
+];
+const PART_ROWS = [
+  {
+    id: HB,
+    parent_id: HEMO,
+    ordinal: 1,
+    code: 'HEMOGRAMA.HB',
+    name: 'Hemoglobina',
+    props: { unit_ucum: 'g/dL' },
+  },
+  {
+    id: ODD,
+    parent_id: HEMO,
+    ordinal: 2,
+    code: 'HEMOGRAMA.SIN_ARANCEL',
+    name: 'Sin arancel',
+    props: null,
+  },
+];
 
 export const inT = <T>(tenantId: string, fn: () => Promise<T>) =>
   runWithTenant(tenantId, fn);

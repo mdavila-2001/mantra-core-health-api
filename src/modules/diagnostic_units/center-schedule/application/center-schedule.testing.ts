@@ -12,6 +12,7 @@ import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 import { GetStudyAvailabilityUseCase } from './get-study-availability.use-case';
 import { ListCenterBookingsUseCase } from './list-center-bookings.use-case';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { OrderQuoteService } from './order-quote.service';
 import { SaveCenterScheduleUseCase } from './save-center-schedule.use-case';
 import { SetEquipmentStatusUseCase } from './set-equipment-status.use-case';
 
@@ -94,6 +95,7 @@ export function build() {
   const studiesRepo = {
     findForUnit: mockFn(async () => [studyRow()]),
     findPublishedByConcept: mockFn(async () => [studyRow()]),
+    findParts: mockFn(async () => []),
   };
   const bookingsRepo = {
     findOccupying: mockFn(async () => []),
@@ -118,6 +120,7 @@ export function build() {
     })),
     hasReleasedResult: mockFn(async () => false),
     homeOf: mockFn(async () => null),
+    orderedComponents: mockFn(async () => []),
     lockOrder: mockFn(async () => undefined),
   };
   const f5a = { announceChanges: mockFn(async () => undefined) };
@@ -128,6 +131,7 @@ export function build() {
   );
   const availability = new CenterAvailabilityService(bookingsRepo as never);
   const access = new OrderBookingAccessService(patients as never);
+  const quotes = new OrderQuoteService(patients as never, studiesRepo as never);
   const reader = new GetCenterScheduleUseCase(
     em as never,
     scheduleRepo as never,
@@ -169,6 +173,7 @@ export function build() {
       patients as never,
       context,
       availability,
+      quotes,
     ),
     booker: new BookOrderUseCase(
       em as never,
@@ -178,6 +183,7 @@ export function build() {
       bookingsRepo as never,
       context,
       availability,
+      quotes,
     ),
     canceller: new CancelOrderBookingUseCase(
       em as never,

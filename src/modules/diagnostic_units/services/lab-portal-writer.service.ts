@@ -154,6 +154,15 @@ export class LabPortalWriterService {
     if (changes.available !== undefined) next.available = changes.available;
     if (changes.status != null)
       next.statusConceptId = statusConcept(changes.status);
+    // A catalog item imported without a suggested price waits as DRAFT, out of
+    // the patients' sight; its first price is what publishes it.
+    else if (
+      changes.price != null &&
+      !ctx.prices.has(offering.id) &&
+      offering.studyConceptId !== DUNIT.STUDY_GENERIC &&
+      offering.statusConceptId === DUNIT.OFFERING_DRAFT
+    )
+      next.statusConceptId = DUNIT.OFFERING_ACTIVE;
 
     const fieldsChanged = (Object.keys(next) as (keyof typeof next)[]).filter(
       (key) => (offering[key] ?? undefined) !== next[key],

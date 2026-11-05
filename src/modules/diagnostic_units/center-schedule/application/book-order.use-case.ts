@@ -27,6 +27,7 @@ import {
   toStudy,
 } from './center-context.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { OrderQuoteService } from './order-quote.service';
 import { canWork } from './get-booking-options.use-case';
 import { inPatientCustodyContext } from './patient-custody-context';
 
@@ -46,6 +47,7 @@ export class BookOrderUseCase {
     private readonly bookingsRepo: CenterBookingsRepository,
     private readonly context: CenterContextService,
     private readonly availability: CenterAvailabilityService,
+    private readonly quotes: OrderQuoteService,
   ) {}
 
   execute(
@@ -124,7 +126,9 @@ export class BookOrderUseCase {
         studyCode: study.code,
         studyName: study.name,
         modalityCode: modality,
-        price: study.price,
+        price: await (
+          await this.quotes.pricerFor(tx, order.id)
+        )(offering.id, study.price),
         currency: study.currency,
         preparation: study.preparation,
       };

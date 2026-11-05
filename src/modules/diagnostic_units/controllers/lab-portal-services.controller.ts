@@ -39,6 +39,12 @@ import {
 import { LabPortalCatalogService } from '../services/lab-portal-catalog.service';
 import { LabPortalCategoriesService } from '../services/lab-portal-categories.service';
 import { LabPortalImportService } from '../services/lab-portal-import.service';
+import { LabPortalStudyCatalogService } from '../services/lab-portal-study-catalog.service';
+import {
+  LabCatalogDto,
+  LabCatalogImportDto,
+  LabCatalogImportResultDto,
+} from '../dto/lab-portal-catalog.dto';
 
 /**
  * Lab portal catalog ("Precios"): services, categories and bulk import of the
@@ -59,12 +65,41 @@ export class LabPortalServicesController {
    * @param catalog - Catalog reads and writes.
    * @param categories - Service categories of the lab.
    * @param importer - Bulk import.
+   * @param studyCatalog - Study catalog browsing and import (proceso 4.2).
    */
   constructor(
     private readonly catalog: LabPortalCatalogService,
     private readonly categories: LabPortalCategoriesService,
     private readonly importer: LabPortalImportService,
+    private readonly studyCatalog: LabPortalStudyCatalogService,
   ) {}
+
+  @Get('catalog')
+  @ApiOperation({
+    summary: 'Catálogo de análisis (LOINC) con componentes y precio sugerido',
+  })
+  @ApiOkResponse({ type: LabCatalogDto })
+  studyCatalogItems(): Promise<LabCatalogDto> {
+    return this.studyCatalog.catalog();
+  }
+
+  @Audited({
+    action: 'LAB_CATALOG_IMPORTED',
+    entity: 'diagnostic_study_offering',
+  })
+  @Post('catalog/import')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Sumar análisis del catálogo, con sus componentes y precio sugerido',
+  })
+  @ApiOkResponse({ type: LabCatalogImportResultDto })
+  importCatalog(
+    @Body() dto: LabCatalogImportDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LabCatalogImportResultDto> {
+    return this.studyCatalog.importCatalog(dto, actor);
+  }
 
   @Get('services')
   @ApiOperation({ summary: 'Catálogo de servicios del laboratorio' })

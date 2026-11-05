@@ -13,6 +13,8 @@ import { LabPortalContextService } from './services/lab-portal-context.service';
 import { LabPortalImportService } from './services/lab-portal-import.service';
 import { LabPortalPricingService } from './services/lab-portal-pricing.service';
 import { LabPortalWriterService } from './services/lab-portal-writer.service';
+import { LabPortalStudyCatalogService } from './services/lab-portal-study-catalog.service';
+import { StudyCatalogModule } from '../study_catalog/study_catalog.module';
 import {
   CENTER_SCHEDULE_CONTROLLERS,
   CENTER_SCHEDULE_PROVIDERS,
@@ -73,6 +75,8 @@ import {
     PracticeModule,
     MessagingModule,
     DirectoryAuthorizationModule,
+    // The lab portal imports análisis from the doctor's study catalog (4.2).
+    StudyCatalogModule,
   ],
   controllers: [
     // First: their `me/*` routes must be matched before any `:id` route.
@@ -117,6 +121,7 @@ import {
     LabPortalCatalogService,
     LabPortalCategoriesService,
     LabPortalImportService,
+    LabPortalStudyCatalogService,
   ],
   // Se exporta para `directory`: `TenantTypeProfileService` lo usa DENTRO de
   // su propia transacción para materializar la unidad diagnóstica de un
