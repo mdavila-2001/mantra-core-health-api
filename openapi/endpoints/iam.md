@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 40 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 45 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
 - **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
@@ -20,37 +20,42 @@ Referencia exhaustiva de 40 operación(es) del módulo `iam`, derivada del contr
 7. [POST /iam/auth/register-organization](#7-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
 8. [POST /iam/auth/register-patient](#8-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
 9. [POST /iam/auth/register-practitioner](#9-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
-10. [POST /iam/auth/resend-verification](#10-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
-11. [POST /iam/auth/reset-password](#11-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
-12. [POST /iam/auth/sessions/purge](#12-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
-13. [POST /iam/auth/token/refresh](#13-post-iam-auth-token-refresh) — Rotar el refresh token
-14. [POST /iam/auth/upload-registration-document](#14-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
-15. [POST /iam/auth/upload-registration-logo](#15-post-iam-auth-upload-registration-logo) — Pre-cargar el logo del consultorio propio para el registro
-16. [POST /iam/auth/upload-registration-signature-image](#16-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
-17. [POST /iam/auth/verify-email](#17-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-18. [GET /iam/me/sessions](#18-get-iam-me-sessions) — Listar mis sesiones abiertas
-19. [POST /iam/me/sessions/{id}/revoke](#19-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
-20. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#20-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
-21. [GET /iam/onboarding-drafts/{formType}/{draftId}](#21-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
-22. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#22-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-23. [GET /iam/users](#23-get-iam-users) — Listado paginado de usuarios (obsoleto)
-24. [POST /iam/users](#24-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-25. [GET /iam/users/{id}](#25-get-iam-users-id) — Ficha de un usuario
-26. [POST /iam/users/{id}/anonymize](#26-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-27. [GET /iam/users/{id}/credentials](#27-get-iam-users-id-credentials) — Credenciales del usuario
-28. [POST /iam/users/{id}/credentials/{cid}/revoke](#28-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-29. [POST /iam/users/{id}/credentials/federated](#29-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-30. [GET /iam/users/{id}/devices](#30-get-iam-users-id-devices) — Dispositivos del usuario
-31. [POST /iam/users/{id}/devices](#31-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-32. [GET /iam/users/{id}/global-roles](#32-get-iam-users-id-global-roles) — Roles globales del usuario
-33. [POST /iam/users/{id}/global-roles](#33-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-34. [POST /iam/users/{id}/lock](#34-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-35. [GET /iam/users/{id}/mfa-factors](#35-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-36. [POST /iam/users/{id}/mfa-factors](#36-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-37. [GET /iam/users/{id}/sessions](#37-get-iam-users-id-sessions) — Sesiones del usuario
-38. [POST /iam/users/assisted-practitioner-registration](#38-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-39. [POST /iam/users/assisted-registration](#39-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
-40. [POST /iam/users/search](#40-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
+10. [POST /iam/auth/register-support-staff](#10-post-iam-auth-register-support-staff) — Registrarse como secretaria (personal de apoyo hospitalario)
+11. [POST /iam/auth/resend-verification](#11-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
+12. [POST /iam/auth/reset-password](#12-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
+13. [POST /iam/auth/sessions/purge](#13-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
+14. [POST /iam/auth/token/refresh](#14-post-iam-auth-token-refresh) — Rotar el refresh token
+15. [POST /iam/auth/upload-registration-document](#15-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
+16. [POST /iam/auth/upload-registration-logo](#16-post-iam-auth-upload-registration-logo) — Pre-cargar el logo del consultorio propio para el registro
+17. [POST /iam/auth/upload-registration-signature-image](#17-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
+18. [POST /iam/auth/verify-email](#18-post-iam-auth-verify-email) — Verificar el correo con el token recibido
+19. [GET /iam/me/sessions](#19-get-iam-me-sessions) — Listar mis sesiones abiertas
+20. [POST /iam/me/sessions/{id}/revoke](#20-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+21. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#21-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+22. [GET /iam/onboarding-drafts/{formType}/{draftId}](#22-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
+23. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#23-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
+24. [GET /iam/users](#24-get-iam-users) — Listado paginado de usuarios (obsoleto)
+25. [POST /iam/users](#25-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+26. [GET /iam/users/{id}](#26-get-iam-users-id) — Ficha de un usuario
+27. [POST /iam/users/{id}/anonymize](#27-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+28. [GET /iam/users/{id}/credentials](#28-get-iam-users-id-credentials) — Credenciales del usuario
+29. [POST /iam/users/{id}/credentials/{cid}/revoke](#29-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+30. [POST /iam/users/{id}/credentials/federated](#30-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+31. [POST /iam/users/{id}/deactivate](#31-post-iam-users-id-deactivate) — Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
+32. [GET /iam/users/{id}/devices](#32-get-iam-users-id-devices) — Dispositivos del usuario
+33. [POST /iam/users/{id}/devices](#33-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+34. [GET /iam/users/{id}/global-roles](#34-get-iam-users-id-global-roles) — Roles globales del usuario
+35. [POST /iam/users/{id}/global-roles](#35-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+36. [GET /iam/users/{id}/lifecycle](#36-get-iam-users-id-lifecycle) — Estado de ciclo de vida de la cuenta y su historia, paginada
+37. [POST /iam/users/{id}/lock](#37-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+38. [GET /iam/users/{id}/mfa-factors](#38-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+39. [POST /iam/users/{id}/mfa-factors](#39-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+40. [POST /iam/users/{id}/reactivate](#40-post-iam-users-id-reactivate) — Reactivar una cuenta suspendida con motivo (idempotente)
+41. [GET /iam/users/{id}/sessions](#41-get-iam-users-id-sessions) — Sesiones del usuario
+42. [POST /iam/users/{id}/suspend](#42-post-iam-users-id-suspend) — Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
+43. [POST /iam/users/assisted-practitioner-registration](#43-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+44. [POST /iam/users/assisted-registration](#44-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+45. [POST /iam/users/search](#45-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
 
 ---
 
@@ -1604,6 +1609,8 @@ Content-Type: application/json
 | `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `institutionSlugs` | No | `array<string>` | longitud máxima 200; máximo 10 elemento(s) | Slugs públicos de organizaciones; cada una recibe un pedido de vínculo pendiente de su aprobación | `["valor-ejemplo"]` |
+| `insurerCarrierIds` | No | `array<string>` | formato `uuid`; máximo 20 elemento(s) | Aseguradoras del catálogo público; cada una recibe una solicitud pendiente de su aprobación | `["00000000-0000-4000-8000-000000000001"]` |
 | `attestationAccepted` | No | `boolean` | Sin restricción adicional declarada | true si aceptó la declaración de veracidad y la verificación de sus datos | `true` |
 | `attestationTextVersion` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `2026-10-29` |
 
@@ -1701,6 +1708,12 @@ Content-Type: application/json
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
+  "institutionSlugs": [
+    "valor-ejemplo"
+  ],
+  "insurerCarrierIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
   "attestationAccepted": true,
   "attestationTextVersion": "2026-10-29"
 }
@@ -1736,7 +1749,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "profilePhotoStored": true,
   "ownPracticeId": "00000000-0000-4000-8000-000000000001",
-  "ownSiteId": "00000000-0000-4000-8000-000000000001"
+  "ownSiteId": "00000000-0000-4000-8000-000000000001",
+  "affiliationIds": [
+    "valor-ejemplo"
+  ],
+  "insurerRequestIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -1758,6 +1777,8 @@ Campos de la respuesta:
 | `profilePhotoStored` | No | `boolean` | Sin restricción adicional declarada | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `true` |
 | `ownPracticeId` | No | `string` | formato `uuid` | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `00000000-0000-4000-8000-000000000001` |
 | `ownSiteId` | No | `string` | formato `uuid` | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationIds` | No | `array<string>` | formato `uuid` | Los vínculos pedidos a , en el mismo orden. Ausente si no eligió ninguna. | `["valor-ejemplo"]` |
+| `insurerRequestIds` | No | `array<string>` | formato `uuid` | Las solicitudes creadas para . Ausente si no eligió ninguna. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1800,7 +1821,159 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /iam/auth/resend-verification
+## 10. POST /iam/auth/register-support-staff
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Registrarse como secretaria (personal de apoyo hospitalario)
+- **Operation ID:** `IamAuthController_registerSupportStaff`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.registerSupportStaff](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Registrarse como secretaria (personal de apoyo hospitalario). Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Alta de una secretaria (personal de apoyo hospitalario) con su documento. Mismo modelo que el alta del paciente; no da acceso a ningún hospital: eso llega sólo con un vínculo aceptado (`/support-engagement-requests`).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/register-support-staff` en `IamAuthController_registerSupportStaff`. El controlador delega en `IamSupportStaffSelfRegistrationService.register`. Valida el body como `RegisterSupportStaffDto` y consume `application/json`. El tipo de retorno estático es `Promise<RegisterSupportStaffResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RegisterSupportStaffDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/register-support-staff HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "password": "ClaveSegura2026!",
+  "email": "usuario@example.com",
+  "birthDate": "2026-07-31",
+  "phone": "+59170000000"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `nationalId` | Sí | `string` | longitud máxima 40 | Documento de identidad con el que se iniciará sesión | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
+| `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
+| `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
+| `displayName` | No | `string` | longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `birthDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `phone` | Sí | `string` | longitud máxima 40 | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `gender` | No | `string` | valores: `MALE`, `FEMALE`, `OTHER`, `UNKNOWN` | Género administrativo (HL7 AdministrativeGender) | `MALE` |
+| `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/register-support-staff HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "password": "ClaveSegura2026!",
+  "name": "Lucía",
+  "middleName": "Andrea",
+  "lastName": "Mamani",
+  "motherLastName": "Quispe",
+  "displayName": "Nombre de ejemplo",
+  "email": "usuario@example.com",
+  "birthDate": "2026-07-31",
+  "phone": "+59170000000",
+  "gender": "MALE",
+  "timeZone": "America/La_Paz"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterSupportStaffResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterSupportStaffResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "supportProfileId": "00000000-0000-4000-8000-000000000001",
+  "role": "SUPPORT_STAFF",
+  "emailVerificationSent": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `userId` | Sí | `string` | formato `uuid` | Cuenta creada. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Persona creada; también es el id de su perfil de secretaria. | `00000000-0000-4000-8000-000000000001` |
+| `supportProfileId` | Sí | `string` | formato `uuid` | Perfil de secretaria (`profiles.secretary_profiles.profile_id`). | `00000000-0000-4000-8000-000000000001` |
+| `role` | Sí | `string` | valores: `SUPPORT_STAFF` | Rol global con el que nace la cuenta. | `SUPPORT_STAFF` |
+| `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se encoló el correo de verificación. La cuenta es usable igual. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-support-staff-self-registration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/register-support-staff"
+}
+```
+
+---
+
+## 11. POST /iam/auth/resend-verification
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1914,7 +2087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /iam/auth/reset-password
+## 12. POST /iam/auth/reset-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2036,7 +2209,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /iam/auth/sessions/purge
+## 13. POST /iam/auth/sessions/purge
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2142,7 +2315,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /iam/auth/token/refresh
+## 14. POST /iam/auth/token/refresh
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2261,7 +2434,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /iam/auth/upload-registration-document
+## 15. POST /iam/auth/upload-registration-document
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2381,7 +2554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /iam/auth/upload-registration-logo
+## 16. POST /iam/auth/upload-registration-logo
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2502,7 +2675,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /iam/auth/upload-registration-signature-image
+## 17. POST /iam/auth/upload-registration-signature-image
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2623,7 +2796,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /iam/auth/verify-email
+## 18. POST /iam/auth/verify-email
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2741,7 +2914,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /iam/me/sessions
+## 19. GET /iam/me/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2847,7 +3020,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /iam/me/sessions/{id}/revoke
+## 20. POST /iam/me/sessions/{id}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2957,7 +3130,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+## 21. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3061,7 +3234,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /iam/onboarding-drafts/{formType}/{draftId}
+## 22. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3151,7 +3324,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. PUT /iam/onboarding-drafts/{formType}/{draftId}
+## 23. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3243,7 +3416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /iam/users
+## 24. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3377,7 +3550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /iam/users
+## 25. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3516,7 +3689,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /iam/users/{id}
+## 26. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3643,7 +3816,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /iam/users/{id}/anonymize
+## 27. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3753,7 +3926,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /iam/users/{id}/credentials
+## 28. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3883,7 +4056,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /iam/users/{id}/credentials/{cid}/revoke
+## 29. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3994,7 +4167,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/{id}/credentials/federated
+## 30. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4129,7 +4302,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /iam/users/{id}/devices
+## 31. POST /iam/users/{id}/deactivate
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
+- **Operation ID:** `IamUsersController_deactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.deactivate](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Dar de baja la cuenta con motivo (sin borrado físico; idempotente). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Da de baja la cuenta: no borra nada; revoca credenciales, roles globales y sesiones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/{id}/deactivate` en `IamUsersController_deactivate`. El controlador delega en `IamUsersService.deactivate`. Valida el body como `UserLifecycleReasonDto` y consume `application/json`. El tipo de retorno estático es `Promise<UserLifecycleResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UserLifecycleReasonDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/deactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo administrativo, obligatorio. Queda en la bitácora de seguridad de la cuenta. No escribir datos clínicos. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/deactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 404 | No existe el usuario | `Promise<UserLifecycleResultDto>` | No |
+| 409 | Transición inválida desde ese estado | `Promise<UserLifecycleResultDto>` | No |
+| 412 | Cuenta propia o última cuenta administradora | `Promise<UserLifecycleResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserLifecycleResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "state": "ACTIVE",
+  "changed": true,
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `state` | Sí | `string` | valores: `ACTIVE`, `SUSPENDED`, `DEACTIVATED`, `ANONYMIZED` | Estado en el que quedó la cuenta | `ACTIVE` |
+| `changed` | Sí | `boolean` | Sin restricción adicional declarada | `false` si la cuenta ya estaba en ese estado: la repetición no escribe nada (idempotente) | `true` |
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Sesiones activas que esta llamada cerró. 0 si no cambió nada o si reactivó | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {           code: 'FORBIDDEN',           reason: IamErrorReason.USER_SUPERADMIN_LIFECYCLE_FORBIDDEN,           message:             'Sólo un SUPERADMIN de plataforma puede modificar esta cuenta',         } | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta no puede pasar a ese estado desde el que tiene | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta cambió de estado mientras se aplicaba: reintentá | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un administrador no puede suspender ni dar de baja su propia cuenta | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 422 | `PRECONDITION_FAILED` | Es la última cuenta que administra accesos: concedé ese rol a otra antes | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/deactivate"
+}
+```
+
+---
+
+## 32. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4255,7 +4566,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /iam/users/{id}/devices
+## 33. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4390,7 +4701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /iam/users/{id}/global-roles
+## 34. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4512,7 +4823,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /iam/users/{id}/global-roles
+## 35. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4563,7 +4874,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN`, `PATIENT`, `PRACTITIONER`, `CLINICIAN` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN`, `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `action` | Sí | `string` | valores: `GRANT`, `REVOKE` | Sin descripción específica en el contrato OpenAPI. | `GRANT` |
 
 ### Payload completo de ejemplo
@@ -4642,7 +4953,140 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /iam/users/{id}/lock
+## 36. GET /iam/users/{id}/lifecycle
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Estado de ciclo de vida de la cuenta y su historia, paginada
+- **Operation ID:** `IamUsersController_lifecycle`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.lifecycle](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Estado de ciclo de vida de la cuenta y su historia, paginada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estado de ciclo de vida de la cuenta y su historia (suspensiones, reactivaciones, bajas).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/lifecycle` en `IamUsersController_lifecycle`. El controlador delega en `IamUsersService.lifecycleOf`. No recibe body. El tipo de retorno estático es `Promise<UserLifecycleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `20` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/lifecycle HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/lifecycle?limit=20&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserLifecycleViewDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+| 404 | No existe el usuario | `Promise<UserLifecycleViewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<UserLifecycleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserLifecycleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "state": "ACTIVE",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "action": "SUSPEND",
+      "reason": "Texto descriptivo de ejemplo",
+      "recordedByUserId": {},
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "nextCursor": "valor-ejemplo",
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `state` | Sí | `string` | valores: `ACTIVE`, `SUSPENDED`, `DEACTIVATED`, `ANONYMIZED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `items` | Sí | `array<UserLifecycleEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","action":"SUSPEND","reason":"Texto descriptivo de ejemplo","recordedByUserId":{},"recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].action` | Sí | `string` | valores: `SUSPEND`, `REACTIVATE`, `DEACTIVATE` | Sin descripción específica en el contrato OpenAPI. | `SUSPEND` |
+| `items[].reason` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].recordedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].recordedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `nextCursor` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/lifecycle"
+}
+```
+
+---
+
+## 37. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4765,7 +5209,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /iam/users/{id}/mfa-factors
+## 38. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4889,7 +5333,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /iam/users/{id}/mfa-factors
+## 39. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5036,7 +5480,144 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /iam/users/{id}/sessions
+## 40. POST /iam/users/{id}/reactivate
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Reactivar una cuenta suspendida con motivo (idempotente)
+- **Operation ID:** `IamUsersController_reactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.reactivate](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Reactivar una cuenta suspendida con motivo (idempotente). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reactiva una cuenta suspendida.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/{id}/reactivate` en `IamUsersController_reactivate`. El controlador delega en `IamUsersService.reactivate`. Valida el body como `UserLifecycleReasonDto` y consume `application/json`. El tipo de retorno estático es `Promise<UserLifecycleResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UserLifecycleReasonDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo administrativo, obligatorio. Queda en la bitácora de seguridad de la cuenta. No escribir datos clínicos. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 404 | No existe el usuario | `Promise<UserLifecycleResultDto>` | No |
+| 409 | Una baja o una cuenta anonimizada no se reactiva | `Promise<UserLifecycleResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserLifecycleResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "state": "ACTIVE",
+  "changed": true,
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `state` | Sí | `string` | valores: `ACTIVE`, `SUSPENDED`, `DEACTIVATED`, `ANONYMIZED` | Estado en el que quedó la cuenta | `ACTIVE` |
+| `changed` | Sí | `boolean` | Sin restricción adicional declarada | `false` si la cuenta ya estaba en ese estado: la repetición no escribe nada (idempotente) | `true` |
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Sesiones activas que esta llamada cerró. 0 si no cambió nada o si reactivó | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {           code: 'FORBIDDEN',           reason: IamErrorReason.USER_SUPERADMIN_LIFECYCLE_FORBIDDEN,           message:             'Sólo un SUPERADMIN de plataforma puede modificar esta cuenta',         } | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta no puede pasar a ese estado desde el que tiene | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta cambió de estado mientras se aplicaba: reintentá | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un administrador no puede suspender ni dar de baja su propia cuenta | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 422 | `PRECONDITION_FAILED` | Es la última cuenta que administra accesos: concedé ese rol a otra antes | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/reactivate"
+}
+```
+
+---
+
+## 41. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5162,7 +5743,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /iam/users/assisted-practitioner-registration
+## 42. POST /iam/users/{id}/suspend
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
+- **Operation ID:** `IamUsersController_suspend`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.suspend](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Suspender la cuenta con motivo (idempotente, cierra sus sesiones). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Suspende la cuenta (reversible): bloquea el acceso y cierra sus sesiones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/{id}/suspend` en `IamUsersController_suspend`. El controlador delega en `IamUsersService.suspend`. Valida el body como `UserLifecycleReasonDto` y consume `application/json`. El tipo de retorno estático es `Promise<UserLifecycleResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UserLifecycleReasonDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo administrativo, obligatorio. Queda en la bitácora de seguridad de la cuenta. No escribir datos clínicos. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 404 | No existe el usuario | `Promise<UserLifecycleResultDto>` | No |
+| 409 | Transición inválida desde ese estado | `Promise<UserLifecycleResultDto>` | No |
+| 412 | Cuenta propia o última cuenta administradora | `Promise<UserLifecycleResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UserLifecycleResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserLifecycleResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "state": "ACTIVE",
+  "changed": true,
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `state` | Sí | `string` | valores: `ACTIVE`, `SUSPENDED`, `DEACTIVATED`, `ANONYMIZED` | Estado en el que quedó la cuenta | `ACTIVE` |
+| `changed` | Sí | `boolean` | Sin restricción adicional declarada | `false` si la cuenta ya estaba en ese estado: la repetición no escribe nada (idempotente) | `true` |
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Sesiones activas que esta llamada cerró. 0 si no cambió nada o si reactivó | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | {           code: 'FORBIDDEN',           reason: IamErrorReason.USER_SUPERADMIN_LIFECYCLE_FORBIDDEN,           message:             'Sólo un SUPERADMIN de plataforma puede modificar esta cuenta',         } | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta no puede pasar a ese estado desde el que tiene | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | La cuenta cambió de estado mientras se aplicaba: reintentá | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un administrador no puede suspender ni dar de baja su propia cuenta | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 422 | `PRECONDITION_FAILED` | Es la última cuenta que administra accesos: concedé ese rol a otra antes | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/suspend"
+}
+```
+
+---
+
+## 43. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5288,6 +6007,8 @@ Content-Type: application/json
 | `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `institutionSlugs` | No | `array<string>` | máximo 10 elemento(s) | Slugs públicos de organizaciones; cada una recibe un pedido de vínculo pendiente de su aprobación | `["valor-ejemplo"]` |
+| `insurerCarrierIds` | No | `array<string>` | máximo 20 elemento(s) | Aseguradoras del catálogo público; cada una recibe una solicitud pendiente de su aprobación | `["00000000-0000-4000-8000-000000000001"]` |
 | `attestationAccepted` | No | `boolean` | Sin restricción adicional declarada | true si aceptó la declaración de veracidad y la verificación de sus datos | `true` |
 | `attestationTextVersion` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `2026-10-29` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
@@ -5387,6 +6108,12 @@ Content-Type: application/json
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
+  "institutionSlugs": [
+    "valor-ejemplo"
+  ],
+  "insurerCarrierIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
   "attestationAccepted": true,
   "attestationTextVersion": "2026-10-29",
   "reason": "Texto descriptivo de ejemplo",
@@ -5475,7 +6202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /iam/users/assisted-registration
+## 44. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5622,7 +6349,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /iam/users/search
+## 45. POST /iam/users/search
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

@@ -18,7 +18,7 @@ const DEPENDENT_ACTIVE = 'concept-dependent-active';
 const IMM_COMPLETED = 'concept-imm-completed';
 const BOB = 'concept-bob';
 
-/** Doble de `EntityManager`: sólo hace falta `getConnection().execute`, como el
+/** Doble de `EntityManager`: sólo hace falta `execute`, como el
  * resto de las agregaciones SQL del repo (`ProcedureNomenclatureService`). */
 function build(responses: unknown[][] = []) {
   const calls: { sql: string; params: unknown[] }[] = [];
@@ -27,7 +27,7 @@ function build(responses: unknown[][] = []) {
     calls.push({ sql, params });
     return Promise.resolve(responses[i++] ?? []);
   });
-  const em = { getConnection: () => ({ execute }) } as never;
+  const em = { execute } as never;
   return { em, llamadas: calls, repo: new InsuranceAnalyticsRepository() };
 }
 

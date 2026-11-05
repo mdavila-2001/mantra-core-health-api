@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import { PharmacyIntegrationConnections } from '../entities';
 import { createdBy } from '../../../common';
+import { PHARM } from '../pharmacy.concepts';
 
 /** Datos para establecer una conexión de integración (UC-24-07). */
 export interface CreateConnectionData {
@@ -78,6 +79,23 @@ export class PharmacyIntegrationConnectionsRepository {
     return em.findOne(PharmacyIntegrationConnections, {
       pharmacyId,
       connectionId,
+    });
+  }
+
+  /**
+   * Conexiones activas con consulta de stock del mismo nivel y alcance: las de
+   * la sucursal indicada o, sin sucursal, las de toda la farmacia.
+   */
+  findActiveStockInScope(
+    em: EntityManager,
+    pharmacyId: string,
+    pharmacySiteId: string | null,
+  ): Promise<PharmacyIntegrationConnections[]> {
+    return em.find(PharmacyIntegrationConnections, {
+      pharmacyId,
+      pharmacySiteId,
+      statusConceptId: PHARM.CONNECTION_ACTIVE,
+      supportsStockQuery: true,
     });
   }
 

@@ -1003,6 +1003,71 @@ describe('MedicationsService · MCH-007', () => {
     expect(d.auditTrail.record).not.toHaveBeenCalled();
   });
 
+  // Regla (c): poder escribir en la historia no es poder tocar lo que recetó otro.
+  it.each([
+    [
+      'editDraft',
+      (d: any) => d.service.editDraft('mr1', { doseText: 'x' }, otherDoctor),
+    ],
+    ['issue', (d: any) => d.service.issue('mr1', otherDoctor)],
+    [
+      'invalidate',
+      (d: any) => d.service.invalidate('mr1', { reasonText: 'x' }, otherDoctor),
+    ],
+    [
+      'replace',
+      (d: any) => d.service.replace('mr1', { reasonText: 'x' }, otherDoctor),
+    ],
+    ['renew', (d: any) => d.service.renew('mr1', {}, otherDoctor)],
+  ])(
+    '%s sobre la receta de otro profesional responde 403 aunque pueda escribir en la historia',
+    async (_name, operate) => {
+      const d = build();
+      const request = draft();
+      d.requestsRepo.findById.mockResolvedValue(request);
+
+      await expect(operate(d)).rejects.toThrow(
+        /sólo la modifica su prescriptor/,
+      );
+      expect(request).toEqual(draft());
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+      expect(d.requestsRepo.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('el prescriptor sí edita su propio borrador', async () => {
+    const d = build();
+    const request: any = draft();
+    d.requestsRepo.findById.mockResolvedValue(request);
+
+    await d.service.editDraft('mr1', { doseText: 'x' }, author);
+
+    expect(request.doseText).toBe('x');
+  });
+
+  it('firmar conserva su propio mensaje, no el de editar', async () => {
+    const d = build();
+    d.requestsRepo.findById.mockResolvedValue(draft());
+
+    await expect(d.service.sign('mr1', otherDoctor)).rejects.toThrow(
+      /no se puede firmar en nombre de otro profesional/,
+    );
+  });
+
+  it('una receta sin prescriptor ni creador registrados no tiene quién la reclame', async () => {
+    const d = build();
+    const request: any = {
+      ...draft(),
+      prescriberProfileId: undefined,
+      createdByUserId: undefined,
+    };
+    d.requestsRepo.findById.mockResolvedValue(request);
+
+    await d.service.editDraft('mr1', { doseText: 'x' }, otherDoctor);
+
+    expect(request.doseText).toBe('x');
+  });
+
   it('el prescriptor firma su receta', async () => {
     const d = build();
     const request = draft();

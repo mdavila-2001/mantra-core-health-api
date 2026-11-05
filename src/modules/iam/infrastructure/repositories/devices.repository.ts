@@ -53,4 +53,17 @@ export class DevicesRepository {
   findByUser(em: EntityManager, userId: string): Promise<Devices[]> {
     return em.find(Devices, { userId }, { orderBy: { createdAt: 'DESC' } });
   }
+
+  /** Device by id; `null` if it does not exist. */
+  findById(em: EntityManager, id: string): Promise<Devices | null> {
+    return em.findOne(Devices, { id });
+  }
+
+  /** Device by its (account-scoped) fingerprint. */
+  findByFingerprint(
+    em: EntityManager,
+    deviceFingerprint: string,
+  ): Promise<Devices | null> {
+    return em.findOne(Devices, { deviceFingerprint });
+  }
 }

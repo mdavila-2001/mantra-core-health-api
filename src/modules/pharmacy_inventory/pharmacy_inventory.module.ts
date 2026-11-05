@@ -113,8 +113,12 @@ import {
   InventoryReadRepository,
   InventoryScopeRepository,
   IntegrationReadRepository,
+  LedgerManagementRepository,
+  StockManagementRepository,
 } from './infrastructure/repositories';
 import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inventory-scope.policy';
+import { ReadInventoryManagementUseCase } from './application/inventory-management/read-inventory-management.use-case';
+import { PharmacyInventoryManagementController } from './presentation/controllers/pharmacy-inventory-management.controller';
 
 /**
  * Módulo 25 — Pharmacy Inventory, Supply and Dispensing.
@@ -151,6 +155,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyInventoryReadController,
     PharmacySiteAvailabilityController,
     PharmacyIntegrationSyncController,
+    PharmacyInventoryManagementController,
   ],
   providers: [
     // Repositorios
@@ -285,6 +290,9 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     InventoryTransfersService,
     InventorySyncService,
     PharmacyInventoryReadService,
+    LedgerManagementRepository,
+    StockManagementRepository,
+    ReadInventoryManagementUseCase,
   ],
 })
 export class PharmacyInventoryModule {}

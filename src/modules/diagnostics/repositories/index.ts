@@ -7,3 +7,4 @@ export * from './diagnostic-orders.repository';
 export * from './lab-reception.repository';
 export * from './clinical-refs.repository';
 export * from './service-request-worklist.repository';
+export * from './lab-portal.repository';

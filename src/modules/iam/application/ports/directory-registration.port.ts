@@ -43,6 +43,8 @@ export interface DirectoryRegistrationPort {
   createTenantMembership(tx: EntityManager, data: object): { id: string };
 
   findTenantByCode(tx: EntityManager, code: string): Promise<unknown>;
+  /** Case-insensitive match on legal or trade name (`identifier-exists`). */
+  tenantNameExists(tx: EntityManager, name: string): Promise<boolean>;
   createTenant(
     tx: EntityManager,
     data: object,

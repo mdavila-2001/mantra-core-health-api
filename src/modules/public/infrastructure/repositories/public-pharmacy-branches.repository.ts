@@ -48,7 +48,7 @@ export class PublicPharmacyBranchesRepository {
     tenantId: string,
     take: number,
   ): Promise<PublicBranchRow[]> {
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT site.id                AS "siteId",
               site.name              AS "siteName",
               COALESCE(NULLIF(btrim(ph.trade_name), ''), ph.legal_name) AS "pharmacyName",
@@ -118,7 +118,7 @@ export class PublicPharmacyBranchesRepository {
       .join(' OR ');
     const sitePlaceholders = siteIds.map(() => '?').join(', ');
     const availability = siteProductAvailabilitySql();
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT stock.site_id            AS "siteId",
               prod.id                  AS "productId",
               COALESCE(prod.generic_name, med.display, prod.brand_name, prod.product_code) AS "genericName",

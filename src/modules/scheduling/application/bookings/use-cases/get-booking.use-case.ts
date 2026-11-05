@@ -61,7 +61,7 @@ export class GetBookingUseCase {
     bookingId: string,
     actor?: AuthenticatedUser,
   ): Promise<BookingItemDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.bookingsRepo.findBookingById(em, bookingId);
     if (!booking) {
       throw new ResourceNotFoundException('Cita no encontrada', { bookingId });

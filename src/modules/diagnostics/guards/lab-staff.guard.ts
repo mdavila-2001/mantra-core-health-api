@@ -7,6 +7,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, roleAuthorizesInTenant } from '../../../common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { Tenants } from '../../directory/entities';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMembershipsRepository } from '../../directory/repositories';
@@ -107,16 +108,26 @@ export class LabStaffGuard implements CanActivate {
     userId: string,
     tenantId: string,
   ): Promise<boolean> {
-    const em = this.em.fork();
-    const tenant = await em.findOne(Tenants, { id: tenantId });
-    if (tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER)
-      return false;
-    const membership = await this.memberships.findActiveByUserTenant(
-      em,
-      userId,
+    // Guards run before the tenant interceptor: `tenant_memberships` is under
+    // RLS, so the read needs its own short transaction under the verified tenant.
+    return withTenantRls(
+      this.em,
       tenantId,
-      DIR.MEMBERSHIP_ACTIVE,
+      async (em) => {
+        const tenant = await em.findOne(Tenants, { id: tenantId });
+        if (
+          tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+        )
+          return false;
+        const membership = await this.memberships.findActiveByUserTenant(
+          em,
+          userId,
+          tenantId,
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+        return membership !== null;
+      },
+      { readOnly: true },
     );
-    return membership !== null;
   }
 }

@@ -121,7 +121,7 @@ interface LayoutInput {
   readonly validity: string;
 }
 
-function renderLayout(input: LayoutInput): string {
+export function renderLayout(input: LayoutInput): string {
   const paragraphs = input.paragraphs
     .map(
       (text) =>

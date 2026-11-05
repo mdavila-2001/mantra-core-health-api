@@ -73,7 +73,7 @@ export class TelemetryClickHeatmapRepository {
   constructor(private readonly em: EntityManager) {}
 
   private sql<T>(query: string, params: unknown[]): Promise<T[]> {
-    return this.em.getConnection().execute<T[]>(query, params, 'all');
+    return this.em.execute<T[]>(query, params, 'all');
   }
 
   /** CTE con un renglón por clic. Sus parámetros van primero en cada consulta. */

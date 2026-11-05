@@ -132,12 +132,21 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
   - **Qué es `quantity`.** La cantidad *disponible* del libro de existencias
     (`available_quantity`), no la física: la sincronización escribe
     `availableQuantity` con `MV_SYNC_ADJUSTMENT`.
-  - **Precedencia.** Dentro de una conexión, su sistema propio gana y, si no
-    tiene, se usa el del servidor. Si a las sedes de una conexión les aplica
-    además otra conexión activa que consulta stock (la de toda la farmacia
-    contra una de sede, o dos de la misma sede), la sincronización responde 409
-    `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids en conflicto y no
-    llama ni escribe nada: no se elige una en silencio.
+  - **Precedencia entre conexiones (regla de Itzan, C9-5).** Dentro de una
+    conexión, su sistema propio gana y, si no tiene, se usa el del servidor.
+    Entre conexiones:
+    - Una general (de toda la farmacia) y una de sucursal **coexisten**, y
+      **gana la sucursal** en su sede; la general sigue mandando en las demás.
+    - Dos conexiones activas de stock del **mismo nivel y alcance** (dos
+      generales, o dos de la misma sucursal) **se rechazan al configurar**:
+      409 `INTEGRATION_CONNECTION_SCOPE_TAKEN`.
+    - La **sincronización general excluye** las sucursales con conexión propia
+      y no pisa lo que ésta escribe.
+    - Si por datos anteriores a la regla ya hay duplicados del mismo nivel y
+      alcance, nunca se elige «la más nueva» o «la primera»: la sincronización
+      responde 409 `PHARMACY_INTEGRATION_CONNECTION_AMBIGUOUS` con los ids y no
+      llama ni escribe nada, y el pedido usa el stock manual
+      (`CONNECTION_PRECEDENCE`).
   - **Lotes.** Un producto que la sede lleva por lotes no se pisa con una
     existencia agregada (`SITE_PRODUCT_KEPT_BY_LOTS`) hasta que haya una
     política (por ejemplo FEFO).
@@ -207,3 +216,36 @@ Los comandos administrativos aceptan relaciones de inventario sin alcance de
 tenant, y los asientos de conteo/recall usan IDs de sede o ubicación como
 farmacia: el movimiento de stock no está validado sobre PostgreSQL con FK
 activas.
+
+## Lectura de gestión del inventario propio
+
+Cuatro `GET` de solo lectura para que el personal de la farmacia vea su propio
+inventario (`PharmacyInventoryManagementController`,
+`@Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')`). A diferencia del directorio del
+paciente (`/pharmacy-inventory/*`), ven también las sedes no publicadas.
+
+| Ruta | Devuelve | Filtros |
+| --- | --- | --- |
+| `GET /pharmacy/:pharmacyId/inventory/locations` | Ubicaciones activas con el nombre de su sede | `siteId` |
+| `GET /pharmacy/:pharmacyId/inventory/positions` | Posiciones de stock: producto, sede, ubicación, lote (número y `expiresAt`), `onHand`, `reserved`, `quarantine`, `available` | `siteId`, `locationId`, `productId`, `lotId`, `onlyWithStock` |
+| `GET /pharmacy/:pharmacyId/inventory/ledger` | Asientos del libro por secuencia de registro (`ledger_sequence`), la más reciente primero: fecha, secuencia, tipo de movimiento (`id`, `code`, `display`), producto, sede, ubicación, lote, `quantityDelta` con signo, origen (`sourceType`, `sourceId`) y costo unitario con su moneda si hay | `siteId`, `productId`, `lotId`, `movementType` (código del concepto tal como lo devuelve `movementType.code`, p. ej. `pharmacy_inventory:MV_RECEIPT`; solo se aceptan los tipos de movimiento del módulo), `from`, `to` |
+| `GET /pharmacy/:pharmacyId/inventory/lots` | Lotes por `expiresAt` ascendente (sin vencimiento al final): producto, número, estados de cuarentena y retiro, `onHandTotal` y `bySite` | `siteId`, `productId`, `expiringBefore` (`YYYY-MM-DD`, estricto), `includeExpired` |
+
+- **Paginación.** `positions`, `ledger` y `lots` usan `PaginationQueryDto`
+  (`page`, `pageSize`; 20 por defecto, 100 como máximo) y responden
+  `{ data, meta }` con `PageResponseDto`, como el resto de los listados de la
+  API. `sortBy` y `order` no aplican: el orden de cada ruta es fijo.
+- **Ámbito.** Cada ruta resuelve la farmacia contra el tenant de la sesión con
+  `PharmacyInventoryScopePolicy`, y cada `siteId`, `locationId`, `productId` o
+  `lotId` de la consulta dentro de esa farmacia. Una farmacia ajena o
+  inexistente, o un id de otra farmacia, responde el mismo 404 uniforme.
+  Las tablas de inventario no tienen RLS: el aislamiento es esa política.
+- **Existencias de un lote.** `bySite` suma `on_hand` de las posiciones del lote
+  por sede; con `siteId` solo salen los lotes con posiciones en esa sede y el
+  total cuenta esa sede. Los vencidos (`expires_at` anterior a hoy) solo salen
+  con `includeExpired=true`.
+- **Booleanos de consulta.** `onlyWithStock` e `includeExpired` se envían como
+  `true` o `false`. `onlyWithStock` deja las posiciones con existencia física o
+  en cuarentena.
+- **Rótulos.** El tipo de movimiento y los estados del lote salen como
+  `{ code, display }` del concepto; el `display` es el del catálogo.

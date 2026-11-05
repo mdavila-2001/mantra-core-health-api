@@ -159,7 +159,7 @@ export class SurveysInsightsService {
       serviceId: query.serviceId,
       ...this.resolvePeriod(query),
     };
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     const spanDays =
       (scope.toExclusive!.getTime() - scope.from!.getTime()) / MS_PER_DAY;

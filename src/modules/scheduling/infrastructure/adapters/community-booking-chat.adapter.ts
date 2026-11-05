@@ -33,42 +33,45 @@ export class CommunityBookingChatAdapter implements BookingChatPort {
     actor: AuthenticatedUser,
   ): Promise<boolean> {
     try {
-      const em = this.em.fork();
-      const cita = await this.noticeRepo.describeBooking(em, bookingId);
-      if (!cita || !cita.resourceId || !cita.startAt) return false;
-      const [pacienteUserId, profesionalUserId] = await Promise.all([
-        this.noticeRepo.findAccountForProfile(em, cita.patientProfileId),
-        this.noticeRepo.findResourceAccount(em, cita.resourceId),
-      ]);
-      if (!pacienteUserId || !profesionalUserId) return false;
-      const cuando = new Intl.DateTimeFormat('es-BO', {
-        dateStyle: 'full',
-        timeStyle: 'short',
-        timeZone: 'America/La_Paz',
-      }).format(cita.startAt);
-      return await this.chat.enviarConfirmacion(
-        {
-          profesional: {
-            userId: profesionalUserId,
-            practitionerProfileId: actor.practitionerProfileId,
-          },
-          pacienteUserId,
-          // Con emojis y el enlace a la cita: el frontend lo pinta como botón
-          // «Ir a la cita» para los dos lados del hilo.
-          texto: bookingConfirmationChatText(
+      return await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const cita = await this.noticeRepo.describeBooking(em, bookingId);
+          if (!cita || !cita.resourceId || !cita.startAt) return false;
+          const [pacienteUserId, profesionalUserId] = await Promise.all([
+            this.noticeRepo.findAccountForProfile(em, cita.patientProfileId),
+            this.noticeRepo.findResourceAccount(em, cita.resourceId),
+          ]);
+          if (!pacienteUserId || !profesionalUserId) return false;
+          const cuando = new Intl.DateTimeFormat('es-BO', {
+            dateStyle: 'full',
+            timeStyle: 'short',
+            timeZone: 'America/La_Paz',
+          }).format(cita.startAt);
+          return await this.chat.enviarConfirmacion(
             {
-              bookingId: cita.bookingId,
-              resourceLabel: cita.resourceLabel,
-              when: cuando,
-              ...(cita.siteLabel === undefined
-                ? {}
-                : { siteLabel: cita.siteLabel }),
+              profesional: {
+                userId: profesionalUserId,
+                practitionerProfileId: actor.practitionerProfileId,
+              },
+              pacienteUserId,
+              // Con emojis y el enlace a la cita: el frontend lo pinta como botón
+              // «Ir a la cita» para los dos lados del hilo.
+              texto: bookingConfirmationChatText(
+                {
+                  bookingId: cita.bookingId,
+                  resourceLabel: cita.resourceLabel,
+                  when: cuando,
+                  ...(cita.siteLabel === undefined
+                    ? {}
+                    : { siteLabel: cita.siteLabel }),
+                },
+                this.env.webAppBaseUrl,
+              ),
             },
-            this.env.webAppBaseUrl,
-          ),
-        },
-        actor,
-      );
+            actor,
+          );
+        });
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.booking.chat', bookingId, err: error },

@@ -8,6 +8,11 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import {
+  applyTenantRls,
+  isRlsEnforced,
+  readWithSystemRls,
+} from '../../../common/tenant/rls-transaction';
 import { DIR } from '../../directory/directory.concepts';
 import { IamErrorReason } from '../../iam/iam.error-reasons';
 import { IamSupportStaffSelfRegistrationService } from '../../iam/application/services';
@@ -57,13 +62,16 @@ export class SupportStaffProvisioningService {
       );
     }
 
-    const em = this.em.fork();
-    const role =
-      await this.provisioningRepo.findActiveRoleAssignmentOfPractitioner(
-        em,
-        actor.practitionerProfileId,
+    // The practitioner works across hospitals with no active tenant: the read is
+    // bound to the actor's own profile, so it runs read-only with system context.
+    const practitionerProfileId = actor.practitionerProfileId;
+    const role = await readWithSystemRls(this.em, (tx) =>
+      this.provisioningRepo.findActiveRoleAssignmentOfPractitioner(
+        tx,
+        practitionerProfileId,
         dto.practitionerRoleAssignmentId,
-      );
+      ),
+    );
     if (!role) {
       throw new ResourceNotFoundException(
         'Vinculación no encontrada o no pertenece al médico',
@@ -75,6 +83,9 @@ export class SupportStaffProvisioningService {
     const secretary = await this.obtainSecretary(dto, ip);
 
     const { linkId } = await this.em.transactional(async (tx) => {
+      // `@TenantAgnostic` route: no request transaction to inherit. The membership
+      // lands in the tenant of the practitioner's own assignment, read above.
+      if (isRlsEnforced()) await applyTenantRls(tx, role.tenantId);
       await this.provisioningRepo.ensureActiveTenantMembership(tx, {
         userId: secretary.userId,
         tenantId: role.tenantId,

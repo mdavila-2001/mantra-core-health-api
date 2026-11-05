@@ -75,3 +75,16 @@ export interface DeclaredPersonName extends PersonNameParts {
 export function composeAccountDisplayName(name: DeclaredPersonName): string {
   return name.displayName ?? composePersonDisplayName(name) ?? '';
 }
+
+/**
+ * Comparison key of a person's name: lower case, no accents, single spaces.
+ * «leonardo loayza vargas» and «Leonardo  Loayza Vargás» share one key.
+ */
+export function personNameKey(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}

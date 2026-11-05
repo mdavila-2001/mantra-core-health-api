@@ -3,12 +3,16 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pg from 'pg';
 
+import { PHARM } from '../../src/modules/pharmacy/pharmacy.concepts';
+
 /**
  * FAR-C9 · H-01 — lectura acotada de las farmacias publicadas por el paciente
  * que navega el mercado, con RLS REAL sobre `pharmacy.pharmacies`.
  *
- * Aplica `2026-08-05_tenant_rls.sql` y `2026-11-03_v4286_farmacias_mercado_
- * lectura_paciente.sql` y demuestra, conectado COMO `mantra_app` (sin BYPASSRLS):
+ * Aplica `2026-08-05_tenant_rls.sql`, `2026-11-03_v4286_farmacias_mercado_
+ * lectura_paciente.sql` y `2026-11-04_farmacias_mercado_por_id.sql` (the policy
+ * compares by concept id; the concepts are seeded with their real id and code)
+ * y demuestra, conectado COMO `mantra_app` (sin BYPASSRLS):
  *   1. Sin `app.marketplace_viewer`, un paciente de A sólo ve lo de A (nada cambia).
  *   2. Con el GUC, ve además las farmacias PUBLICADAS de otras organizaciones, y
  *      sólo esas: ni borradores ni sin verificar.
@@ -47,12 +51,18 @@ const TENANT_C = '33333333-3333-4333-8333-3333333333c3';
 const TENANT_D = '44444444-4444-4444-8444-4444444444d4';
 const TENANT_E = '55555555-5555-4555-8555-5555555555e5';
 
+// The real concepts, with the id and the code they have in the database: module
+// concepts are stored with their key as code (`pharmacy:PHARMACY_ACTIVE`), not with
+// the `PHARM_*` code of their definition. Seeding invented ids hid that the policy
+// compared against codes that do not exist.
 const CONCEPT = {
-  active: 'c0a10000-0000-4000-8000-000000000001',
-  draft: 'c0a10000-0000-4000-8000-000000000002',
-  verified: 'c0a10000-0000-4000-8000-000000000003',
-  pending: 'c0a10000-0000-4000-8000-000000000004',
+  active: PHARM.PHARMACY_ACTIVE,
+  draft: PHARM.PHARMACY_DRAFT,
+  verified: PHARM.VERIFICATION_VERIFIED,
+  pending: PHARM.VERIFICATION_PENDING,
 };
+/** The concept rows this suite inserted (the seed may already have them). */
+let insertedConcepts: string[] = [];
 const PHARMACY = {
   a: 'a0a10000-0000-4000-8000-0000000000a1',
   b: 'b0a10000-0000-4000-8000-0000000000b1',
@@ -106,8 +116,9 @@ describeRls(
       );
       await admin.query(
         'DELETE FROM terminology.catalog_concepts WHERE id = ANY($1)',
-        [Object.values(CONCEPT)],
+        [insertedConcepts],
       );
+      insertedConcepts = [];
     }
 
     beforeAll(async () => {
@@ -131,6 +142,13 @@ describeRls(
           'utf8',
         ),
       );
+      // Replaces the v4.2.86 policy: compare by concept id, not by code text.
+      await admin.query(
+        readFileSync(
+          join(patches, '2026-11-04_farmacias_mercado_por_id.sql'),
+          'utf8',
+        ),
+      );
       if (BOOTSTRAP_LOCAL_ROLE) {
         await admin.query(
           "ALTER ROLE mantra_app LOGIN PASSWORD 'mantra_app_dev'",
@@ -142,14 +160,17 @@ describeRls(
       // organizaciones, versiones de catálogo ni nada ajeno a lo que se prueba.
       await admin.query('BEGIN');
       await admin.query("SET LOCAL session_replication_role = 'replica'");
-      await admin.query(
+      // Only the concepts the seed has not created yet; those are removed at the end.
+      const seeded = await admin.query<{ id: string }>(
         `INSERT INTO terminology.catalog_concepts
          (id, code_system_version_id, code, display, created_at, updated_at)
        VALUES
-         ($1, $5, 'PHARM_PHARMACY_ACTIVE', 'activa', now(), now()),
-         ($2, $5, 'PHARM_PHARMACY_DRAFT', 'borrador', now(), now()),
-         ($3, $5, 'PHARM_VERIFICATION_VERIFIED', 'verificada', now(), now()),
-         ($4, $5, 'PHARM_VERIFICATION_PENDING', 'pendiente', now(), now())`,
+         ($1, $5, 'pharmacy:PHARMACY_ACTIVE', 'activa', now(), now()),
+         ($2, $5, 'pharmacy:PHARMACY_DRAFT', 'borrador', now(), now()),
+         ($3, $5, 'pharmacy:VERIFICATION_VERIFIED', 'verificada', now(), now()),
+         ($4, $5, 'pharmacy:VERIFICATION_PENDING', 'pendiente', now(), now())
+       ON CONFLICT DO NOTHING
+       RETURNING id`,
         [
           CONCEPT.active,
           CONCEPT.draft,
@@ -158,6 +179,7 @@ describeRls(
           'c0a10000-0000-4000-8000-0000000000ff',
         ],
       );
+      insertedConcepts = seeded.rows.map((row) => row.id);
       const pharmacy = (
         id: string,
         tenant: string,

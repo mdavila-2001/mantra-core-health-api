@@ -10,6 +10,10 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ClinicalReadService } from './clinical-read.service';
+import { FULL_READ_SCOPE as FULL } from '../domain/clinical-read-scope';
+import { AUTHZ } from '../../authz/authz.concepts';
+import { CLIN } from '../clinical.concepts';
+import { Conditions } from '../entities';
 
 /**
  * El aislamiento entre historias clínicas (carril 09).
@@ -133,7 +137,12 @@ function build() {
    */
   const careRelations = new Map<
     string,
-    { validFrom: Date; validTo?: Date; purposeConceptId?: string }[]
+    {
+      validFrom: Date;
+      validTo?: Date;
+      purposeConceptId?: string;
+      relationshipTypeConceptId?: string;
+    }[]
   >();
   const careRelationshipsRepo = {
     findActiveForPractitionerPatient: mockFn(
@@ -148,11 +157,12 @@ function build() {
     validFrom: Date = new Date(Date.now() - 86_400_000),
     validTo?: Date,
     purposeConceptId?: string,
+    relationshipTypeConceptId?: string,
   ) => {
     const previous = careRelations.get(key(pro, pac)) ?? [];
     careRelations.set(key(pro, pac), [
       ...previous,
-      { validFrom, validTo, purposeConceptId },
+      { validFrom, validTo, purposeConceptId, relationshipTypeConceptId },
     ]);
   };
 
@@ -182,6 +192,19 @@ function build() {
   };
   em.flush = mockFn().mockResolvedValue(undefined);
 
+  // Alcance por especialidad: por omisión todo lo que abre la historia la abre
+  // completa y no hay encuentro propio; cada prueba lo dicta cuando le importa.
+  const granularScope = {
+    resolve: mockFn().mockResolvedValue({ kind: 'FULL' }),
+    hasWriteLevelGrant: mockFn().mockResolvedValue(false),
+  };
+  const scopeFilter = { build: mockFn().mockResolvedValue(null) };
+  const scopeRepo = {
+    isOwnOpenEncounter: mockFn().mockResolvedValue(false),
+    hasOwnOpenEncounter: mockFn().mockResolvedValue(false),
+    page: mockFn(),
+  };
+
   const service = new ClinicalReadService(
     em as any,
     empty as any,
@@ -201,6 +224,9 @@ function build() {
     representation as any,
     dataAccessLogRepo as any,
     historyRepo as any,
+    granularScope as any,
+    scopeFilter as any,
+    scopeRepo as any,
   );
 
   return {
@@ -223,6 +249,9 @@ function build() {
     vacio: empty,
     allergyReactionsRepo,
     historyRepo,
+    granularScope,
+    scopeFilter,
+    scopeRepo,
   };
 }
 
@@ -246,6 +275,7 @@ describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.patientProfileId).toBe(HOLDER_PERSON);
@@ -266,7 +296,7 @@ describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
 
   it('el asiento no lleva contenido clínico: sólo identificadores', async () => {
     const d = build();
-    await d.service.getPatientSummary(HOLDER_PERSON, 50, medical);
+    await d.service.getPatientSummary(HOLDER_PERSON, 50, medical, FULL);
     const entry = d.dataAccessLogRepo.record.mock.calls[0][1];
     expect(Object.keys(entry).sort()).toEqual(
       [
@@ -286,7 +316,7 @@ describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
     const d = build();
     d.em.flush.mockRejectedValue(new Error('audit down'));
     await expect(
-      d.service.getPatientSummary(HOLDER_PERSON, 50, medical),
+      d.service.getPatientSummary(HOLDER_PERSON, 50, medical, FULL),
     ).rejects.toThrow('audit down');
   });
 });
@@ -333,6 +363,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.conditions[0].lateralityConceptId).toBe('lat-1');
@@ -368,6 +399,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.medicationRequests[0].quantityDecimal).toBe(4);
@@ -393,6 +425,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.allergies[0].reactions).toEqual([
@@ -441,6 +474,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.conditions[0].lastStatusChangeReasonText).toBe('Remite');
@@ -481,6 +515,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
       HOLDER_PERSON,
       50,
       medical,
+      FULL,
     );
 
     expect(summary.conditions[0].lastStatusChangeReasonText).toBe(
@@ -769,6 +804,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
           purposeOfUse: 'TREATMENT',
         }),
         expect.anything(),
+        expect.anything(),
       );
     });
 
@@ -815,6 +851,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
           purposeOfUse: 'EMERGENCY',
         }),
         expect.anything(),
+        expect.anything(),
       );
     });
 
@@ -833,6 +870,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       ).resolves.toBeUndefined();
       expect(c.pdp.evaluate).toHaveBeenCalledWith(
         expect.objectContaining({ action: 'WRITE', purposeOfUse: 'EMERGENCY' }),
+        expect.anything(),
         expect.anything(),
       );
     });
@@ -1159,6 +1197,7 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     expect(c.pdp.evaluate).toHaveBeenLastCalledWith(
       expect.objectContaining({ action: 'WRITE', patientProfileId: PATIENT }),
       expect.anything(),
+      expect.anything(),
     );
   });
 
@@ -1179,10 +1218,11 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
-  it('quien lo atiende hoy escribe sin preguntarle al PDP', async () => {
+  it('quien lo atiende hoy escribe, dentro de un encuentro propio abierto, sin preguntarle al PDP', async () => {
     const c = doctorWithoutSlot();
     const now = new Date();
     c.agendar(DOCTOR, PATIENT, now, LA_PAZ);
+    c.scopeRepo.hasOwnOpenEncounter.mockResolvedValue(true);
 
     await expect(
       c.service.assertCanWriteHistory(PATIENT, doctor()),
@@ -1228,5 +1268,510 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
         scopedRoles: { 'tenant-a': ['SUPERADMIN'] },
       } as any),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});
+
+/**
+ * Alcance de lectura por especialidad: `resolveReadScope` devuelve la historia
+ * completa o solo las especialidades que el paciente autorizó, y
+ * `assertCanReadHistory` sigue siendo el sí/no de siempre.
+ */
+describe('ClinicalReadService · resolveReadScope', () => {
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const LA_PAZ = 'America/La_Paz';
+  const SPECIALTIES = {
+    kind: 'SPECIALTIES',
+    specialtyConceptIds: ['esp-cardio'],
+  };
+
+  const doctor = () =>
+    ({
+      id: 'u',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: DOCTOR,
+      tenantIds: ['t1'],
+    }) as any;
+
+  function doctorWithoutSlot() {
+    const c = build();
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    return c;
+  }
+
+  type Built = ReturnType<typeof build>;
+
+  it('SUPERADMIN y el titular leen todo', async () => {
+    const c = build();
+    c.darDeAltaPaciente(PATIENT);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+      personId: PATIENT,
+    });
+
+    await expect(
+      c.service.resolveReadScope(PATIENT, {
+        id: 'r',
+        roles: ['SUPERADMIN'],
+      } as any),
+    ).resolves.toEqual(FULL);
+    await expect(
+      c.service.resolveReadScope(PATIENT, {
+        id: 'u',
+        roles: ['PATIENT'],
+      } as any),
+    ).resolves.toEqual(FULL);
+  });
+
+  it.each([
+    ['la consulta en curso', (c: Built) => c.iniciarConsulta(DOCTOR, PATIENT)],
+    [
+      'el turno de hoy',
+      (c: Built) => c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ),
+    ],
+    [
+      'una relación que no es la cabecera',
+      (c: Built) =>
+        c.vincular(
+          DOCTOR,
+          PATIENT,
+          undefined,
+          undefined,
+          undefined,
+          AUTHZ.CARE_REL_TREATING,
+        ),
+    ],
+    [
+      'la cabecera',
+      (c: Built) =>
+        c.vincular(
+          DOCTOR,
+          PATIENT,
+          undefined,
+          undefined,
+          undefined,
+          AUTHZ.CARE_REL_PRIMARY,
+        ),
+    ],
+  ])(
+    '%s abre la historia completa sin consultar el consentimiento',
+    async (_name, arrange) => {
+      const c = doctorWithoutSlot();
+      arrange(c);
+
+      await expect(
+        c.service.resolveReadScope(PATIENT, doctor()),
+      ).resolves.toEqual(FULL);
+      expect(c.granularScope.resolve).not.toHaveBeenCalled();
+      expect(c.pdp.evaluate).not.toHaveBeenCalled();
+    },
+  );
+
+  it('cuando solo el PDP concede, el alcance lo decide el consentimiento granular', async () => {
+    const c = doctorWithoutSlot();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    c.granularScope.resolve.mockResolvedValue(SPECIALTIES);
+
+    await expect(
+      c.service.resolveReadScope(PATIENT, doctor()),
+    ).resolves.toEqual(SPECIALTIES);
+    expect(c.granularScope.resolve).toHaveBeenCalledWith(
+      c.em,
+      PATIENT,
+      expect.objectContaining({ id: 'u' }),
+    );
+  });
+
+  it('el acceso de emergencia lee todo aunque no haya consentimiento granular', async () => {
+    const c = doctorWithoutSlot();
+    c.pdp.evaluate.mockImplementation(async (dto: any) => ({
+      decision: dto.purposeOfUse === 'EMERGENCY' ? 'PERMIT' : 'DENY',
+    }));
+
+    await expect(
+      c.service.resolveReadScope(PATIENT, doctor()),
+    ).resolves.toEqual(FULL);
+    expect(c.granularScope.resolve).not.toHaveBeenCalled();
+  });
+
+  it('sin ninguna base devuelve el mismo 403 de siempre', async () => {
+    const c = doctorWithoutSlot();
+    await expect(
+      c.service.resolveReadScope(PATIENT, doctor()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('assertCanReadHistory delega en resolveReadScope y conserva el sí/no', async () => {
+    const c = doctorWithoutSlot();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    c.granularScope.resolve.mockResolvedValue(SPECIALTIES);
+    const spy = jest.spyOn(c.service, 'resolveReadScope');
+
+    await expect(
+      c.service.assertCanReadHistory(PATIENT, doctor()),
+    ).resolves.toBeUndefined();
+    expect(spy).toHaveBeenCalledWith(
+      PATIENT,
+      expect.objectContaining({ id: 'u' }),
+      undefined,
+    );
+  });
+});
+
+describe('ClinicalReadService · getPatientSummary por alcance', () => {
+  const PATIENT = '11111111-1111-1111-1111-111111111111';
+  const medical = {
+    id: 'user-medica',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-1',
+  } as any;
+  const SPECIALTIES = {
+    kind: 'SPECIALTIES',
+    specialtyConceptIds: ['esp-cardio'],
+  } as const;
+  const FILTER = {
+    profileIds: ['hp-9'],
+    userIds: ['u-9'],
+    encounterIds: ['enc-9'],
+  };
+
+  it('sin alcance lo calcula: un alcance ausente no se asume completo', async () => {
+    const d = build();
+    // Sin turno ni consentimiento ni vínculo: el cálculo corta con 403.
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+    await expect(
+      d.service.getPatientSummary(PATIENT, 50, medical),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.dataAccessLogRepo.record).not.toHaveBeenCalled();
+  });
+
+  it('con alcance completo no filtra ni informa lo oculto', async () => {
+    const d = build();
+    const summary = await d.service.getPatientSummary(
+      PATIENT,
+      50,
+      medical,
+      FULL,
+    );
+
+    expect(d.scopeFilter.build).toHaveBeenCalledWith(d.em, PATIENT, FULL);
+    expect(d.scopeRepo.page).not.toHaveBeenCalled();
+    expect(summary.hiddenByScope).toBeUndefined();
+  });
+
+  it('con especialidades lee en SQL con lo IPS siempre visible y cuenta lo oculto', async () => {
+    const d = build();
+    d.scopeFilter.build.mockResolvedValue(FILTER);
+    d.scopeRepo.page.mockResolvedValue({ rows: [], hidden: 2 });
+
+    const summary = await d.service.getPatientSummary(
+      PATIENT,
+      50,
+      medical,
+      SPECIALTIES,
+    );
+
+    expect(d.scopeFilter.build).toHaveBeenCalledWith(
+      d.em,
+      PATIENT,
+      SPECIALTIES,
+    );
+    expect(d.scopeRepo.page).toHaveBeenCalledTimes(5);
+    const conditions = d.scopeRepo.page.mock.calls.find(
+      (call: any[]) => call[1].entity === Conditions,
+    )[1];
+    expect(conditions.filter).toBe(FILTER);
+    expect(conditions.limit).toBe(51);
+    expect(conditions.always).toEqual([
+      {
+        clinicalStatusConceptId: {
+          $in: [
+            CLIN.CONDITION_ACTIVE,
+            CLIN.CONDITION_RECURRENCE,
+            CLIN.CONDITION_RELAPSE,
+          ],
+        },
+      },
+    ]);
+    // Las alergias son IPS completas: no pasan por el filtro.
+    expect(d.vacio.findByPatient).toHaveBeenCalled();
+    expect(summary.hiddenByScope).toEqual({
+      conditions: 2,
+      medicationRequests: 2,
+      observations: 2,
+      encounters: 2,
+      careEpisodes: 2,
+    });
+  });
+
+  it('el asiento de auditoría se escribe igual con alcance reducido', async () => {
+    const d = build();
+    d.scopeFilter.build.mockResolvedValue(FILTER);
+    d.scopeRepo.page.mockResolvedValue({ rows: [], hidden: 0 });
+
+    await d.service.getPatientSummary(PATIENT, 50, medical, SPECIALTIES);
+
+    expect(d.dataAccessLogRepo.record).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * Escritura (reglas (a) y (b)): una relación que no es la cabecera no habilita
+ * escribir por sí sola, y una base de atención escribe dentro de un encuentro
+ * abierto del propio profesional.
+ */
+describe('ClinicalReadService · escritura por base de atención', () => {
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const LA_PAZ = 'America/La_Paz';
+  const doctor = () =>
+    ({
+      id: 'u',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: DOCTOR,
+      tenantIds: ['t1'],
+    }) as any;
+  type Built = ReturnType<typeof build>;
+  const pdpThatGrants = (c: Built, actions: string[]) =>
+    c.pdp.evaluate.mockImplementation(
+      async (dto: { action: string; purposeOfUse: string }) => ({
+        decision:
+          actions.includes(dto.action) && dto.purposeOfUse === 'TREATMENT'
+            ? 'PERMIT'
+            : 'DENY',
+      }),
+    );
+
+  function doctorWithoutSlot() {
+    const c = build();
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    return c;
+  }
+  const relation = (c: Built, type: string) =>
+    c.vincular(DOCTOR, PATIENT, undefined, undefined, undefined, type);
+
+  it('la cabecera escribe sin encuentro y sin preguntarle al PDP', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_PRIMARY);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).resolves.toBeUndefined();
+    expect(c.pdp.evaluate).not.toHaveBeenCalled();
+    expect(c.scopeRepo.hasOwnOpenEncounter).not.toHaveBeenCalled();
+  });
+
+  it('la cabecera con turno hoy tampoco queda acotada a un encuentro', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_PRIMARY);
+    c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-ajeno',
+      }),
+    ).resolves.toBeUndefined();
+    expect(c.scopeRepo.isOwnOpenEncounter).not.toHaveBeenCalled();
+  });
+
+  it('una relación que no es cabecera NO escribe sin un encuentro propio abierto (a)', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_TREATING);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(c.scopeRepo.hasOwnOpenEncounter).toHaveBeenCalledWith(
+      c.em,
+      PATIENT,
+      DOCTOR,
+    );
+  });
+
+  it('esa misma relación escribe cuando hay un encuentro abierto del propio profesional', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_TREATING);
+    c.scopeRepo.hasOwnOpenEncounter.mockResolvedValue(true);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).resolves.toBeUndefined();
+  });
+
+  it('con encuentro en la petición se exige que sea propio, abierto y de ese paciente (b)', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_TREATING);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(c.scopeRepo.isOwnOpenEncounter).toHaveBeenCalledWith(
+      c.em,
+      'enc-1',
+      PATIENT,
+      DOCTOR,
+    );
+
+    c.scopeRepo.isOwnOpenEncounter.mockResolvedValue(true);
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('el turno de hoy sin encuentro propio abierto NO escribe (b)', async () => {
+    const c = doctorWithoutSlot();
+    c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(c.scopeRepo.hasOwnOpenEncounter).toHaveBeenCalledWith(
+      c.em,
+      PATIENT,
+      DOCTOR,
+    );
+  });
+
+  it('el turno de hoy con un encuentro propio abierto escribe sin encounterId', async () => {
+    const c = doctorWithoutSlot();
+    c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
+    c.scopeRepo.hasOwnOpenEncounter.mockResolvedValue(true);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).resolves.toBeUndefined();
+  });
+
+  it('la consulta en curso sin encuentro propio abierto NO escribe (b)', async () => {
+    const c = doctorWithoutSlot();
+    c.iniciarConsulta(DOCTOR, PATIENT);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('base de atención con encounterId propio y abierto escribe; con uno ajeno no', async () => {
+    const c = doctorWithoutSlot();
+    c.agendar(DOCTOR, PATIENT, new Date(), LA_PAZ);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-ajeno',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    c.scopeRepo.isOwnOpenEncounter.mockResolvedValue(true);
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), {
+        encounterId: 'enc-1',
+      }),
+    ).resolves.toBeUndefined();
+    expect(c.scopeRepo.isOwnOpenEncounter).toHaveBeenLastCalledWith(
+      c.em,
+      'enc-1',
+      PATIENT,
+      DOCTOR,
+    );
+  });
+
+  it('un PDP que concede WRITE solo por una relación no abre la escritura', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_TREATING);
+    pdpThatGrants(c, ['READ', 'WRITE']);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('un grant de escritura sí la abre aunque haya una relación', async () => {
+    const c = doctorWithoutSlot();
+    relation(c, AUTHZ.CARE_REL_TREATING);
+    pdpThatGrants(c, ['READ', 'WRITE']);
+    c.granularScope.hasWriteLevelGrant.mockResolvedValue(true);
+
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('ClinicalReadService · puerta con el manager del guard (RLS)', () => {
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const scoped = { tag: 'scoped-by-the-guard' } as any;
+  const doctor = () =>
+    ({
+      id: 'u',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: DOCTOR,
+      tenantIds: ['t1'],
+    }) as any;
+  const withDoctor = () => {
+    const c = build();
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    return c;
+  };
+
+  it('la lectura usa el manager recibido en vez de forkear, y se lo pasa al PDP', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await expect(
+      c.service.assertCanReadHistory(PATIENT, doctor(), scoped),
+    ).resolves.toBeUndefined();
+    expect(c.em.fork).not.toHaveBeenCalled();
+    expect(c.accountLinksRepo.findActiveByUser).toHaveBeenCalledWith(
+      scoped,
+      'u',
+    );
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('la escritura usa el manager recibido y se lo pasa al PDP', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, doctor(), { scoped }),
+    ).resolves.toBeUndefined();
+    expect(c.em.fork).not.toHaveBeenCalled();
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'WRITE' }),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('el PDP sigue evaluando con el primer tenant del token, no con el del manager', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await c.service.assertCanReadHistory(
+      PATIENT,
+      { ...doctor(), tenantIds: ['t1', 't2'] },
+      scoped,
+    );
+    expect(c.pdp.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 't1' }),
+      expect.anything(),
+      scoped,
+    );
+  });
+
+  it('sin manager recibido forkea como siempre', async () => {
+    const c = withDoctor();
+    c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+    await c.service.assertCanReadHistory(PATIENT, doctor());
+    expect(c.em.fork).toHaveBeenCalled();
   });
 });

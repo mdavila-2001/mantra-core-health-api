@@ -87,6 +87,7 @@ function build() {
     findByPractitioners: mockFn().mockResolvedValue([]),
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
     findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
+    findProfileIdsBySpecialties: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
     findById: mockFn(),
     findByIdForUpdate: mockFn(),
@@ -3038,6 +3039,18 @@ describe('ProfilesPractitionersService', () => {
         ratingCount: 0,
         activity: { encounters: 0 },
       });
+    });
+
+    /** A SQL error in the figures must not abort the request transaction. */
+    it('reads the figures in a savepoint that inherits the transaction', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+      expect(d.em.transactional).toHaveBeenCalled();
+      expect(d.practitionerContext.directoryStats.mock.calls[0][0]).toBe(d.tx);
     });
 
     /** La fila de más existe sólo para saber si hay página siguiente. */

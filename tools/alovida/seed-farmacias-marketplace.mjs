@@ -182,6 +182,13 @@ const CATALOGO = [
   { atc: 'J01DD04', marca: 'Rocephin', forma: 'tableta', fuerza: '1 g', envase: 'Vial inyectable', precioBase: 74.0, receta: true, cobertura: 3 },
   { atc: 'J01GB03', marca: 'Garamicina', forma: 'tableta', fuerza: '80 mg/2 ml', envase: 'Caja x 5 ampollas', precioBase: 58.0, receta: true, cobertura: 2 },
   { atc: 'J01XA01', marca: 'Vancocin', forma: 'tableta', fuerza: '500 mg', envase: 'Vial inyectable', precioBase: 165.0, receta: true, cobertura: 2 },
+  // Digestive: without them «dolor abdominal», «gases» or «diarrea» had
+  // nothing published to find (LINAME concepts, ATC A02/A03/A07).
+  { atc: 'A03BB01', marca: 'Buscapina', forma: 'tableta', fuerza: '10 mg', envase: 'Caja x 20 grageas', precioBase: 32.0, receta: false, cobertura: 7 },
+  { atc: 'A03AX13', marca: 'Luftal', forma: 'tableta', fuerza: '40 mg', envase: 'Caja x 20 tabletas masticables', precioBase: 21.0, receta: false, cobertura: 6 },
+  { atc: 'A02AD01', marca: 'Mylanta', forma: 'suspensión', fuerza: '1:1', envase: 'Frasco x 360 ml', precioBase: 39.0, receta: false, cobertura: 6 },
+  { atc: 'A07DA03', marca: 'Imodium', forma: 'cápsula', fuerza: '2 mg', envase: 'Caja x 12 cápsulas', precioBase: 27.0, receta: false, cobertura: 5 },
+  { atc: 'A03FA01', marca: 'Plasil', forma: 'tableta', fuerza: '10 mg', envase: 'Caja x 20 tabletas', precioBase: 29.0, receta: true, cobertura: 4 },
 ];
 
 /* ── Utilidades ──────────────────────────────────────────────────────────── */

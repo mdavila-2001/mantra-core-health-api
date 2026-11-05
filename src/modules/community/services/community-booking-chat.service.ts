@@ -47,48 +47,52 @@ export class CommunityBookingChatService {
     actor: AuthenticatedUser,
   ): Promise<boolean> {
     try {
-      const em = this.em.fork();
-      let delProfesional = null;
-      for (const sujeto of [
-        datos.profesional.practitionerProfileId,
-        datos.profesional.userId,
-      ]) {
-        if (!sujeto) continue;
-        delProfesional = await this.profilesRepo.findByTarget(em, sujeto);
-        if (delProfesional) break;
-      }
-      const delPaciente = await this.profilesRepo.findByTarget(
-        em,
-        datos.pacienteUserId,
-      );
-      if (!delProfesional || !delPaciente) {
-        this.logger.info(
-          {
-            operation: 'community.booking-chat.skipped',
-            profesionalConVitrina: Boolean(delProfesional),
-            pacienteConVitrina: Boolean(delPaciente),
-          },
-          'Sin vitrina pública en ambos lados: la confirmación sólo sale por notificación',
-        );
-        return false;
-      }
-      // Es un aviso transaccional de la agenda: la preferencia de directorio del
-      // paciente (vitrina privada) no impide recibir la confirmación de SU cita.
-      // Por eso se usa el canal interno, que exige el rol `SYSTEM`; el rol se
-      // concede sólo a esta llamada, y el mensaje se firma con el actor real.
-      const hilo = await this.messaging.createSystemDirectConversation(
-        {
-          conversationType: 'DIRECT',
-          participantProfileIds: [delProfesional.id, delPaciente.id],
-        },
-        { ...actor, roles: [...actor.roles, 'SYSTEM'] },
-      );
-      await this.messaging.sendMessage(
-        hilo.id,
-        { senderProfileId: delProfesional.id, bodyText: datos.texto },
-        actor,
-      );
-      return true;
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      return await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          let delProfesional = null;
+          for (const sujeto of [
+            datos.profesional.practitionerProfileId,
+            datos.profesional.userId,
+          ]) {
+            if (!sujeto) continue;
+            delProfesional = await this.profilesRepo.findByTarget(em, sujeto);
+            if (delProfesional) break;
+          }
+          const delPaciente = await this.profilesRepo.findByTarget(
+            em,
+            datos.pacienteUserId,
+          );
+          if (!delProfesional || !delPaciente) {
+            this.logger.info(
+              {
+                operation: 'community.booking-chat.skipped',
+                profesionalConVitrina: Boolean(delProfesional),
+                pacienteConVitrina: Boolean(delPaciente),
+              },
+              'Sin vitrina pública en ambos lados: la confirmación sólo sale por notificación',
+            );
+            return false;
+          }
+          // Es un aviso transaccional de la agenda: la preferencia de directorio del
+          // paciente (vitrina privada) no impide recibir la confirmación de SU cita.
+          // Por eso se usa el canal interno, que exige el rol `SYSTEM`; el rol se
+          // concede sólo a esta llamada, y el mensaje se firma con el actor real.
+          const hilo = await this.messaging.createSystemDirectConversation(
+            {
+              conversationType: 'DIRECT',
+              participantProfileIds: [delProfesional.id, delPaciente.id],
+            },
+            { ...actor, roles: [...actor.roles, 'SYSTEM'] },
+          );
+          await this.messaging.sendMessage(
+            hilo.id,
+            { senderProfileId: delProfesional.id, bodyText: datos.texto },
+            actor,
+          );
+          return true;
+        });
     } catch (error) {
       this.logger.warn(
         { operation: 'community.booking-chat.failed', err: error },

@@ -105,6 +105,32 @@ export class PersonAccountLinksRepository {
   }
 
   /**
+   * Cuentas con vínculo ACTIVO a cualquiera de estas personas, en una lectura.
+   *
+   * Lo usa el filtro de la historia por especialidad para pasar de «perfil
+   * profesional» a las columnas `*_by_user_id` de los registros.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personIds - Personas (perfiles profesionales) a resolver.
+   * @returns Ids de cuenta, sin duplicados.
+   */
+  async findActiveUserIdsByPersons(
+    em: EntityManager,
+    personIds: readonly string[],
+  ): Promise<string[]> {
+    if (personIds.length === 0) return [];
+    const rows = await em.find(
+      PersonAccountLinks,
+      {
+        personId: { $in: [...personIds] },
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      },
+      { fields: ['userId'] },
+    );
+    return [...new Set(rows.map((row) => row.userId))];
+  }
+
+  /**
    * ¿Esta cuenta tiene algún vínculo ACTIVO con esa persona?
    *
    * Es la pregunta exacta de «nadie toca su propia admisión», y por eso mira los
@@ -154,6 +180,38 @@ export class PersonAccountLinksRepository {
       PersonAccountLinks,
       {
         userId,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+      },
+      { orderBy: { validFrom: 'desc', createdAt: 'desc', id: 'desc' } },
+    );
+  }
+
+  /** Whether a person has an ACTIVE own (SELF) account link. */
+  async hasSelfActiveLink(
+    em: EntityManager,
+    personId: string,
+  ): Promise<boolean> {
+    const count = await em.count(PersonAccountLinks, {
+      personId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+      linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+    });
+    return count > 0;
+  }
+
+  /**
+   * The ACTIVE own (SELF) account link of a person, newest first, so a notice
+   * reaches the person's own account and never a delegate's or relative's.
+   */
+  findSelfActiveByPerson(
+    em: EntityManager,
+    personId: string,
+  ): Promise<PersonAccountLinks | null> {
+    return em.findOne(
+      PersonAccountLinks,
+      {
+        personId,
         statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
         linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
       },

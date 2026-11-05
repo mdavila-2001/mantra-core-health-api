@@ -148,7 +148,9 @@ export class HttpSliFlushService
     }));
 
     try {
-      await this.orm.em.fork().transactional(async (tx: EntityManager) => {
+      // Own connection: a joined transaction would keep this set_config alive.
+      const ownFork = this.orm.em.fork({ keepTransactionContext: false });
+      await ownFork.transactional(async (tx: EntityManager) => {
         await this.applyRlsContext(tx);
         this.repository.insertPoints(tx, 'service_sli_series', rows);
       });

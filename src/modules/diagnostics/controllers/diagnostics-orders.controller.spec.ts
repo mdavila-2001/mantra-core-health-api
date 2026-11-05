@@ -9,6 +9,12 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsOrdersController } from './diagnostics-orders.controller';
 import { runWithTenant } from '../../../common';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../../clinical/domain/clinical-read-scope';
+
+const FULL: ClinicalReadScope = { kind: 'FULL' };
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -26,16 +32,43 @@ describe('DiagnosticsOrdersController', () => {
   it('delega la lectura con el tenant del contexto', async () => {
     const d = build();
 
-    await runWithTenant('t1', () => d.controller.getPatientOrders('p1', 10));
+    await runWithTenant('t1', () =>
+      d.controller.getPatientOrders('p1', 10, FULL),
+    );
 
-    expect(d.service.getPatientOrders).toHaveBeenCalledWith('t1', 'p1', 10);
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      10,
+      FULL,
+    );
   });
 
   it('aplica 50 como tope por omisión', async () => {
     const d = build();
 
+    await runWithTenant('t1', () =>
+      d.controller.getPatientOrders('p1', undefined, FULL),
+    );
+
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      50,
+      FULL,
+    );
+  });
+
+  it('sin alcance en la petición cae al más restrictivo, nunca al completo', async () => {
+    const d = build();
+
     await runWithTenant('t1', () => d.controller.getPatientOrders('p1'));
 
-    expect(d.service.getPatientOrders).toHaveBeenCalledWith('t1', 'p1', 50);
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      50,
+      IPS_ONLY_READ_SCOPE,
+    );
   });
 });

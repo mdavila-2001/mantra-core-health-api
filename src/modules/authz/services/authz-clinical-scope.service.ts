@@ -143,7 +143,9 @@ export class AuthzClinicalScopeService {
   ): Promise<boolean> {
     if (!(await this.scopeRepo.patientExists(em, patientProfileId)))
       return false;
-    return em.fork().transactional(async (sys) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = em.fork({ keepTransactionContext: false });
+    return ownFork.transactional(async (sys) => {
       await sys.execute(
         "select set_config('app.system_context', 'true', true)",
       );

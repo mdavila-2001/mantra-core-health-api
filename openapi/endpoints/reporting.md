@@ -2,31 +2,126 @@
 
 # Endpoints del módulo `reporting`
 
-Referencia exhaustiva de 12 operación(es) del módulo `reporting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 13 operación(es) del módulo `reporting`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `reporting`
-- **Controladores:** `ReportingController`
+- **Etiquetas OpenAPI:** `reporting`, `reporting-money`
+- **Controladores:** `ReportingController`, `ReportingMoneyController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /reporting/dashboards](#1-post-reporting-dashboards) — Componer un tablero con sus widgets
-2. [POST /reporting/data-sources](#2-post-reporting-data-sources) — Registrar una fuente de datos gobernada
-3. [POST /reporting/definitions](#3-post-reporting-definitions) — Autorar una definición con sus parámetros y columnas
-4. [POST /reporting/definitions/{id}/deprecate](#4-post-reporting-definitions-id-deprecate) — Deprecar la definición y suspender sus programaciones
-5. [POST /reporting/definitions/{id}/executions](#5-post-reporting-definitions-id-executions) — Encolar una corrida parametrizada
-6. [POST /reporting/definitions/{id}/schedules](#6-post-reporting-definitions-id-schedules) — Programar la distribución periódica del reporte
-7. [POST /reporting/definitions/{id}/versions/publish](#7-post-reporting-definitions-id-versions-publish) — Publicar una versión del reporte
-8. [POST /reporting/executions/{id}/distributions](#8-post-reporting-executions-id-distributions) — Crear las distribuciones del reporte por destinatario
-9. [POST /reporting/executions/{id}/retry](#9-post-reporting-executions-id-retry) — Devolver a la cola una corrida fallida
-10. [POST /reporting/executions/{id}/snapshot](#10-post-reporting-executions-id-snapshot) — Registrar el artefacto materializado y cerrar la corrida
-11. [POST /reporting/scheduler/tick](#11-post-reporting-scheduler-tick) — Disparar las programaciones vencidas
-12. [POST /reporting/schedules/{id}/subscriptions](#12-post-reporting-schedules-id-subscriptions) — Suscribirse a una programación
+1. [GET /admin/analytics/money](#1-get-admin-analytics-money) — Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara
+2. [POST /reporting/dashboards](#2-post-reporting-dashboards) — Componer un tablero con sus widgets
+3. [POST /reporting/data-sources](#3-post-reporting-data-sources) — Registrar una fuente de datos gobernada
+4. [POST /reporting/definitions](#4-post-reporting-definitions) — Autorar una definición con sus parámetros y columnas
+5. [POST /reporting/definitions/{id}/deprecate](#5-post-reporting-definitions-id-deprecate) — Deprecar la definición y suspender sus programaciones
+6. [POST /reporting/definitions/{id}/executions](#6-post-reporting-definitions-id-executions) — Encolar una corrida parametrizada
+7. [POST /reporting/definitions/{id}/schedules](#7-post-reporting-definitions-id-schedules) — Programar la distribución periódica del reporte
+8. [POST /reporting/definitions/{id}/versions/publish](#8-post-reporting-definitions-id-versions-publish) — Publicar una versión del reporte
+9. [POST /reporting/executions/{id}/distributions](#9-post-reporting-executions-id-distributions) — Crear las distribuciones del reporte por destinatario
+10. [POST /reporting/executions/{id}/retry](#10-post-reporting-executions-id-retry) — Devolver a la cola una corrida fallida
+11. [POST /reporting/executions/{id}/snapshot](#11-post-reporting-executions-id-snapshot) — Registrar el artefacto materializado y cerrar la corrida
+12. [POST /reporting/scheduler/tick](#12-post-reporting-scheduler-tick) — Disparar las programaciones vencidas
+13. [POST /reporting/schedules/{id}/subscriptions](#13-post-reporting-schedules-id-subscriptions) — Suscribirse a una programación
 
 ---
 
-## 1. POST /reporting/dashboards
+## 1. GET /admin/analytics/money
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-money`
+- **Nombre:** Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara
+- **Operation ID:** `ReportingMoneyController_money`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingMoneyController.money](../../src/modules/reporting/controllers/reporting-money.controller.ts)
+
+### Descripción de negocio
+
+Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/money` en `ReportingMoneyController_money`. El controlador delega en `ReportingMoneyService.money`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días. Máximo 92 días de ventana. | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/money HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SECURITY_ADMIN`, `PAYMENTS_ADMIN`, `ACCOUNTING_APPROVER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/money?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SECURITY_ADMIN, PAYMENTS_ADMIN, ACCOUNTING_APPROVER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/money"
+}
+```
+
+---
+
+## 2. POST /reporting/dashboards
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -191,7 +286,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /reporting/data-sources
+## 3. POST /reporting/data-sources
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -334,7 +429,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /reporting/definitions
+## 4. POST /reporting/definitions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -532,7 +627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /reporting/definitions/{id}/deprecate
+## 5. POST /reporting/definitions/{id}/deprecate
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -661,7 +756,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /reporting/definitions/{id}/executions
+## 6. POST /reporting/definitions/{id}/executions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -796,7 +891,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /reporting/definitions/{id}/schedules
+## 7. POST /reporting/definitions/{id}/schedules
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -943,7 +1038,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /reporting/definitions/{id}/versions/publish
+## 8. POST /reporting/definitions/{id}/versions/publish
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1071,7 +1166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /reporting/executions/{id}/distributions
+## 9. POST /reporting/executions/{id}/distributions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1213,7 +1308,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /reporting/executions/{id}/retry
+## 10. POST /reporting/executions/{id}/retry
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1341,7 +1436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /reporting/executions/{id}/snapshot
+## 11. POST /reporting/executions/{id}/snapshot
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1486,7 +1581,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /reporting/scheduler/tick
+## 12. POST /reporting/scheduler/tick
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1614,7 +1709,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /reporting/schedules/{id}/subscriptions
+## 13. POST /reporting/schedules/{id}/subscriptions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`

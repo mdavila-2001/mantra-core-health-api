@@ -31,7 +31,7 @@ export class TelemetryClientErrorsReadRepository {
   constructor(private readonly em: EntityManager) {}
 
   private sql<T>(query: string, params: unknown[] = []): Promise<T[]> {
-    return this.em.getConnection().execute<T[]>(query, params, 'all');
+    return this.em.execute<T[]>(query, params, 'all');
   }
 
   private where(scope: ErrorsScope, window: AnalyticsWindow = scope.window) {

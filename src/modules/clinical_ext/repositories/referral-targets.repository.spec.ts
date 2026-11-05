@@ -22,7 +22,7 @@ import { DIR } from '../../directory/directory.concepts';
  */
 function build(rows: unknown[] = []) {
   const execute = mockFn(() => Promise.resolve(rows));
-  const em: any = { getConnection: () => ({ execute }) };
+  const em: any = { execute };
   return { repo: new ReferralTargetsRepository(), em, execute };
 }
 
@@ -245,7 +245,7 @@ describe('ReferralTargetsRepository', () => {
       const execute = mockFn((sql: string, params: unknown[]) =>
         Promise.resolve(inMemory(sql, params)),
       );
-      const em: any = { getConnection: () => ({ execute }) };
+      const em: any = { execute };
       return { repo: new ReferralTargetsRepository(), em };
     }
 

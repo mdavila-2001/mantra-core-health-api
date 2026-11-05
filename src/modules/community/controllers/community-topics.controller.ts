@@ -1,8 +1,24 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../common';
-import { CommunityGroupsReadService } from '../services';
-import type { TopicPageDto } from '../dto';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import { CommunityTopicsService } from '../services';
+import {
+  CreateTopicDto,
+  type TopicListItemDto,
+  type TopicPageDto,
+} from '../dto';
 
 /**
  * Temas del árbol de la plataforma (P7).
@@ -20,18 +36,30 @@ import type { TopicPageDto } from '../dto';
 @ApiBearerAuth()
 @Controller('community/topics')
 export class CommunityTopicsController {
-  /**
-   * Inicializa la instancia y sus dependencias.
-   *
-   * @param readService - Lecturas de grupos y temas.
-   */
-  constructor(private readonly readService: CommunityGroupsReadService) {}
+  constructor(private readonly topics: CommunityTopicsService) {}
 
-  /** Temas activos con los que se clasifican grupos y publicaciones. */
+  /** Temas activos (categorías y temas) con los que se clasifican grupos y publicaciones. */
   @Get()
   @Roles()
   @ApiOperation({ summary: 'Temas de la comunidad' })
   listTopics(): Promise<TopicPageDto> {
-    return this.readService.listTopics();
+    return this.topics.listTopics();
+  }
+
+  /** Crea un tema propio bajo «Temas propios»; si ya existe con ese nombre, lo devuelve. */
+  @Audited({
+    action: 'COMMUNITY_TOPIC_CREATED',
+    entity: 'topic',
+    entityId: 'result.id',
+  })
+  @Post()
+  @Roles()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un tema propio' })
+  createTopic(
+    @Body() dto: CreateTopicDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TopicListItemDto> {
+    return this.topics.createTopic(dto.name, actor);
   }
 }

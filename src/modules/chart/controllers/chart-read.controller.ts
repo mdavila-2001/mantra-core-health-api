@@ -14,7 +14,14 @@ import {
 } from '@nestjs/swagger';
 import { ParseOptionalLimitPipe, Roles, AccessLogged } from '../../../common';
 import { ChartReadService } from '../services';
-import { ClinicalRecordAccessGuard } from '../../clinical/guards';
+import {
+  ClinicalReadScopeParam,
+  ClinicalRecordAccessGuard,
+} from '../../clinical/guards';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../../clinical/domain/clinical-read-scope';
 import type { PatientChartResponseDto } from '../dto';
 
 /**
@@ -65,7 +72,12 @@ export class ChartReadController {
   getPatientChart(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PatientChartResponseDto> {
-    return this.readService.getPatientChart(patientProfileId, limit ?? 50);
+    return this.readService.getPatientChart(
+      patientProfileId,
+      limit ?? 50,
+      scope ?? IPS_ONLY_READ_SCOPE,
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { afterEach, jest } from '@jest/globals';
 
 // Loose-typed mock factory: runtime 'jest' pero sin los tipos estrictos Mock<never>.
 /**
@@ -423,6 +423,127 @@ describe('AttachableFileService.claimAnonymousUpload', () => {
 
     // El objeto devuelto ya trae los cambios en memoria; persistirlos es
     // responsabilidad de la transacción de quien llama.
+    expect(file.tenantId).toBe('tenant-1');
+  });
+});
+
+describe('AttachableFileService.claimAnonymousUpload con RLS', () => {
+  const claim = { tenantId: 'tenant-1', ownerUserId: 'owner-1' };
+  const previous = process.env.RLS_ENFORCE;
+  const SET_TRUE = "select set_config('app.system_context', 'true', true)";
+  const RESTORE = "select set_config('app.system_context', ?, true) <- false";
+
+  afterEach(() => {
+    if (previous === undefined) delete process.env.RLS_ENFORCE;
+    else process.env.RLS_ENFORCE = previous;
+  });
+
+  /** Todo lo que toca la base deja huella en `order`, para comprobar la secuencia. */
+  function buildRls(updated = 1) {
+    const order: string[] = [];
+    const rlsEm = {
+      isInTransaction: () => true,
+      execute: mockFn(async (sql: string, params?: unknown[]) => {
+        order.push(params ? `${sql} <- ${String(params)}` : sql);
+        return sql.includes('current_setting') ? [{ value: null }] : [];
+      }),
+      nativeUpdate: mockFn(async () => {
+        order.push('nativeUpdate');
+        return updated;
+      }),
+      // Like the real re-read: the entity takes the row as the UPDATE left it.
+      refresh: mockFn(async (entity: Record<string, unknown>) => {
+        order.push('refresh');
+        Object.assign(entity, {
+          tenantId: 'tenant-1',
+          createdByUserId: 'owner-1',
+        });
+        return entity;
+      }),
+    };
+    const filesRepo = {
+      findById: mockFn(async () => {
+        order.push('findById');
+        return {
+          id: 'f1',
+          tenantId: SEED.tenantId,
+          createdByUserId: null,
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          currentVersionId: 'v1',
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        };
+      }),
+    };
+    const fileVersionsRepo = {
+      findById: mockFn(async () => {
+        order.push('versions.findById');
+        return {
+          id: 'v1',
+          mimeType: 'application/pdf',
+          malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+        };
+      }),
+    };
+    const logger = { setContext: mockFn(), warn: mockFn(), info: mockFn() };
+    const service = new AttachableFileService(
+      filesRepo as any,
+      fileVersionsRepo as any,
+      logger as any,
+    );
+    return { service, rlsEm: rlsEm as any, order, logger };
+  }
+
+  it('abre la ventana de sistema, lee, hace el UPDATE condicional y restaura', async () => {
+    process.env.RLS_ENFORCE = 'true';
+    const d = buildRls();
+
+    const { file } = await d.service.claimAnonymousUpload(d.rlsEm, 'f1', claim);
+
+    expect(d.order).toEqual([
+      "select current_setting('app.system_context', true) as value",
+      SET_TRUE,
+      'findById',
+      'versions.findById',
+      'nativeUpdate',
+      'refresh',
+      RESTORE,
+    ]);
+    expect(d.rlsEm.nativeUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      { id: 'f1', tenantId: SEED.tenantId, createdByUserId: null },
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        createdByUserId: 'owner-1',
+        updatedByUserId: 'owner-1',
+      }),
+    );
+    expect(file.tenantId).toBe('tenant-1');
+    expect(file.createdByUserId).toBe('owner-1');
+  });
+
+  it('un UPDATE que afecta 0 filas (otro reclamo ganó) da 422 y restaura la ventana', async () => {
+    process.env.RLS_ENFORCE = 'true';
+    const d = buildRls(0);
+
+    await expect(
+      d.service.claimAnonymousUpload(d.rlsEm, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ fileId: 'f1' }),
+      'Refused to claim a file that is not an unclaimed anonymous upload',
+    );
+    expect(d.order.at(-1)).toBe(RESTORE);
+  });
+
+  it('con RLS apagado no ejecuta set_config ni UPDATE propio', async () => {
+    delete process.env.RLS_ENFORCE;
+    const d = buildRls();
+
+    const { file } = await d.service.claimAnonymousUpload(d.rlsEm, 'f1', claim);
+
+    expect(d.order).toEqual(['findById', 'versions.findById']);
+    expect(d.rlsEm.execute).not.toHaveBeenCalled();
+    expect(d.rlsEm.nativeUpdate).not.toHaveBeenCalled();
     expect(file.tenantId).toBe('tenant-1');
   });
 });

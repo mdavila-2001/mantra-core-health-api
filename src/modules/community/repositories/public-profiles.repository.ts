@@ -249,9 +249,7 @@ export class PublicProfilesRepository {
       options.limit,
     ];
 
-    const rows = await em
-      .getConnection()
-      .execute<{ id: string }[]>(sql, params, 'all');
+    const rows = await em.execute<{ id: string }[]>(sql, params, 'all');
     return rows.map((row) => row.id);
   }
 

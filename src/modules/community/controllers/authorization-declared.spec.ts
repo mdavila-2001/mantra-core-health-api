@@ -83,7 +83,7 @@ const DECLARED: ReadonlyArray<readonly [object, readonly string[]]> = [
     ],
   ],
   [CommunityTimelineController, ['getFeed', 'listNotifications']],
-  [CommunityTopicsController, ['listTopics']],
+  [CommunityTopicsController, ['listTopics', 'createTopic']],
 ];
 
 describe('community: autorización declarada en las rutas sin rol global', () => {

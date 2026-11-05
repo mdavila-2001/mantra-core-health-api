@@ -31,7 +31,7 @@ export class TelemetryPartsRepository {
   constructor(private readonly em: EntityManager) {}
 
   private sql<T>(query: string, params: unknown[] = []): Promise<T[]> {
-    return this.em.getConnection().execute<T[]>(query, params, 'all');
+    return this.em.execute<T[]>(query, params, 'all');
   }
 
   /** Predicado de ventana, tenant y portal sobre `user_activity_events` con alias `e`. */

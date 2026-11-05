@@ -16,3 +16,5 @@ export * from './sync.repository';
 export * from './inventory-read.repository';
 export * from './inventory-scope.repository';
 export * from './integration-read.repository';
+export * from './ledger-management.repository';
+export * from './stock-management.repository';

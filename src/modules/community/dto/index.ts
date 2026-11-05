@@ -32,3 +32,4 @@ export * from './verification.dto';
 export * from './profile-stats.dto';
 export * from './group-wall.dto';
 export * from './party-rating.dto';
+export * from './topic.dto';

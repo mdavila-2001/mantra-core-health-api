@@ -4,6 +4,8 @@ import { Roles, PatientAnyTenant } from '../../../../common';
 import { SchedulingAgendaService } from '../../application';
 import {
   BookableOrganizationsResponseDto,
+  BookableResourcesQueryDto,
+  BookableResourcesResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -43,6 +45,22 @@ export class SchedulingAgendaController {
   })
   listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
     return this.agendaService.listBookableOrganizations();
+  }
+
+  /**
+   * Practitioners or laboratories with something to book, from every
+   * organization, paged. Each one carries the `tenantId` its agenda is read with.
+   */
+  @Get('bookable-resources')
+  @Roles('PATIENT')
+  @ApiOperation({
+    summary:
+      'Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones',
+  })
+  listBookableResources(
+    @Query() query: BookableResourcesQueryDto,
+  ): Promise<BookableResourcesResponseDto> {
+    return this.agendaService.listBookableResources(query);
   }
 
   /** Recursos agendables del tenant. */

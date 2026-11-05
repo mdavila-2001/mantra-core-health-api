@@ -35,6 +35,7 @@
 | [0025](ADR-0025-qa-runner-en-servidor.md) | QA Lab ejecuta en el servidor, con destinos aprobados y aprobación ligada al plan | Aceptado (desvío declarado de 0021) |
 | [0026](ADR-0026-molde-de-modulo-ddd.md) | Molde de módulo por capas (DDD) con puertos hacia otros contextos | Aceptado (piloto: scheduling) |
 | [0028](ADR-0028-direcciones-multipais.md) | Direcciones multipaís: país, tres niveles administrativos y distrito para cualquier país | Aceptado |
+| [0029](ADR-0029-fork-hereda-transaccion-bajo-rls.md) | El `fork()` sin argumentos hereda la transacción de la petición bajo RLS | Aceptado |
 
 ## Cómo añadir un ADR nuevo
 

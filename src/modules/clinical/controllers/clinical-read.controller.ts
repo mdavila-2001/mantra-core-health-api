@@ -20,7 +20,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ClinicalReadService, ReceivedServicesReadService } from '../services';
-import { ClinicalRecordAccessGuard } from '../guards';
+import { ClinicalReadScopeParam, ClinicalRecordAccessGuard } from '../guards';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../domain/clinical-read-scope';
 import type {
   PatientClinicalSummaryResponseDto,
   PatientReceivedServicesResponseDto,
@@ -86,12 +90,14 @@ export class ClinicalReadController {
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PatientClinicalSummaryResponseDto> {
     // N-04: el actor viaja al servicio para que la lectura deje su asiento.
     return this.readService.getPatientSummary(
       patientProfileId,
       limit ?? 50,
       actor,
+      scope,
     );
   }
 
@@ -125,7 +131,13 @@ export class ClinicalReadController {
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PatientReceivedServicesResponseDto> {
-    return this.receivedServices.list(patientProfileId, limit ?? 50, actor);
+    return this.receivedServices.list(
+      patientProfileId,
+      limit ?? 50,
+      actor,
+      scope ?? IPS_ONLY_READ_SCOPE,
+    );
   }
 }

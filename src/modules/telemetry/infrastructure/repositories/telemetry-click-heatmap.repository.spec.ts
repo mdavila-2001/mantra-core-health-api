@@ -27,7 +27,7 @@ const scope = (over: Partial<HeatmapScope> = {}): HeatmapScope => ({
 describe('TelemetryClickHeatmapRepository (SQL capturado, base doblada)', () => {
   const execute = mockFn(async () => []);
   const repo = new TelemetryClickHeatmapRepository({
-    getConnection: () => ({ execute }),
+    execute,
   } as unknown as EntityManager);
 
   beforeEach(() => execute.mockClear());

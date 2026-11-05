@@ -8,6 +8,7 @@ import {
   PHONE_PATTERN,
   PHONE_PATTERN_MESSAGE,
 } from '../../../../common/constants/person-field-limits';
+import { IsStrictEmail } from '../../../../common/validators/strict-email.validator';
 export {
   EMPLOYER_FREE_TEXT_MAX_LENGTH,
   OCCUPATION_FREE_TEXT_MAX_LENGTH,
@@ -19,7 +20,6 @@ export {
 import {
   ArrayMaxSize,
   IsArray,
-  IsEmail,
   IsIn,
   IsISO8601,
   IsNumber,
@@ -325,7 +325,7 @@ export class RegisterPatientDto {
    * obligatoria porque es con lo que se entra.
    */
   @ApiProperty({ format: 'email', maxLength: 320 })
-  @IsEmail()
+  @IsStrictEmail()
   @MaxLength(320)
   email!: string;
 

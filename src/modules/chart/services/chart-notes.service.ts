@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
@@ -9,9 +9,6 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-
-/** Rol comodín que puede firmar en nombre de cualquier perfil profesional. */
-const SUPERADMIN_ROLE = 'SUPERADMIN';
 import { ClinicalNotesRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import {
@@ -31,6 +28,11 @@ import type { ClinicalNoteVersions } from '../entities';
 import { ClinicalReadService } from '../../clinical/services';
 import { ChartEncounterScopeService } from './chart-encounter-scope.service';
 import { toEntriesJson } from './chart-note-item.mapper';
+import {
+  assertNoteAuthoredByActor,
+  resolveNoteAuthor,
+  resolveNoteSigner,
+} from './chart-note-identity';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -90,7 +92,7 @@ export class ChartNotesService {
     );
     // CL-20 (BR-13): el autor sale de la sesión; se resuelve antes de tocar
     // nada para que un 403 no deje cabecera.
-    const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
+    const authorProfileId = resolveNoteAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
       // CHART-01: el encuentro tiene que ser de ESTE paciente y seguir abierto;
       // uno ajeno o inexistente responde igual y no deja cabecera.
@@ -174,9 +176,10 @@ export class ChartNotesService {
           { noteId },
         );
       }
+      await this.assertAuthoredByActor(tx, header.currentVersionId, actor);
 
       // CL-20 (BR-13): el autor de la versión sale de la sesión.
-      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
+      const authorProfileId = resolveNoteAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
@@ -216,7 +219,7 @@ export class ChartNotesService {
       'Signing note version',
     );
     return this.em.transactional(async (tx) => {
-      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
+      const signerProfileId = resolveNoteSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -233,6 +236,7 @@ export class ChartNotesService {
           { versionId },
         );
       }
+      assertNoteAuthoredByActor(version.authorProfileId, actor);
 
       const hash = this.contentHash(version);
       this.notesRepo.createSignature(tx, {
@@ -272,7 +276,7 @@ export class ChartNotesService {
       'Cosigning note version',
     );
     return this.em.transactional(async (tx) => {
-      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
+      const signerProfileId = resolveNoteSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -359,9 +363,10 @@ export class ChartNotesService {
           { noteId },
         );
       }
+      await this.assertAuthoredByActor(tx, header.currentVersionId, actor);
 
       // CL-20 (BR-13): quien enmienda es el profesional de la sesión.
-      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
+      const authorProfileId = resolveNoteAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
@@ -561,83 +566,16 @@ export class ChartNotesService {
     });
   }
 
-  /**
-   * D-7: una nota la firma su propio profesional; nadie firma en nombre de
-   * otro perfil. Como el firmante sólo puede ser el perfil de la sesión, el
-   * servidor lo deriva y el cliente no tiene que mandarlo (informe B, C5: el
-   * cuerpo `{}` de la pantalla daba 400). Si el cuerpo lo trae, se confirma.
-   * `SUPERADMIN` tiene paso franco, igual que en el resto del sistema de
-   * roles, y firma con el perfil que declare (o el suyo, si tiene).
-   *
-   * @param declared - Perfil que trajo el cuerpo, si trajo alguno.
-   * @param actor - Sesión que pide firmar o cofirmar.
-   * @returns El perfil profesional que queda como firmante.
-   * @throws ForbiddenException si la sesión no tiene perfil profesional (ni
-   *   uno declarado, en el caso de `SUPERADMIN`), o si el perfil declarado no
-   *   es el suyo.
-   */
-  private resolveSigner(
-    declared: string | undefined,
+  /** Rule (c): only the author of the note's current version modifies it. */
+  private async assertAuthoredByActor(
+    tx: EntityManager,
+    currentVersionId: string | undefined,
     actor: AuthenticatedUser,
-  ): string {
-    if (actor.roles.includes(SUPERADMIN_ROLE)) {
-      const chosen = declared ?? actor.practitionerProfileId;
-      if (!chosen) {
-        throw new ForbiddenException(
-          'Una firma clínica necesita un perfil profesional firmante.',
-        );
-      }
-      return chosen;
-    }
-    if (!actor.practitionerProfileId) {
-      throw new ForbiddenException(
-        'La sesión no tiene un perfil profesional con el que firmar.',
-      );
-    }
-    if (declared !== undefined && declared !== actor.practitionerProfileId) {
-      throw new ForbiddenException(
-        'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
-      );
-    }
-    return actor.practitionerProfileId;
-  }
-
-  /**
-   * CL-20 (BR-13): el autor de una nota, de una versión o de una enmienda es
-   * el profesional de la sesión, nunca el que diga el cuerpo. La misma regla
-   * que {@link resolveSigner}, aplicada a escribir en vez de a
-   * firmar: el DTO conserva `authorProfileId` por compatibilidad —si viene, se
-   * confirma; si difiere, 403— y si no viene, el autor es el perfil de la
-   * sesión. `SUPERADMIN` pasa con lo que declare.
-   *
-   * @param declared - Lo que trajo el cuerpo, si trajo algo.
-   * @param actor - La sesión que escribe.
-   * @returns El perfil profesional que queda como autor.
-   */
-  private resolveAuthor(
-    declared: string | undefined,
-    actor: AuthenticatedUser,
-  ): string {
-    if (actor.roles.includes(SUPERADMIN_ROLE)) {
-      const chosen = declared ?? actor.practitionerProfileId;
-      if (!chosen) {
-        throw new ForbiddenException(
-          'Una nota clínica necesita un profesional autor.',
-        );
-      }
-      return chosen;
-    }
-    if (!actor.practitionerProfileId) {
-      throw new ForbiddenException(
-        'La sesión no tiene un perfil profesional con el que escribir la nota.',
-      );
-    }
-    if (declared !== undefined && declared !== actor.practitionerProfileId) {
-      throw new ForbiddenException(
-        'El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil.',
-      );
-    }
-    return actor.practitionerProfileId;
+  ): Promise<void> {
+    const current = currentVersionId
+      ? await this.notesRepo.findVersionById(tx, currentVersionId)
+      : null;
+    assertNoteAuthoredByActor(current?.authorProfileId, actor);
   }
 
   /**

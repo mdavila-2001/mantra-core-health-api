@@ -1205,6 +1205,7 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
       );
 
       expect(ids).toEqual(['bkg-a', 'bkg-b']);
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
       expect(
         d.targetsRepo.listCompletedBookingsWithoutInvitation,
       ).toHaveBeenCalledWith(

@@ -135,7 +135,9 @@ describe('UploadPaymentReceiptUseCase · el paciente sube su comprobante', () =>
     const res = await d.upload.execute(BOOKING, { fileId: FILE }, patient);
 
     expect(d.notices.emit).toHaveBeenCalledTimes(1);
-    expect(order).toEqual(['commit', 'emit']);
+    // The trailing `commit` is the savepoint the notice itself runs in, opened
+    // after the use case's own transaction closed.
+    expect(order).toEqual(['commit', 'emit', 'commit']);
     const notice = d.notices.emit.mock.calls[0][0];
     expect(notice.kind).toBe('PAYMENT_RECEIPT_UPLOADED');
     expect(notice.recipient).toEqual({ userId: practitioner.id });

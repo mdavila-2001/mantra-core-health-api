@@ -3214,6 +3214,16 @@ describe('SchedulingBookingsService', () => {
       expect(res.statusReason).toBeUndefined();
     });
 
+    it('la lectura de una cita conserva la transacción de la petición (RLS)', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(saved);
+
+      await d.service.getBookingById('booking-1');
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+      expect(d.em.fork).not.toHaveBeenCalledWith();
+    });
+
     /** Un actor profesional, dueño o no de la agenda que se consulta. */
     function practitioner(profile: string) {
       return {
@@ -3256,6 +3266,7 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.items[0].patientName).toBe('Marisol Quispe');
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
     });
 
     describe('v4.2.40 · el servicio reservado en la lectura', () => {

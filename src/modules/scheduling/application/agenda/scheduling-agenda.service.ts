@@ -19,6 +19,8 @@ import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
   BookableOrganizationsResponseDto,
+  BookableResourcesQueryDto,
+  BookableResourcesResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -30,6 +32,8 @@ import {
   type ResourceType,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
+import { findBookableOrganizations } from './bookable-organizations.query';
+import { findBookableResources } from './bookable-resources.query';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -78,75 +82,27 @@ export class SchedulingAgendaService {
   }
 
   /**
-   * Las organizaciones con las que un paciente puede pedir cita **hoy**: las
-   * que tienen algún profesional o laboratorio con un cupo abierto por delante.
-   *
-   * ## Por qué cruza organizaciones
-   *
-   * El paciente no es de una organización: pide cita con la que tiene a su
-   * profesional. Sin esta lectura, «Mis citas» sólo podía mostrar la agenda de
-   * la organización por defecto de la cuenta, y el resto era inalcanzable. La
-   * lista sólo trae lo que hace falta para elegir —identificador, nombre y
-   * cuántos hay— y nada de la organización que no sea público para quien va a
-   * reservar; los profesionales y sus cupos se piden después, uno a uno, con
-   * `X-Tenant-Id` (`@PatientAnyTenant`).
-   *
-   * Corre en contexto de sistema porque RLS acota toda lectura al tenant de la
-   * cuenta, que es justo lo que esta pregunta tiene que saltarse.
+   * Organizations a patient can book with today, across tenants
+   * (see `bookable-organizations.query.ts`).
    */
-  async listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
-    const rows = await this.em.transactional(async (tx) => {
-      await tx.execute("select set_config('app.system_context', 'true', true)");
-      return tx.execute<
-        {
-          tenant_id: string;
-          name: string;
-          practitioner_count: string;
-          room_count: string;
-        }[]
-      >(
-        `SELECT t.id AS tenant_id,
-                coalesce(nullif(t.trade_name, ''), t.legal_name) AS name,
-                count(DISTINCT r.id) FILTER (WHERE r.resource_type_concept_id = ?) AS practitioner_count,
-                count(DISTINCT r.id) FILTER (WHERE r.resource_type_concept_id = ?) AS room_count
-           FROM directory.tenants t
-           JOIN scheduling.schedulable_resources r
-             ON r.tenant_id = t.id AND r.state_concept_id = ?
-           JOIN scheduling.bookable_slots s
-             ON s.resource_id = r.id
-            AND s.status_concept_id = ?
-            AND s.remaining_capacity > 0
-            AND s.start_at > now()
-          WHERE t.status_concept_id = ?
-            AND r.resource_type_concept_id IN (?, ?)
-          GROUP BY t.id, name
-          ORDER BY name`,
-        [
-          CONCEPTS.RESOURCE_PRACTITIONER,
-          CONCEPTS.RESOURCE_ROOM,
-          CONCEPTS.STATE_ACTIVE,
-          CONCEPTS.SLOT_OPEN,
-          CONCEPTS.TENANT_ACTIVE,
-          CONCEPTS.RESOURCE_PRACTITIONER,
-          CONCEPTS.RESOURCE_ROOM,
-        ],
-      );
-    });
+  listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
+    return findBookableOrganizations(this.em);
+  }
 
-    const items = rows.map((row) => ({
-      tenantId: row.tenant_id,
-      name: row.name,
-      practitionerCount: Number(row.practitioner_count),
-      roomCount: Number(row.room_count),
-    }));
-    return { items, count: items.length };
+  /** Practitioners or laboratories a patient can book with, across tenants, paged. */
+  listBookableResources(
+    query: BookableResourcesQueryDto,
+  ): Promise<BookableResourcesResponseDto> {
+    return findBookableResources(this.em, query);
   }
 
   /** Recursos agendables del tenant. */
   async listResources(
     query: ListResourcesQueryDto,
   ): Promise<ListResourcesResponseDto> {
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const resources = await this.agendaRepo.findResources(em, {
       tenantId: query.tenantId,
       practiceId: query.practiceId,
@@ -165,13 +121,18 @@ export class SchedulingAgendaService {
     // una caída.
     let sites = new Map<string, ResourceSiteDto>();
     try {
-      sites = await this.directory.resolveSitesForResources(
-        resources.map((resource) => ({
-          refType: resource.resourceRefType,
-          refId: resource.resourceRefId,
-        })),
-        query.tenantId,
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      sites = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(() =>
+          this.directory.resolveSitesForResources(
+            resources.map((resource) => ({
+              refType: resource.resourceRefType,
+              refId: resource.resourceRefId,
+            })),
+            query.tenantId,
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -185,14 +146,19 @@ export class SchedulingAgendaService {
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
     let names = new Map<string, string>();
     try {
-      names = await this.directory.findPractitionerNames(
-        em,
-        resources
-          .filter((resource) =>
-            PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
-          )
-          .map((resource) => resource.resourceRefId),
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      names = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional((tx) =>
+          this.directory.findPractitionerNames(
+            tx,
+            resources
+              .filter((resource) =>
+                PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
+              )
+              .map((resource) => resource.resourceRefId),
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -220,7 +186,9 @@ export class SchedulingAgendaService {
     this.assertWindow(from, to);
 
     const limit = query.limit ?? DEFAULT_LIMIT;
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const rows = await this.agendaRepo.findSlots(
       em,
       {

@@ -33,6 +33,7 @@ import {
 import { AUTHZ } from '../authz.concepts';
 import { AuthzErrorReason } from '../authz.error-reasons';
 import { AuthzClinicalScopeService } from './authz-clinical-scope.service';
+import { AuthzPrimaryCareSyncService } from './authz-primary-care-sync.service';
 
 /** Cómo se informa una relación asistencial inexistente o de otro tenant. */
 const CARE_RELATIONSHIP_NOT_FOUND = {
@@ -50,6 +51,7 @@ const CARE_REL_TYPE_CONCEPT: Record<CareRelationshipType, string> = {
   TREATING: AUTHZ.CARE_REL_TREATING,
   CONSULTING: AUTHZ.CARE_REL_CONSULTING,
   EMERGENCY: AUTHZ.CARE_REL_EMERGENCY,
+  PRIMARY: AUTHZ.CARE_REL_PRIMARY,
 };
 
 const CARE_REL_PURPOSE_CONCEPT: Record<CareRelationshipPurpose, string> = {
@@ -102,6 +104,7 @@ export class AuthzCareRelationshipsService {
     private readonly outbox: OutboxService,
     private readonly notifications: NotificationsService,
     private readonly scope: AuthzClinicalScopeService,
+    private readonly primaryCare: AuthzPrimaryCareSyncService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzCareRelationshipsService.name);
@@ -245,13 +248,9 @@ export class AuthzCareRelationshipsService {
       }
 
       if (dto.decision === 'ACCEPT') {
-        rel.statusConceptId = CONCEPTS.STATE_ACTIVE;
-        // `validFrom` se refija al momento de la aceptación: la solicitud pudo
-        // quedar pendiente varios días, y la vigencia real de la relación
-        // empieza cuando el paciente autoriza, no cuando el practicante pidió.
-        rel.validFrom = new Date();
+        await this.primaryCare.activate(tx, rel, actor);
       } else {
-        rel.statusConceptId = CONCEPTS.STATE_REVOKED;
+        rel.statusConceptId = AUTHZ.CARE_REL_STATUS_DECLINED;
         rel.validTo = new Date();
       }
       touch(rel, actor.id);
@@ -439,7 +438,7 @@ export class AuthzCareRelationshipsService {
     // `patient_profiles.profile_id` ES el id de la persona (una persona tiene
     // a lo sumo un perfil de paciente, con la misma clave) — el mismo supuesto
     // que ya usa `ClinicalReadService` para resolver en la otra dirección.
-    const link = await this.accountLinksRepo.findActiveByPerson(
+    const link = await this.accountLinksRepo.findSelfActiveByPerson(
       em,
       patientProfileId,
     );
@@ -552,6 +551,7 @@ export class AuthzCareRelationshipsService {
         : CONCEPTS.STATE_REVOKED;
       if (!expired) rel.validTo = now;
       touch(rel, actor.id);
+      await this.primaryCare.onRevoked(tx, rel, actor);
       await tx.flush();
       return { ok: true, affected: 1 };
     });

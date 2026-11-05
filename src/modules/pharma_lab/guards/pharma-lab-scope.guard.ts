@@ -6,8 +6,12 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { withTenantRls } from '../../../common/tenant/rls-transaction';
 import { VisitorsRepository } from '../repositories';
 import { PharmaLabAccessService } from '../services/pharma-lab-access.service';
 
@@ -75,7 +79,31 @@ export class PharmaLabScopeGuard implements CanActivate {
       ]) ?? [];
     if (openTo.some((role) => actor.roles.includes(role))) return true;
 
-    const em = this.em.fork();
+    // Guards run before the tenant interceptor, so the reads need their own
+    // short transaction under the tenant TenantScopeGuard already verified.
+    // Without a resolved tenant nothing is widened: the read stays as it was.
+    const tenantId = request.resolvedTenantId;
+    const allowed = tenantId
+      ? await withTenantRls(
+          this.em,
+          tenantId,
+          (tx) => this.isLabOperator(tx, pharmaLabId, actor),
+          { readOnly: true },
+        )
+      : await this.isLabOperator(this.em.fork(), pharmaLabId, actor);
+    if (allowed) return true;
+
+    throw new ResourceNotFoundException('Laboratorio no encontrado', {
+      pharmaLabId,
+    });
+  }
+
+  /** Administra el laboratorio o es visitador operativo de él. */
+  private async isLabOperator(
+    em: EntityManager,
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
     try {
       await this.access.requireAdministeredLab(em, pharmaLabId, actor);
       return true;
@@ -90,9 +118,6 @@ export class PharmaLabScopeGuard implements CanActivate {
         return true;
       }
     }
-
-    throw new ResourceNotFoundException('Laboratorio no encontrado', {
-      pharmaLabId,
-    });
+    return false;
   }
 }

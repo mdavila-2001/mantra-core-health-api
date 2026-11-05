@@ -7,6 +7,8 @@ import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import { DirectoryAuthorizationModule } from './directory-authorization.module';
 import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { MembershipInvitationsController } from './controllers/membership-invitations.controller';
+import { MembershipInvitationsService } from './services/membership-invitations.service';
 import { OrganizationLogoService } from './services/organization-logo.service';
 import {
   TenantTypeProfileService,
@@ -63,11 +65,13 @@ import {
   ],
   controllers: [
     AdminTenantsController,
+    MembershipInvitationsController,
     TenantsController,
     OrganizationLogoController,
   ],
   providers: [
     OrganizationLogoService,
+    MembershipInvitationsService,
     TenantTypeProfileService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,

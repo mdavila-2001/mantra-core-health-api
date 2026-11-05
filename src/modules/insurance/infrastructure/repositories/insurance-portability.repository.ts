@@ -119,7 +119,7 @@ export class InsurancePortabilityRepository {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<PortabilityPolicyRow[]> {
-    return em.getConnection().execute<PortabilityPolicyRow[]>(
+    return em.execute<PortabilityPolicyRow[]>(
       `SELECT c.id AS coverage_id, ca.legal_name AS carrier_name,
               pl.name AS plan_name, pr.name AS product_name,
               c.policy_identifier, c.member_identifier,
@@ -160,7 +160,7 @@ export class InsurancePortabilityRepository {
     pharmacyProviderTypeConceptId: string,
     diagnosticUnitProviderTypeConceptId: string,
   ): Promise<PortabilityClaimLineRow[]> {
-    return em.getConnection().execute<PortabilityClaimLineRow[]>(
+    return em.execute<PortabilityClaimLineRow[]>(
       `WITH claims AS (
          SELECT c.*
            FROM insurance.insurance_claims c
@@ -237,7 +237,7 @@ export class InsurancePortabilityRepository {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<PortabilityConditionRow[]> {
-    return em.getConnection().execute<PortabilityConditionRow[]>(
+    return em.execute<PortabilityConditionRow[]>(
       `SELECT cd.code_concept_id, cc.code, cc.display,
               cs.internal_code AS code_system,
               cd.clinical_status_concept_id,
@@ -263,7 +263,7 @@ export class InsurancePortabilityRepository {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<PortabilityEncounterRow[]> {
-    return em.getConnection().execute<PortabilityEncounterRow[]>(
+    return em.execute<PortabilityEncounterRow[]>(
       `SELECT e.id AS encounter_id,
               to_char(e.start_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS start_at,
               to_char(e.end_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS end_at,

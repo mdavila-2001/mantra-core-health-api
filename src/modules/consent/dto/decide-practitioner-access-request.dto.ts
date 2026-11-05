@@ -39,7 +39,7 @@ export class DecidePractitionerAccessRequestDto {
   @IsArray()
   @ArrayMaxSize(50)
   @ArrayUnique()
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   authorizedSpecialtyConceptIds?: string[];
 
   /**

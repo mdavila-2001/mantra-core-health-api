@@ -18,7 +18,9 @@ function build(
   }[],
 ) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { fork: () => ({}) };
+  // Savepoint: `transactional` runs its callback on a throwaway tx double.
+  const forked = { transactional: (cb: (tx: object) => unknown) => cb({}) };
+  const em = { fork: () => forked };
   let seq = 0;
   const port = {
     findPublicOrganizations: mockFn((_: unknown, slugs: string[]) =>

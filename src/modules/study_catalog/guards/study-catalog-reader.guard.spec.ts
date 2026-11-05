@@ -24,13 +24,23 @@ function build() {
         ),
     ),
   };
-  const fork = {
+  const calls: string[] = [];
+  const fork: any = {
+    execute: mockFn((_sql: string, params?: unknown[]) => {
+      calls.push(params ? `set_config:${String(params[0])}` : 'system_context');
+      return Promise.resolve([]);
+    }),
     findOne: mockFn((_e: unknown, where: { id: string }) =>
       Promise.resolve(
         TYPES[where.id]
           ? { id: where.id, tenantTypeConceptId: TYPES[where.id] }
           : null,
       ),
+    ),
+    getTransactionContext: () => undefined,
+    isInTransaction: () => false,
+    transactional: mockFn((work: (tx: unknown) => Promise<unknown>) =>
+      work(fork),
     ),
   };
   const guard = new StudyCatalogReaderGuard(
@@ -41,7 +51,7 @@ function build() {
     ({
       switchToHttp: () => ({ getRequest: () => ({ user, resolvedTenantId }) }),
     }) as any;
-  return { guard, ctx, repo };
+  return { guard, ctx, repo, fork, calls };
 }
 
 describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
@@ -60,6 +70,22 @@ describe('StudyCatalogReaderGuard (matriz §3.g)', () => {
     await expect(
       guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB)),
     ).resolves.toBe(true);
+  });
+
+  it('fija el tenant en la transacción antes de leer la membresía (RLS cerrado por defecto)', async () => {
+    const previous = process.env.RLS_ENFORCE;
+    process.env.RLS_ENFORCE = 'true';
+    try {
+      const { guard, ctx, calls } = build();
+      await guard.canActivate(ctx({ id: 'lab-staff', roles: ['USER'] }, LAB));
+      expect(calls.slice(0, 2)).toEqual([
+        'system_context',
+        `set_config:${LAB}`,
+      ]);
+    } finally {
+      if (previous === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = previous;
+    }
   });
 
   it('un paciente (STAFF del tenant por defecto, que no es centro diagnóstico) recibe 403', async () => {

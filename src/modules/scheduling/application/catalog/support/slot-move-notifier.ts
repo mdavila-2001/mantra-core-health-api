@@ -29,9 +29,11 @@ export class SlotMoveNotifier {
   /**
    * Avisa a quien tenía turno en un cupo movido.
    *
-   * **Fuera de la transacción**, como el resto de los avisos del módulo: la
-   * agenda ya quedó corrida y un fallo del canal no puede deshacerla. Y si
-   * fallara la escritura, nadie recibiría un aviso sobre algo que no pasó.
+   * **Después de la transacción del caso de uso**, como el resto de los avisos
+   * del módulo (la de la petición sigue abierta y cada cita se avisa en un
+   * savepoint): la agenda ya quedó corrida y un fallo del canal no puede
+   * deshacerla. Y si fallara la escritura, nadie recibiría un aviso sobre algo
+   * que no pasó.
    *
    * Un fallo al avisar no rompe la operación: se registra y sigue. La persona
    * ve el horario nuevo al entrar aunque el mensaje se haya perdido.
@@ -42,7 +44,7 @@ export class SlotMoveNotifier {
   ): Promise<number> {
     if (slotIds.length === 0) return 0;
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const bookings = await this.catalogRepo.findBookingsOfSlots(
       em,
       slotIds,
@@ -52,18 +54,27 @@ export class SlotMoveNotifier {
     let notified = 0;
     for (const booking of bookings) {
       try {
-        const snapshot = await this.noticeRepo.describeBooking(em, booking.id);
-        if (snapshot === null) continue;
-        const account = await this.noticeRepo.findAccountForProfile(
-          em,
-          booking.patientProfileId,
-        );
-        if (account === null) continue;
+        // One savepoint per booking: a failed notice rolls back on its own and
+        // leaves the request transaction usable for the next one.
+        await this.em
+          .fork({ keepTransactionContext: true })
+          .transactional(async (tx) => {
+            const snapshot = await this.noticeRepo.describeBooking(
+              tx,
+              booking.id,
+            );
+            if (snapshot === null) return;
+            const account = await this.noticeRepo.findAccountForProfile(
+              tx,
+              booking.patientProfileId,
+            );
+            if (account === null) return;
 
-        await this.notices.emit(
-          scheduleMovedNotice(snapshot, minutes, account),
-        );
-        notified += 1;
+            await this.notices.emit(
+              scheduleMovedNotice(snapshot, minutes, account),
+            );
+            notified += 1;
+          });
       } catch (error: unknown) {
         this.logger.warn(
           {
