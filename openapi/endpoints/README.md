@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1938 de 1938 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1939 de 1939 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -101,7 +101,7 @@ Esta referencia documenta **1938 de 1938 operaciones HTTP** registradas en `open
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 84 | `practice`, `practice-infrastructure`, `practice-operations` | 17 |
 | [procedures_perioperative](procedures-perioperative.md) | 42 | `dental-procedures`, `procedure-cases`, `procedures-perioperative-or` | 3 |
-| [profiles](profiles.md) | 84 | `admissions`, `profiles-affiliations`, `profiles-patients`, `profiles-practitioner-admission`, `profiles-practitioners`, `profiles-primary-practitioner` | 9 |
+| [profiles](profiles.md) | 85 | `admissions`, `profiles-affiliations`, `profiles-patients`, `profiles-practitioner-admission`, `profiles-practitioners`, `profiles-primary-practitioner` | 9 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
 | [public](public.md) | 4 | `public-catalog` | 1 |
 | [qa_execution](qa-execution.md) | 9 | `qa-execution`, `qa-execution-internal` | 2 |

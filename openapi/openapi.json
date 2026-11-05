@@ -6448,6 +6448,71 @@
         ]
       }
     },
+    "/profiles/practitioners/me/admission/submit": {
+      "post": {
+        "description": "Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 422 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS (se reenvía con `resubmit`). Si el perfil no está pendiente: 422 ADMISSION_NOT_PENDING. Sin perfil profesional: 404 ADMISSION_NOT_FOUND.",
+        "operationId": "OwnAdmissionController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResubmitAdmissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnAdmissionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enviarme a verificación",
+        "tags": [
+          "profiles-practitioner-admission"
+        ]
+      }
+    },
     "/profiles/practitioners/me/admission/resubmit": {
       "post": {
         "description": "Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. El servidor guarda cuándo se aceptó y qué versión del texto.",
