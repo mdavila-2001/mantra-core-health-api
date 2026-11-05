@@ -70,15 +70,45 @@ describe('ManageCenterEquipmentUseCase', () => {
     });
   });
 
-  it('refuses a modality the catalog has no device type for (422)', async () => {
-    const d = build();
-    await expect(
-      d.useCase.create(
-        UNIT.id,
-        { name: 'Resonador', modalityCode: 'RM' },
-        actor,
-      ),
-    ).rejects.toMatchObject({ status: 422 });
+  it.each([
+    ['ECO', DUNIT.EQUIPMENT_TYPE_ULTRASOUND, DUNIT.MODALITY_ULTRASOUND],
+    ['RX', DUNIT.EQUIPMENT_TYPE_XRAY, DUNIT.MODALITY_XRAY],
+    ['RM', DUNIT.EQUIPMENT_TYPE_MRI, DUNIT.MODALITY_MRI],
+    ['TC', DUNIT.EQUIPMENT_TYPE_CT, DUNIT.MODALITY_CT],
+    ['MG', DUNIT.EQUIPMENT_TYPE_MAMMOGRAPHY, DUNIT.MODALITY_MAMMOGRAPHY],
+    [
+      'DXA',
+      DUNIT.EQUIPMENT_TYPE_BONE_DENSITOMETRY,
+      DUNIT.MODALITY_BONE_DENSITOMETRY,
+    ],
+    ['LAB', DUNIT.EQUIPMENT_TYPE_SAMPLING_STATION, DUNIT.MODALITY_LABORATORY],
+  ] as const)(
+    'every modality registers a line with its own device type (%s)',
+    async (modalityCode, type, modality) => {
+      const d = build();
+      await d.useCase.create(UNIT.id, { name: 'Equipo', modalityCode }, actor);
+      expect(d.created[0]).toMatchObject({
+        equipmentTypeConceptId: type,
+        modalityConceptId: modality,
+      });
+    },
+  );
+
+  it('the device types are distinct concepts, none shared between modalities', () => {
+    const types = [
+      DUNIT.EQUIPMENT_TYPE_ULTRASOUND,
+      DUNIT.EQUIPMENT_TYPE_XRAY,
+      DUNIT.EQUIPMENT_TYPE_MRI,
+      DUNIT.EQUIPMENT_TYPE_CT,
+      DUNIT.EQUIPMENT_TYPE_MAMMOGRAPHY,
+      DUNIT.EQUIPMENT_TYPE_BONE_DENSITOMETRY,
+      DUNIT.EQUIPMENT_TYPE_SAMPLING_STATION,
+      DUNIT.EQUIPMENT_TYPE_ANALYZER,
+    ];
+    expect(new Set(types).size).toBe(types.length);
+    expect(types.every((id) => typeof id === 'string' && id.length > 0)).toBe(
+      true,
+    );
   });
 
   it('a device of another center answers 404', async () => {
