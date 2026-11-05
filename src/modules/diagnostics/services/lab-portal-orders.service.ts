@@ -44,6 +44,10 @@ export function toOrderDto(view: LabOrderView): LabOrderDto {
     requestedAt: view.order.createdAt.toISOString(),
     status: view.status,
     reason: view.reason,
+    // REJECT is recorded against the received specimen: imaging has none.
+    canReject:
+      LAB_ORDER_TRANSITIONS.REJECT.includes(view.status) &&
+      view.openSpecimenIds.length > 0,
     files: view.files
       .filter((file) => file.status === 'AVAILABLE')
       .map((file) => ({

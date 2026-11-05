@@ -283,6 +283,7 @@ describe('ListCenterBookingsUseCase', () => {
           endsAt: '2026-11-04T12:30:00.000Z',
           siteName: 'Sede norte',
           status: 'CONFIRMED',
+          equipmentId: null,
         },
         {
           bookingId: 'b2',
@@ -293,6 +294,7 @@ describe('ListCenterBookingsUseCase', () => {
           endsAt: '2026-11-04T13:30:00.000Z',
           siteName: 'Sede central',
           status: 'CHECKED_IN',
+          equipmentId: null,
         },
       ],
     });
@@ -302,6 +304,41 @@ describe('ListCenterBookingsUseCase', () => {
       new Date('2026-11-04T04:00:00Z'),
       new Date('2026-11-05T04:00:00Z'),
     );
+  });
+
+  it('puts each booking on the line (device) that attends it', async () => {
+    const d = build();
+    d.scheduleRepo.findEquipment.mockResolvedValue([
+      {
+        id: 'eco-1',
+        type_concept_id: DUNIT.EQUIPMENT_TYPE_ULTRASOUND,
+        type_display: 'Ultrasound equipment',
+        manufacturer: null,
+        model: 'Ecógrafo sala 1',
+        serial_number: null,
+        modality_concept_id: DUNIT.MODALITY_ULTRASOUND,
+        status_concept_id: DUNIT.EQUIPMENT_OPERATIONAL,
+      },
+    ] as never);
+    const slot = (id: string) => ({
+      id,
+      start_at: new Date('2026-11-04T13:00:00Z'),
+      end_at: new Date('2026-11-04T13:30:00Z'),
+      status_concept_id: CONCEPTS.BOOKING_CONFIRMED,
+      patient_name: null,
+      snapshot: { modalityCode: 'ECO' },
+    });
+    d.bookingsRepo.listForResource.mockResolvedValue([slot('a'), slot('b')]);
+    const res = await runWithTenant(TENANT, () =>
+      d.bookings.execute({
+        from: '2026-11-04T04:00:00Z',
+        to: '2026-11-05T04:00:00Z',
+      }),
+    );
+    expect(res.items.map((i) => [i.bookingId, i.equipmentId])).toEqual([
+      ['a', 'eco-1'],
+      ['b', null],
+    ]);
   });
 
   it('rejects an inverted or too wide window', async () => {

@@ -48,6 +48,7 @@ export interface EquipmentRow {
   type_display: string | null;
   manufacturer: string | null;
   model: string | null;
+  serial_number: string | null;
   modality_concept_id: string | null;
   status_concept_id: string;
 }
@@ -249,7 +250,7 @@ export class CenterScheduleRepository {
   findEquipment(em: EntityManager, unitId: string): Promise<EquipmentRow[]> {
     return em.execute<EquipmentRow[]>(
       `SELECT e.id, e.equipment_type_concept_id AS type_concept_id, c.display AS type_display,
-              e.manufacturer, e.model, e.modality_concept_id,
+              e.manufacturer, e.model, e.serial_number, e.modality_concept_id,
               e.operational_status_concept_id AS status_concept_id
          FROM diagnostic_units.diagnostic_equipment e
          JOIN diagnostic_units.diagnostic_unit_sites s ON s.id = e.diagnostic_unit_site_id

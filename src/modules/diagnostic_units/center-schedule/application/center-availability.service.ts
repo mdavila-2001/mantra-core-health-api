@@ -6,13 +6,13 @@ import type {
   ScheduleOrigin,
   StudyStart,
 } from '../domain/center-schedule.model';
-import { capacityOf, resolveBlock } from '../domain/schedule-rules';
+import { slotCapacity } from '../domain/equipment-lines';
+import { resolveBlock } from '../domain/schedule-rules';
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
 import { toOccupying, type CenterContext } from './center-context.service';
 
 export interface StudyAvailability {
   readonly origin: ScheduleOrigin;
-  readonly capacity: number;
   /** The template-free slot length, for the booking's end instant. */
   readonly slotMinutes: number;
   readonly items: StudyStart[];
@@ -20,7 +20,8 @@ export interface StudyAvailability {
 
 /**
  * Free starts of a study in a center: the block that applies to it (study →
- * modality → general), capacity from its operational equipment, minus the
+ * modality → general), capacity from the operational lines open in each slot
+ * (a device with its own shift only counts inside it), minus the
  * bookings already taken on the center's resource.
  */
 @Injectable()
@@ -40,11 +41,6 @@ export class CenterAvailabilityService {
       studyCode,
       modalityCode,
     );
-    const capacity = capacityOf(
-      ctx.equipment,
-      modalityCode,
-      ctx.declaredCapacity,
-    );
     const occupying = ctx.resourceId
       ? (
           await this.bookingsRepo.findOccupying(
@@ -58,13 +54,22 @@ export class CenterAvailabilityService {
     const items = availableStarts({
       block,
       zone: ctx.zone,
-      capacity,
+      capacityAt: (start, end) =>
+        slotCapacity(
+          ctx.schedule,
+          ctx.equipment,
+          modalityCode,
+          ctx.declaredCapacity,
+          start,
+          end,
+          ctx.zone,
+        ),
       modalityCode,
       occupying,
       from,
       to,
       now: new Date(),
     });
-    return { origin, capacity, slotMinutes: block.slotMinutes, items };
+    return { origin, slotMinutes: block.slotMinutes, items };
   }
 }
