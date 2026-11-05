@@ -88,7 +88,7 @@ export class SchedulingDelayService {
   ): Promise<DelayNoticeResponseDto> {
     this.assertMinutes(dto.delayMinutes);
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) {
       throw new ResourceNotFoundException(
@@ -135,7 +135,7 @@ export class SchedulingDelayService {
   ): Promise<DelayNoticeResponseDto> {
     this.assertMinutes(dto.delayMinutes);
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
       throw new ResourceNotFoundException(

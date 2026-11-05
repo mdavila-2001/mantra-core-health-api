@@ -86,88 +86,92 @@ export class ReferralNotifier {
   /** `true` si el aviso llegó a la campana de la paciente. */
   async notifyRecommended(referralId: string): Promise<boolean> {
     try {
-      const em = this.em.fork();
-      const referral = await em.findOne(Referrals, { id: referralId });
-      if (referral === null) return false;
-      const targetProfileId = referral.targetProfileId ?? null;
-      const targetTenantId = referral.targetTenantId ?? null;
-      if (targetProfileId === null && targetTenantId === null) return false;
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      return await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const referral = await em.findOne(Referrals, { id: referralId });
+          if (referral === null) return false;
+          const targetProfileId = referral.targetProfileId ?? null;
+          const targetTenantId = referral.targetTenantId ?? null;
+          if (targetProfileId === null && targetTenantId === null) return false;
 
-      const recipientUserId = await this.accountOf(
-        em,
-        referral.patientProfileId,
-      );
-      if (recipientUserId === null) {
-        this.logger.info(
-          { operation: 'clinical_ext.referral.notice', referralId },
-          'Derivación sin destinatario con cuenta de portal',
-        );
-        return false;
-      }
-
-      const referrer =
-        referral.referringProfileId === undefined ||
-        referral.referringProfileId === null
-          ? null
-          : await this.displayNameOf(em, referral.referringProfileId);
-      const notice =
-        targetProfileId !== null
-          ? await this.practitionerNotice(
-              em,
-              targetProfileId,
-              referrer,
-              referral.reasonText,
-            )
-          : await this.organizationNotice(
-              em,
-              targetTenantId as string,
-              referral.targetServiceCatalogId ?? null,
+          const recipientUserId = await this.accountOf(
+            em,
+            referral.patientProfileId,
+          );
+          if (recipientUserId === null) {
+            this.logger.info(
+              { operation: 'clinical_ext.referral.notice', referralId },
+              'Derivación sin destinatario con cuenta de portal',
             );
-      if (notice === null) return false;
-      const { subject, bodyText } = notice;
-      const actor: AuthenticatedUser = {
-        id: SEED.systemWorkerUserId,
-        roles: ['SYSTEM'],
-      };
+            return false;
+          }
 
-      const request = await this.notifications.createRequest(
-        {
-          channelId: MESSAGING_SEED.inAppChannelId,
-          recipientUserId,
-          categoryConceptId: CEXT.NOTICE_REFERRAL_RECOMMENDED,
-          priority: NOTICE_PRIORITY,
-          payloadJson: {
-            kind: 'REFERRAL_RECOMMENDED',
-            subject,
-            bodyText,
-            ...(notice.route === null ? {} : { route: notice.route }),
-            referralId,
-          },
-          // El destino del aviso es la ficha del profesional (o de la
-          // organización) donde la paciente reserva. La derivación misma viaja
-          // en el payload. Sin ficha a la que llevar, el aviso no lleva destino.
-          ...(notice.resource === null
-            ? {}
-            : {
-                relatedResourceType: notice.resource.type,
-                relatedResourceId: notice.resource.id,
-              }),
-        },
-        actor,
-      );
-      if (request.suppressed || request.debounced) return false;
+          const referrer =
+            referral.referringProfileId === undefined ||
+            referral.referringProfileId === null
+              ? null
+              : await this.displayNameOf(em, referral.referringProfileId);
+          const notice =
+            targetProfileId !== null
+              ? await this.practitionerNotice(
+                  em,
+                  targetProfileId,
+                  referrer,
+                  referral.reasonText,
+                )
+              : await this.organizationNotice(
+                  em,
+                  targetTenantId as string,
+                  referral.targetServiceCatalogId ?? null,
+                );
+          if (notice === null) return false;
+          const { subject, bodyText } = notice;
+          const actor: AuthenticatedUser = {
+            id: SEED.systemWorkerUserId,
+            roles: ['SYSTEM'],
+          };
 
-      await this.notifications.deliverNotification(
-        request.id,
-        {
-          outcome: 'SENT',
-          providerChannelConfigId: MESSAGING_SEED.inAppChannelConfigId,
-          subject,
-          bodyText,
-        },
-        actor,
-      );
-      return true;
+          const request = await this.notifications.createRequest(
+            {
+              channelId: MESSAGING_SEED.inAppChannelId,
+              recipientUserId,
+              categoryConceptId: CEXT.NOTICE_REFERRAL_RECOMMENDED,
+              priority: NOTICE_PRIORITY,
+              payloadJson: {
+                kind: 'REFERRAL_RECOMMENDED',
+                subject,
+                bodyText,
+                ...(notice.route === null ? {} : { route: notice.route }),
+                referralId,
+              },
+              // El destino del aviso es la ficha del profesional (o de la
+              // organización) donde la paciente reserva. La derivación misma viaja
+              // en el payload. Sin ficha a la que llevar, el aviso no lleva destino.
+              ...(notice.resource === null
+                ? {}
+                : {
+                    relatedResourceType: notice.resource.type,
+                    relatedResourceId: notice.resource.id,
+                  }),
+            },
+            actor,
+          );
+          if (request.suppressed || request.debounced) return false;
+
+          await this.notifications.deliverNotification(
+            request.id,
+            {
+              outcome: 'SENT',
+              providerChannelConfigId: MESSAGING_SEED.inAppChannelConfigId,
+              subject,
+              bodyText,
+            },
+            actor,
+          );
+          return true;
+        });
     } catch (error: unknown) {
       this.logger.warn(
         {

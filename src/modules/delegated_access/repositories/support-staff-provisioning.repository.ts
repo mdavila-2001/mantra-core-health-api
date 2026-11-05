@@ -26,11 +26,11 @@ export class SupportStaffProvisioningRepository {
     const rows = await em.execute<
       { id: string; tenant_id: string; organization_name: string | null }[]
     >(
-      `SELECT pra.id, p.tenant_id, per.display_name AS organization_name
+      `SELECT pra.id, p.tenant_id,
+              COALESCE(t.trade_name, t.legal_name) AS organization_name
          FROM practice.practitioner_role_assignments pra
          JOIN practice.practices p ON p.id = pra.practice_id
          LEFT JOIN directory.tenants t ON t.id = p.tenant_id
-         LEFT JOIN profiles.persons per ON per.id = t.organization_id
         WHERE pra.id = ? AND pra.practitioner_profile_id = ?
           AND pra.status_concept_id = ?`,
       [roleAssignmentId, practitionerProfileId, PRAC.ROLE_ASSIGNMENT_ACTIVE],

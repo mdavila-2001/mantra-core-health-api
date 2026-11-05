@@ -25,7 +25,9 @@ export class MikroSqlPort implements SqlPort {
   }
 
   transaction<R>(work: (tx: SqlPort) => Promise<R>): Promise<R> {
-    return this.em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = this.em.fork({ keepTransactionContext: false });
+    return ownFork.transactional(async (tx) => {
       // Las filas del registro de plataforma no pertenecen a ningún tenant del
       // actor: se opera con el contexto de sistema, LOCAL a esta transacción
       // (mismo mecanismo que `AuthzClinicalScopeService` y los seeders). Sin

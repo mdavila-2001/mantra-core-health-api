@@ -10,6 +10,7 @@ import {
 } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
 import { IDA } from '../identity_assurance.concepts';
+import { IdentityAssuranceErrorReason } from '../identity_assurance.error-reasons';
 import {
   IDENTITY_CARD_VERTICAL,
   MEDICAL_LICENSE_VERTICAL,
@@ -112,8 +113,27 @@ describe('IdentitySelfServiceService', () => {
   }
 
   describe('requestPatientIdentity', () => {
-    it('opens the case for the actor own person, never for an id in the body', async () => {
+    // A patient has no practitioner profile; `build()` defaults to one.
+    const buildPatient = () => {
       const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+      return d;
+    };
+
+    it('rejects a practitioner and points to the practitioner path', async () => {
+      const d = build();
+
+      await expect(
+        d.service.requestPatientIdentity(dto, actor),
+      ).rejects.toMatchObject({
+        reason:
+          IdentityAssuranceErrorReason.PRACTITIONER_IDENTITY_PATH_REQUIRED,
+      });
+      expect(d.casesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('opens the case for the actor own person, never for an id in the body', async () => {
+      const d = buildPatient();
 
       const res = await d.service.requestPatientIdentity(dto, actor);
 
@@ -133,7 +153,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('records the evidence and plans a required check in one go', async () => {
-      const d = build();
+      const d = buildPatient();
 
       await d.service.requestPatientIdentity(dto, actor);
 
@@ -154,7 +174,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('stores the five typed evidences of the new contract in order', async () => {
-      const d = build();
+      const d = buildPatient();
       const ids = ['f1', 'b1', 'c1', 'l1', 'r1'];
 
       await d.service.requestPatientIdentity(
@@ -182,7 +202,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('rejects a partial set of evidences, mixed contracts and foreign files', async () => {
-      const d = build();
+      const d = buildPatient();
       await expect(
         d.service.requestPatientIdentity(
           { documentFrontFileId: 'f1' } as never,
@@ -207,7 +227,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('refuses a second verification while one is already running', async () => {
-      const d = build();
+      const d = buildPatient();
       d.casesRepo.countLiveForSubject.mockResolvedValue(1);
 
       await expect(
@@ -217,7 +237,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('refuses when the account has no linked person', async () => {
-      const d = build();
+      const d = buildPatient();
       d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
 
       await expect(
@@ -226,7 +246,7 @@ describe('IdentitySelfServiceService', () => {
     });
 
     it('enqueues a confirmation email to the user when requested', async () => {
-      const d = build();
+      const d = buildPatient();
 
       await d.service.requestPatientIdentity(dto, actor);
 
@@ -240,6 +260,31 @@ describe('IdentitySelfServiceService', () => {
         }),
         actor,
       );
+    });
+  });
+
+  describe('requestPractitionerIdentity', () => {
+    it('opens a practitioner identity case for a practitioner', async () => {
+      const d = build();
+
+      await d.service.requestPractitionerIdentity(dto, actor);
+
+      expect(d.casesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          subjectEntityId: 'person-1',
+          subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_IDENTITY,
+        }),
+      );
+    });
+
+    it('rejects an account without a practitioner profile', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.requestPractitionerIdentity(dto, actor),
+      ).rejects.toThrow('La cuenta no tiene un perfil profesional');
     });
   });
 

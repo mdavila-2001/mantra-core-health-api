@@ -28,7 +28,8 @@ const RESOURCE = '22222222-2222-2222-2222-222222222222';
  */
 
 function buildCatalog() {
-  const tx = { flush: mockFn() };
+  const tx: any = { flush: mockFn() };
+  tx.transactional = mockFn((cb: any) => cb(tx));
   // `fork()` además de `transactional`: las lecturas del servicio —listSlots y
   // listTemplates— no abren transacción, piden un contexto propio.
   const em = {
@@ -644,6 +645,9 @@ describe('SchedulingCatalogService', () => {
 
         await d.service.listTemplates(RESOURCE, actor);
 
+        expect(d.em.fork).toHaveBeenCalledWith({
+          keepTransactionContext: true,
+        });
         expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledTimes(1);
         expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledWith(
           expect.anything(),
@@ -872,6 +876,9 @@ describe('SchedulingCatalogService', () => {
 
         await d.service.listExceptions(RESOURCE, FROM, TO, actor);
 
+        expect(d.em.fork).toHaveBeenCalledWith({
+          keepTransactionContext: true,
+        });
         expect(
           d.catalogRepo.findExceptionsByResourceInRange,
         ).toHaveBeenCalledWith(expect.anything(), RESOURCE, FROM, TO);
@@ -2220,6 +2227,10 @@ describe('SchedulingCatalogService', () => {
             'tpl-1',
             owner as never,
           );
+
+          expect(d.em.fork).toHaveBeenCalledWith({
+            keepTransactionContext: true,
+          });
 
           expect(res).toEqual({
             templateId: 'tpl-1',
@@ -3927,6 +3938,19 @@ describe('SchedulingCatalogService', () => {
       expect(options.onlyAvailable).toBe(true);
       // La capacidad no alcanza: un cupo bloqueado la conserva.
       expect(options.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('lee sobre la transacción de la petición (RLS)', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...WINDOW,
+        onlyAvailable: false,
+      });
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
     });
 
     it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {

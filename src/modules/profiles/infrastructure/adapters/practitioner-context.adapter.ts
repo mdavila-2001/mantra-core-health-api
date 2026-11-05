@@ -74,10 +74,8 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
     const output = new Map<string, PractitionerDirectoryStats>();
     if (profileIds.length === 0) return output;
     const ids = [...profileIds];
-    const connection = em.getConnection();
-
     const [activityRows, ratingRows] = await Promise.all([
-      connection.execute<
+      em.execute<
         {
           person_id: string;
           encounters: string;
@@ -101,7 +99,7 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
         [ids, PROF.ACCOUNT_LINK_ACTIVE],
         'all',
       ),
-      connection.execute<{ target_id: string; avg: string; total: string }[]>(
+      em.execute<{ target_id: string; avg: string; total: string }[]>(
         `SELECT p.target_id, AVG(r.overall_rating)::numeric AS avg, COUNT(*) AS total
            FROM community.public_profiles p
            JOIN community.service_reviews r

@@ -30,7 +30,9 @@ export async function runCommitted<T>(
   work: (tx: EntityManager) => Promise<T>,
 ): Promise<T> {
   if (!em.isInTransaction()) return em.transactional(work);
-  return em.fork().transactional(async (tx) => {
+  // Own connection: a joined transaction would keep this set_config alive.
+  const ownFork = em.fork({ keepTransactionContext: false });
+  return ownFork.transactional(async (tx) => {
     await tx.execute("select set_config('app.system_context', 'false', true)");
     await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
       tenantId,

@@ -891,7 +891,9 @@ export class PractitionerAdmissionsService {
     // escribe nada y se suelta al terminar (también si el proceso muere: la
     // base lo libera con la conexión). El trabajo de cada admisión corre en sus
     // propias transacciones, como antes.
-    const guard = this.em.fork();
+    // Own connection: the lock lives in a transaction of its own, never in the
+    // request one.
+    const guard = this.em.fork({ keepTransactionContext: false });
     await guard.begin();
     try {
       const lock = await guard.execute<{ locked: boolean }[]>(

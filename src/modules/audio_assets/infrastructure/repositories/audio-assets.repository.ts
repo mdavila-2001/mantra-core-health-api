@@ -80,7 +80,7 @@ export class AudioAssetsRepository {
   /** La constraint UNIQUE(asset_key) es la garantía final frente a carreras. */
   async createPendingOrGet(input: CreateAudioAssetInput): Promise<AudioAssets> {
     const now = new Date();
-    await this.em.getConnection().execute(
+    await this.em.execute(
       `insert into audio_assets.audio_assets (
         id, asset_key, tenant_id, template_key, template_version, strategy, language, normalized_value_hash,
         display_value_encrypted, rendered_text_hash, provider, provider_model, voice_profile,
@@ -192,13 +192,11 @@ export class AudioAssetsRepository {
   }
 
   async touchUsage(assetId: string): Promise<void> {
-    await this.em
-      .getConnection()
-      .execute(
-        `update audio_assets.audio_assets set last_used_at=now(), use_count=use_count+1, updated_at=now() where id=?`,
-        [assetId],
-        'run',
-      );
+    await this.em.execute(
+      `update audio_assets.audio_assets set last_used_at=now(), use_count=use_count+1, updated_at=now() where id=?`,
+      [assetId],
+      'run',
+    );
   }
   async estimatedUsage(periodKey: string, provider: string): Promise<number> {
     return (

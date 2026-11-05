@@ -268,7 +268,7 @@ export class SurveysAssignmentsService {
    */
   async listCompletedBookingsWithoutInvitation(limit = 100): Promise<string[]> {
     return this.targetsRepo.listCompletedBookingsWithoutInvitation(
-      this.em.fork(),
+      this.em.fork({ keepTransactionContext: true }),
       requireTenantId(),
       SCHED.BOOKING_COMPLETED,
       limit,
@@ -292,7 +292,7 @@ export class SurveysAssignmentsService {
     // reserva tomado ataría una conexión más mientras se espera. Las
     // comprobaciones se repiten abajo, ya con la reserva bloqueada.
     const preRead = await this.targetsRepo.findBooking(
-      this.em.fork(),
+      this.em.fork({ keepTransactionContext: true }),
       dto.appointmentBookingId,
     );
     const pre = this.assertIssuable(
@@ -453,7 +453,7 @@ export class SurveysAssignmentsService {
         // un error: la invitación ya existe, y se responde como emisión previa.
         if (!(error instanceof UniqueConstraintViolationException)) throw error;
         const existing = await this.invitationsRepo.listByBooking(
-          this.em.fork(),
+          this.em.fork({ keepTransactionContext: true }),
           dto.appointmentBookingId,
         );
         return { ids: [], alreadyIssued: existing.length };

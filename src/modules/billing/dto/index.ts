@@ -13,6 +13,6 @@ export * from './service-catalog.dto';
 export * from './admin-service-catalog.dto';
 export * from './procedure-nomenclature.dto';
 export * from './billing-simulated.dto';
+export * from './service-repository.dto';
 export * from './procedure-import.dto';
 export * from './patient-spending.dto';
-export * from './procedure-import.dto';

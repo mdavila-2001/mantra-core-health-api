@@ -19,9 +19,11 @@ function build() {
   const serviceCatalogService = {
     search: mockFn(),
     create: mockFn(),
+    importServices: mockFn(),
     getImageContent: mockFn(),
   };
   const nomenclature = { listSpecialties: mockFn(), search: mockFn() };
+  const repository = { search: mockFn(), facets: mockFn() };
   const procedureImport = {
     listMySpecialties: mockFn(),
     importProcedures: mockFn(),
@@ -29,9 +31,16 @@ function build() {
   const controller = new BillingServiceCatalogController(
     serviceCatalogService as any,
     nomenclature as any,
+    repository as any,
     procedureImport as any,
   );
-  return { controller, serviceCatalogService, nomenclature, procedureImport };
+  return {
+    controller,
+    serviceCatalogService,
+    nomenclature,
+    repository,
+    procedureImport,
+  };
 }
 
 describe('BillingServiceCatalogController', () => {
@@ -135,6 +144,39 @@ describe('BillingServiceCatalogController', () => {
 
     expect(d.nomenclature.listSpecialties).toHaveBeenCalledTimes(1);
   });
+
+  it('delegates the repository search with every filter', async () => {
+    const d = build();
+    d.repository.search.mockResolvedValue({ items: [], nextCursor: null });
+
+    await d.controller.searchRepository('eco', 'sp-1', 'cups', 'pr1', 'c', 10);
+
+    expect(d.repository.search).toHaveBeenCalledWith({
+      query: 'eco',
+      specialtyConceptId: 'sp-1',
+      codeSystem: 'cups',
+      practiceId: 'pr1',
+      cursor: 'c',
+      limit: 10,
+    });
+  });
+
+  it('delegates the import to the catalog service with the actor', async () => {
+    const d = build();
+    const dto = {
+      practiceId: 'pr1',
+      items: [{ conceptId: 'c1', defaultPrice: '1.00' }],
+    };
+    d.serviceCatalogService.importServices.mockResolvedValue({ items: [] });
+
+    await d.controller.importServices(dto, actor);
+
+    expect(d.serviceCatalogService.importServices).toHaveBeenCalledWith(
+      dto,
+      actor,
+    );
+  });
+
   it('sirve la imagen con no-store sin sniffing y sin pasar el actor al servicio', async () => {
     const d = build();
     d.serviceCatalogService.getImageContent.mockResolvedValue({

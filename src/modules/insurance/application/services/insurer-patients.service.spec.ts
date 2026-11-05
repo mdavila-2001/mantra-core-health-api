@@ -54,7 +54,7 @@ function build(responses: unknown[][]) {
   });
   const flush = mockFn().mockResolvedValue(undefined);
   const em = {
-    fork: () => ({ getConnection: () => ({ execute: dbExecute }), flush }),
+    fork: () => ({ execute: dbExecute, flush }),
   };
   const messaging = {
     createConversation: mockFn().mockResolvedValue({ id: 'conversation' }),
@@ -267,7 +267,7 @@ describe('directory authorization, options and conversations', () => {
     );
     expect(queries).toHaveLength(2);
     for (const query of queries)
-      expect(query[4]).toEqual({ debugMode: ['query'] });
+      expect(query[3]).toEqual({ debugMode: ['query'] });
     expect(withContext).toHaveBeenCalledTimes(2);
     for (const call of withContext.mock.calls)
       expect(isTracingSuppressed(call[0])).toBe(true);

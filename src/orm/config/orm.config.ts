@@ -8,6 +8,8 @@ import {
   warnIfRlsRoleFallbackIsUnsafe,
 } from './rls-role-resolution';
 import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
+import { SavepointRootSubscriber } from '../transaction-root.registry';
+import { TransactionInheritingEntityManager } from '../transaction-inheriting-entity-manager';
 
 /**
  * Configuración de runtime de MikroORM para la capa relacional PostgreSQL.
@@ -128,9 +130,14 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
       disableForeignKeys: false,
     },
 
+    // Argument-less `fork()` joins the live transaction (RLS tenant context).
+    // `orm.em` and the injected EntityManager become this subclass; `OrmModule`
+    // aliases the `@mikro-orm/postgresql` token to it.
+    entityManager: TransactionInheritingEntityManager,
+
     // Espejo de versionado (ALOVIDA §2): puebla `audit.<tabla>_history` en cada
     // flush para todo agregado con tabla de historial, dentro de su transacción.
-    subscribers: [new HistoryMirrorSubscriber()],
+    subscribers: [new HistoryMirrorSubscriber(), new SavepointRootSubscriber()],
 
     // `debug` activa el volcado de cada consulta; el logger propio decide luego
     // qué nivel usar y qué registrar siempre (las consultas lentas).

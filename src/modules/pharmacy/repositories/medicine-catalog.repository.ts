@@ -153,6 +153,31 @@ export class MedicineCatalogRepository {
     return { items: await this.hydrate(em, ids), truncated };
   }
 
+  /** Products whose ATC starts with a prefix («A03B»): symptom searches. */
+  async searchByAtcPrefixes(
+    em: EntityManager,
+    prefixes: readonly string[],
+    limit: number,
+  ): Promise<MedicineCatalogProduct[]> {
+    if (prefixes.length === 0) return [];
+    const like = prefixes.map((prefix) => `${escapeLike(prefix)}%`);
+    const rows = await em.execute<{ id: string }[]>(
+      `select c.id from terminology.catalog_concepts c
+         join terminology.code_system_versions v on v.id = c.code_system_version_id
+         join terminology.code_systems s on s.id = v.code_system_id
+         join terminology.concept_properties p on p.concept_id = c.id and p.property_code = ?
+        where s.internal_code in (${markers(MEDICINE_CODE_SYSTEMS)})
+          and exists (select 1 from jsonb_array_elements_text(p.value_json) a
+                       where a.value like any (array[${markers(like)}]::text[]))
+        order by c.display, c.id limit ?`,
+      [MEDICINE_PROPERTY.ATC, ...MEDICINE_CODE_SYSTEMS, ...like, limit],
+    );
+    return this.hydrate(
+      em,
+      rows.map((row) => row.id),
+    );
+  }
+
   /**
    * El concepto del vademécum (el que usa la receta) que corresponde a alguno
    * de estos ATC nivel 5, o `null`. Igualdad exacta de código: nada de

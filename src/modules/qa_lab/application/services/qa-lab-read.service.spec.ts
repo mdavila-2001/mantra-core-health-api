@@ -36,7 +36,7 @@ function build() {
   const em = {
     find: mockFn().mockResolvedValue([]),
     findOne: mockFn().mockResolvedValue(null),
-    getConnection: mockFn().mockReturnValue(connection),
+    execute: connection.execute,
   };
   const service = new QaLabReadService(em as any);
   return { service, em, connection };

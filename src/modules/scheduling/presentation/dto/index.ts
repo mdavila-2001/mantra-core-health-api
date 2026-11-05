@@ -138,6 +138,8 @@ export {
   BookableOrganizationDto,
   BookableOrganizationsResponseDto,
 } from './scheduling-agenda.dto';
+export * from './bookable-resources-query.dto';
+export * from './bookable-resources.dto';
 export * from './tenant-agenda.dto';
 
 export {

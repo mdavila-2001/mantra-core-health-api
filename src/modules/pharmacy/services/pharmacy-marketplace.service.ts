@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ResourceNotFoundException } from '../../../common';
 import {
+  MedicineCatalogRepository,
   PharmacyMarketplaceRepository,
   type PublishedOffer,
 } from '../repositories';
@@ -11,7 +12,14 @@ import type {
   PublicMedicationOfferDto,
   PublicMedicationPageDto,
 } from '../dto';
-import { decorateCards, groupOf, searchOffers, usesOf } from '../search';
+import {
+  catalogOnlyCard,
+  decorateCards,
+  groupOf,
+  searchOfficialCatalog,
+  searchShowcase,
+  usesOf,
+} from '../search';
 
 /** Radio de la Tierra en km, para la distancia en línea recta. */
 const EARTH_RADIUS_KM = 6371;
@@ -58,10 +66,12 @@ export class PharmacyMarketplaceService {
    *
    * @param em - Contexto de persistencia.
    * @param repo - Consultas públicas del catálogo.
+   * @param catalog - Registro sanitario oficial (catálogo universal).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: PharmacyMarketplaceRepository,
+    private readonly catalog: MedicineCatalogRepository,
   ) {}
 
   /**
@@ -79,9 +89,11 @@ export class PharmacyMarketplaceService {
     limit?: number;
     exact?: boolean;
   }): Promise<PublicMedicationPageDto> {
-    // Text is matched in memory (accents, uses, typos): see `search/`.
-    const { offers, outcome } = searchOffers(
-      await this.repo.findPublishedOffers(this.em.fork(), {}),
+    // Matched in memory over offers + vademécum: see `search/`.
+    const em = this.em.fork();
+    const { offers, catalogOnly, outcome } = searchShowcase(
+      await this.repo.findPublishedOffers(em, {}),
+      await this.repo.findVademecum(em),
       consultation.q,
       consultation.exact === true,
     );
@@ -92,7 +104,10 @@ export class PharmacyMarketplaceService {
       consultation.radiusKm,
     );
     const cards = decorateCards(
-      this.group(inScope, consultation.origin),
+      [
+        ...this.group(inScope, consultation.origin),
+        ...catalogOnly.map(catalogOnlyCard),
+      ],
       outcome,
     );
 
@@ -102,7 +117,7 @@ export class PharmacyMarketplaceService {
     // calcularlos sobre el catálogo entero ofrecería grupos que esa búsqueda
     // no puede llenar, y elegirlos daría una vitrina vacía.
     const groups = [
-      ...new Set(offers.map((offer) => groupOf(offer.atcCode))),
+      ...new Set(cards.map((card) => card.therapeuticGroup)),
     ].sort((a, b) => a.localeCompare(b, 'es'));
 
     const filtered =
@@ -120,6 +135,12 @@ export class PharmacyMarketplaceService {
       total: filtered.length,
       groups: groups,
       correctedQuery: outcome.correctedQuery,
+      officialProducts: await searchOfficialCatalog(
+        this.catalog,
+        em,
+        consultation.q,
+        outcome,
+      ),
       generatedAt: new Date().toISOString(),
     };
   }

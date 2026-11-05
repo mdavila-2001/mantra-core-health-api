@@ -97,7 +97,7 @@ export class DeclaredCoveragesReader {
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
     const referenceDate = coverageReferenceDate();
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         coverage_id: string;
         carrier_id: string;
@@ -148,7 +148,7 @@ export class DeclaredCoveragesReader {
     if (rows.length === 0) return [];
 
     const planIds = [...new Set(rows.map((row) => row.insurance_plan_id))];
-    const benefits = await em.getConnection().execute<
+    const benefits = await em.execute<
       {
         id: string;
         insurance_plan_id: string;

@@ -20,7 +20,10 @@ const group = { id: 'g1', name: 'Cardiología', tenantId: 't1' } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const em = { fork: mockFn(() => ({})) };
+  // Savepoint: `transactional` runs its callback on the forked double.
+  const forked: any = {};
+  forked.transactional = mockFn((cb: any) => cb(forked));
+  const em = { fork: mockFn(() => forked) };
   const notifications = {
     createRequest: mockFn().mockResolvedValue({ id: 'n1' }),
   };

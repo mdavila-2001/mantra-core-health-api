@@ -85,6 +85,25 @@ describe('MedicalSpecialtyCatalogService', () => {
     ).rejects.toThrow(/no está disponible/);
   });
 
+  it('assertAllAreSpecialties acepta una lista donde todos son miembros', async () => {
+    const d = build();
+    await expect(
+      d.service.assertAllAreSpecialties(d.em, [CARDIO, PEDIATRICS]),
+    ).resolves.toBeUndefined();
+    expect(d.valueSets.findIncludedConceptIdsByValueSet).toHaveBeenCalledTimes(
+      1,
+    );
+  });
+
+  it('assertAllAreSpecialties rechaza si UNO solo está fuera y lo nombra', async () => {
+    const d = build();
+    await expect(
+      d.service.assertAllAreSpecialties(d.em, [CARDIO, NOT_A_SPECIALTY]),
+    ).rejects.toMatchObject({
+      details: { specialtyConceptIds: [NOT_A_SPECIALTY] },
+    });
+  });
+
   it('un catálogo vacío rechaza, pero no se confunde con uno ausente', async () => {
     const d = build({ miembros: [] });
     await expect(

@@ -3,6 +3,10 @@ import { StoragePublicationService } from '../../../common/storage/storage-publi
 import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  isRlsEnforced,
+  withSystemRlsInTransaction,
+} from '../../../common/tenant/rls-transaction';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -12,7 +16,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { FileVersionsRepository, FilesRepository } from '../repositories';
-import type { Files } from '../entities/files.entity';
+import { Files } from '../entities/files.entity';
 import type { FileVersions } from '../entities/file_versions.entity';
 
 /** Cómo nombrar el archivo en los mensajes de error de cada llamador. */
@@ -224,54 +228,91 @@ export class AttachableFileService {
   ): Promise<{ file: Files; version: FileVersions }> {
     if (loadStorageEnv().lifecycleBinding && !this.publication)
       throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
-    await this.publication?.guardFile(em, fileId);
-    const file = await this.filesRepo.findById(em, fileId);
-    // No se distingue «no existe» de «ya tiene dueño» ni de «no es del
-    // tenant DEFAULT»: los tres mensajes serían indistinguibles para quien
-    // los lee, y separarlos permitiría enumerar qué uuids son archivos
-    // ajenos por descarte.
-    if (
-      !file ||
-      // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor
-      // como `null` (verificado contra Neon, no supuesto por el tipo
-      // `createdByUserId?: string` de la entidad, que sólo dice "opcional en
-      // TS" y no qué valor concreto llega de la base). `!== undefined` dejaba
-      // pasar CERO archivos: todo lo recién subido llegaba con `null` y el
-      // reclamo lo rechazaba siempre como "ya tiene dueño".
-      file.createdByUserId != null ||
-      file.tenantId !== SEED.tenantId
-    ) {
-      this.logger.warn(
-        { operation: options.operation, fileId },
-        'Refused to claim a file that is not an unclaimed anonymous upload',
+    // El archivo pre-subido vive en el tenant DEFAULT y la petición corre con el
+    // tenant de la organización nueva: con RLS, ni la lectura ni el UPDATE que
+    // mueve `tenant_id` lo ven. Todo el paso va en una ventana de sistema acotada.
+    return withSystemRlsInTransaction(em, async () => {
+      await this.publication?.guardFile(em, fileId);
+      const file = await this.filesRepo.findById(em, fileId);
+      // No se distingue «no existe» de «ya tiene dueño» ni de «no es del
+      // tenant DEFAULT»: los tres mensajes serían indistinguibles para quien
+      // los lee, y separarlos permitiría enumerar qué uuids son archivos
+      // ajenos por descarte.
+      if (
+        !file ||
+        // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor
+        // como `null` (verificado contra Neon, no supuesto por el tipo
+        // `createdByUserId?: string` de la entidad, que sólo dice "opcional en
+        // TS" y no qué valor concreto llega de la base). `!== undefined` dejaba
+        // pasar CERO archivos: todo lo recién subido llegaba con `null` y el
+        // reclamo lo rechazaba siempre como "ya tiene dueño".
+        file.createdByUserId != null ||
+        file.tenantId !== SEED.tenantId
+      ) {
+        this.refuseClaim(options, labels, fileId);
+      }
+      if (
+        options.allowedCategoryConceptId &&
+        file.categoryConceptId !== options.allowedCategoryConceptId
+      ) {
+        throw new PreconditionFailedException(
+          `${labels.subject} no corresponde a un archivo subido en este registro`,
+          { fileId },
+        );
+      }
+      const version = await this.assertVersionUsable(
+        em,
+        file,
+        fileId,
+        options,
+        labels,
       );
-      throw new PreconditionFailedException(
-        `${labels.subject} no corresponde a un archivo subido en este registro`,
-        { fileId },
-      );
-    }
-    if (
-      options.allowedCategoryConceptId &&
-      file.categoryConceptId !== options.allowedCategoryConceptId
-    ) {
-      throw new PreconditionFailedException(
-        `${labels.subject} no corresponde a un archivo subido en este registro`,
-        { fileId },
-      );
-    }
-    const version = await this.assertVersionUsable(
-      em,
-      file,
-      fileId,
-      options,
-      labels,
+      const now = new Date();
+      // Con RLS el reclamo se escribe aquí, dentro de la ventana: el UPDATE del
+      // `flush` del llamador ya correría con el tenant nuevo y no vería la fila
+      // vieja. Es condicional y atómico: si otro reclamo ganó la carrera, afecta
+      // 0 filas. Con RLS apagado no cambia nada: el `flush` del llamador escribe
+      // y su control de `row_version` cubre la carrera.
+      if (isRlsEnforced()) {
+        const claimed = await em.nativeUpdate(
+          Files,
+          { id: fileId, tenantId: SEED.tenantId, createdByUserId: null },
+          {
+            tenantId: claim.tenantId,
+            createdByUserId: claim.ownerUserId,
+            updatedByUserId: claim.ownerUserId,
+            updatedAt: now,
+          },
+        );
+        if (claimed !== 1) this.refuseClaim(options, labels, fileId);
+        // Re-read inside the window: the row's version moved with the UPDATE, so
+        // a stale entity would make the caller's flush fail its optimistic lock.
+        // Refreshed, the entity matches the row and the flush has nothing to write.
+        await em.refresh(file);
+        return { file, version };
+      }
+      file.tenantId = claim.tenantId;
+      file.createdByUserId = claim.ownerUserId;
+      file.updatedByUserId = claim.ownerUserId;
+      file.updatedAt = now;
+      return { file, version };
+    });
+  }
+
+  /** Rechazo único del reclamo: mismo log y mismo mensaje para cada causa. */
+  private refuseClaim(
+    options: AttachableFileOptions,
+    labels: AttachableFileLabels,
+    fileId: string,
+  ): never {
+    this.logger.warn(
+      { operation: options.operation, fileId },
+      'Refused to claim a file that is not an unclaimed anonymous upload',
     );
-    const now = new Date();
-    file.tenantId = claim.tenantId;
-    file.createdByUserId = claim.ownerUserId;
-    file.updatedByUserId = claim.ownerUserId;
-    file.updatedAt = now;
-    return { file, version };
+    throw new PreconditionFailedException(
+      `${labels.subject} no corresponde a un archivo subido en este registro`,
+      { fileId },
+    );
   }
 
   /**

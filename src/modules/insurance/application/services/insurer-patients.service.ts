@@ -148,22 +148,17 @@ export class InsurerPatientsService {
     const [{ total }] = await context.with(
       suppressTracing(context.active()),
       () =>
-        em
-          .getConnection()
-          .execute<{ total: number }[]>(
-            countQuery.sql,
-            countQuery.params,
-            'all',
-            undefined,
-            { debugMode: ['query'] },
-          ),
+        em.execute<{ total: number }[]>(
+          countQuery.sql,
+          countQuery.params,
+          'all',
+          { debugMode: ['query'] },
+        ),
     );
     const rows = await context.with(suppressTracing(context.active()), () =>
-      em
-        .getConnection()
-        .execute<InsurerPatientPageRow[]>(sql, params, 'all', undefined, {
-          debugMode: ['query'],
-        }),
+      em.execute<InsurerPatientPageRow[]>(sql, params, 'all', {
+        debugMode: ['query'],
+      }),
     );
     const hasMore = rows.length > criteria.limit;
     const page = hasMore ? rows.slice(0, criteria.limit) : rows;
@@ -216,7 +211,7 @@ export class InsurerPatientsService {
   /** Filiación, contacto y perfil de comunidad elegible de esos pacientes. */
   private readPeople(em: EntityManager, ids: string[]): Promise<PersonRow[]> {
     const placeholders = ids.map(() => '?').join(', ');
-    return em.getConnection().execute<PersonRow[]>(
+    return em.execute<PersonRow[]>(
       `select pa.profile_id as patient_profile_id,
               ${FULL_NAME_SQL} as full_name,
               to_char(p.birth_date, 'YYYY-MM-DD') as birth_date,
@@ -274,7 +269,7 @@ export class InsurerPatientsService {
     carrierId: string | undefined,
   ): Promise<CoverageRow[]> {
     const placeholders = ids.map(() => '?').join(', ');
-    return em.getConnection().execute<CoverageRow[]>(
+    return em.execute<CoverageRow[]>(
       `select c.patient_profile_id, cr.id as carrier_id, cr.legal_name as carrier_name,
               c.status_concept_id, pl.status_concept_id as plan_status_concept_id,
               to_char(c.effective_from, 'YYYY-MM-DD') as effective_from,
@@ -367,7 +362,7 @@ export class InsurerPatientsService {
       return {};
     const scope = await this.insurerContext.resolve(em, actor, ACCESS_DENIED);
     // Un JWT emitido antes de revocar la membresía no conserva acceso al directorio.
-    const memberships = await em.getConnection().execute<{ id: string }[]>(
+    const memberships = await em.execute<{ id: string }[]>(
       `select tm.id from directory.tenant_memberships tm
         join insurance.insurance_carriers cr on cr.tenant_id = tm.tenant_id
         where tm.tenant_id = ? and tm.user_id = ? and tm.status_concept_id = ?
@@ -392,14 +387,12 @@ export class InsurerPatientsService {
   async options(actor: AuthenticatedUser): Promise<InsurerPatientOptionsDto> {
     const em = this.em.fork();
     const { carrierId } = await this.resolveScope(em, actor);
-    const insurers = await em
-      .getConnection()
-      .execute<InsurerPatientCarrierDto[]>(
-        `select id, legal_name as name from insurance.insurance_carriers
+    const insurers = await em.execute<InsurerPatientCarrierDto[]>(
+      `select id, legal_name as name from insurance.insurance_carriers
        where status_concept_id = ? ${carrierId ? 'and id = ?' : ''}
        order by legal_name, id`,
-        [INS.CARRIER_ACTIVE, ...(carrierId ? [carrierId] : [])],
-      );
+      [INS.CARRIER_ACTIVE, ...(carrierId ? [carrierId] : [])],
+    );
     return { insurers };
   }
 
@@ -419,12 +412,13 @@ export class InsurerPatientsService {
       sortBy: 'fullName',
       sortDirection: 'asc',
     });
-    const allowed = await em
-      .getConnection()
-      .execute<InsurerPatientPageRow[]>(query.sql, query.params);
+    const allowed = await em.execute<InsurerPatientPageRow[]>(
+      query.sql,
+      query.params,
+    );
     if (!allowed.length) throw new NotFoundException('Paciente no disponible');
     const [recipient] = await this.readPeople(em, [dto.patientProfileId]);
-    const [initiator] = await em.getConnection().execute<{ id: string }[]>(
+    const [initiator] = await em.execute<{ id: string }[]>(
       `select pub.id from community.public_profiles pub
        join iam.users account on account.id = pub.target_id
        where pub.target_id = ? and pub.target_type_concept_id = ?

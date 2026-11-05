@@ -469,7 +469,9 @@ export class ServiceRequestDetailService {
         { orderBy: { ordinal: 'ASC' } },
       );
     if (em.isInTransaction()) return load(em);
-    return em.fork().transactional(async (tx) => {
+    // Own connection: a joined transaction would keep this set_config alive.
+    const ownFork = em.fork({ keepTransactionContext: false });
+    return ownFork.transactional(async (tx) => {
       await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
         requireTenantId(),
       ]);

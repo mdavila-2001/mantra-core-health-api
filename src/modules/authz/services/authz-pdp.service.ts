@@ -148,12 +148,13 @@ export class AuthzPdpService {
     return { ok: true, cacheKey, invalidatedEntries };
   }
 
-  /** UC-06-12: evalúa la decisión efectiva. Solo lectura (`em.fork`). */
+  /** UC-06-12: evalúa la decisión efectiva. Solo lectura (`scoped` o un fork). */
   async evaluate(
     dto: EvaluateDecisionDto,
     actor: AuthenticatedUser,
+    scoped?: EntityManager,
   ): Promise<DecisionResponseDto> {
-    const em = this.em.fork();
+    const em = scoped ?? this.em.fork();
     this.logger.info(
       {
         operation: 'authz.pdp.evaluate',

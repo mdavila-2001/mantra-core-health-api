@@ -97,6 +97,7 @@ function build() {
     findActiveByPerson: mockFn().mockResolvedValue(null),
     hasActiveLink: mockFn().mockResolvedValue(false),
     findActivePersonIdsByUser: mockFn().mockResolvedValue([]),
+    findActiveUserIdsByPersons: mockFn().mockResolvedValue([]),
     findSelfActiveByUser: mockFn().mockResolvedValue([]),
     hasSelfActiveLink: mockFn().mockResolvedValue(false),
     findSelfActiveByPerson: mockFn().mockResolvedValue(null),

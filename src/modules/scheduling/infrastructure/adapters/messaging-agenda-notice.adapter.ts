@@ -356,8 +356,10 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
     Pick<AgendaNoticeResult, 'emailRequestId' | 'emailSkippedReason'>
   > {
     try {
+      // Own connection: the error is swallowed below and must not abort the
+      // request transaction (the table has no RLS).
       const address = await this.noticeRepo.findEmailForUser(
-        this.em.fork(),
+        this.em.fork({ keepTransactionContext: false }),
         recipientUserId,
       );
       if (address === null) {
@@ -425,8 +427,9 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   private async resolveRecipient(notice: AgendaNotice): Promise<string | null> {
     if (notice.recipient.userId !== undefined) return notice.recipient.userId;
     if (notice.recipient.patientProfileId === undefined) return null;
+    // Own connection, like the other notice reads of this adapter.
     return this.noticeRepo.findAccountForProfile(
-      this.em.fork(),
+      this.em.fork({ keepTransactionContext: false }),
       notice.recipient.patientProfileId,
     );
   }

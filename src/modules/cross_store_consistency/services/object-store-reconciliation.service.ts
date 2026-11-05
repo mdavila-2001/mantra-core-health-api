@@ -221,17 +221,14 @@ export class ObjectStoreReconciliationService {
     prefix: string | undefined,
     limit: number,
   ): Promise<CanonicalReference[]> {
-    const rows = await this.em
-      .fork()
-      .getConnection()
-      .execute<
-        {
-          file_version_id: string;
-          object_key: string;
-          object_version: string | null;
-        }[]
-      >(
-        `select fv.id as file_version_id,
+    const rows = await this.em.execute<
+      {
+        file_version_id: string;
+        object_key: string;
+        object_version: string | null;
+      }[]
+    >(
+      `select fv.id as file_version_id,
                 fv.object_key,
                 fv.object_version
            from common.file_versions fv
@@ -242,8 +239,8 @@ export class ObjectStoreReconciliationService {
             and (? = '' or fv.object_key like ? || '%')
           order by fv.recorded_at
           limit ?`,
-        [bucket, prefix ?? '', prefix ?? '', limit],
-      );
+      [bucket, prefix ?? '', prefix ?? '', limit],
+    );
 
     return rows.map((row) => ({
       fileVersionId: row.file_version_id,

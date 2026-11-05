@@ -106,6 +106,7 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
         affected: 1,
         bookingIds: [BOOKING],
       });
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
     });
 
     it('no cambia el estado de la cita: una demora no la mueve', async () => {
@@ -171,6 +172,7 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
         PRACTITIONER_ACTOR,
       );
 
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
       const [, , from, to, states] =
         d.noticeRepo.findAffectedBookings.mock.calls[0];
       expect(from).toBeInstanceOf(Date);

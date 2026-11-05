@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
+import { readWithSystemRls } from '../../../common/tenant/rls-transaction';
 import { governanceShortName } from '../delegated_access.governance-concepts';
 import type {
   PendingApprovalDto,
@@ -90,12 +91,22 @@ export class PractitionerGovernanceService {
   async panel(
     actor: AuthenticatedUser,
   ): Promise<PractitionerGovernancePanelDto> {
-    const em = this.em.fork();
-    const team = await this.teamOf(actor);
-    const [pendingReviews, anomalies] = await Promise.all([
-      this.repo.countPendingReviews(em, actor.id),
-      this.repo.findOpenAnomalies(em, team.keys, PANEL_ANOMALIES),
-    ]);
+    // Read-only system context: every query is bound to the actor (reviewer id,
+    // keys derived from the actor's own practitioner profile).
+    const { pendingReviews, anomalies } = await readWithSystemRls(
+      this.em,
+      async (tx) => {
+        const team = await this.teamOf(tx, actor);
+        return {
+          pendingReviews: await this.repo.countPendingReviews(tx, actor.id),
+          anomalies: await this.repo.findOpenAnomalies(
+            tx,
+            team.keys,
+            PANEL_ANOMALIES,
+          ),
+        };
+      },
+    );
     return {
       generatedAt: new Date().toISOString(),
       team: [],
@@ -123,12 +134,19 @@ export class PractitionerGovernanceService {
     q: PendingApprovalsQueryDto,
   ): Promise<PendingApprovalsPageDto> {
     const limit = q.limit ?? DEFAULT_PAGE;
-    const team = await this.teamOf(actor);
-    const rows = await this.repo.findPendingForDoctor(this.em.fork(), {
-      doctorUserId: actor.id,
-      team: team.keys,
-      limit: limit + 1,
-      after: q.cursor ? decodeApprovalsCursor(q.cursor) : undefined,
+    const after = q.cursor ? decodeApprovalsCursor(q.cursor) : undefined;
+    // Read-only system context; the team keys come from the actor's own profile.
+    const { team, rows } = await readWithSystemRls(this.em, async (tx) => {
+      const mine = await this.teamOf(tx, actor);
+      return {
+        team: mine,
+        rows: await this.repo.findPendingForDoctor(tx, {
+          doctorUserId: actor.id,
+          team: mine.keys,
+          limit: limit + 1,
+          after,
+        }),
+      };
     });
     const page = rows.slice(0, limit);
     const items = page.map((row): PendingApprovalDto => {
@@ -172,15 +190,18 @@ export class PractitionerGovernanceService {
    * en vez de aparecer de más. Se mira por organización porque las aprobaciones
    * y alertas son de una organización.
    */
-  private async teamOf(actor: AuthenticatedUser): Promise<Team> {
+  private async teamOf(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<Team> {
     if (!actor.practitionerProfileId) return { keys: [], names: new Map() };
-    const mine = await this.links.findLinks(this.em.fork(), {
+    const mine = await this.links.findLinks(em, {
       practitionerProfileId: actor.practitionerProfileId,
       statuses: ['ACTIVE'],
     });
     const sharedHere = new Set<string>();
     for (const userId of new Set(mine.map((r) => r.supportUserId))) {
-      const all = await this.links.findLinks(this.em.fork(), {
+      const all = await this.links.findLinks(em, {
         supportUserId: userId,
         statuses: ['ACTIVE'],
       });

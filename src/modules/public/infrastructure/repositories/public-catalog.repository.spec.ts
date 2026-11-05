@@ -21,7 +21,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
   function withConnection(rows: unknown[] = []) {
     const execute = mockFn().mockResolvedValue(rows);
-    const em = { getConnection: mockFn(() => ({ execute })) };
+    const em = { execute };
     return { em, execute, repo: new PublicCatalogRepository() };
   }
 

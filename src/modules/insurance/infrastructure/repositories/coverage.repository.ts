@@ -134,7 +134,7 @@ export class CoverageRepository {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<PatientCoverageOptionRow[]> {
-    return em.getConnection().execute<PatientCoverageOptionRow[]>(
+    return em.execute<PatientCoverageOptionRow[]>(
       `select c.id as coverage_id, ca.id as carrier_id, ca.legal_name as carrier_name,
               pl.name as plan_name, c.status_concept_id,
               pl.status_concept_id as plan_status_concept_id,

@@ -33,7 +33,9 @@ export class PatientNoticeAdapter implements PatientNoticePort {
   async notifyPatient(input: PatientNoticeInput): Promise<void> {
     try {
       const link = await this.accountLinks.findActiveByPerson(
-        this.em.fork(),
+        // Reads tables without RLS and swallows errors: stay on its own connection
+        // so a failed query cannot abort the request transaction.
+        this.em.fork({ keepTransactionContext: false }),
         input.patientProfileId,
       );
       if (!link) {

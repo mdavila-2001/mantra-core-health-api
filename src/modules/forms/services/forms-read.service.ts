@@ -467,7 +467,7 @@ export class FormsReadService {
       { operation: 'forms.read.assignments', limit },
       'Listando asignaciones de campo',
     );
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const rows = await this.assignmentsRepo.findAssignments(
       em,
       filter,
@@ -526,7 +526,7 @@ export class FormsReadService {
     targetResourceConceptId: string,
     tenantId: string | undefined,
   ): Promise<ExtensionBudgetResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const policy = await this.assignmentsRepo.findActivePolicyForTenant(
       em,
       targetResourceConceptId,

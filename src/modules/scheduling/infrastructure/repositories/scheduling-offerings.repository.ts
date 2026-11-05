@@ -155,7 +155,7 @@ export class SchedulingOfferingsRepository {
       holdId: string;
       startAt: Date | string;
       endAt: Date | string;
-    }[] = await em.getConnection().execute(
+    }[] = await em.execute(
       `SELECT h.id AS "holdId", s.start_at AS "startAt", s.end_at AS "endAt"
          FROM scheduling.slot_holds h
          JOIN scheduling.bookable_slots s ON s.id = h.bookable_slot_id
@@ -238,7 +238,7 @@ export class SchedulingOfferingsRepository {
       endAt: Date | string;
       prepMinutes: number | string | null;
       cleanupMinutes: number | string | null;
-    }[] = await em.getConnection().execute(
+    }[] = await em.execute(
       `SELECT s.id AS "slotId",
               s.start_at AS "startAt",
               s.end_at   AS "endAt",
@@ -305,7 +305,7 @@ export class SchedulingOfferingsRepository {
       slotId: string;
       startAt: Date | string;
       endAt: Date | string;
-    }[] = await em.getConnection().execute(
+    }[] = await em.execute(
       `SELECT s.id AS "slotId", s.start_at AS "startAt", s.end_at AS "endAt"
          FROM scheduling.bookable_slots s
          JOIN scheduling.schedulable_resources r ON r.id = s.resource_id

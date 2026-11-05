@@ -210,6 +210,6 @@ export class ReportingMoneyRepository {
   /** Agrega una fuente por moneda dentro del tenant y la ventana. */
   aggregate(source: MoneySource, scope: MoneyScope): Promise<MoneyGroupRow[]> {
     const { sql, params } = source.build(scope);
-    return this.em.getConnection().execute<MoneyGroupRow[]>(sql, params, 'all');
+    return this.em.execute<MoneyGroupRow[]>(sql, params, 'all');
   }
 }

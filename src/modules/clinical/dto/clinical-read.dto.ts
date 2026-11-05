@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScopedReadResponseDto } from './scoped-read-response.dto';
 
 /**
  * Una reacción registrada de una alergia (BR-14/CL-11): la tabla
@@ -549,7 +550,7 @@ export class CareEpisodeItemDto {
  * escribía. Cada bloque declara si quedó recortado por el tope: un historial al
  * que le faltan alergias sin avisar es peligroso, no incompleto.
  */
-export class PatientClinicalSummaryResponseDto {
+export class PatientClinicalSummaryResponseDto extends ScopedReadResponseDto {
   /**
    * Identificador asociado a patient profile.
    */
@@ -602,9 +603,7 @@ export class PatientClinicalSummaryResponseDto {
   @ApiProperty({ description: 'Tope aplicado a cada bloque' })
   limit!: number;
 
-  /**
-   * Valor de truncated mantenido por la instancia.
-   */
+  /** Bloques recortados por el tope. */
   @ApiProperty({
     description: 'Qué bloques quedaron recortados por el tope',
     type: [String],

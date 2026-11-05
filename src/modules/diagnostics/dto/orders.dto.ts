@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScopedReadResponseDto } from '../../clinical/dto/scoped-read-response.dto';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
@@ -141,7 +142,7 @@ export class DiagnosticReportSummaryDto {
  * `truncated` nombra **los bloques** recortados por el tope, no un booleano
  * global — mismo criterio que el resto de las lecturas del producto.
  */
-export class PatientDiagnosticOrdersResponseDto {
+export class PatientDiagnosticOrdersResponseDto extends ScopedReadResponseDto {
   /** Paciente leído. */
   @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
 

@@ -24,6 +24,7 @@ import {
   ServiceRequestResponseDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { assertOrderRequesterIsActor } from '../domain/clinical-authorship';
 import { ClinicalReadService } from './clinical-read.service';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { OutboxService } from '../../messaging/services';
@@ -316,7 +317,6 @@ export class ServiceRequestsService {
         { catalog: options.catalog },
       );
       const categoryConceptId = prepared.categoryConceptId;
-      // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
       if (basedOnNoteIds.length > 0) {
         await this.basedOnNotes.assertUsable(
           tx,
@@ -335,8 +335,8 @@ export class ServiceRequestsService {
         );
       }
 
-      // La recomendación de ejecutor se valida antes de escribir nada: 422 si el
-      // modo no es coherente. No toca `performerTenantId` (ver más abajo).
+      assertOrderRequesterIsActor(dto.requesterProfileId, actor); // regla (c)
+      // El ejecutor recomendado se valida antes de escribir (422); no toca `performerTenantId`.
       const performer = await this.performerSelection.resolve(tx, {
         procedureConceptId: dto.codeConceptId,
         performerSelectionConceptId: dto.performerSelectionConceptId,

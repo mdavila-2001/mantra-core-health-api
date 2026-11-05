@@ -118,23 +118,20 @@ import {
   PractitionerSpecialtiesRepository,
   JurisdictionAuthorizationsRepository,
 } from '../profiles/infrastructure/repositories';
-// B.1 — la historia de un menor la lee también quien lo representa, y quién
-// representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
-// arriba: es una clase sin estado que recibe el `EntityManager` por parámetro,
-// así que se provee suelta. Importar `ProfilesModule` cerraría el ciclo que el
-// comentario anterior ya explica.
+// B.1 — la historia de un menor la lee también quien lo representa (lo sabe
+// `profiles`). Misma razón de arriba: clase sin estado, provista suelta.
 import { PatientRepresentationService } from '../profiles/application/services/patient-representation.service';
-// v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
-// clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
-// sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
-// existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
-// tampoco acá se importa el módulo entero ni se cierra un ciclo.
+// v4.2.2 — el permiso de lectura nace del turno: se le pregunta a la agenda con
+// una clase sin estado, sin importar su módulo (el cruce inverso ya existe).
 import { SchedulingBookingsRepository } from '../scheduling/infrastructure/repositories';
-// ALV-029 — el permiso de lectura también nace de una relación asistencial
-// vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
-// criterio de arriba: repo sin estado por `EntityManager`, sin importar el
-// módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
+// ALV-029 — la lectura también nace de una relación asistencial vigente, en
+// `authz`: repo sin estado por `EntityManager`, sin importar el módulo.
 import { CareRelationshipsRepository } from '../authz/repositories';
+// Alcance de lectura por especialidad (grants, consents y filtros): ver el archivo.
+import {
+  CLINICAL_SCOPE_EXPORTS,
+  CLINICAL_SCOPE_PROVIDERS,
+} from './clinical-scope.providers';
 // C.4 — el sello del encuentro reusa el hash ya calculado por nota y las
 // actividades/archivos de plan de cuidados y documento. Mismo criterio que
 // los repositorios de arriba: son clases sin estado que reciben el
@@ -258,6 +255,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     HealthPractitionerProfilesRepository,
     SchedulingBookingsRepository,
     CareRelationshipsRepository,
+    ...CLINICAL_SCOPE_PROVIDERS,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,
@@ -327,11 +325,8 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
-  // `ClinicalReadService` se exporta para `medical_groups` (FT-21): el
-  // selector de diagnóstico del grupo médico necesita el mismo gate de
-  // autorización que ya usa `/clinical/patients/:id/summary`
-  // (`assertPuedeLeerHistoria` — titular, o quien atiende con turno hoy), no
-  // uno propio y más débil. Ver `medical_groups.module.ts`.
+  // `ClinicalReadService` se exporta para `medical_groups` (FT-21): necesita el
+  // mismo gate que `/clinical/patients/:id/summary`, no uno propio y más débil.
   // `ClinicalRecordAccessGuard` se exporta para que `ChartModule` aplique el
   // mismo guard sobre `GET /charts/patients/:id/chart` (FT-07-R08): es la
   // misma pregunta de autorización sobre la misma persona. Exportar el guard
@@ -355,6 +350,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     ServiceRequestDetailService,
     EncountersRepository,
     ClinicalReadService,
+    ...CLINICAL_SCOPE_EXPORTS,
     ClinicalRecordAccessGuard,
     EncounterSealGuardService,
     DuplicateStudyDetector,

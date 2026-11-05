@@ -1,0 +1,22 @@
+    "CARDIOLOGIA_PEDIATRICA": 3,
+    "CIRUGIA_ONCOLOGICA": 3,
+    "CIRUGIA_PEDIATRICA": 5,
+    "COLOPROCTOLOGIA": 5,
+    "MEDICINA_FISICA_REHABILITACION": 5,
+    "ORTOPEDIA_PEDIATRICA": 4,
+    "INFECTOLOGIA_PEDIATRICA": 14,
+    "ANATOMIA_PATOLOGICA": 13
+  },
+  "inserted": {
+    "concepts": 14737,
+    "definitionsFilled": 183,
+    "designations": 17153,
+    "properties": 55878,
+    "relationships": 345,
+    "valueSets": 1,
+    "valueSetVersions": 1,
+    "valueSetMembers": 15882,
+    "batches": 4
+  },
+  "segundos": 9
+}

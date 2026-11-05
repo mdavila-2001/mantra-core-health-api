@@ -4,6 +4,14 @@ import { CONCEPTS } from '../../../common';
 import { COMM } from '../../community/community.concepts';
 import { PHARM } from '../pharmacy.concepts';
 import { siteProductAvailabilitySql } from '../../pharmacy_inventory/domain/site-product-availability';
+import { VADEMECUM_CODE_SYSTEM } from '../pharmacy-catalog.properties';
+
+/** A vademécum medication: what the showcase can show without an offer. */
+export interface VademecumConcept {
+  conceptId: string;
+  atcCode: string;
+  genericName: string;
+}
 
 /** Una oferta publicada: un producto de una farmacia, con precio y stock. */
 export interface PublishedOffer {
@@ -98,7 +106,7 @@ export class PharmacyMarketplaceRepository {
     filter: { conceptId?: string },
   ): Promise<PublishedOffer[]> {
     const availability = siteProductAvailabilitySql();
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       Array<{
         concept_id: string;
         atc_code: string;
@@ -230,6 +238,51 @@ export class PharmacyMarketplaceRepository {
       homeDelivery: row.home_delivery === true,
       pickup: row.pickup === true,
       requiresPrescription: row.requires_prescription === true,
+    }));
+  }
+
+  /**
+   * Every medication of the vademécum (the prescription's catalog), with its
+   * ATC code and Spanish name. The showcase searches it too, so «dolor
+   * abdominal» finds the medication even when no pharmacy publishes it yet.
+   *
+   * @param em - Persistence context.
+   */
+  async findVademecum(em: EntityManager): Promise<VademecumConcept[]> {
+    const rows = await em.execute<
+      Array<{ concept_id: string; atc_code: string; generic_name: string }>
+    >(
+      `SELECT c.id AS concept_id,
+              c.code AS atc_code,
+              COALESCE(es.value, c.display) AS generic_name
+         FROM terminology.catalog_concepts c
+         JOIN terminology.code_system_versions v ON v.id = c.code_system_version_id
+         JOIN terminology.code_systems s ON s.id = v.code_system_id
+    LEFT JOIN LATERAL (
+                SELECT d.value
+                  FROM terminology.concept_designations d
+                  JOIN terminology.catalog_concepts lang
+                    ON lang.id = d.language_concept_id AND lang.code = 'ES'
+                 WHERE d.concept_id = c.id
+                 ORDER BY d.preferred DESC
+                 LIMIT 1
+              ) es ON true
+        WHERE s.internal_code = ?
+        -- Most LINAME presentations first: when a substance has two ATC codes
+        -- (ibuprofen M01AE01 ×2, C01EB16 ×1) the common one comes first.
+        ORDER BY (SELECT jsonb_array_length(p.value_json)
+                    FROM terminology.concept_properties p
+                   WHERE p.concept_id = c.id
+                     AND p.property_code = 'liname_presentations'
+                     AND jsonb_typeof(p.value_json) = 'array') DESC NULLS LAST,
+                 c.code`,
+      [VADEMECUM_CODE_SYSTEM],
+      'all',
+    );
+    return rows.map((row) => ({
+      conceptId: row.concept_id,
+      atcCode: row.atc_code,
+      genericName: row.generic_name,
     }));
   }
 }

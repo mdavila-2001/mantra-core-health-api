@@ -60,7 +60,7 @@ export class QaLabReadService {
     const lastRuns =
       suiteIds.length === 0
         ? []
-        : await this.em.getConnection().execute<
+        : await this.em.execute<
             Array<{
               suite_id: string;
               id: string;

@@ -8,7 +8,10 @@ import {
 } from '../../../common/money/decimal-money';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { CLIN } from '../clinical.concepts';
-import type { ReceivedServices } from '../entities';
+import { ReceivedServices } from '../entities';
+import type { ClinicalReadScope } from '../domain/clinical-read-scope';
+import { ClinicalScopeRepository } from '../repositories/clinical-scope.repository';
+import { ClinicalScopeFilterService } from './clinical-scope-filter.service';
 import {
   ReceivedServicesRepository,
   type ChargeLine,
@@ -65,25 +68,42 @@ export class ReceivedServicesReadService {
     private readonly em: EntityManager,
     private readonly repository: ReceivedServicesRepository,
     private readonly logger: PinoLogger,
+    private readonly scopeFilter: ClinicalScopeFilterService,
+    private readonly scopeRepo: ClinicalScopeRepository,
   ) {
     this.logger.setContext(ReceivedServicesReadService.name);
   }
 
+  /**
+   * @param scope - Alcance de lectura. Con especialidades sólo se ven los
+   *   servicios cuyo ejecutor (o, sin ejecutor, el responsable del encuentro)
+   *   ejerce una especialidad autorizada; `hiddenByScope` cuenta el resto.
+   */
   async list(
     patientProfileId: string,
     limit: number,
     actor: AuthenticatedUser,
+    scope: ClinicalReadScope,
   ): Promise<PatientReceivedServicesResponseDto> {
     this.logger.info(
       { operation: 'clinical.received-services.read', patientProfileId, limit },
       'Leyendo servicios recibidos del paciente',
     );
     const em = this.em.fork();
-    const rows = await this.repository.findByPatient(
-      em,
-      patientProfileId,
-      limit + 1,
-    );
+    const filter = await this.scopeFilter.build(em, patientProfileId, scope);
+    const scoped = filter
+      ? await this.scopeRepo.page(em, {
+          entity: ReceivedServices,
+          base: { patientProfileId },
+          filter,
+          columns: { profile: 'performerProfileId', encounter: 'encounterId' },
+          orderBy: { performedAt: 'DESC', id: 'ASC' },
+          limit: limit + 1,
+        })
+      : null;
+    const rows =
+      scoped?.rows ??
+      (await this.repository.findByPatient(em, patientProfileId, limit + 1));
     const truncated = rows.length > limit;
     const page = truncated ? rows.slice(0, limit) : rows;
 
@@ -113,6 +133,7 @@ export class ReceivedServicesReadService {
       limit,
       truncated,
       costsVisible,
+      hiddenByScope: scoped ? { receivedServices: scoped.hidden } : undefined,
     };
   }
 

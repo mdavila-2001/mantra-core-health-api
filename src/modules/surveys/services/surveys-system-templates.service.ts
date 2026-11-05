@@ -107,10 +107,13 @@ export class SurveysSystemTemplatesService {
    * Garantiza que el tenant tenga la encuesta base del tipo indicado y la
    * devuelve. Idempotente.
    *
-   * Corre en su propia transacción —no en la del emisor— a propósito: si dos
-   * emisiones simultáneas la crean a la vez, la que pierde recibe una violación
-   * de clave primaria que deja *su* transacción inservible; aislada, la
-   * recupera releyendo lo que ganó la otra sin arrastrar la reserva.
+   * La escritura corre en un savepoint de la transacción de la petición, no en
+   * una conexión aparte: con RLS, la plantilla del sistema solo se puede
+   * insertar (y releer) con el tenant que el interceptor fijó en esa
+   * transacción. Si dos emisiones simultáneas la crean a la vez, la que pierde
+   * recibe una violación de clave primaria que deja inservible *su savepoint*;
+   * al volver atrás, la transacción de la petición sigue sana y el `catch` de
+   * afuera recupera releyendo lo que ganó la otra sin arrastrar la reserva.
    *
    * @param tenantId - Organización.
    * @param kind - Consulta o servicio.
@@ -123,12 +126,16 @@ export class SurveysSystemTemplatesService {
     actorUserId?: string,
   ): Promise<SystemSurvey> {
     const ids = systemSurveyIds(tenantId, kind);
-    const existing = await this.read(this.em.fork(), tenantId, kind);
+    const existing = await this.read(
+      this.em.fork({ keepTransactionContext: true }),
+      tenantId,
+      kind,
+    );
     if (existing) return existing;
 
     try {
       await this.em
-        .fork()
+        .fork({ keepTransactionContext: true })
         .transactional((tx) =>
           this.materialize(tx, tenantId, kind, actorUserId),
         );
@@ -137,7 +144,11 @@ export class SurveysSystemTemplatesService {
       if (!(error instanceof UniqueConstraintViolationException)) throw error;
     }
 
-    const created = await this.read(this.em.fork(), tenantId, kind);
+    const created = await this.read(
+      this.em.fork({ keepTransactionContext: true }),
+      tenantId,
+      kind,
+    );
     if (!created) {
       throw new Error(
         `La encuesta base ${kind} del tenant no quedó materializada (plantilla ${ids.templateId})`,

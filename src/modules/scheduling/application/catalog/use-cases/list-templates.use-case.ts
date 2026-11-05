@@ -47,7 +47,7 @@ export class ListTemplatesUseCase {
     resourceId: string,
     actor: AuthenticatedUser,
   ): Promise<TemplateListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
       throw new ResourceNotFoundException('Recurso no encontrado', {

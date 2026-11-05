@@ -18,7 +18,14 @@ const scope = {
 /** `em` falso que registra el SQL y los parámetros de cada consulta. */
 function build(rows: unknown[] = []) {
   const execute = mockFn().mockResolvedValue(rows);
-  const em = { getConnection: () => ({ execute }) } as any;
+  // The raw pool connection must stay untouched: it would bypass the tenant the
+  // request transaction carries under RLS.
+  const em = {
+    execute,
+    getConnection: () => {
+      throw new Error('SQL fuera de la transacción de la petición');
+    },
+  } as any;
   return { em, execute, repo: new InsightsRepository() };
 }
 

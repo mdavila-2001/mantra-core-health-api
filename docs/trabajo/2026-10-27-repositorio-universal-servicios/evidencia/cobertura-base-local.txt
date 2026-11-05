@@ -1,0 +1,38 @@
+ total |           esp           | servicios 
+-------+-------------------------+-----------
+ 20290 | TRAUMATOLOGIA           |      1135
+ 20290 | OTORRINOLARINGOLOGIA    |       359
+ 20290 | CIRUGIA_GENERAL         |       325
+ 20290 | RADIOLOGIA              |       287
+ 20290 | PEDIATRIA               |       287
+ 20290 | OFTALMOLOGIA            |       277
+ 20290 | GINECOLOGIA_OBSTETRICIA |       236
+ 20290 | GASTROENTEROLOGIA       |       219
+ 20290 | UROLOGIA                |       182
+ 20290 | ONCOLOGIA               |       178
+ 20290 | ODONTOLOGIA             |       170
+ 20290 | DERMATOLOGIA            |       154
+ 20290 | NEFROLOGIA              |       151
+ 20290 | NEUROLOGIA              |       138
+ 20290 | CARDIOLOGIA             |       104
+ 20290 | PSIQUIATRIA             |        55
+ 20290 | PSICOLOGIA_CLINICA      |        53
+ 20290 | MEDICINA_INTERNA        |        50
+ 20290 | MEDICINA_EMERGENCIA     |        50
+ 20290 | MEDICINA_INTENSIVA      |        42
+ 20290 | REUMATOLOGIA            |        27
+ 20290 | ENDOCRINOLOGIA          |        26
+ 20290 | MEDICINA_GENERAL        |        25
+ 20290 | ANESTESIOLOGIA          |        21
+ 20290 | OBSTETRICIA             |        17
+ 20290 | FISIOTERAPIA            |        13
+ 20290 | ENFERMERIA              |        13
+ 20290 | HEMATOLOGIA             |         9
+ 20290 | NUTRICION               |         9
+ 20290 | MEDICINA_FAMILIAR       |         6
+ 20290 | NEUMOLOGIA              |         5
+ 20290 | INFECTOLOGIA            |         5
+ 20290 | GERIATRIA               |         5
+ 20290 | MEDICINA_DEPORTIVA      |         3
+(34 rows)
+

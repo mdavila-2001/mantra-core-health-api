@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScopedReadResponseDto } from './scoped-read-response.dto';
 
 /**
  * Tipos de servicio que la API distingue hoy. El valor sale del concepto del value
@@ -90,7 +91,7 @@ export class ReceivedServiceItemDto {
 }
 
 /** Servicios recibidos de un paciente. */
-export class PatientReceivedServicesResponseDto {
+export class PatientReceivedServicesResponseDto extends ScopedReadResponseDto {
   /** Paciente de quien se lee. */
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;

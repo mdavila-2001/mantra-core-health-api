@@ -72,7 +72,7 @@ export class TelemetryRetentionService {
   }
 
   private sql<T>(query: string, params: unknown[] = []) {
-    return this.em.getConnection().execute<T[]>(query, params, 'all');
+    return this.em.execute<T[]>(query, params, 'all');
   }
 
   async purge(options: RetentionOptions = {}): Promise<RetentionResult> {

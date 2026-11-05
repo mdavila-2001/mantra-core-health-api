@@ -86,7 +86,7 @@ export class ReferralTargetsRepository {
     limit: number,
   ): Promise<PractitionerTargetRow[]> {
     const pattern = containsPattern(normalizeSearchText(q));
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         profileId: string;
         professionalTitle: string | null;
@@ -156,12 +156,10 @@ export class ReferralTargetsRepository {
     limit: number,
   ): Promise<OrganizationTargetRow[]> {
     const pattern = containsPattern(normalizeSearchText(q));
-    const rows = await em
-      .getConnection()
-      .execute<
-        { tenantId: string; legalName: string; tradeName: string | null }[]
-      >(
-        `SELECT t.id         AS "tenantId",
+    const rows = await em.execute<
+      { tenantId: string; legalName: string; tradeName: string | null }[]
+    >(
+      `SELECT t.id         AS "tenantId",
               t.legal_name AS "legalName",
               t.trade_name AS "tradeName"
          FROM directory.tenants t
@@ -171,17 +169,17 @@ export class ReferralTargetsRepository {
                OR ${sqlSearchKey("coalesce(t.trade_name, '')")} LIKE ?)
         ORDER BY coalesce(t.trade_name, t.legal_name) ASC, t.id ASC
         LIMIT ?`,
-        [
-          CONCEPTS.TENANT_ACTIVE,
-          COMM.PROFILE_TARGET_ORGANIZATION,
-          COMM.PROFILE_VISIBILITY_PUBLIC,
-          CONCEPTS.STATE_ACTIVE,
-          pattern,
-          pattern,
-          limit,
-        ],
-        'all',
-      );
+      [
+        CONCEPTS.TENANT_ACTIVE,
+        COMM.PROFILE_TARGET_ORGANIZATION,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        pattern,
+        pattern,
+        limit,
+      ],
+      'all',
+    );
     return rows.map((row) => ({
       tenantId: row.tenantId,
       legalName: row.legalName,
@@ -201,7 +199,7 @@ export class ReferralTargetsRepository {
     em: EntityManager,
     profileId: string,
   ): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ ok: number }[]>(
+    const rows = await em.execute<{ ok: number }[]>(
       `SELECT 1 AS ok
          FROM profiles.health_practitioner_profiles hp
         WHERE hp.profile_id = ?
@@ -227,7 +225,7 @@ export class ReferralTargetsRepository {
    * @returns `true` sólo si el tenant existe y está activo.
    */
   async isActiveTenant(em: EntityManager, tenantId: string): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ ok: number }[]>(
+    const rows = await em.execute<{ ok: number }[]>(
       `SELECT 1 AS ok
          FROM directory.tenants t
         WHERE t.id = ?
@@ -250,7 +248,7 @@ export class ReferralTargetsRepository {
     em: EntityManager,
     tenantId: string,
   ): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ ok: number }[]>(
+    const rows = await em.execute<{ ok: number }[]>(
       `SELECT 1 AS ok
          FROM directory.tenants t
         WHERE t.id = ?

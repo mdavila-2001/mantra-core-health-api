@@ -16,6 +16,13 @@
    `app.system_context=true`; el interceptor lo hace de forma local a la misma transacción y las
    políticas lo interpretan como elevación cross-tenant explícita.
 
+5. El `set_config` es local a la transacción de la petición, así que todo lo que lee o escribe en esa
+   petición debe correr en esa misma transacción. `em.fork()` sin argumentos la hereda mientras siga viva
+   ([ADR-0029](../adr/ADR-0029-fork-hereda-transaccion-bajo-rls.md)); una conexión propia se pide con
+   `fork({ keepTransactionContext: false })` y un fork cuyo error se traga va con savepoint
+   (`fork({ keepTransactionContext: true }).transactional(...)`). Guards, endpoints `@TenantAgnostic` y
+   WebSocket no tienen esa transacción y leen con el helper de tenant.
+
 ## Por qué esto no basta sin verificación operativa
 
 RLS mal configurado falla **silenciosamente** — no hay excepción, solo fuga de datos. Dos

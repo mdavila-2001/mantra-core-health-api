@@ -47,7 +47,8 @@ export class PharmacyTenantScopeGuard implements CanActivate {
         'Esta operación es de la plataforma, no del personal de una farmacia',
       );
     }
-    const em = this.em.fork();
+    // Own connection: a joined transaction would keep this set_config alive.
+    const em = this.em.fork({ keepTransactionContext: false });
     let pharmacy: Pharmacies | null = null;
     if (this.enforceRls) {
       // Guards precede the tenant interceptor: this read needs its own local
