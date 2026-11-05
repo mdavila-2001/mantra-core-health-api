@@ -39,7 +39,8 @@ export class RequesterReportsReader {
   /**
    * Reports custodied by another tenant that hang from orders of this tenant.
    * Bounded system read: every report is reached through an order whose
-   * custodian is the verified caller tenant, never by a client-chosen id.
+   * custodian is the verified caller tenant, and must be custodied by that
+   * order's performer and released; never by a client-chosen id.
    * Under a SPECIALTIES scope a report follows its order's visibility: its
    * author belongs to the laboratory, never to the authorised specialties.
    */
@@ -51,34 +52,49 @@ export class RequesterReportsReader {
   ): Promise<IssuedOrderReports> {
     return readWithSystemRls(this.em, async (em) => {
       const base = { custodianTenantId: tenantId, patientProfileId };
-      const orderIds = async (where: FilterQuery<ServiceRequests>) =>
-        (await em.find(ServiceRequests, where, { fields: ['id'] })).map(
-          (o) => o.id,
-        );
-      const ofOrders = (ids: string[]) => ({
-        patientProfileId,
-        custodianTenantId: { $ne: tenantId },
-        serviceRequestId: { $in: ids },
-      });
-      const visible = await orderIds(
-        filter
+      // Each order with the tenant it was addressed to: only that performer's report counts.
+      const ordersOf = (where: FilterQuery<ServiceRequests>) =>
+        em.find(ServiceRequests, where, {
+          fields: ['id', 'performerTenantId'],
+        });
+      const ofOrders = (
+        orders: readonly Pick<ServiceRequests, 'id' | 'performerTenantId'>[],
+      ) => {
+        const pairs = orders
+          .filter(
+            (o) => o.performerTenantId && o.performerTenantId !== tenantId,
+          )
+          .map((o) => ({
+            serviceRequestId: o.id,
+            custodianTenantId: o.performerTenantId as string,
+          }));
+        // Released reports only: a draft or a held-back header is not the requester's to see.
+        return pairs.length
           ? {
-              ...base,
-              ...visibleWhere(filter, ORDER_SCOPE_COLUMNS),
+              patientProfileId,
+              currentReleasedVersionId: { $ne: null },
+              $or: pairs,
             }
-          : base,
+          : null;
+      };
+      const visible = ofOrders(
+        await ordersOf(
+          filter
+            ? { ...base, ...visibleWhere(filter, ORDER_SCOPE_COLUMNS) }
+            : base,
+        ),
       );
-      const rows = visible.length
-        ? await em.find(DiagnosticReports, ofOrders(visible), {
+      const rows = visible
+        ? await em.find(DiagnosticReports, visible, {
             orderBy: { createdAt: 'DESC' },
             limit,
           })
         : [];
       if (!filter) return { rows, hidden: 0 };
-      const all = await orderIds(base);
+      const all = ofOrders(await ordersOf(base));
       const [total, shown] = await Promise.all([
-        all.length ? em.count(DiagnosticReports, ofOrders(all)) : 0,
-        visible.length ? em.count(DiagnosticReports, ofOrders(visible)) : 0,
+        all ? em.count(DiagnosticReports, all) : 0,
+        visible ? em.count(DiagnosticReports, visible) : 0,
       ]);
       return { rows, hidden: Math.max(total - shown, 0) };
     });

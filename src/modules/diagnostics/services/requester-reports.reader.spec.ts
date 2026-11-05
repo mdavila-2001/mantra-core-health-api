@@ -8,19 +8,27 @@ const CLINIC = 'clinic';
 const PATIENT = 'pat';
 const FILTER = { profileIds: ['hp-cardio'], userIds: [], encounterIds: [] };
 
-function build(opts: { visible?: string[]; all?: string[] } = {}) {
+const LAB = 'lab';
+
+function build(
+  opts: { visible?: string[]; all?: string[]; performer?: string | null } = {},
+) {
   const visible = opts.visible ?? ['sr1'];
   const all = opts.all ?? visible;
+  const performer = opts.performer === undefined ? LAB : opts.performer;
   const tx: any = {
     execute: mockFn(async () => []),
     find: mockFn(async (cls: any, where: any) => {
       if (cls === ServiceRequests) {
-        return (where.$or ? visible : all).map((id) => ({ id }));
+        return (where.$or ? visible : all).map((id) => ({
+          id,
+          performerTenantId: performer,
+        }));
       }
       return [{ id: 'r-lab', createdAt: new Date() }];
     }),
     count: mockFn(async (_cls: any, where: any) =>
-      where.serviceRequestId.$in.length === all.length ? 5 : 2,
+      where.$or.length === all.length ? 5 : 2,
     ),
   };
   const em: any = { fork: () => tx };
@@ -38,21 +46,21 @@ describe('RequesterReportsReader', () => {
     process.env.RLS_ENFORCE = rls;
   });
 
-  it('reaches only reports of orders the caller tenant issued, custodied elsewhere', async () => {
+  it('reaches only released reports custodied by the performer each issued order was addressed to', async () => {
     const t = build();
     const out = await t.reader.ofIssuedOrders(CLINIC, PATIENT, 51, null);
 
     expect(t.tx.find).toHaveBeenCalledWith(
       ServiceRequests,
       { custodianTenantId: CLINIC, patientProfileId: PATIENT },
-      { fields: ['id'] },
+      { fields: ['id', 'performerTenantId'] },
     );
     expect(t.tx.find).toHaveBeenCalledWith(
       DiagnosticReports,
       {
         patientProfileId: PATIENT,
-        custodianTenantId: { $ne: CLINIC },
-        serviceRequestId: { $in: ['sr1'] },
+        currentReleasedVersionId: { $ne: null },
+        $or: [{ serviceRequestId: 'sr1', custodianTenantId: LAB }],
       },
       { orderBy: { createdAt: 'DESC' }, limit: 51 },
     );
@@ -76,6 +84,15 @@ describe('RequesterReportsReader', () => {
     expect(t.tx.transactional).toHaveBeenCalledWith(expect.any(Function), {
       readOnly: true,
     });
+  });
+
+  it('an order with no performer, or addressed to the caller itself, reaches no foreign report', async () => {
+    for (const performer of [null, CLINIC]) {
+      const t = build({ performer });
+      const out = await t.reader.ofIssuedOrders(CLINIC, PATIENT, 51, null);
+      expect(out.rows).toEqual([]);
+      expect(t.tx.find).toHaveBeenCalledTimes(1);
+    }
   });
 
   it('without any issued order it reads no report', async () => {
