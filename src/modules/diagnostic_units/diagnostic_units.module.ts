@@ -8,6 +8,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { LabPortalServicesController } from './controllers/lab-portal-services.controller';
 import { LabPortalCatalogService } from './services/lab-portal-catalog.service';
+import { LabPortalCategoriesService } from './services/lab-portal-categories.service';
 import { LabPortalContextService } from './services/lab-portal-context.service';
 import { LabPortalImportService } from './services/lab-portal-import.service';
 import { LabPortalPricingService } from './services/lab-portal-pricing.service';
@@ -114,6 +115,7 @@ import {
     LabPortalPricingService,
     LabPortalWriterService,
     LabPortalCatalogService,
+    LabPortalCategoriesService,
     LabPortalImportService,
   ],
   // Se exporta para `directory`: `TenantTypeProfileService` lo usa DENTRO de

@@ -108,9 +108,9 @@ export function cleanText(
 /**
  * Response shape of one service.
  *
- * `categoryId`/`categoryName` are always null and `available` always true: the
- * model has no column for lab categories nor for same-day availability of an
- * offering. `sampleType` is the display of `specimen_type_concept_id`.
+ * `sampleType` is the lab's own free text (`specimen_description`) and falls
+ * back to the display of `specimen_type_concept_id` for services published
+ * before the text existed. `available` is the "available today" switch.
  *
  * An offering with no current price answers `price: null` (never a made-up
  * `0.00`): "not priced yet" and "free" are different facts.
@@ -118,7 +118,8 @@ export function cleanText(
 export function toLabService(
   offering: DiagnosticStudyOfferings,
   price: DiagnosticStudyPrices | undefined,
-  sampleType: string | null,
+  specimenDisplay: string | null,
+  categoryName: string | null,
 ): LabServiceDto {
   const listPrice = price ? money(price.baseAmount) : null;
   const percent = percentOf(price?.discountFactor);
@@ -127,9 +128,9 @@ export function toLabService(
     code: offering.studyCode,
     name: offering.displayName,
     kind: isModalityOffering(offering) ? 'MODALITY' : 'SERVICE',
-    categoryId: null,
-    categoryName: null,
-    sampleType,
+    categoryId: offering.serviceCategoryId ?? null,
+    categoryName: offering.serviceCategoryId ? categoryName : null,
+    sampleType: offering.specimenDescription ?? specimenDisplay,
     preparation: offering.preparationInstructions ?? null,
     description: offering.description ?? null,
     turnaroundHours: minutesToHours(offering.expectedTurnaroundMinutes),
@@ -140,7 +141,7 @@ export function toLabService(
     alovidaPrice: listPrice === null ? null : alovidaPrice(listPrice, percent),
     currency: 'BOB',
     status: statusOf(offering.statusConceptId),
-    available: true,
+    available: offering.available !== false,
     updatedAt: offering.updatedAt.toISOString(),
   };
 }

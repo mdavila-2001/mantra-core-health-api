@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `diagnostic_units`.
- * 111 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 115 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -24,6 +24,9 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_price_schedules', 'price_schedule_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_price_schedules', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_price_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_service_categories', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_service_categories', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
+  ['diagnostic_service_categories', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_study_components', 'component_offering_id', 'diagnostic_units', 'diagnostic_study_offerings', 'id'],
   ['diagnostic_study_components', 'component_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_components', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -33,6 +36,7 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_study_offerings', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
   ['diagnostic_study_offerings', 'diagnostic_unit_site_id', 'diagnostic_units', 'diagnostic_unit_sites', 'id'],
   ['diagnostic_study_offerings', 'modality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_study_offerings', 'service_category_id', 'diagnostic_units', 'diagnostic_service_categories', 'id'],
   ['diagnostic_study_offerings', 'specimen_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_offerings', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_offerings', 'study_concept_id', 'terminology', 'catalog_concepts', 'id'],

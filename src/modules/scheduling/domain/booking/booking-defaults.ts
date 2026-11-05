@@ -16,6 +16,14 @@ export const DISPLACED_REASON =
  */
 export const DEFAULT_REMINDER_OFFSETS: readonly number[] = [24 * 60, 2 * 60];
 
+/**
+ * History reason for a request born confirmed because neither the agenda nor
+ * the service offering requires approval (v4.2.88). It answers "who confirmed
+ * this?" when nobody pressed accept.
+ */
+export const AUTO_CONFIRMED_REASON =
+  'Confirmada automáticamente: no requiere la aceptación del profesional.';
+
 export const DEFAULT_HOLD_TTL_SECONDS = 300;
 export const DEFAULT_WORKER_BATCH = 100;
 

@@ -1,5 +1,6 @@
 export * from './diagnostic_equipment.entity';
 export * from './diagnostic_price_schedules.entity';
+export * from './diagnostic_service_categories.entity';
 export * from './diagnostic_study_components.entity';
 export * from './diagnostic_study_offerings.entity';
 export * from './diagnostic_study_prices.entity';

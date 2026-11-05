@@ -43,8 +43,10 @@ export interface RegistrationDocumentsInput {
   readonly ownerUserId: string;
   /** Tipo societario declarado, para derivar el país y así la autoridad emisora. */
   readonly legalEntityType?: string;
-  /** El NIT ya capturado por el formulario (`payer.regulatorIdentifier`); se copia a `document_number`. */
+  /** The NIT the form captured; copied to `document_number` of the tax document. */
   readonly taxIdentifier?: string;
+  /** Its `common.identifiers` row (`TenantTaxIdentifierService`), linked from that document. */
+  readonly taxIdentifierId?: string;
   readonly documents: RegistrationDocumentFiles;
 }
 
@@ -70,26 +72,21 @@ interface AttachContext {
   readonly concepts: AffiliationDocumentConcepts;
   readonly today: Date;
   readonly documentNumber?: string;
+  readonly identifierId?: string;
   readonly relatedPersonId?: string;
 }
 
 /**
- * Vincula los documentos legales de afiliación (subtarea 1.2) al tenant que
- * el autorregistro público acaba de crear.
+ * Links the affiliation documents (subtask 1.2) to the tenant the public
+ * sign-up just created. Each `fileId` is an anonymous pre-upload
+ * (`POST /iam/auth/upload-registration-document`). Within the SAME sign-up
+ * transaction it (1) refuses two documents sharing a file, (2) claims each file
+ * for the new tenant and owner (`AttachableFileService.claimAnonymousUpload`),
+ * and (3) creates its `tenant_affiliation_documents` row, required and pending.
  *
- * Cada uno de los cinco `fileId` declarados llegó por
- * `POST /iam/auth/upload-registration-document` (pre-carga anónima, sin
- * dueño todavía). Este servicio, dentro de la MISMA transacción del alta:
- * (1) rechaza que dos documentos compartan archivo, (2) reclama cada archivo
- * para el tenant y el owner recién creados
- * (`AttachableFileService.claimAnonymousUpload`), y (3) crea la fila que lo
- * envuelve en `tenant_affiliation_documents`, con
- * `is_required_for_affiliation = true` y `verification_status = pendiente`.
- *
- * Un archivo no reclamable, ya vinculado a otra organización, o un código de
- * catálogo sin sembrar hacen fallar TODO el bloque (y con él la transacción
- * completa del alta): un archivo no puede quedar reclamado por un tenant que
- * termina no existiendo.
+ * An unclaimable file, a file linked to another organization, or an unseeded
+ * catalog code fails the WHOLE block and the sign-up: no file can stay claimed
+ * by a tenant that never came to exist.
  */
 @Injectable()
 export class TenantAffiliationDocumentsService {
@@ -126,9 +123,7 @@ export class TenantAffiliationDocumentsService {
     const createdIds: string[] = [];
     for (const role of REGISTRATION_DOCUMENT_ROLES) {
       const fileId = input.documents[role];
-      // Sólo la constitución y la matrícula pueden faltar, y sólo si el
-      // llamador ya validó que el tipo societario no las exige (personas
-      // naturales: UNIPERSONAL, PROFESIONAL_INDEPENDIENTE).
+      // Only optional when the caller checked the legal entity type allows it.
       if (fileId === undefined) continue;
       const created = await this.attachOne(tx, role, fileId, {
         tenantId: input.tenantId,
@@ -136,11 +131,13 @@ export class TenantAffiliationDocumentsService {
         countryIso,
         concepts,
         today,
-        // Sólo el NIT lleva número: es el único dato que el formulario ya
-        // capturó por separado. El resto queda sin `documentNumber`, no
-        // porque falte, sino porque nadie lo pidió todavía.
-        documentNumber:
-          role === 'TAX_IDENTIFIER_DOC' ? input.taxIdentifier : undefined,
+        // Only the tax document carries the NIT, and points at its identifier.
+        ...(role === 'TAX_IDENTIFIER_DOC'
+          ? {
+              documentNumber: input.taxIdentifier,
+              identifierId: input.taxIdentifierId,
+            }
+          : {}),
       });
       createdIds.push(created);
     }
@@ -212,6 +209,7 @@ export class TenantAffiliationDocumentsService {
       readonly legalEntityType?: string;
       readonly fileId: string;
       readonly documentNumber?: string;
+      readonly identifierId?: string;
     },
   ): Promise<string> {
     const concepts = await this.concepts.resolve(tx);
@@ -222,6 +220,7 @@ export class TenantAffiliationDocumentsService {
       concepts,
       today: new Date(),
       documentNumber: input.documentNumber,
+      identifierId: input.identifierId,
     });
   }
 
@@ -292,6 +291,7 @@ export class TenantAffiliationDocumentsService {
       issuingAuthorityConceptId,
       fileId,
       documentNumber: ctx.documentNumber,
+      identifierId: ctx.identifierId,
       registeredAt: ctx.today,
       relatedPersonId: ctx.relatedPersonId,
       verificationStatusConceptId,

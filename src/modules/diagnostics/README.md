@@ -66,7 +66,7 @@ todos con `LabStaffGuard` y acotados al tenant activo. El catálogo de servicios
 | --- | --- |
 | `GET /diagnostics/lab/summary` | Resumen: ofertas de la unidad del tenant, órdenes sin resultado, archivos y actividad |
 | `GET /diagnostics/lab/orders` | Órdenes con `performer_tenant_id` = tenant (laboratorio, patología, imagen), hasta 500 |
-| `POST /diagnostics/lab/orders/:orderId/transitions` | `RECEIVE`, `PROCESS`, `REJECT`, `CANCEL`; paso fuera de orden: 409 |
+| `POST /diagnostics/lab/orders/:orderId/transitions` | `RECEIVE`, `PROCESS`, `REJECT`, `CANCEL` (estas dos con `reason` obligatorio); paso fuera de orden: 409 |
 | `GET /diagnostics/lab/result-targets` | Órdenes procesadas a las que se adjunta un resultado |
 | `GET /diagnostics/lab/result-files` | Archivos subidos (`kind`, `orderId`, `includeWithdrawn`), sin búsqueda por texto en la URL |
 | `POST /diagnostics/lab/result-files/search` | Lo mismo con `q` en el cuerpo (puede ser un nombre de paciente) |
@@ -77,13 +77,21 @@ todos con `LabStaffGuard` y acotados al tenant activo. El catálogo de servicios
 | `POST /diagnostics/lab/result-uploads/:uploadId/complete` | Guarda el archivo y lo publica en el informe |
 | `DELETE /diagnostics/lab/result-uploads/:uploadId` | Cancela la subida |
 
-El estado de la orden no se guarda: se deriva de filas del ejecutor. `RECEIVED` es una acesión
+El estado de la orden no se guarda como tal: se deriva de filas del ejecutor. `RECEIVED` es una acesión
 (`ACC_RECEIVED`; en laboratorio con tipo de muestra, también el espécimen recibido), `PROCESSED`
-una orden de trabajo con `completed_at`, `UPLOADED` un archivo en la última versión del informe,
-`REJECTED` un `specimen_rejection_events` (motivo en `notes`) y `CANCELLED` la orden revocada.
-`CANCEL` responde 422 `DIAGNOSTICS_LAB_ORDER_ACTION_UNSUPPORTED`: la orden es del tenant que la
-pidió y el ejecutor no tiene dónde registrar la anulación; `REJECT` responde lo mismo si la orden
-no tiene muestra (imagen).
+una orden de trabajo completada (`WO_COMPLETED` o `completed_at`), `UPLOADED` un archivo en la
+última versión del informe y `CANCELLED` la orden revocada por quien la pidió.
+
+`CANCEL` (desde `DRAFT` o `RECEIVED`) y `REJECT` (desde `RECEIVED`) valen para toda orden, imagen
+incluida, y exigen `reason`. La orden es del tenant solicitante y el ejecutor sólo la lee, así que
+cada uno agrega una fila propia a `diagnostics.service_request_performer_events` (append-only,
+`custodian_tenant_id` = ejecutor, tipos `PERF_CANCELLED` / `PERF_REJECTED`); el evento más reciente
+decide `CANCELLED` o `REJECTED` y su motivo. `REJECT` además rechaza los espécimenes recibidos, si
+los hay (`specimen_rejection_events`, igual que UC-20-02). Una orden cancelada o rechazada deja de
+poder reservarse, y un paso que el estado no admite responde 409.
+
+`GET /diagnostics/lab/summary` cuenta `unavailable` (servicios apagados con «disponible hoy») y
+agrupa `byCategory` por las categorías del laboratorio (`diagnostic_service_categories`).
 
 Un archivo subido entra por `FileUploadService.upload` y se publica en una versión nueva de
 `clinical.diagnostic_reports` del ejecutor, liberada y visible al paciente (la que lee

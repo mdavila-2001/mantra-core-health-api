@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1938 de 1938 endpoints** en **79 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1939 de 1939 endpoints** en **79 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -63,7 +63,7 @@ Se documentan **1938 de 1938 endpoints** en **79 módulos**. La referencia compl
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 84 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 42 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 84 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 85 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |
 | `public` | 4 | [Abrir referencia](endpoints/public.md) |
 | `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |

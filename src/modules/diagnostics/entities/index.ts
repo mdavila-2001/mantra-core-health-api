@@ -25,6 +25,7 @@ export * from './media_annotations.entity';
 export * from './observation_specimens.entity';
 export * from './radiation_dose_events.entity';
 export * from './result_verifications.entity';
+export * from './service_request_performer_events.entity';
 export * from './specimen_chain_of_custody_events.entity';
 export * from './specimen_collection_events.entity';
 export * from './specimen_container_events.entity';

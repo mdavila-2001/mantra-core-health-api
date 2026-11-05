@@ -201,7 +201,7 @@ export class BookingMaterializer {
         : null;
       const effective = ofService
         ? planForService(plan, ofService.offering.requiresApproval)
-        : plan;
+        : planForService(plan, resource?.requiresApproval ?? true);
 
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
         policyId: policy?.id,

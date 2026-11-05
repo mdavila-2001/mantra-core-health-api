@@ -232,6 +232,8 @@ export class PadronOrgAdminsSeedService {
         { userId, role: 'ADMIN', accessScope: 'ALL_TENANT' },
         actor,
         deterministicId(`seed:tenant-membership:padron-admin:${target.slug}`),
+        // Seeded admins need access immediately: no invitation to accept.
+        { activate: true },
       ),
     );
     result.memberships++;

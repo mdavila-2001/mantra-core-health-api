@@ -10,19 +10,11 @@ export const INFRA_F2_POLICY: InfraPolicy = {
   name: 'F2',
   actions: {
     'f2.board.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'NURSE',
-        'ADMISSION',
-        'HOUSEKEEPING',
-        'MAINTENANCE',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.availability.clinical': {
-      roles: ['NURSE'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.availability.admin': {
@@ -30,55 +22,44 @@ export const INFRA_F2_POLICY: InfraPolicy = {
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.availability.maintenance': {
-      roles: ['ORG_ADMIN', 'SITE_ADMIN', 'MAINTENANCE'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
     },
     'f2.hygiene.mark-dirty': {
-      roles: ['NURSE', 'HOUSEKEEPING'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.hygiene.mark-contaminated': {
-      roles: ['NURSE'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
-    'f2.isolation.set': { roles: ['NURSE'] },
+    'f2.isolation.set': { roles: ['ORG_ADMIN', 'SITE_ADMIN'] },
     'f2.isolation.cohort-approve': { roles: ['INFECTION_CONTROL'] },
     'f2.cleaning.read': {
-      roles: ['ORG_ADMIN', 'SITE_ADMIN', 'NURSE', 'ADMISSION', 'HOUSEKEEPING'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.cleaning.create': {
-      roles: ['NURSE', 'HOUSEKEEPING'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.cleaning.assign': {
-      roles: ['NURSE', 'HOUSEKEEPING'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
-    'f2.cleaning.work': { roles: ['NURSE', 'HOUSEKEEPING'] },
+    'f2.cleaning.work': { roles: ['ORG_ADMIN', 'SITE_ADMIN'] },
     'f2.cleaning.inspect': {
-      roles: ['NURSE_SUPERVISOR', 'HOUSEKEEPING_SUPERVISOR'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
     },
     'f2.cleaning.cancel': {
-      roles: ['NURSE', 'HOUSEKEEPING'],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.events.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'NURSE',
-        'ADMISSION',
-        'HOUSEKEEPING',
-        'MAINTENANCE',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN'],
       operatingRoomRoles: ['OR_MANAGER'],
     },
   },
 };
 
 /** Supervisores que apagan la bandera de limpieza terminal (§F2.2). */
-export const TERMINAL_INSPECTORS = [
-  'NURSE_SUPERVISOR',
-  'HOUSEKEEPING_SUPERVISOR',
-] as const;
+export const TERMINAL_INSPECTORS = ['ORG_ADMIN', 'SITE_ADMIN'] as const;

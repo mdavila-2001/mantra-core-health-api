@@ -1,6 +1,27 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles, PatientAnyTenant } from '../../../../common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
+  CurrentUser,
+  PatientAnyTenant,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
+import { ListMyResourcesUseCase } from '../../application/catalog/use-cases/list-my-resources.use-case';
+import { UpdateResourceUseCase } from '../../application/catalog/use-cases/update-resource.use-case';
 import { SchedulingAgendaService } from '../../application';
 import {
   BookableOrganizationsResponseDto,
@@ -10,6 +31,10 @@ import {
   ListResourcesResponseDto,
   ListSlotsQueryDto,
   ListSlotsResponseDto,
+  MyResourcesQueryDto,
+  MyResourcesResponseDto,
+  ResourceApprovalDto,
+  UpdateResourceDto,
 } from '../dto';
 
 /**
@@ -30,7 +55,47 @@ export class SchedulingAgendaController {
    *
    * @param agendaService - Valor de agenda service requerido por la operación.
    */
-  constructor(private readonly agendaService: SchedulingAgendaService) {}
+  constructor(
+    private readonly agendaService: SchedulingAgendaService,
+    private readonly listMyResources: ListMyResourcesUseCase,
+    private readonly updateResourceUseCase: UpdateResourceUseCase,
+  ) {}
+
+  /** v4.2.88 · the caller's own agendas and whether requests wait for them. */
+  @Get('my-resources')
+  @Roles('PRACTITIONER', 'SCHEDULING_ADMIN')
+  @ApiOperation({
+    summary: 'Listar mis agendas y cómo reciben las solicitudes de consulta',
+  })
+  @ApiOkResponse({ type: MyResourcesResponseDto })
+  listMine(
+    @Query() query: MyResourcesQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyResourcesResponseDto> {
+    return this.listMyResources.execute(query.tenantId, actor);
+  }
+
+  /** v4.2.88 · a practitioner edits their own agenda; admins edit any. */
+  @Audited({
+    action: 'SCHEDULE_RESOURCE_UPDATED',
+    entity: 'schedulable_resource',
+    entityId: 'param:id',
+  })
+  @Patch('resources/:id')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOkResponse({ type: ResourceApprovalDto })
+  @ApiOperation({
+    summary: 'Editar un recurso agendable',
+    description:
+      'Todo opcional; lo que no se manda se conserva. `requiresApproval: false` hace que las solicitudes de consulta nazcan confirmadas; la oferta de un servicio sigue mandando sobre su cupo.',
+  })
+  updateResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateResourceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ResourceApprovalDto> {
+    return this.updateResourceUseCase.execute(id, dto, actor);
+  }
 
   /**
    * Organizaciones con las que se puede pedir cita hoy, de todas las

@@ -9,6 +9,7 @@ import {
 import {
   TenantAffiliationDocumentsService,
   TenantLegalRepresentativesService,
+  TenantTaxIdentifierService,
   TenantTypeProfileService,
   type RegistrationDocumentsInput as DirectoryDocumentsInput,
 } from '../../../directory/services';
@@ -33,6 +34,7 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
     private readonly representatives: TenantLegalRepresentativesService,
+    private readonly taxIdentifiers: TenantTaxIdentifierService,
   ) {}
 
   createTenantMembership(tx: EntityManager, data: object) {
@@ -67,6 +69,13 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
       tx,
       data as Parameters<BranchesRepository['create']>[1],
     );
+  }
+
+  registerTaxIdentifier(
+    tx: EntityManager,
+    input: Parameters<TenantTaxIdentifierService['register']>[1],
+  ) {
+    return this.taxIdentifiers.register(tx, input);
   }
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto) {

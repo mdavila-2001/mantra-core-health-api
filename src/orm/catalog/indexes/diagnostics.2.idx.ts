@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostics` (parte 2/2).
- * 124 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 128 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticsIndexes2: readonly IndexTuple[] = [
@@ -60,6 +60,10 @@ export const diagnosticsIndexes2: readonly IndexTuple[] = [
   ['result_verifications', 'ix_result_verifications_signature_id', ['signature_id'], false, 'btree'],
   ['result_verifications', 'brin_result_verifications_created_at', ['created_at'], false, 'brin'],
   ['result_verifications', 'ix_result_verifications_target', ['verifiable_type_concept_id', 'verifiable_id', 'verified_at desc'], false, 'btree'],
+  ['service_request_performer_events', 'ix_service_request_performer_events_service_request_id', ['service_request_id'], false, 'btree'],
+  ['service_request_performer_events', 'ix_service_request_performer_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
+  ['service_request_performer_events', 'ix_service_request_performer_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['service_request_performer_events', 'ix_service_request_performer_events_tenant_request', ['custodian_tenant_id', 'service_request_id', 'recorded_at desc'], false, 'btree'],
   ['specimen_chain_of_custody_events', 'ix_specimen_chain_of_custody_events_specimen_id', ['specimen_id'], false, 'btree'],
   ['specimen_chain_of_custody_events', 'ix_specimen_chain_of_custody_events_specimen_container_id', ['specimen_container_id'], false, 'btree'],
   ['specimen_chain_of_custody_events', 'ix_specimen_chain_of_custody_events_custody_event_type_cbadcc6c', ['custody_event_type_concept_id'], false, 'btree'],

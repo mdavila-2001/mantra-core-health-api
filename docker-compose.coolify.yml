@@ -394,7 +394,9 @@ x-worker-healthcheck: &worker-healthcheck
   interval: 30s
   timeout: 5s
   retries: 3
-  start_period: 60s
+  # Misma razón que el healthcheck de `api`: con 0,5 CPU y el servidor cargado,
+  # 60 s no alcanzan y autoheal reinicia el worker antes de que arranque.
+  start_period: 180s
 
 # Rotación de logs. Sin esto el driver json-file de Docker crece sin techo y,
 # con ~30 contenedores escribiendo, es el disco el que tumba el servidor. 30 MB
@@ -839,7 +841,13 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      # Con el servidor cargado (dos builds a la vez), el arranque supera los
+      # ~135 s que daban 60 s de gracia + 5 fallos: la API quedaba `unhealthy`
+      # antes de escuchar, autoheal la reiniciaba en bucle, los workers (que
+      # esperan `service_healthy`) no arrancaban y el deploy se marcaba fallido.
+      # La gracia no demora un arranque normal: el primer chequeo que pasa la
+      # marca `healthy`.
+      start_period: 300s
     depends_on:
       api-migrate:
         condition: service_completed_successfully

@@ -61,6 +61,12 @@ export class SaveCenterScheduleUseCase {
             offered.has(s.studyCode) &&
             dto.studies.findIndex((x) => x.studyCode === s.studyCode) === i,
         ),
+        // Only devices of this center, once each.
+        equipment: (dto.equipment ?? []).filter(
+          (e, i, all) =>
+            ctx.equipment.some((x) => x.id === e.equipmentId) &&
+            all.findIndex((x) => x.equipmentId === e.equipmentId) === i,
+        ),
       };
       const problems = validateSchedule(schedule);
       if (problems.length > 0) {
@@ -125,6 +131,13 @@ export class SaveCenterScheduleUseCase {
           templateName({ level: 'STUDY', key: s.studyCode }),
           offered.get(s.studyCode)?.study_concept_id ?? null,
           s.schedule,
+        );
+      }
+      for (const e of schedule.equipment) {
+        await insert(
+          templateName({ level: 'EQUIPMENT', key: e.equipmentId }),
+          null,
+          e.schedule,
         );
       }
       return this.reader.view(tx, await this.context.load(tx, unit));

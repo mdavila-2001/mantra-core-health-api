@@ -11,6 +11,7 @@ import {
   DIAG,
   DIAGNOSTIC_CATEGORIES,
 } from '../../../diagnostics/diagnostics.concepts';
+import { PERFORMER_OUTCOME_CONCEPTS } from '../../../diagnostics/lab-portal.concepts';
 
 export interface OrderRow {
   id: string;
@@ -52,13 +53,18 @@ export class OrderPatientRepository {
 
   /**
    * An active laboratory or imaging order, with its study's terminology.
-   * Revoked, completed or on-hold orders cannot be booked; only the given
-   * patient's own order is read.
+   * Revoked, completed or on-hold orders cannot be booked, nor can the ones
+   * the performer center cancelled or rejected
+   * (`diagnostics.service_request_performer_events` of the order's performer);
+   * only the given patient's own order is read. `bookable: false` skips the
+   * performer check, so a patient can still cancel the appointment of an order
+   * the center ended afterwards.
    */
   async findDiagnosticOrder(
     em: EntityManager,
     orderId: string,
     patientProfileId: string,
+    bookable = true,
   ): Promise<OrderRow | null> {
     const [row] = await em.execute<OrderRow[]>(
       `SELECT sr.id, sr.patient_profile_id, sr.code_concept_id, sr.category_concept_id,
@@ -67,12 +73,19 @@ export class OrderPatientRepository {
          LEFT JOIN terminology.catalog_concepts c ON c.id = sr.code_concept_id
         WHERE sr.id = ? AND sr.patient_profile_id = ?
           AND sr.category_concept_id = ANY(?::uuid[])
-          AND sr.status_concept_id = ?`,
+          AND sr.status_concept_id = ?
+          AND (NOT ?::boolean OR NOT EXISTS (
+            SELECT 1 FROM diagnostics.service_request_performer_events e
+             WHERE e.service_request_id = sr.id
+               AND e.custodian_tenant_id = sr.performer_tenant_id
+               AND e.event_type_concept_id = ANY(?::uuid[])))`,
       [
         orderId,
         patientProfileId,
         `{${DIAGNOSTIC_CATEGORIES.join(',')}}`,
         CLIN.SERVICE_REQUEST_ACTIVE,
+        bookable,
+        `{${PERFORMER_OUTCOME_CONCEPTS.join(',')}}`,
       ],
       'all',
     );

@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import type { CareSpaces } from '../../../entities';
 import type { HygieneActionDto, HygieneResultDto } from '../../../dto';
 import { effectiveCleaningType } from '../../../domain/ops/cleaning-rules';
+import { PATIENT_VIEWERS } from '../../../domain/ops/infra-scope';
 import { InfrastructureAccessService } from '../../infrastructure-access.service';
 import { CareSpaceOpsCore } from '../care-space-ops-core';
 import { OpsCellBuilder } from '../ops-cell-builder';
@@ -96,7 +97,7 @@ export class ChangeHygieneUseCase {
         );
         orderId = order.id;
       }
-      const withPatient = roles.has('NURSE') || roles.has('ADMISSION');
+      const withPatient = PATIENT_VIEWERS.some((r) => roles.has(r));
       return {
         cell: await this.cells.cellFor(tx, space, practiceId, withPatient),
         cleaningOrderId: orderId,

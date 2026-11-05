@@ -115,6 +115,42 @@ describe('CredentialsRepository.findActivePasswordByLoginIdentifier', () => {
     ).resolves.toBe(cred);
   });
 
+  it('support staff log in with the email of their person contact (OWNER_PERSON)', async () => {
+    const cred = { id: 'c2', userId: 'u2' };
+    const d = build({
+      contacts: [{ ownerId: 'p2' }],
+      links: [{ userId: 'u2' }],
+      byUser: cred,
+    });
+
+    await expect(
+      d.repo.findActivePasswordByLoginIdentifier(
+        d.em,
+        'secretaria@example.com',
+      ),
+    ).resolves.toBe(cred);
+    expect(d.find).toHaveBeenCalledWith(
+      ContactPoints,
+      expect.objectContaining({
+        ownerTypeConceptId: {
+          $in: [CONCEPTS.OWNER_PATIENT, CONCEPTS.OWNER_PERSON],
+        },
+      }),
+    );
+  });
+
+  it('a person contact without an account (a declared third person) does not log anyone in', async () => {
+    const d = build({
+      contacts: [{ ownerId: 'tercero' }],
+      links: [],
+      byUser: { id: 'c1' },
+    });
+
+    await expect(
+      d.repo.findActivePasswordByLoginIdentifier(d.em, 'tercero@example.com'),
+    ).resolves.toBeNull();
+  });
+
   it('un correo de contacto compartido por dos cuentas no entra', async () => {
     const d = build({
       contacts: [{ ownerId: 'p1' }, { ownerId: 'p2' }],

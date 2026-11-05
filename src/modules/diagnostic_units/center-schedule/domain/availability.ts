@@ -6,12 +6,8 @@ import {
   type ScheduleBlock,
   type StudyStart,
 } from './center-schedule.model';
-import {
-  capacityOf,
-  isSlotStart,
-  resolveBlock,
-  slotsBetween,
-} from './schedule-rules';
+import { assignToLines } from './equipment-lines';
+import { isSlotStart, resolveBlock, slotsBetween } from './schedule-rules';
 
 /**
  * A booking that takes capacity on the center's resource. `modalityCode` is
@@ -46,7 +42,8 @@ function overlapping(
 export interface AvailabilityInput {
   readonly block: ScheduleBlock;
   readonly zone: string;
-  readonly capacity: number;
+  /** Patients that fit in one slot: the lines open for it. */
+  readonly capacityAt: (start: Date, end: Date) => number;
   readonly modalityCode: ModalityCode;
   readonly occupying: readonly OccupyingBooking[];
   readonly from: Date;
@@ -56,7 +53,6 @@ export interface AvailabilityInput {
 
 /** Free starts of a study: slots of its block with capacity left. */
 export function availableStarts(input: AvailabilityInput): StudyStart[] {
-  if (input.capacity <= 0) return [];
   const earliest = input.now.getTime() + BOOKING_MARGIN_MINUTES * 60_000;
   const from = new Date(Math.max(input.from.getTime(), earliest));
   if (from.getTime() > input.to.getTime()) return [];
@@ -68,13 +64,14 @@ export function availableStarts(input: AvailabilityInput): StudyStart[] {
       slot.startAt,
       slot.endAt,
     );
-    const remaining = input.capacity - taken;
+    const capacity = input.capacityAt(slot.startAt, slot.endAt);
+    const remaining = capacity - taken;
     if (remaining <= 0) continue;
     items.push({
       startAt: slot.startAt.toISOString(),
       endAt: slot.endAt.toISOString(),
       remaining,
-      capacity: input.capacity,
+      capacity,
     });
   }
   return items;
@@ -96,22 +93,21 @@ export function bookingsOutsideSchedule(
   }).length;
 }
 
-/** Future bookings left without an operational device to attend them. */
+/**
+ * Future bookings no open line can attend (a device broke, went to
+ * maintenance or its shift changed after they were booked). Bookings of a
+ * modality without any registered device ride on the declared capacity.
+ */
 export function bookingsWithoutEquipment(
+  schedule: CenterSchedule,
   future: readonly OccupyingBooking[],
   equipment: readonly CenterEquipment[],
-  declaredCapacity: number,
+  zone: string,
 ): number {
-  return future.filter((b) => {
-    if (b.modalityCode === null) return false;
-    const capacity = capacityOf(equipment, b.modalityCode, declaredCapacity);
-    const others = overlapping(
-      future,
-      b.modalityCode,
-      b.startAt,
-      b.endAt,
-      b.id,
-    );
-    return others >= capacity;
-  }).length;
+  const lined = future.filter(
+    (b) =>
+      b.modalityCode !== null &&
+      equipment.some((e) => e.modalityCode === b.modalityCode),
+  );
+  return assignToLines(schedule, equipment, lined, zone).unassigned.length;
 }

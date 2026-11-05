@@ -171,12 +171,16 @@ describe('PadronOrgAdminsSeedService', () => {
 
     await service.run(OPEN, true);
 
-    const [tenantId, dto, actor, membershipId] = calls(memberships.invite)[0];
+    const [tenantId, dto, actor, membershipId, options] = calls(
+      memberships.invite,
+    )[0];
     expect(tenantId).toMatch(/^[0-9a-f-]{36}$/);
     expect(dto.role).toBe('ADMIN');
     expect(dto.accessScope).toBe('ALL_TENANT');
     expect(actor.id).toBe(SEED_ACTOR_ID);
     expect(membershipId).toMatch(/^[0-9a-f-]{36}$/);
+    // Seeded admins skip the invitation: they must have access right away.
+    expect(options).toEqual({ activate: true });
 
     const again = build();
     await again.service.run(OPEN, true);

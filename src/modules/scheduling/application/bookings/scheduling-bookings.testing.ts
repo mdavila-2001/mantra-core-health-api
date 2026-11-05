@@ -27,6 +27,7 @@ import { CompleteAppointmentUseCase } from './use-cases/complete-appointment.use
 import { ConfirmBookingUseCase } from './use-cases/confirm-booking.use-case';
 import { CreateDirectAppointmentUseCase } from './use-cases/create-direct-appointment.use-case';
 import { ExpireHoldsUseCase } from './use-cases/expire-holds.use-case';
+import { FinishAutoConfirmedRequestUseCase } from './use-cases/finish-auto-confirmed-request.use-case';
 import { GetBookingUseCase } from './use-cases/get-booking.use-case';
 import { GetPaymentStateUseCase } from './use-cases/get-payment-state.use-case';
 import { PlaceHoldUseCase } from './use-cases/place-hold.use-case';
@@ -157,7 +158,20 @@ export function createBookingsService(d: BookingsServiceDoubles) {
   return new SchedulingBookingsService(
     new PlaceHoldUseCase(d.em, d.bookingsRepo, slotPolicy, access, d.logger),
     new ConfirmBookingUseCase(materializer, d.logger),
-    new RequestBookingUseCase(materializer, notifier, d.logger),
+    new RequestBookingUseCase(
+      materializer,
+      notifier,
+      d.logger,
+      new FinishAutoConfirmedRequestUseCase(
+        d.em,
+        d.bookingsRepo,
+        transitions,
+        displaced,
+        d.noticeRepo,
+        d.notices,
+        notifier,
+      ),
+    ),
     new CreateDirectAppointmentUseCase(
       d.em,
       d.bookingsRepo,

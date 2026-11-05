@@ -9,6 +9,7 @@ import {
 
 const none = {
   revoked: false,
+  performerOutcome: null,
   rejected: false,
   processed: false,
   received: false,
@@ -36,6 +37,24 @@ describe('lab portal projection', () => {
     expect(
       deriveLabOrderStatus({ ...none, revoked: true, availableFiles: 2 }),
     ).toBe('CANCELLED');
+  });
+
+  it("the performer's own event ends the order, ahead of the workflow rows", () => {
+    const workflow = { ...none, received: true, processed: true };
+    expect(
+      deriveLabOrderStatus({ ...workflow, performerOutcome: 'CANCELLED' }),
+    ).toBe('CANCELLED');
+    expect(
+      deriveLabOrderStatus({
+        ...none,
+        received: true,
+        performerOutcome: 'REJECTED',
+      }),
+    ).toBe('REJECTED');
+    // An imaging order has no accession item to reject: the event alone is enough.
+    expect(
+      deriveLabOrderStatus({ ...none, performerOutcome: 'REJECTED' }),
+    ).toBe('REJECTED');
   });
 
   it('allows only the documented steps', () => {

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostic_units`.
- * 115 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 118 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
@@ -25,6 +25,8 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['diagnostic_service_categories', 'ix_diagnostic_service_categories_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['diagnostic_service_categories', 'ix_diagnostic_service_categories_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['diagnostic_study_components', 'ix_diagnostic_study_components_parent_offering_id', ['parent_offering_id'], false, 'btree'],
   ['diagnostic_study_components', 'ix_diagnostic_study_components_component_offering_id', ['component_offering_id'], false, 'btree'],
   ['diagnostic_study_components', 'ix_diagnostic_study_components_component_role_concept_id', ['component_role_concept_id'], false, 'btree'],
@@ -35,6 +37,7 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_modality_concept_id', ['modality_concept_id'], false, 'btree'],
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_body_site_concept_id', ['body_site_concept_id'], false, 'btree'],
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_specimen_type_concept_id', ['specimen_type_concept_id'], false, 'btree'],
+  ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_service_category_id', ['service_category_id'], false, 'btree'],
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['diagnostic_study_offerings', 'ix_diagnostic_study_offerings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
