@@ -7,19 +7,15 @@ import {
   CenterScheduleRepository,
   type UnitRow,
 } from '../infrastructure/center-schedule.repository';
-import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
 import type { CenterScheduleViewDto } from '../presentation/dto/center-schedule-view.dto';
 import {
   CenterContextService,
-  toOccupying,
   type CenterContext,
 } from './center-context.service';
+import { DeviceBookingsService } from './device-bookings.service';
 
 const OUT_OF_SCOPE =
   DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE;
-
-/** How far ahead «bookings left without equipment» looks. */
-const FUTURE_WINDOW_MS = 366 * 86_400_000;
 
 /**
  * `GET /diagnostic-units/me/schedule` and `GET /diagnostic-units/:unitId/schedule`:
@@ -30,7 +26,7 @@ export class GetCenterScheduleUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly scheduleRepo: CenterScheduleRepository,
-    private readonly bookingsRepo: CenterBookingsRepository,
+    private readonly devices: DeviceBookingsService,
     private readonly context: CenterContextService,
   ) {}
 
@@ -79,29 +75,21 @@ export class GetCenterScheduleUseCase {
     em: EntityManager,
     ctx: CenterContext,
   ): Promise<CenterScheduleViewDto> {
-    const now = new Date();
-    const future = ctx.resourceId
-      ? (
-          await this.bookingsRepo.findOccupying(
-            em,
-            ctx.resourceId,
-            now,
-            new Date(now.getTime() + FUTURE_WINDOW_MS),
-          )
-        ).map(toOccupying)
-      : [];
+    const future = await this.devices.future(em, ctx);
     return {
       unitId: ctx.unit.id,
       unitName: ctx.unit.name,
       kind: ctx.kind,
       schedule: ctx.schedule,
       studies: ctx.studies,
-      equipment: ctx.equipment,
+      equipment: ctx.equipment.map(({ resourceId: _resourceId, ...e }) => e),
       updatedAt: ctx.updatedAt ? new Date(ctx.updatedAt).toISOString() : null,
       bookingsWithoutEquipment: bookingsWithoutEquipment(
+        ctx.schedule,
         future,
         ctx.equipment,
         ctx.declaredCapacity,
+        ctx.zone,
       ),
     };
   }

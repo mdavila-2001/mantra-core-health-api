@@ -21,14 +21,20 @@ export interface OrderBookingSnapshot {
   price: number | null;
   currency: string | null;
   preparation: string | null;
+  /** The device that attends it; absent on bookings older than per-device scheduling. */
+  equipmentId?: string;
+  equipmentName?: string;
 }
 
 export interface OccupyingRow {
   id: string;
+  slot_id: string;
+  resource_id: string;
   start_at: Date;
   end_at: Date;
   modality_code: string | null;
   study_code: string | null;
+  equipment_id: string | null;
 }
 
 export interface OrderBookingRow {
@@ -53,24 +59,61 @@ const VISIBLE = `{${VISIBLE_BOOKING_STATES.join(',')}}`;
 /** Raw reads/writes of the bookings taken on a center's scheduling resource. */
 @Injectable()
 export class CenterBookingsRepository {
-  /** Bookings that take capacity on the resource and overlap `[from, to)`. */
+  /** Bookings that take capacity on the resources and overlap `[from, to)`. */
   findOccupying(
     em: EntityManager,
-    resourceId: string,
+    resourceIds: readonly string[],
     from: Date,
     to: Date,
   ): Promise<OccupyingRow[]> {
+    if (resourceIds.length === 0) return Promise.resolve([]);
     return em.execute<OccupyingRow[]>(
-      `SELECT b.id, s.start_at, s.end_at,
+      `SELECT b.id, s.id AS slot_id, s.resource_id, s.start_at, s.end_at,
               b.service_snapshot->>'modalityCode' AS modality_code,
-              b.service_snapshot->>'studyCode' AS study_code
+              b.service_snapshot->>'studyCode' AS study_code,
+              b.service_snapshot->>'equipmentId' AS equipment_id
          FROM scheduling.appointment_bookings b
          JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
-        WHERE s.resource_id = ? AND b.status_concept_id = ANY(?::uuid[])
+        WHERE s.resource_id = ANY(?::uuid[]) AND b.status_concept_id = ANY(?::uuid[])
           AND s.start_at < ? AND s.end_at > ?`,
-      [resourceId, VISIBLE, to, from],
+      [`{${resourceIds.join(',')}}`, VISIBLE, to, from],
       'all',
     );
+  }
+
+  /**
+   * Moves a legacy booking from the center's resource to the device that
+   * adopts it: a new booked slot on the device, the booking pointed at it with
+   * the device frozen in its snapshot, and the old place given back.
+   */
+  async moveToDevice(
+    em: EntityManager,
+    booking: OccupyingRow,
+    device: { id: string; name: string; resourceId: string },
+    actorId: string,
+  ): Promise<void> {
+    const slotId = await this.takeSlot(
+      em,
+      device.resourceId,
+      new Date(booking.start_at),
+      new Date(booking.end_at),
+      actorId,
+    );
+    await em.execute(
+      `UPDATE scheduling.appointment_bookings
+          SET bookable_slot_id = ?, resource_id = ?,
+              service_snapshot = service_snapshot || ?::jsonb,
+              updated_at = now(), updated_by_user_id = ?, row_version = row_version + 1
+        WHERE id = ?`,
+      [
+        slotId,
+        device.resourceId,
+        JSON.stringify({ equipmentId: device.id, equipmentName: device.name }),
+        actorId,
+        booking.id,
+      ],
+    );
+    await this.releaseSlot(em, booking.slot_id, actorId);
   }
 
   async findForOrder(
@@ -191,32 +234,41 @@ export class CenterBookingsRepository {
         WHERE id = ?`,
       [CONCEPTS.BOOKING_CANCELLED, actorId, booking.id],
     );
+    await this.releaseSlot(em, booking.bookable_slot_id, actorId);
+  }
+
+  private async releaseSlot(
+    em: EntityManager,
+    slotId: string,
+    actorId: string,
+  ): Promise<void> {
     await em.execute(
       `UPDATE scheduling.bookable_slots
           SET remaining_capacity = LEAST(capacity, remaining_capacity + 1), status_concept_id = ?,
               updated_at = now(), updated_by_user_id = ?, row_version = row_version + 1
         WHERE id = ?`,
-      [CONCEPTS.SLOT_OPEN, actorId, booking.bookable_slot_id],
+      [CONCEPTS.SLOT_OPEN, actorId, slotId],
     );
   }
 
-  /** The center's visible bookings starting in `[from, to)`, by start. */
-  listForResource(
+  /** The center's visible bookings (on its resource and its devices') starting in `[from, to)`, by start. */
+  listForResources(
     em: EntityManager,
-    resourceId: string,
+    resourceIds: readonly string[],
     from: Date,
     to: Date,
   ): Promise<CenterBookingRow[]> {
+    if (resourceIds.length === 0) return Promise.resolve([]);
     return em.execute<CenterBookingRow[]>(
       `SELECT b.id, s.start_at, s.end_at, b.status_concept_id,
               p.display_name AS patient_name, b.service_snapshot AS snapshot
          FROM scheduling.appointment_bookings b
          JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
          LEFT JOIN profiles.persons p ON p.id = b.patient_profile_id
-        WHERE s.resource_id = ? AND b.status_concept_id = ANY(?::uuid[])
+        WHERE s.resource_id = ANY(?::uuid[]) AND b.status_concept_id = ANY(?::uuid[])
           AND s.start_at >= ? AND s.start_at < ?
         ORDER BY s.start_at, b.id`,
-      [resourceId, VISIBLE, from, to],
+      [`{${resourceIds.join(',')}}`, VISIBLE, from, to],
       'all',
     );
   }

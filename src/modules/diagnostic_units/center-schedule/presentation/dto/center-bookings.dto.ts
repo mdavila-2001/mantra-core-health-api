@@ -26,6 +26,13 @@ export class CenterBookingDto {
   @ApiProperty() endsAt!: string;
   @ApiProperty({ type: String, nullable: true }) siteName!: string | null;
   @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'The device that attends it; `null` before devices had lines.',
+  })
+  equipmentId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) equipmentName!: string | null;
+  @ApiProperty({
     enum: [
       'REQUESTED',
       'PENDING_CONFIRMATION',

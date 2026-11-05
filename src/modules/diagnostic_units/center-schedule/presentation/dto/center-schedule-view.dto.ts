@@ -6,6 +6,7 @@ import {
   type ModalityCode,
 } from '../../domain/center-schedule.model';
 import { SaveCenterScheduleDto } from './center-schedule.dto';
+import { ScheduleBlockDto } from './schedule-block.dto';
 
 export class CenterStudyDto {
   @ApiProperty() code!: string;
@@ -20,8 +21,15 @@ export class CenterStudyDto {
 export class CenterEquipmentDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() name!: string;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Catalog type code (`US`, `MR`…); `null` outside the catalog.',
+  })
+  typeCode!: string | null;
   @ApiProperty({ type: String, nullable: true }) manufacturer!: string | null;
   @ApiProperty({ type: String, nullable: true }) model!: string | null;
+  @ApiProperty({ type: String, nullable: true }) serialNumber!: string | null;
   @ApiProperty({
     enum: MODALITY_CODES,
     nullable: true,
@@ -29,6 +37,12 @@ export class CenterEquipmentDto {
   })
   modalityCode!: ModalityCode | null;
   @ApiProperty({ enum: EQUIPMENT_STATUSES }) status!: EquipmentStatus;
+  @ApiProperty({
+    type: ScheduleBlockDto,
+    nullable: true,
+    description: 'Its own hours; `null` while it follows the general schedule.',
+  })
+  schedule!: ScheduleBlockDto | null;
   @ApiProperty({
     type: String,
     nullable: true,

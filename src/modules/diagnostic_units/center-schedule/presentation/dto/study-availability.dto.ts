@@ -33,7 +33,7 @@ export class StudyStartDto {
 export class StudyAvailabilityDto {
   @ApiProperty({ format: 'uuid' }) unitId!: string;
   @ApiProperty() studyCode!: string;
-  @ApiProperty({ enum: ['STUDY', 'MODALITY', 'GENERAL'] })
+  @ApiProperty({ enum: ['STUDY', 'EQUIPMENT', 'MODALITY', 'GENERAL'] })
   origin!: ScheduleOrigin;
   @ApiProperty({ type: [StudyStartDto] }) items!: StudyStartDto[];
 }

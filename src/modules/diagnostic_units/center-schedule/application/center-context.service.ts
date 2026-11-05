@@ -6,21 +6,24 @@ import {
   MODALITY_CODES,
   equipmentStatusOfConcept,
   modalityOfConcept,
-  type CenterEquipment,
+  type CenterDevice,
   type CenterKind,
   type CenterSchedule,
   type CenterStudy,
   type ModalityCode,
   type ScheduleBlock,
 } from '../domain/center-schedule.model';
+import { equipmentTypeOfConcept } from '../domain/equipment-types';
 import { defaultSchedule, scopeOfTemplate } from '../domain/schedule-rules';
 import type { OccupyingBooking } from '../domain/availability';
 import {
   CenterScheduleRepository,
+  type EquipmentRow,
   type SiteRow,
   type TemplateRuleRow,
   type UnitRow,
 } from '../infrastructure/center-schedule.repository';
+import { DeviceResourcesRepository } from '../infrastructure/device-resources.repository';
 import {
   CenterStudiesRepository,
   currencyOf,
@@ -41,7 +44,16 @@ export interface CenterContext {
   readonly declaredCapacity: number;
   readonly studies: CenterStudy[];
   readonly studyRows: readonly StudyRow[];
-  readonly equipment: CenterEquipment[];
+  /** Every device of the unit, with its own schedule and resource when it has them. */
+  readonly equipment: CenterDevice[];
+}
+
+/** The center's resource plus every device's: where its bookings can live. */
+export function resourceIdsOf(ctx: CenterContext): string[] {
+  return [
+    ...(ctx.resourceId ? [ctx.resourceId] : []),
+    ...ctx.equipment.flatMap((e) => (e.resourceId ? [e.resourceId] : [])),
+  ];
 }
 
 export function kindOf(unit: UnitRow): CenterKind {
@@ -79,15 +91,19 @@ export function toOccupying(row: OccupyingRow): OccupyingBooking {
   const modality = row.modality_code as ModalityCode | null;
   return {
     id: row.id,
+    slotId: row.slot_id,
+    resourceId: row.resource_id,
     startAt: new Date(row.start_at),
     endAt: new Date(row.end_at),
     modalityCode:
       modality !== null && MODALITY_CODES.includes(modality) ? modality : null,
     studyCode: row.study_code,
+    equipmentId: row.equipment_id,
   };
 }
 
-function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
+/** The blocks of a resource's published templates, newest first. */
+function blocksOf(rows: readonly TemplateRuleRow[]) {
   const blocks = new Map<string, { name: string; block: ScheduleBlock }>();
   for (const row of rows) {
     const current = blocks.get(row.template_id) ?? {
@@ -109,6 +125,11 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
     }
     blocks.set(row.template_id, current);
   }
+  return blocks;
+}
+
+function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
+  const blocks = blocksOf(rows);
   // Rows come newest first: the first block of each level wins.
   let general: ScheduleBlock | null = null;
   const modalities = new Map<ModalityCode, ScheduleBlock>();
@@ -137,12 +158,29 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
   return schedule;
 }
 
+/** A device's own hours: the first general-scope template on its resource. */
+function ownBlockOf(rows: readonly TemplateRuleRow[]): ScheduleBlock | null {
+  for (const { name, block } of blocksOf(rows).values()) {
+    if (scopeOfTemplate(name).level === 'GENERAL') return block;
+  }
+  return null;
+}
+
+/** How the center and the patient name a device. */
+export function deviceName(row: EquipmentRow): string {
+  const type = equipmentTypeOfConcept(row.type_concept_id);
+  const label = type?.label ?? row.type_display ?? 'Equipo';
+  const make = [row.manufacturer, row.model].filter(Boolean).join(' ');
+  return make ? `${label} ${make}` : label;
+}
+
 /** Loads a unit's schedule, studies and equipment in one place. */
 @Injectable()
 export class CenterContextService {
   constructor(
     private readonly scheduleRepo: CenterScheduleRepository,
     private readonly studiesRepo: CenterStudiesRepository,
+    private readonly devicesRepo: DeviceResourcesRepository,
   ) {}
 
   async load(em: EntityManager, unit: UnitRow): Promise<CenterContext> {
@@ -153,9 +191,17 @@ export class CenterContextService {
       this.studiesRepo.findForUnit(em, unit.id),
       this.scheduleRepo.findEquipment(em, unit.id),
     ]);
-    const rules = resource
-      ? await this.scheduleRepo.findTemplateRules(em, resource.id)
-      : [];
+    const deviceResources = await this.devicesRepo.findResources(
+      em,
+      equipmentRows.map((e) => e.id),
+    );
+    const [rules, deviceRules] = await Promise.all([
+      resource ? this.scheduleRepo.findTemplateRules(em, resource.id) : [],
+      this.devicesRepo.findTemplateRules(
+        em,
+        deviceResources.map((r) => r.id),
+      ),
+    ]);
     const studies: CenterStudy[] = [];
     for (const row of studyRows) {
       const modality = studyModality(row, kind);
@@ -163,19 +209,30 @@ export class CenterContextService {
         continue;
       studies.push(toStudy(row, modality));
     }
-    const equipment = equipmentRows.map((e): CenterEquipment => ({
-      id: e.id,
-      name: e.type_display ?? 'Equipo',
-      manufacturer: e.manufacturer,
-      model: e.model,
-      // An analyzer processes samples in batches: it never limits a slot.
-      modalityCode:
-        e.type_concept_id === DUNIT.EQUIPMENT_TYPE_ANALYZER
-          ? null
-          : modalityOfConcept(e.modality_concept_id),
-      status: equipmentStatusOfConcept(e.status_concept_id),
-      glossaryConceptId: null,
-    }));
+    const equipment = equipmentRows.map((e): CenterDevice => {
+      const type = equipmentTypeOfConcept(e.type_concept_id);
+      const resourceId =
+        deviceResources.find((r) => r.equipment_id === e.id)?.id ?? null;
+      return {
+        id: e.id,
+        name: deviceName(e),
+        typeCode: type?.code ?? null,
+        manufacturer: e.manufacturer,
+        model: e.model,
+        serialNumber: e.serial_number,
+        // An analyzer processes samples in batches: it never limits a slot.
+        modalityCode:
+          e.type_concept_id === DUNIT.EQUIPMENT_TYPE_ANALYZER
+            ? null
+            : (type?.modalityCode ?? modalityOfConcept(e.modality_concept_id)),
+        status: equipmentStatusOfConcept(e.status_concept_id),
+        schedule: resourceId
+          ? ownBlockOf(deviceRules.filter((r) => r.resource_id === resourceId))
+          : null,
+        resourceId,
+        glossaryConceptId: null,
+      };
+    });
     const declared = rules.find((r) => r.capacity_per_slot !== null);
     return {
       unit,

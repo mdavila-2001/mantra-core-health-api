@@ -15,14 +15,17 @@ import {
   DiagnosticUnitsSearchService,
   DiagnosticUnitsService,
 } from '../../services';
+import { AddEquipmentUseCase } from '../application/add-equipment.use-case';
 import { BookOrderUseCase } from '../application/book-order.use-case';
 import { CancelOrderBookingUseCase } from '../application/cancel-order-booking.use-case';
 import { GetBookingOptionsUseCase } from '../application/get-booking-options.use-case';
 import { GetCenterScheduleUseCase } from '../application/get-center-schedule.use-case';
 import { GetStudyAvailabilityUseCase } from '../application/get-study-availability.use-case';
 import { ListCenterBookingsUseCase } from '../application/list-center-bookings.use-case';
+import { RemoveEquipmentUseCase } from '../application/remove-equipment.use-case';
 import { SaveCenterScheduleUseCase } from '../application/save-center-schedule.use-case';
-import { SetEquipmentStatusUseCase } from '../application/set-equipment-status.use-case';
+import { SaveDeviceScheduleUseCase } from '../application/save-device-schedule.use-case';
+import { UpdateEquipmentUseCase } from '../application/update-equipment.use-case';
 import { CENTER_SCHEDULE_CONTROLLERS } from '../center-schedule.providers';
 
 /**
@@ -40,6 +43,9 @@ describe('center schedule routes (HTTP)', () => {
   const reader = { forMe: ok('me'), forUnit: ok('unit') };
   const saver = { execute: ok('saved') };
   const equipment = { execute: ok('equipment') };
+  const adder = { execute: ok('added') };
+  const remover = { execute: ok('removed') };
+  const deviceSchedule = { execute: ok('device-schedule') };
   const bookings = { execute: ok('bookings') };
   const availability = { execute: ok('availability') };
   const options = { execute: ok('options') };
@@ -57,7 +63,10 @@ describe('center schedule routes (HTTP)', () => {
       providers: [
         { provide: GetCenterScheduleUseCase, useValue: reader },
         { provide: SaveCenterScheduleUseCase, useValue: saver },
-        { provide: SetEquipmentStatusUseCase, useValue: equipment },
+        { provide: UpdateEquipmentUseCase, useValue: equipment },
+        { provide: AddEquipmentUseCase, useValue: adder },
+        { provide: RemoveEquipmentUseCase, useValue: remover },
+        { provide: SaveDeviceScheduleUseCase, useValue: deviceSchedule },
         { provide: ListCenterBookingsUseCase, useValue: bookings },
         { provide: GetStudyAvailabilityUseCase, useValue: availability },
         { provide: GetBookingOptionsUseCase, useValue: options },
@@ -135,10 +144,54 @@ describe('center schedule routes (HTTP)', () => {
       .expect(400);
   });
 
-  it('PATCH equipment only accepts the three statuses', async () => {
+  it('PATCH equipment only accepts the three statuses, plus make, model and serial', async () => {
     const path = `/diagnostic-units/${UNIT}/equipment/${ORDER}`;
     await http().patch(path).send({ status: 'MAINTENANCE' }).expect(200);
+    await http()
+      .patch(path)
+      .send({ serialNumber: 'SN-2', model: 'X' })
+      .expect(200);
     await http().patch(path).send({ status: 'BROKEN' }).expect(400);
+    await http().patch(path).send({ careSpaceId: 'x' }).expect(400);
+  });
+
+  it('the equipment catalog and the device routes reach their handlers', async () => {
+    const res = await http()
+      .get('/diagnostic-units/me/equipment-types')
+      .expect(200);
+    expect(res.body.items.map((t: { code: string }) => t.code)).toEqual([
+      'US',
+      'XR',
+      'MR',
+      'CT',
+      'MG',
+      'DX',
+      'SAMPLING',
+      'ANALYZER',
+    ]);
+    const base = `/diagnostic-units/${UNIT}/equipment`;
+    await http()
+      .post(base)
+      .send({ typeCode: 'MR', model: 'Ingenia' })
+      .expect(201, { tag: 'added' });
+    await http().post(base).send({ typeCode: 'LASER' }).expect(400);
+    await http().delete(`${base}/${ORDER}`).expect(200, { tag: 'removed' });
+    const block = {
+      windows: [{ dayOfWeek: 1, startTime: '14:00', endTime: '20:00' }],
+      slotMinutes: 30,
+    };
+    await http()
+      .put(`${base}/${ORDER}/schedule`)
+      .send({ schedule: block })
+      .expect(200, { tag: 'device-schedule' });
+    await http()
+      .put(`${base}/${ORDER}/schedule`)
+      .send({ schedule: null })
+      .expect(200);
+    await http()
+      .put(`${base}/${ORDER}/schedule`)
+      .send({ schedule: { ...block, slotMinutes: 1 } })
+      .expect(400);
   });
 
   it('study availability is served on its own path', async () => {

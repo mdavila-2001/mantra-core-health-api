@@ -3,11 +3,11 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
 import { SCHED } from '../../../scheduling/domain/scheduling.concepts';
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
-import { CenterScheduleRepository } from '../infrastructure/center-schedule.repository';
 import type {
   CenterBookingsDto,
   CenterBookingsQueryDto,
 } from '../presentation/dto/center-bookings.dto';
+import { CenterContextService, resourceIdsOf } from './center-context.service';
 import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 
 const STATUS: Readonly<Record<string, string>> = {
@@ -24,15 +24,16 @@ const MAX_WINDOW_MS = 31 * 86_400_000;
 
 /**
  * `GET /diagnostic-units/me/bookings?from&to`: the appointments booked at the
- * active organization's center, by start. Cancelled ones are left out. It is
- * PHI (patient names) for the center's own staff: never logged.
+ * active organization's center, on its resource and on each device's, by
+ * start. Cancelled ones are left out. It is PHI (patient names) for the
+ * center's own staff: never logged.
  */
 @Injectable()
 export class ListCenterBookingsUseCase {
   constructor(
     private readonly em: EntityManager,
-    private readonly scheduleRepo: CenterScheduleRepository,
     private readonly bookingsRepo: CenterBookingsRepository,
+    private readonly context: CenterContextService,
     private readonly reader: GetCenterScheduleUseCase,
   ) {}
 
@@ -50,25 +51,30 @@ export class ListCenterBookingsUseCase {
     }
     const em = this.em.fork();
     const unit = await this.reader.myUnit(em);
-    const resource = await this.scheduleRepo.findResource(em, unit.id);
-    if (!resource) return { items: [], count: 0 };
-    const [site] = await this.scheduleRepo.findMainSites(em, [unit.id]);
-    const rows = await this.bookingsRepo.listForResource(
+    const ctx = await this.context.load(em, unit);
+    const rows = await this.bookingsRepo.listForResources(
       em,
-      resource.id,
+      resourceIdsOf(ctx),
       from,
       to,
     );
-    const items = rows.map((row) => ({
-      bookingId: row.id,
-      orderId: row.snapshot?.serviceRequestId ?? null,
-      patientName: row.patient_name,
-      studyName: row.snapshot?.studyName ?? null,
-      startsAt: new Date(row.start_at).toISOString(),
-      endsAt: new Date(row.end_at).toISOString(),
-      siteName: row.snapshot?.siteName ?? site?.site_name ?? null,
-      status: STATUS[row.status_concept_id] ?? 'CONFIRMED',
-    }));
+    const items = rows.map((row) => {
+      const device = ctx.equipment.find(
+        (e) => e.id === row.snapshot?.equipmentId,
+      );
+      return {
+        bookingId: row.id,
+        orderId: row.snapshot?.serviceRequestId ?? null,
+        patientName: row.patient_name,
+        studyName: row.snapshot?.studyName ?? null,
+        startsAt: new Date(row.start_at).toISOString(),
+        endsAt: new Date(row.end_at).toISOString(),
+        siteName: row.snapshot?.siteName ?? ctx.site?.site_name ?? null,
+        equipmentId: device?.id ?? row.snapshot?.equipmentId ?? null,
+        equipmentName: device?.name ?? row.snapshot?.equipmentName ?? null,
+        status: STATUS[row.status_concept_id] ?? 'CONFIRMED',
+      };
+    });
     return { items, count: items.length };
   }
 }

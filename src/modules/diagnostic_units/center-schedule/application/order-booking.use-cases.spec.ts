@@ -5,6 +5,10 @@ import { CLIN } from '../../../clinical/clinical.concepts';
 import {
   actor,
   build,
+  DEVICE_ID,
+  DEVICE_RESOURCE_ID,
+  equipmentRow,
+  occupyingRow,
   ORDER_ID,
   OTHER_TENANT,
   PATIENT,
@@ -183,18 +187,90 @@ describe('BookOrderUseCase', () => {
     });
   });
 
+  it('with devices registered, the booking lands on the first free device and freezes it', async () => {
+    const d = setup();
+    const start = nextTuesdaySlot();
+    d.scheduleRepo.findEquipment.mockResolvedValue([
+      equipmentRow({ id: 'busy' }),
+      equipmentRow(),
+    ]);
+    d.devicesRepo.findResources.mockResolvedValue([
+      { id: 'busy-resource', equipment_id: 'busy' },
+    ]);
+    d.bookingsRepo.findOccupying.mockResolvedValue([
+      occupyingRow(start, {
+        resource_id: 'busy-resource',
+        equipment_id: 'busy',
+      }),
+    ]);
+    await d.booker.execute(actor, ORDER_ID, {
+      unitId: UNIT_ID,
+      startAt: start.toISOString(),
+    });
+    // The second device had no resource yet: it gets one on its first booking.
+    expect(d.devicesRepo.createResource).toHaveBeenCalledWith(
+      d.em,
+      expect.objectContaining({ id: UNIT_ID }),
+      expect.objectContaining({ id: DEVICE_ID }),
+      'America/La_Paz',
+      actor.id,
+    );
+    expect(d.bookingsRepo.takeSlot).toHaveBeenCalledWith(
+      d.em,
+      DEVICE_RESOURCE_ID,
+      start,
+      new Date(start.getTime() + 1_800_000),
+      actor.id,
+    );
+    const [, data] = d.bookingsRepo.insertBooking.mock.calls[0];
+    expect(data).toMatchObject({
+      resourceId: DEVICE_RESOURCE_ID,
+      snapshot: { equipmentId: DEVICE_ID, equipmentName: 'Ecógrafo GE Logiq' },
+    });
+  });
+
+  it('a legacy booking on the center resource is adopted by a free device before booking', async () => {
+    const d = setup();
+    const start = nextTuesdaySlot();
+    d.scheduleRepo.findEquipment.mockResolvedValue([equipmentRow()]);
+    d.devicesRepo.findResources.mockResolvedValue([
+      { id: DEVICE_RESOURCE_ID, equipment_id: DEVICE_ID },
+    ]);
+    // Legacy (no equipment) at the only slot: the device adopts it, so the slot is gone.
+    const rows = [occupyingRow(start, { id: 'legacy' })];
+    d.bookingsRepo.findOccupying.mockImplementation(async () => rows);
+    d.bookingsRepo.moveToDevice.mockImplementation(
+      async (_em: unknown, _b: unknown, device: unknown) => {
+        const to = device as { id: string; resourceId: string };
+        rows[0] = {
+          ...rows[0],
+          resource_id: to.resourceId,
+          equipment_id: to.id,
+        };
+      },
+    );
+    await expect(
+      d.booker.execute(actor, ORDER_ID, {
+        unitId: UNIT_ID,
+        startAt: start.toISOString(),
+      }),
+    ).rejects.toMatchObject({ status: 409, details: { slotTaken: true } });
+    expect(d.bookingsRepo.moveToDevice).toHaveBeenCalledWith(
+      d.em,
+      expect.objectContaining({ id: 'legacy' }),
+      {
+        id: DEVICE_ID,
+        name: 'Ecógrafo GE Logiq',
+        resourceId: DEVICE_RESOURCE_ID,
+      },
+      actor.id,
+    );
+  });
+
   it('409 `slotTaken` when the start filled up meanwhile', async () => {
     const d = setup();
     const start = nextTuesdaySlot();
-    d.bookingsRepo.findOccupying.mockResolvedValue([
-      {
-        id: 'other',
-        start_at: start,
-        end_at: new Date(start.getTime() + 1_800_000),
-        modality_code: 'ECO',
-        study_code: 'STUDY-ECO-ABD',
-      },
-    ]);
+    d.bookingsRepo.findOccupying.mockResolvedValue([occupyingRow(start)]);
     await expect(
       d.booker.execute(actor, ORDER_ID, {
         unitId: UNIT_ID,

@@ -44,10 +44,13 @@ const device = (
 ): CenterEquipment => ({
   id: `${modalityCode}-${status}`,
   name: 'x',
+  typeCode: null,
   manufacturer: null,
   model: null,
+  serialNumber: null,
   modalityCode,
   status,
+  schedule: null,
   glossaryConceptId: null,
 });
 

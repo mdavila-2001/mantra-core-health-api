@@ -1,19 +1,26 @@
 import { jest } from '@jest/globals';
 import type { AuthenticatedUser } from '../../../../common';
 import { DUNIT } from '../../diagnostic_units.concepts';
-import type { UnitRow } from '../infrastructure/center-schedule.repository';
+import type {
+  EquipmentRow,
+  UnitRow,
+} from '../infrastructure/center-schedule.repository';
 import type { StudyRow } from '../infrastructure/center-studies.repository';
+import { AddEquipmentUseCase } from './add-equipment.use-case';
 import { BookOrderUseCase } from './book-order.use-case';
 import { CancelOrderBookingUseCase } from './cancel-order-booking.use-case';
 import { CenterAvailabilityService } from './center-availability.service';
 import { CenterContextService } from './center-context.service';
+import { DeviceBookingsService } from './device-bookings.service';
 import { GetBookingOptionsUseCase } from './get-booking-options.use-case';
 import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 import { GetStudyAvailabilityUseCase } from './get-study-availability.use-case';
 import { ListCenterBookingsUseCase } from './list-center-bookings.use-case';
 import { OrderBookingAccessService } from './order-booking-access.service';
+import { RemoveEquipmentUseCase } from './remove-equipment.use-case';
 import { SaveCenterScheduleUseCase } from './save-center-schedule.use-case';
-import { SetEquipmentStatusUseCase } from './set-equipment-status.use-case';
+import { SaveDeviceScheduleUseCase } from './save-device-schedule.use-case';
+import { UpdateEquipmentUseCase } from './update-equipment.use-case';
 
 /** Test doubles for the center-schedule use cases (spec support only). */
 type AsyncMock = jest.Mock<(...args: unknown[]) => Promise<unknown>>;
@@ -27,6 +34,8 @@ export const RESOURCE_ID = '44444444-4444-4444-8444-444444444444';
 export const PATIENT = '55555555-5555-4555-8555-555555555555';
 export const ORDER_ID = '66666666-6666-4666-8666-666666666666';
 export const STUDY_CONCEPT = '77777777-7777-4777-8777-777777777777';
+export const DEVICE_ID = '88888888-8888-4888-8888-888888888888';
+export const DEVICE_RESOURCE_ID = '99999999-9999-4999-8999-999999999999';
 export const actor = {
   id: 'user-1',
   roles: ['USER'],
@@ -56,6 +65,41 @@ export function studyRow(overrides: Partial<StudyRow> = {}): StudyRow {
     preparation_instructions: 'Ayuno de 6 a 8 horas.',
     amount: '250.00',
     currency_code: 'DU_CUR_BOB',
+    ...overrides,
+  };
+}
+
+/** An operational ultrasound device of the unit. */
+export function equipmentRow(
+  overrides: Partial<EquipmentRow> = {},
+): EquipmentRow {
+  return {
+    id: DEVICE_ID,
+    type_concept_id: DUNIT.EQUIPMENT_TYPE_ULTRASOUND,
+    type_display: 'Ultrasound equipment',
+    manufacturer: 'GE',
+    model: 'Logiq',
+    serial_number: 'SN-1',
+    modality_concept_id: DUNIT.MODALITY_ULTRASOUND,
+    status_concept_id: DUNIT.EQUIPMENT_OPERATIONAL,
+    ...overrides,
+  };
+}
+
+/** A booking row as `findOccupying` returns it. */
+export function occupyingRow(
+  start: Date,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    id: 'other',
+    slot_id: 'slot-0',
+    resource_id: RESOURCE_ID,
+    start_at: start,
+    end_at: new Date(start.getTime() + 1_800_000),
+    modality_code: 'ECO',
+    study_code: 'STUDY-ECO-ABD',
+    equipment_id: null as string | null,
     ...overrides,
   };
 }
@@ -91,6 +135,25 @@ export function build() {
     insertTemplate: mockFn(async () => undefined),
     findEquipment: mockFn(async () => []),
   };
+  const devicesRepo = {
+    findResources: mockFn(async () => []),
+    findTemplateRules: mockFn(async () => []),
+    createResource: mockFn(async () => DEVICE_RESOURCE_ID),
+    retireResource: mockFn(async () => undefined),
+    hasBookings: mockFn(async () => false),
+    findMainSiteId: mockFn(async () => ({
+      id: 'site-1',
+      imaging_available: true,
+    })),
+    deleteEquipment: mockFn(async () => undefined),
+  };
+  const equipmentRepo = {
+    findBySerial: mockFn(async () => null),
+    create: jest.fn((_em: unknown, data: unknown) => ({
+      id: 'eq-new',
+      ...(data as object),
+    })),
+  };
   const studiesRepo = {
     findForUnit: mockFn(async () => [studyRow()]),
     findPublishedByConcept: mockFn(async () => [studyRow()]),
@@ -101,8 +164,9 @@ export function build() {
     lockResource: mockFn(async () => undefined),
     takeSlot: mockFn(async () => 'slot-1'),
     insertBooking: mockFn(async () => 'booking-1'),
+    moveToDevice: mockFn(async () => undefined),
     cancel: mockFn(async () => undefined),
-    listForResource: mockFn(async () => []),
+    listForResources: mockFn(async () => []),
   };
   const patients = {
     ownPatientProfileId: mockFn(async () => PATIENT),
@@ -125,18 +189,34 @@ export function build() {
   const context = new CenterContextService(
     scheduleRepo as never,
     studiesRepo as never,
+    devicesRepo as never,
   );
   const availability = new CenterAvailabilityService(bookingsRepo as never);
+  const devices = new DeviceBookingsService(
+    bookingsRepo as never,
+    devicesRepo as never,
+  );
   const access = new OrderBookingAccessService(patients as never);
   const reader = new GetCenterScheduleUseCase(
     em as never,
     scheduleRepo as never,
+    devices,
+    context,
+  );
+  const updater = new UpdateEquipmentUseCase(
+    em as never,
+    f5a as never,
+    equipmentRepo as never,
     bookingsRepo as never,
     context,
+    devices,
+    reader,
   );
   return {
     em,
     scheduleRepo,
+    devicesRepo,
+    equipmentRepo,
     studiesRepo,
     bookingsRepo,
     patients,
@@ -147,12 +227,32 @@ export function build() {
       scheduleRepo as never,
       bookingsRepo as never,
       context,
+      devices,
       reader,
     ),
-    equipment: new SetEquipmentStatusUseCase(
+    equipment: updater,
+    adder: new AddEquipmentUseCase(
       em as never,
-      f5a as never,
+      equipmentRepo as never,
+      devicesRepo as never,
+      bookingsRepo as never,
       context,
+      devices,
+      reader,
+    ),
+    remover: new RemoveEquipmentUseCase(
+      em as never,
+      devicesRepo as never,
+      context,
+      updater,
+      reader,
+    ),
+    deviceSchedule: new SaveDeviceScheduleUseCase(
+      em as never,
+      scheduleRepo as never,
+      bookingsRepo as never,
+      context,
+      devices,
       reader,
     ),
     availability: new GetStudyAvailabilityUseCase(
@@ -178,6 +278,7 @@ export function build() {
       bookingsRepo as never,
       context,
       availability,
+      devices,
     ),
     canceller: new CancelOrderBookingUseCase(
       em as never,
@@ -187,8 +288,8 @@ export function build() {
     ),
     bookings: new ListCenterBookingsUseCase(
       em as never,
-      scheduleRepo as never,
       bookingsRepo as never,
+      context,
       reader,
     ),
   };

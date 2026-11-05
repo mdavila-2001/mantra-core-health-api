@@ -36,6 +36,62 @@ export function resolveBlock(
   return { block: schedule.general, origin: 'GENERAL' };
 }
 
+/**
+ * The block a study gets on ONE device: a study exception still wins (it is a
+ * rule of the study, not of the machine); then the device's own schedule;
+ * then the levels of {@link resolveBlock}. A device is a production line:
+ * its hours are its own, and the center's general schedule is only the
+ * default it inherits.
+ */
+export function resolveBlockFor(
+  schedule: CenterSchedule,
+  device: { readonly schedule: ScheduleBlock | null },
+  studyCode: string | null,
+  modalityCode: ModalityCode | null,
+): ResolvedBlock {
+  const own = schedule.studies.find((s) => s.studyCode === studyCode);
+  if (own) return { block: own.schedule, origin: 'STUDY' };
+  if (device.schedule) return { block: device.schedule, origin: 'EQUIPMENT' };
+  return resolveBlock(schedule, null, modalityCode);
+}
+
+/** The devices of a modality, operational or not. */
+export function devicesOf<T extends CenterEquipment>(
+  equipment: readonly T[],
+  modalityCode: ModalityCode,
+): T[] {
+  return equipment.filter((e) => e.modalityCode === modalityCode);
+}
+
+/** What prevents publishing one block; empty when it is complete. */
+export function validateBlock(
+  field: string,
+  block: ScheduleBlock,
+): ScheduleProblem[] {
+  const problems: ScheduleProblem[] = [];
+  if (block.windows.length === 0) {
+    problems.push({ field, problem: 'Marque al menos un día de atención.' });
+  }
+  for (const w of block.windows) {
+    const from = minutesOf(w.startTime);
+    const to = minutesOf(w.endTime);
+    if (from === null || to === null) {
+      problems.push({ field, problem: 'Complete la hora de inicio y de fin.' });
+    } else if (to <= from) {
+      problems.push({
+        field,
+        problem: 'La hora de fin tiene que ser posterior a la de inicio.',
+      });
+    } else if (to - from < block.slotMinutes) {
+      problems.push({
+        field,
+        problem: `No entra ni una cita de ${block.slotMinutes} min.`,
+      });
+    }
+  }
+  return problems;
+}
+
 /** `HH:MM` → minutes since midnight, or `null` when it is not a valid time. */
 export function minutesOf(time: string): number | null {
   const match = /^(\d{2}):(\d{2})(?::\d{2})?$/.exec(time);
@@ -53,36 +109,13 @@ export interface ScheduleProblem {
 
 /** What prevents publishing a schedule; empty when it is complete. */
 export function validateSchedule(schedule: CenterSchedule): ScheduleProblem[] {
-  const problems: ScheduleProblem[] = [];
-  const check = (field: string, block: ScheduleBlock): void => {
-    if (block.windows.length === 0) {
-      problems.push({ field, problem: 'Marque al menos un día de atención.' });
-    }
-    for (const w of block.windows) {
-      const from = minutesOf(w.startTime);
-      const to = minutesOf(w.endTime);
-      if (from === null || to === null) {
-        problems.push({
-          field,
-          problem: 'Complete la hora de inicio y de fin.',
-        });
-      } else if (to <= from) {
-        problems.push({
-          field,
-          problem: 'La hora de fin tiene que ser posterior a la de inicio.',
-        });
-      } else if (to - from < block.slotMinutes) {
-        problems.push({
-          field,
-          problem: `No entra ni una cita de ${block.slotMinutes} min.`,
-        });
-      }
-    }
-  };
-  check('general', schedule.general);
-  for (const m of schedule.modalities) check(m.modalityCode, m.schedule);
-  for (const s of schedule.studies) check(s.studyCode, s.schedule);
-  return problems;
+  return [
+    ...validateBlock('general', schedule.general),
+    ...schedule.modalities.flatMap((m) =>
+      validateBlock(m.modalityCode, m.schedule),
+    ),
+    ...schedule.studies.flatMap((s) => validateBlock(s.studyCode, s.schedule)),
+  ];
 }
 
 export interface SlotInstant {

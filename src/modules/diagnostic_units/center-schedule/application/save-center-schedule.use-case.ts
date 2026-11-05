@@ -11,21 +11,33 @@ import {
   type CenterSchedule,
   type ScheduleBlock,
 } from '../domain/center-schedule.model';
-import { templateName, validateSchedule } from '../domain/schedule-rules';
+import {
+  devicesOf,
+  templateName,
+  validateSchedule,
+} from '../domain/schedule-rules';
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
 import { CenterScheduleRepository } from '../infrastructure/center-schedule.repository';
 import type { SaveCenterScheduleDto } from '../presentation/dto/center-schedule.dto';
 import type { CenterScheduleViewDto } from '../presentation/dto/center-schedule-view.dto';
-import { CenterContextService, toOccupying } from './center-context.service';
+import {
+  CenterContextService,
+  type CenterContext,
+} from './center-context.service';
+import { DeviceBookingsService } from './device-bookings.service';
 import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 
-const FUTURE_WINDOW_MS = 366 * 86_400_000;
-
 /**
- * `PUT /diagnostic-units/:unitId/schedule`: publishes the whole schedule.
- * The previous templates are retired, not deleted. 409 when a booked future
- * appointment would fall outside the new schedule: the server never cancels
- * a patient's appointment on its own.
+ * `PUT /diagnostic-units/:unitId/schedule`: publishes the center's general
+ * schedule and its study exceptions. The previous templates are retired, not
+ * deleted. 409 when a booked future appointment would fall outside the new
+ * schedule: the server never cancels a patient's appointment on its own.
+ *
+ * A modality schedule is a default for devices that do not exist yet. While
+ * the modality has no device it is published as before, so a center that has
+ * not inventoried its equipment keeps it. Once the modality has devices, it
+ * becomes the own schedule of every device of that modality that has none,
+ * and the modality level disappears for that modality.
  */
 @Injectable()
 export class SaveCenterScheduleUseCase {
@@ -34,6 +46,7 @@ export class SaveCenterScheduleUseCase {
     private readonly scheduleRepo: CenterScheduleRepository,
     private readonly bookingsRepo: CenterBookingsRepository,
     private readonly context: CenterContextService,
+    private readonly devices: DeviceBookingsService,
     private readonly reader: GetCenterScheduleUseCase,
   ) {}
 
@@ -44,14 +57,25 @@ export class SaveCenterScheduleUseCase {
   ): Promise<CenterScheduleViewDto> {
     return this.em.transactional(async (tx) => {
       const unit = await this.reader.staffUnit(tx, unitId);
-      const ctx = await this.context.load(tx, unit);
+      const loaded = await this.context.load(tx, unit);
       // Like the frontend rules: a block for a study the center no longer
-      // offers, or a repeated modality, is dropped instead of failing.
-      const offered = new Map(ctx.studyRows.map((s) => [s.study_code, s]));
+      // offers, or a repeated level, is dropped instead of failing.
+      const offered = new Map(loaded.studyRows.map((s) => [s.study_code, s]));
+      const legacyModalities = [
+        ...loaded.schedule.modalities,
+        ...dto.modalities,
+      ].filter(
+        (m, i, all) =>
+          all.findIndex((x) => x.modalityCode === m.modalityCode) === i,
+      );
+      const withoutDevices = (m: {
+        modalityCode: CenterSchedule['modalities'][number]['modalityCode'];
+      }) => devicesOf(loaded.equipment, m.modalityCode).length === 0;
       const schedule: CenterSchedule = {
         general: dto.general,
         modalities: dto.modalities.filter(
           (m, i) =>
+            withoutDevices(m) &&
             dto.modalities.findIndex(
               (x) => x.modalityCode === m.modalityCode,
             ) === i,
@@ -62,7 +86,10 @@ export class SaveCenterScheduleUseCase {
             dto.studies.findIndex((x) => x.studyCode === s.studyCode) === i,
         ),
       };
-      const problems = validateSchedule(schedule);
+      const problems = validateSchedule({
+        ...schedule,
+        modalities: legacyModalities,
+      });
       if (problems.length > 0) {
         throw new PreconditionFailedException(
           'El horario tiene datos incompletos.',
@@ -71,21 +98,32 @@ export class SaveCenterScheduleUseCase {
       }
 
       const resourceId =
-        ctx.resourceId ??
-        (await this.scheduleRepo.createResource(tx, unit, ctx.zone, actor.id));
-      await this.bookingsRepo.lockResource(tx, resourceId);
-      const now = new Date();
-      const future = (
-        await this.bookingsRepo.findOccupying(
+        loaded.resourceId ??
+        (await this.scheduleRepo.createResource(
           tx,
-          resourceId,
-          now,
-          new Date(now.getTime() + FUTURE_WINDOW_MS),
-        )
-      )
-        .map(toOccupying)
-        .filter((b) => b.startAt.getTime() > now.getTime());
-      const affected = bookingsOutsideSchedule(schedule, future, ctx.zone);
+          unit,
+          loaded.zone,
+          actor.id,
+        ));
+      await this.bookingsRepo.lockResource(tx, resourceId);
+      const ctx = await this.devices.adoptLegacy(
+        tx,
+        { ...loaded, resourceId },
+        actor.id,
+      );
+      const migrated = await this.migrateModalities(
+        tx,
+        ctx,
+        legacyModalities.filter((m) => !withoutDevices(m)),
+        actor.id,
+      );
+      const future = await this.devices.future(tx, migrated);
+      const affected = bookingsOutsideSchedule(
+        schedule,
+        future,
+        migrated.equipment,
+        migrated.zone,
+      );
       if (affected > 0) {
         throw new ConflictException(
           affected === 1
@@ -129,5 +167,40 @@ export class SaveCenterScheduleUseCase {
       }
       return this.reader.view(tx, await this.context.load(tx, unit));
     });
+  }
+
+  /** A modality's old own schedule becomes the own schedule of its devices without one. */
+  private async migrateModalities(
+    tx: EntityManager,
+    ctx: CenterContext,
+    modalities: CenterSchedule['modalities'],
+    actorId: string,
+  ): Promise<CenterContext> {
+    const equipment = [...ctx.equipment];
+    for (const m of modalities) {
+      for (const device of devicesOf(equipment, m.modalityCode)) {
+        if (device.schedule !== null) continue;
+        const index = equipment.findIndex((e) => e.id === device.id);
+        const resourceId = await this.devices.resourceOf(
+          tx,
+          ctx,
+          device,
+          actorId,
+        );
+        await this.scheduleRepo.insertTemplate(
+          tx,
+          {
+            resourceId,
+            name: templateName({ level: 'GENERAL' }),
+            serviceConceptId: null,
+            slotMinutes: m.schedule.slotMinutes,
+            windows: m.schedule.windows,
+          },
+          actorId,
+        );
+        equipment[index] = { ...device, resourceId, schedule: m.schedule };
+      }
+    }
+    return { ...ctx, equipment };
   }
 }

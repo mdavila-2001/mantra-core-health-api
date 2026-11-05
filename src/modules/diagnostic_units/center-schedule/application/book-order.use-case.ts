@@ -26,6 +26,7 @@ import {
   studyModality,
   toStudy,
 } from './center-context.service';
+import { DeviceBookingsService } from './device-bookings.service';
 import { OrderBookingAccessService } from './order-booking-access.service';
 import { canWork } from './get-booking-options.use-case';
 import { inPatientCustodyContext } from './patient-custody-context';
@@ -34,7 +35,9 @@ import { inPatientCustodyContext } from './patient-custody-context';
  * `POST /diagnostic-results/me/orders/:orderId/booking`: books the start and
  * leaves it confirmed. The free start is recomputed under the center's lock:
  * 409 `slotTaken` when it filled up meanwhile, 409 when the order already has
- * an appointment.
+ * an appointment. With devices registered, the booking lands on the first
+ * device free at that start (its production line) and freezes it in the
+ * snapshot; without any, on the center's resource as before.
  */
 @Injectable()
 export class BookOrderUseCase {
@@ -46,6 +49,7 @@ export class BookOrderUseCase {
     private readonly bookingsRepo: CenterBookingsRepository,
     private readonly context: CenterContextService,
     private readonly availability: CenterAvailabilityService,
+    private readonly devices: DeviceBookingsService,
   ) {}
 
   execute(
@@ -93,11 +97,15 @@ export class BookOrderUseCase {
           loaded.zone,
           actor.id,
         ));
-      const ctx = { ...loaded, resourceId };
       await this.bookingsRepo.lockResource(tx, resourceId);
+      const ctx = await this.devices.adoptLegacy(
+        tx,
+        { ...loaded, resourceId },
+        actor.id,
+      );
 
       const start = new Date(dto.startAt);
-      const { items } = await this.availability.startsFor(
+      const availability = await this.availability.startsFor(
         tx,
         ctx,
         offering.study_code,
@@ -105,13 +113,23 @@ export class BookOrderUseCase {
         start,
         start,
       );
-      const free = items.find((i) => i.startAt === start.toISOString());
+      const free = availability.items.find(
+        (i) => i.startAt === start.toISOString(),
+      );
       if (!free) {
         throw new ConflictException(
           'Ese horario se acaba de ocupar. Elija otro.',
           { slotTaken: true },
         );
       }
+      const device = this.availability.deviceFor(
+        ctx,
+        availability,
+        free.startAt,
+      );
+      const bookedOn = device
+        ? await this.devices.resourceOf(tx, ctx, device, actor.id)
+        : resourceId;
       const end = new Date(free.endAt);
       const study = toStudy(offering, modality);
       const snapshot: OrderBookingSnapshot = {
@@ -127,10 +145,13 @@ export class BookOrderUseCase {
         price: study.price,
         currency: study.currency,
         preparation: study.preparation,
+        ...(device
+          ? { equipmentId: device.id, equipmentName: device.name }
+          : {}),
       };
       const slotId = await this.bookingsRepo.takeSlot(
         tx,
-        resourceId,
+        bookedOn,
         start,
         end,
         actor.id,
@@ -141,7 +162,7 @@ export class BookOrderUseCase {
           tenantId: unit.tenant_id,
           patientProfileId,
           slotId,
-          resourceId,
+          resourceId: bookedOn,
           snapshot,
         },
         actor.id,

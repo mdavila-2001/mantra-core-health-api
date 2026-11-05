@@ -9,7 +9,7 @@
 # Módulo `diagnostic_units`
 
 **Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/diagnostic_units/README.md)
-· 5 controllers · 9 services · 12 repositories · 10 entidades · 13 DTO
+· 9 controllers · 19 services · 17 repositories · 15 entidades · 25 DTO
 
 ---
 
@@ -91,7 +91,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 `diagnostic_study_offerings`, `diagnostic_study_components`,
 `diagnostic_price_schedules`, `diagnostic_study_prices`, `diagnostic_equipment`.
 
-## Reglas de negocio
+## Business rules
 
 - **Unicidad**: el modelo declara para la unidad **dos restricciones separadas** —
   `tenant_id` a solas (una unidad de diagnóstico por organización) y `code` a solas
@@ -115,7 +115,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
   mismo rol/sitio (`409`).
 - **Ofertas/estudios/precios/cronogramas** requieren unidad ACTIVA (`422`).
 
-## Permisos
+## Permissions
 
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
@@ -128,6 +128,39 @@ cronograma o precio de otro tenant responde igual que uno inexistente (`404`, `r
 tenant del contexto; un `tenantId` del cuerpo solo se acepta si coincide. Los
 `practiceSiteId`, `practiceId` y `practitionerRoleAssignmentId` que declara el cuerpo
 pertenecen a `practice` y no se contrastan con el tenant desde este módulo.
+
+## Horarios y equipos del centro (`center-schedule/`)
+
+El personal del centro (`LabStaffGuard`: membresía del tenant activo) administra
+su agenda y su parque de equipos bajo `/diagnostic-units`. Una unidad de otro
+tenant responde `404` como una inexistente.
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `GET /diagnostic-units/me/schedule` | Horario, estudios y equipos del centro de la organización activa |
+| `GET /diagnostic-units/me/equipment-types` | Catálogo de tipos de equipo: uno por modalidad, puesto de extracción y analizador |
+| `GET /diagnostic-units/me/bookings?from&to` | Turnos del centro y de cada equipo, con el equipo que atiende |
+| `PUT /diagnostic-units/:unitId/schedule` | Horario general, excepciones por estudio y horario de modalidades sin equipos |
+| `POST /diagnostic-units/:unitId/equipment` | Alta de un equipo desde el catálogo, en la sede principal, operativo |
+| `PATCH /diagnostic-units/:unitId/equipment/:equipmentId` | Estado, marca, modelo y número de serie |
+| `DELETE /diagnostic-units/:unitId/equipment/:equipmentId` | Baja de un equipo sin turnos; uno con historia responde `409` |
+| `PUT /diagnostic-units/:unitId/equipment/:equipmentId/schedule` | Horario propio del equipo; `null` vuelve al general |
+
+Cada equipo que da turnos es una línea de producción: tiene su recurso
+agendable `RES_EQUIPMENT` (`diagnostic_equipment.schedulable_resource_id`), que
+se crea la primera vez que hace falta. Su horario se resuelve así: excepción del
+estudio → horario propio del equipo → horario de la modalidad → general. Los
+turnos libres de un estudio son la unión de los de cada equipo operativo de su
+modalidad, menos lo que ya tiene reservado ese equipo, y la reserva cae en el
+primer equipo libre y lo guarda en `service_snapshot.equipmentId`.
+
+Un centro sin equipos cargados para una modalidad reserva como antes, sobre el
+recurso de la unidad y con la capacidad declarada. Los turnos tomados sobre ese
+recurso se mudan a un equipo operativo que los pueda atender en cada escritura
+del centro; los que ningún equipo puede tomar se informan en
+`bookingsWithoutEquipment` y nunca se cancelan solos. El horario de una
+modalidad pasa a ser el horario propio de sus equipos en cuanto la modalidad
+tiene alguno.
 
 ## Conceptos
 

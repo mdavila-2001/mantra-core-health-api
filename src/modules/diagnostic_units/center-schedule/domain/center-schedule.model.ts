@@ -26,7 +26,12 @@ export const EQUIPMENT_STATUSES = [
 ] as const;
 export type EquipmentStatus = (typeof EQUIPMENT_STATUSES)[number];
 
-export type ScheduleOrigin = 'STUDY' | 'MODALITY' | 'GENERAL';
+/**
+ * Which level gave a study its schedule. `EQUIPMENT` is a device's own
+ * schedule; `MODALITY` only survives for schedules published before devices
+ * had their own (they migrate on the next publish).
+ */
+export type ScheduleOrigin = 'STUDY' | 'EQUIPMENT' | 'MODALITY' | 'GENERAL';
 export type CenterKind = 'LABORATORY' | 'IMAGING';
 
 export interface ScheduleWindow {
@@ -55,11 +60,22 @@ export interface CenterSchedule {
 export interface CenterEquipment {
   readonly id: string;
   readonly name: string;
+  /** Catalog type; `null` for a device registered with a concept outside it. */
+  readonly typeCode: string | null;
   readonly manufacturer: string | null;
   readonly model: string | null;
+  readonly serialNumber: string | null;
   readonly modalityCode: ModalityCode | null;
   readonly status: EquipmentStatus;
+  /** The device's own schedule; `null` while it follows the center's general one. */
+  readonly schedule: ScheduleBlock | null;
   readonly glossaryConceptId: string | null;
+}
+
+/** A device as the server works with it: the equipment plus its scheduling resource. */
+export interface CenterDevice extends CenterEquipment {
+  /** `null` until the device gets its own schedule or its first booking. */
+  readonly resourceId: string | null;
 }
 
 export interface CenterStudy {
