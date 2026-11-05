@@ -46,9 +46,9 @@ export class PractitionerAdmissionSubmitService {
    * Opens the admission of the session's practitioner (PRACT_VERIF_PENDING).
    *
    * - No professional profile: 404 `ADMISSION_NOT_FOUND`, same as `own()`.
-   * - No attestation: 412 `ADMISSION_ATTESTATION_REQUIRED`.
+   * - No attestation: 422 `ADMISSION_ATTESTATION_REQUIRED`.
    * - An admission already exists: 409 `ADMISSION_ALREADY_EXISTS` (use resubmit).
-   * - Profile not pending: 412 `ADMISSION_NOT_PENDING`.
+   * - Profile not pending: 422 `ADMISSION_NOT_PENDING`.
    */
   async submitOwn(
     actor: AuthenticatedUser,

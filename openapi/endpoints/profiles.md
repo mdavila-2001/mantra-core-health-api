@@ -13360,7 +13360,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS (se reenvía con `resubmit`). Si el perfil no está pendiente: 412 ADMISSION_NOT_PENDING. Sin perfil profesional: 404 ADMISSION_NOT_FOUND.
+Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 422 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS (se reenvía con `resubmit`). Si el perfil no está pendiente: 422 ADMISSION_NOT_PENDING. Sin perfil profesional: 404 ADMISSION_NOT_FOUND.
 
 
 ### Descripción del sistema
