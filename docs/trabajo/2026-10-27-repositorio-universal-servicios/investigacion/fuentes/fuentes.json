@@ -1,0 +1,658 @@
+[
+  {
+    "clave": "cie10es-pcs-2026",
+    "nombre": "CIE-10-ES Procedimientos 2026 (tabla de referencia + tabla de conversión)",
+    "organismo": "Ministerio de Sanidad",
+    "pais": "ES",
+    "version": "6.ª edición 2026, v1.0 (2026-06-02)",
+    "urlOficial": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/home.htm",
+    "alcanzable": true,
+    "licencia": "Reutilización autorizada (comercial y no comercial) citando fuente y fecha, sin desnaturalizar: https://www.sanidad.gob.es/avisoLegal/home.htm. Obra original ICD-10-PCS © CMS según hoja Introducción.",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 78948,
+    "ejeEspecialidad": "no (sistema corporal/operación/abordaje)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/cie10es-pcs-2026/03_Tabla_Convers_Proced_CIE10ES_2026.xlsx",
+      "/home/user/servicios-build/sources/cie10es-pcs-2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx"
+    ],
+    "sha256": {
+      "03_Tabla_Convers_Proced_CIE10ES_2026.xlsx": "932dd172d3e40b15026b79b6ed51ac0597de679be03673cd4d94ec400d54a64d",
+      "Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3"
+    },
+    "notas": "Columna vertebral de referencia; nombres técnicos. Importador existente import-cie10es.mjs.",
+    "descargado": true
+  },
+  {
+    "clave": "co-cups-2026-res2706",
+    "nombre": "CUPS — Resolución 2706 de 2025 (Anexos técnicos 1-7)",
+    "organismo": "Ministerio de Salud y Protección Social",
+    "pais": "CO",
+    "version": "Res. 2706 del 23-12-2025, vigente desde 2026-01-01",
+    "urlOficial": "https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/DE/DIJ/resolucion-2706-de-2025.pdf",
+    "alcanzable": true,
+    "licencia": "Acto administrativo (texto normativo). Ley 23/1982 art. 41 citado en SOURCES.md: NO re-verificado hoy (secretariasenado.gov.co no conecta).",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": 9459,
+    "ejeEspecialidad": "capítulos 01-99 + prestador en el descriptor; 23-24 dientes (134)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/co-cups-2026-res2706/resolucion-2706-de-2025.pdf"
+    ],
+    "sha256": {
+      "resolucion-2706-de-2025.pdf": "a9c198bb58b85ba14711acebbc91f5f041d3f67f235e0eb9aae2463f449bbece"
+    },
+    "notas": "Anexo 2: 9459 subcategorías; anexos 3-7 ~600 códigos (aprox.). PDF con texto extraíble (395 págs). Reemplaza copias GitHub.",
+    "descargado": true
+  },
+  {
+    "clave": "co-minsalud-pbs-procedimientos",
+    "nombre": "Procedimiento del PBS (datos abiertos 9zcz-bjue)",
+    "organismo": "Ministerio de Salud y Protección Social",
+    "pais": "CO",
+    "version": "filas actualizadas 2023-07-27",
+    "urlOficial": "https://www.datos.gov.co/d/9zcz-bjue",
+    "alcanzable": true,
+    "licencia": "CC BY-SA 4.0 (metadatos API https://www.datos.gov.co/api/views/9zcz-bjue.json)",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 8114,
+    "ejeEspecialidad": "zona anatómica",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/co-minsalud-pbs-procedimientos/procedimiento_pbs_9zcz-bjue.csv"
+    ],
+    "sha256": {
+      "procedimiento_pbs_9zcz-bjue.csv": "4a8ed7ff9c225a96427d884b4c683472e4c765cacc93a83f22229ebb80140636"
+    },
+    "notas": "8109 con campo QueEs (explicación en lenguaje llano). 7492 códigos presentes en CUPS 2026.",
+    "descargado": true
+  },
+  {
+    "clave": "es-mu-sms-precios-publicos-2026",
+    "nombre": "Orden de 17-06-2026, precios públicos del Servicio Murciano de Salud",
+    "organismo": "Consejería de Salud, Región de Murcia",
+    "pais": "ES",
+    "version": "BORM n.º 140, 20-06-2026",
+    "urlOficial": "https://www.borm.es/services/anuncio/ano/2026/numero/2968/pdf?id=843650",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 3559,
+    "ejeEspecialidad": "sí: secciones E.2 laboratorio, E.3 radiología (catálogo normalizado), E.4 pruebas funcionales por servicio, E.5 salud mental",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-mu-sms-precios-publicos-2026/BORM-2026-2968-orden-precios-publicos-SMS.pdf"
+    ],
+    "sha256": {
+      "BORM-2026-2968-orden-precios-publicos-SMS.pdf": "1520c7f692c8ae566aead7e9816302e21c89fd5eaacee1fea1c12c988277b560"
+    },
+    "notas": "Conteo aprox. de líneas con importe; ~1300 son GRD (no importables). Existe corrección de errores (no descargada).",
+    "descargado": true
+  },
+  {
+    "clave": "es-pv-osakidetza-tarifas-2026",
+    "nombre": "Libro de Tarifas 2026 de Osakidetza + acuerdo BOPV",
+    "organismo": "Osakidetza-Servicio Vasco de Salud",
+    "pais": "ES",
+    "version": "2026 (acuerdo 16-12-2025, BOPV n.º 9 15-01-2026)",
+    "urlOficial": "https://www.euskadi.eus/contenidos/informacion/osk_servic_para_empresas/es_def/adjuntos/LIBRO-DE-TARIFAS-2026_es.pdf",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13 (acuerdo del Consejo de Administración). Aviso legal de euskadi.eus no legible (404).",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 4534,
+    "ejeEspecialidad": "sí: anexos laboratorio, rayos, rehabilitación, hospital de día, hemoterapia",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-pv-osakidetza-tarifas-2026/2600150a.pdf",
+      "/home/user/servicios-build/sources/es-pv-osakidetza-tarifas-2026/LIBRO-DE-TARIFAS-2026_es.pdf"
+    ],
+    "sha256": {
+      "2600150a.pdf": "0e990d8fa02a464079cc923071d34f2f51cd0a30f033540ecb10638b0c79c417",
+      "LIBRO-DE-TARIFAS-2026_es.pdf": "ac4a15f9f12a4191757577a7cfa008a2437cad7b9de59cc7ebb2d230b9a6c878"
+    },
+    "notas": "4534 códigos de artículo únicos; ~1084 filas GRD.",
+    "descargado": true
+  },
+  {
+    "clave": "es-an-sas-precios-publicos-2024",
+    "nombre": "Orden de 24-05-2024, precios públicos del SSPA",
+    "organismo": "Consejería de Salud y Consumo, Junta de Andalucía",
+    "pais": "ES",
+    "version": "BOJA n.º 108, 05-06-2024",
+    "urlOficial": "https://cdn.juntadeandalucia.es/boja/2024/108/BOJA24-108-00163-45904-01_00302853.pdf",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 4872,
+    "ejeEspecialidad": "sí: B3.5 por especialidad; B3.2 imagen; B3.1 anatomía patológica",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-an-sas-precios-publicos-2024/BOJA24-108-00163-45904-01_00302853.pdf"
+    ],
+    "sha256": {
+      "BOJA24-108-00163-45904-01_00302853.pdf": "62c6d7eb7c8f18e75411c5d71d4bc76446aa9149fb9028d02e457146e87cfeb3"
+    },
+    "notas": "1334 GRD (B2.1) excluir.",
+    "descargado": true
+  },
+  {
+    "clave": "es-md-precios-publicos-2023",
+    "nombre": "Orden 1975/2023, precios públicos Comunidad de Madrid",
+    "organismo": "Consejería de Sanidad, Comunidad de Madrid",
+    "pais": "ES",
+    "version": "BOCM n.º 310, 30-12-2023",
+    "urlOficial": "https://www.bocm.es/boletin/CM_Orden_BOCM/2023/12/30/BOCM-20231230-3.PDF",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 2584,
+    "ejeEspecialidad": "parcial; CMA con código CIE-10-ES; pruebas con código catálogo SERMAS",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-md-precios-publicos-2023/BOCM-20231230-3.PDF"
+    ],
+    "sha256": {
+      "BOCM-20231230-3.PDF": "456e77d828e6dd21d481db07772271a6ffc23db396544fda4cdb194283143010"
+    },
+    "notas": "1332 hospitalización GRD, 892 ambulatorio, 56 primaria, 304 hemoterapia/genética. Puente CIE-10-ES↔servicio.",
+    "descargado": true
+  },
+  {
+    "clave": "es-vc-ley20-2017-tasas-sanitarias",
+    "nombre": "Ley 20/2017 de tasas (Título XXIX cap. I asistencia sanitaria), texto consolidado",
+    "organismo": "Generalitat Valenciana (texto consolidado por BOE)",
+    "pais": "ES",
+    "version": "consolidado, última actualización 10-08-2026",
+    "urlOficial": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-1870",
+    "alcanzable": true,
+    "licencia": "Condiciones de reutilización BOE (Res. 27-06-2024): https://www.boe.es/informacion/aviso_legal/index.php; LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 1617,
+    "ejeEspecialidad": "sí, por cuadros del art. 29.1-10 (radiología, procedimientos por área)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-vc-ley20-2017-tasas-sanitarias/BOE-A-2018-1870_consolidado.html",
+      "/home/user/servicios-build/sources/es-vc-ley20-2017-tasas-sanitarias/BOE-A-2018-1870_consolidado_texto.xml"
+    ],
+    "sha256": {
+      "BOE-A-2018-1870_consolidado.html": "e58b4641c26cb68f7f84b6c3d3ad294353ed28c6ffc1dd634d957e69190a22be",
+      "BOE-A-2018-1870_consolidado_texto.xml": "7b84ef0d0594db84cdb67ab65682a9beb11f68f3cc302ba7a062e4029720372f"
+    },
+    "notas": "Conteo aprox. de códigos únicos (incluye versiones históricas en el consolidado). XML vía API datosabiertos BOE.",
+    "descargado": true
+  },
+  {
+    "clave": "es-ct-ics-precios-publicos-2020",
+    "nombre": "Orden SLT/71/2020, precios públicos del Instituto Catalán de la Salud (castellano)",
+    "organismo": "Departament de Salut, Generalitat de Catalunya",
+    "pais": "ES",
+    "version": "DOGC n.º 8153, 12-06-2020",
+    "urlOficial": "https://portaljuridic.gencat.cat/eli/es-ct/o/2020/06/02/slt71",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 4336,
+    "ejeEspecialidad": "sí: gabinetes de atención especializada por especialidad, hemodinámica, endoscopia, ASSIR",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-ct-ics-precios-publicos-2020/DOGC-8153-ORDEN-SLT-71-2020_es.pdf"
+    ],
+    "sha256": {
+      "DOGC-8153-ORDEN-SLT-71-2020_es.pdf": "37b21fd1e9ca475a2b296396720e3a5f40062586f6ba39070a3933a01d954962"
+    },
+    "notas": "~1304 GRD. Vigencia posterior no confirmada.",
+    "descargado": true
+  },
+  {
+    "clave": "es-cn-scs-precios-publicos-2026",
+    "nombre": "Resolución 14-08-2026, actualiza precios públicos del Decreto 81/2009 (SCS)",
+    "organismo": "Servicio Canario de la Salud",
+    "pais": "ES",
+    "version": "BOC n.º 178, 04-09-2026",
+    "urlOficial": "https://www.gobiernodecanarias.org/boc/2026/178/3158.html",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 582,
+    "ejeEspecialidad": "sí, grupos por servicio",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-cn-scs-precios-publicos-2026/boc-a-2026-178-3158.pdf"
+    ],
+    "sha256": {
+      "boc-a-2026-178-3158.pdf": "646543fb0a2a482d55af97276439a2228e89602770e0344bc579c2423450f72e"
+    },
+    "notas": "PDF en sede.gobiernodecanarias.org (conexión inestable).",
+    "descargado": true
+  },
+  {
+    "clave": "es-ingesa-precios-2013",
+    "nombre": "Resolución 19-07-2013, precios INGESA Ceuta y Melilla",
+    "organismo": "Instituto Nacional de Gestión Sanitaria",
+    "pais": "ES",
+    "version": "BOE-A-2013-8240 (modif. BOE-A-2018-1682 no descargada)",
+    "urlOficial": "https://www.boe.es/eli/es/res/2013/07/19/(2)",
+    "alcanzable": true,
+    "licencia": "Condiciones de reutilización BOE (Res. 27-06-2024): https://www.boe.es/informacion/aviso_legal/index.php; LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 876,
+    "ejeEspecialidad": "parcial",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-ingesa-precios-2013/BOE-A-2013-8240.pdf"
+    ],
+    "sha256": {
+      "BOE-A-2013-8240.pdf": "a047f14834be26ef72e2245d31807902edfbda8dc2ee8a66eed129fe3e2e3a7d"
+    },
+    "notas": "Conteo aprox.",
+    "descargado": true
+  },
+  {
+    "clave": "es-ga-sergas-tarifas-2014",
+    "nombre": "Decreto 56/2014, tarifas SERGAS (castellano)",
+    "organismo": "Consellería de Sanidade, Xunta de Galicia",
+    "pais": "ES",
+    "version": "DOG n.º 96, 21-05-2014",
+    "urlOficial": "https://www.xunta.gal/dog/Publicados/2014/20140521/AnuncioC3K1-140514-0001_es.html",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 540,
+    "ejeEspecialidad": "parcial",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-ga-sergas-tarifas-2014/AnuncioC3K1-140514-0001_es.pdf"
+    ],
+    "sha256": {
+      "AnuncioC3K1-140514-0001_es.pdf": "3aec94fe6416bbb6baa2876f70fb79e8faf658e04946b8e835bbfb63aaf3b4e0"
+    },
+    "notas": "Conteo aprox. Vigencia no confirmada.",
+    "descargado": true
+  },
+  {
+    "clave": "es-sns-cartera-servicios-rd1030-2006",
+    "nombre": "RD 1030/2006 Cartera de servicios comunes del SNS (consolidado)",
+    "organismo": "Ministerio de Sanidad / BOE",
+    "pais": "ES",
+    "version": "consolidado 31-07-2026",
+    "urlOficial": "https://www.boe.es/buscar/act.php?id=BOE-A-2006-16212",
+    "alcanzable": true,
+    "licencia": "Condiciones de reutilización BOE (Res. 27-06-2024): https://www.boe.es/informacion/aviso_legal/index.php; LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "por área asistencial (incl. salud bucodental)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-sns-cartera-servicios-rd1030-2006/BOE-A-2006-16212_consolidado.html"
+    ],
+    "sha256": {
+      "BOE-A-2006-16212_consolidado.html": "a284386d8a46d2762ea74a7e40d2356cda8aeded320cadfe2ea625caedc7ae87"
+    },
+    "notas": "Prosa sin códigos: esqueleto de áreas.",
+    "descargado": true
+  },
+  {
+    "clave": "es-isfas-prestaciones-dentarias-2026",
+    "nombre": "Solicitud de prestaciones dentarias 2026",
+    "organismo": "ISFAS (Ministerio de Defensa)",
+    "pais": "ES",
+    "version": "2026",
+    "urlOficial": "https://www.defensa.gob.es/isfas/Galerias/ficheros/Formularios/complementarias/Prestaciones_dentarias_facposene2026_.pdf",
+    "alcanzable": true,
+    "licencia": "Formulario administrativo sin licencia explícita",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": 11,
+    "ejeEspecialidad": "odontología",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/es-isfas-prestaciones-dentarias-2026/Prestaciones_dentarias_facposene2026_.pdf"
+    ],
+    "sha256": {
+      "Prestaciones_dentarias_facposene2026_.pdf": "1fa9440c3e2087701651b0e1e20113728b63c69c80f6f3379f60e01dfd5bd138"
+    },
+    "notas": "Sólo vocabulario.",
+    "descargado": true
+  },
+  {
+    "clave": "ar-pami-nomenclador-comun",
+    "nombre": "Nomenclador de prácticas médicas PAMI — Nomenclador Común",
+    "organismo": "INSSJP-PAMI",
+    "pais": "AR",
+    "version": "Estructura unidades febrero 2019 (dataset 2022-08-03)",
+    "urlOficial": "https://datos.pami.org.ar/dataset/nomenclador",
+    "alcanzable": true,
+    "licencia": "CC BY 4.0 (API CKAN datos.pami.org.ar, license_id CC-BY-4.0)",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": 4739,
+    "ejeEspecialidad": "módulo + capítulo del código (Nomenclador Nacional)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/ar-pami-nomenclador-comun/nomenclador-comun.csv",
+      "/home/user/servicios-build/sources/ar-pami-nomenclador-comun/resol-2019-432-inssjp-de-inssjp.pdf"
+    ],
+    "sha256": {
+      "nomenclador-comun.csv": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4",
+      "resol-2019-432-inssjp-de-inssjp.pdf": "e4c296eb3600b8be64c5eaeb897e43514ad8de17ad236b19d4fdcfb49cfbba07"
+    },
+    "notas": "CSV Latin-1; también PDF Res. 432/2019. datos.gob.ar da 502.",
+    "descargado": true
+  },
+  {
+    "clave": "cl-fonasa-mle-2026-npm",
+    "nombre": "Arancel FONASA MLE 2026 (copia npm @mariohealthbits/fonasa-mle-open@1.0.0)",
+    "organismo": "FONASA (transporte de terceros)",
+    "pais": "CL",
+    "version": "2026 (Res. Exenta 347 del 03-03-2026)",
+    "urlOficial": "https://www.fonasa.gob.cl/wp-content/uploads/sites/3/2026/03/1-Libro-Arancel-MLE-2026.pdf",
+    "alcanzable": false,
+    "licencia": "Paquete MIT; documento oficial sin licencia explícita verificable (fonasa.gob.cl 403)",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": 2515,
+    "ejeEspecialidad": "grupos 01-33 (sin grupo 27 en la copia)",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/cl-fonasa-mle-2026-npm/fonasa-mle-open-1.0.0.tgz"
+    ],
+    "sha256": {
+      "fonasa-mle-open-1.0.0.tgz": "b622019be7a3a1e3eb560c01415d991947ac21561ed074187f2b9ee687e9e05c"
+    },
+    "notas": "alcanzable=false se refiere al oficial; la copia npm sí se bajó. SHA del tgz coincide con SOURCES.md.",
+    "descargado": true
+  },
+  {
+    "clave": "icd10pcs-2027",
+    "nombre": "ICD-10-PCS FY2027 codes file",
+    "organismo": "CMS",
+    "pais": "US",
+    "version": "FY2027",
+    "urlOficial": "https://www.cms.gov/medicare/coding-billing/icd-10-codes",
+    "alcanzable": true,
+    "licencia": "Sin declaración explícita encontrada; obra del gobierno federal de EE. UU. (no verificado con cita de CMS)",
+    "licenciaVerificada": false,
+    "idioma": "en",
+    "items": 79256,
+    "ejeEspecialidad": "no",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/icd10pcs-2027/2027-icd-10-pcs-codes-file.zip"
+    ],
+    "sha256": {
+      "2027-icd-10-pcs-codes-file.zip": "8db2465fe7a65f53bf21d840fce825d7d107dbd603b7fcb66358c8321919809d"
+    },
+    "notas": "Sólo cruce con CIE-10-ES.",
+    "descargado": true
+  },
+  {
+    "clave": "hcpcs-2026q4",
+    "nombre": "HCPCS Level II alfanumérico octubre 2026",
+    "organismo": "CMS",
+    "pais": "US",
+    "version": "2026-10",
+    "urlOficial": "https://www.cms.gov/medicare/coding-billing/healthcare-common-procedure-system/quarterly-update",
+    "alcanzable": true,
+    "licencia": "Sin declaración explícita para Level II; recordlayout advierte CPT (AMA) y serie D CDT (ADA): el archivo no contiene códigos D",
+    "licenciaVerificada": false,
+    "idioma": "en",
+    "items": 8770,
+    "ejeEspecialidad": "no",
+    "rutaLocal": [
+      "/home/user/servicios-build/sources/hcpcs-2026q4/october-2026-alpha-numeric-hcpcs-file.zip"
+    ],
+    "sha256": {
+      "october-2026-alpha-numeric-hcpcs-file.zip": "08c2202fa92c1d1fb6f31b808b61c767bc487954f6930b6a0f8d09c89af5992f"
+    },
+    "notas": "Mayormente insumos/DME.",
+    "descargado": true
+  },
+  {
+    "clave": "who-ichi",
+    "nombre": "International Classification of Health Interventions (ICHI)",
+    "organismo": "OMS",
+    "pais": "INT",
+    "version": "Beta-3 (2020) en plataforma dev",
+    "urlOficial": "https://icd.who.int/dev11/l-ichi/en",
+    "alcanzable": true,
+    "licencia": "CC BY-ND 3.0 IGO, prohíbe adaptaciones: https://icd.who.int/en/docs/icd11-license.pdf",
+    "licenciaVerificada": true,
+    "idioma": "en (sin es: /l-ichi/es 404)",
+    "items": null,
+    "ejeEspecialidad": "no",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Descartada: ND, sin castellano, dev, sin descarga masiva.",
+    "descargado": false
+  },
+  {
+    "clave": "snomed-ct",
+    "nombre": "SNOMED CT",
+    "organismo": "SNOMED International",
+    "pais": "INT",
+    "version": "—",
+    "urlOficial": "https://www.snomed.org/get-snomed",
+    "alcanzable": true,
+    "licencia": "Bolivia no es miembro (https://www.snomed.org/members); uso en no miembros requiere licencia de afiliado MLDS con posibles cargos",
+    "licenciaVerificada": true,
+    "idioma": "—",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Excluida (propietaria para BO).",
+    "descargado": false
+  },
+  {
+    "clave": "au-mbs",
+    "nombre": "Medicare Benefits Schedule",
+    "organismo": "Department of Health, Disability and Ageing",
+    "pais": "AU",
+    "version": "2026-11",
+    "urlOficial": "https://www.mbsonline.gov.au/internet/mbsonline/publishing.nsf/Content/downloads",
+    "alcanzable": true,
+    "licencia": "Copyright: sólo uso personal no comercial y sin alterar (https://www.mbsonline.gov.au/internet/mbsonline/publishing.nsf/Content/Copyright)",
+    "licenciaVerificada": true,
+    "idioma": "en",
+    "items": null,
+    "ejeEspecialidad": "grupos",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Descartada por licencia.",
+    "descargado": false
+  },
+  {
+    "clave": "cl-fonasa-mai",
+    "nombre": "Arancel MAI (Res. 32/2021 modif. Res. Ex. 403/2026)",
+    "organismo": "MINSAL/FONASA",
+    "pais": "CL",
+    "version": "2026",
+    "urlOficial": "https://www.diariooficial.interior.gob.cl/publicaciones/2026/03/25/44409/01/2782597.pdf",
+    "alcanzable": false,
+    "licencia": "no verificada",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "403 en fonasa y Diario Oficial.",
+    "descargado": false
+  },
+  {
+    "clave": "br-sigtap",
+    "nombre": "SIGTAP Tabela Unificada",
+    "organismo": "DATASUS",
+    "pais": "BR",
+    "version": "2026-08 (nota técnica)",
+    "urlOficial": "http://sigtap.datasus.gov.br/tabela-unificada/app/sec/inicio.jsp",
+    "alcanzable": false,
+    "licencia": "no verificada",
+    "licenciaVerificada": false,
+    "idioma": "pt",
+    "items": null,
+    "ejeEspecialidad": "sí (CBO)",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Sitio responde; descargas sólo por FTP (no permitido por el proxy).",
+    "descargado": false
+  },
+  {
+    "clave": "fr-ccam",
+    "nombre": "CCAM (copia InterHop en data.gouv.fr)",
+    "organismo": "Assurance Maladie / InterHop",
+    "pais": "FR",
+    "version": "v77 (2025-02)",
+    "urlOficial": "https://www.data.gouv.fr/datasets/ccam-ameli/",
+    "alcanzable": false,
+    "licencia": "Licence Ouverte v2.0 según metadato API (texto no leído)",
+    "licenciaVerificada": false,
+    "idioma": "fr",
+    "items": null,
+    "ejeEspecialidad": "capítulos",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "static.data.gouv.fr cortó la conexión; ameli.fr 403.",
+    "descargado": false
+  },
+  {
+    "clave": "de-ops",
+    "nombre": "OPS 2026",
+    "organismo": "BfArM",
+    "pais": "DE",
+    "version": "2026",
+    "urlOficial": "https://www.bfarm.de/DE/Kodiersysteme/Klassifikationen/OPS-ICHI/OPS/_node.html",
+    "alcanzable": true,
+    "licencia": "no verificada",
+    "licenciaVerificada": false,
+    "idioma": "de",
+    "items": null,
+    "ejeEspecialidad": "no",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "No descargada (idioma).",
+    "descargado": false
+  },
+  {
+    "clave": "uk-opcs4",
+    "nombre": "OPCS-4",
+    "organismo": "NHS England (TRUD)",
+    "pais": "UK",
+    "version": "—",
+    "urlOficial": "https://isd.digital.nhs.uk/trud/users/guest/filters/0/categories/10",
+    "alcanzable": true,
+    "licencia": "no verificada (TRUD requiere cuenta)",
+    "licenciaVerificada": false,
+    "idioma": "en",
+    "items": null,
+    "ejeEspecialidad": "no",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "No descargada.",
+    "descargado": false
+  },
+  {
+    "clave": "pe-cpms",
+    "nombre": "Catálogo de Procedimientos Médicos y Sanitarios",
+    "organismo": "MINSA",
+    "pais": "PE",
+    "version": "—",
+    "urlOficial": "https://www.gob.pe/minsa",
+    "alcanzable": false,
+    "licencia": "Derivado de CPT según registro previo; no re-verificado",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Excluido por riesgo de licencia.",
+    "descargado": false
+  },
+  {
+    "clave": "ec-tarifario",
+    "nombre": "Tarifario de Prestaciones para el Sistema Nacional de Salud",
+    "organismo": "MSP Ecuador",
+    "pais": "EC",
+    "version": "2014/2020 (vigencia confusa)",
+    "urlOficial": "https://www.salud.gob.ec/",
+    "alcanzable": false,
+    "licencia": "Usa CPT según registro previo; no re-verificado",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Sólo PDFs no oficiales encontrados.",
+    "descargado": false
+  },
+  {
+    "clave": "uy-msp",
+    "nombre": "Aranceles MSP Uruguay",
+    "organismo": "MSP",
+    "pais": "UY",
+    "version": "—",
+    "urlOficial": "https://www.msp.gub.uy/",
+    "alcanzable": false,
+    "licencia": "no verificada",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "No conecta.",
+    "descargado": false
+  },
+  {
+    "clave": "mx-dgis-cie9mc",
+    "nombre": "Catálogo CIE-9-MC procedimientos (DGIS)",
+    "organismo": "DGIS Secretaría de Salud",
+    "pais": "MX",
+    "version": "—",
+    "urlOficial": "http://www.dgis.salud.gob.mx/",
+    "alcanzable": false,
+    "licencia": "no verificada",
+    "licenciaVerificada": false,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "no",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Archivo no encontrado; datos.gob.mx Access Denied; CIE-9-MC superada.",
+    "descargado": false
+  },
+  {
+    "clave": "es-na-sns-o-tarifas-2026",
+    "nombre": "Tarifas SNS-Osasunbidea desde 2026-07-01",
+    "organismo": "Gobierno de Navarra",
+    "pais": "ES",
+    "version": "2026",
+    "urlOficial": "https://bon.navarra.es/",
+    "alcanzable": false,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "bon.navarra.es no conecta; número de orden no identificado.",
+    "descargado": false
+  },
+  {
+    "clave": "es-ar-san-923-2025",
+    "nombre": "Orden SAN/923/2025 tarifas máximas con medios ajenos",
+    "organismo": "Departamento de Sanidad, Aragón",
+    "pais": "ES",
+    "version": "BOA n.º 148, 04-08-2025",
+    "urlOficial": "https://www.boa.aragon.es/",
+    "alcanzable": true,
+    "licencia": "LPI art. 13 (España), norma/acto de organismo público: https://www.boe.es/buscar/act.php?id=BOE-A-1996-8930#a13",
+    "licenciaVerificada": true,
+    "idioma": "es",
+    "items": null,
+    "ejeEspecialidad": "—",
+    "rutaLocal": null,
+    "sha256": null,
+    "notas": "Alcanzable, no descargada por tiempo. Siguiente candidata.",
+    "descargado": false
+  }
+]

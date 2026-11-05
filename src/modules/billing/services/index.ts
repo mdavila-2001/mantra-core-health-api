@@ -12,6 +12,6 @@ export * from './billing-service-catalog.service';
 export * from './admin-service-catalog.service';
 export * from './procedure-nomenclature.service';
 export * from './billing-simulated.service';
+export * from './service-repository.service';
 export * from './procedure-import.service';
 export * from './patient-spending.service';
-export * from './procedure-import.service';
