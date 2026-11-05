@@ -29,6 +29,13 @@ const SERVABLE_MIME_TYPES: ReadonlySet<string> = new Set<SniffedMimeType>([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
+  // Audio is not an active document: served with its real type so that the
+  // chat <audio> player can decode it.
+  'audio/webm',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/mpeg',
+  'audio/wav',
 ]);
 
 /** Imágenes rasterizadas: las únicas que se muestran en línea. */

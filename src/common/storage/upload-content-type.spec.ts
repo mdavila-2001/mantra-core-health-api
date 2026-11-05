@@ -2,6 +2,7 @@ import {
   detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   sniffMimeType,
+  UPLOAD_MIME_ALLOWLIST,
 } from './upload-content-type';
 
 /** Cabeceras auténticas de cada formato reconocido. */
@@ -59,8 +60,46 @@ describe('sniffMimeType', () => {
     expect(sniffMimeType(buffer as Buffer)).toBe(expected);
   });
 
-  it('no confunde un RIFF cualquiera con WEBP', () => {
-    expect(sniffMimeType(HEADERS.wav)).toBeUndefined();
+  it('no confunde un RIFF cualquiera con WEBP: un WAV es audio', () => {
+    expect(sniffMimeType(HEADERS.wav)).toBe('audio/wav');
+  });
+
+  it.each([
+    [
+      'webm (Chrome)',
+      Buffer.concat([
+        Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x9f, 0x42, 0x86, 0x81, 0x01]),
+        Buffer.from([0x42, 0x82, 0x84]),
+        Buffer.from('webm'),
+      ]),
+      'audio/webm',
+    ],
+    ['ogg (Firefox)', Buffer.from('OggS\0\x02\0\0', 'latin1'), 'audio/ogg'],
+    [
+      'm4a (Safari)',
+      Buffer.concat([
+        Buffer.from([0x00, 0x00, 0x00, 0x1c]),
+        Buffer.from('ftypiso5'),
+      ]),
+      'audio/mp4',
+    ],
+    ['mp3 con ID3', Buffer.from('ID3\x04\0\0', 'latin1'), 'audio/mpeg'],
+    ['mp3 sin ID3', Buffer.from([0xff, 0xfb, 0x90, 0x64]), 'audio/mpeg'],
+  ])('reconoce audio %s por su firma', (_name, buffer, expected) => {
+    expect(sniffMimeType(buffer)).toBe(expected);
+  });
+
+  it('no toma por audio un Matroska que no es webm ni una foto HEIC', () => {
+    const mkv = Buffer.concat([
+      Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
+      Buffer.from('matroska'),
+    ]);
+    expect(sniffMimeType(mkv)).toBeUndefined();
+    const heic = Buffer.concat([
+      Buffer.from([0x00, 0x00, 0x00, 0x18]),
+      Buffer.from('ftypheic'),
+    ]);
+    expect(sniffMimeType(heic)).toBeUndefined();
   });
 
   it('no confunde un ZIP cualquiera con un .docx o .xlsx', () => {
@@ -127,6 +166,16 @@ describe('isMimeTypeAllowedForCategory', () => {
       ),
     ).toBe(true);
     expect(isMimeTypeAllowedForCategory('DOCUMENT', 'text/plain')).toBe(true);
+  });
+
+  it('acepta audio en DOCUMENT (nota de voz del chat) y nunca en IMAGE', () => {
+    expect(isMimeTypeAllowedForCategory('DOCUMENT', 'audio/webm')).toBe(true);
+    expect(isMimeTypeAllowedForCategory('DOCUMENT', 'audio/mp4')).toBe(true);
+    expect(isMimeTypeAllowedForCategory('IMAGE', 'audio/webm')).toBe(false);
+  });
+
+  it('no suma audio a la lista que usan credenciales e historia clínica', () => {
+    expect(UPLOAD_MIME_ALLOWLIST.DOCUMENT).not.toContain('audio/webm');
   });
 
   it('rechaza los formatos de oficina en IMAGE', () => {
