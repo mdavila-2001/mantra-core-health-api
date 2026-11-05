@@ -500,6 +500,14 @@ describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
       hasPrice: true,
       status: 'PUBLISHED',
     });
+    // Withdrawn, it can be chosen again and comes back published.
+    await inT(T1, () => catalog.withdraw(offerings[0].id, actor));
+    const listed = await inT(T1, () => studyCatalog.catalog());
+    expect(listed.sections[0].items[0].offeredServiceId).toBeNull();
+    const back = await inT(T1, () =>
+      studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),
+    );
+    expect(back.rows[0]).toMatchObject({ outcome: 'REPUBLISHED' });
     // A second import of the same análisis is a no-op.
     const again = await inT(T1, () =>
       studyCatalog.importCatalog({ conceptIds: [HEMO] }, actor),

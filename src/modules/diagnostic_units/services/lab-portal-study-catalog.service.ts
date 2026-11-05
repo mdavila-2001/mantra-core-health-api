@@ -64,9 +64,11 @@ export class LabPortalStudyCatalogService {
     const items = await this.items(em);
     const sections = new Map<string, LabCatalogSectionDto>();
     for (const { section, ...item } of items.values()) {
+      // A withdrawn panel is not in the price list: it can be added again.
       const offered = this.panelOf(ctx, item.conceptId);
+      const live = offered && statusOf(offered.statusConceptId) !== 'WITHDRAWN';
       const group = sections.get(section.code) ?? { ...section, items: [] };
-      group.items.push({ ...item, offeredServiceId: offered?.id ?? null });
+      group.items.push({ ...item, offeredServiceId: live ? offered.id : null });
       sections.set(section.code, group);
     }
     return {
