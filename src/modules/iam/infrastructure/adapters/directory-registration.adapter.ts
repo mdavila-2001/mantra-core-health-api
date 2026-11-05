@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Tenants } from '../../../directory/entities';
+import type { OpeningHoursShiftDto } from '../../../../common/dto/opening-hours.dto';
 import {
-  BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../../../directory/repositories';
 import {
+  DeclaredBranchesService,
   TenantAffiliationDocumentsService,
   TenantLegalRepresentativesService,
   TenantTypeProfileService,
+  type DeclaredBranchesInput,
+  type OpeningHoursSite,
   type RegistrationDocumentsInput as DirectoryDocumentsInput,
 } from '../../../directory/services';
 import type {
@@ -29,7 +32,7 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
   constructor(
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly tenantsRepo: TenantsRepository,
-    private readonly branchesRepo: BranchesRepository,
+    private readonly declaredBranches: DeclaredBranchesService,
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
     private readonly representatives: TenantLegalRepresentativesService,
@@ -62,11 +65,16 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     );
   }
 
-  createBranch(tx: EntityManager, data: object) {
-    return this.branchesRepo.create(
-      tx,
-      data as Parameters<BranchesRepository['create']>[1],
-    );
+  registerDeclaredBranches(tx: EntityManager, input: DeclaredBranchesInput) {
+    return this.declaredBranches.register(tx, input);
+  }
+
+  recordOpeningHours(
+    tx: EntityManager,
+    site: OpeningHoursSite,
+    shifts?: readonly OpeningHoursShiftDto[],
+  ) {
+    this.declaredBranches.recordShifts(tx, site, shifts);
   }
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto) {

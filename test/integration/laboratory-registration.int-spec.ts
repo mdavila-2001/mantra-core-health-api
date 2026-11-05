@@ -286,6 +286,87 @@ describe('P51 · alta de laboratorio contra la API real (integración)', () => {
     expect(Number(equipetrol!.longitude)).toBeCloseTo(-63.1961, 4);
   });
 
+  it('horario de atención: el de la central queda sin sede y el de cada sucursal con su branchId', async () => {
+    const cuerpo = cuerpoDelFront('HORARIO');
+    const central = [
+      { dayOfWeek: 1, opensAt: '07:00', closesAt: '12:00' },
+      { dayOfWeek: 1, opensAt: '14:30', closesAt: '19:00' },
+      { dayOfWeek: 6, opensAt: '07:00', closesAt: '12:00' },
+    ];
+    const norte = [{ dayOfWeek: 7, opensAt: '00:00', closesAt: '24:00' }];
+    const conHorario = {
+      ...cuerpo,
+      organization: {
+        ...cuerpo.organization,
+        openingHours: central,
+        diagnosticUnit: {
+          ...cuerpo.organization.diagnosticUnit,
+          branches: cuerpo.organization.diagnosticUnit.branches.map(
+            (branch, i) =>
+              i === 0 ? { ...branch, openingHours: norte } : branch,
+          ),
+        },
+      },
+    };
+    const res = await http()
+      .post('/iam/auth/register-organization')
+      .send(conHorario)
+      .expect(201);
+    creados.push({ userId: res.body.ownerUserId, tenantId: res.body.tenantId });
+
+    const filas = await ctx.orm.em
+      .fork()
+      .getConnection()
+      .execute<
+        {
+          branch: string | null;
+          day: number;
+          ordinal: number;
+          opens: string;
+          closes: string;
+        }[]
+      >(
+        `select b.name as branch, h.day_of_week as day, h.shift_ordinal as ordinal,
+                to_char(h.opens_at, 'HH24:MI') as opens, h.closes_at::text as closes
+           from directory.tenant_opening_hours h
+           left join directory.branches b on b.id = h.branch_id
+          where h.tenant_id = ?
+          order by b.name nulls first, h.day_of_week, h.shift_ordinal`,
+        [res.body.tenantId],
+      );
+    expect(filas).toEqual([
+      { branch: null, day: 1, ordinal: 1, opens: '07:00', closes: '12:00:00' },
+      { branch: null, day: 1, ordinal: 2, opens: '14:30', closes: '19:00:00' },
+      { branch: null, day: 6, ordinal: 1, opens: '07:00', closes: '12:00:00' },
+      {
+        branch: 'Sucursal Equipetrol',
+        day: 7,
+        ordinal: 1,
+        opens: '00:00',
+        closes: '24:00:00',
+      },
+    ]);
+  });
+
+  it('horario de atención con turnos superpuestos → 400 y no queda ninguna cuenta', async () => {
+    const cuerpo = cuerpoDelFront('SOLAPE');
+    const res = await http()
+      .post('/iam/auth/register-organization')
+      .send({
+        ...cuerpo,
+        organization: {
+          ...cuerpo.organization,
+          openingHours: [
+            { dayOfWeek: 2, opensAt: '08:00', closesAt: '13:00' },
+            { dayOfWeek: 2, opensAt: '12:00', closesAt: '18:00' },
+          ],
+        },
+      })
+      .expect(400);
+    expect(JSON.stringify(res.body)).toContain('horario');
+    expect(await cuentasConCorreo(cuerpo.owner.email)).toBe(0);
+  });
+
   it('la pestaña Sucursales (GET /tenants/{id}/branches) las lista para su owner; 403 para otra organización; 401 sin sesión', async () => {
     const propia = await http()
       .post('/iam/auth/register-organization')

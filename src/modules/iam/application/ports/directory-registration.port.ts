@@ -1,6 +1,11 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import type { ExecutiveRole } from '../../../../common/constants/legal-representatives';
 import type { RegisterOrganizationDetailsDto } from '../../presentation/dto';
+import type { OpeningHoursShiftDto } from '../../../../common/dto/opening-hours.dto';
+import type {
+  DeclaredBranchesInput,
+  OpeningHoursSite,
+} from '../../../directory/services/declared-branches.service';
 
 /** Un ejecutivo de la organización, con el rol canónico que declara el alta. */
 export interface RegistrationExecutiveInput {
@@ -49,7 +54,17 @@ export interface DirectoryRegistrationPort {
     tx: EntityManager,
     data: object,
   ): { id: string; code: string; statusConceptId: string };
-  createBranch(tx: EntityManager, data: object): unknown;
+  /** The declared branches and their opening hours. */
+  registerDeclaredBranches(
+    tx: EntityManager,
+    input: DeclaredBranchesInput,
+  ): Promise<void>;
+  /** Shifts of an already flushed site, or of the headquarters. */
+  recordOpeningHours(
+    tx: EntityManager,
+    site: OpeningHoursSite,
+    shifts?: readonly OpeningHoursShiftDto[],
+  ): void;
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto): void;
   declaredConcepts(
