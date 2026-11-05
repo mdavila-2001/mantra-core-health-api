@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
+import { isModalityMarker } from '../../diagnostic_units/services/lab-portal.mapping';
 import { LabPortalRepository, LabReceptionRepository } from '../repositories';
 import type {
   LabActivityEntryDto,
@@ -62,10 +63,12 @@ export class LabPortalSummaryService {
 
   async summary(tenantId: string): Promise<LabSummaryDto> {
     const em = this.em.fork();
-    const [offerings, names] = await Promise.all([
+    const [all, names] = await Promise.all([
       this.repo.findOfferings(em, tenantId),
       this.labels.findTenantNames(em, [tenantId]),
     ]);
+    // Same rows as the Precios list: the sign-up modality marker is not a service.
+    const offerings = all.filter((o) => !isModalityMarker(o));
     // Every order of the lab, in batches: totals never depend on a page cap.
     let ordersWithoutResults = 0;
     let resultFiles = 0;

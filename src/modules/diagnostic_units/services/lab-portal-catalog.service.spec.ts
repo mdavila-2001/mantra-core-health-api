@@ -502,6 +502,13 @@ describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
     });
     // Withdrawn, it can be chosen again and comes back published.
     await inT(T1, () => catalog.withdraw(offerings[0].id, actor));
+    // Its components go with it: none stays published on its own.
+    expect(
+      em
+        .rows(DiagnosticStudyOfferings)
+        .slice(1)
+        .every((o) => o.statusConceptId === DUNIT.OFFERING_RETIRED),
+    ).toBe(true);
     const listed = await inT(T1, () => studyCatalog.catalog());
     expect(listed.sections[0].items[0].offeredServiceId).toBeNull();
     const back = await inT(T1, () =>

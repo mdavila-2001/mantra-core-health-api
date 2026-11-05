@@ -151,6 +151,7 @@ export class LabPortalStudyCatalogService {
         offering.statusConceptId = ctx.prices.has(offering.id)
           ? DUNIT.OFFERING_ACTIVE
           : DUNIT.OFFERING_DRAFT;
+        touch(offering, actorUserId);
       }
       return row('REPUBLISHED', existing.id);
     }

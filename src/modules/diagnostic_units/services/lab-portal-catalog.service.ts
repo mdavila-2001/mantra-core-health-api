@@ -5,9 +5,11 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { normalizeSearchText } from '../../../common/text/normalize-search-text';
+import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import type { DiagnosticStudyOfferings } from '../entities';
 import type { LabServiceQueryDto } from '../dto/lab-portal-requests.dto';
@@ -70,18 +72,9 @@ export class LabPortalCatalogService {
       query.status
         ? statusOf(o.statusConceptId) === query.status
         : statusOf(o.statusConceptId) !== 'WITHDRAWN';
-    const withdrawn = new Set(
-      query.status === 'WITHDRAWN'
-        ? []
-        : ctx.offerings
-            .filter((o) => statusOf(o.statusConceptId) === 'WITHDRAWN')
-            .map((o) => o.id),
-    );
     const items = ctx.offerings
       // The per-modality marker of the unit's sign-up is not a priced service.
       .filter((o) => !isModalityMarker(o))
-      // A component follows its panel: a withdrawn panel takes its parts along.
-      .filter((o) => !withdrawn.has(parentOf(ctx, o.id) ?? ''))
       .filter(shown)
       .filter(
         (o) =>
@@ -152,8 +145,35 @@ export class LabPortalCatalogService {
     // Resolve inside the tenant's own unit first: another lab's id is a 404.
     this.context.offering(await this.context.load(this.em.fork()), id);
     await this.studies.retireOffering(id, actor);
+    await this.retireParts(id, actor.id);
     const ctx = await this.context.load(this.em.fork());
     return this.view(ctx, this.context.offering(ctx, id));
+  }
+
+  /**
+   * A withdrawn panel takes along the components that belong to it alone, so
+   * none stays published (directory, search) while the lab no longer sees it.
+   */
+  private async retireParts(
+    panelId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const ctx = await this.context.load(tx);
+      const parentsOf = (id: string) =>
+        ctx.links.filter((l) => l.componentOfferingId === id);
+      for (const link of ctx.links.filter(
+        (l) => l.parentOfferingId === panelId,
+      )) {
+        const part = ctx.offerings.find(
+          (o) => o.id === link.componentOfferingId,
+        );
+        if (!part || part.statusConceptId === DUNIT.OFFERING_RETIRED) continue;
+        if (parentsOf(part.id).length > 1) continue;
+        part.statusConceptId = DUNIT.OFFERING_RETIRED;
+        touch(part, actorUserId);
+      }
+    });
   }
 
   /** `GET /diagnostics/lab/categories`: always empty (no categories table). */

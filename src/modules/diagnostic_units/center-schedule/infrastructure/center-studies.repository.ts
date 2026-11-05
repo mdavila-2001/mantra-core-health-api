@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import { DUNIT } from '../../diagnostic_units.concepts';
 
 /** An active offering with its current public price. */
@@ -82,16 +83,30 @@ export class CenterStudiesRepository {
     );
   }
 
-  /** Every component of a panel offering, published or not, with its price. */
+  /**
+   * The components of a panel offering that are parts of its catalog concept
+   * (`part-of`), published or not, with their price. A panel the admin built
+   * from standalone offerings has none: it is quoted whole.
+   */
   findParts(em: EntityManager, panelOfferingId: string): Promise<PartRow[]> {
     return em.execute<PartRow[]>(
       `SELECT o.study_concept_id,
               CASE WHEN o.status_concept_id = ? THEN pr.amount END AS amount
          FROM diagnostic_units.diagnostic_study_components c
+         JOIN diagnostic_units.diagnostic_study_offerings p ON p.id = c.parent_offering_id
          JOIN diagnostic_units.diagnostic_study_offerings o ON o.id = c.component_offering_id
          ${PRICE_LATERAL}
-        WHERE c.parent_offering_id = ?`,
-      [DUNIT.OFFERING_ACTIVE, ...PRICE_PARAMS.slice(0, 2), panelOfferingId],
+        WHERE c.parent_offering_id = ?
+          AND EXISTS (SELECT 1 FROM terminology.concept_relationships r
+                       WHERE r.source_concept_id = o.study_concept_id
+                         AND r.target_concept_id = p.study_concept_id
+                         AND r.relationship_type_concept_id = ?)`,
+      [
+        DUNIT.OFFERING_ACTIVE,
+        ...PRICE_PARAMS.slice(0, 2),
+        panelOfferingId,
+        CONCEPTS.REL_PART_OF,
+      ],
       'all',
     );
   }
