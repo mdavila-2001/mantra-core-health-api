@@ -23,4 +23,14 @@ export enum DiagnosticsErrorReason {
    * firma la petición.
    */
   DIAGNOSTICS_AUTHOR_NOT_ACTOR = 'DIAGNOSTICS_AUTHOR_NOT_ACTOR',
+  /**
+   * The report was published through the written-report flow: it is immutable
+   * and no later write (new version, attach, withdraw, draft edit) is allowed.
+   */
+  REPORT_ALREADY_PUBLISHED = 'REPORT_ALREADY_PUBLISHED',
+  /**
+   * Only the chosen signer, with their own session, publishes a report that
+   * carries their signature and seal; anyone else requests their signature.
+   */
+  REPORT_SIGNER_MUST_PUBLISH = 'REPORT_SIGNER_MUST_PUBLISH',
 }

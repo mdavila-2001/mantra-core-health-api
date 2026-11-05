@@ -22,6 +22,22 @@ import { CommonModule } from '../common/common.module';
 // por su membresía, no por un rol del token.
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { LabStaffGuard } from './guards';
+// In-app notices of the written-report flow (`NotificationsService`).
+import { MessagingModule } from '../messaging/messaging.module';
+import { DiagnosticsReportDraftsController } from './controllers/diagnostics-report-drafts.controller';
+import { DiagnosticsReportPublishController } from './controllers/diagnostics-report-publish.controller';
+import { DiagnosticsReportReleaseController } from './controllers/diagnostics-report-release.controller';
+import { DiagnosticsReportVerifyPublicController } from './controllers/diagnostics-report-verify-public.controller';
+import { ReportDraftsRepository } from './repositories/report-drafts.repository';
+import { DiagnosticReportPdfService } from './services/diagnostic-report-pdf.service';
+import { ReportDraftsService } from './services/report-drafts.service';
+import { ReportImmutabilityService } from './services/report-immutability.service';
+import { ReportIssuerSettingsService } from './services/report-issuer-settings.service';
+import { ReportNotificationsService } from './services/report-notifications.service';
+import { ReportPublicationWriter } from './services/report-publication.writer';
+import { ReportPublishService } from './services/report-publish.service';
+import { ReportReleaseService } from './services/report-release.service';
+import { ReportSignersService } from './services/report-signers.service';
 import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-portal.controller';
 import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
 import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-uploads.controller';
@@ -90,6 +106,7 @@ import {
     ClinicalModule,
     CommonModule,
     DirectoryAuthorizationModule,
+    MessagingModule,
   ],
   controllers: [
     DiagnosticsSpecimensController,
@@ -102,6 +119,12 @@ import {
     DiagnosticsLabPortalController,
     DiagnosticsLabResultsController,
     DiagnosticsLabUploadsController,
+    // Written report (H1). Drafts first: `GET report-drafts/signers` must be
+    // registered before `GET report-drafts/:id`.
+    DiagnosticsReportDraftsController,
+    DiagnosticsReportPublishController,
+    DiagnosticsReportReleaseController,
+    DiagnosticsReportVerifyPublicController,
   ],
   providers: [
     // Repositorios
@@ -148,6 +171,17 @@ import {
     LabPortalResultWritesService,
     LabPortalSummaryService,
     LabPortalUploadsService,
+    // Written report: draft → published immutable version + official PDF.
+    ReportDraftsRepository,
+    ReportImmutabilityService,
+    ReportSignersService,
+    ReportDraftsService,
+    ReportIssuerSettingsService,
+    DiagnosticReportPdfService,
+    ReportNotificationsService,
+    ReportPublicationWriter,
+    ReportPublishService,
+    ReportReleaseService,
   ],
 })
 export class DiagnosticsModule {}
