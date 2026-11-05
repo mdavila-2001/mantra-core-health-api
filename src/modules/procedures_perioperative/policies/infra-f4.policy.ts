@@ -15,15 +15,7 @@ export const INFRA_F4_POLICY: InfraPolicy = {
   actions: {
     'f4.or-block.manage': { roles: [], operatingRoomRoles: ['OR_MANAGER'] },
     'f4.or.read': {
-      roles: [
-        'SUPERADMIN',
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'NURSE',
-        'HOUSEKEEPING',
-        'MAINTENANCE',
-        'BILLING',
-      ],
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'BILLING'],
       operatingRoomRoles: ['OR_MANAGER'],
       // Matriz F4 «Ver agenda de quirófanos»: R para Facturación y para el
       // personal de periop (sus roles globales, con ámbito de tenant).
