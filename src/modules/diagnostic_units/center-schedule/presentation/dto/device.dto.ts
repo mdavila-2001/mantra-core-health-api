@@ -28,7 +28,7 @@ export class EquipmentTypesDto {
 }
 
 /** Body of `POST /diagnostic-units/{unitId}/equipment`. */
-export class CreateDeviceDto {
+export class CreateCenterDeviceDto {
   @ApiProperty({ enum: EQUIPMENT_TYPE_CODES })
   @IsIn(EQUIPMENT_TYPE_CODES)
   typeCode!: EquipmentTypeCode;
@@ -53,7 +53,7 @@ export class CreateDeviceDto {
 }
 
 /** Body of `PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}`: any of its fields. */
-export class UpdateDeviceDto {
+export class UpdateCenterDeviceDto {
   @ApiPropertyOptional({ enum: EQUIPMENT_STATUSES })
   @IsOptional()
   @IsIn(EQUIPMENT_STATUSES)

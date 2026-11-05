@@ -43,9 +43,9 @@ import { SaveCenterScheduleDto } from './dto/center-schedule.dto';
 import { CenterScheduleViewDto } from './dto/center-schedule-view.dto';
 import { SaveDeviceScheduleDto } from './dto/device-schedule.dto';
 import {
-  CreateDeviceDto,
+  CreateCenterDeviceDto,
   EquipmentTypesDto,
-  UpdateDeviceDto,
+  UpdateCenterDeviceDto,
 } from './dto/device.dto';
 
 /**
@@ -145,7 +145,7 @@ export class CenterScheduleController {
   @ApiOkResponse({ type: CenterScheduleViewDto })
   addEquipment(
     @Param('unitId', ParseUUIDPipe) unitId: string,
-    @Body() dto: CreateDeviceDto,
+    @Body() dto: CreateCenterDeviceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CenterScheduleViewDto> {
     return this.adder.execute(unitId, dto, actor);
@@ -164,7 +164,7 @@ export class CenterScheduleController {
   updateEquipment(
     @Param('unitId', ParseUUIDPipe) unitId: string,
     @Param('equipmentId', ParseUUIDPipe) equipmentId: string,
-    @Body() dto: UpdateDeviceDto,
+    @Body() dto: UpdateCenterDeviceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CenterScheduleViewDto> {
     return this.updater.execute(unitId, equipmentId, dto, actor);

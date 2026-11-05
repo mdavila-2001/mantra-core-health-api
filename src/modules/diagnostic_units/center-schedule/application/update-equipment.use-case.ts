@@ -12,7 +12,7 @@ import { DiagnosticEquipmentRepository } from '../../repositories';
 import { EquipmentF5aService } from '../../services/equipment-f5a.service';
 import { EQUIPMENT_STATUS_CONCEPT } from '../domain/center-schedule.model';
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
-import type { UpdateDeviceDto } from '../presentation/dto/device.dto';
+import type { UpdateCenterDeviceDto } from '../presentation/dto/device.dto';
 import type { CenterScheduleViewDto } from '../presentation/dto/center-schedule-view.dto';
 import { CenterContextService } from './center-context.service';
 import { DeviceBookingsService } from './device-bookings.service';
@@ -41,7 +41,7 @@ export class UpdateEquipmentUseCase {
   execute(
     unitId: string,
     equipmentId: string,
-    dto: UpdateDeviceDto,
+    dto: UpdateCenterDeviceDto,
     actor: AuthenticatedUser,
   ): Promise<CenterScheduleViewDto> {
     return this.em.transactional(async (tx) => {

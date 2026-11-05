@@ -12,7 +12,7 @@ import { MODALITY_CONCEPT } from '../domain/center-schedule.model';
 import { equipmentType } from '../domain/equipment-types';
 import { CenterBookingsRepository } from '../infrastructure/center-bookings.repository';
 import { DeviceResourcesRepository } from '../infrastructure/device-resources.repository';
-import type { CreateDeviceDto } from '../presentation/dto/device.dto';
+import type { CreateCenterDeviceDto } from '../presentation/dto/device.dto';
 import type { CenterScheduleViewDto } from '../presentation/dto/center-schedule-view.dto';
 import { CenterContextService } from './center-context.service';
 import { DeviceBookingsService } from './device-bookings.service';
@@ -40,7 +40,7 @@ export class AddEquipmentUseCase {
 
   execute(
     unitId: string,
-    dto: CreateDeviceDto,
+    dto: CreateCenterDeviceDto,
     actor: AuthenticatedUser,
   ): Promise<CenterScheduleViewDto> {
     return this.em.transactional(async (tx) => {
