@@ -18,6 +18,13 @@ export class LabActivityEntryDto {
 }
 
 export class LabCategoryCountDto {
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'Null for the «Sin categoría» bucket',
+  })
+  categoryId!: string | null;
   @ApiProperty() category!: string;
   @ApiProperty() count!: number;
 }
@@ -28,7 +35,11 @@ export class LabSummaryDto {
   @ApiProperty() published!: number;
   @ApiProperty() drafts!: number;
   @ApiProperty() withdrawn!: number;
-  @ApiProperty() unavailable!: number;
+  @ApiProperty({
+    description:
+      'Services (not withdrawn) switched off with "available today" = false',
+  })
+  unavailable!: number;
   @ApiProperty() ordersWithoutResults!: number;
   @ApiProperty() resultFiles!: number;
   @ApiProperty() resultBytes!: number;

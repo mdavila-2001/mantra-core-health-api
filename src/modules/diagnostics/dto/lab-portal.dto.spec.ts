@@ -26,6 +26,34 @@ describe('laboratory portal DTOs (global ValidationPipe)', () => {
     ).rejects.toThrow();
   });
 
+  it.each(['CANCEL', 'REJECT'])(
+    '%s needs a non-blank reason; RECEIVE and PROCESS do not',
+    async (action) => {
+      await expect(run(LabOrderTransitionDto, { action })).rejects.toThrow();
+      await expect(
+        run(LabOrderTransitionDto, { action, reason: '   ' }),
+      ).rejects.toThrow();
+      await expect(
+        run(LabOrderTransitionDto, { action, reason: 'x'.repeat(1001) }),
+      ).rejects.toThrow();
+      await expect(
+        run(LabOrderTransitionDto, { action, reason: ' Equipo roto ' }),
+      ).resolves.toMatchObject({ action, reason: ' Equipo roto ' });
+    },
+  );
+
+  it('a step that needs no reason still validates one when it is sent', async () => {
+    await expect(
+      run(LabOrderTransitionDto, { action: 'RECEIVE' }),
+    ).resolves.toEqual({ action: 'RECEIVE' });
+    await expect(
+      run(LabOrderTransitionDto, {
+        action: 'RECEIVE',
+        reason: 'x'.repeat(1001),
+      }),
+    ).rejects.toThrow();
+  });
+
   it("the file query reads 'false' as false and refuses free text in the URL", async () => {
     const parsed = await run(
       LabResultFileQueryDto,

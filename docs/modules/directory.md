@@ -69,7 +69,7 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `branch_memberships`, `b
 | 04-02 | `POST /admin/tenants/{tenantId}/verification`                            | `SECURITY_ADMIN` | Verifica y activa el tenant (`pending→active`, `unverified→verified`).        |
 | 04-03 | `POST /tenants/{tenantId}/child-tenants`                                 | `SECURITY_ADMIN` | Crea un sub-tenant hijo (`parent_tenant_id`) con membership admin inicial.    |
 | 04-04 | `POST /tenants/{tenantId}/branches`                                      | Owner/admin del tenant o plataforma | Crea una branch/sede activa con geolocalización opcional. |
-| 04-05 | `POST /tenants/{tenantId}/memberships`                                   | Owner/admin del tenant o plataforma | Incorpora un usuario al tenant (evita duplicado activo). |
+| 04-05 | `POST /tenants/{tenantId}/memberships`                                   | Owner/admin del tenant o plataforma | Invita a un usuario al tenant: crea la membresía `INVITED` (sin acceso hasta que la acepta en `/tenants/me/membership-invitations`); 409 si ya es miembro activo o ya tiene una invitación pendiente. |
 | 04-06 | `POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | Owner/admin del tenant o plataforma | Asigna la membresía a una branch del tenant; fija `primary` si es la primera. |
 | 04-07 | `POST /tenants/{tenantId}/memberships/{membershipId}/transfer`           | Owner/admin del tenant o plataforma | Transfiere entre branches (cierra origen, abre destino, mueve `primary`). |
 | 04-08 | `PATCH /tenants/{tenantId}/memberships/{membershipId}/role`              | Owner/admin; OWNER para ownership | Cambia rol y/o scope de la membresía. |

@@ -38,10 +38,46 @@ describe('DiagnosticUnitsReadRepository.findOfferedConcepts', () => {
       {
         studyConceptId: { $in: ['rx', 'eco'] },
         statusConceptId: DUNIT.OFFERING_ACTIVE,
+        available: true,
       },
       { fields: ['diagnosticUnitId', 'studyConceptId'] },
     );
     expect([...(result.get('u1') ?? [])].sort()).toEqual(['eco', 'rx']);
     expect([...(result.get('u2') ?? [])]).toEqual(['rx']);
+  });
+});
+
+describe('DiagnosticUnitsReadRepository: offerings the lab switched off for today', () => {
+  const build = () => {
+    const em = { find: jest.fn((async () => []) as any) };
+    return { em, repo: new DiagnosticUnitsReadRepository() };
+  };
+
+  it('the directory lists only published offerings that are available', async () => {
+    const { em, repo } = build();
+    await repo.findActiveOfferings(em as any, ['u1']);
+    expect(em.find).toHaveBeenCalledWith(
+      DiagnosticStudyOfferings,
+      {
+        diagnosticUnitId: { $in: ['u1'] },
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+        available: true,
+      },
+      { orderBy: { displayName: 'ASC' } },
+    );
+  });
+
+  it('the search by study code ignores unavailable offerings', async () => {
+    const { em, repo } = build();
+    await repo.findUnitIdsOfferingStudy(em as any, 'HEMO');
+    expect(em.find).toHaveBeenCalledWith(
+      DiagnosticStudyOfferings,
+      {
+        studyCode: 'HEMO',
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+        available: true,
+      },
+      { fields: ['diagnosticUnitId'] },
+    );
   });
 });

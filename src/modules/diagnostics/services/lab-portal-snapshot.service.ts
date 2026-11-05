@@ -6,8 +6,10 @@ import type {
 } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
 import type { LaboratoryAccessions } from '../entities';
+import { LABP } from '../lab-portal.concepts';
 import {
   LAB_PORTAL_PAGE_MAX,
+  LabPortalEventsRepository,
   LabPortalRepository,
   LabReceptionRepository,
   ReportsRepository,
@@ -61,6 +63,19 @@ const REVOKED: readonly string[] = [
 ];
 
 /**
+ * Why the order ended: the performer's own reason when it cancelled or
+ * rejected it, else the note of the specimen rejection (legacy rows).
+ */
+function reasonOf(
+  status: LabOrderStatus,
+  performerReason: string | null | undefined,
+  specimenNote: () => string | null,
+): string | null {
+  if (performerReason) return performerReason;
+  return status === 'REJECTED' ? specimenNote() : null;
+}
+
+/**
  * Builds the portal state of a set of orders from real rows: accessions,
  * work orders, specimen rejections and released report versions with their
  * files. Nothing is cached and no state is stored apart from those rows.
@@ -71,6 +86,7 @@ export class LabPortalSnapshotService {
     private readonly repo: LabPortalRepository,
     private readonly reports: ReportsRepository,
     private readonly labels: LabReceptionRepository,
+    private readonly events: LabPortalEventsRepository,
   ) {}
 
   /**
@@ -106,9 +122,10 @@ export class LabPortalSnapshotService {
     if (orders.length === 0) return { orders: [], files: [] };
     const orderIds = orders.map((order) => order.id);
 
-    const [accessions, reports] = await Promise.all([
+    const [accessions, reports, performerEvents] = await Promise.all([
       this.repo.findAccessions(em, tenantId, orderIds),
       this.repo.findReports(em, tenantId, orderIds),
+      this.events.findLatestByOrders(em, tenantId, orderIds),
     ]);
     const latestAccession = new Map<string, LaboratoryAccessions>();
     for (const accession of accessions) {
@@ -162,7 +179,11 @@ export class LabPortalSnapshotService {
 
     const processed = new Set(
       workOrders
-        .filter((workOrder) => workOrder.completedAt)
+        .filter(
+          (workOrder) =>
+            workOrder.completedAt ||
+            workOrder.statusConceptId === LABP.WORK_ORDER_COMPLETED,
+        )
         .map((workOrder) => workOrder.laboratoryAccessionId),
     );
     const rejectionBySpecimen = new Map<string, string | null>();
@@ -216,8 +237,15 @@ export class LabPortalSnapshotService {
         rejectionBySpecimen.has(item.specimenId),
       );
       const available = files.filter((file) => file.status === 'AVAILABLE');
+      const outcome = performerEvents.get(order.id);
       const status = deriveLabOrderStatus({
         revoked: REVOKED.includes(order.statusConceptId),
+        performerOutcome:
+          outcome?.eventTypeConceptId === LABP.PERFORMER_CANCELLED
+            ? 'CANCELLED'
+            : outcome?.eventTypeConceptId === LABP.PERFORMER_REJECTED
+              ? 'REJECTED'
+              : null,
         rejected: rejected.length > 0,
         processed: accession !== null && processed.has(accession.id),
         received: accession !== null,
@@ -226,10 +254,11 @@ export class LabPortalSnapshotService {
       views.push({
         order,
         status,
-        reason:
-          status === 'REJECTED'
+        reason: reasonOf(status, outcome?.reasonText, () =>
+          rejected.length > 0
             ? (rejectionBySpecimen.get(rejected[0].specimenId) ?? null)
             : null,
+        ),
         studyName,
         patientName,
         requesterName,

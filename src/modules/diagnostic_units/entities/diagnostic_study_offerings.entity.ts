@@ -135,6 +135,28 @@ export class DiagnosticStudyOfferings {
   homeCollectionEligible?: boolean;
 
   /**
+   * Valor de specimen description mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'specimen_description',
+    columnType: 'text',
+    nullable: true,
+  })
+  specimenDescription?: string;
+
+  /**
+   * Identificador asociado a service category.
+   */
+  @Property({ fieldName: 'service_category_id', type: 'uuid', nullable: true }) // FK → diagnostic_units.diagnostic_service_categories
+  serviceCategoryId?: string;
+
+  /**
+   * Valor de available mantenido por la instancia.
+   */
+  @Property({ type: 'boolean', default: true })
+  available!: boolean;
+
+  /**
    * Identificador asociado a status concept.
    */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

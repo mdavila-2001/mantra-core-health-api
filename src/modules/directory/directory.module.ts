@@ -18,6 +18,7 @@ import {
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
+  MembershipInviteService,
   DirectoryReadService,
   PharmacyOperatingRequirementsService,
   TenantDocumentCompletionService,
@@ -90,6 +91,7 @@ import {
     DirectoryTenantsService,
     DirectoryBranchesService,
     DirectoryMembershipsService,
+    MembershipInviteService,
     DirectoryReadService,
   ],
   // `TenantsRepository` lo necesita identity_assurance para marcar verificada la

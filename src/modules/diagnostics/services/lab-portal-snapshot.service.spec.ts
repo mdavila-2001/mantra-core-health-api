@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { LABP } from '../lab-portal.concepts';
 import { LabPortalSnapshotService } from './lab-portal-snapshot.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -59,12 +60,18 @@ function rows(data: Partial<Record<string, any[]>> = {}) {
       async () => new Map([['hemograma', 'Hemograma']]),
     ),
   };
+  const events = {
+    findLatestByOrders: mockFn(
+      async () => new Map(get('events').map((e) => [e.serviceRequestId, e])),
+    ),
+  };
   const snapshot = new LabPortalSnapshotService(
     repo as any,
     reports as any,
     labels as any,
+    events as any,
   );
-  return { snapshot, repo };
+  return { snapshot, repo, events };
 }
 
 describe('LabPortalSnapshotService', () => {
@@ -81,13 +88,14 @@ describe('LabPortalSnapshotService', () => {
   });
 
   it('reads every performer row scoped by the active tenant', async () => {
-    const { snapshot, repo } = rows({
+    const { snapshot, repo, events } = rows({
       accessions: [{ id: 'acc-1', serviceRequestId: 'sr-1' }],
     });
     await snapshot.load({} as any, LAB, [order('sr-1')]);
     expect(repo.findAccessions).toHaveBeenCalledWith({}, LAB, ['sr-1']);
     expect(repo.findReports).toHaveBeenCalledWith({}, LAB, ['sr-1']);
     expect(repo.findWorkOrders).toHaveBeenCalledWith({}, LAB, ['acc-1']);
+    expect(events.findLatestByOrders).toHaveBeenCalledWith({}, LAB, ['sr-1']);
   });
 
   it('accession → RECEIVED; completed work order → PROCESSED', async () => {
@@ -118,6 +126,45 @@ describe('LabPortalSnapshotService', () => {
     expect(view.status).toBe('REJECTED');
     expect(view.reason).toBe('Muestra hemolizada');
     expect(view.openSpecimenIds).toEqual([]);
+  });
+
+  it.each([
+    [LABP.PERFORMER_CANCELLED, 'CANCELLED'],
+    [LABP.PERFORMER_REJECTED, 'REJECTED'],
+  ])(
+    'the performer event %s ends the order as %s, with its reason (imaging: no accession needed)',
+    async (eventTypeConceptId, status) => {
+      const { snapshot } = rows({
+        events: [
+          {
+            serviceRequestId: 'sr-1',
+            eventTypeConceptId,
+            reasonText: 'Equipo en mantenimiento',
+          },
+        ],
+      });
+      const [view] = (await snapshot.load({} as any, LAB, [order('sr-1')]))
+        .orders;
+      expect(view).toMatchObject({
+        status,
+        reason: 'Equipo en mantenimiento',
+      });
+    },
+  );
+
+  it('a work order in WO_COMPLETED counts as processed even without completed_at', async () => {
+    const { snapshot } = rows({
+      accessions: [{ id: 'acc-1', serviceRequestId: 'sr-1' }],
+      workOrders: [
+        {
+          laboratoryAccessionId: 'acc-1',
+          statusConceptId: LABP.WORK_ORDER_COMPLETED,
+        },
+      ],
+    });
+    const [view] = (await snapshot.load({} as any, LAB, [order('sr-1')]))
+      .orders;
+    expect(view.status).toBe('PROCESSED');
   });
 
   it('a revoked order is CANCELLED', async () => {
