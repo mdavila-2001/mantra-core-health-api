@@ -18,6 +18,7 @@ import {
   type AuthenticatedUser,
   Roles,
 } from '../../../../common';
+import { PractitionerAdmissionSubmitService } from '../../application/services/practitioner-admission-submit.service';
 import { PractitionerAdmissionsReadService } from '../../application/services/practitioner-admissions-read.service';
 import {
   attestationOf,
@@ -41,6 +42,7 @@ export class OwnAdmissionController {
   constructor(
     private readonly reads: PractitionerAdmissionsReadService,
     private readonly admissions: PractitionerAdmissionsService,
+    private readonly submission: PractitionerAdmissionSubmitService,
   ) {}
 
   @Get()
@@ -53,6 +55,27 @@ export class OwnAdmissionController {
   @ApiOkResponse({ type: OwnAdmissionDto })
   get(@CurrentUser() actor: AuthenticatedUser): Promise<OwnAdmissionDto> {
     return this.reads.own(actor);
+  }
+
+  @Post('submit')
+  @Roles()
+  @HttpCode(HttpStatus.OK)
+  @Audited({ action: 'ADMISSION_SUBMITTED', entity: 'practitioner_admission' })
+  @ApiOperation({
+    summary: 'Enviarme a verificación',
+    description:
+      'Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. ' +
+      'El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, ' +
+      '412 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS ' +
+      '(se reenvía con `resubmit`). Si el perfil no está pendiente: 412 ADMISSION_NOT_PENDING. ' +
+      'Sin perfil profesional: 404 ADMISSION_NOT_FOUND.',
+  })
+  @ApiOkResponse({ type: OwnAdmissionDto })
+  submit(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Body() body: ResubmitAdmissionDto,
+  ): Promise<OwnAdmissionDto> {
+    return this.submission.submitOwn(actor, attestationOf(body));
   }
 
   @Post('resubmit')

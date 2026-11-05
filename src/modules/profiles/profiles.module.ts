@@ -100,6 +100,7 @@ import { AdmissionFilesAdapter } from './infrastructure/adapters/admission-files
 import { CommunityVerificationSealAdapter } from './infrastructure/adapters/community-verification-seal.adapter';
 import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
 import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
+import { PractitionerAdmissionSubmitService } from './application/services/practitioner-admission-submit.service';
 import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
 import { PractitionerVerificationReader } from './application/services/practitioner-verification-reader.service';
 import { PractitionerAdmissionChecklistService } from './application/services/practitioner-admission-checklist.service';
@@ -252,6 +253,7 @@ import { PractitionerVerificationProjector } from './application/services/practi
     PractitionerAdmissionsReadService,
     PractitionerVerificationReader,
     PractitionerAdmissionsService,
+    PractitionerAdmissionSubmitService,
     PractitionerAdmissionDocumentsService,
     // Servicios
     ProfilesPatientsService,

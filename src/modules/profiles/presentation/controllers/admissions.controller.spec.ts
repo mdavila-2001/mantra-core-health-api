@@ -160,10 +160,10 @@ describe('AdmissionsController.detail · S-3', () => {
 
 describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
   it('las rutas me/* declaran `@Roles()` vacío (sin rol global) y están auditadas las que escriben', () => {
-    for (const name of ['get', 'resubmit', 'withdraw']) {
+    for (const name of ['get', 'submit', 'resubmit', 'withdraw']) {
       expect(Reflect.getMetadata(ROLES_KEY, ownProto[name])).toEqual([]);
     }
-    for (const name of ['resubmit', 'withdraw']) {
+    for (const name of ['submit', 'resubmit', 'withdraw']) {
       expect(Reflect.getMetadata(AUDITED_KEY, ownProto[name])).toBeDefined();
     }
   });
@@ -177,6 +177,7 @@ describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
     const controller = new OwnAdmissionController(
       reads as never,
       admissions as never,
+      {} as never,
     );
     const actor = { id: 'u-me', roles: [] } as never;
     await controller.get(actor);
@@ -195,11 +196,32 @@ describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
     expect(OwnAdmissionController.prototype.get.length).toBe(1);
   });
 
+  it('submit delega con el actor de la sesión y la declaración del cuerpo; sin declaración recibe undefined', async () => {
+    const submission = { submitOwn: fn().mockResolvedValue({}) };
+    const controller = new OwnAdmissionController(
+      {} as never,
+      {} as never,
+      submission as never,
+    );
+    const actor = { id: 'u-me', roles: [] } as never;
+    await controller.submit(actor, {
+      attested: true,
+      attestationVersion: '2026-10',
+    });
+    expect(submission.submitOwn).toHaveBeenLastCalledWith(actor, {
+      acceptedAt: expect.any(Date),
+      textVersion: '2026-10',
+    });
+    await controller.submit(actor, { attested: false });
+    expect(submission.submitOwn).toHaveBeenLastCalledWith(actor, undefined);
+  });
+
   it('resubmit lee el cuerpo: sin declaración aceptada el servicio recibe undefined (no se inventa una)', async () => {
     const admissions = { resubmit: fn().mockResolvedValue({}) };
     const controller = new OwnAdmissionController(
       {} as never,
       admissions as never,
+      {} as never,
     );
     const actor = { id: 'u-me', roles: [] } as never;
     for (const body of [
