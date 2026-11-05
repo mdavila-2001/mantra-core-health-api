@@ -13,7 +13,12 @@ import {
   type LabPortalContext,
 } from './lab-portal-context.service';
 import { LabPortalPricingService } from './lab-portal-pricing.service';
-import { cleanText, hoursToMinutes, statusConcept } from './lab-portal.mapping';
+import {
+  cleanText,
+  hoursToMinutes,
+  isModalityOffering,
+  statusConcept,
+} from './lab-portal.mapping';
 
 /** Why a draft or change cannot be applied; `kind` picks the HTTP status. */
 export interface LabServiceProblem {
@@ -60,6 +65,21 @@ export class LabPortalWriterService {
     // No lab category can exist yet: the model has no table for them.
     if (data.categoryId !== undefined && data.categoryId !== null) {
       return { kind: 'PRECONDITION', message: 'La categoría no existe.' };
+    }
+    // A registration placeholder is not a sellable study: pricing it would
+    // publish "X-rays: 0.00 Bs" instead of the concrete studies.
+    const target = exceptId
+      ? ctx.offerings.find((o) => o.id === exceptId)
+      : undefined;
+    if (
+      target &&
+      isModalityOffering(target) &&
+      (data.price !== undefined || data.alovidaDiscountPercent !== undefined)
+    ) {
+      return {
+        kind: 'PRECONDITION',
+        message: `«${target.displayName}» es una modalidad declarada al registrarse, no un estudio: cargue los estudios concretos de esa modalidad con su precio.`,
+      };
     }
     // Refused rather than dropped: patients would keep seeing it as available.
     if (data.available === false) {

@@ -1,4 +1,5 @@
 import { multiplyDecimalsToMoney } from '../../../common/money/decimal-money';
+import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type {
   DiagnosticStudyOfferings,
@@ -35,6 +36,21 @@ export function statusOf(conceptId: string): LabServiceStatus {
   if (conceptId === DUNIT.OFFERING_ACTIVE) return 'PUBLISHED';
   if (conceptId === DUNIT.OFFERING_RETIRED) return 'WITHDRAWN';
   return 'DRAFT';
+}
+
+/**
+ * A registration placeholder: one generic offering per modality declared when
+ * the unit signed up (`MODALITY_*`), which the public directory reads as "this
+ * unit does X-rays". It is not a sellable study, so it never carries a price.
+ */
+export function isModalityOffering(
+  offering: DiagnosticStudyOfferings,
+): boolean {
+  return (
+    offering.modalityConceptId !== undefined &&
+    findDiagnosticUnitModality(offering.modalityConceptId)?.studyCode ===
+      offering.studyCode
+  );
 }
 
 /** A decimal amount with exactly two decimals ('45' -> '45.00'). */
@@ -95,18 +111,22 @@ export function cleanText(
  * `categoryId`/`categoryName` are always null and `available` always true: the
  * model has no column for lab categories nor for same-day availability of an
  * offering. `sampleType` is the display of `specimen_type_concept_id`.
+ *
+ * An offering with no current price answers `price: null` (never a made-up
+ * `0.00`): "not priced yet" and "free" are different facts.
  */
 export function toLabService(
   offering: DiagnosticStudyOfferings,
   price: DiagnosticStudyPrices | undefined,
   sampleType: string | null,
 ): LabServiceDto {
-  const listPrice = money(price?.baseAmount ?? '0');
+  const listPrice = price ? money(price.baseAmount) : null;
   const percent = percentOf(price?.discountFactor);
   return {
     id: offering.id,
     code: offering.studyCode,
     name: offering.displayName,
+    kind: isModalityOffering(offering) ? 'MODALITY' : 'SERVICE',
     categoryId: null,
     categoryName: null,
     sampleType,
@@ -117,7 +137,7 @@ export function toLabService(
     homeCollection: offering.homeCollectionEligible ?? false,
     price: listPrice,
     alovidaDiscountPercent: percent,
-    alovidaPrice: alovidaPrice(listPrice, percent),
+    alovidaPrice: listPrice === null ? null : alovidaPrice(listPrice, percent),
     currency: 'BOB',
     status: statusOf(offering.statusConceptId),
     available: true,

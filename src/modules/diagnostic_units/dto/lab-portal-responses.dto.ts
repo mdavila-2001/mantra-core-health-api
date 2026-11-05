@@ -6,6 +6,12 @@ export class LabServiceDto {
   @ApiProperty({ example: 'HEMOGRAMA' }) code!: string;
   @ApiProperty() name!: string;
   @ApiProperty({
+    enum: ['SERVICE', 'MODALITY'],
+    description:
+      'MODALITY: the generic placeholder created per modality at registration; it is not priced.',
+  })
+  kind!: 'SERVICE' | 'MODALITY';
+  @ApiProperty({
     type: String,
     nullable: true,
     description: 'Always null: the model has no lab categories',
@@ -19,10 +25,17 @@ export class LabServiceDto {
     number | null;
   @ApiProperty() requiresMedicalOrder!: boolean;
   @ApiProperty() homeCollection!: boolean;
-  @ApiProperty({ example: '45.00' }) price!: string;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: '45.00',
+    description: 'null when the service has no current price',
+  })
+  price!: string | null;
   @ApiProperty({ type: Number, nullable: true, example: 10 })
   alovidaDiscountPercent!: number | null;
-  @ApiProperty({ example: '40.50' }) alovidaPrice!: string;
+  @ApiProperty({ type: String, nullable: true, example: '40.50' })
+  alovidaPrice!: string | null;
   @ApiProperty({ enum: ['BOB'] }) currency!: 'BOB';
   @ApiProperty({ enum: ['PUBLISHED', 'DRAFT', 'WITHDRAWN'] })
   status!: 'PUBLISHED' | 'DRAFT' | 'WITHDRAWN';
