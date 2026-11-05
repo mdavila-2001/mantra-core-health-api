@@ -80,6 +80,7 @@ function build() {
     })),
   };
   const logger = { setContext: fn(), info: fn(), warn: fn() };
+  const taxIdentifiers = { register: fn(async () => 'identifier-tax-1') };
   const service = new TenantDocumentCompletionService(
     em as never,
     tenantsRepo as never,
@@ -87,6 +88,7 @@ function build() {
     tenantAdmin as never,
     concepts as never,
     documents as never,
+    taxIdentifiers as never,
     requirements as never,
     logger as never,
   );
@@ -98,6 +100,7 @@ function build() {
     representative,
     tenantAdmin,
     documents,
+    taxIdentifiers,
     requirements,
   };
 }
@@ -129,12 +132,21 @@ describe('TenantDocumentCompletionService.complete', () => {
         ownerUserId: 'owner-1',
         fileId: NIT,
         documentNumber: '1023456029',
+        identifierId: 'identifier-tax-1',
       }),
+    );
+    expect(d.taxIdentifiers.register).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ tenantId: 't-1', value: '1023456029' }),
     );
     expect(d.documents.attachDocument).toHaveBeenCalledWith(
       d.tx,
       'HEALTH_AUTHORITY_CERT_DOC',
-      expect.objectContaining({ fileId: SEDES, documentNumber: undefined }),
+      expect.objectContaining({
+        fileId: SEDES,
+        documentNumber: undefined,
+        identifierId: undefined,
+      }),
     );
     expect(d.tx.flush).toHaveBeenCalled();
   });

@@ -14,6 +14,7 @@ import {
   TenantTypeProfileService,
   AffiliationDocumentConceptsService,
   TenantAffiliationDocumentsService,
+  TenantTaxIdentifierService,
   TenantLegalRepresentativesService,
   DirectoryTenantsService,
   DirectoryBranchesService,
@@ -76,6 +77,7 @@ import {
     TenantTypeProfileService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
+    TenantTaxIdentifierService,
     TenantLegalRepresentativesService,
     // P50: lo que una farmacia necesita para operar, y la puerta para
     // completar los papeles que el alta pública dejó opcionales.
@@ -115,6 +117,7 @@ import {
     TenantTypeProfileService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,
+    TenantTaxIdentifierService,
     // `TenantLegalRepresentativesService` lo necesita `iam` para el
     // autorregistro de organización (subtarea 1.4), igual que los otros dos.
     TenantLegalRepresentativesService,
