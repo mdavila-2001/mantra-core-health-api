@@ -16,6 +16,7 @@ import {
   DirectoryTenantLegalRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
+import { TenantTaxIdentifierService } from './tenant-tax-identifier.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -102,6 +103,7 @@ export class DirectoryReadService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly concepts: AffiliationDocumentConceptsService,
+    private readonly taxIdentifiers: TenantTaxIdentifierService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryReadService.name);
@@ -286,6 +288,7 @@ export class DirectoryReadService {
 
       const representation = await this.loadRepresentation(em, tenant.id);
       const legalFolder = await this.loadLegalDocuments(em, tenant.id);
+      const nit = await this.taxIdentifiers.currentValue(em, tenant.id);
       const legalEntityType = LEGAL_ENTITY_TYPE_BY_CONCEPT_ID.get(
         tenant.legalEntityTypeConceptId,
       )?.code;
@@ -315,6 +318,7 @@ export class DirectoryReadService {
         ...representation,
         ...(legalEntityType ? { legalEntityType } : {}),
         ...legalFolder,
+        ...(nit ? { taxIdentifier: nit } : {}),
       });
     }
 
@@ -627,12 +631,8 @@ export class DirectoryReadService {
       return {
         role: role,
         fullName: persona.displayName ?? '',
-        // Las partes sólo se declaran si `persons` las tiene: un contacto
-        // registrado con la forma legada (`fullName`), o antes de esta
-        // subtarea, sólo tiene `display_name` — no hay de dónde sacarlas.
-        // MikroORM hidrata una columna nullable sin valor como `null`, nunca
-        // `undefined` — comparar contra `undefined` acá dejaba pasar un
-        // `name: null` explícito al JSON de respuesta.
+        // Name parts only when `persons` has them (legacy rows only have
+        // `display_name`); MikroORM hydrates an empty nullable as `null`.
         ...(persona.name == null ? {} : { name: persona.name }),
         ...(persona.middleName == null
           ? {}

@@ -281,6 +281,7 @@ describeIt(
           undefined as never,
           undefined as never,
           undefined as never,
+          undefined as never,
         ),
         quiet as never,
       );

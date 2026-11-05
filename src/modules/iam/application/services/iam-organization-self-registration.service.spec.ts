@@ -96,6 +96,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       provision: fn().mockResolvedValue({ pharmacyId: 'pharmacy-1' }),
     };
     const branches = { create: fn(() => undefined) };
+    const taxIdentifiers = { register: fn(async () => 'identifier-tax-1') };
 
     const service = new IamOrganizationSelfRegistrationService(
       em as never,
@@ -111,6 +112,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
         branches,
         typeProfile,
         affiliationDocuments,
+        taxIdentifiers,
       }),
       new MessagingEmailNoticeAdapter(notificationsService as never),
       pharmacies as never,
@@ -134,6 +136,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       representatives,
       pharmacies,
       branches,
+      taxIdentifiers,
     };
   }
 
@@ -240,6 +243,22 @@ describe('IamOrganizationSelfRegistrationService', () => {
       expect(d.representatives.register).toHaveBeenCalled();
     });
 
+    it('records the NIT on its own even without any paper', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(pharmacyDto);
+
+      expect(d.taxIdentifiers.register).toHaveBeenCalledWith(d.tx, {
+        tenantId: 'tenant-1',
+        value: '1023456029',
+        holderName: 'Farmacia Central S.R.L.',
+        actorUserId: expect.any(String),
+      });
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+    });
+
     it('copia el NIT declarado como número del documento tributario', async () => {
       const d = build();
 
@@ -262,7 +281,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
         d.affiliationDocuments.attachRegistrationDocuments,
       ).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ taxIdentifier: '1023456029' }),
+        expect.objectContaining({
+          taxIdentifier: '1023456029',
+          taxIdentifierId: 'identifier-tax-1',
+        }),
       );
     });
 
@@ -690,6 +712,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
         ownerUserId: 'user-1',
         legalEntityType: undefined,
         taxIdentifier: 'NIT-12345',
+        taxIdentifierId: 'identifier-tax-1',
         documents: {
           CONSTITUTION_DOC: 'file-constitution',
           TAX_IDENTIFIER_DOC: 'file-tax',
