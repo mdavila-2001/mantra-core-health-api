@@ -167719,13 +167719,7 @@
               "STAFF",
               "SECRETARY",
               "ASSISTANT",
-              "NURSE",
               "BILLING",
-              "NURSE_SUPERVISOR",
-              "ADMISSION",
-              "HOUSEKEEPING",
-              "HOUSEKEEPING_SUPERVISOR",
-              "MAINTENANCE",
               "OR_MANAGER",
               "INFECTION_CONTROL",
               "UNIT_HEAD"

@@ -2,6 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { DELEG } from '../../delegated_access/delegated_access.concepts';
 import { PRAC } from '../practice.concepts';
 import { INFRA_F2_POLICY } from '../policies/infra-f2.policy';
+import { INFRA_F5_ASSETS_POLICY } from '../policies/infra-f5-assets.policy';
 import { INFRA_F5F_POLICY } from '../../accounting/policies/infra-f5f.policy';
 import { INFRA_F4_POLICY } from '../../procedures_perioperative/policies/infra-f4.policy';
 import { grantContains, rolesOn } from '../domain/ops/infra-scope';
@@ -27,6 +28,7 @@ function build(
 ) {
   const registry = new InfraPolicyRegistry();
   registry.register(INFRA_F2_POLICY);
+  registry.register(INFRA_F5_ASSETS_POLICY);
   registry.register(INFRA_F5F_POLICY);
   registry.register(INFRA_F4_POLICY);
   const structureAccess = {
@@ -100,10 +102,8 @@ const grant = (
 });
 
 describe('InfrastructureAccessService (§0.3)', () => {
-  it('permitido: Limpieza con alcance SITE inicia limpieza en una cama de la sede', async () => {
-    const { svc } = build([
-      grant(DELEG.ASSIGN_ROLE_HOUSEKEEPING, DELEG.SCOPE_SITE),
-    ]);
+  it('permitido: el admin de la organización inicia limpieza en una cama de la sede', async () => {
+    const { svc } = build([], 'ORG');
     const { roles } = await svc.assertCan(
       actor,
       'f2.cleaning.work',
@@ -111,13 +111,11 @@ describe('InfrastructureAccessService (§0.3)', () => {
       {} as any,
       TENANT,
     );
-    expect(roles.has('HOUSEKEEPING')).toBe(true);
+    expect(roles.has('ORG_ADMIN')).toBe(true);
   });
 
   it('fail-closed por tenant: el espacio de otro tenant es 404, sin consultar roles', async () => {
-    const { svc, opsRepo } = build([
-      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SITE),
-    ]);
+    const { svc, opsRepo } = build([], 'ORG');
     await expect(
       svc.assertCan(
         actor,
@@ -130,9 +128,9 @@ describe('InfrastructureAccessService (§0.3)', () => {
     expect(opsRepo.grants).not.toHaveBeenCalled();
   });
 
-  it('fail-closed por rol: Limpieza no bloquea → 403 INFRA_ACTION_NOT_ALLOWED con requiredRoles', async () => {
+  it('fail-closed por rol: quien no administra no opera camas → 403 INFRA_ACTION_NOT_ALLOWED con requiredRoles', async () => {
     const { svc } = build([
-      grant(DELEG.ASSIGN_ROLE_HOUSEKEEPING, DELEG.SCOPE_SITE),
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_SITE),
     ]);
     await expect(
       svc.assertCan(
@@ -145,34 +143,34 @@ describe('InfrastructureAccessService (§0.3)', () => {
     ).rejects.toMatchObject({
       status: 403,
       reason: 'INFRA_ACTION_NOT_ALLOWED',
-      details: { requiredRoles: ['NURSE'] },
+      details: { requiredRoles: ['ORG_ADMIN', 'SITE_ADMIN'] },
     });
   });
 
   it('alcance SPACE: vale para la habitación que contiene la cama y no para otra', async () => {
     const inRoom = build([
-      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SPACE, {
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_SPACE, {
         care_space_id: 'room-1',
       }),
     ]);
     await expect(
       inRoom.svc.assertCan(
         actor,
-        'f2.isolation.set',
+        'f5.space.stock.read',
         { careSpaceId: bed.id },
         {} as any,
         TENANT,
       ),
     ).resolves.toBeDefined();
     const elsewhere = build([
-      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SPACE, {
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_SPACE, {
         care_space_id: 'room-9',
       }),
     ]);
     await expect(
       elsewhere.svc.assertCan(
         actor,
-        'f2.isolation.set',
+        'f5.space.stock.read',
         { careSpaceId: bed.id },
         {} as any,
         TENANT,
@@ -347,37 +345,39 @@ describe('plataforma acotada a un tenant', () => {
 describe('alcance por unidad en colecciones (revisión de seguridad F3)', () => {
   it('asignación UNIT A: canOnUnit A sí, B no, null no; nivel sede no', async () => {
     const { svc } = build([
-      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_UNIT, {
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_UNIT, {
         clinical_unit_id: 'unit-A',
       }),
     ]);
     const scope = await svc.actorScope({} as any, actor, site as any);
-    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-A')).toBe(true);
-    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(false);
-    expect(svc.canOnUnit('f2.board.read', scope, site, null)).toBe(false);
-    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(false);
+    const act = 'f5.space.stock.read';
+    expect(svc.canOnUnit(act, scope, site, 'unit-A')).toBe(true);
+    expect(svc.canOnUnit(act, scope, site, 'unit-B')).toBe(false);
+    expect(svc.canOnUnit(act, scope, site, null)).toBe(false);
+    expect(svc.canAtSiteLevel(act, scope, site)).toBe(false);
   });
 
   it('asignación SITE: nivel sede y cualquier unidad', async () => {
     const { svc } = build([
-      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_SITE),
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_SITE),
     ]);
     const scope = await svc.actorScope({} as any, actor, site as any);
-    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(true);
-    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(true);
+    const act = 'f5.space.stock.read';
+    expect(svc.canAtSiteLevel(act, scope, site)).toBe(true);
+    expect(svc.canOnUnit(act, scope, site, 'unit-B')).toBe(true);
   });
 });
 
 describe('scopeFilter / assertTargetInScope (raíz de la revisión F2–F4)', () => {
   it('unidad A: sólo los espacios bajo A; un id fuera del alcance o de otra sede → 404', async () => {
     const { svc } = build([
-      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_UNIT, {
+      grant(DELEG.ASSIGN_ROLE_UNIT_HEAD, DELEG.SCOPE_UNIT, {
         clinical_unit_id: 'unit-A',
       }),
     ]);
     const f = await svc.scopeFilter(
       actor,
-      'f2.board.read',
+      'f5.space.stock.read',
       site.id,
       {} as any,
       TENANT,
@@ -395,7 +395,7 @@ describe('scopeFilter / assertTargetInScope (raíz de la revisión F2–F4)', ()
   });
 
   it('nivel sede: toda la sede, pero un espacio de otra sede sigue siendo 404', async () => {
-    const { svc } = build([grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SITE)]);
+    const { svc } = build([], 'ORG');
     const f = await svc.scopeFilter(
       actor,
       'f2.board.read',
@@ -435,22 +435,25 @@ describe('infra-scope (puro)', () => {
     spaceChain: ['bed', 'room'],
   };
 
-  it('UNIT contiene por vínculo; supervisión implica el rol base', () => {
+  it('UNIT contiene por vínculo; una asignación no implica otros roles', () => {
     expect(
-      grantContains({ role: 'NURSE', scope: 'UNIT', unitId: 'u1' }, target),
+      grantContains({ role: 'UNIT_HEAD', scope: 'UNIT', unitId: 'u1' }, target),
     ).toBe(true);
     const roles = rolesOn(
       [],
-      [{ role: 'NURSE_SUPERVISOR', scope: 'SITE', siteId: 's' }],
+      [{ role: 'UNIT_HEAD', scope: 'SITE', siteId: 's' }],
       target,
     );
-    expect([...roles].sort()).toEqual(['NURSE', 'NURSE_SUPERVISOR']);
+    expect([...roles]).toEqual(['UNIT_HEAD']);
   });
 
   it('una asignación de otra sede no cuenta', () => {
     expect(
-      rolesOn([], [{ role: 'NURSE', scope: 'SITE', siteId: 'otra' }], target)
-        .size,
+      rolesOn(
+        [],
+        [{ role: 'UNIT_HEAD', scope: 'SITE', siteId: 'otra' }],
+        target,
+      ).size,
     ).toBe(0);
   });
 });
@@ -566,18 +569,22 @@ describe('translateInfraWriteError (§0.2)', () => {
   });
 
   describe('acciones permitidas (allowedActions, lo que la UI refleja)', () => {
-    it('Limpieza de sede: limpia pero no bloquea; sin roles, nada', async () => {
+    it('admin de organización: opera el tablero, la limpieza y los bloqueos; sin roles, nada', async () => {
       const { svc } = build();
       const scope = { base: [], grants: [], globals: [] } as any;
-      const keeper = svc.allowedActions(
-        new Set(['HOUSEKEEPING'] as any),
+      const admin = svc.allowedActions(
+        new Set(['ORG_ADMIN'] as any),
         false,
         scope,
       );
-      expect(keeper).toEqual(
-        expect.arrayContaining(['f2.board.read', 'f2.cleaning.work']),
+      expect(admin).toEqual(
+        expect.arrayContaining([
+          'f2.board.read',
+          'f2.cleaning.work',
+          'f2.cleaning.inspect',
+          'f2.availability.admin',
+        ]),
       );
-      expect(keeper).not.toContain('f2.availability.admin');
       expect(svc.allowedActions(new Set(), false, scope)).toEqual([]);
     });
   });
