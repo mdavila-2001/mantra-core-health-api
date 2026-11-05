@@ -3,6 +3,7 @@ import {
   alovidaPrice,
   discountFactorOf,
   hoursToMinutes,
+  isModalityOffering,
   minutesToHours,
   money,
   percentOf,
@@ -66,6 +67,7 @@ describe('lab-portal.mapping', () => {
       id: 'o1',
       code: 'HEMO',
       name: 'Hemograma',
+      kind: 'SERVICE',
       categoryId: null,
       categoryName: null,
       sampleType: 'Sangre venosa',
@@ -82,6 +84,59 @@ describe('lab-portal.mapping', () => {
       available: true,
       updatedAt: '2026-11-01T10:00:00.000Z',
     });
+  });
+
+  it('answers null, never 0.00, for a service that has no current price', () => {
+    const view = toLabService(
+      {
+        id: 'o2',
+        studyCode: 'TAC-CRANEO',
+        displayName: 'Tomografía de cráneo',
+        statusConceptId: DUNIT.OFFERING_ACTIVE,
+        updatedAt: new Date('2026-11-01T10:00:00Z'),
+      } as any,
+      undefined,
+      null,
+      null,
+    );
+    expect(view).toMatchObject({
+      kind: 'SERVICE',
+      price: null,
+      alovidaDiscountPercent: null,
+      alovidaPrice: null,
+    });
+  });
+
+  it('tells a registration modality placeholder from a real study', () => {
+    const placeholder = {
+      studyCode: 'MODALITY_XRAY',
+      modalityConceptId: DUNIT.MODALITY_XRAY,
+    } as any;
+    expect(isModalityOffering(placeholder)).toBe(true);
+    expect(
+      toLabService(
+        {
+          ...placeholder,
+          id: 'o3',
+          displayName: 'Rayos X',
+          statusConceptId: DUNIT.OFFERING_ACTIVE,
+          updatedAt: new Date(),
+        },
+        undefined,
+        null,
+        null,
+      ).kind,
+    ).toBe('MODALITY');
+    // A concrete X-ray study tagged with the modality is still a service.
+    expect(
+      isModalityOffering({
+        studyCode: 'RX-TORAX',
+        modalityConceptId: DUNIT.MODALITY_XRAY,
+      } as any),
+    ).toBe(false);
+    expect(isModalityOffering({ studyCode: 'MODALITY_XRAY' } as any)).toBe(
+      false,
+    );
   });
 
   it('reads category, free-text sample type and availability from the offering', () => {
@@ -101,7 +156,8 @@ describe('lab-portal.mapping', () => {
       categoryName: 'Química',
       sampleType: 'Sangre venosa (tubo gris)',
       available: false,
-      price: '0.00',
+      // No current price: unpriced, never a made-up 0.00.
+      price: null,
     });
     // A category that is not resolved never leaks a stale name.
     const orphan = toLabService(

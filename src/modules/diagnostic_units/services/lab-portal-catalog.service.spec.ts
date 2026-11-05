@@ -9,6 +9,7 @@ import {
   DiagnosticServiceCategories,
   DiagnosticStudyOfferings,
   DiagnosticStudyPrices,
+  DiagnosticUnits,
 } from '../entities';
 import {
   T1,
@@ -66,6 +67,47 @@ describe('LabPortalCatalogService', () => {
     expect(em.rows(DiagnosticStudyPrices).map((p) => p.versionNumber)).toEqual([
       1, 2,
     ]);
+  });
+
+  it('lists a registration modality placeholder as MODALITY with no price, and refuses to price it', async () => {
+    const { em, catalog } = build();
+    const unit = em.rows(DiagnosticUnits).find((u) => u.tenantId === T1)!;
+    const placeholder = em.create(DiagnosticStudyOfferings as any, {
+      id: 'placeholder-xray',
+      diagnosticUnitId: unit.id,
+      studyCode: 'MODALITY_XRAY',
+      studyConceptId: DUNIT.STUDY_GENERIC,
+      modalityConceptId: DUNIT.MODALITY_XRAY,
+      displayName: 'Rayos X',
+      statusConceptId: DUNIT.OFFERING_ACTIVE,
+      updatedAt: new Date(),
+    });
+    await inT(T1, () => catalog.create(draft('RX-TORAX'), actor));
+
+    const page = await inT(T1, () => catalog.list({}));
+    expect(page.items.map((s) => [s.code, s.kind, s.price])).toEqual([
+      ['RX-TORAX', 'SERVICE', '45.00'],
+      ['MODALITY_XRAY', 'MODALITY', null],
+    ]);
+
+    await expect(
+      inT(T1, () =>
+        catalog.update(String(placeholder.id), { price: '120' } as any, actor),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    // Text fields of the placeholder still change (description, status).
+    const renamed = await inT(T1, () =>
+      catalog.update(
+        String(placeholder.id),
+        { description: 'Equipo digital' } as any,
+        actor,
+      ),
+    );
+    expect(renamed).toMatchObject({
+      description: 'Equipo digital',
+      price: null,
+    });
+    expect(em.rows(DiagnosticStudyPrices)).toHaveLength(1);
   });
 
   it('rejects a repeated code (case-insensitive) and a category of another lab', async () => {

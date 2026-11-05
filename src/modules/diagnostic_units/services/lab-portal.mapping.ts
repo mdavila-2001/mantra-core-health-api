@@ -1,4 +1,5 @@
 import { multiplyDecimalsToMoney } from '../../../common/money/decimal-money';
+import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type {
   DiagnosticStudyOfferings,
@@ -35,6 +36,21 @@ export function statusOf(conceptId: string): LabServiceStatus {
   if (conceptId === DUNIT.OFFERING_ACTIVE) return 'PUBLISHED';
   if (conceptId === DUNIT.OFFERING_RETIRED) return 'WITHDRAWN';
   return 'DRAFT';
+}
+
+/**
+ * A registration placeholder: one generic offering per modality declared when
+ * the unit signed up (`MODALITY_*`), which the public directory reads as "this
+ * unit does X-rays". It is not a sellable study, so it never carries a price.
+ */
+export function isModalityOffering(
+  offering: DiagnosticStudyOfferings,
+): boolean {
+  return (
+    offering.modalityConceptId !== undefined &&
+    findDiagnosticUnitModality(offering.modalityConceptId)?.studyCode ===
+      offering.studyCode
+  );
 }
 
 /** A decimal amount with exactly two decimals ('45' -> '45.00'). */
@@ -95,6 +111,9 @@ export function cleanText(
  * `sampleType` is the lab's own free text (`specimen_description`) and falls
  * back to the display of `specimen_type_concept_id` for services published
  * before the text existed. `available` is the "available today" switch.
+ *
+ * An offering with no current price answers `price: null` (never a made-up
+ * `0.00`): "not priced yet" and "free" are different facts.
  */
 export function toLabService(
   offering: DiagnosticStudyOfferings,
@@ -102,12 +121,13 @@ export function toLabService(
   specimenDisplay: string | null,
   categoryName: string | null,
 ): LabServiceDto {
-  const listPrice = money(price?.baseAmount ?? '0');
+  const listPrice = price ? money(price.baseAmount) : null;
   const percent = percentOf(price?.discountFactor);
   return {
     id: offering.id,
     code: offering.studyCode,
     name: offering.displayName,
+    kind: isModalityOffering(offering) ? 'MODALITY' : 'SERVICE',
     categoryId: offering.serviceCategoryId ?? null,
     categoryName: offering.serviceCategoryId ? categoryName : null,
     sampleType: offering.specimenDescription ?? specimenDisplay,
@@ -118,7 +138,7 @@ export function toLabService(
     homeCollection: offering.homeCollectionEligible ?? false,
     price: listPrice,
     alovidaDiscountPercent: percent,
-    alovidaPrice: alovidaPrice(listPrice, percent),
+    alovidaPrice: listPrice === null ? null : alovidaPrice(listPrice, percent),
     currency: 'BOB',
     status: statusOf(offering.statusConceptId),
     available: offering.available !== false,
