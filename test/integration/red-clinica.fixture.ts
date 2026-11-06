@@ -174,6 +174,7 @@ export class Seeder {
 /** Creates a throwaway runtime role and an ORM that connects as it. */
 export async function runtimeOrm(
   owner: pg.Client,
+  entities: unknown[] = ENTITIES,
 ): Promise<{ orm: MikroORM; drop: () => Promise<void> }> {
   const role = `int_rls_${randomUUID().replaceAll('-', '').slice(0, 12)}`;
   const password = randomUUID();
@@ -203,7 +204,7 @@ export async function runtimeOrm(
         DB_APP_PASSWORD: password,
       }),
     ),
-    entities: ENTITIES,
+    entities: entities as typeof ENTITIES,
     entitiesTs: [],
     metadataProvider: ReflectMetadataProvider,
     metadataCache: { enabled: false },

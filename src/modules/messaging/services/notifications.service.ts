@@ -12,11 +12,14 @@ import {
   decodeKeysetCursor,
   deriveWebhookSecret,
   encodeKeysetCursor,
+  getCurrentTenantId,
   touch,
   verifySignature,
   type AuthenticatedUser,
 } from '../../../common';
+import { withSystemRlsInTransaction } from '../../../common/tenant/rls-transaction';
 import { NotificationsRepository } from '../repositories';
+import { inboxTenantOf } from './inbox-tenant';
 import { MessagingErrorReason } from '../messaging.error-reasons';
 import { providerReceiptSignedString } from '../provider-receipt-signature';
 import { NotificationsGateway } from '../gateways';
@@ -264,7 +267,8 @@ export class NotificationsService implements InAppNotificationEmitter {
       };
 
       const request = this.notificationsRepo.createNotificationRequest(tx, {
-        tenantId: dto.tenantId,
+        // Under RLS a row without a tenant is rejected inside a tenant request.
+        tenantId: dto.tenantId ?? getCurrentTenantId(),
         recipientUserId,
         recipientAddress: dto.recipientAddress,
         channelId: dto.channelId,
@@ -802,7 +806,7 @@ export class NotificationsService implements InAppNotificationEmitter {
   async emitInApp(input: EmitInAppInput): Promise<EmitInAppResult> {
     try {
       const { renotify, ...result } = await this.em.transactional((tx) =>
-        this.writeInApp(tx, input),
+        this.writeInRecipientInbox(tx, input),
       );
       // AG-22: el socket se empuja DESPUÉS del commit y fuera de cualquier
       // lock — nunca desde dentro de `writeInApp`. Si quedó suprimida, si el
@@ -1217,6 +1221,32 @@ export class NotificationsService implements InAppNotificationEmitter {
    * vez, y separarlos sólo dejaría estados intermedios que nadie puede
    * resolver: una solicitud in-app «pendiente» no está esperando a nadie.
    */
+  /**
+   * Writes a notice whose caller did not declare a tenant in the recipient's own.
+   *
+   * The bell reads under the recipient's tenant, and it can differ from the
+   * sender's (a patient writing to a doctor of another organization): a row in the
+   * request tenant would stay hidden from them, and one with no tenant is rejected
+   * by RLS. The system step is bounded: every read and write in it filters by the
+   * recipient, and it must flush before the tenant scope comes back.
+   */
+  private writeInRecipientInbox(
+    tx: EntityManager,
+    input: EmitInAppInput,
+  ): Promise<EmitInAppResult & { renotify?: boolean }> {
+    if (input.tenantId) return this.writeInApp(tx, input);
+    return withSystemRlsInTransaction(tx, async () => {
+      const tenantIds = await this.notificationsRepo.listActiveTenantIds(
+        tx,
+        input.recipientUserId,
+      );
+      const tenantId = inboxTenantOf(tenantIds, getCurrentTenantId());
+      const result = await this.writeInApp(tx, { ...input, tenantId });
+      await tx.flush();
+      return result;
+    });
+  }
+
   private async writeInApp(
     tx: EntityManager,
     input: EmitInAppInput,

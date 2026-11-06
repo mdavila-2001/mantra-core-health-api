@@ -4,11 +4,15 @@ import pg from 'pg';
 import request from 'supertest';
 import webpush from 'web-push';
 import { decryptSecret } from '../../src/common/crypto/secret-cipher';
+import { TenantMemberships } from '../../src/modules/directory/entities';
 import { appInstallPrefix } from '../../src/modules/iam/domain/app-device-fingerprint';
+import * as messagingEntities from '../../src/modules/messaging/entities';
+import { NotificationsRepository } from '../../src/modules/messaging/repositories/notifications.repository';
 import {
   NativePushService,
   type NativePushMessage,
 } from '../../src/modules/messaging/services/native-push.service';
+import { NotificationsService } from '../../src/modules/messaging/services/notifications.service';
 import { WebPushService } from '../../src/modules/messaging/services/web-push.service';
 import {
   bootstrapTestApp,
@@ -17,6 +21,7 @@ import {
   camposObligatoriosDePaciente,
   identidadProfesional,
 } from './harness';
+import { asTenant, runtimeOrm } from './red-clinica.fixture';
 
 /**
  * Push notifications end to end against Postgres (commit 32020b53): native
@@ -247,14 +252,19 @@ describe('Push web y nativo (integración)', () => {
       .send({ senderProfileId: doctorProfileId, bodyText: 'Hola' })
       .expect(201);
 
-    const stored = await owner.query<{ id: string }>(
-      `select id from messaging.in_app_notifications
+    const stored = await owner.query<{ id: string; tenant_id: string | null }>(
+      `select id, tenant_id from messaging.in_app_notifications
         where recipient_user_id = $1 and related_resource_type = 'CONVERSATION'
           and related_resource_id = $2`,
       [recipient.userId, conversationId],
     );
     expect(stored.rows).toHaveLength(1);
     const notificationId = stored.rows[0].id;
+    // This harness skips RLS (owner role). In production a row without a tenant is
+    // rejected, and one in another tenant stays hidden from the recipient's bell.
+    expect(claims(recipient.token)['tenants']).toContain(
+      stored.rows[0].tenant_id,
+    );
 
     const bell = await http()
       .get('/notifications/me')
@@ -284,6 +294,72 @@ describe('Push web y nativo (integración)', () => {
         destinationId: conversationId,
       });
       expect(call.route).not.toBe('/notifications');
+    }
+  });
+
+  it('under forced RLS, a notice without a tenant lands in the inbox of a recipient from another tenant', async () => {
+    const recipient = pacientes[1];
+    const recipientTenants = claims(recipient.token)['tenants'] as string[];
+    const senderTenant = randomUUID();
+
+    const admin = new pg.Client({
+      host: process.env.DB_HOST ?? 'localhost',
+      port: Number(process.env.DB_PORT ?? 5434),
+      user: process.env.DB_USER ?? 'mantra',
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME ?? 'mantra_redesa_health',
+    });
+    await admin.connect();
+    const { orm, drop } = await runtimeOrm(admin, [
+      ...Object.values(messagingEntities),
+      TenantMemberships,
+    ]);
+    const quiet = {
+      setContext: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    };
+    const inboxIdVisibleTo = (tenant: string, id: string) =>
+      asTenant(orm, tenant, (tx) =>
+        tx.execute<{ id: string }[]>(
+          'select id from messaging.in_app_notifications where id = ?',
+          [id],
+        ),
+      );
+
+    try {
+      const service = new NotificationsService(
+        orm.em,
+        new NotificationsRepository(),
+        quiet as never,
+      );
+      const result = await asTenant(orm, senderTenant, () =>
+        service.emitInApp({
+          recipientUserId: recipient.userId,
+          category: 'MESSAGES',
+          subject: 'Te escribieron',
+          destination: { type: 'CONVERSATION', id: randomUUID() },
+        }),
+      );
+
+      expect(quiet.error).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ suppressed: false });
+      const id = result.inAppNotificationId as string;
+      const stored = await owner.query<{ tenant_id: string }>(
+        `select tenant_id from messaging.in_app_notifications where id = $1`,
+        [id],
+      );
+      expect(recipientTenants).toContain(stored.rows[0].tenant_id);
+      expect(await inboxIdVisibleTo(stored.rows[0].tenant_id, id)).toEqual([
+        { id },
+      ]);
+      expect(await inboxIdVisibleTo(senderTenant, id)).toEqual([]);
+    } finally {
+      await drop();
+      delete process.env.DB_APP_USER;
+      delete process.env.DB_APP_PASSWORD;
+      await admin.end();
     }
   });
 
