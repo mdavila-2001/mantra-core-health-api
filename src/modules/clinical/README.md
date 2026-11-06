@@ -170,6 +170,17 @@ check-in).
   registrar procedimiento con orden la marca `completed`; administrar la dosis
   final marca la prescripción `completed`; cerrar encuentro cierra participantes y
   ubicaciones activos.
+- **Cierre del encuentro → turno de agenda.** `POST /clinical/encounters/:id/close`
+  pasa por `EncounterCloseService`: cierra con `EncountersService.close` y avisa por
+  `ENCOUNTER_CLOSED_PORT` (`ports/encounter-closed.port.ts`) con la cita clínica del
+  encuentro; `SchedulingEncounterClosedAdapter` pide a `scheduling` completar la
+  reserva atada a esa cita (`CompleteLinkedBookingUseCase`, resuelto con `ModuleRef`
+  porque `scheduling` ya llega a este módulo por `community`), lo que emite la encuesta
+  de satisfacción. Corre en un savepoint de la transacción en curso (la de la petición
+  con `RLS_ENFORCE=true`): un fallo se descarta, queda en el log (`warn` si es
+  esperable, `error` si no) y el cierre sigue en pie. `clinical_ext` usa el mismo
+  puerto al terminar la teleconsulta, pero sólo si el encuentro ya está cerrado: con
+  el encuentro abierto, cortar la videollamada no completa el turno.
 - **VALUE CONTRACT**: la observación (y cada componente) lleva un único tipo de
   valor; el `value_type_concept_id` se infiere del campo presente si no se indica.
 

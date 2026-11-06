@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
@@ -95,6 +96,83 @@ export class TargetsRepository {
       practitionerProfileId,
       serviceCatalogId,
     });
+  }
+
+  /**
+   * Las ofertas del profesional en un estado (las activas, para «mis
+   * servicios»). No filtra por tenant: la oferta no lo lleva; el de cada
+   * servicio sale de su práctica.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional.
+   * @param statusConceptId - Estado de la oferta (`SCHED.OFFERING_ACTIVE`).
+   * @returns Las ofertas, la más antigua primero.
+   */
+  listOfferingsOf(
+    em: EntityManager,
+    practitionerProfileId: string,
+    statusConceptId: string,
+  ): Promise<PractitionerServiceOfferings[]> {
+    return em.find(
+      PractitionerServiceOfferings,
+      { practitionerProfileId, statusConceptId },
+      { orderBy: { createdAt: 'asc' } },
+    );
+  }
+
+  /**
+   * Bloquea las ofertas del profesional para un servicio hasta el fin de la
+   * transacción y las devuelve. Serializa dos reemplazos simultáneos de la
+   * encuesta del mismo servicio.
+   *
+   * @param em - Transacción activa.
+   * @param practitionerProfileId - Profesional.
+   * @param serviceCatalogId - `billing.service_catalog.id`.
+   * @returns Las ofertas bloqueadas (puede haber más de una por canal).
+   */
+  lockOfferingsOf(
+    em: EntityManager,
+    practitionerProfileId: string,
+    serviceCatalogId: string,
+  ): Promise<PractitionerServiceOfferings[]> {
+    return em.find(
+      PractitionerServiceOfferings,
+      { practitionerProfileId, serviceCatalogId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Servicios del catálogo por identificador, de una sola consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - `billing.service_catalog.id`.
+   * @returns Los que existan.
+   */
+  findServiceCatalogs(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ServiceCatalog[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ServiceCatalog, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * El tenant de cada práctica, de una sola consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceIds - Prácticas.
+   * @returns Tenant por práctica.
+   */
+  async findTenantsOfPractices(
+    em: EntityManager,
+    practiceIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    if (practiceIds.length === 0) return new Map();
+    const practices = await em.find(Practices, {
+      id: { $in: [...new Set(practiceIds)] },
+    });
+    return new Map(practices.map((p) => [p.id, p.tenantId]));
   }
 
   /**

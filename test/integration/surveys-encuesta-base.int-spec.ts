@@ -26,6 +26,10 @@ import {
 } from '../../src/modules/surveys/services';
 import { systemSurveyIds } from '../../src/modules/surveys/services/surveys-system-templates.service';
 import { SURVEYS } from '../../src/modules/surveys/surveys.concepts';
+import {
+  SYSTEM_BASE_SURVEYS,
+  SYSTEM_BASE_SURVEY_VERSION,
+} from '../../src/modules/surveys/surveys.base-definitions';
 import { InsightsRepository } from '../../src/modules/surveys/repositories/insights.repository';
 import { SurveysInsightsService } from '../../src/modules/surveys/services/surveys-insights.service';
 import { SCHED } from '../../src/modules/scheduling/domain/scheduling.concepts';
@@ -70,6 +74,22 @@ const DOCTOR = randomUUID(); // perfil profesional
 const OTHER_DOCTOR = randomUUID();
 const PATIENT = randomUUID(); // perfil de paciente
 const ANY = randomUUID(); // concepto cualquiera: no hay FK entre esquemas
+
+/**
+ * La encuesta base de consulta vigente (versión 2, 29/10/2026): 12 preguntas,
+ * obligatorias todas salvo la revisión de la medicación (8) y el comentario
+ * final (12). Se fija acá además de leerse de la definición: si la definición
+ * cambia, esta prueba tiene que cambiar a sabiendas.
+ */
+const BASE_CONSULTATION = SYSTEM_BASE_SURVEYS.CONSULTATION.questions;
+const BASE_CONSULTATION_REQUIRED = [
+  ...Array(7).fill(true),
+  false,
+  true,
+  true,
+  true,
+  false,
+];
 
 const doctorActor: AuthenticatedUser = {
   id: randomUUID(),
@@ -326,18 +346,20 @@ describeIfDb(
             (await rows(`SELECT count(*)::int AS n FROM surveys.${table}`))[0]
               .n,
           );
+        expect(SYSTEM_BASE_SURVEY_VERSION).toBe(2);
+        expect(BASE_CONSULTATION).toHaveLength(12);
         expect(await count('survey_templates')).toBe(1);
         expect(await count('survey_versions')).toBe(1);
-        expect(await count('survey_questions')).toBe(9);
+        expect(await count('survey_questions')).toBe(12);
         expect(await count('survey_assignments')).toBe(1);
 
         await inTenant(() =>
           services().system.ensureSystemTemplate(TENANT, 'CONSULTATION'),
         );
-        expect(await count('survey_questions')).toBe(9);
+        expect(await count('survey_questions')).toBe(12);
       });
 
-      it('la plantilla de sistema no tiene profesional dueño y la marca su tipo; las 8 primeras son obligatorias', async () => {
+      it('la plantilla de sistema no tiene profesional dueño y la marca su tipo; obligatorias todas salvo la medicación y el comentario', async () => {
         const [template] = await rows(
           `SELECT owner_practitioner_id, owner_type_concept_id, owner_id, tenant_id, status_concept_id
            FROM surveys.survey_templates WHERE id = $1`,
@@ -355,10 +377,12 @@ describeIfDb(
           WHERE survey_version_id = $1 ORDER BY position`,
           [systemSurveyIds(TENANT, 'CONSULTATION').versionId],
         );
-        expect(questions.map((q) => q.required)).toEqual([
-          ...Array(8).fill(true),
-          false,
-        ]);
+        expect(questions.map((q) => q.required)).toEqual(
+          BASE_CONSULTATION_REQUIRED,
+        );
+        expect(BASE_CONSULTATION.map((q) => q.required)).toEqual(
+          BASE_CONSULTATION_REQUIRED,
+        );
       });
 
       it('la de servicio tiene 7 preguntas, todas opcionales', async () => {
@@ -635,8 +659,15 @@ describeIfDb(
       });
     });
 
-    describe('el médico asocia su encuesta y el paciente responde una sola', () => {
+    // Desde el 06/11/2026 sólo se asocia y reparte lo importado del catálogo
+    // estándar: la consulta recibe sólo la base del sistema y un servicio, la
+    // importada o la base de servicio. Las encuestas escritas a mano ya no se
+    // asocian ni se emiten, pero lo que se emitió antes con ellas (la base con
+    // su extensión) sigue siendo contestable y legible: eso se prueba con
+    // invitaciones anteriores escritas en la base tal como quedaron.
+    describe('encuesta escrita a mano (anterior al catálogo) y del catálogo', () => {
       let template: { id: string; versionId: string };
+      let catalogTemplate: { id: string; versionId: string };
       let consultationInvitation: string;
       let consultationBooking: string;
       let serviceBooking: string;
@@ -670,11 +701,65 @@ describeIfDb(
         expect(question.required).toBe(false);
       });
 
-      it('la asocia a un servicio del catálogo que ofrece y a «todas mis consultas»', async () => {
+      it('asociar la escrita a mano se rechaza (422, sólo del catálogo) y no deja filas', async () => {
+        for (const dto of [
+          { targetType: 'SERVICE' as const, targetId: ids.catalog },
+          { targetType: 'CARE_TYPE' as const },
+        ]) {
+          await expect(
+            inTenant(() =>
+              services().assignments.createAssignment(
+                { surveyVersionId: template.versionId, ...dto },
+                doctorActor,
+              ),
+            ),
+          ).rejects.toMatchObject({
+            status: 422,
+            reason: 'SURVEY_ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE',
+          });
+        }
+        const targets = await rows(
+          'SELECT id FROM surveys.survey_assignments WHERE survey_version_id = $1',
+          [template.versionId],
+        );
+        expect(targets).toEqual([]);
+      });
+
+      it('una del catálogo se asocia a un servicio que ofrece y a «todas mis consultas»', async () => {
+        // Una plantilla publicada del médico que salió del catálogo estándar.
+        catalogTemplate = await inTenant(() =>
+          services().templates.createTemplate(
+            { title: 'Encuesta de su análisis de laboratorio' },
+            doctorActor,
+          ),
+        );
+        await inTenant(() =>
+          services().templates.addQuestion(
+            catalogTemplate.id,
+            {
+              questionText: '¿Le explicaron cómo prepararse?',
+              answerType: 'BOOLEAN',
+            },
+            doctorActor,
+          ),
+        );
+        await inTenant(() =>
+          services().templates.publishVersion(
+            catalogTemplate.id,
+            1,
+            {},
+            doctorActor,
+          ),
+        );
+        await sql(
+          `UPDATE surveys.survey_templates SET standard_catalog_code = 'STD_LAB_V1' WHERE id = $1`,
+          [catalogTemplate.id],
+        );
+
         await inTenant(() =>
           services().assignments.createAssignment(
             {
-              surveyVersionId: template.versionId,
+              surveyVersionId: catalogTemplate.versionId,
               targetType: 'SERVICE',
               targetId: ids.catalog,
             },
@@ -683,23 +768,30 @@ describeIfDb(
         );
         await inTenant(() =>
           services().assignments.createAssignment(
-            { surveyVersionId: template.versionId, targetType: 'CARE_TYPE' },
+            {
+              surveyVersionId: catalogTemplate.versionId,
+              targetType: 'CARE_TYPE',
+            },
             doctorActor,
           ),
         );
 
         const targets = await rows(
-          `SELECT target_type_concept_id, target_id FROM surveys.survey_assignments
+          `SELECT target_id, owner_practitioner_id FROM surveys.survey_assignments
           WHERE survey_version_id = $1 ORDER BY target_id`,
-          [template.versionId],
+          [catalogTemplate.versionId],
         );
         expect(targets.map((t) => t.target_id).sort()).toEqual(
           [ids.catalog, SURVEYS.CARE_TYPE_CONSULTATION].sort(),
         );
+        expect(targets.map((t) => t.owner_practitioner_id)).toEqual([
+          DOCTOR,
+          DOCTOR,
+        ]);
 
         // El detalle de la plantilla dice a qué está asociada, con el nombre del servicio.
         const detail = await inTenant(() =>
-          services().templates.getTemplate(template.id, doctorActor),
+          services().templates.getTemplate(catalogTemplate.id, doctorActor),
         );
         const byType = new Map(
           detail.assignments!.map((a) => [a.targetType, a]),
@@ -721,7 +813,7 @@ describeIfDb(
           inTenant(() =>
             services().assignments.createAssignment(
               {
-                surveyVersionId: template.versionId,
+                surveyVersionId: catalogTemplate.versionId,
                 targetType: 'SERVICE',
                 targetId,
               },
@@ -737,7 +829,20 @@ describeIfDb(
         expect(await attempt(ids.catalogNotOffered)).toBe(422);
       });
 
-      it('una consulta completada emite UNA invitación: la base y, detrás, la del médico', async () => {
+      it('una consulta completada emite UNA invitación con SÓLO la base, aunque el médico tenga encuestas asociadas a sus consultas', async () => {
+        // Una asociación heredada de la escrita a mano, tal como quedó en la base.
+        await sql(
+          `INSERT INTO surveys.survey_assignments (id, survey_version_id, tenant_id,
+             target_type_concept_id, target_id, active, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, true, now(), now())`,
+          [
+            randomUUID(),
+            template.versionId,
+            TENANT,
+            SURVEYS.TARGET_CARE_TYPE,
+            SURVEYS.CARE_TYPE_CONSULTATION,
+          ],
+        );
         consultationBooking = await insertBooking({});
 
         await inTenant(() =>
@@ -751,12 +856,25 @@ describeIfDb(
         expect(invitations).toHaveLength(1);
         expect(invitations[0]).toMatchObject({
           survey_version_id: systemSurveyIds(TENANT, 'CONSULTATION').versionId,
-          extension_survey_version_id: template.versionId,
+          survey_assignment_id: systemSurveyIds(TENANT, 'CONSULTATION')
+            .assignmentId,
+          extension_survey_version_id: null,
         });
-        consultationInvitation = invitations[0].id;
       });
 
-      it('un servicio completado también lleva la del médico, asociada por service_catalog.id', async () => {
+      it('un servicio completado recibe sólo la del catálogo asociada a ese servicio (ni la base ni la escrita a mano)', async () => {
+        await sql(
+          `INSERT INTO surveys.survey_assignments (id, survey_version_id, tenant_id,
+             target_type_concept_id, target_id, active, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, true, now(), now())`,
+          [
+            randomUUID(),
+            template.versionId,
+            TENANT,
+            SURVEYS.TARGET_SERVICE,
+            ids.catalog,
+          ],
+        );
         serviceBooking = await insertBooking({ offering: true });
 
         await inTenant(() =>
@@ -769,9 +887,35 @@ describeIfDb(
         const invitations = await invitationsOf(serviceBooking);
         expect(invitations).toHaveLength(1);
         expect(invitations[0]).toMatchObject({
-          survey_version_id: systemSurveyIds(TENANT, 'SERVICE').versionId,
-          extension_survey_version_id: template.versionId,
+          survey_version_id: catalogTemplate.versionId,
+          extension_survey_version_id: null,
         });
+      });
+
+      it('una invitación anterior (la base con la escrita a mano detrás) sigue en la base, lista para responder', async () => {
+        // Así quedó lo emitido antes del 06/11/2026.
+        const booking = await insertBooking({});
+        consultationInvitation = randomUUID();
+        await sql(
+          `INSERT INTO surveys.survey_invitations (id, survey_version_id, extension_survey_version_id,
+             survey_assignment_id, tenant_id, patient_profile_id, appointment_booking_id,
+             status_concept_id, issued_at, expires_at, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now() + interval '30 days', now(), now())`,
+          [
+            consultationInvitation,
+            systemSurveyIds(TENANT, 'CONSULTATION').versionId,
+            template.versionId,
+            systemSurveyIds(TENANT, 'CONSULTATION').assignmentId,
+            TENANT,
+            PATIENT,
+            booking,
+            SURVEYS.INVITATION_PENDING,
+          ],
+        );
+        const mine = await inTenant(() =>
+          services().responses.listMyInvitations(patientActor),
+        );
+        expect(mine.map((i) => i.id)).toContain(consultationInvitation);
       });
 
       it('otro profesional no reparte la encuesta del médico en una reserva que no atendió', async () => {
@@ -817,7 +961,7 @@ describeIfDb(
         expect(invitation.extension_survey_version_id).toBeNull();
       });
 
-      it('el paciente ve primero las preguntas del sistema y después las del médico', async () => {
+      it('en esa invitación anterior el paciente ve primero las preguntas del sistema y después las del médico', async () => {
         const questionnaire = await inTenant(() =>
           services().responses.getMyQuestionnaire(
             consultationInvitation,
@@ -826,18 +970,21 @@ describeIfDb(
         );
 
         expect(questionnaire.title).toBe('Encuesta de su consulta médica');
-        expect(questionnaire.questions).toHaveLength(10);
+        expect(questionnaire.questions).toHaveLength(13);
         expect(questionnaire.questions.map((q) => q.source)).toEqual([
-          ...Array(9).fill('SYSTEM'),
+          ...Array(12).fill('SYSTEM'),
           'PRACTITIONER',
         ]);
         expect(questionnaire.questions.map((q) => q.position)).toEqual(
-          Array.from({ length: 10 }, (_, i) => i + 1),
+          Array.from({ length: 13 }, (_, i) => i + 1),
         );
-        expect(questionnaire.questions[9].required).toBe(false);
+        expect(
+          questionnaire.questions.slice(0, 12).map((q) => q.questionText),
+        ).toEqual(BASE_CONSULTATION.map((q) => q.text));
+        expect(questionnaire.questions[12].required).toBe(false);
       });
 
-      it('responder sin las obligatorias del sistema falla; con ellas, se registra y el médico lee sólo lo suyo', async () => {
+      it('responder la anterior sin las obligatorias del sistema falla; con ellas, se registra y el médico lee sólo lo suyo', async () => {
         const questionnaire = await inTenant(() =>
           services().responses.getMyQuestionnaire(
             consultationInvitation,
@@ -850,13 +997,14 @@ describeIfDb(
           inTenant(() =>
             services().responses.submitResponse(
               consultationInvitation,
-              { answers: [{ questionId: q[9].id, valueBoolean: true }] },
+              { answers: [{ questionId: q[12].id, valueBoolean: true }] },
               patientActor,
             ),
           ),
         ).rejects.toMatchObject({ status: 422 });
 
-        // Las 8 obligatorias de la base + la del médico (el comentario libre queda sin responder).
+        // Las 10 obligatorias de la base + la del médico (la medicación y el
+        // comentario libre, opcionales, quedan sin responder).
         await inTenant(() =>
           services().responses.submitResponse(
             consultationInvitation,
@@ -867,13 +1015,15 @@ describeIfDb(
                 { questionId: q[2].id, valueNumber: 5 },
                 { questionId: q[3].id, valueNumber: 5 },
                 { questionId: q[4].id, valueNumber: 5 },
+                { questionId: q[5].id, valueNumber: 4 },
+                { questionId: q[6].id, valueNumber: 5 },
                 {
-                  questionId: q[5].id,
+                  questionId: q[8].id,
                   valueChoices: ['No, no tuve ningún problema'],
                 },
-                { questionId: q[6].id, valueNumber: 4 },
-                { questionId: q[7].id, valueNumber: 9 },
-                { questionId: q[9].id, valueBoolean: true },
+                { questionId: q[9].id, valueNumber: 4 },
+                { questionId: q[10].id, valueNumber: 9 },
+                { questionId: q[12].id, valueBoolean: true },
               ],
             },
             patientActor,
@@ -896,7 +1046,7 @@ describeIfDb(
               )
             )[0].n,
           ),
-        ).toBe(9);
+        ).toBe(11);
 
         const forDoctor = await inTenant(() =>
           services().responses.listTemplateResponses(template.id, doctorActor),
@@ -980,7 +1130,7 @@ describeIfDb(
         expect(doctorBefore.totals.issued).toBeGreaterThan(0);
       });
 
-      it('las preguntas y respuestas de la base Y de la extensión cuentan en el médico que atendió', async () => {
+      it('en invitaciones anteriores, las preguntas de la base Y de la extensión cuentan en el médico que atendió', async () => {
         await sql(
           `INSERT INTO scheduling.schedulable_resources (id, tenant_id, resource_type_concept_id,
              resource_ref_type, resource_ref_id, name, state_concept_id, created_at, updated_at)
@@ -1000,12 +1150,15 @@ describeIfDb(
         await inTenant(() =>
           services().templates.publishVersion(tpl.id, 1, {}, doc3Actor),
         );
-        await inTenant(() =>
-          services().assignments.createAssignment(
-            { surveyVersionId: tpl.versionId, targetType: 'CARE_TYPE' },
-            doc3Actor,
+        // La escrita a mano ya no se asocia (sólo del catálogo).
+        await expect(
+          inTenant(() =>
+            services().assignments.createAssignment(
+              { surveyVersionId: tpl.versionId, targetType: 'CARE_TYPE' },
+              doc3Actor,
+            ),
           ),
-        );
+        ).rejects.toMatchObject({ status: 422 });
 
         for (let i = 0; i < 5; i += 1) {
           const patient = randomUUID();
@@ -1017,7 +1170,13 @@ describeIfDb(
             ),
           );
           const [invitation] = await invitationsOf(booking);
-          expect(invitation.extension_survey_version_id).toBe(tpl.versionId);
+          // Hoy sale sólo la base; las anteriores llevaban la extensión detrás,
+          // y así se reproduce lo que quedó en la base de datos.
+          expect(invitation.extension_survey_version_id).toBeNull();
+          await sql(
+            'UPDATE surveys.survey_invitations SET extension_survey_version_id = $1 WHERE id = $2',
+            [tpl.versionId, invitation.id],
+          );
           await answerAll(invitation.id, patient);
         }
 

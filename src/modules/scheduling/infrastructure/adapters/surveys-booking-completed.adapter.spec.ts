@@ -7,7 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-import { runWithTenant } from '../../../../common';
+import { ResourceNotFoundException, runWithTenant } from '../../../../common';
 import { SurveysBookingCompletedAdapter } from './surveys-booking-completed.adapter';
 
 const actor = { id: 'usr-doc', roles: ['PRACTITIONER'] } as any;
@@ -21,11 +21,15 @@ function build() {
     }),
   };
   const logger = { setContext: mockFn(), warn: mockFn(), error: mockFn() };
+  // La emisión corre en un savepoint de la transacción en curso.
+  const em: any = { transactional: mockFn((cb: any) => cb(em)) };
+  em.fork = mockFn(() => em);
   const adapter = new SurveysBookingCompletedAdapter(
     surveys as any,
+    em,
     logger as any,
   );
-  return { adapter, surveys, logger };
+  return { adapter, surveys, logger, em };
 }
 
 describe('SurveysBookingCompletedAdapter', () => {
@@ -60,6 +64,25 @@ describe('SurveysBookingCompletedAdapter', () => {
       tenantId: 'ten-1',
       reason: 'base caída',
     });
+  });
+
+  it('emite dentro de un savepoint de la transacción en curso', async () => {
+    const d = build();
+    await d.adapter.onBookingCompleted('bkg-1', actor);
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    expect(d.em.transactional).toHaveBeenCalledTimes(1);
+  });
+
+  it('lo esperable (la reserva no se ve, precondición) va a warn y no a error', async () => {
+    const d = build();
+    d.surveys.issueForCompletedBooking.mockRejectedValue(
+      new ResourceNotFoundException('Reserva no encontrada'),
+    );
+    await expect(
+      d.adapter.onBookingCompleted('bkg-1', actor),
+    ).resolves.toBeUndefined();
+    expect(d.logger.warn).toHaveBeenCalledTimes(1);
+    expect(d.logger.error).not.toHaveBeenCalled();
   });
 
   it('tampoco lanza ante un error que no es una Error', async () => {

@@ -40,3 +40,15 @@ export {
   type SurveyCatalogOrigin,
   type SurveyCatalogScope,
 } from './survey-catalog.dto';
+export {
+  StandardSurveySourceDto,
+  StandardSurveyQuestionDto,
+  StandardSurveyDto,
+  StandardSurveyCatalogDto,
+  BaseSurveyQuestionDto,
+  ConsultationSurveyRowDto,
+  ServiceSurveyAssignmentDto,
+  ServiceSurveyRowDto,
+  ServiceSurveyAssignmentsDto,
+  ImportServiceSurveyDto,
+} from './service-assignments.dto';

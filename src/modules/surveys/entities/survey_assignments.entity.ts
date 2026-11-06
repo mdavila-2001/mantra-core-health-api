@@ -31,6 +31,22 @@ export class SurveyAssignments {
   tenantId!: string;
 
   /**
+   * Copia del profesional dueño de la plantilla de la versión asignada (v4.2.91).
+   * Existe porque un destino `SERVICE` (`billing.service_catalog.id`) lo
+   * comparten todos los profesionales que ofrecen ese servicio, y el índice
+   * `uq_survey_assignments_active_service_owner` —una asignación SERVICE activa
+   * por servicio y profesional— no puede leer otra tabla. Nula en las de
+   * sistema. El disparador `trg_survey_assignments_owner_from_template` la
+   * completa si llega nula y rechaza un valor distinto del de la plantilla.
+   */
+  @Property({
+    fieldName: 'owner_practitioner_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → profiles.health_practitioner_profiles
+  ownerPractitionerId?: string;
+
+  /**
    * Identificador asociado a target type concept.
    */
   @Property({ fieldName: 'target_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

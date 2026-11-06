@@ -93,6 +93,13 @@ DO $$ BEGIN
         REFERENCES "directory"."tenants" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "surveys"."survey_assignments"
+        ADD CONSTRAINT "fk_survey_assignments_owner_practitioner_id" FOREIGN KEY ("owner_practitioner_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "surveys"."survey_assignments"
