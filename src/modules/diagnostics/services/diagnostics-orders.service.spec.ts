@@ -35,6 +35,11 @@ function build() {
   const scopeRepo = {
     page: mockFn().mockResolvedValue({ rows: [], hidden: 0 }),
   };
+  // Reports of this tenant's orders custodied by the performing laboratory.
+  const requesterReports = {
+    ofIssuedOrders: mockFn().mockResolvedValue({ rows: [], hidden: 0 }),
+    visibilityOf: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new DiagnosticsOrdersService(
     em as any,
     repo as any,
@@ -43,6 +48,7 @@ function build() {
     basedOnNotes as any,
     scopeFilter as any,
     scopeRepo as any,
+    requesterReports as any,
   );
   return {
     service,
@@ -53,6 +59,7 @@ function build() {
     basedOnNotes,
     scopeFilter,
     scopeRepo,
+    requesterReports,
   };
 }
 
@@ -322,6 +329,87 @@ describe('DiagnosticsOrdersService', () => {
       expect(out.orders.map((o) => o.id)).toEqual(['o1']);
       expect(out.reports.map((r) => r.id)).toEqual(['r1']);
       expect(out.hiddenByScope).toEqual({ orders: 2, reports: 1 });
+    });
+
+    it('con especialidades los informes de órdenes propias en otro custodio siguen el alcance y suman a lo oculto', async () => {
+      const d = build();
+      d.scopeFilter.build.mockResolvedValue(FILTER);
+      d.requesterReports.ofIssuedOrders.mockResolvedValue({
+        rows: [],
+        hidden: 3,
+      });
+
+      const out = await d.service.getPatientOrders(
+        TENANT,
+        PATIENT,
+        50,
+        SPECIALTIES,
+      );
+
+      expect(d.requesterReports.ofIssuedOrders).toHaveBeenCalledWith(
+        TENANT,
+        PATIENT,
+        51,
+        FILTER,
+      );
+      expect(out.hiddenByScope).toEqual({ orders: 0, reports: 3 });
+    });
+  });
+
+  describe('H1 · el informe de la orden propia que custodia el laboratorio', () => {
+    it('suma los informes de las órdenes del tenant, del más nuevo al más viejo, con un solo tope', async () => {
+      const d = build();
+      d.repo.findReportsByPatient.mockResolvedValue([
+        { ...report('own'), createdAt: new Date('2026-08-14T09:00:00Z') },
+      ]);
+      d.requesterReports.ofIssuedOrders.mockResolvedValue({
+        rows: [
+          { ...report('lab-new'), createdAt: new Date('2026-08-15T09:00:00Z') },
+          { ...report('lab-old'), createdAt: new Date('2026-08-13T09:00:00Z') },
+        ],
+        hidden: 0,
+      });
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 2, FULL);
+
+      expect(d.requesterReports.ofIssuedOrders).toHaveBeenCalledWith(
+        TENANT,
+        PATIENT,
+        3,
+        null,
+      );
+      expect(out.reports.map((r) => r.id)).toEqual(['lab-new', 'own']);
+      expect(out.truncated).toEqual(['reports']);
+      expect(out.hiddenByScope).toBeUndefined();
+    });
+
+    it('expone la versión liberada y si quedó retenida para el paciente', async () => {
+      const d = build();
+      d.repo.findReportsByPatient.mockResolvedValue([
+        { ...report('held'), currentReleasedVersionId: 'v-held' },
+        { ...report('visible'), currentReleasedVersionId: 'v-visible' },
+        report('unreleased'),
+      ]);
+      d.requesterReports.visibilityOf.mockResolvedValue(
+        new Map([
+          ['v-held', 'HELD'],
+          ['v-visible', 'VISIBLE'],
+        ]),
+      );
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
+
+      expect(d.requesterReports.visibilityOf).toHaveBeenCalledWith([
+        'v-held',
+        'v-visible',
+      ]);
+      expect(
+        out.reports.map((r) => [r.releasedVersionId, r.patientVisibility]),
+      ).toEqual([
+        ['v-held', 'HELD'],
+        ['v-visible', 'VISIBLE'],
+        [null, null],
+      ]);
     });
   });
 });

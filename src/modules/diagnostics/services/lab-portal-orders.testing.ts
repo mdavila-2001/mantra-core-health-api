@@ -81,6 +81,7 @@ export function build(
     setContext: mockFn(),
     info: mockFn(),
   };
+  const drafts = { findByOrders: mockFn(async () => []) };
   const service = new LabPortalOrdersService(
     em as never,
     repo as never,
@@ -89,6 +90,17 @@ export function build(
     snapshot as never,
     outcome,
     logger as never,
+    drafts as never,
   );
-  return { service, repo, specimens, work, tx, specimen, workOrder, events };
+  return {
+    service,
+    repo,
+    specimens,
+    work,
+    tx,
+    specimen,
+    workOrder,
+    events,
+    drafts,
+  };
 }

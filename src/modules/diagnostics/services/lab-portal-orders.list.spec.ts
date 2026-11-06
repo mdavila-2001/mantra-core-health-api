@@ -12,7 +12,7 @@ const orders = (n: number): any[] =>
     createdAt: new Date(Date.UTC(2026, 10, 1, 10, n - i)),
   }));
 
-function build(rows: (page: any) => any[], total: number) {
+function build(rows: (page: any) => any[], total: number, drafts: any[] = []) {
   const repo = {
     findOrders: mockFn(async (_em: any, _t: string, page: any) => rows(page)),
     countOrders: mockFn(async () => total),
@@ -32,6 +32,7 @@ function build(rows: (page: any) => any[], total: number) {
       files: [],
     })),
   };
+  const draftsRepo = { findByOrders: mockFn(async () => drafts) };
   const service = new LabPortalOrdersService(
     { fork: () => ({}) } as any,
     repo as any,
@@ -40,8 +41,9 @@ function build(rows: (page: any) => any[], total: number) {
     snapshot as any,
     {} as any,
     { setContext: mockFn(), info: mockFn() } as any,
+    draftsRepo as any,
   );
-  return { service, repo, snapshot };
+  return { service, repo, snapshot, draftsRepo };
 }
 
 describe('LabPortalOrdersService.list', () => {
@@ -78,6 +80,29 @@ describe('LabPortalOrdersService.list', () => {
     expect(page.items).toHaveLength(2);
     expect(page).not.toHaveProperty('nextCursor');
     expect(page.count).toBe(102);
+  });
+
+  it('each order carries its written report state, read in one batch for the page', async () => {
+    const t = build(() => orders(3), 3, [
+      { serviceRequestId: 'sr-3', statusCode: 'DRAFT' },
+      {
+        serviceRequestId: 'sr-2',
+        statusCode: 'PUBLISHED',
+        publishedVersionId: 'v-2',
+      },
+    ]);
+    const page = await t.service.list(LAB);
+    expect(page.items.map((i) => i.report)).toEqual([
+      { draftStatus: 'DRAFT' },
+      { draftStatus: 'PUBLISHED', publishedVersionId: 'v-2' },
+      { draftStatus: null },
+    ]);
+    expect(t.draftsRepo.findByOrders).toHaveBeenCalledTimes(1);
+    expect(t.draftsRepo.findByOrders).toHaveBeenCalledWith(
+      expect.anything(),
+      LAB,
+      ['sr-3', 'sr-2', 'sr-1'],
+    );
   });
 
   it.each(['not-a-cursor', Buffer.from('{"id":"x"}').toString('base64url')])(

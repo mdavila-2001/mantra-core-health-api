@@ -13,32 +13,9 @@ import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
 } from '../../clinical/service-request-category';
+import { DiagnosticResultFileDto } from './patient-result-file.dto';
 
-/**
- * Un archivo del informe: lo que se descarga.
- *
- * No transporta el contenido ni una URL firmada. El `fileId` va a
- * `GET /common/files/{id}/content`, que ya resuelve bytes, tipo y nombre y que
- * ya decide si quien pide puede descargarlo. Duplicar acá esa descarga sería
- * una segunda implementación de algo que funciona.
- */
-export class DiagnosticResultFileDto {
-  /** Identificador del enlace informe↔archivo. */
-  @ApiProperty({ format: 'uuid' }) id!: string;
-
-  /** Archivo en `common.files`; se descarga por `/common/files/{id}/content`. */
-  @ApiProperty({ format: 'uuid' }) fileId!: string;
-
-  /** Qué es el archivo dentro del informe (concept id). */
-  @ApiProperty({ format: 'uuid' }) contentRoleConceptId!: string;
-
-  /** Formato de presentación (concept id), si se declaró. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  presentationFormatConceptId?: string;
-
-  /** Posición dentro del informe. */
-  @ApiPropertyOptional() ordinal?: number;
-}
+export { DiagnosticResultFileDto } from './patient-result-file.dto';
 
 /**
  * Un resultado que el paciente puede ver.
