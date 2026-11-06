@@ -4,3 +4,6 @@ export { SurveysResponsesService } from './surveys-responses.service';
 export { SurveysSystemTemplatesService } from './surveys-system-templates.service';
 export { SurveysInsightsService } from './surveys-insights.service';
 export { SurveysCatalogService } from './surveys-catalog.service';
+export { SurveysServiceAssignmentsService } from './surveys-service-assignments.service';
+export { ServiceSurveyOwnership } from './service-survey-ownership';
+export { StandardSurveyMaterializer } from './standard-survey-materializer';

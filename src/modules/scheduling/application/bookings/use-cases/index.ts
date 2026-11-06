@@ -2,6 +2,7 @@ import { AcceptBookingUseCase } from './accept-booking.use-case';
 import { CancelBookingUseCase } from './cancel-booking.use-case';
 import { CheckInBookingUseCase } from './check-in-booking.use-case';
 import { CompleteAppointmentUseCase } from './complete-appointment.use-case';
+import { CompleteLinkedBookingUseCase } from './complete-linked-booking.use-case';
 import { ConfirmBookingUseCase } from './confirm-booking.use-case';
 import { ConfirmPaymentReceiptUseCase } from './confirm-payment-receipt.use-case';
 import { CreateDirectAppointmentUseCase } from './create-direct-appointment.use-case';
@@ -29,6 +30,7 @@ export const bookingUseCases = [
   CancelBookingUseCase,
   CheckInBookingUseCase,
   CompleteAppointmentUseCase,
+  CompleteLinkedBookingUseCase,
   ConfirmBookingUseCase,
   ConfirmPaymentReceiptUseCase,
   CreateDirectAppointmentUseCase,

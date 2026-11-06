@@ -11,28 +11,34 @@ diagnóstico ALOVIDA marcaba **todas `AUSENTE`**.
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+<!-- Medido el 2026-11-06 sobre claude/amazing-brown-f2c2a9 (5594749d + cambios de la encuesta por servicio). Repetir con:
   find src/modules/surveys -name '*.controller.ts' | wc -l
   find src/modules/surveys -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/surveys -name '*.entity.ts' | wc -l
   find src/modules/surveys -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 17 rutas HTTP, 7 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **6 controllers, 23 rutas HTTP, 8 entidades y 7 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Su `*.module.ts` no declara `imports` de otros módulos.
 
-Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `survey_answers`, `survey_assignments`, `survey_invitations`, `survey_questions`, `survey_responses`, `survey_templates`, `survey_versions`.
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `survey_answers`, `survey_assignments`, `survey_invitation_reminders`, `survey_invitations`, `survey_questions`, `survey_responses`, `survey_templates`, `survey_versions`.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
 | `POST /surveys/assignments` | PRACTITIONER, CLINICIAN | `surveys-assignments` |
 | `POST /surveys/invitations` | PRACTITIONER, CLINICIAN | `surveys-assignments` |
+| `GET /surveys/insights` | PRACTITIONER, CLINICIAN | `surveys-insights` |
 | `GET /surveys/me/invitations` | sesión | `surveys-patient` |
 | `GET /surveys/me/invitations/:id` | sesión | `surveys-patient` |
 | `POST /surveys/me/invitations/:id/responses` | sesión | `surveys-patient` |
+| `GET /surveys/catalog` | PRACTITIONER, CLINICIAN | `surveys-catalog` |
+| `GET /surveys/standard-catalog` | PRACTITIONER, CLINICIAN | `surveys-service-assignments` |
+| `GET /surveys/service-assignments` | PRACTITIONER, CLINICIAN | `surveys-service-assignments` |
+| `PUT /surveys/service-assignments/:serviceId` | PRACTITIONER, CLINICIAN | `surveys-service-assignments` |
+| `DELETE /surveys/service-assignments/:serviceId` | PRACTITIONER, CLINICIAN | `surveys-service-assignments` |
 | `POST /surveys/templates` | PRACTITIONER, CLINICIAN | `surveys-templates` |
 | `GET /surveys/templates` | PRACTITIONER, CLINICIAN | `surveys-templates` |
 | `GET /surveys/templates/:id` | PRACTITIONER, CLINICIAN | `surveys-templates` |
@@ -66,7 +72,7 @@ por dominio propio.
 
 | Método y ruta | Permiso | Descripción |
 |---|---|---|
-| `POST /surveys/templates` | `PRACTITIONER` `CLINICIAN` | Crea la encuesta y su versión 1 en borrador |
+| `POST /surveys/templates` | `PRACTITIONER` `CLINICIAN` | Crea la encuesta y su versión 1 en borrador. El front ya no la usa (sólo se importa del catálogo); la ruta se mantiene para no romper consumidores |
 | `GET /surveys/templates` | `PRACTITIONER` `CLINICIAN` | Lista las encuestas propias |
 | `GET /surveys/templates/:id` | `PRACTITIONER` `CLINICIAN` | Encuesta con el cuestionario de su última versión |
 | `POST /surveys/templates/:id/questions` | `PRACTITIONER` `CLINICIAN` | Agrega pregunta (tipo, obligatoriedad, opciones, escala) |
@@ -79,6 +85,11 @@ por dominio propio.
 | `GET /surveys/me/invitations/:id` | autenticado con perfil de paciente | Abre el cuestionario a responder |
 | `POST /surveys/me/invitations/:id/responses` | autenticado con perfil de paciente | Responde |
 | `GET /surveys/insights` | `PRACTITIONER` `CLINICIAN` | Resumen agregado de las encuestas del profesional (ver abajo) |
+| `GET /surveys/catalog` | `PRACTITIONER` `CLINICIAN` | Las encuestas base del sistema y las propias del profesional, cada una con sus servicios |
+| `GET /surveys/standard-catalog` | `PRACTITIONER` `CLINICIAN` | Catálogo estándar de encuestas por tipo de servicio (`surveys-standard.catalog.ts`); no es `GET /surveys/catalog`, que ya existía con otra forma |
+| `GET /surveys/service-assignments` | `PRACTITIONER` `CLINICIAN` | La cita médica (fija) y cada servicio activo del profesional con su encuesta |
+| `PUT /surveys/service-assignments/:serviceId` | `PRACTITIONER` `CLINICIAN` | Importa una plantilla del catálogo al servicio y reemplaza la anterior |
+| `DELETE /surveys/service-assignments/:serviceId` | `PRACTITIONER` `CLINICIAN` | Quita la encuesta del servicio: vuelve a la base de servicio del sistema (204) |
 
 ### Resumen del profesional (`GET /surveys/insights`) y su privacidad
 
@@ -131,10 +142,14 @@ Es un riesgo residual aceptado.
   `owner_id` = tenant) y su asignación de sistema (`TARGET_SYSTEM_BASE`). Ningún
   profesional la modifica, publica, desactiva ni asigna: 403
   `SURVEY_SYSTEM_TEMPLATE_IMMUTABLE`.
-- **Una invitación por reserva completada.** Lleva las preguntas base primero y,
-  detrás, las de la encuesta del profesional que atendió
-  (`survey_invitations.extension_survey_version_id`). Cada pregunta que ve el paciente
-  trae `source`: `SYSTEM` o `PRACTITIONER`. El envío se valida contra la unión.
+- **Una invitación por reserva completada, y qué lleva (06/11/2026).** Una consulta
+  recibe **sólo** la encuesta base de consulta del sistema. Un servicio recibe la
+  encuesta del catálogo estándar que el profesional que atendió le importó o, si no
+  hay, la base de servicio. Las encuestas escritas a mano ya no se emiten (ni como
+  extensión ni sueltas). Las invitaciones anteriores que llevan una extensión
+  (`survey_invitations.extension_survey_version_id`) siguen contestables y legibles:
+  cada pregunta que ve el paciente trae `source` (`SYSTEM` o `PRACTITIONER`) y el
+  envío se valida contra la unión.
 - **Las preguntas del profesional son siempre opcionales.** El servidor guarda
   `required = false` en el alta y la edición, y al responder una invitación base no
   exige las de la extensión aunque una versión anterior las guardara obligatorias.
@@ -181,9 +196,10 @@ Cómo se sostiene acá:
 1. **No existe la columna.** `survey_responses` no tiene ningún campo de
    visibilidad pública. No hay estado que alguien pueda fijar por error.
 2. **El paciente no se identifica por parámetro.** Las rutas `/surveys/me/*` no
-   aceptan `patientProfileId`: sale del claim `pid` de la sesión. Este filtro no
-   incorpora el tenant de la sesión, por lo que no aísla a un paciente que
-   atiende en más de una organización.
+   aceptan `patientProfileId`: sale del claim `pid` de la sesión, y la lectura
+   se acota además al tenant activo. Una cuenta con rol `PATIENT` cuyo token no
+   trae `pid` recibe `[]` en `GET /surveys/me/invitations` (no 403); sin rol de
+   paciente sigue siendo 403.
 3. **La autorización de lectura es por dueño, no por rol.** Dos profesionales de
    la misma organización comparten roles y no comparten instrumentos; las
    respuestas se leen colgando de `GET /surveys/templates/:id/responses`, que
@@ -200,23 +216,56 @@ vistas de paciente de M41 scheduling.
 
 ## Tests
 
-- Unit: `corepack yarn test src/modules/surveys --runInBand --silent` — 3 suites
-  y 65 pruebas aprobadas el 2026-10-05. Cubre propiedad de plantilla,
-  invitación ajena, sesión sin perfil y validación por tipo; no cubre aislamiento
-  de tenant en autoservicio ni carreras de persistencia.
+- Unit: `corepack yarn test src/modules/surveys --runInBand --silent` — 13 suites
+  y 421 pruebas aprobadas el 2026-11-06. Cubre propiedad de plantilla,
+  invitación ajena, sesión sin perfil, validación por tipo, la importación del
+  catálogo por servicio (dueño, 403/404/409, baja antes que alta, idempotencia) y
+  el reemplazo de la base de servicio al emitir.
+- Integración contra PostgreSQL real (opt-in `SURVEYS_IT_DB_URL`, base
+  desechable): `test/integration/surveys-encuesta-base.int-spec.ts` (31) y
+  `test/integration/surveys-encuesta-por-servicio.int-spec.ts` (17: importación,
+  idempotencia en paralelo, índice único, tenant de la reserva, cierre del
+  encuentro → turno completado → invitación del paciente, la teleconsulta que no
+  completa con el encuentro abierto, y RLS forzado con `mantra_app`, con su caso
+  negativo), aprobadas el 2026-11-06.
 
 ## Notas de integración
 
 ### 1. La emisión es automática y también un comando
 
 Al completarse una reserva, `scheduling` avisa por su puerto `BOOKING_COMPLETED_PORT`
-(adaptador `SurveysBookingCompletedAdapter`) **después de confirmar la transacción de
-cierre**; un fallo se registra y nunca revierte el cierre. El mismo
+(adaptador `SurveysBookingCompletedAdapter`) cuando terminó la transacción de cierre
+del caso de uso: confirmada si la petición no tiene una propia; con `RLS_ENFORCE=true`
+la petición entera es una transacción y se confirma al responder. El adaptador emite en
+un savepoint de la transacción en curso, así que un fallo descarta sólo la encuesta y
+nunca revierte el cierre. El mismo
 `SurveysAssignmentsService.issueForBooking` es el que atiende
 `POST /surveys/invitations`, que sirve para reintentar: es idempotente. Una reserva sin
 oferta de servicio (`practitionerServiceOfferingId` nulo) es una consulta; con oferta,
 un servicio. `SurveysModule` no importa `SchedulingModule` (sólo lee sus entidades), así
 que no hay ciclo.
+
+La reserva llega a `BOOKING_COMPLETED` por «Completar la cita» de la agenda
+(`POST /scheduling/bookings/:id/complete`) y también al **cerrar la consulta**:
+cerrar el encuentro clínico (`POST /clinical/encounters/:id/close`,
+`EncounterCloseService`) avisa por
+`ENCOUNTER_CLOSED_PORT` de `clinical` (adaptador
+`SchedulingEncounterClosedAdapter`, que resuelve la agenda con `ModuleRef` para
+no cerrar el ciclo `scheduling → community → clinical`), y
+`CompleteLinkedBookingUseCase` completa la reserva atada a la cita clínica del
+encuentro (`appointment_bookings.appointment_id`). Sigue la máquina de estados:
+una en curso se completa, una confirmada o con llegada registrada se inicia y se
+completa, una ya completada se deja como está y una cancelada, ausente o sin
+confirmar no se toca. Pasa por los mismos casos de uso y la misma autorización
+que la agenda, así que la encuesta sale por el mismo puerto, todo en un savepoint.
+Un fallo esperable (quien cierra no opera esa agenda, el turno ya cambió por otra vía)
+queda en `warn`; uno inesperado, en `error`; ninguno deshace el cierre.
+
+Terminar la teleconsulta (`clinical_ext`, fin de la sesión virtual) **no** completa el
+turno mientras el encuentro clínico siga abierto: le quitaría al profesional la base
+para seguir escribiendo la consulta y mandaría la encuesta antes del cierre. El turno
+se completa al cerrar el encuentro; si el encuentro ya estaba cerrado, el fin de la
+sesión sólo repite el aviso (idempotente).
 
 ### 2. Claim `pid` expuesto en `AuthenticatedUser` — cambio en contrato compartido
 
@@ -238,9 +287,13 @@ contrato anterior cambia de comportamiento.
   puede omitir). Cualquier otro tipo se rechaza al crear (422), con el motivo explícito.
 - `APPOINTMENT`: una reserva del tenant atendida por el profesional.
 
-Una asignación sólo reparte la encuesta del profesional que atendió la reserva. Si
-aplican varias, la más específica (cita > servicio > tipo de atención) viaja dentro de
-la invitación base y las demás salen como invitaciones sueltas.
+`POST /surveys/assignments` sólo asocia plantillas importadas del catálogo
+(`standard_catalog_code`): una escrita a mano responde 422
+`SURVEY_ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE`, sea cual sea el destino, porque ya no
+se emitiría nunca. La ruta se mantiene para no romper consumidores; el front asocia
+con `PUT /surveys/service-assignments/:serviceId`. De las asignaciones activas, sólo
+reparte una `SERVICE` importada del profesional que atendió la reserva de ese
+servicio; entre varias, la más reciente y, de una plantilla, su versión más alta.
 
 La creación automática de una «Satisfacción — <servicio>» por servicio nuevo (FT-31) se
 retiró: la encuesta base la reemplaza. Las que ya existen no se borraron.
@@ -252,11 +305,69 @@ el umbral mínimo de participantes (decisión **D-13**), que no está definido: 
 puede modelar la encuesta sin el umbral, pero no se puede publicar ningún
 agregado sin él»*. El módulo no los ofrece.
 
+### 5. Encuesta estandarizada por servicio (06/11/2026)
+
+El profesional ya no escribe encuestas: a cada servicio suyo le importa una
+plantilla del catálogo estándar (`surveys-standard.catalog.ts`, instrumentos de
+dominio público citados en cada pregunta).
+
+- **Qué es «sus servicios».** Las ofertas activas del profesional
+  (`scheduling.practitioner_service_offerings`, `OFFERING_ACTIVE`) cuyo servicio
+  (`billing.service_catalog`) es de una práctica del tenant activo. Un servicio
+  fuera de esa lista responde 403 `SURVEY_SERVICE_NOT_OWNED`, también si no
+  existe. Un código fuera del catálogo responde 404
+  `SURVEY_CATALOG_CODE_UNKNOWN`.
+- **Importar materializa una plantilla propia**, publicada (versión 1
+  inmutable, preguntas siempre opcionales) con
+  `survey_templates.standard_catalog_code`, una por `(tenant, profesional,
+  código)` y con ids deterministas: importar dos veces, o en paralelo, reutiliza
+  la misma. La misma plantilla puede usarse en varios servicios, cada uno con su
+  asignación.
+- **Una activa por servicio y profesional.** El `PUT` bloquea las ofertas del
+  servicio, desactiva la asignación activa anterior, la escribe en la base y
+  recién entonces crea la nueva, todo en una transacción. Lo respalda el índice
+  único parcial `uq_survey_assignments_active_service_owner` (v4.2.91), sobre la
+  copia `survey_assignments.owner_practitioner_id` que el servicio fija y un
+  disparador valida contra la plantilla; perder la carrera responde 409
+  `SURVEY_ASSIGNMENT_ALREADY_ACTIVE`. Repetir el `PUT` con la encuesta vigente
+  no cambia nada.
+- **La importada reemplaza a la base de servicio.** Al completarse una reserva de
+  ese servicio, la invitación lleva la plantilla importada **en lugar de** la
+  base de servicio del sistema: su núcleo copia literalmente el de la base y
+  emitir las dos repetiría las preguntas. Una encuesta escrita a mano ya no se
+  emite. La cita médica sin servicio usa
+  siempre la base de consulta: no se reemplaza ni se quita (la fila «Cita
+  médica» de `GET /surveys/service-assignments` es `replaceable: false`).
+- **Quitar** (`DELETE`) desactiva la asignación; la plantilla queda y lo ya
+  emitido sigue siendo contestable.
+- **`GET /surveys/service-assignments`** trae, además, `consultation.questions` (las
+  preguntas de la base de consulta vigente, de `SYSTEM_BASE_SURVEYS`) y
+  `services[].serviceKind`, el tipo de servicio derivado en el servidor del nombre
+  del servicio (`service-kind.ts`, con la tabla de reglas): `billing.service_catalog`
+  no tiene columna de tipo y el nombre sale del repositorio universal de servicios.
+  Lo no reconocido es `OTHER`. Orienta qué plantilla sugerir; no restringe.
+
+### 6. La emisión del cierre usa el tenant de la reserva
+
+`scheduling` autoriza completar una reserva por agenda propia
+(`BookingAccess.loadForOperation`), no por el tenant activo de la sesión. La
+emisión automática (`issueForCompletedBooking`) corre por eso en el tenant de la
+reserva, que es donde la ve el paciente: con el de la sesión respondía «Reserva no
+encontrada», el adaptador lo registraba y el paciente se quedaba sin encuesta. La
+emisión manual (`POST /surveys/invitations`) sigue acotada al tenant de la sesión.
+
+Con `RLS_ENFORCE=true` la reserva sólo se ve en el tenant de la petición
+(`app.current_tenant_id`): una reserva de otra organización no se puede completar ni
+emitir desde esa sesión (404), y la emisión escribe en el tenant de la petición, que es
+el de la reserva. Lo prueba `surveys-encuesta-por-servicio.int-spec.ts` con el parche
+de RLS y el rol `mantra_app`, incluido el caso negativo.
+
 ## Runbook: reservas completadas sin invitación
 
 La emisión automática no reintenta: si falla (base caída, conceptos sin sembrar), el
-cierre de la atención queda bien y se registra un `error` de
-`SurveysBookingCompletedAdapter` con `bookingId`, `tenantId` y `reason`. No hay
+cierre de la atención queda bien y `SurveysBookingCompletedAdapter` registra
+`bookingId`, `tenantId` y `reason` (`warn` si es esperable, como una reserva que la
+sesión no ve; `error` si no). No hay
 barrido automático ni endpoint de listado.
 
 1. Listar las reservas completadas del tenant sin ninguna invitación:

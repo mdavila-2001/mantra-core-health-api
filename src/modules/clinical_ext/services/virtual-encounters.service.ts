@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -21,6 +21,10 @@ import type { Encounters } from '../../clinical/entities';
 import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
 import { lockLogicalKey } from './clinical-ext-access';
 import { CLIN } from '../../clinical/clinical.concepts';
+import {
+  ENCOUNTER_CLOSED_PORT,
+  type EncounterClosedPort,
+} from '../../clinical/ports/encounter-closed.port';
 
 /**
  * Telesalud (UC-18-12): alta de la sesión virtual (scheduled), unión (in-progress)
@@ -41,6 +45,10 @@ export class VirtualEncountersService {
     private readonly encountersRepo: VirtualEncountersRepository,
     private readonly clinicalEncountersRepo: EncountersRepository,
     private readonly logger: PinoLogger,
+    // El fin de la teleconsulta completa el turno de la agenda (y emite la
+    // encuesta), por el mismo puerto que el cierre del encuentro. No lanza.
+    @Inject(ENCOUNTER_CLOSED_PORT)
+    private readonly encounterClosed: EncounterClosedPort,
   ) {
     this.logger.setContext(VirtualEncountersService.name);
   }
@@ -142,13 +150,20 @@ export class VirtualEncountersService {
       { operation: 'clinical_ext.virtual_encounter.end', id },
       'Ending virtual encounter',
     );
-    return this.em.transactional(async (tx) => {
+    // La cita clínica del encuentro, sólo si el encuentro ya está cerrado.
+    let appointmentId: string | undefined;
+    const ended = await this.em.transactional(async (tx) => {
       const due = await this.encountersRepo.findById(tx, id);
       if (!due)
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
-      await this.requireEncounterParticipant(tx, due.encounterId, actor, false);
+      const encounter = await this.requireEncounterParticipant(
+        tx,
+        due.encounterId,
+        actor,
+        false,
+      );
       if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('La sesión no está en progreso', {
           id,
@@ -159,6 +174,14 @@ export class VirtualEncountersService {
       due.endedAt = new Date();
       due.recordingFileId = dto.recordingFileId;
       touch(due, actor.id);
+      // El turno se completa cuando se CIERRA el encuentro clínico, no al
+      // cortar la videollamada: completarlo antes le quitaría al profesional la
+      // base para seguir escribiendo la consulta y mandaría la encuesta antes
+      // del cierre. Si el encuentro ya está cerrado, el fin de la sesión sólo
+      // repite el aviso (idempotente: el turno ya está completado).
+      if (encounter.statusConceptId === CLIN.ENCOUNTER_FINISHED) {
+        appointmentId = encounter.appointmentId;
+      }
 
       return {
         id: due.id,
@@ -166,6 +189,14 @@ export class VirtualEncountersService {
         statusConceptId: due.statusConceptId,
       };
     });
+
+    // Terminada la transacción del fin de la sesión. Un fallo de la agenda no
+    // lo deshace (el puerto no lanza y trabaja en un savepoint).
+    await this.encounterClosed.onEncounterClosed(
+      { encounterId: ended.encounterId, appointmentId },
+      actor,
+    );
+    return ended;
   }
 
   /**

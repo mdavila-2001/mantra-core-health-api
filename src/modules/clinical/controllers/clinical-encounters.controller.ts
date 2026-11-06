@@ -18,6 +18,7 @@ import {
 } from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { CareEpisodesService, EncountersService } from '../services';
+import { EncounterCloseService } from '../services/encounter-close.service';
 import {
   AttachFileToEncounterDto,
   CreateCareEpisodeDto,
@@ -67,6 +68,7 @@ export class ClinicalEncountersController {
   constructor(
     private readonly episodesService: CareEpisodesService,
     private readonly encountersService: EncountersService,
+    private readonly encounterClose: EncounterCloseService,
   ) {}
 
   /** UC-08-01. */
@@ -119,7 +121,8 @@ export class ClinicalEncountersController {
     @Body() dto: CloseEncounterDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<EncounterResponseDto> {
-    return this.encountersService.close(id, dto, actor);
+    // Cierra y completa el turno de la agenda que el encuentro atendía.
+    return this.encounterClose.close(id, dto, actor);
   }
 
   /**
