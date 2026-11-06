@@ -9,8 +9,10 @@
 // - Secciones: por número QRD al inicio de línea (el mismo catálogo que CIMA,
 //   `CIMA_SECTIONS`). El texto es el de las líneas tal como las deja
 //   `pdftotext -layout`: sólo se quitan los números de página (la línea de sólo
-//   dígitos antes de un salto de página) y los espacios al final de línea. Las
-//   tablas quedan alineadas por columnas, como en el PDF; no se reinterpretan.
+//   dígitos antes de un salto de página) y los espacios al final de línea. En el
+//   texto de pdftotext las tablas quedan alineadas por columnas, como en el PDF;
+//   en las filas del extractor verificado, una tabla de la grilla trae sus celdas
+//   (`grid`) y la sección lleva su HTML (`<table>`) y su matriz (`tables`).
 // - Números de autorización (sección 8): EU/1/AA/NNN(N)/PPP. En CIMA el mismo
 //   medicamento lleva nº de registro AANNN(N)PPP: así se sabe, por código, si
 //   la ficha ya está en CIMA.
@@ -69,16 +71,22 @@ function smpcsFromLines(lines) {
   let sec = null;
   const close = () => {
     if (cur && sec) {
-      const marked = sec.lines.some((l) => l.html);
+      const grids = sec.lines.filter((l) => l.grid).map((l) => l.grid);
+      const marked = grids.length > 0 || sec.lines.some((l) => l.html);
       cur.sections.set(sec.number, {
         title: sec.title,
         text: clean(sec.lines.map((l) => l.text)),
-        // Superíndices y subíndices (p. ej. 10⁹/l) no caben en el texto plano: van en HTML, como en CIMA.
-        html: marked ? clean(sec.lines.map((l) => l.html ?? escapeHtml(l.text))).replace(/\n/g, '<br>\n') : null,
-        table: sec.lines.some((l) => l.table),
-        graphic: sec.lines.some((l) => l.graphic),
+        // Superíndices y subíndices (p. ej. 10⁹/l) y tablas no caben en el texto plano: van en HTML, como en CIMA.
+        html: marked ? sectionHtml(sec.lines) : null,
+        tables: grids,
+        // Línea dentro de una grilla dibujada sin celdas reconocidas: la estructura de la tabla no se conoce.
+        table: sec.lines.some((l) => l.table && !l.grid),
+        tableIssue: grids.map(gridIssue).find(Boolean) ?? (sec.lines.some((l) => l.grid && l.split) ? 'tabla partida entre páginas' : null),
+        graphic: sec.lines.some((l) => l.graphic) || grids.some((g) => g.rows.some((row) => row.some((c) => c.graphic))),
         incomplete: sec.lines.some((l) => l.incomplete),
         unresolved: sec.lines.reduce((n, l) => n + (l.text.match(/\uFFFD/g)?.length ?? 0), 0),
+        // Consenso por fila y por celda con `pdftotext -bbox` (sólo en secciones con tabla; las demás usan el texto de pdftotext).
+        cellConsensus: grids.length > 0 ? sec.lines.every((l) => !l.altGap && (l.grid ? l.grid.rows.every((row) => row.every((c) => cellsAgree(c.text, c.alt))) : cellsAgree(l.text, l.alt))) : null,
       });
     }
     sec = null;
@@ -119,14 +127,23 @@ export const piSmpcs = (text) => smpcsFromLines(annexI(piLines(text)).map((t) =>
  */
 export function piSmpcsFromRows(doc) {
   const lines = (doc?.pages ?? []).flatMap((p) =>
-    p.rows.map((r) => ({
+    p.rows.map((r, i) => ({
       text: r.text.replace(/\s+$/, ''),
       table: Boolean(r.table),
       graphic: Boolean(r.graphic),
       incomplete: Boolean(r.incomplete),
       html: r.html ? r.html.replace(/\s+$/, '') : null,
+      grid: r.grid ?? null,
+      alt: r.alt ?? null,
+      altGap: Boolean(p.altUnassigned),
+      pageFirst: i === 0,
+      pageLast: i === p.rows.length - 1,
     })),
   );
+  // Tabla al pie de una página seguida de otra al principio de la siguiente: puede ser la misma, partida (una celda en dos filas).
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].grid && lines[i].pageFirst && lines[i - 1].grid && lines[i - 1].pageLast) lines[i].split = lines[i - 1].split = true;
+  }
   const start = lines.findIndex((l) => /^\s*ANEXO I\s*$/.test(l.text));
   if (start < 0) return [];
   const end = lines.findIndex((l, i) => i > start && /^\s*ANEXO II\s*$/.test(l.text));
@@ -135,6 +152,44 @@ export function piSmpcsFromRows(doc) {
 
 const escapeHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/** Tabla de la grilla → `<table>`: una fila por fila de la grilla, colspan/rowspan sólo donde la grilla no tiene el borde. */
+export function gridHtml(grid) {
+  const cell = (c) => `<td${c.colspan ? ` colspan="${c.colspan}"` : ''}${c.rowspan ? ` rowspan="${c.rowspan}"` : ''}>${c.html ?? escapeHtml(c.text).replace(/\n/g, '<br>')}</td>`;
+  return `<table>${grid.rows.map((row) => `<tr>${row.map(cell).join('')}</tr>`).join('')}</table>`;
+}
+
+/** Tabla de la grilla → matriz de celdas, el formato de `extractTables` (celda vacía = null; colspan/rowspan sin expandir). */
+export const gridMatrix = (grid) => ({
+  rows: grid.rows.map((row) => row.map((c) => ({ text: c.text.trim() === '' ? null : c.text, ...(c.colspan ? { colspan: c.colspan } : {}), ...(c.rowspan ? { rowspan: c.rowspan } : {}) }))),
+});
+
+/** Líneas de una sección → HTML: el texto en párrafos con <br> y cada tabla como `<table>`, en el orden del PDF. */
+function sectionHtml(lines) {
+  const out = [];
+  let buf = [];
+  const flush = () => {
+    const t = clean(buf);
+    if (t) out.push(t.replace(/\n/g, '<br>\n'));
+    buf = [];
+  };
+  for (const l of lines) {
+    if (l.grid) {
+      flush();
+      out.push(gridHtml(l.grid));
+    } else buf.push(l.html ?? escapeHtml(l.text));
+  }
+  flush();
+  return out.join('\n');
+}
+
+/** Problema estructural de una tabla de la grilla, o null. */
+function gridIssue(grid) {
+  if (grid.nested) return 'tabla dentro de otra tabla';
+  if (grid.unassigned) return 'glifos fuera de las celdas';
+  if (grid.altUnassigned) return 'pdftotext no coincide';
+  return null;
+}
+
 /** Guion a final de línea entre dos letras: en el PDF no se distingue un guion real de uno de corte de palabra. */
 const AMBIGUOUS_HYPHEN = /\p{L}-\n\p{L}/u;
 
@@ -142,6 +197,7 @@ const AMBIGUOUS_HYPHEN = /\p{L}-\n\p{L}/u;
 export function withheldReason(s) {
   if (!s?.text) return 'sin texto';
   if (s.table) return 'tabla';
+  if (s.tableIssue) return s.tableIssue;
   if (s.incomplete) return 'glifos fuera de las filas';
   if (s.graphic) return 'trazo dibujado dentro del texto';
   if (s.unresolved > 0 || s.text.includes('\uFFFD')) return 'glifo sin resolver';
@@ -166,7 +222,22 @@ export function cimaNregCandidates(eu) {
 
 /** Secciones de una ficha que entran en la monografía (catálogo de CIMA, por número QRD). */
 export const piMonographSections = (smpc) =>
-  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, html: s.html ?? null, table: s.table, graphic: s.graphic, incomplete: s.incomplete, unresolved: s.unresolved, consensus: s.consensus }));
+  [...smpc.sections]
+    .filter(([n, s]) => CIMA_SECTIONS[n] && s.text)
+    .map(([n, s]) => ({
+      number: n,
+      key: CIMA_SECTIONS[n],
+      title: s.title,
+      text: s.text,
+      html: s.html ?? null,
+      tables: s.tables ?? [],
+      table: s.table,
+      tableIssue: s.tableIssue ?? null,
+      graphic: s.graphic,
+      incomplete: s.incomplete,
+      unresolved: s.unresolved,
+      consensus: s.consensus,
+    }));
 
 /** Clave de comparación entre fuentes: el texto sin ningún espacio en blanco. Sólo para medir, nunca se publica. */
 export const comparisonKey = (text) => String(text ?? '').replace(/\s+/g, '');
@@ -196,9 +267,9 @@ const LATIN_LETTER = /^[\p{Script=Latin}]$/u;
  * símbolo no latino que `pdftotext` deja en blanco (el «≥» de las fuentes Symbol sin mapa, ya demostrado) y que
  * `pdfminer` resolvió. Cualquier otra diferencia → false.
  */
-export function extractorsAgree(pdfminerText, pdftotextText) {
-  const a = fidelityKey(pdfminerText);
-  const b = fidelityKey(pdftotextText);
+export function extractorsAgree(pdfminerText, pdftotextText, key = fidelityKey) {
+  const a = key(pdfminerText);
+  const b = key(pdftotextText);
   let i = 0;
   let j = 0;
   while (i < a.length && j < b.length) {
@@ -215,6 +286,19 @@ export function extractorsAgree(pdfminerText, pdftotextText) {
   return i === a.length && j === b.length;
 }
 
+/**
+ * Consenso de una fila o una celda con las palabras de `pdftotext -bbox` que caen en ella. Mismo criterio que
+ * `extractorsAgree`, sobre el texto en NFKC y sin espacios (sin quitar viñetas: las dos versiones las traen).
+ */
+export const cellsAgree = (pdfminerText, pdftotextWords) =>
+  pdftotextWords != null && extractorsAgree(pdfminerText, pdftotextWords, (t) => comparisonKey(String(t ?? '').normalize('NFKC')));
+
+/**
+ * Consenso de una sección: con tabla, por fila y por celda (`cellConsensus`); sin tabla, contra la misma sección del
+ * texto de pdftotext (`other`, o undefined si no hay).
+ */
+export const sectionConsensus = (sec, other) => (sec.tables?.length ? sec.cellConsensus === true : Boolean(other?.text) && extractorsAgree(sec.text, other.text));
+
 /** Dónde difieren dos claves: el tramo distinto de cada una, sin el prefijo ni el sufijo comunes. */
 export function keyDiff(a, b) {
   let i = 0;
@@ -227,8 +311,9 @@ export function keyDiff(a, b) {
 export const EMA_PI_TEXT_WITHHELD =
   'Texto publicado sólo en las secciones de extracción verificada (py/ema_pi_extract.py): cada carácter sale del mapa ToUnicode o de la codificación ' +
   'declarada de una fuente de texto; los símbolos de fuentes Symbol se traducen con la tabla oficial de Adobe (unicode.org). Una sección con algún ' +
-  'glifo que no se puede resolver, con filas dentro de una tabla, con un trazo dibujado dentro del texto (un símbolo vectorial como el «≥» de Besremi, 4.3) ' +
-  'o con un guion de fin de línea ambiguo no se publica: queda este puntero al documento oficial.';
+  'glifo que no se puede resolver, con una tabla cuyas celdas no se reconocen o que está partida entre páginas, con un trazo dibujado dentro del texto ' +
+  '(un símbolo vectorial como el «≥» de Besremi, 4.3), con un guion de fin de línea ambiguo o en la que pdftotext no coincide no se publica: queda este ' +
+  'puntero al documento oficial.';
 
 /** Sección verificada de una ficha EMA que no está en CIMA → fila literal (castellano) con su procedencia. */
 export function emaPiSection(r, smpc, s, { url, retrievedAt, license }) {
@@ -252,12 +337,16 @@ export function emaPiSection(r, smpc, s, { url, retrievedAt, license }) {
     section: { number: s.number, title: s.title, url, apiUrl: url },
     html: s.html ?? null,
     text: s.text,
-    tables: [],
+    tables: (s.tables ?? []).map(gridMatrix),
     textSha256: textSha256(s.text),
     extraction:
       'pdfminer.six (py/ema_pi_extract.py): carácter por carácter desde el mapa ToUnicode o la codificación declarada; símbolos de fuentes Symbol con la tabla ' +
       'oficial de Adobe (unicode.org), en su forma NFKC cuando la tabla da varios valores equivalentes (μ); superíndices y subíndices en `html`. ' +
-      'Verificada: todos los glifos de la página en las filas, ninguno sin resolver, sin tablas, sin trazos dibujados dentro del texto y sin guiones de fin de línea ambiguos.',
+      (s.tables?.length
+        ? 'Tablas celda por celda desde la grilla dibujada (geometría de pdfplumber), en `html` (<table>) y `tables`; en `text`, celdas separadas por tabulador y filas por salto de línea. ' +
+          'Verificada: todos los glifos de la página en las filas o en una celda, ninguno sin resolver, tablas no anidadas ni partidas entre páginas, sin trazos dibujados dentro del texto ' +
+          'ni de las celdas, sin guiones de fin de línea ambiguos y con las mismas palabras que pdftotext en cada fila y cada celda.'
+        : 'Verificada: todos los glifos de la página en las filas, ninguno sin resolver, sin tablas, sin trazos dibujados dentro del texto y sin guiones de fin de línea ambiguos.'),
     retrievedAt,
     license,
     citation:

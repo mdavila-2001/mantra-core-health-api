@@ -1,13 +1,14 @@
 """
 Pruebas del extractor verificado con PDF reales de la EMA (información de
-producto en castellano: Deferasirox Accord y Besremi) y la tabla oficial de
-Adobe/Unicode.
+producto en castellano: Deferasirox Accord, Besremi, Peyona y Silodyx) y la
+tabla oficial de Adobe/Unicode.
 
 Uso: python3 -I -m unittest discover -s tools/terminology-import/clinical-pharmacology/py -p 'test_*.py'
-     (con pdfminer.six de py/requirements.txt instalado)
+     (con pdfminer.six y pdfplumber de py/requirements.txt instalados, y pdftotext de poppler)
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -110,6 +111,86 @@ class VectorSymbol(unittest.TestCase):
         self.assertTrue(nyha[0].get('graphic'), 'la fila queda marcada: el símbolo no está en el texto')
         self.assertFalse(any(r.get('graphic') for r in rows if r['text'].strip() in ('Posología', 'Embarazo')), 'un subrayado no marca la fila')
         self.assertFalse(any(r.get('incomplete') for r in rows), 'todos los glifos de la página llegan a las filas')
+
+
+class GridTables(unittest.TestCase):
+    """Tablas de Deferasirox Accord (4.2): celdas de la grilla, texto literal por celda y palabras de pdftotext en la misma celda."""
+
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as out:
+            path = x.extract((SYMBOL, out, os.path.join(FIX, 'deferasirox-accord_es.pdf')))
+            with open(path, encoding='utf-8') as f:
+                cls.doc = json.load(f)
+        cls.grids = [(p['page'], r['grid']) for p in cls.doc['pages'] for r in p['rows'] if 'grid' in r]
+
+    def test_celdas_de_la_dosis_inicial(self):
+        page, g = self.grids[0]
+        self.assertEqual(page, 4)
+        first = g['rows'][0]
+        self.assertEqual([(c['text'], c.get('colspan')) for c in first], [('Dosis inicial recomendada', 4)], 'fila de título: una celda que abarca las 4 columnas')
+        self.assertEqual([c['text'] for c in g['rows'][2]][:2], ['>1 000 μg/l', 'o'])
+        self.assertEqual(g['rows'][2][3]['text'], '14 mg/kg/día')
+        self.assertTrue(all(c['alt'] == c['text'] for c in g['rows'][2] if '\n' not in c['text']), 'pdftotext ve las mismas palabras en cada celda')
+
+    def test_celda_de_varias_lineas(self):
+        _, g = self.grids[1]
+        self.assertEqual(g['rows'][1][0]['text'].split('\n')[0], 'Persistentemente > 2 500', 'las líneas de una celda se unen con salto de línea')
+
+    def test_completitud_y_anidadas(self):
+        self.assertTrue(all(not g.get('unassigned') for _, g in self.grids), 'todo glifo de una tabla cae en una celda')
+        self.assertNotIn(9, [p for p, _ in self.grids], 'la página 9 tiene una tabla dentro de otra: las dos se descartan')
+        p9 = next(p for p in self.doc['pages'] if p['page'] == 9)['rows']
+        self.assertTrue(any(r['table'] and 'Creatinina sérica' in r['text'] for r in p9), 'sus líneas quedan como filas marcadas, con el texto')
+
+    def test_filas_fuera_de_tabla_con_palabras_de_pdftotext(self):
+        rows = [r for p in self.doc['pages'] for r in p['rows'] if 'grid' not in r]
+        self.assertTrue(all('alt' in r for r in rows))
+        row = next(r for r in rows if '(≥ 7 ml/kg/mes de concentrado de hematíes)' in r['text'])
+        self.assertIn('7 ml/kg/mes', row['alt'])
+
+
+class CellBorders(unittest.TestCase):
+    TABLE = {'bbox': (0, 0, 200, 100), 'cells': [{'bbox': (0, 50, 100, 100)}, {'bbox': (100, 50, 200, 100)}, {'bbox': (0, 0, 200, 50)}]}
+
+    def test_borde_y_fondo(self):
+        self.assertTrue(x._on_border((0, 49.6, 200, 50.4), self.TABLE), 'línea horizontal sobre el borde entre filas')
+        self.assertTrue(x._on_border((99.5, 50, 100.5, 100), self.TABLE), 'línea vertical entre columnas')
+        self.assertTrue(x._on_border((0, 50, 100, 100), self.TABLE), 'fondo del tamaño de la celda')
+
+    def test_trazo_dentro_de_la_celda(self):
+        self.assertFalse(x._on_border((40, 70, 46, 78), self.TABLE), 'un símbolo dibujado dentro de la celda no es borde')
+
+
+class Frames(unittest.TestCase):
+    def test_titulo_de_seccion_en_una_celda(self):
+        """Una «tabla» con un título de sección dentro es un marco (Imaavy, pág. 2; Constella, 5.3)."""
+        for line in ('1.\tNOMBRE DEL MEDICAMENTO', '4.2\tPosología y forma de administración', '5.3  Datos preclínicos sobre seguridad', 'ANEXO I'):
+            self.assertTrue(x.QRD_HEADING.match(line), line)
+        for line in ('1 Independientemente de la gravedad', '11. La aleatorización fue estratificada', '4.5 mg/kg', '30\tPlacebo'):
+            self.assertFalse(x.QRD_HEADING.match(line), f'nota al pie o celda de datos: {line}')
+
+
+class GridsThatDropText(unittest.TestCase):
+    """Grillas que no se pueden usar enteras: sus líneas vuelven a ser filas y no se pierde ningún nº EU de la sección 8."""
+
+    def eu_numbers(self, pdf):
+        with tempfile.TemporaryDirectory() as out:
+            path = x.extract((SYMBOL, out, os.path.join(FIX, pdf)))
+            with open(path, encoding='utf-8') as f:
+                doc = json.load(f)
+        text = '\n'.join(r['text'] for p in doc['pages'] for r in p['rows'])
+        return re.findall(r'EU/1/\d{2}/\d{3,4}/\d{3}', text)
+
+    def test_glifos_fuera_de_las_celdas(self):
+        """Peyona: el primer nº EU cae en el área de la grilla pero fuera de sus celdas."""
+        self.assertEqual(sorted(self.eu_numbers('peyona_es.pdf')), ['EU/1/09/528/001', 'EU/1/09/528/002'])
+
+    def test_borde_que_corta_una_palabra(self):
+        """Silodyx: una columna de la grilla separaba «EU/1/09/607/01» de su «5»."""
+        eus = self.eu_numbers('silodyx_es.pdf')
+        self.assertIn('EU/1/09/607/015', eus)
+        self.assertEqual(eus[:15], [f'EU/1/09/607/{n:03d}' for n in range(1, 16)])
 
 
 if __name__ == '__main__':
