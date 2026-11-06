@@ -69,6 +69,12 @@ export function toOrderDto(
     canReject:
       LAB_ORDER_TRANSITIONS.REJECT.includes(view.status) &&
       view.openSpecimenIds.length > 0,
+    registeredByPerformer: view.order.registeredByPerformer,
+    canEdit: view.order.registeredByPerformer && view.status === 'DRAFT',
+    codeConceptId: view.order.codeConceptId,
+    priorityConceptId: view.order.priorityConceptId ?? null,
+    externalRequesterName: view.order.externalRequesterName ?? null,
+    externalRequesterLicense: view.order.externalRequesterLicense ?? null,
     files: view.files
       .filter((file) => file.status === 'AVAILABLE')
       .map((file) => ({

@@ -74928,6 +74928,197 @@
         "tags": [
           "diagnostics-lab-portal"
         ]
+      },
+      "post": {
+        "description": "Queda con el centro como custodio y ejecutor, sin encuentro ni médico de la plataforma; quien firmó el papel va en `externalRequesterName`. El estudio se valida contra el mismo catálogo que la orden del médico (422 con `reason`).",
+        "operationId": "DiagnosticsLabPortalController_createOrder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLabOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "El centro carga una orden que llega en papel o por mostrador",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/patients/lookup": {
+      "post": {
+        "description": "Coincidencia exacta con el documento de identidad vigente. `POST` porque el documento es PHI y no viaja en la URL. 404 si nadie lo tiene.",
+        "operationId": "DiagnosticsLabPortalController_lookupPatient",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabPatientLookupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Paciente por número de documento, para cargar su orden",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/orders/{orderId}": {
+      "put": {
+        "description": "Reemplaza el estudio, su detalle, la prioridad y el solicitante externo. Sólo órdenes con `canEdit`: las de un médico o las ya recibidas responden 409.",
+        "operationId": "DiagnosticsLabPortalController_updateOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLabOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabOrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "La orden no es editable"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir una orden que cargó el centro, antes de recibirla",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
       }
     },
     "/diagnostics/lab/orders/{orderId}/transitions": {
@@ -176979,6 +177170,237 @@
           "scope"
         ],
         "additionalProperties": false
+      },
+      "LabPatientLookupDto": {
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Exact national id number"
+          }
+        },
+        "required": [
+          "nationalId"
+        ],
+        "additionalProperties": false
+      },
+      "CreateLabOrderDto": {
+        "type": "object",
+        "properties": {
+          "codeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "LAB",
+              "IMAGING"
+            ]
+          },
+          "priorityConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specimenTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "imaging": {
+            "$ref": "#/components/schemas/ImagingDetailDto"
+          },
+          "externalRequesterName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "externalRequesterLicense": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "codeConceptId",
+          "category",
+          "patientProfileId"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateLabOrderDto": {
+        "type": "object",
+        "properties": {
+          "codeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "LAB",
+              "IMAGING"
+            ]
+          },
+          "priorityConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specimenTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "imaging": {
+            "$ref": "#/components/schemas/ImagingDetailDto"
+          },
+          "externalRequesterName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "externalRequesterLicense": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "codeConceptId",
+          "category"
+        ],
+        "additionalProperties": false
+      },
+      "LabOrderFileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "fileName",
+          "sizeBytes"
+        ]
+      },
+      "LabOrderReportStateDto": {
+        "type": "object",
+        "properties": {
+          "draftStatus": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED"
+            ],
+            "nullable": true,
+            "description": "Null when the tenant never opened a written report."
+          },
+          "publishedVersionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "draftStatus"
+        ]
+      },
+      "LabOrderDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studyName": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string"
+          },
+          "requesterName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RECEIVED",
+              "PROCESSED",
+              "UPLOADED",
+              "CANCELLED",
+              "REJECTED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "canReject": {
+            "type": "boolean",
+            "description": "Whether REJECT applies now: a received order with an open specimen."
+          },
+          "registeredByPerformer": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "codeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priorityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "externalRequesterName": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalRequesterLicense": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabOrderFileDto"
+            }
+          },
+          "report": {
+            "$ref": "#/components/schemas/LabOrderReportStateDto"
+          }
+        },
+        "required": [
+          "orderId",
+          "studyName",
+          "patientName",
+          "requesterName",
+          "requestedAt",
+          "status",
+          "reason",
+          "canReject",
+          "registeredByPerformer",
+          "canEdit",
+          "codeConceptId",
+          "priorityConceptId",
+          "externalRequesterName",
+          "externalRequesterLicense",
+          "files",
+          "report"
+        ]
       },
       "LabOrderTransitionDto": {
         "type": "object",
