@@ -32,6 +32,7 @@ import {
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
+import { toPatientResultFileDto } from '../dto/patient-result-file.dto';
 import {
   DIAGNOSTIC_CATEGORIES,
   DIAG,
@@ -883,13 +884,9 @@ export class DiagnosticsPatientResultsService {
         releasedAt: release?.recordedAt ?? version.recordedAt,
         clinicalStatusConceptId: version.clinicalStatusConceptId,
         observationIds: observationsByVersion.get(version.id) ?? [],
-        files: (filesByVersion.get(version.id) ?? []).map((file) => ({
-          id: file.id,
-          fileId: file.fileId,
-          contentRoleConceptId: file.contentRoleConceptId,
-          presentationFormatConceptId: file.presentationFormatConceptId,
-          ordinal: file.ordinal,
-        })),
+        files: (filesByVersion.get(version.id) ?? []).map(
+          toPatientResultFileDto,
+        ),
       });
     }
     return items;

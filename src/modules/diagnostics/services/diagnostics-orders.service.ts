@@ -11,6 +11,7 @@ import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
 import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
 import { ClinicalScopeRepository } from '../../clinical/repositories/clinical-scope.repository';
 import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
+import { RequesterReportsReader } from './requester-reports.reader';
 
 /**
  * Cara de lectura del circuito diagnóstico (laboratorio e imagenología).
@@ -46,6 +47,7 @@ export class DiagnosticsOrdersService {
     private readonly basedOnNotes: ServiceRequestNotesService,
     private readonly scopeFilter: ClinicalScopeFilterService,
     private readonly scopeRepo: ClinicalScopeRepository,
+    private readonly requesterReports: RequesterReportsReader,
   ) {
     this.logger.setContext(DiagnosticsOrdersService.name);
   }
@@ -80,8 +82,8 @@ export class DiagnosticsOrdersService {
 
     const filter = await this.scopeFilter.build(em, patientProfileId, scope);
     let hiddenByScope: Record<string, number> | undefined;
-    const [orders, reports] = filter
-      ? await Promise.all([
+    const own = filter
+      ? Promise.all([
           this.scopeRepo.page(em, {
             entity: ServiceRequests,
             base: {
@@ -109,7 +111,7 @@ export class DiagnosticsOrdersService {
           hiddenByScope = { orders: o.hidden, reports: r.hidden };
           return [o.rows, r.rows] as const;
         })
-      : await Promise.all([
+      : Promise.all([
           this.ordersRepo.findOrdersByPatient(
             em,
             custodianTenantId,
@@ -124,9 +126,25 @@ export class DiagnosticsOrdersService {
             over,
           ),
         ]);
+    // The report of an order this tenant issued lives with the performing
+    // laboratory: the requester still sees it next to its order.
+    const [[orders, ownReports], issued] = await Promise.all([
+      own,
+      this.requesterReports.ofIssuedOrders(
+        custodianTenantId,
+        patientProfileId,
+        over,
+        filter,
+      ),
+    ]);
+    if (hiddenByScope) hiddenByScope.reports += issued.hidden;
+    const reports = [...ownReports, ...issued.rows].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
 
     const truncated: string[] = [];
     const visibleOrders = this.cut(orders, limit, 'orders', truncated);
+    const visibleReports = this.cut(reports, limit, 'reports', truncated);
     const spaceIds = [
       ...new Set(
         visibleOrders
@@ -144,7 +162,7 @@ export class DiagnosticsOrdersService {
         : []
       ).map((r) => [r.id, r]),
     );
-    const [suggestedSiteNames, notesByOrder] = await Promise.all([
+    const [suggestedSiteNames, notesByOrder, visibility] = await Promise.all([
       this.siteNames.namesFor(
         em,
         visibleOrders.map((row) => row.suggestedPracticeSiteId),
@@ -152,6 +170,11 @@ export class DiagnosticsOrdersService {
       this.basedOnNotes.noteIdsFor(
         em,
         visibleOrders.map((row) => row.id),
+      ),
+      this.requesterReports.visibilityOf(
+        visibleReports
+          .map((row) => row.currentReleasedVersionId)
+          .filter((x): x is string => !!x),
       ),
     ]);
 
@@ -183,7 +206,7 @@ export class DiagnosticsOrdersService {
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,
       })),
-      reports: this.cut(reports, limit, 'reports', truncated).map((row) => ({
+      reports: visibleReports.map((row) => ({
         id: row.id,
         patientProfileId: row.patientProfileId,
         serviceRequestId: row.serviceRequestId,
@@ -194,6 +217,10 @@ export class DiagnosticsOrdersService {
         currentVersionId: row.currentVersionId,
         currentReleasedVersionId: row.currentReleasedVersionId,
         resultReleaseStatusConceptId: row.resultReleaseStatusConceptId,
+        releasedVersionId: row.currentReleasedVersionId ?? null,
+        patientVisibility: row.currentReleasedVersionId
+          ? (visibility.get(row.currentReleasedVersionId) ?? null)
+          : null,
         createdAt: row.createdAt,
       })),
       limit,

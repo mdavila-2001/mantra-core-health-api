@@ -19,6 +19,7 @@ import {
   LabPortalResultsService,
   toResultFileDto,
 } from './lab-portal-results.service';
+import { ReportImmutabilityService } from './report-immutability.service';
 
 /**
  * Writes of the laboratory portal result files. A file lives in
@@ -40,6 +41,7 @@ export class LabPortalResultWritesService {
     private readonly orders: DiagnosticOrdersRepository,
     private readonly reads: LabPortalResultsService,
     private readonly logger: PinoLogger,
+    private readonly immutability: ReportImmutabilityService,
   ) {
     this.logger.setContext(LabPortalResultWritesService.name);
   }
@@ -59,6 +61,7 @@ export class LabPortalResultWritesService {
     await this.em.transactional(async (tx) => {
       // Locked first, read after: the new version number and file list are fresh.
       await this.lockReport(tx, known.file.reportId);
+      await this.immutability.assertWritable(known.file.reportId, tx);
       const { view, file } = await this.reads.locate(tx, tenantId, fileId);
       if (file.status === 'WITHDRAWN') {
         throw new ConflictException('El archivo ya estaba retirado.', {
@@ -93,6 +96,7 @@ export class LabPortalResultWritesService {
       if (known.reports[0]) await this.lockReport(tx, known.reports[0].id);
       const view = await this.reads.assertUploadable(tx, tenantId, orderId);
       let report = view.reports[0];
+      if (report) await this.immutability.assertWritable(report.id, tx);
       if (!report) {
         report = this.clinicalReports.create(tx, {
           custodianTenantId: tenantId,

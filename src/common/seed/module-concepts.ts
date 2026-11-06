@@ -25,6 +25,7 @@ import { DIAGNOSTIC_UNITS_CONCEPT_SEEDS } from '../../modules/diagnostic_units/d
 import { PHARMACY_CONCEPT_SEEDS } from '../../modules/pharmacy/pharmacy.concepts';
 import { DIAGNOSTICS_CONCEPT_SEEDS } from '../../modules/diagnostics/diagnostics.concepts';
 import { LAB_PORTAL_CONCEPT_SEEDS } from '../../modules/diagnostics/lab-portal.concepts';
+import { REPORT_DRAFT_CONCEPT_SEEDS } from '../../modules/diagnostics/report-drafts.concepts';
 import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/domain/insurance.concepts';
 import { IDENTITY_ASSURANCE_CONCEPT_SEEDS } from '../../modules/identity_assurance/identity_assurance.concepts';
@@ -76,6 +77,7 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...PHARMACY_CONCEPT_SEEDS,
   ...DIAGNOSTICS_CONCEPT_SEEDS,
   ...LAB_PORTAL_CONCEPT_SEEDS,
+  ...REPORT_DRAFT_CONCEPT_SEEDS,
   ...PHARMACY_INVENTORY_CONCEPT_SEEDS,
   ...INSURANCE_CONCEPT_SEEDS,
   ...IDENTITY_ASSURANCE_CONCEPT_SEEDS,

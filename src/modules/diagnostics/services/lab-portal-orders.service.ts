@@ -23,8 +23,14 @@ import type {
   LabOrderDto,
   LabOrderListQueryDto,
   LabOrderPageDto,
+  LabOrderReportStateDto,
   LabOrderTransitionDto,
 } from '../dto/lab-portal-orders.dto';
+import type { ReportDrafts } from '../entities';
+import {
+  DRAFT_STATUS,
+  ReportDraftsRepository,
+} from '../repositories/report-drafts.repository';
 import { LAB_ORDER_TRANSITIONS } from './lab-portal.projection';
 import { notAvailable } from './lab-portal-results.service';
 import { LabPortalOrderOutcomeService } from './lab-portal-order-outcome.service';
@@ -33,7 +39,24 @@ import {
   type LabOrderView,
 } from './lab-portal-snapshot.service';
 
-export function toOrderDto(view: LabOrderView): LabOrderDto {
+/** The written report state of an order, from the tenant's draft if any. */
+export function toReportState(draft?: ReportDrafts): LabOrderReportStateDto {
+  if (!draft) return { draftStatus: null };
+  if (draft.statusCode !== DRAFT_STATUS.PUBLISHED) {
+    return { draftStatus: 'DRAFT' };
+  }
+  return {
+    draftStatus: 'PUBLISHED',
+    ...(draft.publishedVersionId && {
+      publishedVersionId: draft.publishedVersionId,
+    }),
+  };
+}
+
+export function toOrderDto(
+  view: LabOrderView,
+  draft?: ReportDrafts,
+): LabOrderDto {
   return {
     orderId: view.order.id,
     studyName: view.studyName,
@@ -53,6 +76,7 @@ export function toOrderDto(view: LabOrderView): LabOrderDto {
         fileName: file.meta.fileName,
         sizeBytes: file.meta.sizeBytes,
       })),
+    report: toReportState(draft),
   };
 }
 
@@ -97,8 +121,24 @@ export class LabPortalOrdersService {
     private readonly snapshot: LabPortalSnapshotService,
     private readonly outcome: LabPortalOrderOutcomeService,
     private readonly logger: PinoLogger,
+    private readonly drafts: ReportDraftsRepository,
   ) {
     this.logger.setContext(LabPortalOrdersService.name);
+  }
+
+  /** Each view as a DTO, with its report state read in one batch query. */
+  private async toDtos(
+    em: EntityManager,
+    tenantId: string,
+    views: readonly LabOrderView[],
+  ): Promise<LabOrderDto[]> {
+    const drafts = await this.drafts.findByOrders(
+      em,
+      tenantId,
+      views.map((v) => v.order.id),
+    );
+    const byOrder = new Map(drafts.map((d) => [d.serviceRequestId, d]));
+    return views.map((v) => toOrderDto(v, byOrder.get(v.order.id)));
   }
 
   /** One keyset page, newest first; `count` is the laboratory's total. */
@@ -118,7 +158,7 @@ export class LabPortalOrdersService {
     const snap = await this.snapshot.load(em, tenantId, orders);
     const last = orders[orders.length - 1];
     return {
-      items: snap.orders.map(toOrderDto),
+      items: await this.toDtos(em, tenantId, snap.orders),
       count,
       ...(rows.length > limit && { nextCursor: encodeOrderKey(last) }),
     };
@@ -157,11 +197,11 @@ export class LabPortalOrdersService {
       if (dto.action === 'CANCEL')
         await this.outcome.cancel(tx, tenantId, view, dto.reason, actor);
     });
-    const order = await this.repo.findOrder(this.em.fork(), tenantId, orderId);
-    const [view] = (
-      await this.snapshot.load(this.em.fork(), tenantId, [order!])
-    ).orders;
-    return toOrderDto(view);
+    const em = this.em.fork();
+    const order = await this.repo.findOrder(em, tenantId, orderId);
+    const { orders } = await this.snapshot.load(em, tenantId, [order!]);
+    const [result] = await this.toDtos(em, tenantId, orders);
+    return result;
   }
 
   private async receive(

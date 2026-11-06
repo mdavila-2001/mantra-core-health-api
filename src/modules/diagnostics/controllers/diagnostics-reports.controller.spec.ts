@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsReportsController } from './diagnostics-reports.controller';
+import { reportAlreadyPublished } from '../services/report-immutability.service';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -15,16 +16,25 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(published = false) {
   const service = {
     createReportVersion: mockFn(),
     releaseVersion: mockFn(),
     detectCritical: mockFn(),
     acknowledgeCritical: mockFn(),
   };
+  const immutability = {
+    assertWritable: mockFn(async () => {
+      if (published) throw reportAlreadyPublished();
+    }),
+  };
   return {
-    controller: new DiagnosticsReportsController(service as any),
+    controller: new DiagnosticsReportsController(
+      service as any,
+      immutability as any,
+    ),
     service,
+    immutability,
   };
 }
 
@@ -69,5 +79,18 @@ describe('DiagnosticsReportsController', () => {
       { acknowledgedByProfileId: 'p1' },
       actor,
     );
+  });
+
+  it('D16: a published report takes no new version and no release (409)', async () => {
+    const d = build(true);
+    await expect(
+      d.controller.createVersion('r1', { custodianTenantId: 't1' }, actor),
+    ).rejects.toMatchObject({ reason: 'REPORT_ALREADY_PUBLISHED' });
+    await expect(
+      d.controller.releaseVersion('r1', 'v1', {}, actor),
+    ).rejects.toMatchObject({ reason: 'REPORT_ALREADY_PUBLISHED' });
+    expect(d.immutability.assertWritable).toHaveBeenCalledWith('r1');
+    expect(d.service.createReportVersion).not.toHaveBeenCalled();
+    expect(d.service.releaseVersion).not.toHaveBeenCalled();
   });
 });
