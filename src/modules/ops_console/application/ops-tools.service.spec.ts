@@ -88,6 +88,53 @@ describe('OpsToolsService', () => {
       });
     });
 
+    it('native push (FCM): missing, unusable and valid service account', async () => {
+      const { service } = build(okCheck());
+      const fcm = async (env: NodeJS.ProcessEnv) =>
+        (await service.listTools({ ...EMPTY_ENV, ...env })).tools.find(
+          (t) => t.code === 'native_push',
+        )!;
+
+      expect(await fcm({})).toMatchObject({
+        binding: 'none',
+        isConfigured: false,
+        missingEnvVars: ['FCM_PROJECT_ID', 'FCM_SERVICE_ACCOUNT_JSON'],
+        checkType: 'CONFIGURATION',
+      });
+      expect(
+        await fcm({
+          FCM_PROJECT_ID: 'p',
+          FCM_SERVICE_ACCOUNT_JSON: 'not json',
+        }),
+      ).toMatchObject({
+        // Variables present, sender off: the binding tells it apart.
+        binding: 'none',
+        missingEnvVars: [],
+      });
+      expect(
+        await fcm({
+          FCM_PROJECT_ID: 'p',
+          FCM_SERVICE_ACCOUNT_JSON: JSON.stringify({
+            client_email: 'sa@p.iam.gserviceaccount.com',
+            private_key: 'dummy',
+          }),
+        }),
+      ).toMatchObject({ binding: 'real', isConfigured: true });
+    });
+
+    it('web push keeps its VAPID rule after moving to push-tool-resolvers', async () => {
+      const { service } = build(okCheck());
+      const res = await service.listTools(EMPTY_ENV);
+      expect(res.tools.find((t) => t.code === 'web_push')).toMatchObject({
+        binding: 'none',
+        missingEnvVars: [
+          'VAPID_PUBLIC_KEY',
+          'VAPID_PRIVATE_KEY',
+          'VAPID_SUBJECT',
+        ],
+      });
+    });
+
     it('Gmail sin credenciales en producción → none, nombres de lo que falta y sin salud', async () => {
       const { service } = build(okCheck());
       const res = await service.listTools({

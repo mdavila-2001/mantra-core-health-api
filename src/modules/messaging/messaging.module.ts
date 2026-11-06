@@ -8,6 +8,9 @@ import {
   ProviderWebhooksController,
   WebPushController,
 } from './controllers';
+import { NativePushController } from './controllers/native-push.controller';
+import { NativePushService } from './services/native-push.service';
+import { InAppReleaseService } from './services/in-app-release.service';
 import {
   OutboxService,
   QueuesService,
@@ -39,6 +42,7 @@ import { NotificationsGateway } from './gateways';
     MessagingInternalController,
     ProviderWebhooksController,
     WebPushController,
+    NativePushController,
   ],
   providers: [
     OutboxRepository,
@@ -49,6 +53,9 @@ import { NotificationsGateway } from './gateways';
     QueuesService,
     NotificationsService,
     WebPushService,
+    NativePushService,
+    // Releases inbox rows deferred by quiet hours (socket + push when due).
+    InAppReleaseService,
     // Auth del gateway WS — igual que en `CommunityMessagingModule`, no es un
     // `APP_GUARD` (los gateways no pasan por el pipeline HTTP de Nest) y se
     // provee acá explícitamente para que `NotificationsGateway` lo inyecte.

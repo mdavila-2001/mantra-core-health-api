@@ -77,12 +77,26 @@ function build() {
     findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const gateway = { notifyUser: mockFn() };
+  const webPush = { pushToUser: mockFn(() => Promise.resolve()) };
+  const nativePush = { pushToUser: mockFn(() => Promise.resolve()) };
   const service = new NotificationsService(
     em,
     notificationsRepo,
     logger as any,
+    gateway as any,
+    webPush as any,
+    nativePush as any,
   );
-  return { service, tx, notificationsRepo, logger };
+  return {
+    service,
+    tx,
+    notificationsRepo,
+    logger,
+    gateway,
+    webPush,
+    nativePush,
+  };
 }
 
 /**
@@ -327,6 +341,50 @@ describe('NotificationsService', () => {
       expect(res.suppressed).toBe(false);
     });
 
+    it('in-app channel: quiet hours defer at delivery instead of suppressing', async () => {
+      const d = build();
+      d.notificationsRepo.findChannelById.mockResolvedValue(
+        activeChannel({ channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP }),
+      );
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        { optedIn: true, quietHoursJson: { start: '22:00', end: '07:00' } },
+      ]);
+
+      const res = await d.service.createRequest(
+        { ...dto, scheduledAt: '2026-07-20T23:30:00.000Z' },
+        actor,
+      );
+
+      expect(res.suppressed).toBe(false);
+      expect(res.statusConceptId).toBe(CONCEPTS.NOTIF_PENDING);
+    });
+
+    it('a fact-scoped key stays collapsed after it was SENT (a replay never notifies twice)', async () => {
+      const d = build();
+      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+      d.notificationsRepo.findLiveRequestByDebounceKey.mockResolvedValue({
+        id: 'request-prev',
+        statusConceptId: CONCEPTS.NOTIF_SENT,
+      });
+
+      const res = await d.service.createRequest(
+        { ...dto, debounceKey: 'admission:adm-1:APPROVED' },
+        actor,
+      );
+
+      expect(res).toMatchObject({ id: 'request-prev', debounced: true });
+      expect(
+        d.notificationsRepo.findLiveRequestByDebounceKey,
+      ).toHaveBeenCalledWith(d.tx, 'admission:adm-1:APPROVED', [
+        CONCEPTS.NOTIF_PENDING,
+        CONCEPTS.NOTIF_SENDING,
+        CONCEPTS.NOTIF_SENT,
+      ]);
+      expect(
+        d.notificationsRepo.createNotificationRequest,
+      ).not.toHaveBeenCalled();
+    });
+
     it('returns the live request when the debounce key repeats', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
@@ -504,6 +562,103 @@ describe('NotificationsService', () => {
         d.tx,
         expect.objectContaining({ statusConceptId: CONCEPTS.INAPP_UNREAD }),
       );
+    });
+
+    it('in-app delivery emits notification:new and web + native push with the payload route', async () => {
+      const d = build();
+      wire(
+        d,
+        activeChannel({ channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP }),
+      );
+      d.notificationsRepo.findRequestForUpdate.mockResolvedValue(
+        pendingRequest({
+          payloadJson: { route: '/account/profile' },
+          relatedResourceType: 'profiles.practitioner_admissions',
+          relatedResourceId: 'adm-1',
+        }),
+      );
+
+      await d.service.deliverNotification(
+        REQUEST,
+        { ...dto, subject: 'Su verificación avanzó', bodyText: 'Entre' },
+        actor,
+      );
+
+      expect(d.gateway.notifyUser).toHaveBeenCalledWith(
+        RECIPIENT,
+        expect.objectContaining({
+          id: 'in-app-1',
+          subject: 'Su verificación avanzó',
+          destination: {
+            type: 'profiles.practitioner_admissions',
+            id: 'adm-1',
+          },
+        }),
+      );
+      for (const sender of [d.webPush, d.nativePush]) {
+        expect(sender.pushToUser).toHaveBeenCalledWith(
+          expect.objectContaining({
+            recipientUserId: RECIPIENT,
+            notificationId: 'in-app-1',
+            route: '/account/profile',
+          }),
+        );
+      }
+    });
+
+    it('worker delivery (no subject in the call) takes the inbox text from the payload', async () => {
+      const d = build();
+      wire(
+        d,
+        activeChannel({ channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP }),
+      );
+      d.notificationsRepo.findRequestForUpdate.mockResolvedValue(
+        pendingRequest({
+          payloadJson: { subject: 'Hay algo nuevo en G', bodyText: 'Entre' },
+        }),
+      );
+
+      await d.service.deliverNotification(REQUEST, { outcome: 'SENT' }, actor);
+
+      const [, row] = d.notificationsRepo.createInAppNotification.mock.calls[0];
+      expect(row).toMatchObject({
+        subject: 'Hay algo nuevo en G',
+        bodyText: 'Entre',
+      });
+      expect(d.gateway.notifyUser).toHaveBeenCalled();
+    });
+
+    it('inside quiet hours the row is deferred, left unannounced, and nothing is pushed yet', async () => {
+      const d = build();
+      wire(
+        d,
+        activeChannel({ channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP }),
+      );
+      const inApp: any = { id: 'in-app-1', sentAt: new Date() };
+      d.notificationsRepo.createInAppNotification.mockReturnValue(inApp);
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        { optedIn: true, quietHoursJson: { start: '00:00', end: '23:59' } },
+      ]);
+
+      const res = await d.service.deliverNotification(REQUEST, dto, actor);
+
+      expect(res.inAppNotificationId).toBe('in-app-1');
+      const [, row] = d.notificationsRepo.createInAppNotification.mock.calls[0];
+      expect(row.availableAt.getUTCHours()).toBe(23);
+      expect(inApp.sentAt).toBeUndefined();
+      expect(d.gateway.notifyUser).not.toHaveBeenCalled();
+      expect(d.webPush.pushToUser).not.toHaveBeenCalled();
+      expect(d.nativePush.pushToUser).not.toHaveBeenCalled();
+    });
+
+    it('a non in-app delivery announces nothing', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.deliverNotification(REQUEST, dto, actor);
+
+      expect(d.gateway.notifyUser).not.toHaveBeenCalled();
+      expect(d.webPush.pushToUser).not.toHaveBeenCalled();
     });
 
     it('marks the request as failed when the provider rejected it', async () => {

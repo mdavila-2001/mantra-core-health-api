@@ -1,3 +1,4 @@
+import { PUSH_TOOLS } from './push-tools.catalog';
 /**
  * Catálogo cerrado de herramientas e integraciones de la API, al estilo del
  * `ToolItem` de Atlas Admin Portal.
@@ -61,6 +62,7 @@ export const TOOL_CODES = [
   'clamav',
   'gmail',
   'web_push',
+  'native_push',
   'mock_provider_server',
   'identity_verification',
   'embeddings',
@@ -225,22 +227,8 @@ export const TOOL_CATALOG: readonly ToolCatalogItem[] = [
     fallback:
       'Fuera de producción cae al emulador mock-provider-server; en producción no hay respaldo.',
   },
-  // src/modules/messaging/services/web-push.service.ts (readVapid: las 3 variables)
-  {
-    code: 'web_push',
-    name: 'Web Push (VAPID)',
-    kind: 'MAIL',
-    provider: 'Servicios push de los navegadores (lib web-push)',
-    purpose: 'Notificaciones push al navegador.',
-    isCritical: false,
-    status: 'ACTIVE',
-    requiredEnvVars: ['VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT'],
-    checkType: 'CONFIGURATION',
-    ownerTeam: 'plataforma',
-    failureImpact:
-      'No se envían notificaciones push; los demás canales siguen.',
-    fallback: 'El servicio queda inactivo sin las claves.',
-  },
+  // Web push + native push (FCM): see push-tools.catalog.ts.
+  ...PUSH_TOOLS,
   // src/worker/worker.env.ts (mockProviderBaseUrl, prohibido en producción) · src/worker/mock-provider-client.service.ts
   {
     code: 'mock_provider_server',

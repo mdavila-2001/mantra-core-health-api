@@ -270,6 +270,19 @@ x-app-env: &app-env
   # VACÍA, y es una condición de arranque: ver el punto 6 de la cabecera.
   MOCK_PROVIDER_BASE_URL: ""
 
+  # --- Push (web VAPID + native FCM) -------------------------------------
+  # Empty by default: each sender stays disabled (no-op + one warning, reported
+  # by the ops console) and the bell keeps working. Set them in the deployment
+  # secrets, never in this file. Generate VAPID keys with
+  # `node -e "console.log(require('web-push').generateVAPIDKeys())"`.
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+  # FCM HTTP v1 (Android + iOS through APNs): project id + the service account
+  # JSON as a single-line string.
+  FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+  FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
+
   # --- Sistema de gestión de la farmacia externa (pestaña Integración) ----
   # VACÍAS por defecto: la sincronización responde «no configurada» y no llama
   # a nadie. Hoy el único sistema que existe es el simulador de

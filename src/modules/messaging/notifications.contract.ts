@@ -164,7 +164,21 @@ export type NotificationDestinationType =
    * lista». Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front
    * lo enruta a la misma pantalla que `PRESCRIPTION`.
    */
-  | 'PRESCRIPTION_EXPIRING';
+  | 'PRESCRIPTION_EXPIRING'
+  /**
+   * Pharma lab (carril 17), one literal per audience because the screen
+   * depends on who reads it: the doctor's visit inbox, the visitor's visits,
+   * the lab admin panel. The `id` is the originating pharma_lab resource.
+   */
+  | 'PHARMA_LAB_DOCTOR_VISITS'
+  | 'PHARMA_LAB_VISITOR_VISITS'
+  | 'PHARMA_LAB_ADMIN'
+  /** A critical diagnostic result awaiting acknowledgement (UC-20-09). */
+  | 'CRITICAL_RESULT'
+  /** A surgical case (procedures_perioperative); the `id` is the case. */
+  | 'PROCEDURE_CASE'
+  /** A community group (`community.groups`); the `id` is the group. */
+  | 'community.groups';
 
 /**
  * A dónde lleva la notificación al abrirla.

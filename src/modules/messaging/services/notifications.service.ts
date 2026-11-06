@@ -20,17 +20,17 @@ import { NotificationsRepository } from '../repositories';
 import { MessagingErrorReason } from '../messaging.error-reasons';
 import { providerReceiptSignedString } from '../provider-receipt-signature';
 import { NotificationsGateway } from '../gateways';
+import { WebPushService } from './web-push.service';
+import { NativePushService } from './native-push.service';
+import { PushFanout, type InboxAnnouncement } from './push-fanout';
+import { routeFromPayload } from './push-route';
+import { inboxText } from './in-app-text';
+import { collapseUnreadInApp } from './in-app-collapse';
 import {
-  safeRoute,
-  WebPushService,
-  type WebPushMessage,
-} from './web-push.service';
-
-/** La ruta a abrir, si el aviso la trae en su payload (`payload.route`). */
-function routeFromPayload(payload: unknown): string | undefined {
-  const route = (payload as { route?: unknown } | null | undefined)?.route;
-  return typeof route === 'string' ? safeRoute(route) : undefined;
-}
+  availableAfterSilence,
+  inQuietHours,
+  readSilenceHours,
+} from './quiet-hours';
 import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
@@ -118,13 +118,18 @@ export class NotificationsService implements InAppNotificationEmitter {
     // argumentos y no deberían tener que aprender del socket sólo para probar
     // la escritura. En producción, Nest siempre lo resuelve (está en
     // `MessagingModule.providers`).
-    private readonly gateway?: NotificationsGateway,
+    gateway?: NotificationsGateway,
     // Opcional por la misma razón que el socket: un push caído no puede tumbar
     // la entrega, y los specs que no lo necesitan no tienen que construirlo.
-    private readonly webPush?: WebPushService,
+    webPush?: WebPushService,
+    nativePush?: NativePushService,
   ) {
     this.logger.setContext(NotificationsService.name);
+    this.fanout = new PushFanout(logger, gateway, webPush, nativePush);
   }
+
+  /** Socket + web/native push of every inbox row, after the commit. */
+  private readonly fanout: PushFanout;
 
   /**
    * UC-35-10: crear la solicitud de notificación.
@@ -211,7 +216,9 @@ export class NotificationsService implements InAppNotificationEmitter {
       }
 
       // El rebote colapsa las repetidas, pero conserva la que ya existe: se
-      // devuelve esa en lugar de crear una segunda.
+      // devuelve esa en lugar de crear una segunda. The key names one fact
+      // (an admission status, a booking, a post): once sent it stays collapsed
+      // for good, so a replay of the same fact never notifies twice.
       if (dto.debounceKey) {
         const live = await this.notificationsRepo.findLiveRequestByDebounceKey(
           tx,
@@ -231,6 +238,9 @@ export class NotificationsService implements InAppNotificationEmitter {
       const suppression = await this.evaluateSuppression(tx, {
         ...dto,
         ignoreCategoryOptOut: options.mandatory === true,
+        // In-app defers quiet hours at delivery instead of suppressing.
+        ignoreQuietHours:
+          channel.channelTypeConceptId === CONCEPTS.CHANNEL_TYPE_IN_APP,
       });
       const statusConceptId = suppression
         ? CONCEPTS.NOTIF_SUPPRESSED
@@ -374,7 +384,7 @@ export class NotificationsService implements InAppNotificationEmitter {
     dto: DeliverNotificationDto,
     actor: AuthenticatedUser,
   ): Promise<DeliverNotificationResponseDto> {
-    let pushTarget: WebPushMessage | undefined;
+    let announcement: InboxAnnouncement | undefined;
     const response = await this.em.transactional(async (tx) => {
       const request = await this.notificationsRepo.findRequestForUpdate(
         tx,
@@ -506,32 +516,58 @@ export class NotificationsService implements InAppNotificationEmitter {
         // antes de que la bandeja la referencie.
         await tx.flush();
 
-        inAppNotificationId = this.notificationsRepo.createInAppNotification(
+        // The worker only reports the outcome: the text comes from the payload.
+        const text = inboxText(dto, request.payloadJson);
+        // Quiet hours defer the row (lane P9) instead of suppressing it.
+        const availableAt = await this.deferBySilence(
           tx,
-          {
-            recipientUserId: request.recipientUserId,
-            tenantId: request.tenantId,
-            // NOT NULL: qué clase de canal originó la bandeja. Aquí siempre es
-            // in-app, que es la única rama que crea esta fila.
-            channelConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
-            categoryConceptId: request.categoryConceptId,
-            subject: dto.subject,
-            bodyText: dto.bodyText,
-            payloadJson: request.payloadJson,
-            relatedResourceType: request.relatedResourceType,
-            relatedResourceId: request.relatedResourceId,
-            statusConceptId: CONCEPTS.INAPP_UNREAD,
-            notificationRequestId: requestId,
-            notificationDeliveryId: delivery.id,
-            actorUserId: actor.id,
-          },
-        ).id;
-        pushTarget = {
+          request.recipientUserId,
+          request.channelId,
+          request.categoryConceptId,
+          now,
+        );
+        const inApp = this.notificationsRepo.createInAppNotification(tx, {
           recipientUserId: request.recipientUserId,
-          subject: dto.subject ?? '',
-          route: routeFromPayload(request.payloadJson),
-          notificationId: inAppNotificationId,
-        };
+          tenantId: request.tenantId,
+          // NOT NULL: qué clase de canal originó la bandeja. Aquí siempre es
+          // in-app, que es la única rama que crea esta fila.
+          channelConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+          categoryConceptId: request.categoryConceptId,
+          subject: text.subject,
+          bodyText: text.bodyText,
+          payloadJson: request.payloadJson,
+          relatedResourceType: request.relatedResourceType,
+          relatedResourceId: request.relatedResourceId,
+          statusConceptId: CONCEPTS.INAPP_UNREAD,
+          notificationRequestId: requestId,
+          notificationDeliveryId: delivery.id,
+          actorUserId: actor.id,
+          availableAt,
+        });
+        inAppNotificationId = inApp.id;
+        if (availableAt > now) {
+          // Not announced yet: InAppReleaseService does it when the window ends.
+          inApp.sentAt = undefined;
+        } else {
+          announcement = {
+            recipientUserId: request.recipientUserId,
+            notificationId: inApp.id,
+            category:
+              NOTIFICATION_CATEGORY_BY_CONCEPT.get(
+                request.categoryConceptId ?? '',
+              ) ?? null,
+            subject: text.subject,
+            bodyText: text.bodyText ?? null,
+            destination: request.relatedResourceType
+              ? {
+                  type: request.relatedResourceType,
+                  id: request.relatedResourceId ?? '',
+                }
+              : null,
+            explicitRoute: routeFromPayload(request.payloadJson),
+            availableAt: availableAt.toISOString(),
+          };
+        }
       }
 
       request.statusConceptId = sent
@@ -560,7 +596,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       };
     });
     // Después del commit y fuera de todo lock: el push sale hacia un tercero.
-    if (pushTarget) void this.webPush?.pushToUser(pushTarget);
+    if (announcement) this.fanout.announce(announcement);
     return response;
   }
 
@@ -765,31 +801,31 @@ export class NotificationsService implements InAppNotificationEmitter {
    */
   async emitInApp(input: EmitInAppInput): Promise<EmitInAppResult> {
     try {
-      const result = await this.em.transactional((tx) =>
+      const { renotify, ...result } = await this.em.transactional((tx) =>
         this.writeInApp(tx, input),
       );
       // AG-22: el socket se empuja DESPUÉS del commit y fuera de cualquier
       // lock — nunca desde dentro de `writeInApp`. Si quedó suprimida, si el
-      // silencio nocturno la aplazó a más tarde, o si no llegó a crear la fila
-      // de bandeja, no hay nada que empujar: el sondeo de respaldo la sirve
-      // cuando corresponda.
+      // silencio nocturno la aplazó (InAppReleaseService la anuncia al final
+      // de la ventana) o si no creó fila, no hay nada que empujar ahora.
+      const notice = {
+        recipientUserId: input.recipientUserId,
+        notificationId: result.inAppNotificationId ?? '',
+        category: input.category,
+        destination: input.destination ?? null,
+        explicitRoute: routeFromPayload(input.payloadJson),
+      };
+      if (renotify) this.fanout.push(notice);
       if (
         !result.suppressed &&
         result.inAppNotificationId &&
         result.availableAt &&
         new Date(result.availableAt).getTime() <= Date.now()
       ) {
-        void this.webPush?.pushToUser({
-          recipientUserId: input.recipientUserId,
-          subject: input.subject,
-          notificationId: result.inAppNotificationId,
-        });
-        this.gateway?.notifyUser(input.recipientUserId, {
-          id: result.inAppNotificationId,
-          category: input.category,
+        this.fanout.announce({
+          ...notice,
           subject: input.subject,
           bodyText: input.bodyText ?? null,
-          destination: input.destination ?? null,
           availableAt: result.availableAt,
         });
       }
@@ -970,7 +1006,7 @@ export class NotificationsService implements InAppNotificationEmitter {
           byCategory.get(NOTIFICATION_CATEGORY_CONCEPT[category])?.optedIn ??
           true,
       })),
-      quietHours: this.readSilenceHours(
+      quietHours: readSilenceHours(
         rows.find((row) => !row.categoryConceptId)?.quietHoursJson,
       ),
     };
@@ -1133,7 +1169,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       : new Date();
     const silenceHours =
       ofCategory?.quietHoursJson ?? ofChannel?.quietHoursJson;
-    if (this.inQuietHours(silenceHours, scheduledAt)) {
+    if (inQuietHours(silenceHours, scheduledAt)) {
       return 'La notificación cae dentro de las horas de silencio del destinatario';
     }
 
@@ -1147,115 +1183,30 @@ export class NotificationsService implements InAppNotificationEmitter {
    * @param recipientUserId - Destinatario.
    * @param channelId - Canal in-app.
    * @param categoryConceptId - Categoría del aviso.
+   * @param now - Reference instant; returned as is when there is no silence.
    * @returns El instante desde el que se muestra.
    */
   private async deferBySilence(
     tx: EntityManager,
     recipientUserId: string,
     channelId: string,
-    categoryConceptId: string,
+    categoryConceptId: string | undefined,
+    now: Date,
   ): Promise<Date> {
-    const now = new Date();
     const preferences = await this.notificationsRepo.findPreferences(
       tx,
       recipientUserId,
       channelId,
     );
     const window =
-      preferences.find(
-        (preference) => preference.categoryConceptId === categoryConceptId,
-      )?.quietHoursJson ??
+      (categoryConceptId
+        ? preferences.find(
+            (preference) => preference.categoryConceptId === categoryConceptId,
+          )?.quietHoursJson
+        : undefined) ??
       preferences.find((preference) => !preference.categoryConceptId)
         ?.quietHoursJson;
-
-    if (!this.inQuietHours(window, now)) return now;
-
-    const fin = this.windowEnd(window);
-    if (fin === undefined) return now;
-
-    const available = new Date(now);
-    available.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
-    // Si el fin ya pasó hoy, la ventana cruza la medianoche: termina mañana.
-    if (available <= now) {
-      available.setUTCDate(available.getUTCDate() + 1);
-    }
-    return available;
-  }
-
-  /** Los minutos UTC en que termina la ventana, o `undefined`. */
-  private windowEnd(quietHoursJson: unknown): number | undefined {
-    if (!quietHoursJson || typeof quietHoursJson !== 'object') return undefined;
-    const { end } = quietHoursJson as {
-      /** Hora de fin. */
-      end?: unknown;
-    };
-    if (typeof end !== 'string') return undefined;
-    const match = /^(\d{1,2}):(\d{2})$/.exec(end.trim());
-    return match ? Number(match[1]) * 60 + Number(match[2]) : undefined;
-  }
-
-  /**
-   * Lee la ventana de silencio guardada, o `null` si no hay una válida.
-   *
-   * Una ventana con formato roto se trata como ausente y no como error: el
-   * emisor ya la ignora con la misma lógica, y devolver un 500 al abrir la
-   * pantalla de preferencias por una fila vieja mal escrita dejaría a alguien
-   * sin poder arreglarla.
-   */
-  private readSilenceHours(
-    quietHoursJson: unknown,
-  ): { start: string; end: string } | null {
-    if (!quietHoursJson || typeof quietHoursJson !== 'object') return null;
-    const { start, end } = quietHoursJson as {
-      /** Hora de inicio. */
-      start?: unknown;
-      /** Hora de fin. */
-      end?: unknown;
-    };
-    return typeof start === 'string' && typeof end === 'string'
-      ? { start, end }
-      : null;
-  }
-
-  /**
-   * Las horas de silencio se declaran como `{ start: "22:00", end: "07:00" }` en
-   * hora UTC. Un rango que cruza la medianoche se interpreta como tal, que es el
-   * caso habitual y el que se rompería si se comparara ingenuamente.
-   */
-  private inQuietHours(quietHoursJson: unknown, at: Date): boolean {
-    if (!quietHoursJson || typeof quietHoursJson !== 'object') return false;
-
-    const { start, end } = quietHoursJson as {
-      /**
-       * Valor de start mantenido por la instancia.
-       */
-      start?: unknown; /**
-       * Valor de end mantenido por la instancia.
-       */
-      end?: unknown;
-    };
-    if (typeof start !== 'string' || typeof end !== 'string') return false;
-
-    /**
-     * Transforma to minutes.
-     *
-     * @param value - Valor de value requerido por la operación.
-     * @returns Resultado de to minutes conforme al contrato `number | undefined`.
-     */
-    const toMinutes = (value: string): number | undefined => {
-      const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
-      if (!match) return undefined;
-      return Number(match[1]) * 60 + Number(match[2]);
-    };
-
-    const from = toMinutes(start);
-    const to = toMinutes(end);
-    if (from === undefined || to === undefined) return false;
-
-    const minutes = at.getUTCHours() * 60 + at.getUTCMinutes();
-    return from <= to
-      ? minutes >= from && minutes < to
-      : minutes >= from || minutes < to;
+    return availableAfterSilence(window, now);
   }
 
   /**
@@ -1269,7 +1220,7 @@ export class NotificationsService implements InAppNotificationEmitter {
   private async writeInApp(
     tx: EntityManager,
     input: EmitInAppInput,
-  ): Promise<EmitInAppResult> {
+  ): Promise<EmitInAppResult & { renotify?: boolean }> {
     const channel = await this.notificationsRepo.findActiveChannelByType(
       tx,
       CONCEPTS.CHANNEL_TYPE_IN_APP,
@@ -1304,11 +1255,23 @@ export class NotificationsService implements InAppNotificationEmitter {
           CONCEPTS.INAPP_UNREAD,
         );
       if (withoutRead) {
-        return {
-          inAppNotificationId: withoutRead.id,
-          requestId: withoutRead.notificationRequestId,
-          suppressed: false,
-        };
+        return collapseUnreadInApp(withoutRead, input, actorUserId, {
+          optedOut: () =>
+            this.evaluateSuppression(tx, {
+              channelId: channel.id,
+              recipientUserId: input.recipientUserId,
+              categoryConceptId,
+              ignoreQuietHours: true,
+            }),
+          silentUntil: (now) =>
+            this.deferBySilence(
+              tx,
+              input.recipientUserId,
+              channel.id,
+              categoryConceptId,
+              now,
+            ),
+        });
       }
     }
 
@@ -1329,11 +1292,13 @@ export class NotificationsService implements InAppNotificationEmitter {
     // se entere de algo que sí ocurrió. Se crea con `available_at` al final de
     // la ventana y aparece a la mañana, que es literalmente lo que el carril
     // pide: «no crece entre 22:00 y 07:00; se muestra a la mañana».
+    const now = new Date();
     const availableAt = await this.deferBySilence(
       tx,
       input.recipientUserId,
       channel.id,
       categoryConceptId,
+      now,
     );
 
     const contentSnapshotJson = {
@@ -1341,7 +1306,6 @@ export class NotificationsService implements InAppNotificationEmitter {
       bodyText: input.bodyText ?? null,
       categoryConceptId,
     };
-    const now = new Date();
 
     const request = this.notificationsRepo.createNotificationRequest(tx, {
       tenantId: input.tenantId,
@@ -1451,6 +1415,8 @@ export class NotificationsService implements InAppNotificationEmitter {
       actorUserId,
       availableAt,
     });
+    // Deferred: `sent_at` stays empty until InAppReleaseService announces it.
+    if (availableAt > now) inApp.sentAt = undefined;
     await tx.flush();
 
     this.logger.info(

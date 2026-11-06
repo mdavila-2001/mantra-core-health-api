@@ -261,6 +261,19 @@ x-app-env: &app-env
   # `mock-provider-server/README.md`.
   MOCK_PROVIDER_BASE_URL: ${MOCK_PROVIDER_BASE_URL:-http://mock-provider-server:4100}
   MOCK_PROVIDER_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
+
+  # --- Push (web VAPID + native FCM) -------------------------------------
+  # Empty by default: each sender stays disabled (no-op + one warning, reported
+  # by the ops console) and the bell keeps working. Set them in the deployment
+  # secrets, never in this file. Generate VAPID keys with
+  # `node -e "console.log(require('web-push').generateVAPIDKeys())"`.
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+  # FCM HTTP v1 (Android + iOS through APNs): project id + the service account
+  # JSON as a single-line string.
+  FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+  FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
   # Proveedor REAL de email (Gmail API). `GoogleProviderWiringService` sustituye
   # el adapter del `NotificationDeliveryJob` sólo si `isConfigured()` da true, o
   # sea si las CUATRO tienen valor; si falta una, retorna temprano y el worker se

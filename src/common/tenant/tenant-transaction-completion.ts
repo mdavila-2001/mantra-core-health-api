@@ -5,6 +5,7 @@ interface CompletionContext {
   collecting: boolean;
   tasks: Array<() => Promise<void>>;
   failureTasks: Array<() => Promise<void>>;
+  commitTasks: Array<() => Promise<void>>;
 }
 const storage = new AsyncLocalStorage<CompletionContext>();
 const logger = new Logger('TenantTransactionCompletion');
@@ -34,13 +35,27 @@ export function deferAfterTenantTransactionFailure(
   return true;
 }
 
+/**
+ * Queues `task` to run only if the enclosing transaction COMMITS; a rollback
+ * drops it. For side effects the outside world sees (socket, push) that must
+ * never announce a row that was rolled back. Returns `false` when there is no
+ * enclosing boundary: the caller's own transaction is the outermost one, so
+ * the caller runs the task itself once that transaction has returned.
+ */
+export function deferAfterTenantCommit(task: () => Promise<void>): boolean {
+  const context = storage.getStore();
+  if (!context?.collecting) return false;
+  context.commitTasks.push(task);
+  return true;
+}
+
 /** Waits for independent bookkeeping after commit/rollback, before completing the HTTP result. */
 export async function withTenantTransactionCompletion<T>(
   transaction: () => Promise<T>,
 ): Promise<T> {
   if (storage.getStore()?.collecting) return transaction();
   return storage.run(
-    { collecting: true, tasks: [], failureTasks: [] },
+    { collecting: true, tasks: [], failureTasks: [], commitTasks: [] },
     async () => {
       const context = storage.getStore()!;
       let outcome: { ok: true; value: T } | { ok: false; error: unknown };
@@ -53,7 +68,7 @@ export async function withTenantTransactionCompletion<T>(
       const failures: unknown[] = [];
       for (const task of [
         ...context.tasks,
-        ...(outcome.ok ? [] : context.failureTasks),
+        ...(outcome.ok ? context.commitTasks : context.failureTasks),
       ]) {
         try {
           await task();

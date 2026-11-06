@@ -32,15 +32,18 @@ function build() {
     deliverNotification: mockFn(),
     listDeliverable: mockFn(),
   };
+  const inAppRelease = { releaseDue: mockFn() };
   return {
     controller: new MessagingInternalController(
       outboxService as any,
       queuesService as any,
       notificationsService as any,
+      inAppRelease as any,
     ),
     outboxService,
     queuesService,
     notificationsService,
+    inAppRelease,
   };
 }
 
@@ -128,5 +131,15 @@ describe('MessagingInternalController', () => {
     await d.controller.listPendingNotifications(25);
 
     expect(d.notificationsService.listDeliverable).toHaveBeenCalledWith(25);
+  });
+
+  it('delegates releasing in-app rows deferred by quiet hours (worker)', async () => {
+    const d = build();
+    d.inAppRelease.releaseDue.mockResolvedValue({ released: 2, announced: 1 });
+
+    const res = await d.controller.releaseDueInApp(50);
+
+    expect(d.inAppRelease.releaseDue).toHaveBeenCalledWith(50);
+    expect(res).toEqual({ released: 2, announced: 1 });
   });
 });

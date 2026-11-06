@@ -31,7 +31,11 @@ import {
   PeriopInstrumentsRepository,
   PeriopDentalRepository,
 } from './repositories';
-import { ProfessionalCredentialsRepository } from '../profiles/infrastructure/repositories';
+import {
+  PersonAccountLinksRepository,
+  ProfessionalCredentialsRepository,
+} from '../profiles/infrastructure/repositories';
+import { PeriopEventPublisher } from './services/periop-event-publisher';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ClinicalModule } from '../clinical/clinical.module';
@@ -75,6 +79,10 @@ import { AuthzModule } from '../authz/authz.module';
     PeriopDentalRepository,
     // Fuente autoritativa de vigencia de credencial del equipo (C-14).
     ProfessionalCredentialsRepository,
+    // Stateless (receives the EntityManager): profile → account for notices.
+    PersonAccountLinksRepository,
+    // Outbox event + the in-app notice the periop events promise.
+    PeriopEventPublisher,
     // Regla compartida por el caso, el equipo y la valoración preoperatoria.
     PeriopReacceptanceService,
     PeriopCasesService,

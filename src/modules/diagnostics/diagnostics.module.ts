@@ -34,6 +34,7 @@ import { ReportDraftsService } from './services/report-drafts.service';
 import { ReportImmutabilityService } from './services/report-immutability.service';
 import { ReportIssuerSettingsService } from './services/report-issuer-settings.service';
 import { ReportNotificationsService } from './services/report-notifications.service';
+import { CriticalResultDetectionService } from './services/critical-result-detection.service';
 import { ReportPublicationWriter } from './services/report-publication.writer';
 import { ReportPublishService } from './services/report-publish.service';
 import { ReportReleaseService } from './services/report-release.service';
@@ -182,6 +183,8 @@ import {
     ReportIssuerSettingsService,
     DiagnosticReportPdfService,
     ReportNotificationsService,
+    // UC-20-09: critical result + bell/push to the responsible practitioner.
+    CriticalResultDetectionService,
     ReportPublicationWriter,
     ReportPublishService,
     ReportReleaseService,

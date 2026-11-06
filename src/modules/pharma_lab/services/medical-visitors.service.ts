@@ -505,7 +505,7 @@ export class MedicalVisitorsService {
           actorUserId: actor.id,
           createdByUserId: actor.id,
         });
-        this.notifications.notify(
+        await this.notifications.notify(
           tx,
           {
             recipientUserId: request.doctorUserId,

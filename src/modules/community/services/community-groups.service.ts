@@ -568,7 +568,7 @@ export class CommunityGroupsService {
                   name: access.group.name,
                   tenantId: access.group.tenantId,
                 },
-                memberProfileId: member.memberProfileId,
+                member,
               }
             : undefined,
       };
@@ -577,7 +577,7 @@ export class CommunityGroupsService {
     if (approved)
       await this.notifications.notifyJoinApproved(
         approved.group,
-        approved.memberProfileId,
+        approved.member,
         actor,
       );
 
