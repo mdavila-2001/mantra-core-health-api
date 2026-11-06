@@ -8,6 +8,7 @@ import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts'
 import { DIAG } from '../../modules/diagnostics/diagnostics.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 import { ALLERGY_SPANISH_DESIGNATION_ENTRIES } from './data/allergies/allergy-designations.es';
+import { BONE_TYPE_SPANISH_DESIGNATION_ENTRIES } from '../../modules/clinical/clinical.bone-type.designations.es';
 import { STUDY_CATALOG_SPANISH_DESIGNATION_ENTRIES } from '../../modules/study_catalog/study_catalog.designations.es';
 
 /**
@@ -5825,6 +5826,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   ...ALLERGY_SPANISH_DESIGNATION_ENTRIES,
   // Modalidades, regiones y contraste del catálogo de estudios de imagen.
   ...STUDY_CATALOG_SPANISH_DESIGNATION_ENTRIES,
+  ...BONE_TYPE_SPANISH_DESIGNATION_ENTRIES,
 ];
 
 /**

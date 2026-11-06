@@ -90,6 +90,37 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 > con el router (Express 5 / path-to-regexp v8, donde `:` es sintaxis de
 > parámetro). El método HTTP y la intención se preservan.
 
+## Detalle de la orden de estudio: muestra, región 3D y tipo de hueso
+
+`POST /clinical/service-requests` (y cada renglón de `POST /clinical/requisitions`) lleva el detalle
+que pide el cliente: **laboratorio = qué muestra; imagenología = qué parte del cuerpo**. Un 422 trae
+siempre `details.reason` y `details.field`; un uuid mal formado o un texto de más de 64 caracteres es 400.
+
+| Campo (camelCase) | Columna de `clinical.service_requests` | Regla |
+|---|---|---|
+| `specimenTypeConceptId` | `specimen_type_concept_id` | Value set `specimen-type`; sólo laboratorio o patología |
+| `modalityConceptId` | `modality_concept_id` | `service-request-imaging-modality`; si el estudio fija una, debe coincidir |
+| `bodySiteConceptId` | `body_site_concept_id` | `imaging-body-structure`; obligatoria en estudios de imagen del catálogo |
+| `lateralityConceptId` | `laterality_concept_id` | `condition-laterality`; exige región y que la región admita lateralidad |
+| `bodyStructureUberon` | `body_structure_uberon` | Forma `UBERON:<n>` (hasta 12 dígitos). Sólo se valida la forma, no contra el atlas |
+| `bodyMeshId` | `body_mesh_id` | Alfanumérico (`A-Z a-z 0-9 _ -`), hasta 64 caracteres |
+| `boneTypeConceptId` | `bone_type_concept_id` | Value set `bone-type` (largo, corto, plano, irregular, sesamoideo); exige región o `bodyStructureUberon`; lo elige el médico, no se deriva |
+| `imaging.contrastConceptId` | `contrast_concept_id` | `imaging-contrast`; exige modalidad (sólo dentro de `imaging`) |
+
+Los seis primeros, salvo la muestra, viajan **en el nivel superior del cuerpo o dentro de `imaging`**
+(equivalentes; el mismo dato con valores distintos en los dos lugares es 422 `IMAGING_FIELD_CONFLICT`).
+La respuesta de la orden, `GET /clinical/service-requests/:id` y los listados de órdenes del paciente
+repiten la región en el nivel superior (con su nombre en castellano: `bodySiteDisplay`,
+`lateralityDisplay`, `boneTypeDisplay`, …) y dentro de `imaging`. Una orden sin detalle de imagen
+responde exactamente igual que antes.
+
+Motivos 422 nuevos: `SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE` (laboratorio con muestra y datos de
+imagen a la vez), `IMAGING_FIELD_CONFLICT`, `BODY_STRUCTURE_FORMAT_INVALID`, `BODY_MESH_ID_FORMAT_INVALID`,
+`BONE_TYPE_REQUIRES_BODY_STRUCTURE` y `BONE_TYPE_NOT_IN_CATALOG`. La API los responde antes de que la
+base lance `check_violation` de `ck_service_requests_specimen_xor_imaging` y
+`ck_service_requests_bone_type_requires_location`. La autorización no cambia: roles `CLINICIAN` /
+`PRACTITIONER` y `ClinicalRecordAccessGuard` sobre el paciente del cuerpo.
+
 ## Aviso de receta por vencer (PAC-REC-002)
 
 `POST /clinical/internal/prescription-expiry-notices` lo dispara el job `prescription-expiry-notice`

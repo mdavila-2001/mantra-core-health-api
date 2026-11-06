@@ -87,6 +87,12 @@ export interface CreateServiceRequestData {
   lateralityConceptId?: string;
   /** Contraste (`imaging-contrast`). */
   contrastConceptId?: string;
+  /** Estructura marcada en el atlas 3D (`UBERON:<n>` o `FMA:<n>`). */
+  bodyStructureUberon?: string;
+  /** Malla marcada en el atlas 3D. */
+  bodyMeshId?: string;
+  /** Tipo de hueso (`imaging-bone-type`). */
+  boneTypeConceptId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -143,6 +149,9 @@ export class ServiceRequestsRepository {
         bodySiteConceptId: data.bodySiteConceptId,
         lateralityConceptId: data.lateralityConceptId,
         contrastConceptId: data.contrastConceptId,
+        bodyStructureUberon: data.bodyStructureUberon,
+        bodyMeshId: data.bodyMeshId,
+        boneTypeConceptId: data.boneTypeConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

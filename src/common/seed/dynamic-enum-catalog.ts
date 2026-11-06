@@ -3,6 +3,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
+import { BONE_TYPE_CONCEPT_IDS } from '../../modules/clinical/clinical.bone-type.concepts';
 import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import {
@@ -1724,6 +1725,14 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       'Sin contraste, con contraste, o sin y con contraste. La vía de administración es un dato del estudio, no de esta lista.',
     concepts: CONTRAST_CONCEPT_IDS,
     targets: ['clinical.service_requests.contrast_concept_id'],
+  },
+  {
+    code: 'bone-type',
+    name: 'Tipo de hueso del estudio de imagen',
+    description:
+      'Clase anatómica del hueso que se estudia: largo, corto, plano, irregular o sesamoideo. Lo elige el médico; no se deriva de la región marcada en el modelo 3D.',
+    concepts: BONE_TYPE_CONCEPT_IDS,
+    targets: ['clinical.service_requests.bone_type_concept_id'],
   },
 ];
 

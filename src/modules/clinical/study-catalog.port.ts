@@ -11,12 +11,21 @@ import type { EntityManager } from '@mikro-orm/postgresql';
  */
 export const STUDY_CATALOG_PORT = Symbol('STUDY_CATALOG_PORT');
 
+/**
+ * Código interno (`terminology.value_sets.internal_code`) de los tipos de hueso
+ * de una orden de imagen. Lo materializa la API desde `DYNAMIC_ENUM_CATALOG`
+ * (`bone-type`); mientras no se haya sembrado, ningún `boneTypeConceptId` es
+ * válido (422 `BONE_TYPE_NOT_IN_CATALOG`).
+ */
+export const IMAGING_BONE_TYPE_VALUE_SET = 'bone-type' as const;
+
 /** Los value sets que consulta la validación de la orden. */
 export type StudyValueSetCode =
   | 'service-request-code'
   | 'service-request-imaging-modality'
   | 'imaging-body-structure'
   | 'imaging-contrast'
+  | typeof IMAGING_BONE_TYPE_VALUE_SET
   | 'specimen-type'
   | 'condition-laterality';
 
