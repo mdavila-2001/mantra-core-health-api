@@ -596,7 +596,7 @@ export class IamOrganizationSelfRegistrationService {
             },
           ]
         : [];
-    // v4.2.91: the central site is the head office; each declared one, a branch.
+    // v4.2.92: the central site is the head office; each declared one, a branch.
     return this.directory.registerDeclaredBranches(tx, {
       tenantId,
       timeZone: dto.organization.timeZone,

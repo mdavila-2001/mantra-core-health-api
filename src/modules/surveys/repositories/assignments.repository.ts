@@ -30,6 +30,11 @@ export interface CreateAssignmentData {
    */
   active: boolean;
   /**
+   * Dueño de la plantilla asignada (copia; ver la entidad). Si se omite, el
+   * disparador de la base lo completa desde la plantilla.
+   */
+  ownerPractitionerId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -129,6 +134,36 @@ export class AssignmentsRepository {
     surveyVersionId: string,
   ): Promise<SurveyAssignments[]> {
     return em.find(SurveyAssignments, { surveyVersionId });
+  }
+
+  /**
+   * Asignaciones activas de tipo servicio a estos servicios en el tenant, de
+   * cualquier dueño: quien llama filtra por el profesional (por la plantilla,
+   * que es la fuente de verdad del dueño).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización.
+   * @param targetTypeConceptId - `SURVEYS.TARGET_SERVICE`.
+   * @param serviceIds - `billing.service_catalog.id` de los servicios.
+   * @returns Las asignaciones activas, la más reciente primero.
+   */
+  listActiveByTypeAndTargets(
+    em: EntityManager,
+    tenantId: string,
+    targetTypeConceptId: string,
+    serviceIds: readonly string[],
+  ): Promise<SurveyAssignments[]> {
+    if (serviceIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      SurveyAssignments,
+      {
+        tenantId,
+        targetTypeConceptId,
+        targetId: { $in: [...serviceIds] },
+        active: true,
+      },
+      { orderBy: { createdAt: 'desc' } },
+    );
   }
 
   /**

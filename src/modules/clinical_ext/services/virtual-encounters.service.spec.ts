@@ -16,6 +16,7 @@ import {
 } from '../../../common';
 import { ForbiddenException } from '@nestjs/common';
 import { CEXT } from '../clinical_ext.concepts';
+import { CLIN } from '../../clinical/clinical.concepts';
 
 const actor = {
   id: 'md-1',
@@ -50,13 +51,25 @@ function build() {
     findActiveParticipants: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  // El fin de la teleconsulta completa el turno de la agenda (puerto que no lanza).
+  const encounterClosed = {
+    onEncounterClosed: mockFn().mockResolvedValue(undefined),
+  };
   const service = new VirtualEncountersService(
     em as any,
     encountersRepo,
     clinicalEncountersRepo as any,
     logger as any,
+    encounterClosed as any,
   );
-  return { service, tx, encountersRepo, clinicalEncountersRepo };
+  return {
+    service,
+    tx,
+    em,
+    encountersRepo,
+    clinicalEncountersRepo,
+    encounterClosed,
+  };
 }
 
 describe('VirtualEncountersService (UC-18-12)', () => {
@@ -235,6 +248,80 @@ describe('VirtualEncountersService (UC-18-12)', () => {
     const res = await d.service.end('ve1', { recordingFileId: 'f1' }, actor);
     expect(res.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_COMPLETED);
     expect(due.recordingFileId).toBe('f1');
+  });
+
+  it('con el encuentro abierto, terminar la teleconsulta NO completa el turno (lo hace el cierre del encuentro)', async () => {
+    const d = build();
+    d.clinicalEncountersRepo.findById.mockResolvedValue({
+      id: 'e1',
+      tenantId: 'ten-1',
+      patientProfileId: 'pat-1',
+      primaryPractitionerId: 'pr-1',
+      appointmentId: 'appt-1',
+      statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
+    });
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 've1',
+      encounterId: 'e1',
+      statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
+      updatedAt: new Date(),
+    });
+
+    await d.service.end('ve1', {}, actor);
+
+    expect(d.encounterClosed.onEncounterClosed).toHaveBeenCalledWith(
+      { encounterId: 'e1', appointmentId: undefined },
+      actor,
+    );
+  });
+
+  it('con el encuentro ya cerrado, terminar la teleconsulta avisa a la agenda con su cita clínica, después de su transacción', async () => {
+    const d = build();
+    d.clinicalEncountersRepo.findById.mockResolvedValue({
+      id: 'e1',
+      tenantId: 'ten-1',
+      patientProfileId: 'pat-1',
+      primaryPractitionerId: 'pr-1',
+      appointmentId: 'appt-1',
+      statusConceptId: CLIN.ENCOUNTER_FINISHED,
+    });
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 've1',
+      encounterId: 'e1',
+      statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
+      updatedAt: new Date(),
+    });
+    const order: string[] = [];
+    d.em.transactional.mockImplementation(async (cb: any) => {
+      const out = await cb(d.tx);
+      order.push('commit');
+      return out;
+    });
+    d.encounterClosed.onEncounterClosed.mockImplementation(async () => {
+      order.push('port');
+    });
+
+    await d.service.end('ve1', {}, actor);
+
+    expect(d.encounterClosed.onEncounterClosed).toHaveBeenCalledWith(
+      { encounterId: 'e1', appointmentId: 'appt-1' },
+      actor,
+    );
+    expect(order).toEqual(['commit', 'port']);
+  });
+
+  it('una sesión que no está en curso no avisa a la agenda', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 've1',
+      encounterId: 'e1',
+      statusConceptId: CEXT.VIRTUAL_ENCOUNTER_SCHEDULED,
+      updatedAt: new Date(),
+    });
+    await expect(d.service.end('ve1', {}, actor)).rejects.toBeInstanceOf(
+      PreconditionFailedException,
+    );
+    expect(d.encounterClosed.onEncounterClosed).not.toHaveBeenCalled();
   });
 
   it('el paciente no puede finalizar la sesión', async () => {

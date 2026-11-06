@@ -76321,6 +76321,9 @@ paths:
         Todas las respuestas de error usan el envelope ErrorResponse.
   /surveys/assignments:
     post:
+      description: >-
+        Sólo asocia plantillas importadas del catálogo estándar. La cita médica usa siempre la encuesta base del sistema
+        y un servicio se asocia con PUT /surveys/service-assignments/{serviceId}.
       operationId: SurveysAssignmentsController_createAssignment
       parameters: []
       requestBody:
@@ -76332,6 +76335,10 @@ paths:
       responses:
         '201':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -76343,7 +76350,10 @@ paths:
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '422':
-          $ref: '#/components/responses/PreconditionFailed'
+          description: >-
+            SURVEY_ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE: la plantilla se escribió a mano (no viene del catálogo
+            estándar) y ya no se reparte. También SURVEY_ASSIGNMENT_SERVICE_NOT_OFFERED y
+            SURVEY_ASSIGNMENT_CARE_TYPE_UNSUPPORTED.
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -76355,9 +76365,6 @@ paths:
       summary: Asociar una encuesta a una consulta o servicio
       tags:
         - surveys-assignments
-      description: >-
-        Asociar una encuesta a una consulta o servicio. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /surveys/invitations:
     post:
       operationId: SurveysAssignmentsController_issueInvitations
@@ -76586,6 +76593,155 @@ paths:
       description: >-
         Catálogo de encuestas con sus servicios. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/standard-catalog:
+    get:
+      operationId: SurveysServiceAssignmentsController_getCatalog
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardSurveyCatalogDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Ver el catálogo estándar de encuestas
+      tags:
+        - surveys-service-assignments
+      description: >-
+        Ver el catálogo estándar de encuestas. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /surveys/service-assignments:
+    get:
+      operationId: SurveysServiceAssignmentsController_listServiceAssignments
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceSurveyAssignmentsDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Ver la encuesta de cada uno de mis servicios
+      tags:
+        - surveys-service-assignments
+      description: >-
+        Ver la encuesta de cada uno de mis servicios. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/service-assignments/{serviceId}:
+    put:
+      operationId: SurveysServiceAssignmentsController_importServiceSurvey
+      parameters:
+        - name: serviceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportServiceSurveyDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceSurveyRowDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 'SURVEY_SERVICE_NOT_OWNED: el servicio no es suyo.'
+        '404':
+          description: 'SURVEY_CATALOG_CODE_UNKNOWN: el código no está en el catálogo.'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Asociar a un servicio una encuesta del catálogo estándar
+      tags:
+        - surveys-service-assignments
+      description: >-
+        Asociar a un servicio una encuesta del catálogo estándar. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: SurveysServiceAssignmentsController_removeServiceSurvey
+      parameters:
+        - name: serviceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: El servicio vuelve a la encuesta base de servicio.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 'SURVEY_SERVICE_NOT_OWNED: el servicio no es suyo.'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Quitar la encuesta de un servicio
+      tags:
+        - surveys-service-assignments
+      description: >-
+        Quitar la encuesta de un servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /admin/portal/version:
     get:
       operationId: AdminPortalController_version
@@ -87240,6 +87396,10 @@ tags:
     description: >-
       Operaciones del dominio funcional surveys patient. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: surveys-service-assignments
+    description: >-
+      Operaciones del dominio funcional surveys service assignments. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: surveys-templates
     description: >-
       Operaciones del dominio funcional surveys templates. Consulte el catálogo Markdown de endpoints para payloads
@@ -144495,6 +144655,246 @@ components:
           format: date-time
         path:
           type: string
+    StandardSurveySourceDto:
+      type: object
+      properties:
+        instrument:
+          type: string
+          example: CAHPS Clinician & Group Survey 3.0
+        license:
+          type: string
+          example: Dominio público (AHRQ)
+        url:
+          type: string
+          format: uri
+      required:
+        - instrument
+        - license
+        - url
+    StandardSurveyQuestionDto:
+      type: object
+      properties:
+        text:
+          type: string
+        answerType:
+          type: string
+          enum:
+            - TEXT
+            - SCALE
+            - BOOLEAN
+            - SINGLE_CHOICE
+            - MULTIPLE_CHOICE
+        required:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        scaleMin:
+          type: number
+        scaleMax:
+          type: number
+        dimension:
+          type: string
+          example: espera
+      required:
+        - text
+        - answerType
+        - required
+        - dimension
+    StandardSurveyDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: STD_IMAGING_V1
+        title:
+          type: string
+        description:
+          type: string
+        serviceKinds:
+          type: array
+          items:
+            type: string
+            enum:
+              - CONSULTATION
+              - PROCEDURE
+              - LAB
+              - IMAGING
+              - TELEMEDICINE
+              - THERAPY
+              - HOME_CARE
+              - PHARMACY
+              - OTHER
+        source:
+          $ref: '#/components/schemas/StandardSurveySourceDto'
+        additionalSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/StandardSurveySourceDto'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/StandardSurveyQuestionDto'
+      required:
+        - code
+        - title
+        - description
+        - serviceKinds
+        - source
+        - additionalSources
+        - questions
+    StandardSurveyCatalogDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StandardSurveyDto'
+      required:
+        - items
+    ConsultationSurveyRowDto:
+      type: object
+      properties:
+        system:
+          type: boolean
+          example: true
+        title:
+          type: string
+          example: Cita médica
+        templateTitle:
+          type: string
+          example: Encuesta de su consulta médica
+        questionCount:
+          type: number
+          example: 12
+        replaceable:
+          type: boolean
+          example: false
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseSurveyQuestionDto'
+      required:
+        - system
+        - title
+        - templateTitle
+        - questionCount
+        - replaceable
+        - questions
+    ServiceSurveyAssignmentDto:
+      type: object
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        catalogCode:
+          type: string
+          example: STD_IMAGING_V1
+          nullable: true
+        title:
+          type: string
+        templateId:
+          type: string
+          format: uuid
+        versionId:
+          type: string
+          format: uuid
+        assignedAt:
+          type: string
+          format: date-time
+      required:
+        - assignmentId
+        - catalogCode
+        - title
+        - templateId
+        - versionId
+        - assignedAt
+    ServiceSurveyRowDto:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+          example: Ecografía abdominal
+        serviceKind:
+          type: string
+          enum:
+            - CONSULTATION
+            - PROCEDURE
+            - LAB
+            - IMAGING
+            - TELEMEDICINE
+            - THERAPY
+            - HOME_CARE
+            - PHARMACY
+            - OTHER
+          example: IMAGING
+        assignment:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ServiceSurveyAssignmentDto'
+      required:
+        - serviceId
+        - serviceName
+        - serviceKind
+        - assignment
+    ServiceSurveyAssignmentsDto:
+      type: object
+      properties:
+        consultation:
+          $ref: '#/components/schemas/ConsultationSurveyRowDto'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceSurveyRowDto'
+      required:
+        - consultation
+        - services
+    ImportServiceSurveyDto:
+      type: object
+      properties:
+        catalogCode:
+          type: string
+          example: STD_IMAGING_V1
+          pattern: ^STD_[A-Z0-9_]+$
+      required:
+        - catalogCode
+      additionalProperties: false
+    BaseSurveyQuestionDto:
+      type: object
+      properties:
+        position:
+          type: number
+          example: 1
+        text:
+          type: string
+        answerType:
+          type: string
+          enum:
+            - TEXT
+            - SCALE
+            - BOOLEAN
+            - SINGLE_CHOICE
+            - MULTIPLE_CHOICE
+        required:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        scaleMin:
+          type: number
+        scaleMax:
+          type: number
+      required:
+        - position
+        - text
+        - answerType
+        - required
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

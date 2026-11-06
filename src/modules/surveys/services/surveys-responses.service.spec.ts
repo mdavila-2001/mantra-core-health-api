@@ -189,6 +189,27 @@ describe('SurveysResponsesService', () => {
       expect(d.invitationsRepo.listByPatient).not.toHaveBeenCalled();
     });
 
+    it('una cuenta de paciente sin perfil en el token ve la bandeja vacía (200 []), no un 403', async () => {
+      const d = build();
+      const result = await withTenant(() =>
+        d.service.listMyInvitations({
+          id: 'usr-pat-sin-perfil',
+          roles: ['PATIENT'],
+        } as never),
+      );
+      expect(result).toEqual([]);
+      expect(d.invitationsRepo.listByPatient).not.toHaveBeenCalled();
+    });
+
+    it('un paciente sin invitaciones recibe una lista vacía', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockResolvedValue([]);
+      const result = await withTenant(() =>
+        d.service.listMyInvitations(patientActor),
+      );
+      expect(result).toEqual([]);
+    });
+
     it('no deja que otro paciente responda la invitación', async () => {
       const d = build();
       d.invitationsRepo.findById.mockResolvedValue(

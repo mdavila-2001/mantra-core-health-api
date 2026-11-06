@@ -1,5 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -43,6 +49,13 @@ export class SurveysAssignmentsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Asociar una encuesta a una consulta o servicio',
+    description:
+      'Sólo asocia plantillas importadas del catálogo estándar. La cita médica usa siempre la encuesta base del sistema y un servicio se asocia con PUT /surveys/service-assignments/{serviceId}.',
+  })
+  @ApiCreatedResponse({ type: IdResponseDto })
+  @ApiUnprocessableEntityResponse({
+    description:
+      'SURVEY_ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE: la plantilla se escribió a mano (no viene del catálogo estándar) y ya no se reparte. También SURVEY_ASSIGNMENT_SERVICE_NOT_OFFERED y SURVEY_ASSIGNMENT_CARE_TYPE_UNSUPPORTED.',
   })
   createAssignment(
     @Body() dto: CreateAssignmentDto,

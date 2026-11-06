@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -34,6 +34,10 @@ import {
   type QuestionSource,
 } from '../surveys.concepts';
 import { SurveysErrorReason } from '../surveys.error-reasons';
+import {
+  isPatientWithoutProfile,
+  requirePatientProfile,
+} from './patient-session';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
 import type {
   SurveyInvitations,
@@ -100,7 +104,8 @@ export class SurveysResponsesService {
   async listMyInvitations(
     actor: AuthenticatedUser,
   ): Promise<PatientInvitationDto[]> {
-    const patientProfileId = this.requirePatientProfile(actor);
+    if (isPatientWithoutProfile(actor)) return [];
+    const patientProfileId = requirePatientProfile(actor);
     const tenantId = requireTenantId();
     const invitations = await this.listInvitationsOf(
       patientProfileId,
@@ -129,7 +134,7 @@ export class SurveysResponsesService {
     invitationId: string,
     actor: AuthenticatedUser,
   ): Promise<PatientQuestionnaireDto> {
-    const patientProfileId = this.requirePatientProfile(actor);
+    const patientProfileId = requirePatientProfile(actor);
     // Primero la invitación acotada a paciente y tenant: nada de plantilla ni
     // preguntas se lee antes de saber que es del contexto activo.
     const invitation = await this.loadOwnInvitation(
@@ -182,7 +187,7 @@ export class SurveysResponsesService {
     dto: SubmitResponseDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    const patientProfileId = this.requirePatientProfile(actor);
+    const patientProfileId = requirePatientProfile(actor);
     const tenantId = requireTenantId();
 
     const outcome = await this.em
@@ -348,26 +353,6 @@ export class SurveysResponsesService {
           .sort((a, b) => a.questionText.localeCompare(b.questionText)),
       }))
       .filter((response) => response.answers.length > 0);
-  }
-
-  /**
-   * Exige que la sesión tenga perfil de paciente.
-   *
-   * Es lo que impide que un profesional o un administrador entren por la puerta
-   * del autoservicio: sin perfil de paciente no hay invitaciones que mirar, y
-   * el identificador no se acepta por parámetro justamente para que nadie pida
-   * las de otro.
-   */
-  private requirePatientProfile(actor: AuthenticatedUser): string {
-    // 403 y no 422: no es una precondición que el cliente pueda cumplir
-    // mandando otra cosa — es que esta sesión no es la de un paciente. Mismo
-    // criterio que `community-reviews.service.ts` para calificar.
-    if (!actor.patientProfileId) {
-      throw new ForbiddenException(
-        'Solo un paciente puede ver sus cuestionarios',
-      );
-    }
-    return actor.patientProfileId;
   }
 
   /**

@@ -7,6 +7,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   requireTenantId,
+  runWithTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -21,14 +22,14 @@ import {
   InvitationsIssuedDto,
   IssueInvitationsDto,
 } from '../dto';
-import {
-  isSystemOwnerType,
-  SURVEYS,
-  TARGET_TYPE_BY_CODE,
-} from '../surveys.concepts';
+import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
 import { MS_PER_DAY } from '../surveys.constants';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
+import {
+  InvitationCandidates,
+  isCatalogTemplate,
+} from './invitation-candidates';
 import type { SystemSurveyKind } from '../surveys.base-definitions';
 import {
   SurveysSystemTemplatesService,
@@ -38,31 +39,7 @@ import { AppointmentBookings } from '../../scheduling/entities/appointment_booki
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { operatesAnyAgenda } from '../../scheduling/domain/booking/agenda-actors';
-import type {
-  SurveyAssignments,
-  SurveyInvitations,
-  SurveyTemplates,
-  SurveyVersions,
-} from '../entities';
-
-/**
- * Qué tan específico es el destino de una asignación: cuanto menor, más
- * específico. Decide cuál de las encuestas del profesional viaja dentro de la
- * invitación base cuando aplican varias a la misma reserva.
- */
-const TARGET_SPECIFICITY: Readonly<Record<string, number>> = {
-  [SURVEYS.TARGET_APPOINTMENT]: 0,
-  [SURVEYS.TARGET_SERVICE]: 1,
-  [SURVEYS.TARGET_CARE_TYPE]: 2,
-};
-
-/** Una encuesta del profesional que aplica a la reserva que se está cerrando. */
-interface PractitionerCandidate {
-  /** La asignación que la trae. */
-  assignment: SurveyAssignments;
-  /** Su versión publicada y vigente. */
-  version: SurveyVersions;
-}
+import type { SurveyInvitations } from '../entities';
 
 /**
  * Reparto del instrumento: a qué se asocia y a quién se le pide.
@@ -96,7 +73,11 @@ export class SurveysAssignmentsService {
     private readonly targetsRepo: TargetsRepository,
   ) {
     this.logger.setContext(SurveysAssignmentsService.name);
+    this.candidates = new InvitationCandidates(templatesRepo);
   }
+
+  /** Las encuestas del profesional que aplican a una reserva. */
+  private readonly candidates: InvitationCandidates;
 
   /**
    * Asocia una versión publicada a la cosa evaluada.
@@ -158,6 +139,20 @@ export class SurveysAssignmentsService {
             surveyVersionId: dto.surveyVersionId,
           });
         }
+        // Desde el 06/11/2026 sólo se reparte lo importado del catálogo estándar:
+        // una encuesta escrita a mano asociada acá quedaría viva sin emitirse
+        // nunca. La consulta usa siempre la base del sistema; un servicio se
+        // asocia con `PUT /surveys/service-assignments/:serviceId`.
+        if (!isCatalogTemplate(template)) {
+          throw new PreconditionFailedException(
+            'Sólo se asocian encuestas del catálogo estándar: importe una a su servicio desde «Encuestas por servicio»; la cita médica usa la encuesta base del sistema',
+            {
+              surveyVersionId: dto.surveyVersionId,
+              targetType: dto.targetType,
+            },
+            SurveysErrorReason.ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE,
+          );
+        }
 
         await this.assertTargetUsable(
           tx,
@@ -191,6 +186,8 @@ export class SurveysAssignmentsService {
           tenantId,
           targetTypeConceptId,
           targetId,
+          // Copia del dueño de la plantilla (v4.2.91): la valida un disparador.
+          ownerPractitionerId: template.ownerPractitionerId,
           active: true,
           actorUserId: actor.id,
         });
@@ -223,18 +220,17 @@ export class SurveysAssignmentsService {
   /**
    * Emite la invitación de una reserva completada.
    *
-   * Es **una sola invitación por reserva**: lleva las preguntas base del
-   * sistema (de consulta o de servicio, según la reserva) y, detrás, las de la
-   * encuesta del profesional que atendió si la asoció a este servicio o a sus
-   * consultas. Si aplican varias encuestas del profesional, la más específica
-   * (cita > servicio > tipo de atención; a igualdad, la más antigua) viaja
-   * dentro de la invitación base y las demás se emiten sueltas, como antes.
+   * Es **una sola invitación por reserva**. Una consulta recibe la encuesta
+   * base de consulta del sistema, fija para todos. Un servicio recibe la
+   * encuesta del catálogo estándar que el profesional que atendió le importó
+   * o, si no hay, la base de servicio del sistema. Las encuestas escritas a
+   * mano ya no se emiten (ni como extensión ni sueltas); lo emitido antes
+   * sigue siendo contestable y legible.
    *
-   * Es **idempotente**: si la reserva ya tiene la invitación base, o una
-   * versión del profesional ya fue emitida (suelta o dentro de la base), no se
-   * emite otra. Cerrar dos veces la misma cita —o reintentar tras un fallo de
-   * red— no puede terminar reclamándole al paciente el mismo cuestionario dos
-   * veces.
+   * Es **idempotente**: si la reserva ya tiene su invitación (la base de
+   * cualquier versión, o la importada), no se emite otra. Cerrar dos veces la
+   * misma cita —o reintentar tras un fallo de red— no puede terminar
+   * reclamándole al paciente el mismo cuestionario dos veces.
    */
   async issueForBooking(
     dto: IssueInvitationsDto,
@@ -254,7 +250,24 @@ export class SurveysAssignmentsService {
     appointmentBookingId: string,
     actor: AuthenticatedUser,
   ): Promise<InvitationsIssuedDto> {
-    return this.issue({ appointmentBookingId }, actor, false);
+    // La invitación vive en el tenant de la reserva, que es el que ve el
+    // paciente. El de la sesión de quien cerró puede ser otro: `scheduling`
+    // autoriza el cierre por agenda propia (`BookingAccess.loadForOperation`),
+    // no por el tenant activo, y con el tenant de la sesión esta emisión
+    // respondía «Reserva no encontrada» —tragado por el adaptador— y el
+    // paciente se quedaba sin encuesta. El cierre ya autorizó al actor.
+    const booking = await this.targetsRepo.findBooking(
+      this.em.fork({ keepTransactionContext: true }),
+      appointmentBookingId,
+    );
+    if (!booking) {
+      throw new ResourceNotFoundException('Reserva no encontrada', {
+        appointmentBookingId,
+      });
+    }
+    return runWithTenant(booking.tenantId, () =>
+      this.issue({ appointmentBookingId }, actor, false),
+    );
   }
 
   /**
@@ -376,23 +389,53 @@ export class SurveysAssignmentsService {
         const ids: string[] = [];
         let alreadyIssued = 0;
 
-        const candidates = await this.practitionerCandidates(
-          tx,
-          assignments,
-          practitionerProfileId,
-          now,
+        // Qué se reparte (decisión del 06/11/2026):
+        //  - una consulta recibe SÓLO la encuesta base de consulta del sistema,
+        //    fija y no reemplazable;
+        //  - un servicio recibe la encuesta del catálogo estándar que el
+        //    profesional le importó (`PUT /surveys/service-assignments/:serviceId`)
+        //    o, si no le importó ninguna, la base de servicio del sistema.
+        // Las encuestas escritas a mano (asignaciones anteriores al catálogo)
+        // ya no se emiten: siguen existiendo y lo ya respondido se sigue leyendo.
+        const candidates =
+          kind === 'SERVICE'
+            ? await this.candidates.forBooking(
+                tx,
+                assignments,
+                practitionerProfileId,
+                now,
+              )
+            : [];
+        const replacement = candidates.find(
+          (c) =>
+            c.assignment.targetTypeConceptId === SURVEYS.TARGET_SERVICE &&
+            isCatalogTemplate(c.template),
         );
-        const extension = baseAlreadyIssued
-          ? undefined
-          : candidates.find((c) => !alreadyByVersion.has(c.version.id));
 
-        if (baseAlreadyIssued) {
+        // Una por reserva: si ya salió la base (de la versión que sea) o la
+        // importada, un reintento no emite otra.
+        const primaryAlreadyIssued =
+          baseAlreadyIssued ||
+          (replacement !== undefined &&
+            alreadyByVersion.has(replacement.version.id));
+
+        if (primaryAlreadyIssued) {
           alreadyIssued += 1;
         } else {
+          const primary = replacement
+            ? {
+                versionId: replacement.version.id,
+                assignmentId: replacement.assignment.id,
+                windowDays: replacement.version.responseWindowDays,
+              }
+            : {
+                versionId: base.versionId,
+                assignmentId: base.assignmentId,
+                windowDays: base.responseWindowDays,
+              };
           const invitation = this.invitationsRepo.create(tx, {
-            surveyVersionId: base.versionId,
-            extensionSurveyVersionId: extension?.version.id,
-            surveyAssignmentId: base.assignmentId,
+            surveyVersionId: primary.versionId,
+            surveyAssignmentId: primary.assignmentId,
             tenantId,
             patientProfileId: booking.patientProfileId,
             appointmentBookingId: booking.id,
@@ -401,35 +444,10 @@ export class SurveysAssignmentsService {
             // Se congela al emitir en vez de calcularse al leer: si mañana
             // alguien acorta el plazo, la ventana ya prometida no se mueve.
             expiresAt: new Date(
-              now.getTime() + base.responseWindowDays * MS_PER_DAY,
+              now.getTime() + primary.windowDays * MS_PER_DAY,
             ),
             actorUserId: actor.id,
           });
-          alreadyByVersion.add(base.versionId);
-          if (extension) alreadyByVersion.add(extension.version.id);
-          ids.push(invitation.id);
-        }
-
-        for (const candidate of candidates) {
-          if (candidate === extension) continue;
-          if (alreadyByVersion.has(candidate.version.id)) {
-            alreadyIssued += 1;
-            continue;
-          }
-          const invitation = this.invitationsRepo.create(tx, {
-            surveyVersionId: candidate.version.id,
-            surveyAssignmentId: candidate.assignment.id,
-            tenantId,
-            patientProfileId: booking.patientProfileId,
-            appointmentBookingId: booking.id,
-            statusConceptId: SURVEYS.INVITATION_PENDING,
-            issuedAt: now,
-            expiresAt: new Date(
-              now.getTime() + candidate.version.responseWindowDays * MS_PER_DAY,
-            ),
-            actorUserId: actor.id,
-          });
-          alreadyByVersion.add(candidate.version.id);
           ids.push(invitation.id);
         }
 
@@ -440,7 +458,7 @@ export class SurveysAssignmentsService {
             operation: 'surveys.invitation.issue',
             appointmentBookingId: booking.id,
             kind,
-            withExtension: extension !== undefined,
+            withCatalogReplacement: replacement !== undefined,
             issued: ids.length,
             alreadyIssued,
           },
@@ -584,88 +602,6 @@ export class SurveysAssignmentsService {
   }
 
   /**
-   * Las encuestas del profesional que atendió que aplican a la reserva, de la
-   * más específica a la menos.
-   *
-   * Aplica una asignación activa cuya versión está vigente, cuya plantilla está
-   * activa y **es del profesional que atendió** (una asignación heredada o mal
-   * cargada no puede repartir la encuesta de un colega), y que no es la base
-   * del sistema, que se emite aparte. Una misma versión asignada por dos
-   * destinos cuenta una vez.
-   */
-  private async practitionerCandidates(
-    tx: EntityManager,
-    assignments: SurveyAssignments[],
-    practitionerProfileId: string | null,
-    now: Date,
-  ): Promise<PractitionerCandidate[]> {
-    if (practitionerProfileId === null) return [];
-
-    const ordered = [...assignments].sort(
-      (a, b) =>
-        (TARGET_SPECIFICITY[a.targetTypeConceptId] ?? 3) -
-          (TARGET_SPECIFICITY[b.targetTypeConceptId] ?? 3) ||
-        // A igual especificidad gana la intención más reciente del médico.
-        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0),
-    );
-
-    const candidates: PractitionerCandidate[] = [];
-    const seen = new Set<string>();
-    for (const assignment of ordered) {
-      if (seen.has(assignment.surveyVersionId)) continue;
-      const version = await this.templatesRepo.findVersionById(
-        tx,
-        assignment.surveyVersionId,
-      );
-      if (!version) continue;
-      if (!this.isEffective(version.effectiveFrom, version.effectiveTo, now))
-        continue;
-
-      const template = await this.templatesRepo.findTemplateById(
-        tx,
-        version.surveyTemplateId,
-      );
-      // Una plantilla desactivada deja de repartirse; lo ya emitido sigue en
-      // pie, que es exactamente la diferencia entre desactivar y borrar.
-      if (!template || template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE)
-        continue;
-      if (!this.isPractitionerOf(template, practitionerProfileId)) continue;
-
-      seen.add(version.id);
-      candidates.push({ assignment, version });
-    }
-
-    // De una misma plantilla sólo se reparte su versión más alta: dos versiones
-    // asignadas a la vez (la vieja y la corregida) le repetirían la encuesta al
-    // paciente.
-    const highest = new Map<string, number>();
-    for (const { version } of candidates) {
-      highest.set(
-        version.surveyTemplateId,
-        Math.max(
-          highest.get(version.surveyTemplateId) ?? 0,
-          version.versionNumber,
-        ),
-      );
-    }
-    return candidates.filter(
-      ({ version }) =>
-        version.versionNumber >= (highest.get(version.surveyTemplateId) ?? 0),
-    );
-  }
-
-  /** Si la plantilla es del profesional (y no una encuesta de sistema). */
-  private isPractitionerOf(
-    template: SurveyTemplates,
-    practitionerProfileId: string,
-  ): boolean {
-    return (
-      !isSystemOwnerType(template.ownerTypeConceptId) &&
-      template.ownerPractitionerId === practitionerProfileId
-    );
-  }
-
-  /**
    * Identificadores contra los que se buscan asignaciones activas, y el
    * profesional que atendió.
    *
@@ -729,16 +665,5 @@ export class SurveysAssignmentsService {
       booking.practitionerServiceOfferingId,
     );
     return offering?.serviceCatalogId ?? null;
-  }
-
-  /** Si el instante indicado cae dentro de la vigencia de la versión. */
-  private isEffective(
-    from: Date | undefined,
-    to: Date | undefined,
-    now: Date,
-  ): boolean {
-    if (from && now < from) return false;
-    if (to && now > to) return false;
-    return true;
   }
 }

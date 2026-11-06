@@ -191,6 +191,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
  * observación, orden de servicio, reporte diagnóstico, condición, alergia,
  * medicación, procedimiento, inmunización y cierre de encuentro).
  */
+import * as encounterLifecycle from './encounter-lifecycle.providers';
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
@@ -286,6 +287,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     // Servicios
     CareEpisodesService,
     EncountersService,
+    ...encounterLifecycle.encounterLifecycleProviders,
     EncounterSealService,
     EncounterSealGuardService,
     ObservationsService,
@@ -342,6 +344,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
   // `ReceivedServicesProjector` se exporta para que `procedures_perioperative` proyecte
   // el cierre de un caso quirúrgico a la historia sin escribir esta tabla.
   exports: [
+    encounterLifecycle.ENCOUNTER_CLOSED_PORT,
     ConditionsService,
     ProceduresService,
     ReceivedServicesProjector,

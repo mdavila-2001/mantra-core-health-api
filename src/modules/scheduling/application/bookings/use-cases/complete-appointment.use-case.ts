@@ -77,9 +77,10 @@ export class CompleteAppointmentUseCase {
       };
     });
 
-    // Después del commit y fuera de la transacción: la encuesta de la atención
-    // se emite al paciente, pero un fallo de ese contexto nunca revierte el
-    // cierre (el puerto no lanza). Ver `BookingCompletedPort`.
+    // Fuera de la transacción del caso de uso (confirmada salvo que la petición
+    // tenga la suya, con RLS): la encuesta se emite al paciente, pero un fallo
+    // de ese contexto nunca revierte el cierre (el puerto no lanza y trabaja en
+    // un savepoint). Ver `BookingCompletedPort`.
     await this.completed.onBookingCompleted(result.bookingId, actor);
     return result;
   }
