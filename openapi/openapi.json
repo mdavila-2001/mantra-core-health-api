@@ -143175,6 +143175,15 @@
             "type": "string",
             "description": "Enlace de ubicación (http/https)",
             "maxLength": 2000
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría de la sede: default (sin clasificar), head_office (casa matriz, una por organización) o branch (sucursal). Por omisión, default.",
+            "enum": [
+              "default",
+              "head_office",
+              "branch"
+            ]
           }
         },
         "required": [
@@ -143211,6 +143220,15 @@
             "minimum": -180,
             "maximum": 180,
             "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría de la sede: default, head_office (casa matriz, una por organización) o branch.",
+            "enum": [
+              "default",
+              "head_office",
+              "branch"
+            ]
           }
         },
         "additionalProperties": false

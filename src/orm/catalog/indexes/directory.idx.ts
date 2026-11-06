@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `directory`.
- * 80 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 82 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const directoryIndexes: readonly IndexTuple[] = [
@@ -35,6 +35,8 @@ export const directoryIndexes: readonly IndexTuple[] = [
   ['branches', 'ix_branches_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['branches', 'ix_branches_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['branches', 'ix_branches_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['branches', 'ix_branches_tenant_id_branch_category', ['tenant_id', 'branch_category'], false, 'btree'],
+  ['branches', 'ux_branches_one_head_office', ['tenant_id'], true, 'btree', 'branch_category = \'head_office\''],
   ['tenant_affiliation_documents', 'ix_tenant_affiliation_documents_tenant_id', ['tenant_id'], false, 'btree'],
   ['tenant_affiliation_documents', 'ix_tenant_affiliation_documents_document_type_concept_id', ['document_type_concept_id'], false, 'btree'],
   ['tenant_affiliation_documents', 'ix_tenant_affiliation_documents_issuing_authority_concept_id', ['issuing_authority_concept_id'], false, 'btree'],
