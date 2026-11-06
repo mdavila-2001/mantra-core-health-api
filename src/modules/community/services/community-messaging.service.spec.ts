@@ -934,7 +934,7 @@ describe('CommunityMessagingService', () => {
       );
     });
 
-    it('no deja editar pasados los cinco minutos', async () => {
+    it('no deja editar pasados los quince minutos', async () => {
       // La barrera es el servidor, no la pantalla: el cliente deja de ofrecer
       // «Editar» al vencer la ventana, pero un `PATCH` a mano llega igual.
       const d = build();
@@ -942,7 +942,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        message({ sentAt: minutesAgo(6) }),
+        message({ sentAt: minutesAgo(16) }),
       );
 
       await expect(

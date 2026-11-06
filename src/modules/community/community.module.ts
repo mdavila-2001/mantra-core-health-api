@@ -43,6 +43,8 @@ import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
 // importa a `community`).
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { WsJwtGuard } from '../../common';
+import { CommunityMessageReactionsController } from './controllers/community-message-reactions.controller';
+import { CommunityMessageReactionsService } from './services/community-message-reactions.service';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -159,6 +161,7 @@ import {
   controllers: [
     CommunitySocialController,
     CommunityMessagingController,
+    CommunityMessageReactionsController,
     CommunityModerationController,
     CommunityReviewsController,
     // Cuelga de `/patients/me` y no de `/community/profiles`: el paciente
@@ -222,6 +225,7 @@ import {
     CommunitySocialService,
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    CommunityMessageReactionsService,
     CommunityBookingChatService,
     CommunityOrganizationStaffService,
     CommunityOrderChatService,

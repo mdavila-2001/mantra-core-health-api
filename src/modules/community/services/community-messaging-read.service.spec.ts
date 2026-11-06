@@ -96,6 +96,13 @@ function build() {
     files as any,
     verifications as any,
     logger as any,
+    // Reactions are covered by community-message-reactions.service.spec.ts;
+    // here they pass the page through untouched.
+    {
+      attach: mockFn((_em: unknown, items: unknown[]) =>
+        Promise.resolve(items),
+      ),
+    } as any,
   );
   return {
     service,
