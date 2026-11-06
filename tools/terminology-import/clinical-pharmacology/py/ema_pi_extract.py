@@ -22,7 +22,8 @@ Cada glifo va a la celda que contiene su centro; una fila de la página lleva
 borde interior) y, por celda, `alt`: las palabras de `pdftotext -bbox` (poppler,
 otro extractor) cuyo centro cae en la misma celda. Una grilla se descarta entera
 (sus líneas quedan como filas marcadas `table`, sin celdas, como sin grilla) si
-algún glifo de su área no cae en ninguna celda, si está dentro de otra o la
+algún glifo de su área no cae en ninguna celda, si un borde corta una palabra
+(dos glifos seguidos sin espacio en celdas distintas), si está dentro de otra o la
 contiene, o si una celda trae un título de sección (es un marco alrededor del
 texto, no una tabla). La tabla queda marcada si una palabra de pdftotext de su
 área no cae en ninguna celda (`altUnassigned`) o si una celda tiene un trazo que
@@ -282,7 +283,7 @@ def grid_tables(plumber_page, height):
                 'frags': [], 'alt': [], 'graphic': False,
             })
         b = t.bbox
-        tables.append({'bbox': (b[0], height - b[3], b[2], height - b[1]), 'cells': out, 'nested': False, 'unassigned': 0, 'altUnassigned': 0})
+        tables.append({'bbox': (b[0], height - b[3], b[2], height - b[1]), 'cells': out, 'nested': False, 'unassigned': 0, 'cut': 0, 'altUnassigned': 0})
     inside = lambda a, b: a[0] >= b[0] - 1 and a[1] >= b[1] - 1 and a[2] <= b[2] + 1 and a[3] <= b[3] + 1
     for a in tables:
         for b in tables:
@@ -391,11 +392,15 @@ def page_rows(page, tables=(), words=()):
                     cs = [i for i in buf if isinstance(i, LTChar)]
                     cur['frags'].append({'items': list(buf), 'x0': min(i.x0 for i in cs), 'y0': min(i.y0 for i in cs), 'y1': max(i.y1 for i in cs)})
 
+            prev = None
             for item in ln:
                 if isinstance(item, LTChar):
                     c = _cell_at(grid, (item.x0 + item.x1) / 2, (item.y0 + item.y1) / 2)
                     if c is None:
                         grid['unassigned'] += 1
+                    # Dos glifos seguidos, sin espacio entre ellos, en celdas distintas: la grilla corta una palabra.
+                    if c is not cur and isinstance(prev, LTChar) and prev.get_text().strip() and item.get_text().strip():
+                        grid['cut'] += 1
                     if c is not cur:
                         flush()
                         cur, buf = c, []
@@ -403,6 +408,7 @@ def page_rows(page, tables=(), words=()):
                         buf.append(item)
                 elif isinstance(item, LTAnno) and cur is not None:
                     buf.append(item)
+                prev = item
             flush()
             continue
         best, best_ov = None, 0.0
@@ -561,7 +567,7 @@ def extract_pdf(symbol_path, pdf):
             for _ in range(4):
                 kept = [(i, t) for i, t in enumerate(grid_tables(pp, layout.height)) if i not in dropped] if same_coords else []
                 rows, alt_unassigned = page_rows(layout, [t for _, t in kept], page_words)
-                bad = {i for i, t in kept if t['nested'] or t['unassigned'] or is_frame(t)}
+                bad = {i for i, t in kept if t['nested'] or t['unassigned'] or t['cut'] or is_frame(t)}
                 if not bad:
                     break
                 dropped |= bad

@@ -1,13 +1,14 @@
 """
 Pruebas del extractor verificado con PDF reales de la EMA (información de
-producto en castellano: Deferasirox Accord y Besremi) y la tabla oficial de
-Adobe/Unicode.
+producto en castellano: Deferasirox Accord, Besremi, Peyona y Silodyx) y la
+tabla oficial de Adobe/Unicode.
 
 Uso: python3 -I -m unittest discover -s tools/terminology-import/clinical-pharmacology/py -p 'test_*.py'
-     (con pdfminer.six de py/requirements.txt instalado)
+     (con pdfminer.six y pdfplumber de py/requirements.txt instalados, y pdftotext de poppler)
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -168,6 +169,28 @@ class Frames(unittest.TestCase):
             self.assertTrue(x.QRD_HEADING.match(line), line)
         for line in ('1 Independientemente de la gravedad', '11. La aleatorización fue estratificada', '4.5 mg/kg', '30\tPlacebo'):
             self.assertFalse(x.QRD_HEADING.match(line), f'nota al pie o celda de datos: {line}')
+
+
+class GridsThatDropText(unittest.TestCase):
+    """Grillas que no se pueden usar enteras: sus líneas vuelven a ser filas y no se pierde ningún nº EU de la sección 8."""
+
+    def eu_numbers(self, pdf):
+        with tempfile.TemporaryDirectory() as out:
+            path = x.extract((SYMBOL, out, os.path.join(FIX, pdf)))
+            with open(path, encoding='utf-8') as f:
+                doc = json.load(f)
+        text = '\n'.join(r['text'] for p in doc['pages'] for r in p['rows'])
+        return re.findall(r'EU/1/\d{2}/\d{3,4}/\d{3}', text)
+
+    def test_glifos_fuera_de_las_celdas(self):
+        """Peyona: el primer nº EU cae en el área de la grilla pero fuera de sus celdas."""
+        self.assertEqual(sorted(self.eu_numbers('peyona_es.pdf')), ['EU/1/09/528/001', 'EU/1/09/528/002'])
+
+    def test_borde_que_corta_una_palabra(self):
+        """Silodyx: una columna de la grilla separaba «EU/1/09/607/01» de su «5»."""
+        eus = self.eu_numbers('silodyx_es.pdf')
+        self.assertIn('EU/1/09/607/015', eus)
+        self.assertEqual(eus[:15], [f'EU/1/09/607/{n:03d}' for n in range(1, 16)])
 
 
 if __name__ == '__main__':
