@@ -139,6 +139,18 @@ export class Conditions {
   noteText?: string;
 
   /**
+   * v4291: el diagnóstico que reemplazó a éste cuando se descartó (diferencial
+   * resuelto). Sólo en un diagnóstico refutado, del mismo paciente y distinto
+   * de sí mismo; nulo en cualquier otro caso.
+   */
+  @Property({
+    fieldName: 'replaced_by_condition_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.conditions
+  replacedByConditionId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -182,6 +182,17 @@ export class ConditionItemDto {
   verification?: ConditionVerificationDto | null;
 
   /**
+   * v4291: el diagnóstico que reemplazó a éste al refutarlo (diferencial
+   * resuelto). Ausente si no fue reemplazado.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado',
+    format: 'uuid',
+  })
+  replacedByConditionId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })

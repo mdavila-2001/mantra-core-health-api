@@ -901,3 +901,144 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     });
   });
 });
+
+describe('ConditionsService.verify · replacedByConditionId (v4291)', () => {
+  const medical = {
+    id: 'user-1',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'prac-1',
+  } as any;
+
+  function setup() {
+    const d = build();
+    // El reemplazo existe y es del paciente, salvo que el test diga otra cosa.
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) => ({
+      id: where.id,
+      patientProfileId: where.patientProfileId,
+    }));
+    d.conditionsRepo.findById.mockResolvedValue({
+      id: 'cond-1',
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+      codeConceptId: 'code-1',
+      clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+      verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
+      createdAt: new Date('2026-09-01T10:00:00Z'),
+    });
+    return d;
+  }
+
+  /** El 422 que lanza `verify`, con su `reason`. */
+  async function reasonOf(promise: Promise<unknown>): Promise<string> {
+    const err = await promise.catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(PreconditionFailedException);
+    return (err as PreconditionFailedException).getResponse()['reason'];
+  }
+
+  it('al refutar, guarda el reemplazo del mismo paciente, lo devuelve y lo sella en el historial', async () => {
+    const d = setup();
+    const res = await d.service.verify(
+      'cond-1',
+      {
+        outcome: 'REFUTED',
+        reasonText: 'Descartado por la serología',
+        replacedByConditionId: 'cond-2',
+      },
+      medical,
+    );
+    expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
+      id: 'cond-2',
+      patientProfileId: 'p1',
+    });
+    expect(res.replacedByConditionId).toBe('cond-2');
+    expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_REFUTED);
+    const revision = d.historyRepo.append.mock.calls[0][3];
+    expect(revision.dataSnapshot.replacedByConditionId).toBe('cond-2');
+  });
+
+  it('sin reemplazo el campo queda ausente de la respuesta', async () => {
+    const d = setup();
+    const res = await d.service.verify(
+      'cond-1',
+      { outcome: 'REFUTED', reasonText: 'Descartado' },
+      medical,
+    );
+    expect('replacedByConditionId' in res).toBe(false);
+    expect((d.tx as any).findOne).not.toHaveBeenCalled();
+  });
+
+  it('422 CONDITION_REPLACEMENT_INVALID si el reemplazo es de otro paciente (o no existe), sin escribir', async () => {
+    const d = setup();
+    (d.tx as any).findOne.mockResolvedValue(null);
+    expect(
+      await reasonOf(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'REFUTED',
+            reasonText: 'x',
+            replacedByConditionId: 'cond-ajena',
+          },
+          medical,
+        ),
+      ),
+    ).toBe('CONDITION_REPLACEMENT_INVALID');
+    expect(d.tx.flush).not.toHaveBeenCalled();
+    expect(d.historyRepo.append).not.toHaveBeenCalled();
+  });
+
+  it('422 CONDITION_REPLACEMENT_REQUIRES_REFUTED si viaja al confirmar', async () => {
+    const d = setup();
+    expect(
+      await reasonOf(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'CONFIRMED',
+            reasonText: 'x',
+            onsetAt: new Date(Date.now() - 86_400_000).toISOString(),
+            expectedResolutionAt: new Date(
+              Date.now() + 86_400_000,
+            ).toISOString(),
+            replacedByConditionId: 'cond-2',
+          },
+          medical,
+        ),
+      ),
+    ).toBe('CONDITION_REPLACEMENT_REQUIRES_REFUTED');
+    expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+
+  it('422 CONDITION_REPLACEMENT_SELF si el reemplazo es el mismo diagnóstico', async () => {
+    const d = setup();
+    expect(
+      await reasonOf(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'REFUTED',
+            reasonText: 'x',
+            replacedByConditionId: 'cond-1',
+          },
+          medical,
+        ),
+      ),
+    ).toBe('CONDITION_REPLACEMENT_SELF');
+    expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+
+  it('la autorización de la historia se aplica antes que el reemplazo', async () => {
+    const d = setup();
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+      new ForbiddenException('sin vínculo'),
+    );
+    await expect(
+      d.service.verify(
+        'cond-1',
+        { outcome: 'REFUTED', reasonText: 'x', replacedByConditionId: 'c2' },
+        medical,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect((d.tx as any).findOne).not.toHaveBeenCalled();
+  });
+});

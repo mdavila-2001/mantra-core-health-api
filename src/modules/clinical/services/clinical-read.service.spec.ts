@@ -340,6 +340,39 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     expect(summary.encounters[0].rowVersion).toBe(3);
   });
 
+  it('v4291: la condición trae el diagnóstico que la reemplazó y, si es null, no trae el campo', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([
+        {
+          id: 'cond-1',
+          codeConceptId: 'code-1',
+          replacedByConditionId: 'cond-2',
+          createdAt: new Date(),
+        },
+        {
+          id: 'cond-2',
+          codeConceptId: 'code-2',
+          replacedByConditionId: null,
+          createdAt: new Date(),
+        },
+      ]) // conditions
+      .mockResolvedValueOnce([]) // allergies
+      .mockResolvedValueOnce([]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+
+    const summary = await d.service.getPatientSummary(
+      HOLDER_PERSON,
+      50,
+      medical,
+    );
+
+    expect(summary.conditions[0].replacedByConditionId).toBe('cond-2');
+    expect('replacedByConditionId' in summary.conditions[1]).toBe(false);
+  });
+
   it('CL-11: la alergia trae sus reacciones', async () => {
     const d = build();
     d.vacio.findByPatient

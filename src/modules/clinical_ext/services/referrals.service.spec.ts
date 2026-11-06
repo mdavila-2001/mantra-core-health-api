@@ -1368,4 +1368,142 @@ describe('ReferralsService', () => {
       ]);
     });
   });
+
+  describe('targetEncounterId al aceptar (v4291)', () => {
+    /** Derivación pendiente al tenant activo, de la paciente p1. */
+    function pending(): any {
+      return {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetTenantId: ACTIVE_TENANT,
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      };
+    }
+    const receiver = {
+      id: 'u2',
+      roles: ['CLINICIAN'],
+      tenantIds: [ACTIVE_TENANT],
+    } as any;
+
+    it('el destino acepta con la atención de llegada: se guarda y sale en la respuesta', async () => {
+      const d = build();
+      const referral = pending();
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'enc-dest',
+        patientProfileId: 'p1',
+        tenantId: ACTIVE_TENANT,
+      });
+      const res = await d.service.respond(
+        'ref1',
+        { decision: 'ACCEPT', targetEncounterId: 'enc-dest' },
+        receiver,
+      );
+      expect(referral.targetEncounterId).toBe('enc-dest');
+      expect(res).toMatchObject({
+        status: 'ACCEPTED',
+        targetEncounterId: 'enc-dest',
+      });
+    });
+
+    it('sin atención de llegada el campo queda ausente de la respuesta', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue(pending());
+      const res = await d.service.respond(
+        'ref1',
+        { decision: 'ACCEPT' },
+        receiver,
+      );
+      expect('targetEncounterId' in res).toBe(false);
+      expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('422 REFERRAL_TARGET_ENCOUNTER_INVALID si la atención es de otro paciente, sin aceptar', async () => {
+      const d = build();
+      const referral = pending();
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'enc-x',
+        patientProfileId: 'p2',
+        tenantId: ACTIVE_TENANT,
+      });
+      await expectReason(
+        d.service.respond(
+          'ref1',
+          { decision: 'ACCEPT', targetEncounterId: 'enc-x' },
+          receiver,
+        ),
+        422,
+        ClinicalExtErrorReason.REFERRAL_TARGET_ENCOUNTER_INVALID,
+      );
+      expect(referral.statusConceptId).toBe(CEXT.REFERRAL_REQUESTED);
+      expect(referral.targetEncounterId).toBeUndefined();
+    });
+
+    it('422 REFERRAL_TARGET_ENCOUNTER_INVALID si la atención es de otro tenant (la del origen)', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue(pending());
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'enc-origen',
+        patientProfileId: 'p1',
+        tenantId: 't-origen',
+      });
+      await expectReason(
+        d.service.respond(
+          'ref1',
+          { decision: 'ACCEPT', targetEncounterId: 'enc-origen' },
+          receiver,
+        ),
+        422,
+        ClinicalExtErrorReason.REFERRAL_TARGET_ENCOUNTER_INVALID,
+      );
+    });
+
+    it('422 REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED al rechazar con atención, antes de buscar', async () => {
+      const d = build();
+      await expectReason(
+        d.service.respond(
+          'ref1',
+          {
+            decision: 'REJECT',
+            rejectReason: 'Sin cupo',
+            targetEncounterId: 'enc-dest',
+          },
+          receiver,
+        ),
+        422,
+        ClinicalExtErrorReason.REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED,
+      );
+      expect(d.referralsRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('quien no es el destino recibe 404 y la atención ni se consulta', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        ...pending(),
+        targetTenantId: 'otro-tenant',
+      });
+      await expectReason(
+        d.service.respond(
+          'ref1',
+          { decision: 'ACCEPT', targetEncounterId: 'enc-dest' },
+          receiver,
+        ),
+        404,
+        ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+      );
+      expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('la lectura por id devuelve la atención de llegada registrada', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        ...pending(),
+        statusConceptId: CEXT.REFERRAL_ACCEPTED,
+        targetEncounterId: 'enc-dest',
+      });
+      const res = await d.service.get('ref1', receiver);
+      expect(res.targetEncounterId).toBe('enc-dest');
+    });
+  });
 });

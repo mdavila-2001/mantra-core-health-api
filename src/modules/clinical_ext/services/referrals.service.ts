@@ -374,6 +374,32 @@ export class ReferralsService {
   }
 
   /**
+   * v4291: la atención de llegada tiene que ser del paciente de la derivación
+   * y del tenant destino que acepta (el que la escribe). Inexistente, de otro
+   * paciente o de otro tenant responden igual (422): distinguirlos diría que
+   * ese id existe en otra historia u otra organización.
+   */
+  private async assertTargetEncounter(
+    tx: EntityManager,
+    encounterId: string,
+    patientProfileId: string,
+    activeTenantId: string,
+  ): Promise<void> {
+    const encounter = await this.encountersRepo.findById(tx, encounterId);
+    if (
+      !encounter ||
+      encounter.patientProfileId !== patientProfileId ||
+      encounter.tenantId !== activeTenantId
+    ) {
+      throw new PreconditionFailedException(
+        'La atención indicada no existe o no es de esta persona en esta organización',
+        { field: 'targetEncounterId' },
+        ClinicalExtErrorReason.REFERRAL_TARGET_ENCOUNTER_INVALID,
+      );
+    }
+  }
+
+  /**
    * UC-18-08: el destinatario acepta o rechaza la referencia.
    *
    * Sólo responde quien recibe: el profesional destino (`targetProfileId`) o,
@@ -402,6 +428,13 @@ export class ReferralsService {
         ['rejectReason'],
       );
     }
+    if (dto.decision === 'REJECT' && dto.targetEncounterId !== undefined) {
+      throw new PreconditionFailedException(
+        'La atención de llegada sólo se registra al aceptar la derivación',
+        { field: 'targetEncounterId' },
+        ClinicalExtErrorReason.REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED,
+      );
+    }
     const activeTenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const referral = await this.referralsRepo.findById(tx, referralId);
@@ -423,6 +456,16 @@ export class ReferralsService {
           },
           ClinicalExtErrorReason.REFERRAL_NOT_PENDING,
         );
+      }
+
+      if (dto.targetEncounterId !== undefined) {
+        await this.assertTargetEncounter(
+          tx,
+          dto.targetEncounterId,
+          referral.patientProfileId,
+          activeTenantId,
+        );
+        referral.targetEncounterId = dto.targetEncounterId;
       }
 
       referral.statusConceptId =
@@ -1138,6 +1181,9 @@ export function toReferralResponse(
     rejectReason: row.rejectReason,
     counterReferralText: row.counterReferralText,
     counterReferralAt: row.counterReferralAt,
+    ...(row.targetEncounterId
+      ? { targetEncounterId: row.targetEncounterId }
+      : {}),
     updatedAt: row.updatedAt,
     createdAt: row.createdAt,
   };

@@ -74,6 +74,10 @@ export interface CreateServiceRequestData {
    */
   duplicateOverrideReason?: string;
   /**
+   * v4291: diagnóstico que motiva el estudio, ya validado contra el paciente.
+   */
+  reasonConditionId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -120,6 +124,7 @@ export class ServiceRequestsRepository {
         suggestedPracticeSiteId: data.suggestedPracticeSiteId,
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
+        reasonConditionId: data.reasonConditionId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

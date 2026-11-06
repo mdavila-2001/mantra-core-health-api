@@ -482,6 +482,8 @@ export class ConditionsService {
         );
       }
 
+      await this.assertReplacementOfPatient(tx, condition, dto);
+
       const reasonText = dto.reasonText?.trim() || undefined;
       if (reasonText === undefined && dto.basedOn === undefined) {
         throw new PreconditionFailedException(
@@ -507,6 +509,9 @@ export class ConditionsService {
         condition.verificationStatusConceptId = CLIN.CONDITION_REFUTED;
         condition.clinicalStatusConceptId = CLIN.CONDITION_INACTIVE;
         condition.resolvedAt = now;
+        if (dto.replacedByConditionId !== undefined) {
+          condition.replacedByConditionId = dto.replacedByConditionId;
+        }
       }
       touch(condition, actor.id);
       await tx.flush();
@@ -554,6 +559,57 @@ export class ConditionsService {
       );
       return this.toItem(condition, verification);
     });
+  }
+
+  /**
+   * v4291: el reemplazo de un diagnóstico descartado (diferencial resuelto).
+   *
+   * Sólo al refutar, nunca el propio diagnóstico, y del mismo paciente. Un
+   * diagnóstico ajeno responde igual que uno inexistente, para que la ruta no
+   * sirva para averiguar qué diagnósticos tiene otra persona.
+   *
+   * @param tx - Transacción activa.
+   * @param condition - El presuntivo que se decide.
+   * @param dto - La decisión.
+   * @throws PreconditionFailedException si la combinación no es válida o el
+   *         reemplazo no es de este paciente.
+   */
+  private async assertReplacementOfPatient(
+    tx: EntityManager,
+    condition: Conditions,
+    dto: VerifyConditionDto,
+  ): Promise<void> {
+    const replacementId = dto.replacedByConditionId;
+    if (replacementId === undefined) return;
+    const details = {
+      conditionId: condition.id,
+      field: 'replacedByConditionId',
+    };
+    if (dto.outcome !== 'REFUTED') {
+      throw new PreconditionFailedException(
+        'Sólo un diagnóstico descartado puede indicar el diagnóstico que lo reemplaza.',
+        details,
+        ClinicalErrorReason.CONDITION_REPLACEMENT_REQUIRES_REFUTED,
+      );
+    }
+    if (replacementId === condition.id) {
+      throw new PreconditionFailedException(
+        'Un diagnóstico no puede reemplazarse a sí mismo.',
+        details,
+        ClinicalErrorReason.CONDITION_REPLACEMENT_SELF,
+      );
+    }
+    const replacement = await tx.findOne(Conditions, {
+      id: replacementId,
+      patientProfileId: condition.patientProfileId,
+    });
+    if (!replacement) {
+      throw new PreconditionFailedException(
+        'El diagnóstico que lo reemplaza no existe o no es de esta persona.',
+        details,
+        ClinicalErrorReason.CONDITION_REPLACEMENT_INVALID,
+      );
+    }
   }
 
   /**
@@ -781,6 +837,7 @@ export class ConditionsService {
       onsetAt: condition.onsetAt,
       expectedResolutionAt: condition.expectedResolutionAt,
       resolvedAt: condition.resolvedAt,
+      replacedByConditionId: condition.replacedByConditionId,
     };
   }
 
@@ -807,6 +864,9 @@ export class ConditionsService {
       resolvedAt: condition.resolvedAt,
       noteText: condition.noteText,
       verification,
+      ...(condition.replacedByConditionId
+        ? { replacedByConditionId: condition.replacedByConditionId }
+        : {}),
       createdAt: condition.createdAt,
     };
   }

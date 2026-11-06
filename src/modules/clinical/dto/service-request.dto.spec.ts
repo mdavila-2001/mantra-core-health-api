@@ -199,3 +199,17 @@ describe('CreateServiceRequestDto · ejecutor de la orden', () => {
     ).toEqual([]);
   });
 });
+
+describe('CreateServiceRequestDto — reasonConditionId (v4291)', () => {
+  it('acepta el diagnóstico que motiva el estudio como uuid opcional', async () => {
+    expect(
+      await validateCreation(dtoBase({ reasonConditionId: REPORT })),
+    ).toEqual([]);
+  });
+
+  it('rechaza un diagnóstico que no es uuid', async () => {
+    expect(
+      await validateCreation(dtoBase({ reasonConditionId: 'cond-1' })),
+    ).toEqual(['reasonConditionId']);
+  });
+});

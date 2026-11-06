@@ -315,6 +315,23 @@ export class VerifyConditionDto {
   @Type(() => DiagnosisEvidenceDto)
   basedOn?: DiagnosisEvidenceDto;
 
+  /**
+   * v4291: al refutar, el diagnóstico que reemplaza a éste (diferencial
+   * resuelto). Sólo con `outcome: REFUTED`, distinto del propio y del mismo
+   * paciente; el servicio responde 422 si no.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Sólo al refutar: diagnóstico (clinical.conditions) que reemplaza a éste. ' +
+      '422 CONDITION_REPLACEMENT_REQUIRES_REFUTED con CONFIRMED, ' +
+      '422 CONDITION_REPLACEMENT_SELF si es el mismo, ' +
+      '422 CONDITION_REPLACEMENT_INVALID si no existe o es de otro paciente',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  replacedByConditionId?: string;
+
   /** Inicio; obligatorio al confirmar si la condición todavía no lo declara. */
   @ApiPropertyOptional({ format: 'date-time' })
   @IsOptional()

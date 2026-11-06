@@ -104,6 +104,9 @@ export class DiagnosticsOrdersService {
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
         formInstanceId: row.formInstanceId,
+        ...(row.reasonConditionId
+          ? { reasonConditionId: row.reasonConditionId }
+          : {}),
         codeConceptId: row.codeConceptId,
         categoryConceptId: row.categoryConceptId,
         category: analysisCategoryOf(row.categoryConceptId),

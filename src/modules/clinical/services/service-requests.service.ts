@@ -27,6 +27,7 @@ import {
   DuplicateStudyDetector,
 } from './duplicate-study-detector';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
+import { Conditions } from '../entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { PerformerSelectionValidator } from './performer-selection.validator';
@@ -225,6 +226,31 @@ export class ServiceRequestsService {
   }
 
   /**
+   * v4291: el diagnóstico que motiva el estudio tiene que existir y ser del
+   * mismo paciente que la orden. Responde 422 (la precondición que falla es
+   * del cuerpo, como `MEDICATION_INDICATION_INVALID`), y un diagnóstico ajeno
+   * responde igual que uno inexistente: distinguirlos diría que ese id existe
+   * en otra historia.
+   */
+  private async assertReasonConditionBelongsToPatient(
+    tx: EntityManager,
+    dto: CreateServiceRequestDto,
+  ): Promise<void> {
+    if (dto.reasonConditionId === undefined) return;
+    const condition = await tx.findOne(Conditions, {
+      id: dto.reasonConditionId,
+      patientProfileId: dto.patientProfileId,
+    });
+    if (!condition) {
+      throw new PreconditionFailedException(
+        'El diagnóstico indicado no existe o no es de esta persona',
+        { field: 'reasonConditionId' },
+        ClinicalErrorReason.SERVICE_REQUEST_REASON_CONDITION_INVALID,
+      );
+    }
+  }
+
+  /**
    * P40: el `category_concept_id` que se guarda. El texto (`category`) se
    * resuelve a su concepto; si viaja con `categoryConceptId`, tienen que
    * coincidir —un concepto que el texto no nombra (p. ej. procedimiento) es
@@ -267,6 +293,8 @@ export class ServiceRequestsService {
     const basedOnNoteIds = dto.basedOnNoteIds ?? [];
     return this.em.transactional(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // v4291: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
+      await this.assertReasonConditionBelongsToPatient(tx, dto);
       // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
       if (basedOnNoteIds.length > 0) {
         await this.basedOnNotes.assertUsable(
@@ -319,6 +347,7 @@ export class ServiceRequestsService {
         suggestedPracticeSiteId: performer.suggestedPracticeSiteId ?? undefined,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
+        reasonConditionId: dto.reasonConditionId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -382,6 +411,9 @@ export class ServiceRequestsService {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
         formInstanceId: sr.formInstanceId ?? null,
+        ...(sr.reasonConditionId
+          ? { reasonConditionId: sr.reasonConditionId }
+          : {}),
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,

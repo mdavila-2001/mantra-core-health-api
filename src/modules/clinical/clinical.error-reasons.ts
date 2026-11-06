@@ -90,4 +90,12 @@ export enum ClinicalErrorReason {
   BASED_ON_NOTE_ENCOUNTER_MISMATCH = 'BASED_ON_NOTE_ENCOUNTER_MISMATCH',
   /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
   SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
+  /** v4291: `reasonConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
+  SERVICE_REQUEST_REASON_CONDITION_INVALID = 'SERVICE_REQUEST_REASON_CONDITION_INVALID',
+  /** v4291: `replacedByConditionId` sólo se admite al refutar (`outcome: REFUTED`). */
+  CONDITION_REPLACEMENT_REQUIRES_REFUTED = 'CONDITION_REPLACEMENT_REQUIRES_REFUTED',
+  /** v4291: un diagnóstico no puede reemplazarse a sí mismo. */
+  CONDITION_REPLACEMENT_SELF = 'CONDITION_REPLACEMENT_SELF',
+  /** v4291: `replacedByConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
+  CONDITION_REPLACEMENT_INVALID = 'CONDITION_REPLACEMENT_INVALID',
 }

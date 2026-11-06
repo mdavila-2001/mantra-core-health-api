@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical_ext`.
- * 101 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 102 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtIndexes: readonly IndexTuple[] = [
@@ -99,6 +99,7 @@ export const clinicalExtIndexes: readonly IndexTuple[] = [
   ['referrals', 'ix_referrals_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['referrals', 'ix_referrals_priority_concept_id', ['priority_concept_id'], false, 'btree'],
   ['referrals', 'ix_referrals_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['referrals', 'ix_referrals_target_encounter_id', ['target_encounter_id'], false, 'btree'],
   ['referrals', 'ix_referrals_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['referrals', 'ix_referrals_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['referrals', 'ix_referrals_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],

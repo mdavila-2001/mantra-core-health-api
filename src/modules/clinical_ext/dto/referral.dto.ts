@@ -411,6 +411,21 @@ export class RespondReferralDto {
   @IsString()
   @MaxLength(4000)
   rejectReason?: string;
+
+  /**
+   * v4291: la atención en la que el destino recibe al paciente. Sólo al
+   * aceptar; tiene que ser del mismo paciente y del tenant destino que acepta.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Sólo con ACCEPT: atención (clinical.encounters) del tenant destino en la que se ' +
+      'recibe al paciente. 422 REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED con REJECT; ' +
+      '422 REFERRAL_TARGET_ENCOUNTER_INVALID si no existe, es de otro paciente o de otro tenant',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  targetEncounterId?: string;
 }
 
 /** Cuerpo de `PATCH /referrals/{id}/counter-referral` (v4266). */
@@ -625,6 +640,17 @@ export class ReferralResponseDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   counterReferralAt?: Date;
+
+  /**
+   * v4291: la atención en la que el destino recibió al paciente; ausente si
+   * no se registró.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Atención en la que el destino recibió al paciente. Ausente = no registrada',
+    format: 'uuid',
+  })
+  targetEncounterId?: string;
 
   /**
    * Última actualización.

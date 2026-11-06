@@ -747,6 +747,9 @@ export class ClinicalReadService {
           verification: verificationFromSnapshot(
             verificationHistory.get(row.id)?.dataSnapshot,
           ),
+          ...(row.replacedByConditionId
+            ? { replacedByConditionId: row.replacedByConditionId }
+            : {}),
           createdAt: row.createdAt,
         };
       }),

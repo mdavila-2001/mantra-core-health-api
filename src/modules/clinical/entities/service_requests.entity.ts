@@ -128,6 +128,14 @@ export class ServiceRequests {
   formInstanceId?: string;
 
   /**
+   * v4291: el diagnóstico (`clinical.conditions`) que el estudio se pidió para
+   * confirmar, descartar o seguir. Del mismo paciente que la orden; nulo si la
+   * orden no declara motivo diagnóstico.
+   */
+  @Property({ fieldName: 'reason_condition_id', type: 'uuid', nullable: true }) // FK → clinical.conditions
+  reasonConditionId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

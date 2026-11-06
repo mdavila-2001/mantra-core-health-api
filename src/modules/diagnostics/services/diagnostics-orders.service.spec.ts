@@ -251,4 +251,19 @@ describe('DiagnosticsOrdersService', () => {
       expect(out.orders[0].category).toBeUndefined();
     });
   });
+
+  describe('reasonConditionId (v4291)', () => {
+    it('la orden trae el diagnóstico que la motiva y, si es null, no trae el campo', async () => {
+      const d = build();
+      d.repo.findOrdersByPatient.mockResolvedValue([
+        { ...order('o1'), reasonConditionId: 'cond-1' },
+        { ...order('o2'), reasonConditionId: null },
+      ]);
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+
+      expect(out.orders[0].reasonConditionId).toBe('cond-1');
+      expect('reasonConditionId' in out.orders[1]).toBe(false);
+    });
+  });
 });
