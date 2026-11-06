@@ -15,7 +15,6 @@ import {
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
-  BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
   MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
@@ -50,6 +49,8 @@ import {
 } from '../../presentation/dto';
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
+import { verificationEmail } from '../emails/access-email.templates';
 
 /** Nombre con el que nace la sede central de una farmacia (P50). */
 const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
@@ -235,6 +236,7 @@ export class IamOrganizationSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       // Las dos unicidades se comprueban ANTES de escribir nada: el código de
       // tenant y el correo del owner son ambos únicos, y descubrirlo por una
       // violación de constraint devolvería un 500 en vez de un 409 explicativo.
@@ -257,14 +259,10 @@ export class IamOrganizationSelfRegistrationService {
         );
       }
 
-      // Cerrojo por correo antes de comprobarlo, como el alta de paciente: sin
-      // él, dos altas simultáneas con el mismo correo pasan las dos la lectura y
-      // la segunda choca con el índice único como un 409 genérico.
-      await this.credentialsRepo.lockSubjectForRegistration(
-        tx,
-        dto.owner.email,
-      );
-      const emailClash = await this.credentialsRepo.findLivePasswordBySubject(
+      // Case-insensitive email lock before the check (#1000): otherwise two
+      // concurrent sign-ups both pass the read and the second gets a bare 409.
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.owner.email);
+      const emailClash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.owner.email,
       );
@@ -358,6 +356,13 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // Horario de atención de la casa central: el tenant ya está volcado.
+      this.directory.recordOpeningHours(
+        tx,
+        { tenantId: tenant.id, actorUserId: user.id },
+        dto.organization.openingHours,
+      );
+
       // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
       // registro sanitario, el director y las sedes declaradas. La respuesta lo
       // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
@@ -368,15 +373,12 @@ export class IamOrganizationSelfRegistrationService {
         ? dto.organization.medicalFacility !== undefined
         : undefined;
 
-      // 2b) Farmacia (P50): la fila de `pharmacy.pharmacies` en borrador, su
-      // práctica propia y la casa central y cada sucursal como sede física y
-      // sede dispensadora, con la central enlazada. Las sucursales además se
-      // registran en `directory.branches`, que es lo que lista y edita el
-      // portal de la organización. Todo en esta transacción: si algo falla no
-      // queda una farmacia sin sedes ni sedes sin farmacia.
+      // 2b) Pharmacy (P50): draft `pharmacy.pharmacies` row, its practice, and the
+      // HQ plus each branch as physical and dispensing sites (branches also in
+      // `directory.branches`). One transaction: no pharmacy without sites.
       let pharmacyId: string | undefined;
       if (dto.organization.tenantType === 'PHARMACY') {
-        this.createPharmacyBranches(tx, tenant.id, dto, user.id);
+        await this.registerPharmacyBranches(tx, tenant.id, dto, user.id);
         const block = dto.organization.pharmacy;
         const provisioned = await this.pharmacies.provision(
           tx,
@@ -419,22 +421,32 @@ export class IamOrganizationSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // 3b) Documentos legales de afiliación (subtarea 1.2), si el alta los
-      // declaró. Va DESPUÉS del tenant y ANTES del correo, dentro de esta
-      // misma transacción: cada PDF se reclama por su `fileId` y queda
-      // vinculado al tenant recién creado, así que un archivo no puede
-      // terminar reclamado por un tenant que no llegó a existir. Un 422 acá
-      // (archivo ajeno, ya reclamado, o el catálogo sin sembrar) revienta
-      // toda el alta — ni cuenta, ni tenant, ni correo.
+      // 3a) The NIT on its own (`common.identifiers`), with or without its PDF.
+      const taxIdentifier =
+        (
+          dto.organization.taxIdentifier ??
+          dto.organization.payer?.regulatorIdentifier ??
+          dto.organization.medicalFacility?.taxIdentifierNumber
+        )?.trim() || undefined;
+      const taxIdentifierId = taxIdentifier
+        ? await this.directory.registerTaxIdentifier(tx, {
+            tenantId: tenant.id,
+            value: taxIdentifier,
+            holderName: dto.organization.legalName,
+            actorUserId: user.id,
+          })
+        : undefined;
+
+      // 3b) Affiliation documents (subtask 1.2), claimed inside this same
+      // transaction: a 422 here (foreign or claimed file, unseeded catalog)
+      // aborts the whole sign-up — no account, no tenant, no email.
       const legalDocumentIds = dto.organization.legalDocuments
         ? await this.directory.attachRegistrationDocuments(tx, {
             tenantId: tenant.id,
             ownerUserId: user.id,
             legalEntityType: dto.organization.legalEntityType,
-            taxIdentifier:
-              dto.organization.taxIdentifier ??
-              dto.organization.payer?.regulatorIdentifier ??
-              dto.organization.medicalFacility?.taxIdentifierNumber,
+            taxIdentifier,
+            taxIdentifierId,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
@@ -451,11 +463,8 @@ export class IamOrganizationSelfRegistrationService {
           })
         : undefined;
 
-      // 3c) Representante legal y gerencias de contacto (subtarea 1.4), si el
-      // alta las declaró. Va DESPUÉS de los documentos porque el poder
-      // notariado no puede repetir un archivo que los cinco ya reclamaron, y
-      // dentro de la misma transacción: las personas, sus contactos y sus
-      // vínculos no deben sobrevivir a un alta que termina revertida.
+      // 3c) Legal representative and executives (subtask 1.4), AFTER the papers
+      // (the power of attorney cannot reuse a claimed file), same transaction.
       const representativesRegistered =
         dto.organization.legalRepresentative || dto.organization.executives
           ? (
@@ -565,63 +574,41 @@ export class IamOrganizationSelfRegistrationService {
   }
 
   /**
-   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada.
-   * El código sale del nombre, en mayúsculas y sin repetirse dentro del alta.
+   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada,
+   * con el horario de atención de cada sucursal.
    */
-  private createPharmacyBranches(
+  private registerPharmacyBranches(
     tx: EntityManager,
     tenantId: string,
     dto: RegisterOrganizationDto,
     actorUserId: string,
-  ): void {
+  ): Promise<void> {
     const block = dto.organization.pharmacy;
-    if (!block) return;
-    const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
-    const add = (item: {
-      name: string;
-      latitude?: number;
-      longitude?: number;
-      description?: string;
-      locationUrl?: string;
-    }): void => {
-      this.directory.createBranch(tx, {
-        tenantId,
-        code: codeOf(item.name),
-        name: item.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
-        statusConceptId: DIR.BRANCH_ACTIVE,
-        timeZone: dto.organization.timeZone,
-        latitude:
-          item.latitude !== undefined ? String(item.latitude) : undefined,
-        longitude:
-          item.longitude !== undefined ? String(item.longitude) : undefined,
-        description: item.description,
-        locationUrl: item.locationUrl,
-        actorUserId,
-      });
-    };
-    if (block.latitude !== undefined && block.longitude !== undefined) {
-      add({
-        name: 'Casa central',
-        latitude: block.latitude,
-        longitude: block.longitude,
-      });
-    }
-    for (const branch of block.branches ?? []) add(branch);
+    if (!block) return Promise.resolve();
+    const headquarters =
+      block.latitude !== undefined && block.longitude !== undefined
+        ? [
+            {
+              name: 'Casa central',
+              latitude: block.latitude,
+              longitude: block.longitude,
+              category: 'head_office' as const,
+            },
+          ]
+        : [];
+    // v4.2.91: the central site is the head office; each declared one, a branch.
+    return this.directory.registerDeclaredBranches(tx, {
+      tenantId,
+      timeZone: dto.organization.timeZone,
+      actorUserId,
+      branches: [
+        ...headquarters,
+        ...(block.branches ?? []).map((branch) => ({
+          ...branch,
+          category: 'branch' as const,
+        })),
+      ],
+    });
   }
 
   /**
@@ -644,11 +631,7 @@ export class IamOrganizationSelfRegistrationService {
       await this.emailNotice.enqueueEmail({
         recipientUserId: userId,
         recipientAddress: email,
-        subject: 'Verifique el correo de su organización',
-        bodyText:
-          'Para verificar su correo, use este código: ' +
-          `${token}\n\nTu organización quedó registrada y está pendiente ` +
-          'de verificación por parte de la plataforma.',
+        ...verificationEmail({ token, variant: 'organization' }),
       });
       return true;
     } catch (error) {

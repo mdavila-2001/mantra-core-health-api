@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { CLIN } from '../clinical.concepts';
 import { ReceivedServicesReadService } from './received-services-read.service';
+import { FULL_READ_SCOPE as FULL } from '../domain/clinical-read-scope';
+import { ReceivedServices } from '../entities';
 
 /** Crea un mock tipado de forma laxa. */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -36,24 +38,30 @@ function build(rows: any[] = [row()]) {
     findSiteNames: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const scopeFilter = { build: mockFn().mockResolvedValue(null) };
+  const scopeRepo = {
+    page: mockFn().mockResolvedValue({ rows: [], hidden: 0 }),
+  };
   const service = new ReceivedServicesReadService(
     em,
     repository as any,
     logger as any,
+    scopeFilter as any,
+    scopeRepo as any,
   );
-  return { service, repository };
+  return { service, repository, scopeFilter, scopeRepo };
 }
 
 describe('ReceivedServicesReadService', () => {
   it('pide uno más que el tope para saber si la lista quedó cortada', async () => {
     const d = build();
-    await d.service.list(PATIENT, 50, patient);
+    await d.service.list(PATIENT, 50, patient, FULL);
     expect(d.repository.findByPatient).toHaveBeenCalledWith(em, PATIENT, 51);
   });
 
   it('dice que cortó la lista cuando hay más servicios que el tope', async () => {
     const d = build([row({ id: 'a' }), row({ id: 'b' }), row({ id: 'c' })]);
-    const res = await d.service.list(PATIENT, 2, patient);
+    const res = await d.service.list(PATIENT, 2, patient, FULL);
     expect(res.items.map((item) => item.id)).toEqual(['a', 'b']);
     expect(res.truncated).toBe(true);
     expect(res.limit).toBe(2);
@@ -61,7 +69,7 @@ describe('ReceivedServicesReadService', () => {
 
   it('no marca corte cuando la lista entra en el tope', async () => {
     const d = build([row({ id: 'a' }), row({ id: 'b' })]);
-    const res = await d.service.list(PATIENT, 2, patient);
+    const res = await d.service.list(PATIENT, 2, patient, FULL);
     expect(res.items).toHaveLength(2);
     expect(res.truncated).toBe(false);
   });
@@ -75,7 +83,7 @@ describe('ReceivedServicesReadService', () => {
       row({ id: 'b', serviceTypeConceptId: CLIN.RECEIVED_SERVICE_VACCINATION }),
       row({ id: 'c', serviceTypeConceptId: 'un-tipo-nuevo' }),
     ]);
-    const res = await d.service.list(PATIENT, 50, patient);
+    const res = await d.service.list(PATIENT, 50, patient, FULL);
     expect(res.items.map((item) => item.type)).toEqual([
       'INTERVENTION',
       'VACCINATION',
@@ -94,7 +102,7 @@ describe('ReceivedServicesReadService', () => {
       d.repository.findSiteNames.mockResolvedValue(
         new Map([['site-1', 'Clínica Central']]),
       );
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0]).toMatchObject({
         performerName: 'Dra. Ana Rojas',
         practiceSiteName: 'Clínica Central',
@@ -107,7 +115,7 @@ describe('ReceivedServicesReadService', () => {
 
     it('pide cada nombre una sola vez aunque se repita', async () => {
       const d = build([row({ id: 'a' }), row({ id: 'b' })]);
-      await d.service.list(PATIENT, 50, patient);
+      await d.service.list(PATIENT, 50, patient, FULL);
       expect(d.repository.findPerformerNames).toHaveBeenCalledWith(em, [
         'doc-1',
       ]);
@@ -117,7 +125,7 @@ describe('ReceivedServicesReadService', () => {
       const d = build([
         row({ performerProfileId: undefined, practiceSiteId: undefined }),
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].performerName).toBeUndefined();
       expect(res.items[0].practiceSiteName).toBeUndefined();
     });
@@ -138,7 +146,7 @@ describe('ReceivedServicesReadService', () => {
             currencyConceptId: CONCEPTS.CURRENCY_BOB,
           },
         ]);
-        const res = await d.service.list(PATIENT, 50, actor);
+        const res = await d.service.list(PATIENT, 50, actor, FULL);
         expect(res.costsVisible).toBe(false);
         expect(res.items[0].cost).toBeNull();
         // Ni siquiera se consultan los importes.
@@ -156,7 +164,7 @@ describe('ReceivedServicesReadService', () => {
           currencyConceptId: CONCEPTS.CURRENCY_BOB,
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.costsVisible).toBe(true);
       expect(res.items[0].cost).toEqual({
         amount: '350.00',
@@ -183,7 +191,7 @@ describe('ReceivedServicesReadService', () => {
           currencyCode: 'BOB',
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost).toEqual({
         amount: '0.40',
         currencyCode: 'BOB',
@@ -202,7 +210,7 @@ describe('ReceivedServicesReadService', () => {
           currencyCode: 'USD',
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost).toMatchObject({
         amount: '100.00',
         currencyCode: 'USD',
@@ -225,7 +233,7 @@ describe('ReceivedServicesReadService', () => {
           currencyCode: 'USD',
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost).toBeNull();
     });
 
@@ -234,7 +242,7 @@ describe('ReceivedServicesReadService', () => {
       d.repository.findChargeLines.mockResolvedValue([
         { procedureCaseId: 'case-1', quantity: '1', currencyCode: 'BOB' },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost).toBeNull();
     });
 
@@ -248,7 +256,7 @@ describe('ReceivedServicesReadService', () => {
           currencyCode: 'BOB',
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost).toBeNull();
     });
 
@@ -271,13 +279,13 @@ describe('ReceivedServicesReadService', () => {
           currencyCode: 'BOB',
         },
       ]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.items[0].cost?.source).toBe('CHARGE_ITEMS');
     });
 
     it('sin ningún cobro registrado el costo es null, no cero', async () => {
       const d = build([row()]);
-      const res = await d.service.list(PATIENT, 50, patient);
+      const res = await d.service.list(PATIENT, 50, patient, FULL);
       expect(res.costsVisible).toBe(true);
       expect(res.items[0].cost).toBeNull();
     });
@@ -285,7 +293,64 @@ describe('ReceivedServicesReadService', () => {
 
   it('nunca expone cobertura del seguro: el reparto se publica por pedido y no por servicio', async () => {
     const d = build([row({ insuranceClaimLineId: 'claim-line-1' })]);
-    const res = await d.service.list(PATIENT, 50, patient);
+    const res = await d.service.list(PATIENT, 50, patient, FULL);
     expect(JSON.stringify(res)).not.toMatch(/coverage|insurance|claim/i);
+  });
+  describe('por alcance', () => {
+    const SPECIALTIES = {
+      kind: 'SPECIALTIES',
+      specialtyConceptIds: ['esp-cardio'],
+    } as const;
+    const FILTER = {
+      profileIds: ['doc-9'],
+      userIds: [],
+      encounterIds: ['e-9'],
+    };
+
+    it('con alcance completo lee por el repositorio y no informa lo oculto', async () => {
+      const d = build();
+      const res = await d.service.list(PATIENT, 50, clinician, FULL);
+      expect(d.scopeRepo.page).not.toHaveBeenCalled();
+      expect(res.hiddenByScope).toBeUndefined();
+    });
+
+    it('con especialidades filtra por ejecutor (o por el encuentro) y cuenta lo oculto', async () => {
+      const d = build();
+      d.scopeFilter.build.mockResolvedValue(FILTER);
+      d.scopeRepo.page.mockResolvedValue({
+        rows: [row({ id: 'v' })],
+        hidden: 4,
+      });
+
+      const res = await d.service.list(PATIENT, 50, clinician, SPECIALTIES);
+
+      expect(d.repository.findByPatient).not.toHaveBeenCalled();
+      expect(d.scopeRepo.page).toHaveBeenCalledWith(
+        em,
+        expect.objectContaining({
+          entity: ReceivedServices,
+          base: { patientProfileId: PATIENT },
+          filter: FILTER,
+          columns: { profile: 'performerProfileId', encounter: 'encounterId' },
+          limit: 51,
+        }),
+      );
+      expect(res.items.map((item) => item.id)).toEqual(['v']);
+      expect(res.hiddenByScope).toEqual({ receivedServices: 4 });
+    });
+
+    it('el tope y el corte siguen valiendo con el filtro en SQL', async () => {
+      const d = build();
+      d.scopeFilter.build.mockResolvedValue(FILTER);
+      d.scopeRepo.page.mockResolvedValue({
+        rows: [row({ id: 'a' }), row({ id: 'b' })],
+        hidden: 0,
+      });
+
+      const res = await d.service.list(PATIENT, 1, clinician, SPECIALTIES);
+
+      expect(res.items.map((item) => item.id)).toEqual(['a']);
+      expect(res.truncated).toBe(true);
+    });
   });
 });

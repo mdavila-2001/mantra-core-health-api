@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 /** Query de `GET /pharmacy-erp/stock`. */
 export class ErpStockQueryDto {
@@ -11,6 +11,15 @@ export class ErpStockQueryDto {
   @IsNotEmpty()
   @MaxLength(100)
   siteCode!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Código de la farmacia en la plataforma: dos farmacias con sedes del mismo código no comparten stock',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  pharmacyCode?: string;
 }
 
 export class ErpProductDto {
@@ -43,6 +52,9 @@ export class ErpStockLineDto {
 export class ErpStockResponseDto {
   @ApiProperty()
   siteCode!: string;
+
+  @ApiPropertyOptional()
+  pharmacyCode?: string;
 
   @ApiProperty({ format: 'date-time' })
   asOf!: string;

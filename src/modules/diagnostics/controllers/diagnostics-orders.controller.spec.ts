@@ -12,6 +12,12 @@ import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { DiagnosticsOrdersController } from './diagnostics-orders.controller';
 import { runWithTenant } from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../../clinical/domain/clinical-read-scope';
+
+const FULL: ClinicalReadScope = { kind: 'FULL' };
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -48,17 +54,44 @@ describe('DiagnosticsOrdersController', () => {
   it('delega la lectura con el tenant del contexto', async () => {
     const d = build();
 
-    await runWithTenant('t1', () => d.controller.getPatientOrders('p1', 10));
+    await runWithTenant('t1', () =>
+      d.controller.getPatientOrders('p1', 10, FULL),
+    );
 
-    expect(d.service.getPatientOrders).toHaveBeenCalledWith('t1', 'p1', 10);
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      10,
+      FULL,
+    );
   });
 
   it('aplica 50 como tope por omisión', async () => {
     const d = build();
 
+    await runWithTenant('t1', () =>
+      d.controller.getPatientOrders('p1', undefined, FULL),
+    );
+
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      50,
+      FULL,
+    );
+  });
+
+  it('sin alcance en la petición cae al más restrictivo, nunca al completo', async () => {
+    const d = build();
+
     await runWithTenant('t1', () => d.controller.getPatientOrders('p1'));
 
-    expect(d.service.getPatientOrders).toHaveBeenCalledWith('t1', 'p1', 50);
+    expect(d.service.getPatientOrders).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      50,
+      IPS_ONLY_READ_SCOPE,
+    );
   });
 
   it('el resultado liberado delega con tenant, paciente e informe', async () => {
@@ -138,12 +171,14 @@ describe('DiagnosticsOrdersController', () => {
   );
 
   it('sin acceso a la historia la puerta corta con 403 antes del handler', async () => {
+    // En lectura la puerta resuelve el alcance (`resolveReadScope`), que es
+    // quien niega el acceso. Sin tenant resuelto no abre la transacción RLS.
     const readService = {
-      assertCanReadHistory: mockFn().mockRejectedValue(
+      resolveReadScope: mockFn().mockRejectedValue(
         new ForbiddenException('Sin acceso a la historia'),
       ),
     };
-    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
     const context = {
       switchToHttp: () => ({
         getRequest: () => ({
@@ -157,7 +192,7 @@ describe('DiagnosticsOrdersController', () => {
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
-    expect(readService.assertCanReadHistory).toHaveBeenCalledWith('p1', {
+    expect(readService.resolveReadScope).toHaveBeenCalledWith('p1', {
       id: 'u1',
       roles: ['CLINICIAN'],
     });

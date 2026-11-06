@@ -1,6 +1,10 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS, type AuthenticatedUser } from '../../../common';
+import {
+  CONCEPTS,
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { SocialPosts } from '../entities';
 import {
   BlocksRepository,
@@ -17,13 +21,18 @@ export type MessagingProfileAccess =
 
 /** Lo que hace falta de un perfil para decidir su titularidad. */
 type HolderProfile = {
+  tenantId?: string | null;
   targetId: string;
   targetTypeConceptId: string;
   statusConceptId: string;
   createdByUserId?: string | null;
 };
 
-/** Roles de plataforma que leen cualquier perfil. */
+/**
+ * Roles de plataforma que leen cualquier perfil. Sólo pasan en el tenant en que
+ * autorizan (`roleAuthorizesInTenant`): sin ámbito valen en cualquiera;
+ * acotados en `scopedRoles`, sólo sobre perfiles y grupos de su tenant.
+ */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
 
 /**
@@ -69,10 +78,27 @@ export class CommunityVisibilityService {
     private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {}
 
-  /** `true` si el actor tiene un rol de plataforma. */
-  isPlatform(actor: AuthenticatedUser): boolean {
-    const roles = actor.roles ?? [];
-    return PLATFORM_ROLES.some((role) => roles.includes(role));
+  /**
+   * `true` si un rol de plataforma del actor autoriza **en el tenant del
+   * recurso**.
+   *
+   * Mirar sólo `actor.roles` trataba como global a un `SECURITY_ADMIN`
+   * acotado al tenant A: leía perfiles, bandejas y grupos secretos del tenant
+   * B. Con `roleAuthorizesInTenant` vale la regla de `RolesGuard`: el rol sin
+   * ámbito autoriza en cualquier tenant; el acotado, sólo en el suyo.
+   *
+   * @param actor - Quien pide.
+   * @param tenantId - Tenant dueño del recurso (perfil, grupo, directorio).
+   *   `null`/`undefined` cuando el recurso no tiene tenant o todavía no se
+   *   cargó: entonces sólo pasa un rol de plataforma **global**.
+   */
+  isPlatform(
+    actor: AuthenticatedUser,
+    tenantId: string | null | undefined,
+  ): boolean {
+    return PLATFORM_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId ?? undefined),
+    );
   }
 
   /**
@@ -144,8 +170,10 @@ export class CommunityVisibilityService {
     profileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.isPlatform(actor)) return;
+    // El global pasa sin cargar el perfil; el acotado, sólo si el perfil es de su tenant.
+    if (this.isPlatform(actor, undefined)) return;
     const profile = await this.profilesRepo.findById(em, profileId);
+    if (profile && this.isPlatform(actor, profile.tenantId)) return;
     if (await this.isHolder(em, profile, actor)) return;
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
@@ -202,8 +230,9 @@ export class CommunityVisibilityService {
     profileId: string,
     actor: AuthenticatedUser,
   ): Promise<MessagingProfileAccess> {
-    if (this.isPlatform(actor)) return 'PLATFORM';
+    if (this.isPlatform(actor, undefined)) return 'PLATFORM';
     const profile = await this.profilesRepo.findById(em, profileId);
+    if (profile && this.isPlatform(actor, profile.tenantId)) return 'PLATFORM';
     const access = await this.messagingAccess(em, profile, actor);
     if (access) return access;
     throw new ForbiddenException(
@@ -283,7 +312,9 @@ export class CommunityVisibilityService {
   ): Promise<string | undefined> {
     if (requested) {
       // La plataforma puede mirar con cualquier perfil: es su trabajo moderar.
-      if (this.isPlatform(actor)) return requested;
+      // La global, con cualquiera; la acotada, con los de su tenant
+      // (lo decide `assertOwnProfile`, que carga el perfil).
+      if (this.isPlatform(actor, undefined)) return requested;
       await this.assertOwnProfile(em, requested, actor);
       return requested;
     }

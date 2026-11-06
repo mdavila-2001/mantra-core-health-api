@@ -49,7 +49,7 @@ export class RoleIdParamDto {
 }
 
 /** Cursor y tope de los listados paginados por clave. */
-class AdminPageQueryDto {
+export class AdminPageQueryDto {
   @ApiPropertyOptional({
     minimum: 1,
     maximum: AUTHZ_ADMIN_MAX_PAGE_SIZE,

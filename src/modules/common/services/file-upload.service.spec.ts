@@ -42,8 +42,15 @@ describe('FileUploadService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const forked = {};
-    const em = { fork: fn(() => forked) };
+    const forked: any = {};
+    forked.execute = fn(async () => []);
+    forked.transactional = fn(async (cb: (tx: unknown) => unknown) =>
+      cb(forked),
+    );
+    const em = {
+      fork: fn(() => forked),
+      transactional: fn(async (cb: (tx: unknown) => unknown) => cb(forked)),
+    };
     const storage = { store: fn(), retrieve: fn(), exists: fn(), delete: fn() };
     const filesService = { createFile: fn() };
     const filesRepo = { findById: fn() };

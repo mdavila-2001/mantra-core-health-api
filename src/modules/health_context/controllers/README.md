@@ -50,7 +50,7 @@ separador de acción, así que aquí no hay la desviación de ruteo que sí tien
 `ParseUUIDPipe` en los `:id` de ruta y en los parámetros `country` y `domain` de la resolución;
 `key` no lo lleva, porque es una cadena elegida al crear el contexto.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` en todo. Además: `SOURCE_ADMIN` (01, 02), `CONTEXT_CURATOR` (03–05, 07, 09, 11, 12),
 `QUALITY_REVIEWER` (08), `SYSTEM` (05–08, 10, 12) y `CONTEXT_CONSUMER` (12).
@@ -58,7 +58,7 @@ separador de acción, así que aquí no hay la desviación de ruteo que sí tien
 Ninguna ruta es `@Public()`: el consumidor de contexto es otro módulo con su propia sesión, no un
 visitante anónimo.
 
-## Pruebas
+## Tests
 
 `health-context.controller.spec.ts` (12): una por endpoint, comprobando que delega en el servicio
 correcto y que pasa el id de ruta o los parámetros de consulta, el cuerpo y el actor.

@@ -6,6 +6,7 @@ import {
 } from '../../../common/repositories';
 import { AdministrativeAreaCatalogService } from '../../../profiles/application/services/administrative-area-catalog.service';
 import { createContactPerson } from '../../../profiles/application/services/contact-person';
+import { assertNoHomonymPatient } from '../../../profiles/application/services/homonym-guard';
 import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
 import { MedicalSpecialtyCatalogService } from '../../../profiles/application/services/medical-specialty-catalog.service';
 import { PractitionerAdmissionsService } from '../../../profiles/application/services/practitioner-admissions.service';
@@ -21,6 +22,8 @@ import {
   ProfessionalCredentialsRepository,
   RelatedPersonsRepository,
 } from '../../../profiles/infrastructure/repositories';
+import { SecretaryProfiles } from '../../../profiles/entities';
+import { createdBy } from '../../../../common/persistence/audit-fields';
 import type {
   ContactPersonInput,
   GuardianInput,
@@ -70,6 +73,35 @@ export class ProfilesRegistrationAdapter implements ProfileRegistrationPort {
     return this.patientProfilesRepo.create(
       tx,
       data as Parameters<PatientProfilesRepository['create']>[1],
+    );
+  }
+
+  assertNoHomonymPatient(
+    tx: EntityManager,
+    check: { readonly displayName?: string; readonly allowHomonym?: boolean },
+  ): Promise<void> {
+    return assertNoHomonymPatient(tx, this.patientProfilesRepo, check);
+  }
+
+  createSecretaryProfile(
+    tx: EntityManager,
+    data: {
+      readonly profileId: string;
+      readonly roleConceptId?: string;
+      readonly actorUserId: string;
+    },
+  ): { profileId: string } {
+    // `profiles` no tiene repositorio para esta tabla: la fila son tres columnas
+    // y nadie más la escribe, así que se crea acá con las marcas de auditoría
+    // de siempre.
+    return tx.create(
+      SecretaryProfiles,
+      {
+        profileId: data.profileId,
+        roleConceptId: data.roleConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
     );
   }
 

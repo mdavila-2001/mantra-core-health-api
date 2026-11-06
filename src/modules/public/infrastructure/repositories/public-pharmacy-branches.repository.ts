@@ -48,7 +48,7 @@ export class PublicPharmacyBranchesRepository {
     tenantId: string,
     take: number,
   ): Promise<PublicBranchRow[]> {
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT site.id                AS "siteId",
               site.name              AS "siteName",
               COALESCE(NULLIF(btrim(ph.trade_name), ''), ph.legal_name) AS "pharmacyName",
@@ -92,8 +92,8 @@ export class PublicPharmacyBranchesRepository {
   /**
    * Los productos **disponibles** de las sedes de un tenant que casan con algún
    * renglón de la receta, con su precio vigente para esa sede. «Disponible» es
-   * la regla única de {@link siteProductAvailabilitySql}: lotes si la sede los
-   * lleva, lo declarado en el catálogo si no.
+   * la regla única de {@link siteProductAvailabilitySql}: lotes si el producto
+   * tiene posición en la sede, lo declarado en el catálogo si no.
    *
    * El filtro por renglón va en SQL (sin tildes ni mayúsculas, «contiene») para
    * no traer el catálogo entero; cuál gana por renglón lo decide el dominio.
@@ -118,7 +118,7 @@ export class PublicPharmacyBranchesRepository {
       .join(' OR ');
     const sitePlaceholders = siteIds.map(() => '?').join(', ');
     const availability = siteProductAvailabilitySql();
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT stock.site_id            AS "siteId",
               prod.id                  AS "productId",
               COALESCE(prod.generic_name, med.display, prod.brand_name, prod.product_code) AS "genericName",

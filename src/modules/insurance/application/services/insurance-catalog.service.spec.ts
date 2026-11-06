@@ -49,7 +49,7 @@ function build(rows: {
   });
   const service = new InsuranceCatalogService({
     find,
-    getConnection: () => ({ execute }),
+    execute,
   } as never);
   return { service, find, execute };
 }

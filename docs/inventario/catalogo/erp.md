@@ -2550,7 +2550,7 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: contracts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `Contracts` — `src/modules/erp/entities/contracts.entity.ts`
-- **Resumen:** 33 columnas · 21 índices · 19 FK salientes · 34 entrantes · 13 operaciones
+- **Resumen:** 33 columnas · 21 índices · 19 FK salientes · 35 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2639,6 +2639,7 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 | desde | id | billing.invoices (contract_id) | fk_invoices_contract_id |
 | desde | id | billing.bills (contract_id) | fk_bills_contract_id |
 | desde | id | billing.billing_document_links (contract_id) | fk_billing_document_links_contract_id |
+| desde | id | insurance.insurance_terms_conditions (contract_id) | fk_insurance_terms_conditions_contract_id |
 | desde | id | payments.payment_transactions (contract_id) | fk_payment_transactions_contract_id |
 | desde | id | payments.payment_debts (contract_id) | fk_payment_debts_contract_id |
 | desde | id | crm.opportunities (contract_id) | fk_opportunities_contract_id |

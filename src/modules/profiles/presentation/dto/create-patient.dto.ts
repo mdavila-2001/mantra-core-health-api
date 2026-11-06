@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDateString,
   IsOptional,
   IsString,
@@ -75,6 +76,15 @@ export class CreatePatientDto {
   @IsString()
   @MaxLength(100)
   masterPatientIndexCode?: string;
+
+  /** The operator confirmed a homonym is a different person (skips the 409). */
+  @ApiPropertyOptional({
+    description:
+      'Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT)',
+  })
+  @IsOptional()
+  @IsBoolean()
+  allowHomonym?: boolean;
 }
 
 /** Respuesta de alta de paciente. */

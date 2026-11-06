@@ -76,6 +76,6 @@ Entidades (`tableName`, 32 de 32 archivos `*.entity.ts`): `account_contact_relat
 | `POST /crm/cases/:id/resolve` | CRM_ADMIN, CRM_AGENT | `crm` |
 | `PATCH /crm/contacts/:id/channels/:cid/opt-in` | CRM_ADMIN, CRM_AGENT | `crm` |
 
-## Pruebas
+## Tests
 
 `node --experimental-vm-modules node_modules/jest-cli/bin/jest.js src/modules/crm` cubre dos tenants para cada cadena de UUID (lead, oportunidad, caso, cuenta, contacto, canal) y el cruce de pipeline/etapa.

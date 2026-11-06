@@ -249,9 +249,11 @@ export class EducationScopeService {
    * @returns `true` si debe limitarse a sus propias inscripciones.
    */
   isLearnerOnly(actor: AuthenticatedUser): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return false;
     const tenantId = requireTenantId();
+    // `SUPERADMIN` global vale en cualquiera; acotado en `scopedRoles`, sólo
+    // en el suyo (#1241).
     return !(
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId) ||
       roleAuthorizesInTenant(actor, 'EDUCATION_ADMIN', tenantId) ||
       roleAuthorizesInTenant(actor, 'SYSTEM', tenantId)
     );

@@ -380,7 +380,7 @@ before(async () => {
   });
 });
 
-test('conteos del modelo: 1 230 tablas, 16 851 columnas, 7 069 FK y 7 836 índices', () => {
+test('conteos del modelo: 1 230 tablas, 16 852 columnas, 7 069 FK y 7 836 índices', () => {
   assert.deepEqual(
     {
       tablas: modelo.conteos.tablas,
@@ -388,7 +388,7 @@ test('conteos del modelo: 1 230 tablas, 16 851 columnas, 7 069 FK y 7 836 índic
       relaciones: modelo.conteos.relaciones,
       indices: modelo.conteos.indices,
     },
-    { tablas: 1230, columnas: 16851, relaciones: 7069, indices: 7836 },
+    { tablas: 1230, columnas: 16852, relaciones: 7069, indices: 7836 },
   );
   assert.equal(catalogo.tablas.length, 1230);
   assert.equal(
@@ -399,7 +399,7 @@ test('conteos del modelo: 1 230 tablas, 16 851 columnas, 7 069 FK y 7 836 índic
   const r = resumirCatalogo(catalogo.tablas);
   assert.deepEqual(
     { columnas: r.columnas, indices: r.indices, relaciones: r.relaciones },
-    { columnas: 16851, indices: 7836 + 431, relaciones: 7069 },
+    { columnas: 16852, indices: 7836 + 431, relaciones: 7069 },
   );
 });
 

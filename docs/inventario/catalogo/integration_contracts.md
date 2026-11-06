@@ -2,7 +2,7 @@
 
 # Catálogo del schema `integration_contracts`
 
-- **Tablas:** 9 · **Columnas:** 116 (26 con descripción: 22.4 %) · **Índices:** 55
+- **Tablas:** 9 · **Columnas:** 117 (27 con descripción: 23.1 %) · **Índices:** 57
 - **Dominio:** Integraciones y Contratos
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -13,7 +13,7 @@
 | [contract_webhook_subscriptions](#contract_webhook_subscriptions) | Asocia suscripciones de webhook con contratos para definir qué eventos se notifican a cada consumidor. | 14 | 5 | 3 | COINCIDE |
 | [integration_auth_profiles](#integration_auth_profiles) | Configura perfiles de autenticación exigidos por contratos para controlar identidad y seguridad de conexiones. | 17 | 6 | 3 | COINCIDE |
 | [integration_contract_versions](#integration_contract_versions) | Preserva versiones de contratos para mantener compatibilidad y reproducibilidad de intercambios. | 13 | 8 | 10 | COINCIDE |
-| [integration_contracts](#integration_contracts) | Define contratos de intercambio entre el sistema médico y sus socios técnicos para acordar estructura y comportamiento de datos. | 14 | 9 | 13 | DIVERGE |
+| [integration_contracts](#integration_contracts) | Define contratos de intercambio entre el sistema médico y sus socios técnicos para acordar estructura y comportamiento de datos. | 15 | 11 | 13 | COINCIDE |
 | [integration_exchange_attempts](#integration_exchange_attempts) | Mantiene intentos de intercambio para conservar respuestas, fallos y reintentos técnicos. | 13 | 6 | 5 | COINCIDE |
 | [integration_exchange_records](#integration_exchange_records) | Registra intercambios ejecutados bajo contratos para conocer qué operación se solicitó y su contexto. | 16 | 8 | 4 | COINCIDE |
 | [integration_idempotency_records](#integration_idempotency_records) | Evita procesar dos veces la misma operación externa mediante claves y resultados de idempotencia. | 10 | 5 | 6 | COINCIDE |
@@ -38,13 +38,13 @@ erDiagram
   }
   integration_contracts_integration_contracts["integration_contracts.integration_contracts"] {
     uuid id PK
+    uuid tenant_id FK
     uuid external_provider_id FK
     uuid capability_concept_id FK
     uuid data_classification_concept_id FK
     uuid legal_basis_concept_id FK
     uuid allowed_purpose_value_set_id FK
     uuid status_concept_id FK
-    uuid created_by_user_id FK
   }
   integration_contracts_integration_auth_profiles["integration_contracts.integration_auth_profiles"] {
     uuid id PK
@@ -365,31 +365,33 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml: integration_contracts`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml` · **DDL:** `SQL/31_integration_contracts/02_tables.sql`
 - **Entidad del ORM:** `IntegrationContracts` — `src/modules/integration_contracts/entities/integration_contracts.entity.ts`
-- **Resumen:** 14 columnas · 9 índices · 8 FK salientes · 5 entrantes · 13 operaciones
+- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 5 entrantes · 13 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:12`)_ | coincide |
-| 2 | `external_provider_id` | `uuid` | Clave foránea → integrations.external_providers.id; Obligatoria | _sin dato_ | coincide |
-| 3 | `contract_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 4 | `capability_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 5 | `data_classification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 6 | `legal_basis_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 7 | `allowed_purpose_value_set_id` | `uuid` | Clave foránea → terminology.value_sets.id; Opcional | _sin dato_ | coincide |
-| 8 | `data_use_agreement_id` | `uuid` | Opcional | _sin dato_ | coincide |
-| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:91`)_ | coincide |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:97`)_ | coincide |
-| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:115`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | Tenant propietario del contrato. Todo recurso hijo (versiones, perfiles, suscripciones, intercambios, cursores) hereda este tenant. Un contrato sin tenant (previo a la columna) no pertenece a ningún tenant y no es accesible hasta que se le asigne uno. _(JSDOC_ENTIDAD, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:21`)_ | coincide |
+| 3 | `external_provider_id` | `uuid` | Clave foránea → integrations.external_providers.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `contract_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `capability_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `data_classification_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 7 | `legal_basis_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 8 | `allowed_purpose_value_set_id` | `uuid` | Clave foránea → terminology.value_sets.id; Opcional | _sin dato_ | coincide |
+| 9 | `data_use_agreement_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:91`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:97`)_ | coincide |
+| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:115`)_ | coincide |
 
 #### Relaciones
 
 | Sentido | Columnas | Tabla | Restricción |
 |---|---|---|---|
+| hacia | tenant_id | directory.tenants (id) | fk_integration_contracts_tenant_id |
 | hacia | external_provider_id | integrations.external_providers (id) | fk_integration_contracts_external_provider_id |
 | hacia | capability_concept_id | terminology.catalog_concepts (id) | fk_integration_contracts_capability_concept_id |
 | hacia | data_classification_concept_id | terminology.catalog_concepts (id) | fk_integration_contracts_data_classification_concept_id |
@@ -408,7 +410,9 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
+| `ix_integration_contracts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_integration_contracts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_integration_contracts_external_provider_id` | no | external_provider_id | Soporta la clave foránea fk_integration_contracts_external_provider_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «external_provider_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_integration_contracts_tenant_provider_code` | sí | tenant_id, external_provider_id, contract_code donde WHERE tenant_id IS NOT NULL | Garantiza que no se repita la combinación (tenant_id, external_provider_id, contract_code) _(DOCUMENTO)_; Soporta la clave foránea fk_integration_contracts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE tenant_id IS NOT NULL _(ESTRUCTURAL)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_integration_contracts_capability_concept_id` | no | capability_concept_id | Soporta la clave foránea fk_integration_contracts_capability_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_integration_contracts_data_classification_concept_id` | no | data_classification_concept_id | Soporta la clave foránea fk_integration_contracts_data_classification_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_integration_contracts_legal_basis_concept_id` | no | legal_basis_concept_id | Soporta la clave foránea fk_integration_contracts_legal_basis_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -417,6 +421,12 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 | `ix_integration_contracts_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_integration_contracts_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_integration_contracts_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_integration_contracts_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_integration_contracts_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_integration_contracts_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_integration_contracts_tenant_provider_code` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "external_provider_id", "contract_code") WHERE tenant_id IS NOT NULL |
 
 #### Operaciones que la tocan
 

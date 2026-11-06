@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  Pharmacies,
   PharmacyExternalProductMappings,
   PharmacyIntegrationConnections,
   PharmacyProducts,
@@ -153,5 +154,70 @@ export class IntegrationReadRepository {
       pharmacyInventorySyncBatchId: batchId,
       reconciliationStatusConceptId: PINV.SYNC_ITEM_MATCHED,
     });
+  }
+
+  /** El código de la farmacia (`pharmacies.code`); `null` si no existe. */
+  async findPharmacyCode(
+    em: EntityManager,
+    pharmacyId: string,
+  ): Promise<string | null> {
+    const pharmacy = await em.findOne(
+      Pharmacies,
+      { id: pharmacyId },
+      { fields: ['id', 'code'] },
+    );
+    return pharmacy?.code ?? null;
+  }
+
+  /**
+   * De los productos dados, los que la sede marcó «No lo tengo» a mano: nada
+   * vendible sin lote en sus ubicaciones activas, y el último asiento de ese
+   * producto en la sede es un ajuste manual (`MV_COUNT_ADJUSTMENT`: el
+   * interruptor por sede, la carga por sucursal o una confirmación de pedido),
+   * no una sincronización ni un pedido.
+   */
+  async findMarkedNotAvailable(
+    em: EntityManager,
+    pharmacySiteId: string,
+    productIds: readonly string[],
+  ): Promise<Set<string>> {
+    if (productIds.length === 0) return new Set();
+    // Un marcador por id: el driver no convierte un arreglo de JavaScript en
+    // uno de Postgres (ver `community/repositories/reactions.repository.ts`).
+    const markers = productIds.map(() => '?').join(', ');
+    const rows = await em.execute<{ pharmacy_product_id: string }[]>(
+      `with sellable as (
+         select st.pharmacy_product_id, sum(st.available_quantity) as available
+           from pharmacy_inventory.inventory_locations loc
+           join pharmacy_inventory.inventory_stock_positions st
+             on st.inventory_location_id = loc.id
+          where loc.pharmacy_site_id = ?
+            and loc.status_concept_id = ?
+            and st.inventory_lot_id is null
+            and st.pharmacy_product_id in (${markers})
+          group by st.pharmacy_product_id
+       ), last_entry as (
+         select distinct on (le.pharmacy_product_id)
+                le.pharmacy_product_id, le.movement_type_concept_id
+           from pharmacy_inventory.inventory_ledger_entries le
+          where le.pharmacy_site_id = ?
+            and le.pharmacy_product_id in (${markers})
+          order by le.pharmacy_product_id, le.ledger_sequence desc
+       )
+       select s.pharmacy_product_id
+         from sellable s
+         join last_entry l on l.pharmacy_product_id = s.pharmacy_product_id
+        where s.available <= 0
+          and l.movement_type_concept_id = ?`,
+      [
+        pharmacySiteId,
+        PINV.LOCATION_ACTIVE,
+        ...productIds,
+        pharmacySiteId,
+        ...productIds,
+        PINV.MV_COUNT_ADJUSTMENT,
+      ],
+    );
+    return new Set(rows.map((row) => row.pharmacy_product_id));
   }
 }

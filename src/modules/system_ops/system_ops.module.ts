@@ -1,3 +1,4 @@
+import { MutabilityModule } from './mutability/mutability.module';
 import { Module } from '@nestjs/common';
 import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { IdentityEvidenceLifecycleModule } from '../identity_assurance/identity-evidence-lifecycle.module';
@@ -5,6 +6,8 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
   GovernanceCatalogController,
+  GovernanceReadController,
+  GovernanceOperationsReadController,
   RetentionExecutionController,
   ResidencyController,
   LegalHoldController,
@@ -15,6 +18,8 @@ import {
 } from './controllers';
 import {
   GovernanceCatalogService,
+  GovernanceReadService,
+  GovernanceOperationsReadService,
   RetentionExecutionService,
   ResidencyService,
   LegalHoldService,
@@ -25,6 +30,8 @@ import {
 } from './services';
 import {
   GovernanceRepository,
+  GovernanceReadRepository,
+  GovernanceOperationsReadRepository,
   RetentionExecutionRepository,
   ResidencyRepository,
   LegalHoldRepository,
@@ -43,12 +50,15 @@ import {
  */
 @Module({
   imports: [
+    MutabilityModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     StorageLifecycleModule,
     IdentityEvidenceLifecycleModule,
   ],
   controllers: [
     GovernanceCatalogController,
+    GovernanceReadController,
+    GovernanceOperationsReadController,
     RetentionExecutionController,
     ResidencyController,
     LegalHoldController,
@@ -60,6 +70,8 @@ import {
   providers: [
     // Repositorios
     GovernanceRepository,
+    GovernanceReadRepository,
+    GovernanceOperationsReadRepository,
     RetentionExecutionRepository,
     ResidencyRepository,
     LegalHoldRepository,
@@ -74,6 +86,8 @@ import {
     { provide: RETENTION_DISPOSITION_EXECUTORS, useValue: [] },
     // Servicios
     GovernanceCatalogService,
+    GovernanceReadService,
+    GovernanceOperationsReadService,
     RetentionExecutionService,
     ResidencyService,
     LegalHoldService,

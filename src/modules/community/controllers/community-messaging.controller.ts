@@ -21,6 +21,7 @@ import {
   ParseOptionalLimitPipe,
   servedContentHeaders,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import {
   CommunityMessagingService,
@@ -50,7 +51,12 @@ import {
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
 
-/** Endpoints de mensajería social (conversaciones, mensajes directos, recibos). */
+/** Endpoints de mensajería social (conversaciones, mensajes directos, recibos). *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global. El servicio exige que
+ * el perfil sea del actor (`assertActsAsMessagingProfile` /
+ * `assertOwnMessagingProfile`) y que sea participante activo de la
+ * conversación; una conversación ajena responde 404.
+ */
 @ApiTags('community-messaging')
 @ApiBearerAuth()
 @Controller('community/conversations')
@@ -73,6 +79,7 @@ export class CommunityMessagingController {
     entityId: 'result.id',
   })
   @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una conversación con participantes' })
   createConversation(
@@ -89,6 +96,7 @@ export class CommunityMessagingController {
     entityId: 'result.id',
   })
   @Post(':conversationId/messages')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar un mensaje directo en la conversación' })
   sendMessage(
@@ -106,6 +114,7 @@ export class CommunityMessagingController {
     entityId: 'param:messageId',
   })
   @Patch(':conversationId/messages/:messageId')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Editar el texto de un mensaje propio' })
   editMessage(
@@ -124,6 +133,7 @@ export class CommunityMessagingController {
     entityId: 'param:messageId',
   })
   @Delete(':conversationId/messages/:messageId')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Eliminar un mensaje propio' })
   deleteMessage(
@@ -147,6 +157,7 @@ export class CommunityMessagingController {
     entityId: 'param:conversationId',
   })
   @Post(':conversationId/read')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar mensajes como leídos (recibos)' })
   markRead(
@@ -164,6 +175,7 @@ export class CommunityMessagingController {
     entityId: 'param:conversationId',
   })
   @Patch(':conversationId/participant')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Marcar la conversación como favorita, fijada o archivada',
@@ -183,6 +195,7 @@ export class CommunityMessagingController {
     entityId: 'param:conversationId',
   })
   @Post(':conversationId/pin')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fijar un mensaje de la conversación' })
   pinMessage(
@@ -200,6 +213,7 @@ export class CommunityMessagingController {
     entityId: 'param:conversationId',
   })
   @Delete(':conversationId/pin')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soltar el mensaje fijado de la conversación' })
   unpinMessage(
@@ -218,6 +232,7 @@ export class CommunityMessagingController {
     entity: 'conversation',
   })
   @Post('contacts/search')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Buscar personas para iniciar una conversación' })
@@ -244,6 +259,7 @@ export class CommunityMessagingController {
    * debe conservar un adjunto clínico después de cerrar sesión.
    */
   @Get(':conversationId/attachments/:fileId/content')
+  @Roles()
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el adjunto de una conversación (participante activo)',
@@ -281,6 +297,7 @@ export class CommunityMessagingController {
    * (nombre del otro lado o texto del último mensaje).
    */
   @Get()
+  @Roles()
   @ApiOperation({ summary: 'Conversaciones activas de un perfil' })
   listConversations(
     @Query('profileId', ParseUUIDPipe) profileId: string,
@@ -298,6 +315,7 @@ export class CommunityMessagingController {
 
   /** Mensajes de una conversación en la que se participa. */
   @Get(':conversationId/messages')
+  @Roles()
   @ApiOperation({ summary: 'Mensajes de una conversación' })
   listMessages(
     @Param('conversationId', ParseUUIDPipe) conversationId: string,
@@ -314,6 +332,7 @@ export class CommunityMessagingController {
 
   /** F4.2 · Quién de los otros está en línea, y si no, cuándo se lo vio. */
   @Get(':conversationId/presence')
+  @Roles()
   @ApiOperation({ summary: 'Presencia de los demás participantes' })
   conversationPresence(
     @Param('conversationId', ParseUUIDPipe) conversationId: string,

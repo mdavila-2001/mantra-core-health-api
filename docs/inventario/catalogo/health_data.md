@@ -19,10 +19,10 @@
 | [fhir_profile_versions](#fhir_profile_versions) | Versiona perfiles FHIR para conservar qué reglas de interoperabilidad se aplicaban a cada validación. | 16 | 6 | 1 | COINCIDE |
 | [fhir_validation_issues](#fhir_validation_issues) | Detalla errores o advertencias encontrados en validaciones FHIR para orientar correcciones de interoperabilidad. | 8 | 3 | 1 | COINCIDE |
 | [fhir_validation_runs](#fhir_validation_runs) | Registra ejecuciones de validación FHIR sobre datos recibidos o transformados para evaluar conformidad con perfiles definidos. | 11 | 6 | 2 | COINCIDE |
-| [health_data_quality_issues](#health_data_quality_issues) | Conserva hallazgos de calidad detectados en datos de salud para su análisis, resolución y seguimiento. | 12 | 7 | 2 | COINCIDE |
-| [health_data_quality_rule_sets](#health_data_quality_rule_sets) | Agrupa reglas de calidad aplicables a datos sanitarios para evaluar su aptitud y consistencia de manera gobernada. | 13 | 8 | 1 | COINCIDE |
-| [health_data_quality_rules](#health_data_quality_rules) | Define verificaciones concretas sobre datos de salud para detectar problemas antes de usarlos en atención, intercambio o análisis. | 15 | 8 | 1 | COINCIDE |
-| [health_data_quality_runs](#health_data_quality_runs) | Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaron y cuándo. | 12 | 7 | 2 | COINCIDE |
+| [health_data_quality_issues](#health_data_quality_issues) | Conserva hallazgos de calidad detectados en datos de salud para su análisis, resolución y seguimiento. | 12 | 7 | 7 | COINCIDE |
+| [health_data_quality_rule_sets](#health_data_quality_rule_sets) | Agrupa reglas de calidad aplicables a datos sanitarios para evaluar su aptitud y consistencia de manera gobernada. | 13 | 8 | 3 | COINCIDE |
+| [health_data_quality_rules](#health_data_quality_rules) | Define verificaciones concretas sobre datos de salud para detectar problemas antes de usarlos en atención, intercambio o análisis. | 15 | 8 | 6 | COINCIDE |
+| [health_data_quality_runs](#health_data_quality_runs) | Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaron y cuándo. | 12 | 7 | 6 | COINCIDE |
 | [health_deidentification_profiles](#health_deidentification_profiles) | Configura perfiles de desidentificación para preparar datos de salud para usos autorizados que no requieren identificación directa. | 17 | 8 | 5 | COINCIDE |
 | [health_deidentification_runs](#health_deidentification_runs) | Traza ejecuciones de desidentificación para vincular los datos procesados con el perfil y resultado de la operación. | 14 | 9 | 4 | COINCIDE |
 | [health_export_jobs](#health_export_jobs) | Representa trabajos de exportación de datos de salud para controlar sus solicitudes, ejecución y destino previsto. | 15 | 11 | 5 | COINCIDE |
@@ -1084,7 +1084,7 @@ Conserva hallazgos de calidad detectados en datos de salud para su análisis, re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_data_quality_issues`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthDataQualityIssues` — `src/modules/health_data/entities/health_data_quality_issues.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -1130,6 +1130,11 @@ Conserva hallazgos de calidad detectados en datos de salud para su análisis, re
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/data-quality/issues | LEE | POR_SQL |
+| GET /admin/governance/data-quality/issues/{id} | LEE | POR_SQL |
+| POST /admin/governance/data-quality/issues/{id}/resolution | ACTUALIZA | POR_SQL |
+| POST /admin/governance/data-quality/issues/{id}/resolution | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
 | POST /health-data/quality-runs | CREA | DIRECTA |
 | POST /health-data/quality-runs | LEE | DIRECTA |
 
@@ -1156,7 +1161,7 @@ Agrupa reglas de calidad aplicables a datos sanitarios para evaluar su aptitud y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_data_quality_rule_sets`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthDataQualityRuleSets` — `src/modules/health_data/entities/health_data_quality_rule_sets.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 2 entrantes · 1 operaciones
+- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 2 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1212,6 +1217,8 @@ Agrupa reglas de calidad aplicables a datos sanitarios para evaluar su aptitud y
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/data-quality/rules | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
 | POST /health-data/quality-runs | LEE | DIRECTA |
 
 #### Gobierno
@@ -1237,7 +1244,7 @@ Define verificaciones concretas sobre datos de salud para detectar problemas ant
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_data_quality_rules`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthDataQualityRules` — `src/modules/health_data/entities/health_data_quality_rules.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 1 entrantes · 1 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1295,6 +1302,11 @@ Define verificaciones concretas sobre datos de salud para detectar problemas ant
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/data-quality/issues | LEE | POR_SQL |
+| GET /admin/governance/data-quality/issues/{id} | LEE | POR_SQL |
+| POST /admin/governance/data-quality/issues/{id}/resolution | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
 | POST /health-data/quality-runs | LEE | DIRECTA |
 
 #### Gobierno
@@ -1320,7 +1332,7 @@ Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaro
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_data_quality_runs`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthDataQualityRuns` — `src/modules/health_data/entities/health_data_quality_runs.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1366,6 +1378,10 @@ Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaro
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/data-quality/issues | LEE | POR_SQL |
+| GET /admin/governance/data-quality/issues/{id} | LEE | POR_SQL |
+| POST /admin/governance/data-quality/issues/{id}/resolution | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
 | POST /health-data/quality-runs | ACTUALIZA | POR_TIPO |
 | POST /health-data/quality-runs | CREA | DIRECTA |
 

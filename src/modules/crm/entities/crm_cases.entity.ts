@@ -151,4 +151,10 @@ export class CrmCases {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a insurance claim.
+   */
+  @Property({ fieldName: 'insurance_claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims (inferida)
+  insuranceClaimId?: string;
 }

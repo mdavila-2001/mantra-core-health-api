@@ -41,7 +41,12 @@ import {
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
 
-/** Endpoints de confianza y seguridad: reportes, decisiones y apelaciones. */
+/** Endpoints de confianza y seguridad: reportes, decisiones y apelaciones. *
+ * Reportar y apelar llevan `@Roles()` vacío (O3-3): reportar es de cualquier
+ * cuenta y el denunciante sale de la sesión; apelar exige actuar como el perfil
+ * sancionado (`assertActsAsProfile`). Decidir y leer la cola siguen siendo de
+ * `SECURITY_ADMIN`.
+ */
 @ApiTags('community-moderation')
 @ApiBearerAuth()
 @Controller('community')
@@ -64,6 +69,7 @@ export class CommunityModerationController {
     entityId: 'result.id',
   })
   @Post('reports')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Reportar contenido y encolar moderación' })
   report(
@@ -98,6 +104,7 @@ export class CommunityModerationController {
     entityId: 'result.id',
   })
   @Post('moderation/decisions/:decisionId/appeal')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Apelar una decisión de moderación' })
   appeal(

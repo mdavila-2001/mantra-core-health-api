@@ -283,6 +283,13 @@ export class BookingServiceDto {
 
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
+  /** F5d: consultorio de la cita, o `null`. */
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Consultorio de la cita {id, code, name} (F5d)',
+  })
+  careSpace?: { id: string; code: string; name: string } | null;
+
   /**
    * El estado de pago, si alguien lo marcó (TAREA-13 punto 5).
    *
@@ -300,6 +307,16 @@ export class BookingItemDto {
    */
   @ApiProperty({ format: 'uuid' })
   id!: string;
+
+  /**
+   * La organización de la agenda en que está la cita.
+   *
+   * Una cuenta de paciente lista sus citas de **todas** las organizaciones, y
+   * para cancelar, reprogramar o subir un comprobante tiene que hablarle a la
+   * de cada cita (`X-Tenant-Id`): ya no alcanza con la activa de la sesión.
+   */
+  @ApiProperty({ format: 'uuid' })
+  tenantId!: string;
 
   /**
    * Identificador asociado a patient profile.

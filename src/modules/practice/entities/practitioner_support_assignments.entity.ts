@@ -83,4 +83,14 @@ export class PractitionerSupportAssignments {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a initiated by party concept.
+   */
+  @Property({
+    fieldName: 'initiated_by_party_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  initiatedByPartyConceptId?: string;
 }

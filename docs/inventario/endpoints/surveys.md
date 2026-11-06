@@ -3,8 +3,8 @@
 # Endpoints del módulo `surveys`
 
 - **Bloque:** —
-- **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 9 · BAJO 7
+- **Operaciones:** 19 (19 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 10 · BAJO 7
 - **Tablas distintas que tocan:** 14
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/surveys.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -13,23 +13,24 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/surveys/assignments` | Asociar una encuesta a una consulta o servicio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
-| 2 | GET | `/surveys/insights` | Resumen general de mis encuestas (agregado, sin pacientes) | BAJO | 11 | PRACTITIONER, CLINICIAN |
-| 3 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 16 | PRACTITIONER, CLINICIAN |
-| 4 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 9 | sesión (sin roles) |
-| 5 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 10 | sesión (sin roles) |
-| 6 | POST | `/surveys/me/invitations/{id}/responses` | Responder el cuestionario | ALTO | 5 | sesión (sin roles) |
-| 7 | GET | `/surveys/templates` | Listar mis encuestas | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 8 | POST | `/surveys/templates` | Crear una encuesta para pacientes | MEDIO | 2 | PRACTITIONER, CLINICIAN |
-| 9 | GET | `/surveys/templates/{id}` | Ver una encuesta y su cuestionario | BAJO | 5 | PRACTITIONER, CLINICIAN |
-| 10 | PATCH | `/surveys/templates/{id}` | Corregir título, consigna y plazo del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 11 | POST | `/surveys/templates/{id}/deactivate` | Desactivar la encuesta | MEDIO | 2 | PRACTITIONER, CLINICIAN |
-| 12 | POST | `/surveys/templates/{id}/questions` | Configurar una pregunta y su tipo de respuesta | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 13 | DELETE | `/surveys/templates/{id}/questions/{questionId}` | Quitar una pregunta del borrador | ALTO | 4 | PRACTITIONER, CLINICIAN |
-| 14 | PATCH | `/surveys/templates/{id}/questions/{questionId}` | Corregir una pregunta del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 15 | PUT | `/surveys/templates/{id}/questions/order` | Reordenar el cuestionario del borrador | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 16 | GET | `/surveys/templates/{id}/responses` | Revisar las respuestas de los pacientes | BAJO | 6 | PRACTITIONER, CLINICIAN |
-| 17 | POST | `/surveys/templates/{id}/versions` | Abrir una versión nueva del cuestionario | MEDIO | 3 | PRACTITIONER, CLINICIAN |
-| 18 | POST | `/surveys/templates/{id}/versions/{versionNumber}/publish` | Publicar la encuesta y configurar su vigencia | MEDIO | 5 | PRACTITIONER, CLINICIAN |
+| 2 | GET | `/surveys/catalog` | Catálogo de encuestas con sus servicios | MEDIO | 11 | PRACTITIONER, CLINICIAN |
+| 3 | GET | `/surveys/insights` | Resumen general de mis encuestas (agregado, sin pacientes) | BAJO | 11 | PRACTITIONER, CLINICIAN |
+| 4 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 16 | PRACTITIONER, CLINICIAN |
+| 5 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 9 | sesión (sin roles) |
+| 6 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 10 | sesión (sin roles) |
+| 7 | POST | `/surveys/me/invitations/{id}/responses` | Responder el cuestionario | ALTO | 5 | sesión (sin roles) |
+| 8 | GET | `/surveys/templates` | Listar mis encuestas | BAJO | 3 | PRACTITIONER, CLINICIAN |
+| 9 | POST | `/surveys/templates` | Crear una encuesta para pacientes | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 10 | GET | `/surveys/templates/{id}` | Ver una encuesta y su cuestionario | BAJO | 5 | PRACTITIONER, CLINICIAN |
+| 11 | PATCH | `/surveys/templates/{id}` | Corregir título, consigna y plazo del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 12 | POST | `/surveys/templates/{id}/deactivate` | Desactivar la encuesta | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 13 | POST | `/surveys/templates/{id}/questions` | Configurar una pregunta y su tipo de respuesta | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 14 | DELETE | `/surveys/templates/{id}/questions/{questionId}` | Quitar una pregunta del borrador | ALTO | 4 | PRACTITIONER, CLINICIAN |
+| 15 | PATCH | `/surveys/templates/{id}/questions/{questionId}` | Corregir una pregunta del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 16 | PUT | `/surveys/templates/{id}/questions/order` | Reordenar el cuestionario del borrador | BAJO | 3 | PRACTITIONER, CLINICIAN |
+| 17 | GET | `/surveys/templates/{id}/responses` | Revisar las respuestas de los pacientes | BAJO | 6 | PRACTITIONER, CLINICIAN |
+| 18 | POST | `/surveys/templates/{id}/versions` | Abrir una versión nueva del cuestionario | MEDIO | 3 | PRACTITIONER, CLINICIAN |
+| 19 | POST | `/surveys/templates/{id}/versions/{versionNumber}/publish` | Publicar la encuesta y configurar su vigencia | MEDIO | 5 | PRACTITIONER, CLINICIAN |
 
 ---
 
@@ -46,7 +47,7 @@
 
 Asociar una encuesta a una consulta o servicio. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -58,10 +59,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -137,7 +138,91 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. GET /surveys/insights
+## 2. GET /surveys/catalog
+
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de encuestas con sus servicios
+- **Bloque:** —
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SurveysCatalogController.list` — `src/modules/surveys/controllers/surveys-catalog.controller.ts:16`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de encuestas con sus servicios. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+
+### Cómo se atiende (sistema)
+
+`GET /surveys/catalog` la atiende `SurveysCatalogController.list` (src/modules/surveys/controllers/surveys-catalog.controller.ts:16). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysCatalogService.list`. Crea filas en surveys.survey_assignments, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza surveys.survey_templates, surveys.survey_versions. Lee billing.service_catalog, surveys.survey_assignments, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-catalog.controller.ts:16` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysTemplatesService.listAssignments → TargetsRepository.findServiceNames | `src/modules/surveys/repositories/targets.repository.ts:126` |
+| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:143` |
+| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysTemplatesService.listAssignments → AssignmentsRepository.listActiveByVersions | `src/modules/surveys/repositories/assignments.repository.ts:113` |
+| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:365` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysTemplatesService.listTemplates → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:211` |
+| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:209` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysTemplatesService.listTemplates → TemplatesRepository.listTemplatesByOwner | `src/modules/surveys/repositories/templates.repository.ts:193` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:222` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysCatalogService.systemEntries → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:291` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysCatalogController.list → SurveysCatalogService.list → SurveysTemplatesService.listTemplates → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SurveyCatalogEntryDto[]>` · DTO `SurveyCatalogEntryDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `origin` | `object` | Sí | — | — | `SYSTEM` for the base surveys, `PRACTITIONER` for the ones they wrote. | `src/modules/surveys/dto/survey-catalog.dto.ts:16` |
+| `scope` | `object` | No | — | — | Only for `SYSTEM`: `CONSULTATION` is issued for bookings without a service, `SERVICE` for every booking of a service. | `src/modules/surveys/dto/survey-catalog.dto.ts:23` |
+| `assignments` | `array<TemplateAssignmentDto>` | Sí | — | — | Active associations (only the practitioner's own surveys have them). | `src/modules/surveys/dto/survey-catalog.dto.ts:27` |
+| `assignments[].id` | `string` | Sí | formato uuid | — | Identificador de la asignación. | `src/modules/surveys/dto/responses.dto.ts:163` |
+| `assignments[].targetType` | `string` | Sí | valores: APPOINTMENT, SERVICE, CARE_TYPE | — | Qué se evalúa. | `src/modules/surveys/dto/responses.dto.ts:167` |
+| `assignments[].targetId` | `string` | Sí | formato uuid | — | La reserva (`APPOINTMENT`), el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`), o el tipo de atención «consulta» (`CARE_TYPE`). | `src/modules/surveys/dto/responses.dto.ts:174` |
+| `assignments[].targetName` | `string` | No | admite null | — | Nombre del servicio del catálogo cuando `targetType` es `SERVICE`; ausente en el resto. | `src/modules/surveys/dto/responses.dto.ts:181` |
+| `assignments[].active` | `boolean` | Sí | — | — | Siempre `true`: sólo se informan las activas. | `src/modules/surveys/dto/responses.dto.ts:185` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) |
+
+El árbol de decisión completo está en [flujos](../flujos/surveys.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Surveys — Cuestionarios y encuestas de satisfacción — etapa `ctrl:SurveysCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. GET /surveys/insights
 
 - **Origen:** CONTRATO
 - **Nombre:** Resumen general de mis encuestas (agregado, sin pacientes)
@@ -150,7 +235,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Resumen general de mis encuestas (agregado, sin pacientes). Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -162,8 +247,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-insights.controller.ts:27` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -257,7 +342,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 3. POST /surveys/invitations
+## 4. POST /surveys/invitations
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir los cuestionarios de una atención completada
@@ -270,7 +355,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Emitir los cuestionarios de una atención completada. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -282,10 +367,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -364,7 +449,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /surveys/me/invitations
+## 5. GET /surveys/me/invitations
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver mis cuestionarios
@@ -377,7 +462,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ver mis cuestionarios. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -389,8 +474,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -448,7 +533,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. GET /surveys/me/invitations/{id}
+## 6. GET /surveys/me/invitations/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir un cuestionario para responderlo
@@ -461,7 +546,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir un cuestionario para responderlo. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -473,9 +558,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-patient.controller.ts:51` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -540,7 +625,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /surveys/me/invitations/{id}/responses
+## 7. POST /surveys/me/invitations/{id}/responses
 
 - **Origen:** CONTRATO
 - **Nombre:** Responder el cuestionario
@@ -553,7 +638,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Responder el cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -565,11 +650,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -660,7 +745,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. GET /surveys/templates
+## 8. GET /surveys/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar mis encuestas
@@ -673,7 +758,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Listar mis encuestas. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -685,8 +770,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -734,7 +819,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. POST /surveys/templates
+## 9. POST /surveys/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una encuesta para pacientes
@@ -747,7 +832,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una encuesta para pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -759,10 +844,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -832,7 +917,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. GET /surveys/templates/{id}
+## 10. GET /surveys/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver una encuesta y su cuestionario
@@ -845,7 +930,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ver una encuesta y su cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -857,9 +942,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -930,7 +1015,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. PATCH /surveys/templates/{id}
+## 11. PATCH /surveys/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir título, consigna y plazo del borrador
@@ -943,7 +1028,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Corregir título, consigna y plazo del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -955,11 +1040,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:97` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1032,7 +1117,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /surveys/templates/{id}/deactivate
+## 12. POST /surveys/templates/{id}/deactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Desactivar la encuesta
@@ -1045,7 +1130,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Desactivar la encuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1057,9 +1142,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:219` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:219` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1109,7 +1194,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /surveys/templates/{id}/questions
+## 13. POST /surveys/templates/{id}/questions
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar una pregunta y su tipo de respuesta
@@ -1122,7 +1207,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Configurar una pregunta y su tipo de respuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1134,11 +1219,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1231,7 +1316,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. DELETE /surveys/templates/{id}/questions/{questionId}
+## 14. DELETE /surveys/templates/{id}/questions/{questionId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una pregunta del borrador
@@ -1244,7 +1329,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Quitar una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1256,9 +1341,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1310,7 +1395,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. PATCH /surveys/templates/{id}/questions/{questionId}
+## 15. PATCH /surveys/templates/{id}/questions/{questionId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una pregunta del borrador
@@ -1323,7 +1408,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Corregir una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1335,11 +1420,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1422,7 +1507,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. PUT /surveys/templates/{id}/questions/order
+## 16. PUT /surveys/templates/{id}/questions/order
 
 - **Origen:** CONTRATO
 - **Nombre:** Reordenar el cuestionario del borrador
@@ -1435,7 +1520,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reordenar el cuestionario del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1447,11 +1532,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:134` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1525,7 +1610,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /surveys/templates/{id}/responses
+## 17. GET /surveys/templates/{id}/responses
 
 - **Origen:** CONTRATO
 - **Nombre:** Revisar las respuestas de los pacientes
@@ -1538,7 +1623,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Revisar las respuestas de los pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1550,9 +1635,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:242` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1614,7 +1699,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /surveys/templates/{id}/versions
+## 18. POST /surveys/templates/{id}/versions
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir una versión nueva del cuestionario
@@ -1627,7 +1712,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir una versión nueva del cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1639,9 +1724,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:186` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1694,7 +1779,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 19. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar la encuesta y configurar su vigencia
@@ -1707,7 +1792,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar la encuesta y configurar su vigencia. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -1719,11 +1804,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:202` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

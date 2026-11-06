@@ -156,6 +156,17 @@ const siteRecord = (over: Record<string, unknown> = {}): any => ({
 
 describe('PractitionerSitesService', () => {
   describe('listSitesOfPractitioner', () => {
+    // Under RLS a bare fork opens a connection without app.current_tenant_id
+    // and practices/practice_sites come back empty: no own site, no logo.
+    it('reads inside the request transaction so RLS sees the tenant', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([]);
+
+      await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    });
+
     it('resolves the sites of the practitioner current assignments', async () => {
       const d = build();
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([

@@ -4,13 +4,16 @@ import {
   ArrayMinSize,
   IsArray,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { InventoryConceptDto } from './read-responses.dto';
@@ -200,7 +203,9 @@ export class PharmacyOrderLineDto {
 
   /**
    * Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada,
-   * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada).
+   * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada,
+   * `PINV_RES_LINE_PENDING_CONFIRMATION` por confirmar: la sede lo ofrece por
+   * su catálogo y la farmacia todavía no dijo si lo tiene; no reserva nada).
    */
   @ApiProperty({ type: InventoryConceptDto })
   status!: InventoryConceptDto;
@@ -487,10 +492,16 @@ export class PharmacyOrderSubstitutionDto {
  * `PROPONER_GENERICO` exige además `proposedProductId`: un producto activo de
  * la misma farmacia y del MISMO medicamento del vademécum. La propuesta se
  * persiste como bitácora (v4.2.1) y la decide el paciente.
+ *
+ * `CONFIRMAR_STOCK` sólo vale para una línea «por confirmar»
+ * (`PINV_RES_LINE_PENDING_CONFIRMATION`) y exige `quantity`: las unidades que
+ * la sede tiene para vender. Sin ajuste, una línea «por confirmar» se confirma
+ * con lo pedido; con `NO_DISPONIBLE` queda sin stock.
  */
 export const CONFIRM_LINE_DECISIONS = [
   'NO_DISPONIBLE',
   'PROPONER_GENERICO',
+  'CONFIRMAR_STOCK',
 ] as const;
 
 /** Un ajuste de línea que el mostrador declara al confirmar. */
@@ -521,6 +532,23 @@ export class ConfirmOrderAdjustmentDto {
   @IsOptional()
   @IsUUID()
   proposedProductId?: string;
+
+  /**
+   * Unidades que la sede tiene para vender del producto. Obligatoria con
+   * `CONFIRMAR_STOCK` (la regla vive en el servicio para responder 422
+   * tipificado); ignorada con las demás decisiones.
+   */
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: 1_000_000,
+    description:
+      'Unidades que la sede tiene para vender (con CONFIRMAR_STOCK, sobre una línea por confirmar)',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1_000_000)
+  quantity?: number;
 }
 
 /** Cuerpo de `POST /pharmacy/orders/:id/confirm` (FAR-E2). */

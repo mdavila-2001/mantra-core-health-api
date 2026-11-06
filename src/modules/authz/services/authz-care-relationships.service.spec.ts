@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuthzCareRelationshipsService } from './authz-care-relationships.service';
+import { AuthzPrimaryCareSyncService } from './authz-primary-care-sync.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -43,6 +44,7 @@ function build() {
     findById: mockFn(),
     findByPatient: mockFn().mockResolvedValue([]),
     findPendingByPatient: mockFn().mockResolvedValue([]),
+    findActivePrimaryInTenant: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const legalRepo = {
@@ -53,6 +55,7 @@ function build() {
   };
   const accountLinksRepo = {
     findActiveByPerson: mockFn().mockResolvedValue(null),
+    findSelfActiveByPerson: mockFn().mockResolvedValue(null),
   };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const outbox = { publishDomainEvent: mockFn().mockResolvedValue(undefined) };
@@ -61,6 +64,21 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const { scope, scopeRepo } = buildClinicalScope();
+  // Calls in order, to prove the flush sits between closing and opening C.
+  const calls: string[] = [];
+  tx.flush.mockImplementation(async () => {
+    calls.push('flush');
+  });
+  const primaryRepo = {
+    findCurrentByPatient: mockFn().mockResolvedValue(null),
+    close: mockFn(() => calls.push('close-c')),
+    open: mockFn(() => calls.push('open-c')),
+  };
+  const primaryCare = new AuthzPrimaryCareSyncService(
+    careRepo as any,
+    primaryRepo as any,
+    auditTrail as any,
+  );
   const service = new AuthzCareRelationshipsService(
     em as any,
     careRepo as any,
@@ -70,9 +88,12 @@ function build() {
     outbox as any,
     notifications as any,
     scope,
+    primaryCare,
     logger as any,
   );
   return {
+    calls,
+    primaryRepo,
     // Cada método corre con el tenant activo en el contexto, como en una petición.
     service: inTenant(service),
     // Sin tenant en el contexto: lo que ve un actor de plataforma que no declara ninguno.
@@ -175,6 +196,63 @@ describe('AuthzCareRelationshipsService', () => {
       expect(rel.validTo).toBeInstanceOf(Date);
     });
 
+    describe('cabecera (PRIMARY)', () => {
+      const primaryRel = (practitionerProfileId: string): any => ({
+        id: 'cr-primary',
+        tenantId: ACTIVE_TENANT,
+        patientProfileId: 'pat-1',
+        practitionerProfileId,
+        relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        validTo: null,
+        updatedAt: new Date(),
+      });
+
+      it('revocar la cabecera cierra el médico de cabecera vigente en la misma transacción', async () => {
+        const d = build();
+        const current = { practitionerProfileId: 'prac-1' };
+        d.careRepo.findById.mockResolvedValue(primaryRel('prac-1'));
+        d.primaryRepo.findCurrentByPatient.mockResolvedValue(current);
+
+        await d.service.revokeCareRelationship('cr-primary', actor);
+
+        expect(d.primaryRepo.findCurrentByPatient).toHaveBeenCalledWith(
+          d.tx,
+          'pat-1',
+        );
+        expect(d.primaryRepo.close).toHaveBeenCalledWith(
+          current,
+          expect.any(Date),
+          actor.id,
+        );
+        expect(d.calls).toEqual(['close-c', 'flush']);
+      });
+
+      it('si el médico de cabecera vigente es otro, no lo toca', async () => {
+        const d = build();
+        d.careRepo.findById.mockResolvedValue(primaryRel('prac-1'));
+        d.primaryRepo.findCurrentByPatient.mockResolvedValue({
+          practitionerProfileId: 'prac-OTRO',
+        });
+
+        await d.service.revokeCareRelationship('cr-primary', actor);
+
+        expect(d.primaryRepo.close).not.toHaveBeenCalled();
+      });
+
+      it('revocar una relación que no es de cabecera no mira el médico de cabecera', async () => {
+        const d = build();
+        d.careRepo.findById.mockResolvedValue({
+          ...primaryRel('prac-1'),
+          relationshipTypeConceptId: AUTHZ.CARE_REL_TREATING,
+        });
+
+        await d.service.revokeCareRelationship('cr-primary', actor);
+
+        expect(d.primaryRepo.findCurrentByPatient).not.toHaveBeenCalled();
+      });
+    });
+
     it('throws when the relationship does not exist', async () => {
       const d = build();
       d.careRepo.findById.mockResolvedValue(null);
@@ -209,7 +287,7 @@ describe('AuthzCareRelationshipsService', () => {
       d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue({
         userId: 'u-pat-1',
       });
 
@@ -239,7 +317,7 @@ describe('AuthzCareRelationshipsService', () => {
       d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue(null);
 
       await expect(
         d.service.requestCareRelationship(
@@ -390,7 +468,94 @@ describe('AuthzCareRelationshipsService', () => {
         patientActor,
       );
 
-      expect(rel.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
+      expect(rel.statusConceptId).toBe(AUTHZ.CARE_REL_STATUS_DECLINED);
+      expect(rel.validTo).toBeInstanceOf(Date);
+    });
+
+    describe('cabecera (PRIMARY) pedida por el médico', () => {
+      const pending = (): any => ({
+        id: 'cr-1',
+        patientProfileId: 'pat-1',
+        practitionerProfileId: 'prac-2',
+        tenantId: 't1',
+        relationshipTypeConceptId: AUTHZ.CARE_REL_PRIMARY,
+        statusConceptId: CONCEPTS.STATE_PENDING,
+        establishedByUserId: 'u-doctor',
+      });
+
+      it('aceptar reemplaza la cabecera anterior: revoca B, cierra C, flush y abre C nueva', async () => {
+        const d = build();
+        const rel = pending();
+        const previous: any = {
+          id: 'cr-vieja',
+          tenantId: 't1',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        };
+        d.careRepo.findById.mockResolvedValue(rel);
+        d.careRepo.findActivePrimaryInTenant.mockResolvedValue([previous, rel]);
+        d.primaryRepo.findCurrentByPatient.mockResolvedValue({
+          practitionerProfileId: 'prac-1',
+        });
+
+        await d.service.respondToCareRelationshipRequest(
+          'cr-1',
+          { decision: 'ACCEPT' } as any,
+          patientActor,
+        );
+
+        expect(previous.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
+        expect(previous.validTo).toBeInstanceOf(Date);
+        expect(rel.statusConceptId).toBe(CONCEPTS.STATE_ACTIVE);
+        expect(d.calls.slice(0, 3)).toEqual(['close-c', 'flush', 'open-c']);
+        expect(d.primaryRepo.open).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            patientProfileId: 'pat-1',
+            practitionerProfileId: 'prac-2',
+          }),
+          expect.any(Date),
+        );
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          patientActor,
+          expect.objectContaining({
+            action: 'CARE_RELATIONSHIP_REVOKED',
+            entityId: 'cr-vieja',
+          }),
+        );
+      });
+
+      it('rechazar deja la solicitud DECLINED y no toca el médico de cabecera', async () => {
+        const d = build();
+        const rel = pending();
+        d.careRepo.findById.mockResolvedValue(rel);
+
+        await d.service.respondToCareRelationshipRequest(
+          'cr-1',
+          { decision: 'REJECT' } as any,
+          patientActor,
+        );
+
+        expect(rel.statusConceptId).toBe(AUTHZ.CARE_REL_STATUS_DECLINED);
+        expect(d.primaryRepo.open).not.toHaveBeenCalled();
+        expect(d.primaryRepo.close).not.toHaveBeenCalled();
+      });
+
+      it('el paciente no acepta la cabecera que él mismo pidió', async () => {
+        const d = build();
+        const rel = { ...pending(), establishedByUserId: patientActor.id };
+        d.careRepo.findById.mockResolvedValue(rel);
+
+        await expect(
+          d.service.respondToCareRelationshipRequest(
+            'cr-1',
+            { decision: 'ACCEPT' } as any,
+            patientActor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(rel.statusConceptId).toBe(CONCEPTS.STATE_PENDING);
+        expect(d.primaryRepo.open).not.toHaveBeenCalled();
+      });
     });
 
     it('rechaza si quien responde no es el paciente titular', async () => {
@@ -971,7 +1136,7 @@ describe('AuthzCareRelationshipsService', () => {
   describe('notifyEncounterCareRelationshipRequests (REQ-16-035)', () => {
     it('avisa al paciente titular de cada solicitud', async () => {
       const d = build();
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+      d.accountLinksRepo.findSelfActiveByPerson.mockResolvedValue({
         userId: 'user-pat',
       });
       await d.service.notifyEncounterCareRelationshipRequests(

@@ -40,6 +40,12 @@ contradice esta regla, esta regla gana y el conflicto se registra en la descripc
    o feo fuera de alcance va a un **issue** en el repo que corresponde (regla 40), no se arregla.
 3. Todo trabajo no previsto que aparezca en el camino **se agrega al plan** como microtarea con su
    criterio de aceptación y su Definition of Done. Nada se hace "de paso".
+4. **Prohibido crear archivos de código de más de 300 líneas** salvo necesidad estricta demostrada.
+   Los archivos existentes > 300 líneas están congelados en su baseline por ratchet y no pueden crecer;
+   al modificarse deben ser descompuestos en unidades modulares.
+5. **Comentarios de código exclusivamente en inglés (English inline comments).** Todo comentario inline,
+   documentación JSDoc o anotación técnica en el código fuente debe redactarse obligatoriamente en idioma inglés.
+
 
 ## 4. Pruebas
 

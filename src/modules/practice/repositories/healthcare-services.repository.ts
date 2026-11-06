@@ -6,6 +6,11 @@ import { createdBy } from '../../../common';
 /** Datos para publicar un servicio de salud. */
 export interface CreateHealthcareServiceData {
   /**
+   * Tenant dueño del servicio: el de la práctica. La columna es NOT NULL desde
+   * F1c y la FK compuesta `(tenant_id, practice_id)` exige que coincidan.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a practice.
    */
   practiceId: string;
@@ -131,6 +136,7 @@ export class HealthcareServicesRepository {
     return em.create(
       HealthcareServices,
       {
+        tenantId: data.tenantId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,
         clinicalUnitId: data.clinicalUnitId,

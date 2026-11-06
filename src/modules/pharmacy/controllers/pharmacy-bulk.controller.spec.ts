@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common/constants';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { AUDITED_KEY } from '../../../common/audit-trail';
 import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 import { createGlobalValidationPipe } from '../../../common/http/validation-pipe';
 import { BulkRequestDto } from '../dto';
@@ -56,6 +57,19 @@ describe('PharmacyBulkController', () => {
     expect(
       Reflect.getMetadata(GUARDS_METADATA, PharmacyBulkController),
     ).toEqual([PharmacyTenantScopeGuard]);
+  });
+
+  it('a preview is audited as a preview, not as the load it simulates', () => {
+    for (const name of Object.keys(ROUTES)) {
+      const audited = Reflect.getMetadata(
+        AUDITED_KEY,
+        handlerOf(name as keyof typeof ROUTES),
+      ) as { action: string; dryRunAction?: string };
+      expect(audited.action).toMatch(/^PHARMACY_[A-Z]+_BULK_LOADED$/);
+      expect(audited.dryRunAction).toBe(
+        audited.action.replace('_LOADED', '_PREVIEWED'),
+      );
+    }
   });
 
   it('each route runs the common service with its own table handler', async () => {
@@ -113,6 +127,28 @@ describe('PharmacyBulkController', () => {
         rows: [{ whatever: 1, name: '' }],
       }),
     ).toHaveLength(0);
+  });
+
+  it('dryRun is a strict boolean or absent: 0, "", null, strings, [] and {} are a 400 through the global pipe', async () => {
+    const pipe = createGlobalValidationPipe();
+    const send = (extra: Record<string, unknown>) =>
+      pipe.transform(
+        { mode: 'UPSERT', rows: [{ name: 'x' }], ...extra },
+        { type: 'body', metatype: BulkRequestDto },
+      ) as Promise<BulkRequestDto>;
+    for (const bad of [0, 1, null, 'true', 'false', '0', '1', '', [], {}]) {
+      await expect(send({ dryRun: bad })).rejects.toMatchObject({
+        status: 400,
+      });
+    }
+    await expect(send({ dryRun: true })).resolves.toMatchObject({
+      dryRun: true,
+    });
+    await expect(send({ dryRun: false })).resolves.toMatchObject({
+      dryRun: false,
+    });
+    const absent = await send({});
+    expect(absent.dryRun).toBeUndefined();
   });
 
   it('the global validation pipe lets the rows through as plain objects', async () => {

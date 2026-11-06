@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PHARM } from '../../../pharmacy/pharmacy.concepts';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { InventoryStockPositions } from '../../entities';
 
@@ -43,16 +42,6 @@ export interface CreateStockPositionData extends StockPositionKey {
    * Valor de last ledger sequence mantenido por la instancia.
    */
   lastLedgerSequence?: string;
-}
-
-/** Un producto de la farmacia que todavía no tiene posición en una sede. */
-export interface ProductWithoutSitePosition {
-  /** Producto de la farmacia. */
-  readonly productId: string;
-  /** Conteo declarado en el catálogo; `null` es «hay» sin número. */
-  readonly stockQuantity: number | null;
-  /** «No tengo» de toda la farmacia. */
-  readonly outOfStockDeclared: boolean;
 }
 
 /**
@@ -102,6 +91,33 @@ export class StockPositionsRepository {
     );
   }
 
+  /**
+   * Las posiciones **sin lote** de unos productos en unas ubicaciones, con
+   * `SELECT ... FOR UPDATE`, en un orden estable. Es el stock que una sede
+   * declara sin lotes y que el escritor por sede tiene que ver entero.
+   */
+  findLooseForUpdate(
+    em: EntityManager,
+    locationIds: readonly string[],
+    productIds: readonly string[],
+  ): Promise<InventoryStockPositions[]> {
+    if (locationIds.length === 0 || productIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      InventoryStockPositions,
+      {
+        inventoryLocationId: { $in: [...locationIds] },
+        pharmacyProductId: { $in: [...productIds] },
+        inventoryLotId: null,
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+        orderBy: { inventoryLocationId: 'asc', pharmacyProductId: 'asc' },
+      },
+    );
+  }
+
   /** Todas las posiciones de un lote (para recall/liberación en cualquier ubicación). */
   findByLot(
     em: EntityManager,
@@ -139,70 +155,6 @@ export class StockPositionsRepository {
   }
 
   /**
-   * Si la sede lleva su propio stock: tiene al menos una posición en alguna de
-   * sus ubicaciones activas. Es la misma condición que decide el «modo libro»
-   * en `domain/site-product-availability.ts`.
-   */
-  async siteKeepsLedger(
-    em: EntityManager,
-    pharmacySiteId: string,
-  ): Promise<boolean> {
-    const rows = await em.execute<{ kept: boolean }[]>(
-      `select exists (
-                select 1
-                  from pharmacy_inventory.inventory_locations loc
-                  join pharmacy_inventory.inventory_stock_positions st
-                    on st.inventory_location_id = loc.id
-                 where loc.pharmacy_site_id = ?
-                   and loc.status_concept_id = ?
-              ) as kept`,
-      [pharmacySiteId, PINV.LOCATION_ACTIVE],
-    );
-    return rows?.[0]?.kept === true;
-  }
-
-  /**
-   * Productos no retirados de la farmacia (publicados y borradores) sin ninguna
-   * posición en las ubicaciones activas de la sede, con lo que declara el
-   * catálogo de cada uno. Ordenados por id para que la escritura sea estable.
-   */
-  async findProductsWithoutPositionInSite(
-    em: EntityManager,
-    pharmacyId: string,
-    pharmacySiteId: string,
-  ): Promise<ProductWithoutSitePosition[]> {
-    const rows = await em.execute<
-      {
-        id: string;
-        stock_quantity: number | string | null;
-        out_of_stock_declared: boolean | null;
-      }[]
-    >(
-      `select prod.id, prod.stock_quantity, prod.out_of_stock_declared
-         from pharmacy.pharmacy_products prod
-        where prod.pharmacy_id = ?
-          and prod.status_concept_id <> ?
-          and not exists (
-                select 1
-                  from pharmacy_inventory.inventory_locations loc
-                  join pharmacy_inventory.inventory_stock_positions st
-                    on st.inventory_location_id = loc.id
-                 where loc.pharmacy_site_id = ?
-                   and loc.status_concept_id = ?
-                   and st.pharmacy_product_id = prod.id
-              )
-        order by prod.id`,
-      [pharmacyId, PHARM.PRODUCT_RETIRED, pharmacySiteId, PINV.LOCATION_ACTIVE],
-    );
-    return (rows ?? []).map((row) => ({
-      productId: row.id,
-      stockQuantity:
-        row.stock_quantity === null ? null : Number(row.stock_quantity),
-      outOfStockDeclared: row.out_of_stock_declared === true,
-    }));
-  }
-
-  /**
    * Cuántas posiciones **con lote** tiene un producto en las ubicaciones
    * activas de una sede. Con lotes, la existencia la llevan las recepciones y
    * los conteos, no el interruptor por sede.
@@ -221,6 +173,30 @@ export class StockPositionsRepository {
           and loc.status_concept_id = ?
           and st.pharmacy_product_id = ?
           and st.inventory_lot_id is not null`,
+      [pharmacySiteId, PINV.LOCATION_ACTIVE, pharmacyProductId],
+    );
+    return Number(rows?.[0]?.total ?? 0);
+  }
+
+  /**
+   * Cuántas posiciones **sin lote** tiene un producto en las ubicaciones
+   * activas de una sede: con alguna, la sede ya lleva ese producto por su
+   * cuenta (stock propio) y deja de seguir lo que declara el catálogo.
+   */
+  async countLoosePositionsInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+    pharmacyProductId: string,
+  ): Promise<number> {
+    const rows = await em.execute<{ total: string | number }[]>(
+      `select count(*) as total
+         from pharmacy_inventory.inventory_locations loc
+         join pharmacy_inventory.inventory_stock_positions st
+           on st.inventory_location_id = loc.id
+        where loc.pharmacy_site_id = ?
+          and loc.status_concept_id = ?
+          and st.pharmacy_product_id = ?
+          and st.inventory_lot_id is null`,
       [pharmacySiteId, PINV.LOCATION_ACTIVE, pharmacyProductId],
     );
     return Number(rows?.[0]?.total ?? 0);

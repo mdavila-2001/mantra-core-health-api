@@ -14,6 +14,7 @@ import {
   Audited,
   CurrentUser,
   type AuthenticatedUser,
+  Roles,
 } from '../../../../common';
 import {
   InsurerPatientConversationDto,
@@ -24,7 +25,11 @@ import {
 } from '../dto/insurer-patients.dto';
 import { InsurerPatientsService } from '../../application/services/insurer-patients.service';
 
-/** El servicio valida plataforma o membresía vigente en la aseguradora activa. */
+/** El servicio valida plataforma o membresía vigente en la aseguradora activa. *
+ * `@Roles()` vacío en cada ruta (O3-3): `resolveScope` deja pasar a
+ * `SECURITY_ADMIN`/`SUPERADMIN` o a OWNER/ADMIN/`INSURANCE_OPERATOR` con
+ * membresía vigente en la aseguradora activa, y 403 al resto.
+ */
 @ApiTags('insurer-patients')
 @ApiBearerAuth()
 @PlatformTenantOptional('SECURITY_ADMIN', 'SUPERADMIN')
@@ -37,6 +42,7 @@ export class InsurerPatientsController {
     entity: 'patient_coverage',
   })
   @Post('search')
+  @Roles()
   @HttpCode(200)
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
@@ -57,6 +63,7 @@ export class InsurerPatientsController {
   }
 
   @Get('options')
+  @Roles()
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Aseguradoras disponibles en el alcance autorizado',
@@ -76,6 +83,7 @@ export class InsurerPatientsController {
     entity: 'patient_coverage',
   })
   @Post('conversation')
+  @Roles()
   @HttpCode(200)
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({

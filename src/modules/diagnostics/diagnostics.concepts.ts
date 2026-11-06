@@ -20,6 +20,11 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
       display: 'Specimen collected',
     },
     SPECIMEN_RECEIVED: { code: 'SPEC_RECEIVED', display: 'Specimen received' },
+    // --- Evento de toma (specimen_collection_events.event_type_concept_id, F5b) ---
+    COLLECTION_EVENT_COLLECTED: {
+      code: 'SPEC_COLLECTION_EVENT_COLLECTED',
+      display: 'Specimen collection performed',
+    },
     SPECIMEN_REJECTED: { code: 'SPEC_REJECTED', display: 'Specimen rejected' },
 
     // --- Acesión de laboratorio (laboratory_accessions.status_concept_id) ---
@@ -432,9 +437,9 @@ export const PATIENT_PORTAL_CATEGORIES: readonly string[] = [
 /**
  * Las categorías que lista la ficha diagnóstica del paciente
  * (`GET /diagnostics/patients/:id/orders`): las diagnósticas, la orden de
- * análisis «otro» de C2 (P40) y los estudios que el formulario de la ficha
- * también pide —cardiológicos y de anatomía patológica—. Lista aparte de
- * {@link DIAGNOSTIC_CATEGORIES} por lo mismo que la del portal: esa alimenta
+ * análisis «otro» de C2 (P40) y lo que el formulario de la ficha también pide
+ * —estudios cardiológicos, de anatomía patológica y procedimientos—. Lista
+ * aparte de {@link DIAGNOSTIC_CATEGORIES} por lo mismo que la del portal: esa alimenta
  * colas y liquidaciones de laboratorio e imagen, y estas órdenes no son trabajo
  * de esos equipos.
  *
@@ -447,6 +452,7 @@ export const PATIENT_CHART_ORDER_CATEGORIES: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
   CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
   CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+  CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
   CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
 ];
 

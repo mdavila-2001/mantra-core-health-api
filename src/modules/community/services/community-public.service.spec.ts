@@ -99,6 +99,7 @@ function build(options?: {
     specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
     affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
     practiceSitesByPractitioner: mockFn().mockResolvedValue(new Map()),
+    practiceIdByTenant: mockFn().mockResolvedValue(null),
     practitionerIdsBySpecialty: mockFn().mockResolvedValue([]),
     isPostPublic: mockFn().mockResolvedValue(true),
     listPostReactors: mockFn().mockResolvedValue([]),
@@ -326,6 +327,33 @@ describe('CommunityPublicService', () => {
       expect(d.repo.affiliationsByPractitioner).not.toHaveBeenCalled();
     });
 
+    it('la ficha de una organización trae el practiceId de su tenant', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue({
+        ...completeProfile,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+      d.repo.practiceIdByTenant.mockResolvedValue('practica-1');
+
+      const res = await d.service.getBySlug('clinica-del-sur');
+
+      expect(res.practiceId).toBe('practica-1');
+      expect(d.repo.practiceIdByTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        completeProfile.targetId,
+      );
+    });
+
+    it('la ficha de un profesional no pide ni trae practiceId', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceId).toBeNull();
+      expect(d.repo.practiceIdByTenant).not.toHaveBeenCalled();
+    });
+
     // 2.1 — dónde atiende. Qué asignación cuenta y qué sede es propia se prueba
     // contra la regla en `public-search.repository.spec.ts`; acá, que la ficha
     // la sirva sólo para un profesional, con sus cinco campos y sin tocar el
@@ -413,13 +441,14 @@ describe('CommunityPublicService', () => {
       expect(d.repo.practiceSitesByPractitioner).not.toHaveBeenCalled();
     });
 
-    it('J · la lista blanca de la ficha sumó practiceSites y ninguna otra clave', () => {
+    it('J · la lista blanca de la ficha sumó practiceSites y practiceId, y ninguna otra clave', () => {
       // Literal a propósito: comparar la salida contra `PUBLIC_PROFILE_KEYS`
       // prueba que coinciden, no qué contienen. Abrir otra clave obliga a
       // editar esta lista, que es el momento de pensarlo.
       expect([...PUBLIC_PROFILE_KEYS].sort()).toEqual(
         [
           'kind',
+          'practiceId',
           'slug',
           'displayName',
           'headline',

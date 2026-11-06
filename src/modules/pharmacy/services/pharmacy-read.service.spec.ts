@@ -48,6 +48,11 @@ function build() {
     findActiveProducts: mockFn().mockResolvedValue([]),
     findActiveProductOwners: mockFn().mockResolvedValue([]),
     findSellableProductsByIds: mockFn().mockResolvedValue([]),
+    // La regla por sede, doblada: por defecto la sede tiene todo lo pedido.
+    findAvailableProductIdsAtSite: mockFn(
+      async (_em: unknown, _siteId: string, ids: readonly string[]) =>
+        new Set(ids),
+    ),
     findCurrentPublicPriceLists: mockFn().mockResolvedValue([]),
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
@@ -333,6 +338,13 @@ describe('PharmacyReadService', () => {
         productCode: 'IBU-400',
         genericName: 'Ibuprofeno',
       },
+      {
+        id: 'prod-3',
+        pharmacyId: '1',
+        productCode: 'TRX-250',
+        brandName: 'Trimoxal',
+        genericName: 'Amoxicilina',
+      },
     ]);
     d.repo.findConcepts.mockResolvedValue([MEDICATION]);
 
@@ -340,20 +352,62 @@ describe('PharmacyReadService', () => {
       d.service.searchProducts({ search: 'amox' }, 1),
     );
 
-    // Se pide una fila de más para declarar el recorte.
+    // The text is matched in memory (accents, uses, typos), not in SQL: the
+    // repository is asked for candidates without it.
     expect(d.repo.findActiveProducts).toHaveBeenCalledWith(
       d.fork,
       ['1'],
-      { search: 'amox' },
-      2,
+      { conceptId: undefined },
+      5000,
     );
+    // Two amoxicillins match and the limit is 1: the cut is declared, and the
+    // ibuprofen never makes it in.
     expect(result.items).toHaveLength(1);
     expect(result.truncated).toBe(true);
+    expect(result.correctedQuery).toBeNull();
     expect(result.items[0].pharmacyName).toBe('Farmacia 1');
     expect(result.items[0].medication).toEqual({
       code: 'J01CA04',
       display: 'Amoxicilina',
     });
+  });
+
+  it('corrects a typo and finds by what the medication is for', async () => {
+    const d = build();
+    d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
+    d.repo.findActiveProducts.mockResolvedValue([
+      {
+        id: 'p-ibu',
+        pharmacyId: '1',
+        productCode: 'IBU',
+        genericName: 'Ibuprofeno',
+      },
+      {
+        id: 'p-amox',
+        pharmacyId: '1',
+        productCode: 'AMX',
+        genericName: 'Amoxicilina',
+        medicationConceptId: MEDICATION.id,
+      },
+    ]);
+    d.repo.findConcepts.mockResolvedValue([MEDICATION]);
+
+    const typo = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'ibopofeno' }, 10),
+    );
+    expect(typo.correctedQuery).toBe('ibuprofeno');
+    expect(typo.items.map((item) => item.id)).toEqual(['p-ibu']);
+
+    // J01CA04 (the concept's ATC) is in the «Infecciones bacterianas» group.
+    const byUse = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'antibiotico' }, 10),
+    );
+    expect(byUse.items.map((item) => item.id)).toEqual(['p-amox']);
+
+    const literal = await runWithTenant('tenant-a', () =>
+      d.service.searchProducts({ search: 'ibopofeno', exact: true }, 10),
+    );
+    expect(literal.items).toEqual([]);
   });
 
   it('search over a tenant without published pharmacies returns empty', async () => {
@@ -457,6 +511,49 @@ describe('PharmacyReadService', () => {
       display: CURRENCY.display,
     });
     expect(result.pharmacyName).toBe('Farmacia 1');
+  });
+
+  it('does not price what the site does not have under the per-site rule', async () => {
+    const d = build();
+    d.repo.findActiveSiteById.mockResolvedValue({
+      id: 'site-1',
+      pharmacyId: '1',
+      name: 'Sede Centro',
+    });
+    d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+    d.repo.findCurrentPublicPriceLists.mockResolvedValue([
+      { id: 'list-pharm', pharmacyId: '1', code: 'GENERAL' },
+    ]);
+    d.repo.findCurrentPrices.mockResolvedValue(
+      ['prod-catalogo-0-lo-tengo', 'prod-no-lo-tengo'].map((id) => ({
+        pharmacyPriceListId: 'list-pharm',
+        pharmacyProductId: id,
+        unitAmount: '10.00',
+        effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
+      })),
+    );
+    // Los dos siguen publicados y sin el «no tengo» del catálogo…
+    d.repo.findSellableProductsByIds.mockResolvedValue([
+      { id: 'prod-catalogo-0-lo-tengo', productCode: 'A', stockQuantity: 0 },
+      { id: 'prod-no-lo-tengo', productCode: 'B', stockQuantity: 9 },
+    ]);
+    // …pero la sede sólo tiene el primero: «Lo tengo» con catálogo en 0.
+    d.repo.findAvailableProductIdsAtSite.mockResolvedValue(
+      new Set(['prod-catalogo-0-lo-tengo']),
+    );
+
+    const result = await runWithTenant('tenant-a', () =>
+      d.service.getSitePrices('site-1'),
+    );
+
+    expect(d.repo.findAvailableProductIdsAtSite).toHaveBeenCalledWith(
+      expect.anything(),
+      'site-1',
+      ['prod-catalogo-0-lo-tengo', 'prod-no-lo-tengo'],
+    );
+    expect(result.items.map((item) => item.productId)).toEqual([
+      'prod-catalogo-0-lo-tengo',
+    ]);
   });
 
   it('keeps a normal public list visible and excludes an insurer-linked one marked public', async () => {

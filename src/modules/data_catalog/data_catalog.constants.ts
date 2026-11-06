@@ -16,6 +16,15 @@ export const PORTAL_READ_ROLES = [
 ] as const;
 
 /**
+ * Lectura del portal con el alias X-6: `DATA_GOVERNANCE_ADMIN` (sembrado por `authz`) lee lo mismo
+ * que `GOVERNANCE_ADMIN`. Sólo se usa en rutas `GET`; escribir sigue siendo `CATALOG_WRITE_ROLES`.
+ */
+export const PORTAL_VIEW_ROLES = [
+  ...PORTAL_READ_ROLES,
+  'DATA_GOVERNANCE_ADMIN',
+] as const;
+
+/**
  * Roles que pueden escribir en el catálogo (ficha, evidencia, revisión y escaneo).
  *
  * Leer el catálogo no autoriza a cambiarlo: un DPO, un auditor o un administrador de seguridad

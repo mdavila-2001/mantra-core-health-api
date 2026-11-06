@@ -1608,7 +1608,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `categories` | Sí | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Decisión por categoría: **siempre las cuatro**, aunque nunca las tocó. | `[{"category":"CLINICAL","optedIn":true}]` |
-| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL`, `ADMISSION` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
 | `categories[].optedIn` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `quietHours` | No | `QuietHoursDto` | Sin restricción adicional declarada | Ventana de silencio, o `null` si no configuró ninguna. | `{"start":"22:00","end":"07:00"}` |
 | `quietHours.start` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `22:00` |
@@ -1687,7 +1687,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `categories` | No | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"category":"CLINICAL","optedIn":true}]` |
-| `categories[].category` | No | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].category` | No | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL`, `ADMISSION` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
 | `categories[].optedIn` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `quietHours` | No | `QuietHoursDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"start":"22:00","end":"07:00"}` |
 | `quietHours.start` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `22:00` |
@@ -1754,7 +1754,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `categories` | Sí | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Decisión por categoría: **siempre las cuatro**, aunque nunca las tocó. | `[{"category":"CLINICAL","optedIn":true}]` |
-| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL`, `ADMISSION` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
 | `categories[].optedIn` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `quietHours` | No | `QuietHoursDto` | Sin restricción adicional declarada | Ventana de silencio, o `null` si no configuró ninguna. | `{"start":"22:00","end":"07:00"}` |
 | `quietHours.start` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `22:00` |

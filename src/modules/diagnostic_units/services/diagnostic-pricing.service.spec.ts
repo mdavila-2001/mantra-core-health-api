@@ -70,6 +70,7 @@ function build() {
   const pricesRepo = {
     findById: mockFn(),
     findActive: mockFn().mockResolvedValue(null),
+    lockSchedule: mockFn().mockResolvedValue(undefined),
     maxVersion: mockFn().mockResolvedValue(0),
     create: mockFn(),
   };

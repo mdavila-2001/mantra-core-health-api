@@ -97,11 +97,13 @@ forma. Hay que corregirlas en el modelo (`2026-08-05_tenant_rls.sql`) antes de
 activar `RLS_ENFORCE`. Mientras tanto la API corre con
 `DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true`.
 
-## Pendiente
+## Límites conocidos
 
-- **La API se sigue cortando ~1 min por despliegue**: Coolify recrea también las
-  bases del compose (postgres, mongo, redis, opensearch, minio). El standby cubre
-  los ~20 min de init/migrate, no el reinicio de postgres. Sacar las bases a un
-  stack propio lo elimina, pero mueve volúmenes de datos: requiere ventana.
-- `app.alovidasalud.arauzsoftware.com` apunta en DNS al servidor viejo
-  (173.249.39.237): hay que cambiar el registro A a 62.169.18.132.
+- En los entornos que no pasaron sus bases a `data-stack/` (sección anterior),
+  cada despliegue de la API también recrea postgres, mongo, redis, opensearch y
+  minio, y la API se corta mientras postgres reinicia: el standby cubre el
+  init/migrate, no ese reinicio. El switchover mueve volúmenes de datos y
+  requiere ventana. Ver mdavila-2001/mantra-core-health-api#1170.
+- Al 25/10/2026, `app.alovidasalud.arauzsoftware.com` apuntaba en DNS al
+  servidor viejo (173.249.39.237), no a 62.169.18.132. Ver
+  mdavila-2001/mantra-core-health-api#1170.

@@ -39,8 +39,15 @@ describe('POST /common/files/:id/links · destino del vínculo (AUTHZ-T03)', () 
       const roles = String(req.headers['x-test-roles'] ?? '')
         .split(',')
         .filter(Boolean);
+      // `x-test-scoped-tenant`: los roles quedan acotados a ese tenant
+      // (`scopedRoles`, MCH-001) en vez de concedidos sin ámbito.
+      const scopedTenant = req.headers['x-test-scoped-tenant'];
+      const scopedRoles =
+        typeof scopedTenant === 'string'
+          ? { [scopedTenant]: roles }
+          : undefined;
       Object.assign(req, {
-        user: { id: USER_ID, roles, tenantIds: [TENANT_ID] },
+        user: { id: USER_ID, roles, scopedRoles, tenantIds: [TENANT_ID] },
         resolvedTenantId: TENANT_ID,
       });
       next();
@@ -72,11 +79,14 @@ describe('POST /common/files/:id/links · destino del vínculo (AUTHZ-T03)', () 
   const link = (
     body: Record<string, unknown>,
     roles = 'PATIENT',
-  ): request.Test =>
-    request(app.getHttpServer())
+    scopedTenant?: string,
+  ): request.Test => {
+    const req = request(app.getHttpServer())
       .post(`/common/files/${FILE_ID}/links`)
-      .set('x-test-roles', roles)
-      .send(body);
+      .set('x-test-roles', roles);
+    if (scopedTenant) req.set('x-test-scoped-tenant', scopedTenant);
+    return req.send(body);
+  };
 
   it('Correcto: un usuario vincula su archivo a sí mismo', async () => {
     await link({ ownerType: 'USER', ownerId: USER_ID }).expect(201);
@@ -127,6 +137,67 @@ describe('POST /common/files/:id/links · destino del vínculo (AUTHZ-T03)', () 
       'SUPERADMIN',
     ).expect(201);
     expect(createLink).toHaveBeenCalledTimes(1);
+  });
+
+  // Un SUPERADMIN acotado a un tenant (`scopedRoles`) no es plataforma: el
+  // dueño de un vínculo no tiene un tenant que la ruta genérica conozca, así
+  // que el atajo exige el rol global y el acotado sigue la regla ordinaria.
+  describe('SUPERADMIN acotado a un tenant', () => {
+    it.each(['PATIENT', 'ENCOUNTER'])(
+      'Error: acotado al tenant resuelto, no vincula el tipo clínico %s',
+      async (ownerType) => {
+        const res = await link(
+          { ownerType, ownerId: OTHER_ID },
+          'SUPERADMIN',
+          TENANT_ID,
+        ).expect(403);
+        expect(res.body.reason).toBe('FILE_LINK_OWNER_NOT_ALLOWED');
+        expect(createLink).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Error: acotado a A no vincula al tenant B ni a otro usuario', async () => {
+      await link(
+        { ownerType: 'TENANT', ownerId: OTHER_ID },
+        'SUPERADMIN',
+        TENANT_ID,
+      ).expect(403);
+      await link(
+        { ownerType: 'USER', ownerId: OTHER_ID },
+        'SUPERADMIN',
+        TENANT_ID,
+      ).expect(403);
+      expect(createLink).not.toHaveBeenCalled();
+    });
+
+    it('Error: acotado a otro tenant tampoco tiene el atajo en éste', async () => {
+      await link(
+        { ownerType: 'PATIENT', ownerId: OTHER_ID },
+        'SUPERADMIN',
+        OTHER_ID,
+      ).expect(403);
+      expect(createLink).not.toHaveBeenCalled();
+    });
+
+    it('Correcto: acotado a A vincula a su tenant A resuelto (regla ordinaria)', async () => {
+      await link(
+        { ownerType: 'TENANT', ownerId: TENANT_ID },
+        'SUPERADMIN',
+        TENANT_ID,
+      ).expect(201);
+      expect(createLink).toHaveBeenCalledTimes(1);
+    });
+
+    it('Límite: el global vincula a otro tenant y a otro usuario', async () => {
+      await link(
+        { ownerType: 'TENANT', ownerId: OTHER_ID },
+        'SUPERADMIN',
+      ).expect(201);
+      await link({ ownerType: 'USER', ownerId: OTHER_ID }, 'SUPERADMIN').expect(
+        201,
+      );
+      expect(createLink).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('un tipo de dueño ajeno al contrato lo rechaza la validación del DTO (400), no el guard', async () => {

@@ -1,3 +1,4 @@
+import { assertChecklistPhase } from './or/checklist-gates';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -222,7 +223,7 @@ export class PeriopPreopService {
             // laboratorio/imagen desde la ficha; una orden preoperatoria se
             // justifica por el caso quirúrgico, no por si el paciente ya se
             // hizo el mismo estudio antes.
-            { duplicatePolicy: 'skip' },
+            { duplicatePolicy: 'skip', catalog: 'skip' },
           )
         ).id;
 
@@ -867,6 +868,11 @@ export class PeriopPreopService {
         );
       }
 
+      // F4 (§F4.3): la inducción marca el inicio real; exige la Entrada OMS.
+      if (dto.eventType === 'INDUCTION') {
+        await assertChecklistPhase(this.casesRepo, tx, caseId, 'SIGN_IN');
+      }
+
       const severity = dto.severity ?? 'ROUTINE';
       const event = this.preopRepo.createAnesthesiaEvent(tx, {
         procedureCaseId: caseId,
@@ -926,6 +932,7 @@ export class PeriopPreopService {
         });
         if (surgicalCase.operatingRoomId) {
           this.casesRepo.createUtilizationEvent(tx, {
+            tenantId: surgicalCase.custodianTenantId,
             operatingRoomId: surgicalCase.operatingRoomId,
             procedureCaseId: caseId,
             eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_START,

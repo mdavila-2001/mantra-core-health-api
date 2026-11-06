@@ -117,6 +117,8 @@ describe('AdminPortalController (HTTP)', () => {
     '/admin/portal/catalogo/deriva',
     '/admin/portal/linaje',
     '/admin/portal/linaje/tablas/scheduling/slot_holds',
+    '/admin/portal/linaje/nodos',
+    '/admin/portal/linaje/aristas',
     '/admin/portal/glosario',
   ];
 
@@ -405,6 +407,85 @@ describe('AdminPortalController (HTTP)', () => {
         inventario.reset();
       }
       await get('/admin/portal/version', ['DPO']).expect(200);
+    });
+  });
+  describe('linaje: nodos y aristas', () => {
+    it('los nodos se filtran por tipo y vienen en orden de id', async () => {
+      const res = await get(
+        '/admin/portal/linaje/nodos?tipo=DOMINIO&limit=200',
+        ['DPO'],
+      ).expect(200);
+      expect(res.body.total).toBeGreaterThan(0);
+      const ids = res.body.items.map((n: { id: string }) => n.id);
+      expect(ids).toEqual([...ids].sort());
+      expect(
+        res.body.items.every((n: { tipo: string }) => n.tipo === 'DOMINIO'),
+      ).toBe(true);
+      expect(Object.keys(res.body.items[0]).sort()).toEqual(
+        ['dominio', 'etiqueta', 'id', 'riesgo', 'tipo'].sort(),
+      );
+    });
+
+    it('paginar nodos recorre todo sin saltar ni repetir', async () => {
+      const total = (
+        await get('/admin/portal/linaje/nodos?limit=1', ['DPO']).expect(200)
+      ).body.total;
+      const vistos = new Set<string>();
+      let cursor: string | null = null;
+      let paginas = 0;
+      do {
+        const q: string = cursor
+          ? `limit=200&cursor=${encodeURIComponent(cursor)}`
+          : 'limit=200';
+        const res = await get(`/admin/portal/linaje/nodos?${q}`, [
+          'DPO',
+        ]).expect(200);
+        for (const n of res.body.items) {
+          expect(vistos.has(n.id)).toBe(false);
+          vistos.add(n.id);
+        }
+        cursor = res.body.nextCursor;
+        paginas += 1;
+      } while (cursor && paginas < 50);
+      expect(vistos.size).toBe(total);
+    });
+
+    it('las aristas se filtran por tipo y origen exactos', async () => {
+      const res = await get(
+        '/admin/portal/linaje/aristas?tipo=ESCRIBE&limit=200',
+        ['DPO'],
+      ).expect(200);
+      expect(res.body.items.length).toBeGreaterThan(0);
+      expect(
+        res.body.items.every((a: { tipo: string }) => a.tipo === 'ESCRIBE'),
+      ).toBe(true);
+      const de = res.body.items[0].de;
+      const acotado = await get(
+        `/admin/portal/linaje/aristas?de=${encodeURIComponent(de)}&limit=200`,
+        ['DPO'],
+      ).expect(200);
+      expect(acotado.body.items.every((a: { de: string }) => a.de === de)).toBe(
+        true,
+      );
+    });
+
+    it('un filtro sin coincidencias es una lista vacía, no un error', async () => {
+      const res = await get('/admin/portal/linaje/aristas?de=no-existe', [
+        'DPO',
+      ]).expect(200);
+      expect(res.body).toMatchObject({ items: [], nextCursor: null, total: 0 });
+    });
+
+    it.each([
+      ['/admin/portal/linaje/nodos?tipo=COLUMNA'],
+      ['/admin/portal/linaje/nodos?limit=999'],
+      ['/admin/portal/linaje/nodos?orden=desc'],
+      ['/admin/portal/linaje/nodos?cursor=%25%25%25'],
+      ['/admin/portal/linaje/aristas?tipo=ELIMINA'],
+      ['/admin/portal/linaje/aristas?limit=0'],
+      [`/admin/portal/linaje/aristas?de=${'x'.repeat(241)}`],
+    ])('%s → 400', async (ruta) => {
+      await get(ruta, ['DPO']).expect(400);
     });
   });
 });

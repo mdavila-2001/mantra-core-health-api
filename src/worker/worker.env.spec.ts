@@ -131,3 +131,45 @@ describe('TS_ADMIN_TENANT_ID', () => {
     ).toBeDefined();
   });
 });
+
+/**
+ * Intervalo del latido hacia la API. Los umbrales de la sonda de vida
+ * (VIVA ≤ 30 s, CAIDA > 60 s) asumen 15 s; un valor absurdo no puede pasar
+ * en silencio.
+ */
+describe('WORKER_HEARTBEAT_INTERVAL_MS', () => {
+  const original = process.env.WORKER_HEARTBEAT_INTERVAL_MS;
+  afterEach(() => {
+    if (original === undefined) delete process.env.WORKER_HEARTBEAT_INTERVAL_MS;
+    else process.env.WORKER_HEARTBEAT_INTERVAL_MS = original;
+  });
+
+  it('por defecto, 15 s en el esquema y en la carga', () => {
+    delete process.env.WORKER_HEARTBEAT_INTERVAL_MS;
+    const { value } = workerEnvSchema.validate({}) as {
+      value: { WORKER_HEARTBEAT_INTERVAL_MS: number };
+    };
+    expect(value.WORKER_HEARTBEAT_INTERVAL_MS).toBe(15_000);
+    expect(loadWorkerEnv().heartbeatIntervalMs).toBe(15_000);
+  });
+
+  it('límite: 1 000 ms es válido; 999 ms y no enteros se rechazan en el esquema', () => {
+    expect(
+      workerEnvSchema.validate({ WORKER_HEARTBEAT_INTERVAL_MS: 1000 }).error,
+    ).toBeUndefined();
+    expect(
+      workerEnvSchema.validate({ WORKER_HEARTBEAT_INTERVAL_MS: 999 }).error,
+    ).toBeDefined();
+    expect(
+      workerEnvSchema.validate({ WORKER_HEARTBEAT_INTERVAL_MS: 'rápido' })
+        .error,
+    ).toBeDefined();
+  });
+
+  it('inválido: en la carga, un valor no numérico cae a 15 s y uno menor al mínimo se sube a 1 s', () => {
+    process.env.WORKER_HEARTBEAT_INTERVAL_MS = 'nunca';
+    expect(loadWorkerEnv().heartbeatIntervalMs).toBe(15_000);
+    process.env.WORKER_HEARTBEAT_INTERVAL_MS = '5';
+    expect(loadWorkerEnv().heartbeatIntervalMs).toBe(1000);
+  });
+});

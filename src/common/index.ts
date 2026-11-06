@@ -18,6 +18,7 @@ export { RolesGuard, roleAuthorizesInTenant } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
+export { PatientAnyTenant } from './tenant/patient-any-tenant.decorator';
 export { RequiresVerifiedIdentity } from './auth/requires-verified-identity.decorator';
 export { VerifiedIdentityGuard } from './auth/verified-identity.guard';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
@@ -127,7 +128,11 @@ export { createdBy, touch } from './persistence/audit-fields';
 export type { AuditableCreate } from './persistence/audit-fields';
 
 // Criptografía
-export { encryptSecret, decryptSecret } from './crypto/secret-cipher';
+export {
+  encryptSecret,
+  decryptSecret,
+  isSecretCipherConfigured,
+} from './crypto/secret-cipher';
 export {
   signPayload,
   verifySignature,
@@ -150,6 +155,9 @@ export { buildCorsOptions, loadCorsAllowedOrigins } from './http/cors-origins';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
 export { ParseUuidListPipe } from './http/parse-uuid-list.pipe';
 export { ParseOptionalDatePipe } from './http/parse-optional-date.pipe';
+export { RequestId } from './http/request-id.decorator';
+export { RequestIdBodyInterceptor } from './http/request-id-body.interceptor';
+export { stripEtagOnNoStore } from './http/no-store-etag.middleware';
 
 // Almacenamiento de archivos (adaptador seleccionado por entorno)
 export { FileStorageModule } from './storage/file-storage.module';

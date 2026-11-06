@@ -9,6 +9,15 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/** Accesión → punto de toma (sugerido en la orden o de la toma registrada). */
+const POINT_OF_ACCESSION = `WITH points AS (
+  SELECT a.id AS accession_id, coalesce(sr.suggested_care_space_id, ev.collection_care_space_id) AS care_space_id
+    FROM diagnostics.laboratory_accessions a
+    LEFT JOIN clinical.service_requests sr ON sr.id = a.service_request_id
+    LEFT JOIN diagnostics.specimens sp ON sp.service_request_id = a.service_request_id
+    LEFT JOIN diagnostics.specimen_collection_events ev ON ev.specimen_id = sp.id
+   WHERE a.custodian_tenant_id = ?)`;
+
 /** Datos de alta de una orden de trabajo. */
 export interface CreateWorkOrderData {
   /**
@@ -135,7 +144,7 @@ export class LabWorkRepository {
    * @param filters - Acotaciones opcionales y paginación.
    * @returns Las órdenes que cumplen el filtro, de la más reciente a la más antigua.
    */
-  findWorkOrders(
+  async findWorkOrders(
     em: EntityManager,
     custodianTenantId: string,
     filters: {
@@ -145,6 +154,8 @@ export class LabWorkRepository {
       statusConceptId?: string;
       /** Profesional asignado. */
       assignedProfileId?: string;
+      /** F5b: punto de toma. */
+      collectionCareSpaceId?: string;
       /** Tamaño de página. */
       limit: number;
       /** Desplazamiento. */
@@ -158,11 +169,61 @@ export class LabWorkRepository {
       where.statusConceptId = filters.statusConceptId;
     if (filters.assignedProfileId)
       where.assignedProfileId = filters.assignedProfileId;
+    if (filters.collectionCareSpaceId) {
+      const rows = await em.execute<{ id: string }[]>(
+        `${POINT_OF_ACCESSION} SELECT accession_id AS id FROM points WHERE care_space_id = ?`,
+        [custodianTenantId, filters.collectionCareSpaceId],
+        'all',
+      );
+      where.laboratoryAccessionId = filters.laboratoryAccessionId
+        ? rows.some((r) => r.id === filters.laboratoryAccessionId)
+          ? filters.laboratoryAccessionId
+          : '00000000-0000-0000-0000-000000000000'
+        : {
+            $in: rows.length
+              ? rows.map((r) => r.id)
+              : ['00000000-0000-0000-0000-000000000000'],
+          };
+    }
     return em.find(LaboratoryWorkOrders, where, {
       orderBy: { createdAt: 'DESC', id: 'ASC' },
       limit: filters.limit,
       offset: filters.offset,
     });
+  }
+
+  /**
+   * F5b: punto de toma de cada accesión (el sugerido en su orden o, si no, el
+   * de la toma registrada de alguno de sus especímenes).
+   *
+   * @param em - Contexto.
+   * @param accessionIds - Accesiones.
+   */
+  async collectionPointsOf(
+    em: EntityManager,
+    accessionIds: readonly string[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>> {
+    if (accessionIds.length === 0) return new Map();
+    const rows = await em.execute<
+      { accession_id: string; id: string; code: string; name: string }[]
+    >(
+      `SELECT DISTINCT ON (a.id) a.id AS accession_id, cs.id, cs.code, cs.name
+         FROM diagnostics.laboratory_accessions a
+         LEFT JOIN clinical.service_requests sr ON sr.id = a.service_request_id
+         LEFT JOIN diagnostics.specimens sp ON sp.service_request_id = a.service_request_id
+         LEFT JOIN diagnostics.specimen_collection_events ev ON ev.specimen_id = sp.id
+         JOIN practice.care_spaces cs ON cs.id = coalesce(sr.suggested_care_space_id, ev.collection_care_space_id)
+        WHERE a.id = ANY(?::uuid[])
+        ORDER BY a.id, (sr.suggested_care_space_id IS NOT NULL) DESC, ev.occurred_at DESC`,
+      [`{${accessionIds.join(',')}}`],
+      'all',
+    );
+    return new Map(
+      rows.map((r) => [
+        r.accession_id,
+        { id: r.id, code: r.code, name: r.name },
+      ]),
+    );
   }
 
   findWorkOrder(

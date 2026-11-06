@@ -63,6 +63,7 @@ import {
   ProductResponseDto,
   SiteResponseDto,
   StatusResultDto,
+  UpdateMappingDto,
   UpdateProductDto,
   VerifyLicenseDto,
 } from '../dto';
@@ -484,16 +485,83 @@ export class PharmacyController {
     entity: 'pharmacy_external_product_mapping',
     entityId: 'result.id',
   })
-  @Post(':pharmacyId/integration-connections/:connId/product-mappings')
+  @Post(':pharmacyId/integration-connections/:connectionId/product-mappings')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Mapear producto a código de proveedor externo' })
   mapProduct(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
-    @Param('connId', ParseUUIDPipe) connId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
     @Body() dto: CreateMappingDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MappingResponseDto> {
-    return this.integrationService.mapProduct(pharmacyId, connId, dto, actor);
+    return this.integrationService.mapProduct(
+      pharmacyId,
+      connectionId,
+      dto,
+      actor,
+    );
+  }
+
+  /** Corrige un vínculo con el código externo (producto, código o unidad). */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_PRODUCT_MAPPING_UPDATED',
+    entity: 'pharmacy_external_product_mapping',
+    entityId: 'param:mappingId',
+  })
+  @Patch(
+    ':pharmacyId/integration-connections/:connectionId/product-mappings/:mappingId',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Corregir un vínculo con un código de proveedor externo',
+    description:
+      'Cambia el producto, el código externo o la unidad; lo que no viene no cambia. Mismas condiciones que el alta y el vínculo vuelve a quedar sin verificar. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión; 409 EXTERNAL_MAPPING_PRODUCT_TAKEN si el producto nuevo ya tiene vínculo; 400 EXTERNAL_MAPPING_EMPTY_UPDATE sin campos.',
+  })
+  @ApiOkResponse({ type: MappingResponseDto })
+  updateMapping(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
+    @Param('mappingId', ParseUUIDPipe) mappingId: string,
+    @Body() dto: UpdateMappingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MappingResponseDto> {
+    return this.integrationService.updateMapping(
+      pharmacyId,
+      connectionId,
+      mappingId,
+      dto,
+      actor,
+    );
+  }
+
+  /** Deshace un vínculo con el código externo. */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_PRODUCT_UNMAPPED',
+    entity: 'pharmacy_external_product_mapping',
+    entityId: 'param:mappingId',
+  })
+  @Delete(
+    ':pharmacyId/integration-connections/:connectionId/product-mappings/:mappingId',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Deshacer un vínculo con un código de proveedor externo',
+    description:
+      'Borra el vínculo, también con la conexión inactiva, y devuelve cómo estaba. El stock que ya se sincronizó se conserva. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión.',
+  })
+  @ApiOkResponse({ type: MappingResponseDto })
+  unmapProduct(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
+    @Param('mappingId', ParseUUIDPipe) mappingId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MappingResponseDto> {
+    return this.integrationService.unmapProduct(
+      pharmacyId,
+      connectionId,
+      mappingId,
+      actor,
+    );
   }
 
   /** UC-24-11. */

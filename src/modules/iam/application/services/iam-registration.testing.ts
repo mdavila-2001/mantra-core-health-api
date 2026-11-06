@@ -1,3 +1,5 @@
+import { TenantOpeningHoursRepository } from '../../../directory/repositories/tenant-opening-hours.repository';
+import { DeclaredBranchesService } from '../../../directory/services/declared-branches.service';
 import { CommonRecordsAdapter } from '../../infrastructure/adapters/common-records.adapter';
 import { DirectoryRegistrationAdapter } from '../../infrastructure/adapters/directory-registration.adapter';
 import { ProfilesRegistrationAdapter } from '../../infrastructure/adapters/profiles-registration.adapter';
@@ -70,18 +72,24 @@ export function directoryRegistration(
     | 'memberships'
     | 'tenants'
     | 'branches'
+    | 'openingHours'
     | 'typeProfile'
     | 'affiliationDocuments'
     | 'representatives'
+    | 'taxIdentifiers'
   >,
 ): DirectoryRegistrationAdapter {
   const pick = (key: keyof typeof d): never => (d[key] ?? blank()) as never;
   return new DirectoryRegistrationAdapter(
     pick('memberships'),
     pick('tenants'),
-    pick('branches'),
+    new DeclaredBranchesService(
+      pick('branches'),
+      (d.openingHours ?? new TenantOpeningHoursRepository()) as never,
+    ),
     pick('typeProfile'),
     pick('affiliationDocuments'),
     pick('representatives'),
+    (d.taxIdentifiers ?? { register: async () => 'identifier-tax' }) as never,
   );
 }

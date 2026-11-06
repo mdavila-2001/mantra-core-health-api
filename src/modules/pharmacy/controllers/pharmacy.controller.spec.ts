@@ -35,6 +35,8 @@ function build() {
   const integrationService = {
     createConnection: mockFn(),
     mapProduct: mockFn(),
+    updateMapping: mockFn(),
+    unmapProduct: mockFn(),
   };
   const catalogService = { projectCatalog: mockFn() };
   const openingHoursService = {
@@ -241,5 +243,25 @@ describe('PharmacyController', () => {
     const d = build();
     await d.controller.projectCatalog('ph1', actor);
     expect(d.catalogService.projectCatalog).toHaveBeenCalledWith('ph1', actor);
+  });
+
+  it('delegates updateMapping and unmapProduct', async () => {
+    const d = build();
+    const dto = { externalProductCode: 'ERP-0002' } as any;
+    await d.controller.updateMapping('ph1', 'conn1', 'map1', dto, actor);
+    expect(d.integrationService.updateMapping).toHaveBeenCalledWith(
+      'ph1',
+      'conn1',
+      'map1',
+      dto,
+      actor,
+    );
+    await d.controller.unmapProduct('ph1', 'conn1', 'map1', actor);
+    expect(d.integrationService.unmapProduct).toHaveBeenCalledWith(
+      'ph1',
+      'conn1',
+      'map1',
+      actor,
+    );
   });
 });

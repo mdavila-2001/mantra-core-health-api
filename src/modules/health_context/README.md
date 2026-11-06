@@ -138,7 +138,7 @@ de procedencia llevan `reason` estable (`health_context.error-reasons.ts`):
 
 A un revisor humano todavía se le permite enviar un `reviewerAgentId`.
 
-## Pruebas
+## Tests
 
 ```sh
 corepack yarn test src/modules/health_context --runInBand --silent

@@ -65,6 +65,8 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     userId: string;
     /** Organización de la que es dueño, si lo es. */
     orgTenantId?: string;
+    /** Sesión del dueño dentro de su organización (ver {@link enSuOrganizacion}). */
+    orgToken?: string;
   }
   interface Medico extends Cuenta {
     hpid: string;
@@ -88,6 +90,8 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     addresses: [] as string[],
     catalog: [] as string[],
     services: [] as string[],
+    /** Filas de `service-request-code` que esta corrida agregó (ver `beforeAll`). */
+    valueSetMembers: [] as string[],
   };
   const orders: Record<string, string> = {};
   const svc: Record<string, string> = {};
@@ -116,6 +120,17 @@ describe('Centros médicos · recorrido completo (integración)', () => {
   const as = (cuenta: Cuenta) => ({
     ...bearer(cuenta.token),
     'X-Tenant-Id': cuenta.tenantId,
+  });
+
+  /**
+   * Cabeceras de un dueño dentro de SU organización. Desde c306ad4a3 la lista de
+   * vinculaciones de una práctica responde 404 si el tenant del contexto no es el
+   * de la práctica, antes de mirar quién la administra: ni un 403 confirma que
+   * la práctica ajena exista. Sólo se usa en lecturas: no deja fila en la bitácora.
+   */
+  const enSuOrganizacion = (cuenta: Cuenta) => ({
+    ...bearer(cuenta.orgToken!),
+    'X-Tenant-Id': cuenta.orgTenantId!,
   });
 
   function claims(token: string): Record<string, unknown> {
@@ -156,8 +171,19 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     const token = ctx.app
       .get(TokenService)
       .signAccessToken(res.body.ownerUserId, sid, ['USER'], [SEED.tenantId]);
+    // Las lecturas acotadas al tenant de la práctica (la lista de vinculaciones,
+    // c306ad4a3) se hacen desde la organización: la membresía es la del claim.
+    const orgToken = ctx.app
+      .get(TokenService)
+      .signAccessToken(
+        res.body.ownerUserId,
+        sid,
+        ['USER'],
+        [res.body.tenantId],
+      );
     return {
       token,
+      orgToken,
       tenantId: SEED.tenantId,
       orgTenantId: res.body.tenantId,
       userId: res.body.ownerUserId,
@@ -248,6 +274,8 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     const site = em.create(
       PracticeSites,
       {
+        // La sede es del tenant de su práctica (FK compuesta, infraestructura_f1b).
+        tenantId: duenoA.orgTenantId!,
         practiceId: practiceA,
         code: `${code}-${marca}`,
         name: nombre,
@@ -323,6 +351,28 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     ENDO = miembros[0].conceptId;
     COLO = miembros[1].conceptId;
 
+    // v4.2.82 (V1): una orden —de procedimiento también— sólo pide un estudio
+    // del catálogo de estudios solicitables (`service-request-code`, el binding
+    // de `clinical.service_requests.code_concept_id`). Los dos procedimientos
+    // que la sede publica del nomenclador se dan de alta ahí para esta corrida,
+    // como lo haría quien publica el catálogo; los que ya fueran miembros no se
+    // tocan, y en `afterAll` se borran sólo las filas que se insertaron acá.
+    const altas = await em.getConnection().execute<{ id: string }[]>(
+      `INSERT INTO terminology.value_set_members
+         (id, value_set_version_id, concept_id, included, created_at, updated_at, row_version)
+       SELECT gen_random_uuid(), v.id, c.id, true, now(), now(), 1
+         FROM terminology.value_sets vs
+         JOIN terminology.value_set_versions v
+           ON v.value_set_id = vs.id AND v.is_default = true
+         CROSS JOIN unnest(string_to_array(?, ',')::uuid[]) AS c(id)
+        WHERE vs.internal_code = 'service-request-code'
+       ON CONFLICT (value_set_version_id, concept_id) DO NOTHING
+       RETURNING id`,
+      [`${ENDO},${COLO}`],
+      'all',
+    );
+    creados.valueSetMembers.push(...altas.map((fila) => fila.id));
+
     const practica = em.create(
       Practices,
       {
@@ -385,6 +435,12 @@ describe('Centros médicos · recorrido completo (integración)', () => {
       ['DELETE FROM practice.practices WHERE id = ?', [practiceA]],
       ['DELETE FROM common.addresses WHERE id IN (?)', [creados.addresses]],
     ];
+    if (creados.valueSetMembers.length > 0) {
+      pasos.push([
+        'DELETE FROM terminology.value_set_members WHERE id IN (?)',
+        [creados.valueSetMembers],
+      ]);
+    }
     const fallos: string[] = [];
     for (const [sql, params] of pasos) {
       try {
@@ -602,7 +658,7 @@ describe('Centros médicos · recorrido completo (integración)', () => {
       expect(filas).toBe(0);
     });
 
-    it('el administrador de otra organización → 403 al invitar y al listar', async () => {
+    it('el administrador de otra organización → 403 al invitar; 404 al listar, como si no existiera (c306ad4a3)', async () => {
       await http()
         .post(`/practices/${practiceA}/role-assignments/invitations`)
         .set(as(duenoB))
@@ -612,16 +668,23 @@ describe('Centros médicos · recorrido completo (integración)', () => {
           healthcareServiceIds: [svc.norteEndo],
         })
         .expect(403);
+      // c306ad4a3: con tenant en el contexto, una práctica de otro tenant es 404
+      // igual que una inexistente; un 403 confirmaría que existe. Desde el tenant
+      // semilla y desde la propia organización de B.
       await http()
         .get(`/practices/${practiceA}/role-assignments`)
         .set(as(duenoB))
-        .expect(403);
+        .expect(404);
+      await http()
+        .get(`/practices/${practiceA}/role-assignments`)
+        .set(enSuOrganizacion(duenoB))
+        .expect(404);
     });
 
     it('las filas invitadas figuran INVITED en la lista del centro, no como activas', async () => {
       const res = await http()
         .get(`/practices/${practiceA}/role-assignments`)
-        .set(as(duenoA))
+        .set(enSuOrganizacion(duenoA))
         .expect(200);
 
       const mias = res.body.items.filter(

@@ -300,8 +300,9 @@ describe('Insurance controllers (delegación)', () => {
   });
 
   /**
-   * Las lecturas no llevan `@Roles`: el aislamiento lo da el tenant del
-   * contexto, como en las rutas de organización de `directory`. Se comprueba
+   * Las lecturas llevan `@Roles()` vacío —ningún rol global—: el aislamiento
+   * lo da el tenant del contexto, como en las rutas de organización de
+   * `directory`. Se comprueba
    * acá para que reintroducir un rol global sea una decisión y no un descuido.
    */
   it('las lecturas no exigen rol global', () => {
@@ -319,7 +320,7 @@ describe('Insurance controllers (delegación)', () => {
           method
         ],
       );
-      expect(roles).toBeUndefined();
+      expect(roles).toEqual([]);
     }
   });
 
@@ -342,7 +343,7 @@ describe('Insurance controllers (delegación)', () => {
       'updateBenefitRules',
       'updatePlanPremium',
     ]) {
-      expect(roles(method)).toBeUndefined();
+      expect(roles(method)).toEqual([]);
     }
     expect(roles('createProduct')).toEqual(['SECURITY_ADMIN']);
     expect(roles('createCarrier')).toEqual(['SECURITY_ADMIN']);

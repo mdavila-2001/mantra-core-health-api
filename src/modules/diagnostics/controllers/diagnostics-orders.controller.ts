@@ -29,7 +29,14 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPractitionerResultsService,
 } from '../services';
-import { ClinicalRecordAccessGuard } from '../../clinical/guards';
+import {
+  ClinicalReadScopeParam,
+  ClinicalRecordAccessGuard,
+} from '../../clinical/guards';
+import {
+  IPS_ONLY_READ_SCOPE,
+  type ClinicalReadScope,
+} from '../../clinical/domain/clinical-read-scope';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 import { PractitionerDiagnosticResultDto } from '../dto';
 
@@ -86,11 +93,13 @@ export class DiagnosticsOrdersController {
   getPatientOrders(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PatientDiagnosticOrdersResponseDto> {
     return this.readService.getPatientOrders(
       requireTenantId(),
       patientProfileId,
       limit ?? 50,
+      scope ?? IPS_ONLY_READ_SCOPE,
     );
   }
 

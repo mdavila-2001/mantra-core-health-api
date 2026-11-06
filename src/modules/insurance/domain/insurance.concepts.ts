@@ -66,6 +66,26 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       display: 'En red',
     },
 
+    // El médico pide trabajar con una aseguradora (v4.2.64,
+    // `insurance.practitioner_insurer_requests`). Distintos de MEMBERSHIP_*: la
+    // solicitud no es el contrato con una red, es el pedido que la precede.
+    PRACTITIONER_REQUEST_PENDING: {
+      code: 'PRACTITIONER_REQUEST_PENDING',
+      display: 'Solicitud del profesional pendiente',
+    },
+    PRACTITIONER_REQUEST_APPROVED: {
+      code: 'PRACTITIONER_REQUEST_APPROVED',
+      display: 'Solicitud del profesional aprobada',
+    },
+    PRACTITIONER_REQUEST_REJECTED: {
+      code: 'PRACTITIONER_REQUEST_REJECTED',
+      display: 'Solicitud del profesional rechazada',
+    },
+    PRACTITIONER_REQUEST_WITHDRAWN: {
+      code: 'PRACTITIONER_REQUEST_WITHDRAWN',
+      display: 'Solicitud del profesional retirada',
+    },
+
     // Coberturas y dependientes
     COVERAGE_ACTIVE: { code: 'COVERAGE_ACTIVE', display: 'Cobertura activa' },
     DEPENDENT_ACTIVE: {

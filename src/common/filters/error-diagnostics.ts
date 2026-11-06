@@ -98,6 +98,34 @@ function whereOf(stack: string | undefined): { where?: string[] } {
   return frames.length > 0 ? { where: frames } : {};
 }
 
+/**
+ * Marcos propios del stack (`src/…:línea`, sin columna ni `dist/`), del más
+ * reciente al más viejo. Es la base de la huella estable de un error
+ * (`observability.error_groups.fingerprint`): la línea cambia entre versiones
+ * del código, la columna y la ruta absoluta del disco no deberían.
+ *
+ * @param stack - `error.stack`.
+ * @param max - Cuántos marcos como máximo.
+ */
+export function ownFramesOf(stack: string | undefined, max: number): string[] {
+  if (!stack) return [];
+  return stack
+    .split('\n')
+    .slice(1)
+    .filter((line) => !line.includes('node_modules'))
+    .map((line) =>
+      /(?:^|[\\/])((?:dist[\\/])?src[\\/][^\s):]+):(\d+)(?::\d+)?\)?\s*$/.exec(
+        line,
+      ),
+    )
+    .filter((match): match is RegExpExecArray => match !== null)
+    .map(
+      (match) =>
+        `${match[1].replace(/\\/g, '/').replace(/^dist\//, '')}:${match[2]}`,
+    )
+    .slice(0, max);
+}
+
 /** Techo de marcos del stack en el log y de eslabones de la cadena de causas. */
 const MAX_LOG_FRAMES = 15;
 const MAX_CAUSE_DEPTH = 5;

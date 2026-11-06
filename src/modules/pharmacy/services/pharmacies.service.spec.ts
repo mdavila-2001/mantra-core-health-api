@@ -64,6 +64,8 @@ function build() {
     findByTenantAndCode: mockFn(),
     findByIdInTenant: mockFn(),
     create: mockFn(),
+    // La vitrina publicada del tenant: por defecto, todavía ninguna.
+    findTenantShowcaseId: mockFn().mockResolvedValue(null),
   };
   const licensesRepo = {
     create: mockFn(),
@@ -192,6 +194,81 @@ describe('PharmaciesService', () => {
       expect(pharmacy.verificationStatusConceptId).toBe(
         PHARM.VERIFICATION_VERIFIED,
       );
+    });
+
+    it('links the approved pharmacy to the published showcase of its organization', async () => {
+      const d = build();
+      const pharmacy: Record<string, unknown> = {
+        id: 'ph1',
+        tenantId: T1,
+        statusConceptId: PHARM.PHARMACY_DRAFT,
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+        updatedAt: new Date(),
+      };
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(pharmacy);
+      d.licensesRepo.findById.mockResolvedValue({
+        id: 'lic1',
+        pharmacyId: 'ph1',
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+        updatedAt: new Date(),
+      });
+      d.licensesRepo.countUnverified.mockResolvedValue(0);
+      d.pharmaciesRepo.findTenantShowcaseId.mockResolvedValue('vitrina-t1');
+
+      await inTenant(() =>
+        d.service.verifyLicense('ph1', 'lic1', { approve: true }, actor),
+      );
+
+      expect(d.pharmaciesRepo.findTenantShowcaseId).toHaveBeenCalledWith(
+        d.tx,
+        T1,
+      );
+      expect(pharmacy.publicProfileId).toBe('vitrina-t1');
+      expect(pharmacy.statusConceptId).toBe(PHARM.PHARMACY_ACTIVE);
+    });
+
+    it('keeps an existing showcase link, and leaves none when the organization has no showcase yet', async () => {
+      const d = build();
+      const linked: Record<string, unknown> = {
+        id: 'ph1',
+        tenantId: T1,
+        publicProfileId: 'vitrina-propia',
+        statusConceptId: PHARM.PHARMACY_DRAFT,
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+      };
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(linked);
+      d.licensesRepo.findById.mockResolvedValue({
+        id: 'lic1',
+        pharmacyId: 'ph1',
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+      });
+      d.licensesRepo.countUnverified.mockResolvedValue(0);
+      d.pharmaciesRepo.findTenantShowcaseId.mockResolvedValue('vitrina-t1');
+
+      await inTenant(() =>
+        d.service.verifyLicense('ph1', 'lic1', { approve: true }, actor),
+      );
+      expect(linked.publicProfileId).toBe('vitrina-propia');
+
+      const d2 = build();
+      const unlinked: Record<string, unknown> = {
+        id: 'ph1',
+        tenantId: T1,
+        statusConceptId: PHARM.PHARMACY_DRAFT,
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+      };
+      d2.pharmaciesRepo.findByIdInTenant.mockResolvedValue(unlinked);
+      d2.licensesRepo.findById.mockResolvedValue({
+        id: 'lic1',
+        pharmacyId: 'ph1',
+        verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+      });
+      d2.licensesRepo.countUnverified.mockResolvedValue(0);
+
+      await inTenant(() =>
+        d2.service.verifyLicense('ph1', 'lic1', { approve: true }, actor),
+      );
+      expect(unlinked.publicProfileId).toBeUndefined();
     });
 
     it('rejects (not verified) leaves the pharmacy untouched', async () => {

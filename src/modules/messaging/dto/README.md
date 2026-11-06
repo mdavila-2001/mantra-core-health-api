@@ -51,7 +51,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`InAppReadResponseDto.alreadyRead`** distingue la primera lectura de las siguientes sin cambiar
   `readAt`.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

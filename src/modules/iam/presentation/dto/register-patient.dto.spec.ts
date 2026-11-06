@@ -259,3 +259,33 @@ describe('RegisterPatientDto · teléfonos y contactos de emergencia adicionales
     ).toEqual(['additionalEmergencyContacts']);
   });
 });
+
+describe('RegisterPatientDto · strict email', () => {
+  it.each(['ana.paz1@ejemplo.test', 'juan_perez-1@mi-clinica.com.bo'])(
+    'accepts «%s»',
+    async (email) => {
+      expect(
+        await propertiesWithError({ ...MINIMAL_REGISTRATION, email }),
+      ).toEqual([]);
+    },
+  );
+
+  it.each([
+    'qqoewqw*[]@gmail.com',
+    '---++++-++--+++++@gmail.com',
+    '-ana@gmail.com',
+    'ana-@gmail.com',
+    'ana+promo@gmail.com',
+    'ana.-paz@gmail.com',
+    'ana@gm_ail.com',
+    'ana paz@gmail.com',
+    'josé@gmail.com',
+    "ana'paz@gmail.com",
+    'ana..paz@gmail.com',
+    '.ana@gmail.com',
+  ])('rejects «%s»', async (email) => {
+    expect(
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, email }),
+    ).toEqual(['email']);
+  });
+});

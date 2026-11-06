@@ -386,7 +386,6 @@ export class PublicSearchRepository {
 
   private async normalizer(em: EntityManager): Promise<string> {
     this.unaccentAvailable ??= em
-      .getConnection()
       .execute<{ present: boolean }[]>(
         `SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'unaccent') AS present`,
         [],
@@ -529,13 +528,11 @@ export class PublicSearchRepository {
     // directorio de una ciudad real, y muy por encima del de éste.
     const params = [city, 5000];
     const norm = await this.normalizer(em);
-    const rows = await em
-      .getConnection()
-      .execute<{ owner_id: string }[]>(
-        base.replace(/%NORM%/g, norm),
-        params,
-        'all',
-      );
+    const rows = await em.execute<{ owner_id: string }[]>(
+      base.replace(/%NORM%/g, norm),
+      params,
+      'all',
+    );
     return rows.map((f) => f.owner_id);
   }
 
@@ -563,7 +560,7 @@ export class PublicSearchRepository {
     const tope = 5000;
     const rows =
       'municipalityConceptId' in territory
-        ? await em.getConnection().execute<{ owner_id: string }[]>(
+        ? await em.execute<{ owner_id: string }[]>(
             `SELECT DISTINCT owner_id FROM common.addresses
               WHERE (valid_to IS NULL OR valid_to >= CURRENT_DATE)
                 AND municipality_concept_id = ?
@@ -571,7 +568,7 @@ export class PublicSearchRepository {
             [territory.municipalityConceptId, tope],
             'all',
           )
-        : await em.getConnection().execute<{ owner_id: string }[]>(
+        : await em.execute<{ owner_id: string }[]>(
             `SELECT DISTINCT a.owner_id FROM common.addresses a
               WHERE (a.valid_to IS NULL OR a.valid_to >= CURRENT_DATE)
                 AND (a.administrative_area_concept_id = ?
@@ -618,9 +615,11 @@ export class PublicSearchRepository {
       limit,
     ];
     const norm = await this.normalizer(em);
-    const rows = await em
-      .getConnection()
-      .execute<{ id: string }[]>(base.replace(/%NORM%/g, norm), params, 'all');
+    const rows = await em.execute<{ id: string }[]>(
+      base.replace(/%NORM%/g, norm),
+      params,
+      'all',
+    );
     return rows.map((f) => f.id);
   }
 
@@ -669,7 +668,7 @@ export class PublicSearchRepository {
     const cos = Math.max(Math.abs(Math.cos((punto.lat * Math.PI) / 180)), 0.01);
     const degreesLng = punto.radiusKm / (111 * cos);
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         id: string;
         latitude: string;
@@ -785,7 +784,7 @@ export class PublicSearchRepository {
     const output = new Map<string, ProfileLocation>();
     if (ownerIds.length === 0) return output;
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         owner_id: string;
         lines: string | null;
@@ -863,18 +862,18 @@ export class PublicSearchRepository {
     const output = new Map<string, string[]>();
     if (practitionerProfileIds.length === 0) return output;
 
-    const rows = await em
-      .getConnection()
-      .execute<{ practitioner_profile_id: string; display: string }[]>(
-        `SELECT ps.practitioner_profile_id, cc.display
+    const rows = await em.execute<
+      { practitioner_profile_id: string; display: string }[]
+    >(
+      `SELECT ps.practitioner_profile_id, cc.display
            FROM profiles.practitioner_specialties ps
            JOIN terminology.catalog_concepts cc ON cc.id = ps.specialty_concept_id
           WHERE ps.practitioner_profile_id IN (?)
             AND (ps.valid_to IS NULL OR ps.valid_to >= CURRENT_DATE)
           ORDER BY ps.is_primary DESC NULLS LAST, cc.display ASC`,
-        [practitionerProfileIds],
-        'all',
-      );
+      [practitionerProfileIds],
+      'all',
+    );
 
     for (const row of rows) {
       if (!row.display) continue;
@@ -901,7 +900,7 @@ export class PublicSearchRepository {
     const output = new Map<string, ProfileAffiliation[]>();
     if (practitionerProfileIds.length === 0) return output;
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         practitioner_profile_id: string;
         organization_name: string;
@@ -957,7 +956,7 @@ export class PublicSearchRepository {
   ): Promise<Map<string, ProfilePracticeSite[]>> {
     if (practitionerProfileIds.length === 0) return new Map();
 
-    const rows = await em.getConnection().execute<SitePublicRow[]>(
+    const rows = await em.execute<SitePublicRow[]>(
       `SELECT pra.practitioner_profile_id,
               pra.status_concept_id AS assignment_status_concept_id,
               pra.valid_to AS assignment_valid_to,
@@ -979,6 +978,33 @@ export class PublicSearchRepository {
       'all',
     );
     return publicSitesOf(rows);
+  }
+
+  /**
+   * La práctica (`practice.practices`) detrás de la ficha de una organización.
+   *
+   * La ficha pública de una organización apunta a su **tenant**
+   * (`public_profiles.target_id = tenant.id`), pero quien pide pertenecer a ella
+   * (`POST /practices/:practiceId/role-assignments/self-request`) necesita el
+   * identificador de la práctica. Si el tenant tiene exactamente una, ese es; con
+   * cero o con varias no hay una respuesta inequívoca y se devuelve `null`: es
+   * preferible que el cliente no ofrezca pedir a que mande la solicitud a una
+   * práctica que el profesional no eligió.
+   *
+   * @param em - Gestor de entidades de la lectura.
+   * @param tenantId - Tenant al que apunta la ficha.
+   * @returns Identificador de la única práctica del tenant, o `null`.
+   */
+  async practiceIdByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string | null> {
+    const rows = await em.execute<{ id: string }[]>(
+      `SELECT id FROM practice.practices WHERE tenant_id = ? LIMIT 2`,
+      [tenantId],
+      'all',
+    );
+    return rows.length === 1 ? rows[0].id : null;
   }
 
   /**
@@ -1015,7 +1041,7 @@ export class PublicSearchRepository {
     >();
     if (practitionerProfileIds.length === 0) return output;
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         practitioner_profile_id: string;
         has_agenda: boolean;
@@ -1166,20 +1192,18 @@ export class PublicSearchRepository {
     const output = new Map<string, { average: number; count: number }>();
     if (profileIds.length === 0) return output;
 
-    const rows = await em
-      .getConnection()
-      .execute<
-        { target_public_profile_id: string; avg: string; total: string }[]
-      >(
-        `SELECT target_public_profile_id, AVG(overall_rating)::numeric AS avg, COUNT(*) AS total
+    const rows = await em.execute<
+      { target_public_profile_id: string; avg: string; total: string }[]
+    >(
+      `SELECT target_public_profile_id, AVG(overall_rating)::numeric AS avg, COUNT(*) AS total
            FROM community.service_reviews
           WHERE target_public_profile_id IN (?)
             AND publication_status_concept_id = ?
             AND moderation_status_concept_id <> ?
           GROUP BY target_public_profile_id`,
-        [profileIds, COMM.PUBLICATION_PUBLISHED, COMM.MODERATION_REMOVED],
-        'all',
-      );
+      [profileIds, COMM.PUBLICATION_PUBLISHED, COMM.MODERATION_REMOVED],
+      'all',
+    );
 
     for (const row of rows) {
       output.set(row.target_public_profile_id, {
@@ -1267,7 +1291,7 @@ export class PublicSearchRepository {
     }
     params.push(limit);
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         id: string;
         body_text: string;
@@ -1347,9 +1371,7 @@ export class PublicSearchRepository {
       return row;
     };
 
-    const conn = em.getConnection();
-
-    const media = await conn.execute<{ post_id: string; file_id: string }[]>(
+    const media = await em.execute<{ post_id: string; file_id: string }[]>(
       `SELECT post_id, file_id
          FROM community.post_media
         WHERE post_id IN (?)
@@ -1360,7 +1382,7 @@ export class PublicSearchRepository {
     );
     for (const row of media) ensure(row.post_id).imageFileIds.push(row.file_id);
 
-    const reactions = await conn.execute<
+    const reactions = await em.execute<
       { reactable_ref_id: string; total: string }[]
     >(
       `SELECT reactable_ref_id, COUNT(*) AS total
@@ -1375,7 +1397,7 @@ export class PublicSearchRepository {
       ensure(row.reactable_ref_id).reactionCount = Number(row.total);
     }
 
-    const comments = await conn.execute<
+    const comments = await em.execute<
       { commentable_ref_id: string; total: string }[]
     >(
       `SELECT commentable_ref_id, COUNT(*) AS total
@@ -1404,7 +1426,7 @@ export class PublicSearchRepository {
    * @param fileId - El archivo a comprobar.
    */
   async isPublicPostMedia(em: EntityManager, fileId: string): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ uno: number }[]>(
+    const rows = await em.execute<{ uno: number }[]>(
       `SELECT 1 AS uno
          FROM community.post_media pm
          JOIN community.social_posts sp ON sp.id = pm.post_id
@@ -1453,7 +1475,7 @@ export class PublicSearchRepository {
     em: EntityManager,
     fileId: string,
   ): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ uno: number }[]>(
+    const rows = await em.execute<{ uno: number }[]>(
       `SELECT 1 AS uno
          FROM community.comment_media cm
          JOIN community.comments c ON c.id = cm.comment_id
@@ -1513,7 +1535,7 @@ export class PublicSearchRepository {
    * @returns `true` si el feed público la serviría.
    */
   async isPostPublic(em: EntityManager, postId: string): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ uno: number }[]>(
+    const rows = await em.execute<{ uno: number }[]>(
       `SELECT 1 AS uno
          FROM community.social_posts sp
          JOIN community.public_profiles pp
@@ -1563,7 +1585,7 @@ export class PublicSearchRepository {
     }
     params.push(limit);
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         id: string;
         created_at: Date;
@@ -1690,10 +1712,8 @@ export class PublicSearchRepository {
     em: EntityManager,
     commentId: string,
   ): Promise<string | null> {
-    const rows = await em
-      .getConnection()
-      .execute<{ commentable_ref_id: string }[]>(
-        `SELECT c.commentable_ref_id
+    const rows = await em.execute<{ commentable_ref_id: string }[]>(
+      `SELECT c.commentable_ref_id
          FROM community.comments c
          JOIN community.public_profiles pp ON pp.id = c.author_profile_id
         WHERE c.id = ?
@@ -1701,14 +1721,14 @@ export class PublicSearchRepository {
           AND c.status_concept_id = ?
           AND ${PUBLIC_AUTHOR_SQL}
         LIMIT 1`,
-        [
-          commentId,
-          COMM.CONTENT_TYPE_POST,
-          CONCEPTS.STATE_ACTIVE,
-          ...PUBLIC_AUTHOR_PARAMS,
-        ],
-        'all',
-      );
+      [
+        commentId,
+        COMM.CONTENT_TYPE_POST,
+        CONCEPTS.STATE_ACTIVE,
+        ...PUBLIC_AUTHOR_PARAMS,
+      ],
+      'all',
+    );
     return rows[0]?.commentable_ref_id ?? null;
   }
 
@@ -1732,19 +1752,17 @@ export class PublicSearchRepository {
     em: EntityManager,
     specialtyConceptId: string,
   ): Promise<string[]> {
-    const rows = await em
-      .getConnection()
-      .execute<{ practitioner_profile_id: string }[]>(
-        `SELECT DISTINCT ps.practitioner_profile_id
+    const rows = await em.execute<{ practitioner_profile_id: string }[]>(
+      `SELECT DISTINCT ps.practitioner_profile_id
            FROM profiles.practitioner_specialties ps
           WHERE ps.specialty_concept_id = ?
             AND (ps.valid_to IS NULL OR ps.valid_to >= CURRENT_DATE)
           LIMIT ?`,
-        // El mismo tope holgado que el filtro de ciudad, y por lo mismo: que el
-        // `IN` no crezca sin límite en una especialidad muy poblada.
-        [specialtyConceptId, 5000],
-        'all',
-      );
+      // El mismo tope holgado que el filtro de ciudad, y por lo mismo: que el
+      // `IN` no crezca sin límite en una especialidad muy poblada.
+      [specialtyConceptId, 5000],
+      'all',
+    );
     return rows.map((row) => row.practitioner_profile_id);
   }
 
@@ -1774,7 +1792,7 @@ export class PublicSearchRepository {
     }
     params.push(limit);
 
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         id: string;
         body_text: string;
@@ -1839,7 +1857,7 @@ export class PublicSearchRepository {
     const byComment = new Map<string, PublicCommentMediaRow[]>();
     if (commentIds.length === 0) return byComment;
     const markers = commentIds.map(() => '?').join(', ');
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         comment_id: string;
         file_id: string;

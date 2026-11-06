@@ -92,7 +92,7 @@ transacción del alta, con el owner como autor. El bloque con cualquier otro
 `tenantType` responde 422, y la latitud y la longitud de cada sede van juntas o no
 van (400 en el DTO, 422 si llega a `TenantTypeProfileService`).
 
-## Reglas de negocio
+## Business rules
 
 - `code` de tenant es único global; `code` de branch es único por tenant.
 - Verificación solo desde `pending`; creación de branch/child/membership exige

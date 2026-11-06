@@ -13,6 +13,8 @@ import {
 import type { CreateOwnSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
 import { siteCodeBase, uniqueCode } from '../site-code';
+import { ServiceCatalogRepository } from '../../billing/repositories';
+import { ensureDefaultAppointmentService } from '../../billing/default-services';
 
 /**
  * A quién pertenece el consultorio que se va a provisionar: el tenant en el
@@ -65,6 +67,7 @@ export class OwnSiteProvisioningService {
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OwnSiteProvisioningService.name);
@@ -110,6 +113,13 @@ export class OwnSiteProvisioningService {
       });
       await tx.flush();
     }
+
+    await ensureDefaultAppointmentService(
+      tx,
+      this.serviceCatalogRepo,
+      practice.id,
+      actorUserId,
+    );
 
     let addressId: string | undefined;
     if (dto.address) {
@@ -161,6 +171,9 @@ export class OwnSiteProvisioningService {
       addressId,
       managingTenantId: owner.tenantId,
       statusConceptId: PRAC.SITE_ACTIVE,
+      // F1: la sede pertenece al tenant de su práctica (backfill del patch
+      // v4.2.67); `managingTenantId` sigue diciendo quién la opera.
+      tenantId: practice.tenantId,
       actorUserId,
     });
     // El archivo ya lo validó quien llama: el alta lo reclama como pre-carga

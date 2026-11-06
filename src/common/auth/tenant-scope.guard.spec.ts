@@ -87,3 +87,129 @@ describe('TenantScopeGuard (MCH-001)', () => {
     expect(request.resolvedTenantId).toBeUndefined();
   });
 });
+
+describe('TenantScopeGuard: @PlatformScopeOptional (H2)', () => {
+  const guardFor = (marked: boolean) =>
+    new TenantScopeGuard({
+      getAllAndOverride: fn((key: unknown) =>
+        key === 'platformScopeOptional'
+          ? marked
+          : key === 'requiredRoles'
+            ? ['PLATFORM_ADMIN', 'GOVERNANCE_ADMIN']
+            : false,
+      ),
+    } as never);
+  const two = ['tenant-A', 'tenant-B'];
+
+  it('plataforma global, 2 membresías, sin cabecera → pasa sin tenant', () => {
+    const { context, request } = contextFor({
+      id: 'p1',
+      roles: ['PLATFORM_ADMIN'],
+      tenantIds: two,
+    });
+    expect(guardFor(true).canActivate(context)).toBe(true);
+    expect(request.resolvedTenantId).toBeUndefined();
+  });
+
+  it('GOVERNANCE_ADMIN global (rol que la ruta acepta) sin cabecera → pasa', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['GOVERNANCE_ADMIN'],
+      tenantIds: two,
+    });
+    expect(guardFor(true).canActivate(context)).toBe(true);
+  });
+
+  it('DATA_PLATFORM_ADMIN global que la ruta no acepta → sin alcance plataforma (TENANT_AMBIGUOUS)', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['DATA_PLATFORM_ADMIN'],
+      tenantIds: two,
+    });
+    expect(() => guardFor(true).canActivate(context)).toThrow(
+      expect.objectContaining({
+        response: expect.objectContaining({ reason: 'TENANT_AMBIGUOUS' }),
+      }),
+    );
+  });
+
+  it('rol de plataforma global ajeno a la ruta + rol de la ruta sólo acotado a un tenant → no hay alcance plataforma', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['DATA_PLATFORM_ADMIN'],
+      scopedRoles: { 'tenant-A': ['PLATFORM_ADMIN'] },
+      tenantIds: two,
+    } as never);
+    expect(() => guardFor(true).canActivate(context)).toThrow(
+      expect.objectContaining({
+        response: expect.objectContaining({ reason: 'TENANT_AMBIGUOUS' }),
+      }),
+    );
+  });
+
+  it('con cabecera de tenant propio → resuelve ese tenant', () => {
+    const { context, request } = contextFor(
+      { id: 'p1', roles: ['PLATFORM_ADMIN'], tenantIds: two },
+      { 'x-tenant-id': 'tenant-B' },
+    );
+    expect(guardFor(true).canActivate(context)).toBe(true);
+    expect(request.resolvedTenantId).toBe('tenant-B');
+  });
+
+  it('con cabecera de tenant ajeno → TENANT_MEMBERSHIP_REQUIRED', () => {
+    const { context } = contextFor(
+      { id: 'p1', roles: ['PLATFORM_ADMIN'], tenantIds: two },
+      { 'x-tenant-id': 'tenant-Z' },
+    );
+    try {
+      guardFor(true).canActivate(context);
+      throw new Error('debía lanzar');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ForbiddenException);
+      expect(
+        ((error as ForbiddenException).getResponse() as { reason?: string })
+          .reason,
+      ).toBe('TENANT_MEMBERSHIP_REQUIRED');
+    }
+  });
+
+  it('PLATFORM_ADMIN con ámbito de tenant (scopedRoles) → TENANT_AMBIGUOUS', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['PLATFORM_ADMIN'],
+      scopedRoles: { 'tenant-A': ['PLATFORM_ADMIN'] },
+      tenantIds: two,
+    });
+    try {
+      guardFor(true).canActivate(context);
+      throw new Error('debía lanzar');
+    } catch (error) {
+      expect(
+        ((error as ForbiddenException).getResponse() as { reason?: string })
+          .reason,
+      ).toBe('TENANT_AMBIGUOUS');
+    }
+  });
+
+  it('BUSINESS_ADMIN con 2 membresías sin cabecera → TENANT_AMBIGUOUS', () => {
+    const { context } = contextFor({
+      id: 'b1',
+      roles: ['BUSINESS_ADMIN'],
+      tenantIds: two,
+    });
+    expect(() => guardFor(true).canActivate(context)).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('ruta sin marcar: PLATFORM_ADMIN global sin cabecera sigue en 403', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['PLATFORM_ADMIN'],
+      tenantIds: two,
+    });
+    expect(() => guardFor(false).canActivate(context)).toThrow(
+      ForbiddenException,
+    );
+  });
+});

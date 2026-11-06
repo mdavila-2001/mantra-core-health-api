@@ -51,6 +51,11 @@ export class StorageLifecycleCoordinator {
     private readonly queues: QueuesRepository,
   ) {}
 
+  /** Each intent commits on its own connection before native I/O. */
+  private ownConnection(): EntityManager {
+    return this.em.fork({ keepTransactionContext: false });
+  }
+
   /** Call BEFORE all graph/hold/reference mutations; locks live on the caller's tx. */
   async excludeNamespaces(
     tx: EntityManager,
@@ -88,7 +93,7 @@ export class StorageLifecycleCoordinator {
       phase: 'RESERVED',
     };
     readStorageIntent(intent);
-    return this.em.fork().transactional(async (tx) => {
+    return this.ownConnection().transactional(async (tx) => {
       await this.excludeNamespaces(tx, [input.identity]);
       const prior = await this.queues.findJobByDedupeKey(
         tx,
@@ -261,7 +266,7 @@ export class StorageLifecycleCoordinator {
 
   /** Recovery is quarantine only. No TTL, retry count, HEAD or 404 clears uncertainty. */
   async recover(): Promise<{ inspected: number; quarantined: number }> {
-    const jobs = await this.em.fork().transactional(async (tx) => {
+    const jobs = await this.ownConnection().transactional(async (tx) => {
       await this.assertPrimaryVisibility(tx);
       return this.queues.findStorageIntents(tx);
     });
@@ -277,7 +282,7 @@ export class StorageLifecycleCoordinator {
         stale &&
         ['STORE_DISPATCHED', 'DELETE_DISPATCHED'].includes(intent.phase)
       ) {
-        await this.em.fork().transactional(async (tx) => {
+        await this.ownConnection().transactional(async (tx) => {
           await this.excludeNamespaces(tx, [intent.identity]);
           const current = await this.queues.findJobByDedupeKey(
             tx,
@@ -395,7 +400,7 @@ export class StorageLifecycleCoordinator {
   }
 
   async pendingPurges(): Promise<StorageIntent[]> {
-    return this.em.fork().transactional(async (tx) => {
+    return this.ownConnection().transactional(async (tx) => {
       await this.assertPrimaryVisibility(tx);
       return (await this.queues.findStorageIntents(tx))
         .filter((job) => job.jobType === 'storage.purge')
@@ -408,7 +413,7 @@ export class StorageLifecycleCoordinator {
     candidate: StorageIntent,
     review: (tx: EntityManager, intent: StorageIntent) => Promise<T>,
   ): Promise<T> {
-    return this.em.fork().transactional(async (tx) => {
+    return this.ownConnection().transactional(async (tx) => {
       await this.excludeNamespaces(tx, [candidate.identity]);
       const job = await this.queues.findJobByDedupeKey(
         tx,
@@ -478,7 +483,7 @@ export class StorageLifecycleCoordinator {
     // Failure/ambiguous commit above grants NO native attempt. A retry sees the
     // durable phase if that commit actually succeeded, and fails closed.
     try {
-      return await this.em.fork().transactional(async (tx) => {
+      return await this.ownConnection().transactional(async (tx) => {
         await this.excludeNamespaces(tx, [dispatched.identity]);
         const job = await this.queues.findJobByDedupeKey(
           tx,
@@ -601,7 +606,7 @@ export class StorageLifecycleCoordinator {
     } catch {
       // A commit/receipt failure cannot certify success. Recovery also covers a
       // process crash here. Do not retry I/O or infer completion from HEAD/404.
-      await this.em.fork().transactional(async (tx) => {
+      await this.ownConnection().transactional(async (tx) => {
         await this.excludeNamespaces(tx, [dispatched.identity]);
         const job = await this.queues.findJobByDedupeKey(
           tx,
@@ -640,7 +645,7 @@ export class StorageLifecycleCoordinator {
       intent: StorageIntent,
     ) => Promise<T>,
   ): Promise<T> {
-    return this.em.fork().transactional(async (tx) => {
+    return this.ownConnection().transactional(async (tx) => {
       await this.excludeNamespaces(tx, [reservation.identity]);
       const job = await this.queues.findJobByDedupeKey(
         tx,

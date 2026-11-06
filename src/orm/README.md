@@ -59,6 +59,7 @@ lo que las capas siguientes acaban de crear. Está explicado en
 |---|---|---|
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | sin valor | Conexión. Obligatorias, sin default a propósito |
 | `DB_POOL_MIN` / `DB_POOL_MAX` | 2 / 10 | Tamaño del pool. El mínimo de 2 es necesario: el cerrojo de arranque ocupa una conexión |
+| `DB_CONNECTION_TIMEOUT_MS` | 30000 | Espera máxima por una conexión libre del pool (`connectionTimeoutMillis` de `pg`). Sin tope `pg` espera para siempre y un pool agotado cuelga la API |
 | `ORM_SCHEMA_SYNC` | `safe` | `safe` aplica el DDL aditivo, `dry-run` solo lo registra, `off` no toca la base |
 | `ORM_VERIFY_FIDELITY` | `true` | Compara entidades contra `information_schema` al terminar el arranque |
 | `MIKRO_ORM_DEBUG` | `false` | Volcado de todas las consultas. Muy ruidoso |

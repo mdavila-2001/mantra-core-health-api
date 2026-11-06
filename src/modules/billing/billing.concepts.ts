@@ -14,6 +14,21 @@ import { defineModuleConcepts } from '../../common/seed/concept-seed';
 export const { seeds: BILLING_CONCEPT_SEEDS, ids: BILL } = defineModuleConcepts(
   'billing',
   {
+    // --- F5e cargos de espacio (CONTRATO-F2-F5 §F5e). `TARIFF_OR_TIME` lo
+    // fija el modelo por literal (`ck_space_tariffs_or_time_unit_minutes`). ---
+    TARIFF_BED_DAY: { code: 'TARIFF_BED_DAY', display: 'Tarifa de día-cama' },
+    TARIFF_OR_TIME: {
+      code: 'TARIFF_OR_TIME',
+      display: 'Tarifa de quirófano por tiempo',
+    },
+    CHG_SRC_BED_DAY: { code: 'CHG_SRC_BED_DAY', display: 'Cargo de día-cama' },
+    CHG_SRC_OR_TIME: {
+      code: 'CHG_SRC_OR_TIME',
+      display: 'Cargo de quirófano por tiempo',
+    },
+    CHG_PENDING: { code: 'CHG_PENDING', display: 'Cargo devengado pendiente' },
+    CHG_INVOICED: { code: 'CHG_INVOICED', display: 'Cargo facturado' },
+    CHG_VOIDED: { code: 'CHG_VOIDED', display: 'Cargo anulado' },
     // --- Ciclo de vida de facturas (billing.invoices.status_concept_id) ---
     INVOICE_DRAFT: { code: 'INV_DRAFT', display: 'Invoice draft' },
     INVOICE_ISSUED: { code: 'INV_ISSUED', display: 'Invoice issued' },

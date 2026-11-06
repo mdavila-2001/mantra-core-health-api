@@ -3,6 +3,8 @@ export * from './anesthesia_events.entity';
 export * from './anesthesia_plans.entity';
 export * from './implant_identifiers.entity';
 export * from './instrument_sets.entity';
+export * from './operating_room_block_series.entity';
+export * from './operating_room_blocks.entity';
 export * from './operating_room_utilization_events.entity';
 export * from './operative_findings.entity';
 export * from './operative_reports.entity';

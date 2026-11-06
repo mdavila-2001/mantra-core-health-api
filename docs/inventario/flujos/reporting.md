@@ -3,13 +3,13 @@
 # Flujos del módulo `reporting`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 12 (12 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 13 (13 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [reporting](../endpoints/reporting.md)
 
 ## Proceso: Módulo 39 — Reportes, Distribución y Tableros
 
-- **Código:** `reporting` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 12
-- **Actores:** DATA_STEWARD · REPORTING_ADMIN · REPORT_AUTHOR · REPORT_VIEWER · SYSTEM
+- **Código:** `reporting` · **Agrupación:** MIXTO · **Operaciones:** 13
+- **Actores:** ACCOUNTING_APPROVER · DATA_STEWARD · PAYMENTS_ADMIN · PLATFORM_ADMIN · REPORTING_ADMIN · REPORT_AUTHOR · REPORT_VIEWER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/reporting/README.md`
 
@@ -56,6 +56,7 @@ _Fuente: `src/modules/reporting/README.md:61`_
 | `UC-39-10` | Componer tablero con widgets | POST /reporting/dashboards | REPORTING_ADMIN · REPORT_AUTHOR | MEDIO | 4 |
 | `UC-39-11` | Reintentar corrida fallida | POST /reporting/executions/{id}/retry | SYSTEM · REPORTING_ADMIN | MEDIO | 4 |
 | `UC-39-12` | Deprecar definición | POST /reporting/definitions/{id}/deprecate | REPORTING_ADMIN | MEDIO | 3 |
+| `ctrl:ReportingMoneyController` | Operaciones de ReportingMoneyController que el README no asigna a un caso de uso | GET /admin/analytics/money | PLATFORM_ADMIN · SECURITY_ADMIN · PAYMENTS_ADMIN · ACCOUNTING_APPROVER | BAJO | 0 |
 
 ### Diagrama — etapas `UC-39-01`, `UC-39-02`, `UC-39-03`…
 
@@ -68,6 +69,7 @@ flowchart LR
   a21(["SYSTEM · REPORTING_ADMIN"]):::actor
   a25(["REPORT_VIEWER · REPORTING_ADMIN"]):::actor
   a31(["REPORTING_ADMIN"]):::actor
+  a33(["PLATFORM_ADMIN · SECURITY_ADMIN · PAYMENTS_ADMIN · ACCOUNTI…"]):::actor
   t3[("reporting.report_data_sources")]:::tabla
   t6[("reporting.report_columns")]:::tabla
   t7[("reporting.report_definitions")]:::tabla
@@ -115,6 +117,9 @@ flowchart LR
   end
   subgraph s11["UC-39-12 · Deprecar definición"]
     o30["POST /reporting/definitions/{id}/deprecate"]:::op
+  end
+  subgraph s12["ctrl:ReportingMoneyController · Operaciones de ReportingMoneyController que el…"]
+    o32["GET /admin/analytics/money"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -173,6 +178,7 @@ flowchart LR
   o30 -->|"LEE"| t7
   o30 -->|"ACTUALIZA"| t18
   o30 -->|"LEE"| t18
+  a33 --> o32
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -185,7 +191,46 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /reporting/dashboards
+#### 1. GET /admin/analytics/money
+
+Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReportingMoneyService.money"]:::llamada
+  n2 --> n3
+  n4["Llama a ReportingMoneyService.window"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9(("200 Responde con éxito")):::ok
+  n5 --> n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /reporting/dashboards
 
 Componer un tablero con sus widgets
 
@@ -249,7 +294,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /reporting/data-sources
+#### 3. POST /reporting/data-sources
 
 Registrar una fuente de datos gobernada
 
@@ -302,7 +347,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /reporting/definitions
+#### 4. POST /reporting/definitions
 
 Autorar una definición con sus parámetros y columnas
 
@@ -385,7 +430,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /reporting/definitions/{id}/deprecate
+#### 5. POST /reporting/definitions/{id}/deprecate
 
 Deprecar la definición y suspender sus programaciones
 
@@ -434,7 +479,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /reporting/definitions/{id}/executions
+#### 6. POST /reporting/definitions/{id}/executions
 
 Encolar una corrida parametrizada
 
@@ -496,7 +541,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /reporting/definitions/{id}/schedules
+#### 7. POST /reporting/definitions/{id}/schedules
 
 Programar la distribución periódica del reporte
 
@@ -550,7 +595,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /reporting/definitions/{id}/versions/publish
+#### 8. POST /reporting/definitions/{id}/versions/publish
 
 Publicar una versión del reporte
 
@@ -607,7 +652,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /reporting/executions/{id}/distributions
+#### 9. POST /reporting/executions/{id}/distributions
 
 Crear las distribuciones del reporte por destinatario
 
@@ -676,7 +721,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /reporting/executions/{id}/retry
+#### 10. POST /reporting/executions/{id}/retry
 
 Devolver a la cola una corrida fallida
 
@@ -736,7 +781,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /reporting/executions/{id}/snapshot
+#### 11. POST /reporting/executions/{id}/snapshot
 
 Registrar el artefacto materializado y cerrar la corrida
 
@@ -800,7 +845,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /reporting/scheduler/tick
+#### 12. POST /reporting/scheduler/tick
 
 Disparar las programaciones vencidas
 
@@ -855,7 +900,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /reporting/schedules/{id}/subscriptions
+#### 13. POST /reporting/schedules/{id}/subscriptions
 
 Suscribirse a una programación
 

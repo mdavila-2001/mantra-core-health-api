@@ -90,6 +90,7 @@ src/graphify-out/
 # Excepción: settings.json sí se versiona — declara los plugins/skills del equipo.
 .claude/*
 !.claude/settings.json
+!.claude/skills/
 CLAUDE.md
 
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
@@ -170,3 +171,7 @@ Mantra Core Health Context/
 # Cada corrida genera su volcado e informe con fecha: son evidencia de esa
 # máquina y ese momento, no fuente. Lo que se conserva del ensayo va al runbook.
 .drill/
+
+# Salida por defecto de tools/terminology-import/measure-sources.mjs: es
+# evidencia de una corrida, no fuente (AGENTS.md §2.1).
+/docs/progress/

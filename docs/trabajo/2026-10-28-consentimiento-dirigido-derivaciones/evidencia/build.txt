@@ -1,2 +1,0 @@
-$ yarn build (merge con origin/dev)
-EXIT 0

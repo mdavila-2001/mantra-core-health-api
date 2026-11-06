@@ -7,18 +7,23 @@ import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import { DirectoryAuthorizationModule } from './directory-authorization.module';
 import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { MembershipInvitationsController } from './controllers/membership-invitations.controller';
+import { MembershipInvitationsService } from './services/membership-invitations.service';
 import { OrganizationLogoService } from './services/organization-logo.service';
 import {
   TenantTypeProfileService,
   AffiliationDocumentConceptsService,
   TenantAffiliationDocumentsService,
+  TenantTaxIdentifierService,
   TenantLegalRepresentativesService,
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
+  MembershipInviteService,
   DirectoryReadService,
   PharmacyOperatingRequirementsService,
   TenantDocumentCompletionService,
+  DeclaredBranchesService,
 } from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
@@ -28,6 +33,7 @@ import {
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
   TenantMedicalFacilitiesRepository,
+  TenantOpeningHoursRepository,
 } from './repositories';
 
 /**
@@ -63,14 +69,17 @@ import {
   ],
   controllers: [
     AdminTenantsController,
+    MembershipInvitationsController,
     TenantsController,
     OrganizationLogoController,
   ],
   providers: [
     OrganizationLogoService,
+    MembershipInvitationsService,
     TenantTypeProfileService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
+    TenantTaxIdentifierService,
     TenantLegalRepresentativesService,
     // P50: lo que una farmacia necesita para operar, y la puerta para
     // completar los papeles que el alta pública dejó opcionales.
@@ -82,10 +91,13 @@ import {
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
     TenantMedicalFacilitiesRepository,
+    TenantOpeningHoursRepository,
     // Servicios
+    DeclaredBranchesService,
     DirectoryTenantsService,
     DirectoryBranchesService,
     DirectoryMembershipsService,
+    MembershipInviteService,
     DirectoryReadService,
   ],
   // `TenantsRepository` lo necesita identity_assurance para marcar verificada la
@@ -107,8 +119,11 @@ import {
     DirectoryAuthorizationModule,
     BranchesRepository,
     TenantTypeProfileService,
+    // Sucursales y horario de atención del alta pública (farmacia, P50).
+    DeclaredBranchesService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,
+    TenantTaxIdentifierService,
     // `TenantLegalRepresentativesService` lo necesita `iam` para el
     // autorregistro de organización (subtarea 1.4), igual que los otros dos.
     TenantLegalRepresentativesService,

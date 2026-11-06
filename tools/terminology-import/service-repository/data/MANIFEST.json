@@ -1,0 +1,28 @@
+{
+  "_nota": "Corpus del repositorio universal de servicios. Lo escribe build-service-repository.mjs; lo lee load-service-repository.mjs. Las fuentes crudas no se versionan (SOURCES.md).",
+  "records": 15882,
+  "bySystem": {
+    "ar-pami-nomenclador": 4681,
+    "cups-co": 8114,
+    "fonasa-mle-2026": 2515,
+    "mantra-curado": 572
+  },
+  "withSpecialty": 1970,
+  "withDefinition": 8109,
+  "corpus": [
+    {
+      "file": "service-repository.part-001.ndjson.gz",
+      "lines": 15882,
+      "sha256": "b4a1a89fde1fd3b5ac8c40e8a3fe675fe0712125ca2ec2d60cebf6a53db3acf2",
+      "bytes": 641221
+    }
+  ],
+  "meta": [
+    {
+      "file": "service-repository.meta.part-001.ndjson.gz",
+      "lines": 1,
+      "sha256": "9c52c94c58114411a699698348ba4f8708327feb734db968d61c457f213f5579",
+      "bytes": 1851
+    }
+  ]
+}

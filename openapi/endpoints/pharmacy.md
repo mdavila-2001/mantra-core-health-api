@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `pharmacy`
 
-Referencia exhaustiva de 33 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 39 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `pharmacy`, `pharmacy-directory`, `pharmacy-public`
-- **Controladores:** `PharmacyController`, `PharmacyPublicController`, `PharmacyReadController`
+- **Controladores:** `PharmacyBulkController`, `PharmacyController`, `PharmacyPublicController`, `PharmacyReadController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -16,34 +16,40 @@ Referencia exhaustiva de 33 operación(es) del módulo `pharmacy`, derivada del 
 3. [POST /pharmacies/{pharmacyId}/categories](#3-post-pharmacies-pharmacyid-categories) — Crear una categoría de la farmacia
 4. [DELETE /pharmacies/{pharmacyId}/categories/{categoryId}](#4-delete-pharmacies-pharmacyid-categories-categoryid) — Eliminar una categoría de la farmacia
 5. [PATCH /pharmacies/{pharmacyId}/categories/{categoryId}](#5-patch-pharmacies-pharmacyid-categories-categoryid) — Renombrar una categoría de la farmacia
-6. [POST /pharmacies/{pharmacyId}/integration-connections](#6-post-pharmacies-pharmacyid-integration-connections) — Establecer conexión de integración externa
-7. [POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings](#7-post-pharmacies-pharmacyid-integration-connections-connid-product-mappings) — Mapear producto a código de proveedor externo
-8. [PATCH /pharmacies/{pharmacyId}/inventory](#8-patch-pharmacies-pharmacyid-inventory) — Guardar el inventario declarado de varios productos (todo o nada)
-9. [POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify](#9-post-pharmacies-pharmacyid-licenses-licenseid-verify) — Verificar licencia y aprobar farmacia
-10. [POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel](#10-post-pharmacies-pharmacyid-on-call-shifts-shiftid-cancel) — Cancelar un turno de guardia (deja de publicarse)
-11. [GET /pharmacies/{pharmacyId}/opening-hours](#11-get-pharmacies-pharmacyid-opening-hours) — Horario declarado de las sedes: 24 h y turnos vigentes y próximos
-12. [POST /pharmacies/{pharmacyId}/price-lists](#12-post-pharmacies-pharmacyid-price-lists) — Crear lista de precios (pública / por aseguradora)
-13. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close](#13-post-pharmacies-pharmacyid-price-lists-pricelistid-close) — Cerrar/expirar lista de precios
-14. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices](#14-post-pharmacies-pharmacyid-price-lists-pricelistid-prices) — Fijar/versionar precio de producto
-15. [POST /pharmacies/{pharmacyId}/products](#15-post-pharmacies-pharmacyid-products) — Publicar producto en catálogo con identificadores
-16. [DELETE /pharmacies/{pharmacyId}/products/{productId}](#16-delete-pharmacies-pharmacyid-products-productid) — Retirar (soft-delete) producto del catálogo
-17. [PATCH /pharmacies/{pharmacyId}/products/{productId}](#17-patch-pharmacies-pharmacyid-products-productid) — Editar un producto del catálogo de la farmacia
-18. [POST /pharmacies/{pharmacyId}/projections](#18-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
-19. [POST /pharmacies/{pharmacyId}/sites](#19-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
-20. [POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts](#20-post-pharmacies-pharmacyid-sites-siteid-on-call-shifts) — Registrar un turno de guardia de la sede
-21. [PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h](#21-put-pharmacies-pharmacyid-sites-siteid-open-24h) — Declarar si la sede abre las 24 horas
-22. [GET /pharmacy/catalog-products](#22-get-pharmacy-catalog-products) — Buscar en el catálogo universal de medicamentos
-23. [GET /pharmacy/pharmacies](#23-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
-24. [GET /pharmacy/pharmacies/{id}](#24-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
-25. [GET /pharmacy/pharmacies/{id}/contacts](#25-get-pharmacy-pharmacies-id-contacts) — Representante legal y gerencias de la farmacia (sólo su personal)
-26. [GET /pharmacy/pharmacies/{id}/licenses](#26-get-pharmacy-pharmacies-id-licenses) — Licencias de la farmacia (sólo su personal)
-27. [GET /pharmacy/pharmacies/{id}/summary](#27-get-pharmacy-pharmacies-id-summary) — Resumen del catálogo de la farmacia (sólo su personal)
-28. [GET /pharmacy/products](#28-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
-29. [GET /pharmacy/sites](#29-get-pharmacy-sites) — Listar sedes publicadas, sueltas
-30. [GET /pharmacy/sites/{siteId}/prices](#30-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
-31. [GET /public/medications](#31-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
-32. [GET /public/medications/{conceptId}/availability](#32-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
-33. [GET /public/pharmacies/open-now](#33-get-public-pharmacies-open-now) — Farmacias abiertas ahora: 24 h o de turno vigente
+6. [POST /pharmacies/{pharmacyId}/categories/bulk](#6-post-pharmacies-pharmacyid-categories-bulk) — Cargar categorías en lote, con vista previa
+7. [POST /pharmacies/{pharmacyId}/integration-connections](#7-post-pharmacies-pharmacyid-integration-connections) — Establecer conexión de integración externa
+8. [POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings](#8-post-pharmacies-pharmacyid-integration-connections-connectionid-product-mappings) — Mapear producto a código de proveedor externo
+9. [DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}](#9-delete-pharmacies-pharmacyid-integration-connections-connectionid-product-mappings-mappingid) — Deshacer un vínculo con un código de proveedor externo
+10. [PATCH /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}](#10-patch-pharmacies-pharmacyid-integration-connections-connectionid-product-mappings-mappingid) — Corregir un vínculo con un código de proveedor externo
+11. [PATCH /pharmacies/{pharmacyId}/inventory](#11-patch-pharmacies-pharmacyid-inventory) — Guardar el inventario declarado de varios productos (todo o nada)
+12. [POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify](#12-post-pharmacies-pharmacyid-licenses-licenseid-verify) — Verificar licencia y aprobar farmacia
+13. [POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel](#13-post-pharmacies-pharmacyid-on-call-shifts-shiftid-cancel) — Cancelar un turno de guardia (deja de publicarse)
+14. [GET /pharmacies/{pharmacyId}/opening-hours](#14-get-pharmacies-pharmacyid-opening-hours) — Horario declarado de las sedes: 24 h y turnos vigentes y próximos
+15. [POST /pharmacies/{pharmacyId}/price-lists](#15-post-pharmacies-pharmacyid-price-lists) — Crear lista de precios (pública / por aseguradora)
+16. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close](#16-post-pharmacies-pharmacyid-price-lists-pricelistid-close) — Cerrar/expirar lista de precios
+17. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices](#17-post-pharmacies-pharmacyid-price-lists-pricelistid-prices) — Fijar/versionar precio de producto
+18. [POST /pharmacies/{pharmacyId}/prices/bulk](#18-post-pharmacies-pharmacyid-prices-bulk) — Cargar precios de venta en lote, con vista previa
+19. [POST /pharmacies/{pharmacyId}/products](#19-post-pharmacies-pharmacyid-products) — Publicar producto en catálogo con identificadores
+20. [DELETE /pharmacies/{pharmacyId}/products/{productId}](#20-delete-pharmacies-pharmacyid-products-productid) — Retirar (soft-delete) producto del catálogo
+21. [PATCH /pharmacies/{pharmacyId}/products/{productId}](#21-patch-pharmacies-pharmacyid-products-productid) — Editar un producto del catálogo de la farmacia
+22. [POST /pharmacies/{pharmacyId}/products/bulk](#22-post-pharmacies-pharmacyid-products-bulk) — Cargar productos en lote, con vista previa
+23. [POST /pharmacies/{pharmacyId}/projections](#23-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
+24. [POST /pharmacies/{pharmacyId}/sites](#24-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
+25. [POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts](#25-post-pharmacies-pharmacyid-sites-siteid-on-call-shifts) — Registrar un turno de guardia de la sede
+26. [PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h](#26-put-pharmacies-pharmacyid-sites-siteid-open-24h) — Declarar si la sede abre las 24 horas
+27. [POST /pharmacies/{pharmacyId}/sites/bulk](#27-post-pharmacies-pharmacyid-sites-bulk) — Cargar sucursales (sedes de venta) en lote, con vista previa
+28. [GET /pharmacy/catalog-products](#28-get-pharmacy-catalog-products) — Buscar en el catálogo universal de medicamentos
+29. [GET /pharmacy/pharmacies](#29-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
+30. [GET /pharmacy/pharmacies/{id}](#30-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
+31. [GET /pharmacy/pharmacies/{id}/contacts](#31-get-pharmacy-pharmacies-id-contacts) — Representante legal y gerencias de la farmacia (sólo su personal)
+32. [GET /pharmacy/pharmacies/{id}/licenses](#32-get-pharmacy-pharmacies-id-licenses) — Licencias de la farmacia (sólo su personal)
+33. [GET /pharmacy/pharmacies/{id}/summary](#33-get-pharmacy-pharmacies-id-summary) — Resumen del catálogo de la farmacia (sólo su personal)
+34. [GET /pharmacy/products](#34-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
+35. [GET /pharmacy/sites](#35-get-pharmacy-sites) — Listar sedes publicadas, sueltas
+36. [GET /pharmacy/sites/{siteId}/prices](#36-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
+37. [GET /public/medications](#37-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
+38. [GET /public/medications/{conceptId}/availability](#38-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
+39. [GET /public/pharmacies/open-now](#39-get-public-pharmacies-open-now) — Farmacias abiertas ahora: 24 h o de turno vigente
 
 ---
 
@@ -700,7 +706,179 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /pharmacies/{pharmacyId}/integration-connections
+## 6. POST /pharmacies/{pharmacyId}/categories/bulk
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Cargar categorías en lote, con vista previa
+- **Operation ID:** `PharmacyBulkController_bulkCategories`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyBulkController.bulkCategories](../../src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts)
+
+### Descripción de negocio
+
+Cargar categorías en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacies/{pharmacyId}/categories/bulk` en `PharmacyBulkController_bulkCategories`. El controlador delega en `PharmacyBulkService.run`. Valida el body como `BulkRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<BulkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BulkRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/categories/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mode` | Sí | `string` | valores: `CREATE`, `UPDATE`, `UPSERT` | Sin descripción específica en el contrato OpenAPI. | `CREATE` |
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `rows` | Sí | `array<object>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/categories/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "dryRun": false,
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BulkResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BulkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "dryRun": true,
+  "results": [
+    {
+      "row": 1,
+      "outcome": "CREATED",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "errors": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ],
+      "warnings": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `results` | Sí | `array<BulkRowResultDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"row":1,"outcome":"CREATED","id":"00000000-0000-4000-8000-000000000001","errors":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}],"warnings":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]}]` |
+| `results[].row` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `results[].outcome` | Sí | `string` | valores: `CREATED`, `UPDATED`, `REJECTED`, `UNCHANGED` | Sin descripción específica en el contrato OpenAPI. | `CREATED` |
+| `results[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `results[].errors` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].errors[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].errors[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].errors[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].warnings[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].warnings[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | dryRun debe ser true o false | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/categories/bulk"
+}
+```
+
+---
+
+## 7. POST /pharmacies/{pharmacyId}/integration-connections
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -751,7 +929,6 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `integrationMode` | Sí | `string` | valores: `REALTIME`, `BATCH` | Modo de integración | `REALTIME` |
-| `connectionId` | No | `string` | formato `uuid` | Conexión de integración externa registrada; si se omite, la fila se auto-referencia | `00000000-0000-4000-8000-000000000001` |
 | `pharmacySiteId` | No | `string` | formato `uuid` | Sede a la que aplica la conexión | `00000000-0000-4000-8000-000000000001` |
 | `inventoryAuthorityConceptId` | No | `string` | formato `uuid` | Concept id de la autoridad de inventario | `00000000-0000-4000-8000-000000000001` |
 | `supportsStockQuery` | No | `boolean` | Sin restricción adicional declarada | Soporta consulta de stock | `true` |
@@ -772,7 +949,6 @@ Content-Type: application/json
 
 {
   "integrationMode": "REALTIME",
-  "connectionId": "00000000-0000-4000-8000-000000000001",
   "pharmacySiteId": "00000000-0000-4000-8000-000000000001",
   "inventoryAuthorityConceptId": "00000000-0000-4000-8000-000000000001",
   "supportsStockQuery": true,
@@ -817,7 +993,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
-| `connectionId` | Sí | `string` | formato `uuid` | Identificador asociado a connection. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | Sí | `string` | formato `uuid`; admite null | Conexión registrada en integraciones; nulo mientras la farmacia no tiene configurado su sistema externo. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
@@ -830,7 +1006,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una conexión para esa integración | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -850,7 +1025,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings
+## 8. POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -866,14 +1041,14 @@ Mapear producto a código de proveedor externo. Requiere JWT y los roles o alcan
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings` en `PharmacyController_mapProduct`. El controlador delega en `PharmacyIntegrationService.mapProduct`. Valida el body como `CreateMappingDto` y consume `application/json`. El tipo de retorno estático es `Promise<MappingResponseDto>`.
+NestJS resuelve `POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` en `PharmacyController_mapProduct`. El controlador delega en `PharmacyIntegrationService.mapProduct`. Valida el body como `CreateMappingDto` y consume `application/json`. El tipo de retorno estático es `Promise<MappingResponseDto>`.
 
 ### Parámetros
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `connId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -895,7 +1070,7 @@ Content-Type: application/json
 
 - Requiere `Authorization: Bearer <JWT>`.
 - Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
-- Deben ser UUID válidos: `pharmacyId`, `connId`.
+- Deben ser UUID válidos: `pharmacyId`, `connectionId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -949,6 +1124,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyIntegrationConnectionId": "00000000-0000-4000-8000-000000000001",
   "pharmacyProductId": "00000000-0000-4000-8000-000000000001",
   "externalProductCode": "CODIGO_EJEMPLO",
+  "externalUnitCode": {},
   "verificationStatus": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
@@ -958,12 +1134,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `pharmacyIntegrationConnectionId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy integration connection. | `00000000-0000-4000-8000-000000000001` |
-| `pharmacyProductId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy product. | `00000000-0000-4000-8000-000000000001` |
-| `externalProductCode` | Sí | `string` | Sin restricción adicional declarada | Valor de external product code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyIntegrationConnectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyProductId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalProductCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `externalUnitCode` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
-| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -978,8 +1155,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 409 | `CONFLICT` | El producto ya está mapeado en esta conexión | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La conexión no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La conexión no soporta consulta de stock ni de precio | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -992,13 +1167,285 @@ Ejemplo de error normalizado:
   "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
-  "path": "/pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings"
+  "path": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings"
 }
 ```
 
 ---
 
-## 8. PATCH /pharmacies/{pharmacyId}/inventory
+## 9. DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Deshacer un vínculo con un código de proveedor externo
+- **Operation ID:** `PharmacyController_unmapProduct`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyController.unmapProduct](../../src/modules/pharmacy/controllers/pharmacy.controller.ts)
+
+### Descripción de negocio
+
+Borra el vínculo, también con la conexión inactiva, y devuelve cómo estaba. El stock que ya se sincronizó se conserva. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión.
+
+Contexto declarado en el controlador: Deshace un vínculo con el código externo.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}` en `PharmacyController_unmapProduct`. El controlador delega en `PharmacyIntegrationService.unmapProduct`. No recibe body. El tipo de retorno estático es `Promise<MappingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `mappingId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /pharmacies/00000000-0000-4000-8000-000000000001/integration-connections/00000000-0000-4000-8000-000000000001/product-mappings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`, `connectionId`, `mappingId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /pharmacies/00000000-0000-4000-8000-000000000001/integration-connections/00000000-0000-4000-8000-000000000001/product-mappings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MappingResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MappingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "pharmacyIntegrationConnectionId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyProductId": "00000000-0000-4000-8000-000000000001",
+  "externalProductCode": "CODIGO_EJEMPLO",
+  "externalUnitCode": {},
+  "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyIntegrationConnectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyProductId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalProductCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `externalUnitCode` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 404 | `NOT_FOUND` | Vínculo no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}"
+}
+```
+
+---
+
+## 10. PATCH /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Corregir un vínculo con un código de proveedor externo
+- **Operation ID:** `PharmacyController_updateMapping`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyController.updateMapping](../../src/modules/pharmacy/controllers/pharmacy.controller.ts)
+
+### Descripción de negocio
+
+Cambia el producto, el código externo o la unidad; lo que no viene no cambia. Mismas condiciones que el alta y el vínculo vuelve a quedar sin verificar. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión; 409 EXTERNAL_MAPPING_PRODUCT_TAKEN si el producto nuevo ya tiene vínculo; 400 EXTERNAL_MAPPING_EMPTY_UPDATE sin campos.
+
+Contexto declarado en el controlador: Corrige un vínculo con el código externo (producto, código o unidad).
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}` en `PharmacyController_updateMapping`. El controlador delega en `PharmacyIntegrationService.updateMapping`. Valida el body como `UpdateMappingDto` y consume `application/json`. El tipo de retorno estático es `Promise<MappingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `mappingId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateMappingDto`; los campos opcionales se omiten.
+
+```http
+PATCH /pharmacies/00000000-0000-4000-8000-000000000001/integration-connections/00000000-0000-4000-8000-000000000001/product-mappings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`, `connectionId`, `mappingId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `pharmacyProductId` | No | `string` | formato `uuid` | Producto al que pasa el vínculo (activo, de la farmacia) | `00000000-0000-4000-8000-000000000001` |
+| `externalProductCode` | No | `string` | longitud mínima 1; longitud máxima 200 | Código de producto en el sistema externo | `CODIGO_EJEMPLO` |
+| `externalUnitCode` | No | `object` | longitud máxima 100; admite null | Unidad del sistema externo que equivale a una del producto; null la borra | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /pharmacies/00000000-0000-4000-8000-000000000001/integration-connections/00000000-0000-4000-8000-000000000001/product-mappings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "pharmacyProductId": "00000000-0000-4000-8000-000000000001",
+  "externalProductCode": "CODIGO_EJEMPLO",
+  "externalUnitCode": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MappingResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MappingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "pharmacyIntegrationConnectionId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyProductId": "00000000-0000-4000-8000-000000000001",
+  "externalProductCode": "CODIGO_EJEMPLO",
+  "externalUnitCode": {},
+  "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyIntegrationConnectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyProductId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalProductCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `externalUnitCode` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 404 | `NOT_FOUND` | Vínculo no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 409 | `CONFLICT` | El producto ya está mapeado en esta conexión | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}"
+}
+```
+
+---
+
+## 11. PATCH /pharmacies/{pharmacyId}/inventory
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1139,7 +1586,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
+## 12. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1268,7 +1715,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel
+## 13. POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1398,7 +1845,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /pharmacies/{pharmacyId}/opening-hours
+## 14. GET /pharmacies/{pharmacyId}/opening-hours
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1546,7 +1993,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /pharmacies/{pharmacyId}/price-lists
+## 15. POST /pharmacies/{pharmacyId}/price-lists
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1698,7 +2145,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
+## 16. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1810,7 +2257,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
+## 17. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1962,7 +2409,179 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /pharmacies/{pharmacyId}/products
+## 18. POST /pharmacies/{pharmacyId}/prices/bulk
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Cargar precios de venta en lote, con vista previa
+- **Operation ID:** `PharmacyBulkController_bulkPrices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyBulkController.bulkPrices](../../src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts)
+
+### Descripción de negocio
+
+Cargar precios de venta en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacies/{pharmacyId}/prices/bulk` en `PharmacyBulkController_bulkPrices`. El controlador delega en `PharmacyBulkService.run`. Valida el body como `BulkRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<BulkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BulkRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/prices/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mode` | Sí | `string` | valores: `CREATE`, `UPDATE`, `UPSERT` | Sin descripción específica en el contrato OpenAPI. | `CREATE` |
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `rows` | Sí | `array<object>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/prices/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "dryRun": false,
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BulkResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BulkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "dryRun": true,
+  "results": [
+    {
+      "row": 1,
+      "outcome": "CREATED",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "errors": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ],
+      "warnings": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `results` | Sí | `array<BulkRowResultDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"row":1,"outcome":"CREATED","id":"00000000-0000-4000-8000-000000000001","errors":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}],"warnings":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]}]` |
+| `results[].row` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `results[].outcome` | Sí | `string` | valores: `CREATED`, `UPDATED`, `REJECTED`, `UNCHANGED` | Sin descripción específica en el contrato OpenAPI. | `CREATED` |
+| `results[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `results[].errors` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].errors[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].errors[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].errors[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].warnings[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].warnings[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | dryRun debe ser true o false | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/prices/bulk"
+}
+```
+
+---
+
+## 19. POST /pharmacies/{pharmacyId}/products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2109,7 +2728,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "productCode": "CODIGO_EJEMPLO",
   "status": "00000000-0000-4000-8000-000000000001",
   "identifierCount": 1,
-  "createdAt": "2026-07-31T12:00:00.000Z"
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "warnings": [
+    {
+      "field": "valor-ejemplo",
+      "reason": "Texto descriptivo de ejemplo",
+      "message": "valor-ejemplo"
+    }
+  ]
 }
 ```
 
@@ -2123,6 +2749,10 @@ Campos de la respuesta:
 | `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
 | `identifierCount` | Sí | `number` | Sin restricción adicional declarada | Nº de identificadores registrados | `1` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `warnings` | No | `array<ProductWarningDto>` | Sin restricción adicional declarada | Avisos sobre el producto guardado, calculados con lo que quedó (también lo derivado del catálogo oficial): `MEDICATION_NOT_LINKED` si pide receta y no tiene medicamento. Ausente si no hay ninguno. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `warnings[].field` | No | `string` | Sin restricción adicional declarada | Campo al que se refiere el aviso. | `valor-ejemplo` |
+| `warnings[].reason` | No | `string` | Sin restricción adicional declarada | Código estable del aviso. | `Texto descriptivo de ejemplo` |
+| `warnings[].message` | No | `string` | Sin restricción adicional declarada | El aviso en castellano, para mostrarlo tal cual. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2169,7 +2799,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. DELETE /pharmacies/{pharmacyId}/products/{productId}
+## 20. DELETE /pharmacies/{pharmacyId}/products/{productId}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2281,7 +2911,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PATCH /pharmacies/{pharmacyId}/products/{productId}
+## 21. PATCH /pharmacies/{pharmacyId}/products/{productId}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2336,6 +2966,7 @@ Content-Type: application/json
 | `strengthText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Concentración (texto libre); `null` la borra | `valor-ejemplo` |
 | `packageSizeText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Tamaño de empaque (texto libre); `null` lo borra | `valor-ejemplo` |
 | `requiresPrescription` | No | `boolean` | admite null | Requiere receta; `null` lo borra | `true` |
+| `medicationConceptId` | No | `string` | formato `uuid`; admite null | Medicamento del catálogo `medication` con que se receta; `null` lo desvincula. Fuera de ese catálogo es 422. | `00000000-0000-4000-8000-000000000001` |
 | `unitPrice` | No | `number | string` | Sin restricción adicional declarada | Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`. | `12.5` |
 | `category` | No | `string` | longitud máxima 60; admite null | Categoría por nombre (una de la farmacia; otra es 422); `null` la quita | `valor-ejemplo` |
 | `description` | No | `string` | longitud máxima 2000; admite null | Descripción para el paciente; `null` la borra | `Texto descriptivo de ejemplo` |
@@ -2361,6 +2992,7 @@ Content-Type: application/json
   "strengthText": "valor-ejemplo",
   "packageSizeText": "valor-ejemplo",
   "requiresPrescription": true,
+  "medicationConceptId": "00000000-0000-4000-8000-000000000001",
   "unitPrice": 12.5,
   "category": "valor-ejemplo",
   "description": "Texto descriptivo de ejemplo",
@@ -2419,6 +3051,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "PUBLISHED",
   "stock": 1,
   "minStock": 1,
+  "outOfStockDeclared": true,
   "imageFileIds": [
     "00000000-0000-4000-8000-000000000001"
   ]
@@ -2452,6 +3085,7 @@ Campos de la respuesta:
 | `status` | No | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
 | `stock` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `minStock` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `outOfStockDeclared` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `imageFileIds` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -2463,11 +3097,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 400 | `VALIDATION_FAILED` | ${changed.join(', ')} vienen del catálogo oficial y no se editan | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 400 | `VALIDATION_FAILED` | unitPrice debe ser un importe positivo con hasta 2 decimales | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
+| 400 | `VALIDATION_FAILED` | medicationConceptId viene del catálogo oficial y no se cambia | Excepción explícita en src/modules/pharmacy/services/medication-catalog.resolver.ts |
+| 400 | `VALIDATION_FAILED` | Indique el campo destino (`target`) o el código de la enumeración (`code`) | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Enumeración no encontrada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 404 | `NOT_FOUND` | La enumeración está retirada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 422 | `PRECONDITION_FAILED` | La imagen del producto no es un archivo de imagen | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
@@ -2476,6 +3114,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | La categoría no es una de las de su farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-categories.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese medicamento no está en el catálogo con que se receta | Excepción explícita en src/modules/pharmacy/services/medication-catalog.resolver.ts |
+| 422 | `PRECONDITION_FAILED` | La enumeración no tiene versión publicada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2493,7 +3133,179 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /pharmacies/{pharmacyId}/projections
+## 22. POST /pharmacies/{pharmacyId}/products/bulk
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Cargar productos en lote, con vista previa
+- **Operation ID:** `PharmacyBulkController_bulkProducts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyBulkController.bulkProducts](../../src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts)
+
+### Descripción de negocio
+
+Cargar productos en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacies/{pharmacyId}/products/bulk` en `PharmacyBulkController_bulkProducts`. El controlador delega en `PharmacyBulkService.run`. Valida el body como `BulkRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<BulkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BulkRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/products/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mode` | Sí | `string` | valores: `CREATE`, `UPDATE`, `UPSERT` | Sin descripción específica en el contrato OpenAPI. | `CREATE` |
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `rows` | Sí | `array<object>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/products/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "dryRun": false,
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BulkResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BulkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "dryRun": true,
+  "results": [
+    {
+      "row": 1,
+      "outcome": "CREATED",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "errors": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ],
+      "warnings": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `results` | Sí | `array<BulkRowResultDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"row":1,"outcome":"CREATED","id":"00000000-0000-4000-8000-000000000001","errors":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}],"warnings":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]}]` |
+| `results[].row` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `results[].outcome` | Sí | `string` | valores: `CREATED`, `UPDATED`, `REJECTED`, `UNCHANGED` | Sin descripción específica en el contrato OpenAPI. | `CREATED` |
+| `results[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `results[].errors` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].errors[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].errors[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].errors[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].warnings[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].warnings[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | dryRun debe ser true o false | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/products/bulk"
+}
+```
+
+---
+
+## 23. POST /pharmacies/{pharmacyId}/projections
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2628,7 +3440,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /pharmacies/{pharmacyId}/sites
+## 24. POST /pharmacies/{pharmacyId}/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2780,7 +3592,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts
+## 25. POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -2929,7 +3741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h
+## 26. PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -3086,7 +3898,179 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /pharmacy/catalog-products
+## 27. POST /pharmacies/{pharmacyId}/sites/bulk
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Cargar sucursales (sedes de venta) en lote, con vista previa
+- **Operation ID:** `PharmacyBulkController_bulkSites`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyBulkController.bulkSites](../../src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts)
+
+### Descripción de negocio
+
+Cargar sucursales (sedes de venta) en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacies/{pharmacyId}/sites/bulk` en `PharmacyBulkController_bulkSites`. El controlador delega en `PharmacyBulkService.run`. Valida el body como `BulkRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<BulkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BulkRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/sites/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mode` | Sí | `string` | valores: `CREATE`, `UPDATE`, `UPSERT` | Sin descripción específica en el contrato OpenAPI. | `CREATE` |
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `rows` | Sí | `array<object>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /pharmacies/00000000-0000-4000-8000-000000000001/sites/bulk HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE",
+  "dryRun": false,
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BulkResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BulkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BulkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "dryRun": true,
+  "results": [
+    {
+      "row": 1,
+      "outcome": "CREATED",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "errors": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ],
+      "warnings": [
+        {
+          "field": "valor-ejemplo",
+          "reason": "Texto descriptivo de ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `results` | Sí | `array<BulkRowResultDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"row":1,"outcome":"CREATED","id":"00000000-0000-4000-8000-000000000001","errors":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}],"warnings":[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]}]` |
+| `results[].row` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `results[].outcome` | Sí | `string` | valores: `CREATED`, `UPDATED`, `REJECTED`, `UNCHANGED` | Sin descripción específica en el contrato OpenAPI. | `CREATED` |
+| `results[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `results[].errors` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].errors[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].errors[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].errors[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings` | No | `array<BulkRowErrorDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","message":"valor-ejemplo"}]` |
+| `results[].warnings[].field` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `results[].warnings[].reason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `results[].warnings[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | dryRun debe ser true o false | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-bulk.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/sites/bulk"
+}
+```
+
+---
+
+## 28. GET /pharmacy/catalog-products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3264,7 +4248,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /pharmacy/pharmacies
+## 29. GET /pharmacy/pharmacies
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3394,7 +4378,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /pharmacy/pharmacies/{id}
+## 30. GET /pharmacy/pharmacies/{id}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3569,7 +4553,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /pharmacy/pharmacies/{id}/contacts
+## 31. GET /pharmacy/pharmacies/{id}/contacts
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3699,7 +4683,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /pharmacy/pharmacies/{id}/licenses
+## 32. GET /pharmacy/pharmacies/{id}/licenses
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3849,7 +4833,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /pharmacy/pharmacies/{id}/summary
+## 33. GET /pharmacy/pharmacies/{id}/summary
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -3989,7 +4973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /pharmacy/products
+## 34. GET /pharmacy/products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -4089,6 +5073,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "status": "PUBLISHED",
       "stock": 1,
       "minStock": 1,
+      "outOfStockDeclared": true,
       "imageFileIds": [
         "00000000-0000-4000-8000-000000000001"
       ]
@@ -4103,7 +5088,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PharmacyProductReadDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","productCode":"CODIGO_EJEMPLO","brandName":{},"genericName":{},"strengthText":{},"packageSizeText":{},"dosageForm":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requiresPrescription":{},"unitPrice":"12.50","currency":"BOB","inStock":true,"category":"valor-ejemplo","description":"Texto descriptivo de ejemplo","status":"PUBLISHED","stock":1,"minStock":1,"imageFileIds":["00000000-0000-4000-8000-000000000001"]}]` |
+| `items` | Sí | `array<PharmacyProductReadDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","productCode":"CODIGO_EJEMPLO","brandName":{},"genericName":{},"strengthText":{},"packageSizeText":{},"dosageForm":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requiresPrescription":{},"unitPrice":"12.50","currency":"BOB","inStock":true,"category":"valor-ejemplo","description":"Texto descriptivo de ejemplo","status":"PUBLISHED","stock":1,"minStock":1,"outOfStockDeclared":true,"imageFileIds":["00000000-0000-4000-8000-000000000001"]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -4127,6 +5112,7 @@ Campos de la respuesta:
 | `items[].status` | No | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
 | `items[].stock` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `items[].minStock` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].outOfStockDeclared` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `items[].imageFileIds` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado al listado | `1` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | true si quedaron productos fuera del tope. Se declara, no se calla | `true` |
@@ -4158,7 +5144,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /pharmacy/sites
+## 35. GET /pharmacy/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -4298,7 +5284,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /pharmacy/sites/{siteId}/prices
+## 36. GET /pharmacy/sites/{siteId}/prices
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -4464,7 +5450,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /public/medications
+## 37. GET /public/medications
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`
@@ -4607,7 +5593,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /public/medications/{conceptId}/availability
+## 38. GET /public/medications/{conceptId}/availability
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`
@@ -4778,7 +5764,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /public/pharmacies/open-now
+## 39. GET /public/pharmacies/open-now
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`

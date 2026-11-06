@@ -26,6 +26,7 @@ import {
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
 } from './presentation/controllers';
+import { RegistrationAffiliationsService } from './application/services/registration-affiliations.service';
 import {
   DependentLinkRequestsService,
   ProfilesAffiliationsService,
@@ -99,6 +100,7 @@ import { AdmissionFilesAdapter } from './infrastructure/adapters/admission-files
 import { CommunityVerificationSealAdapter } from './infrastructure/adapters/community-verification-seal.adapter';
 import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
 import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
+import { PractitionerAdmissionSubmitService } from './application/services/practitioner-admission-submit.service';
 import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
 import { PractitionerVerificationReader } from './application/services/practitioner-verification-reader.service';
 import { PractitionerAdmissionChecklistService } from './application/services/practitioner-admission-checklist.service';
@@ -155,6 +157,7 @@ import { PractitionerVerificationProjector } from './application/services/practi
     AdministrativeAreaCatalogService,
     HealthFacilityCatalogService,
     ProfilesAffiliationsService,
+    RegistrationAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
     // decide no sabe que existe un canal in-app, y eso es lo que deja probar la
@@ -250,6 +253,7 @@ import { PractitionerVerificationProjector } from './application/services/practi
     PractitionerAdmissionsReadService,
     PractitionerVerificationReader,
     PractitionerAdmissionsService,
+    PractitionerAdmissionSubmitService,
     PractitionerAdmissionDocumentsService,
     // Servicios
     ProfilesPatientsService,
@@ -261,6 +265,9 @@ import { PractitionerVerificationProjector } from './application/services/practi
   // repositorios y no el servicio porque `registerPatient` de este módulo es
   // admin-only y abre su propia transacción.
   exports: [
+    // Los vínculos con instituciones que el profesional elige en su alta: los
+    // pide `iam` dentro de la transacción del registro.
+    RegistrationAffiliationsService,
     // `DirectoryNetworksSeedService` (H3) carga los consultorios de las redes
     // con el mismo caso de uso que el alta administrativa de una afiliación.
     ProfilesPractitionersService,

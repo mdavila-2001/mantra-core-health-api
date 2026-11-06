@@ -1,6 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import type { AuthenticatedUser } from '../../../../common';
+import {
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
+} from '../../../../common';
 import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
@@ -43,10 +46,18 @@ export class ProfileOwnershipService {
     private readonly patientsRepo: PatientProfilesRepository,
   ) {}
 
-  /** `true` si el actor tiene un rol de plataforma. */
+  /**
+   * `true` si el actor tiene un rol de plataforma **global**.
+   *
+   * Los perfiles de persona no son de ningún tenant, así que el rol se evalúa
+   * sin tenant (`roleAuthorizesInTenant(..., undefined)`): un SECURITY_ADMIN
+   * concedido dentro de una organización (MCH-001, `scopedRoles`) administra
+   * esa organización, no los perfiles de cualquiera.
+   */
   private isPlatform(actor: AuthenticatedUser): boolean {
-    const roles = actor.roles ?? [];
-    return PLATFORM_ROLES.some((role) => roles.includes(role));
+    return PLATFORM_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, undefined),
+    );
   }
 
   /**

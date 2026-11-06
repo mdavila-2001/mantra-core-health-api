@@ -96,6 +96,17 @@ describe('HttpExternalPharmacyCatalogAdapter', () => {
     expect(requests[0].url).toBe('/pharmacy-erp/stock?siteCode=SEDE+CENTRAL');
   });
 
+  it('sends the pharmacy code with the site code', async () => {
+    process.env.PHARMACY_ERP_BASE_URL = await serve(() => ({
+      body: JSON.stringify({ items: [] }),
+    }));
+    const adapter = new HttpExternalPharmacyCatalogAdapter();
+    await adapter.stockForSite('SEDE CENTRAL', 'FARM-1');
+    expect(requests[0].url).toBe(
+      '/pharmacy-erp/stock?siteCode=SEDE+CENTRAL&pharmacyCode=FARM-1',
+    );
+  });
+
   it.each([
     ['a 500', { status: 500, body: '{"message":"boom"}' }],
     ['invalid JSON', { body: 'not json' }],

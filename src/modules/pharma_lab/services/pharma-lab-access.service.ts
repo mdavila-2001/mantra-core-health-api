@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import type { MedicalVisitors, PharmaLabs } from '../entities';
@@ -35,7 +36,7 @@ export class PharmaLabAccessService {
   /**
    * ¿Administra el actor todos los laboratorios de la red?
    *
-   * Sólo `SUPERADMIN` y `PLATFORM_ADMIN`/`BUSINESS_ADMIN` con alcance global.
+   * Sólo `SUPERADMIN`, `PLATFORM_ADMIN` y `BUSINESS_ADMIN` con alcance global.
    * Un código concedido dentro de un tenant (MCH-001, `scopedRoles`) no cuenta,
    * igual que en `RolesGuard`.
    *
@@ -43,7 +44,9 @@ export class PharmaLabAccessService {
    * @returns `true` si puede operar sobre cualquier laboratorio.
    */
   administersAllLabs(actor: AuthenticatedUser): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return true;
+    // «Todos los laboratorios» no es un tenant: sólo el `SUPERADMIN` global;
+    // el acotado administra los de sus organizaciones (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return true;
     return CROSS_LAB_ROLES.some(
       (role) =>
         actor.roles.includes(role) &&

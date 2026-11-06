@@ -1,3 +1,4 @@
+import { assertChecklistPhase } from './or/checklist-gates';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -610,6 +611,10 @@ export class PeriopIntraopService {
         caseId,
       );
       const report = await this.intraopRepo.findReportForUpdate(tx, reportId);
+      // F4 (§F4.3): firmar el informe completa el caso; exige la Salida OMS.
+      if (report && report.procedureCaseId === caseId) {
+        await assertChecklistPhase(this.casesRepo, tx, caseId, 'SIGN_OUT');
+      }
       if (!report) {
         throw new ResourceNotFoundException(
           'Reporte operatorio no encontrado',

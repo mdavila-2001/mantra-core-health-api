@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 23 (23 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 3 · MEDIO 13 · BAJO 7
-- **Tablas distintas que tocan:** 41
+- **Tablas distintas que tocan:** 43
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/chart.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,23 +13,23 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/charts/care-plans` | Crear un plan de cuidado con actividades | MEDIO | 5 | CLINICIAN, PRACTITIONER |
-| 2 | PATCH | `/charts/care-plans/{planId}/activities/{activityId}` | Actualizar una actividad del plan de cuidado | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 2 | PATCH | `/charts/care-plans/{planId}/activities/{activityId}` | Actualizar una actividad del plan de cuidado | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 | 3 | POST | `/charts/documents` | Adjuntar un documento con archivos gobernados | MEDIO | 5 | CLINICIAN, PRACTITIONER |
-| 4 | GET | `/charts/documents/{documentId}/files/{fileId}/content` | Descargar el archivo de un documento del expediente | BAJO | 22 | CLINICIAN, PRACTITIONER |
-| 5 | GET | `/charts/encounters/{id}/pdf` | Descargar el PDF oficial de un encuentro cerrado | BAJO | 30 | CLINICIAN, PRACTITIONER |
+| 4 | GET | `/charts/documents/{documentId}/files/{fileId}/content` | Descargar el archivo de un documento del expediente | BAJO | 24 | CLINICIAN, PRACTITIONER |
+| 5 | GET | `/charts/encounters/{id}/pdf` | Descargar el PDF oficial de un encuentro cerrado | BAJO | 32 | CLINICIAN, PRACTITIONER |
 | 6 | GET | `/charts/me/documents` | Ver mis documentos visibles | ALTO | 3 | sesión (sin roles) |
 | 7 | GET | `/charts/me/documents/{documentId}/files/{fileId}/content` | Descargar el archivo de un documento propio | ALTO | 5 | sesión (sin roles) |
 | 8 | GET | `/charts/me/encounters/{id}/pdf` | Descargar el PDF oficial de una atención propia | BAJO | 14 | sesión (sin roles) |
 | 9 | GET | `/charts/me/notes` | Ver mis evoluciones liberadas | ALTO | 3 | sesión (sin roles) |
 | 10 | GET | `/charts/notes` | Listar las notas de evolución de un profesional por ventana de fechas | BAJO | 2 | CLINICIAN, PRACTITIONER |
 | 11 | POST | `/charts/notes` | Crear una nota clínica versionada (borrador SOAP) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 12 | POST | `/charts/notes/{noteId}/amendments` | Enmendar una nota firmada (addendum versionado) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 13 | PUT | `/charts/notes/{noteId}/versions` | Editar borrador creando una nueva versión inmutable | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 14 | POST | `/charts/notes/{noteId}/versions/{versionId}/cosign` | Cofirmar una versión firmada (cadena de firmas) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 15 | POST | `/charts/notes/{noteId}/versions/{versionId}/sign` | Firmar una versión y sellar su contenido | MEDIO | 19 | CLINICIAN, PRACTITIONER |
-| 16 | POST | `/charts/notes/versions/{versionId}/exam-findings` | Registrar hallazgos de examen físico | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 17 | POST | `/charts/notes/versions/{versionId}/release` | Liberar una versión al paciente | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 18 | POST | `/charts/notes/versions/{versionId}/withhold` | Retener una versión del paciente (motivo legal) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 12 | POST | `/charts/notes/{noteId}/amendments` | Enmendar una nota firmada (addendum versionado) | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 13 | PUT | `/charts/notes/{noteId}/versions` | Editar borrador creando una nueva versión inmutable | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 14 | POST | `/charts/notes/{noteId}/versions/{versionId}/cosign` | Cofirmar una versión firmada (cadena de firmas) | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 15 | POST | `/charts/notes/{noteId}/versions/{versionId}/sign` | Firmar una versión y sellar su contenido | MEDIO | 21 | CLINICIAN, PRACTITIONER |
+| 16 | POST | `/charts/notes/versions/{versionId}/exam-findings` | Registrar hallazgos de examen físico | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 17 | POST | `/charts/notes/versions/{versionId}/release` | Liberar una versión al paciente | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 18 | POST | `/charts/notes/versions/{versionId}/withhold` | Retener una versión del paciente (motivo legal) | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 | 19 | GET | `/charts/patients/{patientProfileId}/chart` | UC-40-14: expediente del paciente (notas, planes de cuidados y documentos) | BAJO | 6 | CLINICIAN, PRACTITIONER |
 | 20 | GET | `/charts/templates` | Listar las plantillas de chart por especialidad | BAJO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
 | 21 | POST | `/charts/templates` | Crear una plantilla de chart con su esquema de campos, por especialidad | MEDIO | 5 | SECURITY_ADMIN |
@@ -51,7 +51,7 @@
 
 Crear un plan de cuidado con actividades. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -63,10 +63,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-care-plans.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -75,7 +75,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.care_plan_activities` | ESCRIBE | CREA | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → CarePlansRepository.createActivity | `src/modules/chart/repositories/care-plans.repository.ts:240` |
 | `chart.care_plans` | ESCRIBE | CREA | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → CarePlansRepository.createPlan | `src/modules/chart/repositories/care-plans.repository.ts:210` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertConditionBelongsToPatient → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
 
 ### Cuerpo — DTO `CreateCarePlanDto` · `application/json`
@@ -179,11 +179,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Actualizar una actividad del plan de cuidado. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /charts/care-plans/{planId}/activities/{activityId}` la atiende `ChartCarePlansController.updateActivity` (src/modules/chart/controllers/chart-care-plans.controller.ts:65). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `UpdateActivityDto` (3 campos, 0 obligatorios). Delega en `ChartCarePlansService.updateActivity`. Actualiza chart.care_plan_activities, chart.care_plans. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`PATCH /charts/care-plans/{planId}/activities/{activityId}` la atiende `ChartCarePlansController.updateActivity` (src/modules/chart/controllers/chart-care-plans.controller.ts:65). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `UpdateActivityDto` (3 campos, 0 obligatorios). Delega en `ChartCarePlansService.updateActivity`. Actualiza chart.care_plan_activities, chart.care_plans. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -191,11 +191,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-care-plans.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, activityId | `src/modules/chart/controllers/chart-care-plans.controller.ts:65` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -209,18 +209,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.care_plan_activities` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity | `src/modules/chart/services/chart-care-plans.service.ts:233` |
 | `chart.care_plan_activities` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → CarePlansRepository.findActivityById | `src/modules/chart/repositories/care-plans.repository.ts:185` |
 | `chart.care_plans` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity | `src/modules/chart/services/chart-care-plans.service.ts:248` |
 | `chart.care_plans` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → CarePlansRepository.findPlanById | `src/modules/chart/repositories/care-plans.repository.ts:96` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartCarePlansController.updateActivity → ChartCarePlansService.updateActivity → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -302,7 +304,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Adjuntar un documento con archivos gobernados. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -314,10 +316,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-documents.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -325,7 +327,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `chart.document_record_files` | ESCRIBE | CREA | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → DocumentsRepository.createFile | `src/modules/chart/repositories/documents.repository.ts:224` |
 | `chart.document_records` | ESCRIBE | CREA | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → DocumentsRepository.createRecord | `src/modules/chart/repositories/documents.repository.ts:192` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 
@@ -415,7 +417,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:143` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:163` |
 | CONTROLADOR | `src/modules/chart/controllers/chart-documents.controller.spec.ts:19` |
 
 ### Flujos
@@ -437,11 +439,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Descargar el archivo de un documento del expediente. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`GET /charts/documents/{documentId}/files/{fileId}/content` la atiende `ChartDocumentsController.getDocumentFileContent` (src/modules/chart/controllers/chart-documents.controller.ts:79). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ChartDocumentsService.getDocumentFileContent`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`GET /charts/documents/{documentId}/files/{fileId}/content` la atiende `ChartDocumentsController.getDocumentFileContent` (src/modules/chart/controllers/chart-documents.controller.ts:79). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ChartDocumentsService.getDocumentFileContent`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -449,9 +451,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: documentId, fileId | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -465,20 +467,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → DocumentsRepository.findRecordById | `src/modules/chart/repositories/documents.repository.ts:123` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → FileUploadService.downloadForAuthorizedContext → FileUploadService.serveCurrentVersion → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → FileUploadService.downloadForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartDocumentsController.getDocumentFileContent → ChartDocumentsService.getDocumentFileContent → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -513,7 +517,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:241` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:261` |
 | CONTROLADOR | `src/modules/chart/controllers/chart-documents.controller.spec.ts:35` |
 
 ### Flujos
@@ -535,11 +539,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Descargar el PDF oficial de un encuentro cerrado. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`GET /charts/encounters/{id}/pdf` la atiende `ChartEncountersController.getEncounterPdf` (src/modules/chart/controllers/chart-encounters.controller.ts:48). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `EncounterPdfService.render`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 22 más.
+`GET /charts/encounters/{id}/pdf` la atiende `ChartEncountersController.getEncounterPdf` (src/modules/chart/controllers/chart-encounters.controller.ts:48). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `EncounterPdfService.render`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
 
 ### Requerimientos
 
@@ -547,9 +551,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-encounters.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-encounters.controller.ts:48` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -563,9 +567,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.care_plan_activities` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → CarePlansRepository.findByEncounter → CarePlansRepository.findActivitiesForPlans | `src/modules/chart/repositories/care-plans.repository.ts:171` |
 | `chart.care_plans` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → CarePlansRepository.findByEncounter | `src/modules/chart/repositories/care-plans.repository.ts:131` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → ClinicalNotesRepository.findHeadersByEncounter | `src/modules/chart/repositories/clinical-notes.repository.ts:284` |
@@ -573,17 +577,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `common.files` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → EncounterPdfService.resolvePatientName → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
 ### Parámetros
@@ -640,7 +646,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Ver mis documentos visibles. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -652,8 +658,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -727,7 +733,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Descargar el archivo de un documento propio. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -739,9 +745,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: documentId, fileId | `src/modules/chart/controllers/chart-me.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -808,7 +814,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Descargar el PDF oficial de una atención propia. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -820,9 +826,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-me.controller.ts:123` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -835,7 +841,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `common.files` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → EncounterPdfService.resolvePractitionerName → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
@@ -896,7 +902,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Ver mis evoluciones liberadas. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -908,8 +914,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -987,7 +993,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Listar las notas de evolución de un profesional por ventana de fechas. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -999,8 +1005,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1068,7 +1074,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:164` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:178` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:192` |
 | CONTROLADOR | `src/modules/chart/controllers/chart-notes.controller.spec.ts:41` |
 
@@ -1091,7 +1097,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Crear una nota clínica versionada (borrador SOAP). Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1103,10 +1109,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1115,7 +1121,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.createNote → ChartNotesService.createNote | `src/modules/chart/services/chart-notes.service.ts:131` |
 | `chart.clinical_note_headers` | ESCRIBE | CREA | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ClinicalNotesRepository.createHeader | `src/modules/chart/repositories/clinical-notes.repository.ts:414` |
 | `chart.clinical_note_versions` | ESCRIBE | CREA | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ClinicalNotesRepository.createVersion | `src/modules/chart/repositories/clinical-notes.repository.ts:440` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 
 ### Cuerpo — DTO `CreateNoteDto` · `application/json`
 
@@ -1197,8 +1203,8 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:465` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:85` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:274` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:86` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:294` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:145` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:148` |
 | INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:148` |
@@ -1223,11 +1229,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Enmendar una nota firmada (addendum versionado). Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/{noteId}/amendments` la atiende `ChartNotesController.amendNote` (src/modules/chart/controllers/chart-notes.controller.ts:173). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AmendNoteDto` (10 campos, 1 obligatorio). Delega en `ChartNotesService.amendNote`. Crea filas en chart.clinical_note_versions. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /charts/notes/{noteId}/amendments` la atiende `ChartNotesController.amendNote` (src/modules/chart/controllers/chart-notes.controller.ts:173). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AmendNoteDto` (10 campos, 1 obligatorio). Delega en `ChartNotesService.amendNote`. Crea filas en chart.clinical_note_versions. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -1235,11 +1241,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:173` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId | `src/modules/chart/controllers/chart-notes.controller.ts:173` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1253,18 +1259,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.amendNote → ChartNotesService.amendNote | `src/modules/chart/services/chart-notes.service.ts:384` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_versions` | ESCRIBE | CREA | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalNotesRepository.createVersion | `src/modules/chart/repositories/clinical-notes.repository.ts:440` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalNotesRepository.maxVersionNumber | `src/modules/chart/repositories/clinical-notes.repository.ts:381` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.amendNote → ChartNotesService.amendNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1345,7 +1353,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:271` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:285` |
 | CONTROLADOR | `src/modules/chart/controllers/chart-notes.controller.spec.ts:86` |
 
 ### Flujos
@@ -1367,11 +1375,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Editar borrador creando una nueva versión inmutable. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /charts/notes/{noteId}/versions` la atiende `ChartNotesController.addVersion` (src/modules/chart/controllers/chart-notes.controller.ts:118). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AddVersionDto` (9 campos, 0 obligatorios). Delega en `ChartNotesService.addVersion`. Crea filas en chart.clinical_note_versions. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`PUT /charts/notes/{noteId}/versions` la atiende `ChartNotesController.addVersion` (src/modules/chart/controllers/chart-notes.controller.ts:118). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AddVersionDto` (9 campos, 0 obligatorios). Delega en `ChartNotesService.addVersion`. Crea filas en chart.clinical_note_versions. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -1379,11 +1387,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId | `src/modules/chart/controllers/chart-notes.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1397,18 +1405,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.addVersion → ChartNotesService.addVersion | `src/modules/chart/services/chart-notes.service.ts:197` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_versions` | ESCRIBE | CREA | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalNotesRepository.createVersion | `src/modules/chart/repositories/clinical-notes.repository.ts:440` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalNotesRepository.maxVersionNumber | `src/modules/chart/repositories/clinical-notes.repository.ts:381` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.addVersion → ChartNotesService.addVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1507,11 +1517,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Cofirmar una versión firmada (cadena de firmas). Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/{noteId}/versions/{versionId}/cosign` la atiende `ChartNotesController.cosignVersion` (src/modules/chart/controllers/chart-notes.controller.ts:155). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CosignVersionDto` (3 campos, 0 obligatorios). Delega en `ChartNotesService.cosignVersion`. Crea filas en chart.clinical_note_signatures. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`POST /charts/notes/{noteId}/versions/{versionId}/cosign` la atiende `ChartNotesController.cosignVersion` (src/modules/chart/controllers/chart-notes.controller.ts:155). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CosignVersionDto` (3 campos, 0 obligatorios). Delega en `ChartNotesService.cosignVersion`. Crea filas en chart.clinical_note_signatures. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -1519,11 +1529,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId, versionId | `src/modules/chart/controllers/chart-notes.controller.ts:155` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1537,18 +1547,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ChartNotesService.loadNoteAndVersion → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_signatures` | ESCRIBE | CREA | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalNotesRepository.createSignature | `src/modules/chart/repositories/clinical-notes.repository.ts:475` |
 | `chart.clinical_note_signatures` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalNotesRepository.findSignatures | `src/modules/chart/repositories/clinical-notes.repository.ts:398` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ChartNotesService.loadNoteAndVersion → ClinicalNotesRepository.findVersionById | `src/modules/chart/repositories/clinical-notes.repository.ts:249` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.cosignVersion → ChartNotesService.cosignVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1633,11 +1645,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Firmar una versión y sellar su contenido. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/{noteId}/versions/{versionId}/sign` la atiende `ChartNotesController.signVersion` (src/modules/chart/controllers/chart-notes.controller.ts:137). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `SignVersionDto` (3 campos, 0 obligatorios). Delega en `ChartNotesService.signVersion`. Crea filas en chart.clinical_note_signatures. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /charts/notes/{noteId}/versions/{versionId}/sign` la atiende `ChartNotesController.signVersion` (src/modules/chart/controllers/chart-notes.controller.ts:137). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `SignVersionDto` (3 campos, 0 obligatorios). Delega en `ChartNotesService.signVersion`. Crea filas en chart.clinical_note_signatures. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -1645,11 +1657,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId, versionId | `src/modules/chart/controllers/chart-notes.controller.ts:137` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1663,17 +1675,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ChartNotesService.loadNoteAndVersion → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_signatures` | ESCRIBE | CREA | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalNotesRepository.createSignature | `src/modules/chart/repositories/clinical-notes.repository.ts:475` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ChartNotesService.loadNoteAndVersion → ClinicalNotesRepository.findVersionById | `src/modules/chart/repositories/clinical-notes.repository.ts:249` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.signVersion → ChartNotesService.signVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1737,8 +1751,8 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:478` |
-| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:263` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:284` |
+| INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:277` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:304` |
 | INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:159` |
 | CONTROLADOR | `src/modules/chart/controllers/chart-notes.controller.spec.ts:62` |
 
@@ -1761,11 +1775,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Registrar hallazgos de examen físico. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/versions/{versionId}/exam-findings` la atiende `ChartNotesController.recordExamFindings` (src/modules/chart/controllers/chart-notes.controller.ts:224). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ExamFindingsDto` (6 campos, 1 obligatorio). Delega en `ChartNotesService.recordExamFindings`. Crea filas en chart.physical_exam_findings. Actualiza chart.clinical_note_versions. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /charts/notes/versions/{versionId}/exam-findings` la atiende `ChartNotesController.recordExamFindings` (src/modules/chart/controllers/chart-notes.controller.ts:224). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ExamFindingsDto` (6 campos, 1 obligatorio). Delega en `ChartNotesService.recordExamFindings`. Crea filas en chart.physical_exam_findings. Actualiza chart.clinical_note_versions. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -1773,11 +1787,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:224` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1791,18 +1805,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings | `src/modules/chart/services/chart-notes.service.ts:558` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ClinicalNotesRepository.findVersionById | `src/modules/chart/repositories/clinical-notes.repository.ts:249` |
 | `chart.physical_exam_findings` | ESCRIBE | CREA | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ClinicalNotesRepository.createExamFinding | `src/modules/chart/repositories/clinical-notes.repository.ts:528` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.recordExamFindings → ChartNotesService.recordExamFindings → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1895,11 +1911,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Liberar una versión al paciente. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/versions/{versionId}/release` la atiende `ChartNotesController.releaseVersion` (src/modules/chart/controllers/chart-notes.controller.ts:190). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReleaseVersionDto` (1 campo, 0 obligatorios). Delega en `ChartNotesService.releaseVersion`. Crea filas en chart.note_release_events. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /charts/notes/versions/{versionId}/release` la atiende `ChartNotesController.releaseVersion` (src/modules/chart/controllers/chart-notes.controller.ts:190). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReleaseVersionDto` (1 campo, 0 obligatorios). Delega en `ChartNotesService.releaseVersion`. Crea filas en chart.note_release_events. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -1907,11 +1923,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1925,18 +1941,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion | `src/modules/chart/services/chart-notes.service.ts:450` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ClinicalNotesRepository.findVersionById | `src/modules/chart/repositories/clinical-notes.repository.ts:249` |
 | `chart.note_release_events` | ESCRIBE | CREA | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ClinicalNotesRepository.createReleaseEvent | `src/modules/chart/repositories/clinical-notes.repository.ts:501` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.releaseVersion → ChartNotesService.releaseVersion → ChartNotesService.assertCanWriteNote → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2014,11 +2032,11 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Retener una versión del paciente (motivo legal). Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /charts/notes/versions/{versionId}/withhold` la atiende `ChartNotesController.withholdVersion` (src/modules/chart/controllers/chart-notes.controller.ts:207). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `WithholdVersionDto` (2 campos, 0 obligatorios). Delega en `ChartNotesService.withholdVersion`. Crea filas en chart.note_release_events. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /charts/notes/versions/{versionId}/withhold` la atiende `ChartNotesController.withholdVersion` (src/modules/chart/controllers/chart-notes.controller.ts:207). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `WithholdVersionDto` (2 campos, 0 obligatorios). Delega en `ChartNotesService.withholdVersion`. Crea filas en chart.note_release_events. Actualiza chart.clinical_note_headers. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -2026,11 +2044,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:207` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:207` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2044,18 +2062,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion | `src/modules/chart/services/chart-notes.service.ts:502` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalNotesRepository.findHeaderById | `src/modules/chart/repositories/clinical-notes.repository.ts:235` |
 | `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalNotesRepository.findVersionById | `src/modules/chart/repositories/clinical-notes.repository.ts:249` |
 | `chart.note_release_events` | ESCRIBE | CREA | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalNotesRepository.createReleaseEvent | `src/modules/chart/repositories/clinical-notes.repository.ts:501` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ChartNotesController.withholdVersion → ChartNotesService.withholdVersion → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2133,7 +2153,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2145,9 +2165,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-read.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/chart/controllers/chart-read.controller.ts:51` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2242,7 +2262,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:492` |
-| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:224` |
+| INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:244` |
 | INTEGRACION | `test/integration/p39-nota-medica-filas.int-spec.ts:167` |
 
 ### Flujos
@@ -2264,7 +2284,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Listar las plantillas de chart por especialidad. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2276,8 +2296,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2377,7 +2397,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Crear una plantilla de chart con su esquema de campos, por especialidad. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2389,10 +2409,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2556,7 +2576,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Leer el esquema de una plantilla de chart. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2568,9 +2588,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-templates.controller.ts:109` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2671,7 +2691,7 @@ El árbol de decisión completo está en [flujos](../flujos/chart.md).
 
 Asignar una plantilla de chart por especialidad. Dentro del módulo (descripción del modelo, en inglés): «A patient chart with immutable, signed clinical-note versions; explicit release to the patient; addenda instead of destructive edits; and a document cabinet that supports multiple governed file versions.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_15_chart.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2683,11 +2703,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: templateId | `src/modules/chart/controllers/chart-templates.controller.ts:49` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

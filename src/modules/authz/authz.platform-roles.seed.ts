@@ -27,7 +27,8 @@ import type { BaseRole, RoleScope } from './dto';
  *
  * - `PHARMACY_STAFF` lo deriva el login de una membresía en un tenant de farmacia
  *   (`withPharmacyStaffRole`); sembrarlo permitiría asignarlo a mano.
- * - `SYSTEM` y los seis globales de `iam` existen aparte (`PLATFORM_ROLE_CODES`).
+ * - `SYSTEM` y los globales de `iam` existen aparte (`PLATFORM_ROLE_CODES`).
+ *   SECURITY_ADMIN tiene además un descriptor no asignable en IAM_POLICY_ROLE_SEED para el PDP.
  */
 function role(
   code: string,
@@ -131,6 +132,8 @@ const PLATFORM_OPERATIONS: readonly ClinicalRoleSeed[] = [
 
 /** Datos, cumplimiento, inteligencia y gobierno de IA: sin tenant. */
 const DATA_AND_GOVERNANCE: readonly ClinicalRoleSeed[] = [
+  // ALIAS de `GOVERNANCE_ADMIN` (data_catalog): la fila se conserva para no romper asignaciones ni
+  // tokens vigentes; `common/auth/role-aliases.ts` hace que los dos códigos autoricen lo mismo.
   role(
     'DATA_GOVERNANCE_ADMIN',
     'Administrador de gobierno de datos',

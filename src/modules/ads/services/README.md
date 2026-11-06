@@ -11,7 +11,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `AdsDataService` | 06, 07, 08, 09, 13 | Política de datos, ingesta, conversiones y catálogo |
 | `AdsOptimizationService` | 10, 11, 12, 14, 15 | Experimentos, reglas, moderación, facturación y leads |
 
-## Reglas de negocio
+## Business rules
 
 - **Provisión (01)**: el business manager se crea si no viene; la cuenta nace activa con el gasto en
   cero y el propietario con rol de administrador — una cuenta sin administrador no la gestionaría
@@ -96,7 +96,7 @@ repetido, periodo ya facturado, infracción ya apelada, tramo solapado).
 política y al recibir un rechazo de la plataforma. Nunca se loguean payloads de conversión,
 respuestas de leads ni identificadores de usuario.
 
-## Pruebas
+## Tests
 
 `ads-accounts.service.spec.ts` (17), `ads-campaigns.service.spec.ts` (24),
 `ads-data.service.spec.ts` (28) y `ads-optimization.service.spec.ts` (30): idempotencia de webhooks

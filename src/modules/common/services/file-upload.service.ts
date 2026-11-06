@@ -21,6 +21,7 @@ import {
   isMimeTypeAllowedForCategory,
   loadStorageEnv,
   sniffMimeType,
+  getCurrentTenantId,
   type AuthenticatedUser,
   type FileStorageAdapter,
   type SniffedMimeType,
@@ -28,7 +29,7 @@ import {
 
 import { FileVersionsRepository, FilesRepository } from '../repositories';
 import { AttachableFileService } from './attachable-file.service';
-import { canActorReadOwnFile } from './file-access';
+import { canActorReadOwnFile, fileOwnerTenantId } from './file-access';
 import { FilesService } from './files.service';
 import type { Files } from '../entities';
 import type {
@@ -466,9 +467,10 @@ export class FileUploadService {
       throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     return this.publication.publish(
       { buffer: file.buffer, originalName: file.originalname, mimeType },
-      // This is the existing technical upload tenant, NOT proof of evidence ownership.
+      // Mismo tenant con el que `createFile` registra el archivo: la reserva y
+      // la fila tienen que coincidir. No prueba propiedad de evidencia.
       {
-        tenantId: SEED.tenantId,
+        tenantId: fileOwnerTenantId(actor, getCurrentTenantId(), SEED.tenantId),
         producer: actor ? 'common.upload' : 'common.anonymous-upload',
         targetId: randomUUID(),
       },
@@ -513,8 +515,8 @@ export class FileUploadService {
     fileId: string,
     actor: AuthenticatedUser,
   ): Promise<FileContentDto> {
-    const forked = this.em.fork();
-
+    // Preserve tenant transaction context so RLS policies allow reading common.files
+    const forked = this.em.fork({ keepTransactionContext: true });
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
@@ -566,8 +568,8 @@ export class FileUploadService {
     fileId: string,
     operation: string,
   ): Promise<FileContentDto> {
-    const forked = this.em.fork();
-
+    // Preserve tenant transaction context so RLS policies allow reading common.files
+    const forked = this.em.fork({ keepTransactionContext: true });
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
@@ -651,50 +653,50 @@ export class FileUploadService {
    *   para servir algo que no se terminó de revisar).
    */
   async downloadPublicMedia(fileId: string): Promise<FileContentDto> {
-    const forked = this.em.fork();
+    // Own connection: a joined transaction would keep this set_config alive.
+    const forked = this.em.fork({ keepTransactionContext: false });
+    const { file, version } = await forked.transactional(async (tx) => {
+      // Scoped system context allows reading clean public images without an HTTP tenant session.
+      await tx.execute("select set_config('app.system_context', 'true', true)");
+      const f = await this.filesRepo.findById(tx, fileId);
+      if (
+        !f ||
+        f.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE ||
+        f.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL
+      ) {
+        throw new ResourceNotFoundException('Archivo no encontrado', {
+          fileId,
+        });
+      }
+      if (f.deletedAt || f.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED) {
+        throw new PreconditionFailedException('El archivo está borrado', {
+          fileId,
+        });
+      }
+      if (!f.currentVersionId) {
+        throw new PreconditionFailedException(
+          'El archivo no tiene una versión vigente',
+          { fileId },
+        );
+      }
 
-    const file = await this.filesRepo.findById(forked, fileId);
-    if (
-      !file ||
-      file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE ||
-      file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL
-    ) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
-    }
-    if (
-      file.deletedAt ||
-      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
-    ) {
-      throw new PreconditionFailedException('El archivo está borrado', {
-        fileId,
-      });
-    }
-    if (!file.currentVersionId) {
-      throw new PreconditionFailedException(
-        'El archivo no tiene una versión vigente',
-        { fileId },
-      );
-    }
+      const v = await this.fileVersionsRepo.findById(tx, f.currentVersionId);
+      if (!v) {
+        throw new ResourceNotFoundException('Versión vigente no encontrada', {
+          fileId,
+        });
+      }
+      if (v.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
+        throw new PreconditionFailedException(
+          'La versión vigente todavía no está lista para servirse públicamente',
+          { fileId },
+        );
+      }
+      return { file: f, version: v };
+    });
 
-    const version = await this.fileVersionsRepo.findById(
-      forked,
-      file.currentVersionId,
-    );
-    if (!version) {
-      throw new ResourceNotFoundException('Versión vigente no encontrada', {
-        fileId,
-      });
-    }
-    if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
-      throw new PreconditionFailedException(
-        'La versión vigente todavía no está lista para servirse públicamente',
-        { fileId },
-      );
-    }
-
-    const buffer = await this.storage.retrieve(version.storageUri);
     return {
-      buffer,
+      buffer: await this.storage.retrieve(version.storageUri),
       mimeType: version.mimeType,
       originalName: file.originalName,
     };

@@ -28,6 +28,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const repo = {
     findWorkOrders: mockFn().mockResolvedValue([]),
+    collectionPointsOf: mockFn().mockResolvedValue(new Map()),
     findWorkOrder: mockFn(),
     findWorkOrderTest: mockFn(),
     findAnalyzerRun: mockFn(),

@@ -82,6 +82,9 @@ export enum PlatformOpsErrorReason {
   INCIDENT_RESOLVE_MISSING_ROOT_CAUSE = 'INCIDENT_RESOLVE_MISSING_ROOT_CAUSE',
   POSTMORTEM_ACTION_CODE_DUPLICATE = 'POSTMORTEM_ACTION_CODE_DUPLICATE',
 
+  // --- Registro de herramientas (ops-tools.service.ts) ---
+  TOOL_NOT_FOUND = 'TOOL_NOT_FOUND',
+
   // --- Alcance de tenant (todos los servicios) ---
   PLATFORM_OPS_RESOURCE_OUT_OF_SCOPE = 'PLATFORM_OPS_RESOURCE_OUT_OF_SCOPE',
 }

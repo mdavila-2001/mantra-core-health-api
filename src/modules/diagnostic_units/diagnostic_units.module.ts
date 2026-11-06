@@ -3,6 +3,24 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
+import { MessagingModule } from '../messaging/messaging.module';
+// Tenant memberships: `LabStaffGuard` on the lab portal recognises lab staff by membership.
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { LabPortalServicesController } from './controllers/lab-portal-services.controller';
+import { LabPortalCatalogService } from './services/lab-portal-catalog.service';
+import { LabPortalCategoriesService } from './services/lab-portal-categories.service';
+import { LabPortalContextService } from './services/lab-portal-context.service';
+import { LabPortalImportService } from './services/lab-portal-import.service';
+import { LabPortalPricingService } from './services/lab-portal-pricing.service';
+import { LabPortalWriterService } from './services/lab-portal-writer.service';
+import { LabPortalStudyCatalogService } from './services/lab-portal-study-catalog.service';
+import { StudyCatalogModule } from '../study_catalog/study_catalog.module';
+import {
+  CENTER_SCHEDULE_CONTROLLERS,
+  CENTER_SCHEDULE_PROVIDERS,
+} from './center-schedule/center-schedule.providers';
+import { EquipmentF5aService } from './services/equipment-f5a.service';
+import { InfraF5aPolicyRegistrar } from './policies/infra-f5a.policy';
 import * as entities from './entities';
 import {
   DiagnosticUnitsController,
@@ -55,13 +73,20 @@ import {
     CommunityModule,
     CommonModule,
     PracticeModule,
+    MessagingModule,
+    DirectoryAuthorizationModule,
+    // The lab portal imports análisis from the doctor's study catalog (4.2).
+    StudyCatalogModule,
   ],
   controllers: [
+    // First: their `me/*` routes must be matched before any `:id` route.
+    ...CENTER_SCHEDULE_CONTROLLERS,
     DiagnosticUnitsController,
     DiagnosticUnitSitesController,
     DiagnosticPricingController,
     DiagnosticEquipmentController,
     DiagnosticUnitAccreditationsController,
+    LabPortalServicesController,
   ],
   providers: [
     // Repositorios
@@ -83,10 +108,20 @@ import {
     DiagnosticStudiesService,
     DiagnosticPricingService,
     DiagnosticEquipmentService,
+    EquipmentF5aService,
+    InfraF5aPolicyRegistrar,
     DiagnosticUnitsReadService,
     DiagnosticUnitsAdminReadService,
     DiagnosticUnitsSearchService,
     DiagnosticUnitProvisioningService,
+    ...CENTER_SCHEDULE_PROVIDERS,
+    LabPortalContextService,
+    LabPortalPricingService,
+    LabPortalWriterService,
+    LabPortalCatalogService,
+    LabPortalCategoriesService,
+    LabPortalImportService,
+    LabPortalStudyCatalogService,
   ],
   // Se exporta para `directory`: `TenantTypeProfileService` lo usa DENTRO de
   // su propia transacción para materializar la unidad diagnóstica de un

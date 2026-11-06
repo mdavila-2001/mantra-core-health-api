@@ -685,57 +685,62 @@ flowchart TD
   n38 -->|"sí"| n39
   n40["Repite: por cada const pharmacy de pharmacies"]:::bucle
   n39 --> n40
-  n41[("ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies")]:::efecto
+  n41{"pharmacy.statusConceptId === PHARM.PHARMACY_DRAFT"}:::decision
   n40 -->|"cada elemento"| n41
-  n42["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
-  n41 --> n42
-  n40 -->|"al terminar"| n42
-  n43["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n42[("ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies")]:::efecto
+  n41 -->|"sí"| n42
+  n43[("ACTUALIZA pharmacy.pharmacies")]:::efecto
   n42 --> n43
-  n44{"!this.cache"}:::decision
+  n41 -->|"no"| n43
+  n44["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
   n43 --> n44
-  n45["Transacción: catch(…)"]:::transaccion
-  n44 -->|"sí"| n45
-  n46(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"al terminar"| n44
+  n45["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n44 --> n45
+  n46{"!this.cache"}:::decision
   n45 --> n46
-  n47["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
-  n44 -->|"no"| n47
-  n48{"!conceptId"}:::decision
+  n47["Transacción: catch(…)"]:::transaccion
+  n46 -->|"sí"| n47
+  n48(["↩ (relanza el error capturado)"]):::error
   n47 --> n48
-  n49(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
-  n48 -->|"sí"| n49
-  n50["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
-  n48 -->|"no"| n50
-  n51[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
-  n50 -->|"cada elemento"| n51
-  n52{"operating?.kind === 'LABORATORY'"}:::decision
-  n51 --> n52
-  n50 -->|"al terminar"| n52
-  n38 -->|"no"| n52
-  n53["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
-  n52 -->|"sí"| n53
-  n54["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n49["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n46 -->|"no"| n49
+  n50{"!conceptId"}:::decision
+  n49 --> n50
+  n51(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n50 -->|"sí"| n51
+  n52["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
+  n50 -->|"no"| n52
+  n53[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
+  n52 -->|"cada elemento"| n53
+  n54{"operating?.kind === 'LABORATORY'"}:::decision
   n53 --> n54
-  n55{"!this.cache"}:::decision
-  n54 --> n55
-  n56["Transacción: catch(…)"]:::transaccion
-  n55 -->|"sí"| n56
-  n57(["↩ (relanza el error capturado)"]):::error
+  n52 -->|"al terminar"| n54
+  n38 -->|"no"| n54
+  n55["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
+  n54 -->|"sí"| n55
+  n56["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n55 --> n56
+  n57{"!this.cache"}:::decision
   n56 --> n57
-  n58["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
-  n55 -->|"no"| n58
-  n59{"!conceptId"}:::decision
+  n58["Transacción: catch(…)"]:::transaccion
+  n57 -->|"sí"| n58
+  n59(["↩ (relanza el error capturado)"]):::error
   n58 --> n59
-  n60(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
-  n59 -->|"sí"| n60
-  n61["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
-  n59 -->|"no"| n61
-  n62[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
-  n61 -->|"cada elemento"| n62
-  n63(("200 Responde con éxito")):::ok
-  n62 --> n63
-  n61 -->|"al terminar"| n63
-  n52 -->|"no"| n63
+  n60["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n57 -->|"no"| n60
+  n61{"!conceptId"}:::decision
+  n60 --> n61
+  n62(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n61 -->|"sí"| n62
+  n63["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
+  n61 -->|"no"| n63
+  n64[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
+  n63 -->|"cada elemento"| n64
+  n65(("200 Responde con éxito")):::ok
+  n64 --> n65
+  n63 -->|"al terminar"| n65
+  n54 -->|"no"| n65
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -780,18 +785,9 @@ flowchart TD
   n9 --> n10
   n11[("LEE directory.tenant_memberships")]:::efecto
   n10 --> n11
-  n12{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
+  n12(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
   n11 --> n12
-  n13["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
-  n12 -->|"sí"| n13
-  n14["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
-  n13 --> n14
-  n15[("LEE directory.tenant_memberships")]:::efecto
-  n14 --> n15
-  n16(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
-  n15 --> n16
-  n12 -->|"no"| n16
-  n17(("200 Responde con éxito")):::ok
+  n13(("200 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1562,34 +1558,25 @@ flowchart TD
   n5 --> n6
   n7[("LEE directory.tenant_memberships")]:::efecto
   n6 --> n7
-  n8{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
+  n8(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
   n7 --> n8
-  n9["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
-  n8 -->|"sí"| n9
-  n10["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n9["Llama a OrganizationLogoService.assertTenant"]:::llamada
+  n10["Llama a TenantsRepository.findById"]:::llamada
   n9 --> n10
-  n11[("LEE directory.tenant_memberships")]:::efecto
+  n11[("LEE directory.tenants")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n12{"!tenant"}:::decision
   n11 --> n12
-  n8 -->|"no"| n12
-  n13["Llama a OrganizationLogoService.assertTenant"]:::llamada
-  n14["Llama a TenantsRepository.findById"]:::llamada
-  n13 --> n14
-  n15[("LEE directory.tenants")]:::efecto
+  n13(["404 NOT_FOUND Organización no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PublicProfileProjectionService.getOrganizationLogo"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PublicProfilesRepository.findByTarget"]:::llamada
   n14 --> n15
-  n16{"!tenant"}:::decision
+  n16[("LEE community.public_profiles")]:::efecto
   n15 --> n16
-  n17(["404 NOT_FOUND Organización no encontrada"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a PublicProfileProjectionService.getOrganizationLogo"]:::llamada
-  n16 -->|"no"| n18
-  n19["Llama a PublicProfilesRepository.findByTarget"]:::llamada
-  n18 --> n19
-  n20[("LEE community.public_profiles")]:::efecto
-  n19 --> n20
-  n21(("200 Responde con éxito")):::ok
-  n20 --> n21
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

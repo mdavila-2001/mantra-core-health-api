@@ -80,6 +80,13 @@ export class AuthzClinicalScopeRepository {
     patientProfileId: string,
     tenantId: string,
   ): Promise<boolean> {
+    // «Admisión crea el vínculo» (decisión del usuario 2026-10-31): un ingreso
+    // hospitalario auditado deja huella aunque el paciente no tenga cuenta. Sólo
+    // la escribe POST /clinical/admissions con permiso de ingreso de nivel sede
+    // (tabla append-only clinical.patient_admission_footprints).
+    if (await this.hasAdmissionFootprint(em, patientProfileId, tenantId))
+      return true;
+
     // `patient_profiles.profile_id` es el id de la persona: de ahí a su cuenta.
     // Sin cuenta el paciente no ha hecho nada por sí mismo: no hay huella propia.
     const link = await em.findOne(PersonAccountLinks, {
@@ -105,6 +112,66 @@ export class AuthzClinicalScopeRepository {
         $or: [{ invitedByUserId: null }, { invitedByUserId: link.userId }],
       })) > 0
     );
+  }
+
+  /** ¿Hay huella de ingreso (Admisión crea el vínculo) del paciente en el tenant? */
+  async hasAdmissionFootprint(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    const rows = await em.execute<{ n: number }[]>(
+      `SELECT count(*)::int AS n FROM clinical.patient_admission_footprints
+        WHERE patient_profile_id = ? AND tenant_id = ?`,
+      [patientProfileId, tenantId],
+      'all',
+    );
+    return Number(rows[0]?.n ?? 0) > 0;
+  }
+
+  /**
+   * ¿El paciente tiene huella propia en ALGÚN tenant distinto de `tenantId`?
+   * Lo usa el ingreso sin huella previa: un paciente de otra organización no
+   * se «adopta» internándolo (404). Recorre tenants ajenos, así que el
+   * llamador lo corre en contexto de sistema y sólo recibe el booleano.
+   *
+   * @param em - Contexto (con `app.system_context` en su transacción).
+   * @param patientProfileId - Paciente.
+   * @param tenantId - Tenant activo (se excluye).
+   */
+  async hasFootprintElsewhere(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    const rows = await em.execute<{ n: number }[]>(
+      `SELECT (
+         (SELECT count(*) FROM clinical.patient_admission_footprints
+           WHERE patient_profile_id = ? AND tenant_id <> ?)
+       + (SELECT count(*) FROM profiles.person_account_links l
+            JOIN scheduling.appointment_bookings b
+              ON b.booked_by_user_id = l.user_id AND b.patient_profile_id = l.person_id
+           WHERE l.person_id = ? AND l.status_concept_id = ? AND b.tenant_id <> ?)
+       + (SELECT count(*) FROM profiles.person_account_links l
+            JOIN directory.tenant_memberships m ON m.user_id = l.user_id
+           WHERE l.person_id = ? AND l.status_concept_id = ? AND m.tenant_id <> ?
+             AND m.status_concept_id = ANY(?::uuid[])
+             AND (m.invited_by_user_id IS NULL OR m.invited_by_user_id = l.user_id))
+       )::int AS n`,
+      [
+        patientProfileId,
+        tenantId,
+        patientProfileId,
+        PROF.ACCOUNT_LINK_ACTIVE,
+        tenantId,
+        patientProfileId,
+        PROF.ACCOUNT_LINK_ACTIVE,
+        tenantId,
+        `{${DIR.MEMBERSHIP_ACTIVE},${CONCEPTS.MEMBERSHIP_ACTIVE}}`,
+      ],
+      'all',
+    );
+    return Number(rows[0]?.n ?? 0) > 0;
   }
 
   /**

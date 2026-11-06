@@ -111,6 +111,7 @@ function main() {
     ['cache/dailymed/fetch.meta.json', cpCache('dailymed', 'fetch.meta.json')],
     ['cache/lactmed/fetch.meta.json', cpCache('lactmed', 'fetch.meta.json')],
     ['cache/livertox/fetch.meta.json', cpCache('livertox', 'fetch.meta.json')],
+    ['cache/ema-pi/fetch.meta.json', cpCache('ema-pi', 'fetch.meta.json')],
   ];
   for (const [from, path] of small) {
     if (!existsSync(path)) continue;

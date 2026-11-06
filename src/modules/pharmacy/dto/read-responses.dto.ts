@@ -463,6 +463,13 @@ export class PharmacyProductReadDto {
   @ApiPropertyOptional({ nullable: true, type: Number })
   minStock?: number | null;
 
+  /**
+   * «No tengo» de toda la farmacia: gana sobre el conteo y sobre el stock de
+   * cada sede, que no lo puede apagar.
+   */
+  @ApiPropertyOptional({ type: Boolean })
+  outOfStockDeclared?: boolean;
+
   /** Imágenes propias, en orden. */
   @ApiPropertyOptional({ type: [String], format: 'uuid' })
   imageFileIds?: string[];
@@ -470,9 +477,6 @@ export class PharmacyProductReadDto {
 
 /** Resultado de la búsqueda de productos, acotado y con el recorte declarado. */
 export class PharmacyProductSearchResponseDto {
-  /**
-   * Valor de items mantenido por la instancia.
-   */
   @ApiProperty({ type: [PharmacyProductReadDto] })
   items!: PharmacyProductReadDto[];
 
@@ -482,14 +486,14 @@ export class PharmacyProductSearchResponseDto {
   @ApiProperty({ description: 'Tope aplicado al listado' })
   limit!: number;
 
-  /**
-   * Valor de truncated mantenido por la instancia.
-   */
   @ApiProperty({
     description:
       'true si quedaron productos fuera del tope. Se declara, no se calla',
   })
   truncated!: boolean;
+
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'ibuprofeno' })
+  correctedQuery?: string | null;
 }
 
 /** Un precio vigente de un producto en una sede. */

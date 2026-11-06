@@ -1,8 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScopedReadResponseDto } from '../../clinical/dto/scoped-read-response.dto';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
 } from '../../clinical/service-request-category';
+import {
+  REPORT_PATIENT_VISIBILITIES,
+  type ReportPatientVisibility,
+} from './report-draft.dto';
 
 /**
  * Una orden diagnóstica del paciente — la fila de `clinical.service_requests`
@@ -26,7 +31,7 @@ export class DiagnosticOrderSummaryDto {
   /** P43: instancia del formulario médico de la que salió la orden, si salió de uno. */
   @ApiPropertyOptional({ format: 'uuid' }) formInstanceId?: string;
 
-  /** v4291: diagnóstico que el estudio se pidió para confirmar, descartar o seguir; ausente si no lo declara. */
+  /** v4292: diagnóstico que el estudio se pidió para confirmar, descartar o seguir; ausente si no lo declara. */
   @ApiPropertyOptional({ format: 'uuid' }) reasonConditionId?: string;
 
   /** Qué se pidió (concept id). */
@@ -67,6 +72,13 @@ export class DiagnosticOrderSummaryDto {
   /** Nombre de la sede sugerida, o `null`. */
   @ApiProperty({ nullable: true, type: String })
   suggestedPracticeSiteName!: string | null;
+
+  /** F5b: punto de toma sugerido {id, code, name}, o `null`. */
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Punto de toma sugerido (F5b)',
+  })
+  suggestedCareSpace?: { id: string; code: string; name: string } | null;
 
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
@@ -122,6 +134,17 @@ export class DiagnosticReportSummaryDto {
   @ApiPropertyOptional({ format: 'uuid' })
   resultReleaseStatusConceptId?: string;
 
+  /** Released version whose patient visibility `patientVisibility` reports. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  releasedVersionId!: string | null;
+
+  /**
+   * Latest release event of that version: `HELD` means the requester still
+   * has to release it (`POST /diagnostics/reports/:id/patient-release`).
+   */
+  @ApiProperty({ enum: REPORT_PATIENT_VISIBILITIES, nullable: true })
+  patientVisibility!: ReportPatientVisibility | null;
+
   /** Cuándo se emitió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 }
@@ -137,7 +160,7 @@ export class DiagnosticReportSummaryDto {
  * `truncated` nombra **los bloques** recortados por el tope, no un booleano
  * global — mismo criterio que el resto de las lecturas del producto.
  */
-export class PatientDiagnosticOrdersResponseDto {
+export class PatientDiagnosticOrdersResponseDto extends ScopedReadResponseDto {
   /** Paciente leído. */
   @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
 

@@ -18,6 +18,8 @@ import type {
   OrganizationPracticeResponseDto,
 } from '../dto';
 import { siteCodeBase, uniqueCode } from '../site-code';
+import { ServiceCatalogRepository } from '../../billing/repositories';
+import { ensureDefaultAppointmentService } from '../../billing/default-services';
 
 /**
  * Alta de la práctica y la primera sede de una organización ya verificada
@@ -56,6 +58,7 @@ export class OrganizationPracticeProvisioningService {
     private readonly practicesRepo: PracticesRepository,
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrganizationPracticeProvisioningService.name);
@@ -131,6 +134,13 @@ export class OrganizationPracticeProvisioningService {
       });
       await tx.flush();
 
+      await ensureDefaultAppointmentService(
+        tx,
+        this.serviceCatalogRepo,
+        practice.id,
+        actor.id,
+      );
+
       // La dirección es de la organización (`OWNER_TENANT`), no de quien la
       // cargó: sobrevive al cambio de administrador.
       const address = this.addressesRepo.create(tx, {
@@ -164,6 +174,8 @@ export class OrganizationPracticeProvisioningService {
         operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
         addressId: address.id,
         managingTenantId: tenantId,
+        // F1: la sede pertenece al tenant de su práctica (NOT NULL desde v4.2.67).
+        tenantId,
         statusConceptId: PRAC.SITE_ACTIVE,
         actorUserId: actor.id,
       });

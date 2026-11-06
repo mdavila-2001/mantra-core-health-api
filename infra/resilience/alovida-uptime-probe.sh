@@ -1,8 +1,8 @@
 #!/bin/bash
 # Sonda de disponibilidad vista desde el propio Traefik.
 # Cada 2 s pide cada URL; anota SÓLO lo que no es 200, más un latido por hora.
-#   - /auth de demo y test: lo sirve el front (failover de Traefik).
-#   - una ruta de API por el front de test: la API detrás del nginx (respaldo
+#   - /auth de demo y prod: lo sirve el front (failover de Traefik).
+#   - una ruta de API por el front de prod: la API detrás del nginx (respaldo
 #     `alovida-api-standby`), así se mide también el despliegue de la API.
 # Alerta por Telegram (vía alovida-autodeploy) cuando una URL falla
 # $ALERT_AFTER veces seguidas, y otra vez cuando se recupera: un aviso por
@@ -10,8 +10,8 @@
 LOG=/var/log/alovida-uptime.log
 ALERT_AFTER="${ALERT_AFTER:-3}"
 URLS="demo.alovidasalud.arauzsoftware.com/auth
-test.62.169.18.132.sslip.io/auth
-test.62.169.18.132.sslip.io/terminology/value-sets?code=VS_BO_DEPARTMENT"
+app.alovidasalud.com/auth
+app.alovidasalud.com/terminology/value-sets?code=VS_BO_DEPARTMENT"
 declare -A streak down
 ok=0; last=$(date +%H)
 alert() { /usr/local/sbin/alovida-autodeploy --test-alert "$1" >/dev/null 2>&1 & }

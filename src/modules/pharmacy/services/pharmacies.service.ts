@@ -200,6 +200,15 @@ export class PharmaciesService {
         if (remaining === 0) {
           pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
           pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
+          // Aprobada, se enlaza a la vitrina de su organización: sin ese
+          // enlace no aparece en el buscador ni en «Dónde comprar», aunque
+          // esté activa y verificada. La vitrina la publica la verificación
+          // del tenant; si todavía no la hay, la enlaza esa verificación.
+          pharmacy.publicProfileId ??=
+            (await this.pharmaciesRepo.findTenantShowcaseId(
+              tx,
+              pharmacy.tenantId,
+            )) ?? undefined;
           touch(pharmacy, actor.id);
         }
       }

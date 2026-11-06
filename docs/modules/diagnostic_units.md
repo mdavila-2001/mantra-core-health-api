@@ -114,6 +114,13 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 - **Asignaciones**: se rechaza el solape activo del mismo profesional en el
   mismo rol/sitio (`409`).
 - **Ofertas/estudios/precios/cronogramas** requieren unidad ACTIVA (`422`).
+- **Portal «Precios» (`/diagnostics/lab/services`)**: una oferta sin precio
+  vigente responde `price: null` y `alovidaPrice: null`, nunca un `0.00`
+  inventado. Cada servicio lleva `kind`: `MODALITY` es el marcador genérico que
+  el alta crea por cada modalidad declarada (`MODALITY_*`) y del que el
+  directorio deriva «esta unidad hace rayos X»; no es un estudio vendible y
+  ponerle precio o descuento se rechaza con `422`. `SERVICE` es un estudio
+  concreto del catálogo.
 
 ## Permisos
 

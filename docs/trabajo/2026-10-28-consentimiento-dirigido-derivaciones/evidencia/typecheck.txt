@@ -1,2 +1,0 @@
-$ yarn typecheck (merge con origin/dev)
-EXIT 0

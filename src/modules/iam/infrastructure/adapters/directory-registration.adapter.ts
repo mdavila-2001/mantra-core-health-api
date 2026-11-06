@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { Tenants } from '../../../directory/entities';
+import type { OpeningHoursShiftDto } from '../../../../common/dto/opening-hours.dto';
 import {
-  BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../../../directory/repositories';
 import {
+  DeclaredBranchesService,
   TenantAffiliationDocumentsService,
   TenantLegalRepresentativesService,
+  TenantTaxIdentifierService,
   TenantTypeProfileService,
+  type DeclaredBranchesInput,
+  type OpeningHoursSite,
   type RegistrationDocumentsInput as DirectoryDocumentsInput,
 } from '../../../directory/services';
 import type {
@@ -28,10 +33,11 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
   constructor(
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly tenantsRepo: TenantsRepository,
-    private readonly branchesRepo: BranchesRepository,
+    private readonly declaredBranches: DeclaredBranchesService,
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
     private readonly representatives: TenantLegalRepresentativesService,
+    private readonly taxIdentifiers: TenantTaxIdentifierService,
   ) {}
 
   createTenantMembership(tx: EntityManager, data: object) {
@@ -45,6 +51,15 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     return this.tenantsRepo.findByCode(tx, code);
   }
 
+  async tenantNameExists(tx: EntityManager, name: string): Promise<boolean> {
+    // `%`, `_` and `\` are matched literally, not as ILIKE wildcards.
+    const exact = { $ilike: name.trim().replace(/[\\%_]/g, '\\$&') };
+    const found = await tx.findOne(Tenants, {
+      $or: [{ legalName: exact }, { tradeName: exact }],
+    });
+    return found !== null;
+  }
+
   createTenant(tx: EntityManager, data: object) {
     return this.tenantsRepo.create(
       tx,
@@ -52,11 +67,23 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     );
   }
 
-  createBranch(tx: EntityManager, data: object) {
-    return this.branchesRepo.create(
-      tx,
-      data as Parameters<BranchesRepository['create']>[1],
-    );
+  registerDeclaredBranches(tx: EntityManager, input: DeclaredBranchesInput) {
+    return this.declaredBranches.register(tx, input);
+  }
+
+  recordOpeningHours(
+    tx: EntityManager,
+    site: OpeningHoursSite,
+    shifts?: readonly OpeningHoursShiftDto[],
+  ) {
+    this.declaredBranches.recordShifts(tx, site, shifts);
+  }
+
+  registerTaxIdentifier(
+    tx: EntityManager,
+    input: Parameters<TenantTaxIdentifierService['register']>[1],
+  ) {
+    return this.taxIdentifiers.register(tx, input);
   }
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto) {

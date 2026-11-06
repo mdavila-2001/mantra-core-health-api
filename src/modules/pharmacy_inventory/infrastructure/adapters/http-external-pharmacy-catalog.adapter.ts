@@ -10,7 +10,7 @@ import { loadPharmacyErpEnv, type PharmacyErpEnv } from './pharmacy-erp.env';
 
 /**
  * Adaptador HTTP del sistema de la farmacia externa: `GET /pharmacy-erp/products`
- * y `GET /pharmacy-erp/stock?siteCode=`, con `X-Api-Key`. En local apunta al
+ * y `GET /pharmacy-erp/stock?siteCode=&pharmacyCode=`, con `X-Api-Key`. En local apunta al
  * simulador de `mock-provider-server/`.
  *
  * Valida la forma de cada respuesta antes de devolverla: una respuesta que no
@@ -54,8 +54,14 @@ export class HttpExternalPharmacyCatalogAdapter implements ExternalPharmacyCatal
     });
   }
 
-  async stockForSite(siteCode: string): Promise<ExternalStockLine[]> {
-    const body = await this.get('/pharmacy-erp/stock', { siteCode });
+  async stockForSite(
+    siteCode: string,
+    pharmacyCode?: string,
+  ): Promise<ExternalStockLine[]> {
+    const body = await this.get('/pharmacy-erp/stock', {
+      siteCode,
+      ...(pharmacyCode ? { pharmacyCode } : {}),
+    });
     return itemsOf(body).map((item) => {
       const quantity = item.quantity;
       if (
@@ -68,6 +74,11 @@ export class HttpExternalPharmacyCatalogAdapter implements ExternalPharmacyCatal
       }
       return { code: item.code, quantity };
     });
+  }
+
+  /** El sistema del servidor no tiene ruta de salud: responde si lista su catálogo. */
+  async checkHealth(): Promise<void> {
+    await this.listProducts();
   }
 
   private async get(

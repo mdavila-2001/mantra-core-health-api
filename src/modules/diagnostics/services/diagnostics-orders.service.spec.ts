@@ -10,6 +10,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsOrdersService } from './diagnostics-orders.service';
 import { DIAG } from '../diagnostics.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { FULL_READ_SCOPE as FULL } from '../../clinical/domain/clinical-read-scope';
+import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
 
 const TENANT = 't1';
 const PATIENT = 'p1';
@@ -29,14 +31,36 @@ function build() {
   const siteNames = { namesFor: mockFn().mockResolvedValue(new Map()) };
   // P40: las notas que motivan cada orden. Por defecto, ninguna.
   const basedOnNotes = { noteIdsFor: mockFn().mockResolvedValue(new Map()) };
+  const scopeFilter = { build: mockFn().mockResolvedValue(null) };
+  const scopeRepo = {
+    page: mockFn().mockResolvedValue({ rows: [], hidden: 0 }),
+  };
+  // Reports of this tenant's orders custodied by the performing laboratory.
+  const requesterReports = {
+    ofIssuedOrders: mockFn().mockResolvedValue({ rows: [], hidden: 0 }),
+    visibilityOf: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new DiagnosticsOrdersService(
     em as any,
     repo as any,
     siteNames as any,
     logger as any,
     basedOnNotes as any,
+    scopeFilter as any,
+    scopeRepo as any,
+    requesterReports as any,
   );
-  return { service, repo, em, fork, siteNames, basedOnNotes };
+  return {
+    service,
+    repo,
+    em,
+    fork,
+    siteNames,
+    basedOnNotes,
+    scopeFilter,
+    scopeRepo,
+    requesterReports,
+  };
 }
 
 /**
@@ -86,7 +110,7 @@ describe('DiagnosticsOrdersService', () => {
     it('acota la lectura al tenant y al paciente', async () => {
       const d = build();
 
-      await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(d.repo.findOrdersByPatient).toHaveBeenCalledWith(
         d.fork,
@@ -104,13 +128,13 @@ describe('DiagnosticsOrdersService', () => {
     });
 
     // P40 amplía el requisito: la orden de análisis «otro» de C2 también es
-    // de esta ficha, y también los estudios cardiológicos, de patología y la
-    // imagen de `clinical` que el formulario de la ficha pide. Siguen fuera
-    // procedimientos, derivaciones e interconsultas.
+    // de esta ficha, y también los estudios cardiológicos, de patología, los
+    // procedimientos y la imagen de `clinical` que el formulario de la ficha
+    // pide. Siguen fuera derivaciones e interconsultas.
     it('pide las categorías de estudio que la ficha pide (P40)', async () => {
       const d = build();
 
-      await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       const categories = d.repo.findOrdersByPatient.mock.calls[0][3];
       expect(categories).toEqual([
@@ -119,9 +143,9 @@ describe('DiagnosticsOrdersService', () => {
         CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
         CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
         CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+        CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
         CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
       ]);
-      expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
     });
 
     it('proyecta órdenes e informes con el tope aplicado', async () => {
@@ -129,7 +153,7 @@ describe('DiagnosticsOrdersService', () => {
       d.repo.findOrdersByPatient.mockResolvedValue([order('o1')]);
       d.repo.findReportsByPatient.mockResolvedValue([report('r1')]);
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(out.patientProfileId).toBe(PATIENT);
       expect(out.orders).toHaveLength(1);
@@ -146,7 +170,7 @@ describe('DiagnosticsOrdersService', () => {
       d.repo.findOrdersByPatient.mockResolvedValue([order('o1'), order('o2')]);
       d.repo.findReportsByPatient.mockResolvedValue([report('r1')]);
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1, FULL);
 
       expect(out.orders).toHaveLength(1);
       expect(out.orders[0].id).toBe('o1');
@@ -161,7 +185,7 @@ describe('DiagnosticsOrdersService', () => {
         report('r2'),
       ]);
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1, FULL);
 
       expect(out.truncated).toEqual(['orders', 'reports']);
     });
@@ -169,7 +193,7 @@ describe('DiagnosticsOrdersService', () => {
     it('devuelve bloques vacíos sin inventar nada cuando no hay filas', async () => {
       const d = build();
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(out.orders).toEqual([]);
       expect(out.reports).toEqual([]);
@@ -190,7 +214,7 @@ describe('DiagnosticsOrdersService', () => {
     ]);
     siteNames.namesFor.mockResolvedValue(new Map([['site-1', 'Centro Norte']]));
 
-    const res = await service.getPatientOrders('t1', PATIENT, 50);
+    const res = await service.getPatientOrders('t1', PATIENT, 50, FULL);
 
     expect(res.orders[0]).toMatchObject({
       performerSelectionConceptId: 'modo-self',
@@ -223,7 +247,7 @@ describe('DiagnosticsOrdersService', () => {
         new Map([['o1', ['n1', 'n2']]]),
       );
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(out.orders.map((o) => o.category)).toEqual([
         'LAB',
@@ -246,13 +270,13 @@ describe('DiagnosticsOrdersService', () => {
         { ...order('o1'), categoryConceptId: undefined },
       ]);
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(out.orders[0].category).toBeUndefined();
     });
   });
 
-  describe('reasonConditionId (v4291)', () => {
+  describe('reasonConditionId (v4292)', () => {
     it('la orden trae el diagnóstico que la motiva y, si es null, no trae el campo', async () => {
       const d = build();
       d.repo.findOrdersByPatient.mockResolvedValue([
@@ -260,10 +284,148 @@ describe('DiagnosticsOrdersService', () => {
         { ...order('o2'), reasonConditionId: null },
       ]);
 
-      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
 
       expect(out.orders[0].reasonConditionId).toBe('cond-1');
       expect('reasonConditionId' in out.orders[1]).toBe(false);
+    });
+  });
+
+  describe('getPatientOrders · por alcance', () => {
+    const SPECIALTIES = {
+      kind: 'SPECIALTIES',
+      specialtyConceptIds: ['esp-cardio'],
+    } as const;
+    const FILTER = { profileIds: ['hp-9'], userIds: ['u-9'], encounterIds: [] };
+
+    it('con alcance completo no filtra ni informa lo oculto', async () => {
+      const d = build();
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
+
+      expect(d.scopeRepo.page).not.toHaveBeenCalled();
+      expect(out.hiddenByScope).toBeUndefined();
+    });
+
+    it('con especialidades filtra órdenes por solicitante e informes por autor, y cuenta lo oculto', async () => {
+      const d = build();
+      d.scopeFilter.build.mockResolvedValue(FILTER);
+      d.scopeRepo.page.mockImplementation(async (_em: unknown, spec: any) =>
+        spec.entity === ServiceRequests
+          ? { rows: [order('o1')], hidden: 2 }
+          : { rows: [report('r1')], hidden: 1 },
+      );
+
+      const out = await d.service.getPatientOrders(
+        TENANT,
+        PATIENT,
+        50,
+        SPECIALTIES,
+      );
+
+      expect(d.repo.findOrdersByPatient).not.toHaveBeenCalled();
+      const orders = d.scopeRepo.page.mock.calls.find(
+        (call: any[]) => call[1].entity === ServiceRequests,
+      )[1];
+      expect(orders.columns).toEqual({
+        profile: 'requesterProfileId',
+        encounter: 'encounterId',
+      });
+      expect(orders.base).toMatchObject({
+        custodianTenantId: TENANT,
+        patientProfileId: PATIENT,
+      });
+      const reports = d.scopeRepo.page.mock.calls.find(
+        (call: any[]) => call[1].entity === DiagnosticReports,
+      )[1];
+      expect(reports.columns).toEqual({
+        user: 'createdByUserId',
+        encounter: 'encounterId',
+      });
+      expect(out.orders.map((o) => o.id)).toEqual(['o1']);
+      expect(out.reports.map((r) => r.id)).toEqual(['r1']);
+      expect(out.hiddenByScope).toEqual({ orders: 2, reports: 1 });
+    });
+
+    it('con especialidades los informes de órdenes propias en otro custodio siguen el alcance y suman a lo oculto', async () => {
+      const d = build();
+      d.scopeFilter.build.mockResolvedValue(FILTER);
+      d.requesterReports.ofIssuedOrders.mockResolvedValue({
+        rows: [],
+        hidden: 3,
+      });
+
+      const out = await d.service.getPatientOrders(
+        TENANT,
+        PATIENT,
+        50,
+        SPECIALTIES,
+      );
+
+      expect(d.requesterReports.ofIssuedOrders).toHaveBeenCalledWith(
+        TENANT,
+        PATIENT,
+        51,
+        FILTER,
+      );
+      expect(out.hiddenByScope).toEqual({ orders: 0, reports: 3 });
+    });
+  });
+
+  describe('H1 · el informe de la orden propia que custodia el laboratorio', () => {
+    it('suma los informes de las órdenes del tenant, del más nuevo al más viejo, con un solo tope', async () => {
+      const d = build();
+      d.repo.findReportsByPatient.mockResolvedValue([
+        { ...report('own'), createdAt: new Date('2026-08-14T09:00:00Z') },
+      ]);
+      d.requesterReports.ofIssuedOrders.mockResolvedValue({
+        rows: [
+          { ...report('lab-new'), createdAt: new Date('2026-08-15T09:00:00Z') },
+          { ...report('lab-old'), createdAt: new Date('2026-08-13T09:00:00Z') },
+        ],
+        hidden: 0,
+      });
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 2, FULL);
+
+      expect(d.requesterReports.ofIssuedOrders).toHaveBeenCalledWith(
+        TENANT,
+        PATIENT,
+        3,
+        null,
+      );
+      expect(out.reports.map((r) => r.id)).toEqual(['lab-new', 'own']);
+      expect(out.truncated).toEqual(['reports']);
+      expect(out.hiddenByScope).toBeUndefined();
+    });
+
+    it('expone la versión liberada y si quedó retenida para el paciente', async () => {
+      const d = build();
+      d.repo.findReportsByPatient.mockResolvedValue([
+        { ...report('held'), currentReleasedVersionId: 'v-held' },
+        { ...report('visible'), currentReleasedVersionId: 'v-visible' },
+        report('unreleased'),
+      ]);
+      d.requesterReports.visibilityOf.mockResolvedValue(
+        new Map([
+          ['v-held', 'HELD'],
+          ['v-visible', 'VISIBLE'],
+        ]),
+      );
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50, FULL);
+
+      expect(d.requesterReports.visibilityOf).toHaveBeenCalledWith([
+        'v-held',
+        'v-visible',
+      ]);
+      expect(
+        out.reports.map((r) => [r.releasedVersionId, r.patientVisibility]),
+      ).toEqual([
+        ['v-held', 'HELD'],
+        ['v-visible', 'VISIBLE'],
+        [null, null],
+      ]);
     });
   });
 });

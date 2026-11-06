@@ -19,5 +19,8 @@ import { SystemContextRepository } from './repositories';
     DynamicEnumsService,
     SystemContextsService,
   ],
+  // La lectura de una enumeración por su campo: farmacia resuelve el
+  // medicamento de un producto contra el mismo catálogo que la receta.
+  exports: [DynamicEnumsService],
 })
 export class SystemContextModule {}

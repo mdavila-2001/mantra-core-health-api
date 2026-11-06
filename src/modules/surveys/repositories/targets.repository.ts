@@ -49,7 +49,7 @@ export class TargetsRepository {
     completedStatusConceptId: string,
     limit: number,
   ): Promise<string[]> {
-    const rows: { id: string }[] = await em.getConnection().execute(
+    const rows: { id: string }[] = await em.execute(
       `SELECT b.id
          FROM scheduling.appointment_bookings b
         WHERE b.tenant_id = ?

@@ -57,6 +57,8 @@ export interface OrmEnv {
      * contra el contenedor del compose, que escucha en una red privada.
      */
     readonly ssl: boolean;
+    /** Espera máxima por una conexión libre del pool (ms). */
+    readonly acquireTimeoutMs: number;
   };
   /**
    * Límites del pool de conexiones. Dimensionar esto importa: cada conexión de
@@ -128,6 +130,11 @@ export const ormEnvSchema = Joi.object({
   // handshake TCP + autenticación en cada pico; el máximo acota el consumo.
   DB_POOL_MIN: Joi.number().integer().min(0).default(2),
   DB_POOL_MAX: Joi.number().integer().min(1).default(10),
+  // Cuánto espera una petición por una conexión libre del pool antes de fallar.
+  // `pg` espera SIN LÍMITE por defecto: con el pool agotado (p. ej. por una espera
+  // circular de conexiones) se cuelga todo acceso a la base en vez de fallar la
+  // petición. Es un tope de seguridad, no un plazo de consulta.
+  DB_CONNECTION_TIMEOUT_MS: Joi.number().integer().min(1000).default(30000),
 
   // Arranque del DDL. El default es 'safe' porque el objetivo declarado del
   // servicio es levantar su propia estructura de forma idempotente.
@@ -180,6 +187,10 @@ interface RawOrmEnv {
    * Valor de db pool max mantenido por la instancia.
    */
   DB_POOL_MAX: number;
+  /**
+   * Espera máxima por una conexión libre del pool, en milisegundos.
+   */
+  DB_CONNECTION_TIMEOUT_MS: number;
   /**
    * Valor de orm schema sync mantenido por la instancia.
    */
@@ -238,6 +249,7 @@ export function loadOrmEnv(source: NodeJS.ProcessEnv = process.env): OrmEnv {
       password: v.DB_PASSWORD,
       name: v.DB_NAME,
       ssl: v.DB_SSL,
+      acquireTimeoutMs: v.DB_CONNECTION_TIMEOUT_MS,
     },
     pool: { min: v.DB_POOL_MIN, max: v.DB_POOL_MAX },
     schema: {

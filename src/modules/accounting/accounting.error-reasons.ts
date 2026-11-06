@@ -6,6 +6,11 @@
  * `message`.
  */
 export enum AccountingErrorReason {
+  REPORT_TEMPLATE_NOT_FOUND = 'REPORT_TEMPLATE_NOT_FOUND',
+  REPORT_TEMPLATE_CODE_EXISTS = 'REPORT_TEMPLATE_CODE_EXISTS',
+  REPORT_TEMPLATE_VERSION_CONFLICT = 'REPORT_TEMPLATE_VERSION_CONFLICT',
+  REPORT_TEMPLATE_GLOBAL_ADMIN_REQUIRED = 'REPORT_TEMPLATE_GLOBAL_ADMIN_REQUIRED',
+  REPORT_TEMPLATE_INVALID_COLUMNS = 'REPORT_TEMPLATE_INVALID_COLUMNS',
   // --- Calendario fiscal (fiscal.service.ts) ---
   /** Ya existe un ejercicio fiscal con ese código en la práctica. */
   FISCAL_YEAR_ALREADY_EXISTS = 'FISCAL_YEAR_ALREADY_EXISTS',
@@ -128,4 +133,14 @@ export enum AccountingErrorReason {
   SIMPLE_ACCOUNT_SEEDED = 'SIMPLE_ACCOUNT_SEEDED',
   /** La cuenta ya la usa algún registro o transacción. */
   SIMPLE_ACCOUNT_IN_USE = 'SIMPLE_ACCOUNT_IN_USE',
+
+  // --- Contabilidad por espacio, F5c/F5f (space-accounting.service.ts) ---
+  /** El espacio no es de la misma práctica que el activo (422). */
+  INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH = 'INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH',
+  /** La unidad no es de la misma práctica que el centro de costo (422). */
+  COST_CENTER_UNIT_PRACTICE_MISMATCH = 'COST_CENTER_UNIT_PRACTICE_MISMATCH',
+  /** La unidad ya tiene un centro de costo activo (409). */
+  UNIT_ALREADY_HAS_COST_CENTER = 'UNIT_ALREADY_HAS_COST_CENTER',
+  /** El centro de costo no está activo: no se liga a una unidad (422). */
+  COST_CENTER_NOT_ACTIVE = 'COST_CENTER_NOT_ACTIVE',
 }

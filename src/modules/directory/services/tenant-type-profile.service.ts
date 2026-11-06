@@ -12,13 +12,11 @@ import {
   resolveDiagnosticUnitType,
 } from '../../diagnostic_units/diagnostic-unit-modalities';
 import {
-  BRANCH_TYPE_CONCEPT_BY_CODE,
-  DIR,
   MEDICAL_FACILITY_TENANT_TYPES,
   TERRITORIAL_TENANT_TYPES,
   type TenantTypeCode,
 } from '../directory.concepts';
-import { BranchesRepository } from '../repositories/branches.repository';
+import { DeclaredBranchesService } from './declared-branches.service';
 import { TenantMedicalFacilitiesRepository } from '../repositories/tenant-medical-facilities.repository';
 import {
   LEGAL_ENTITY_TYPE_BY_CODE,
@@ -121,7 +119,7 @@ export class TenantTypeProfileService {
    * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
    * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
    * @param addressesRepo - Repositorio de `common.addresses`, para la casa matriz del PAYER.
-   * @param branchesRepo - `directory.branches`, para las sucursales del laboratorio (P51).
+   * @param declaredBranches - Sucursales del laboratorio (P51) y horario de cada sede declarada.
    * @param medicalFacilitiesRepo - El establecimiento médico declarado y sus sedes declaradas.
    */
   constructor(
@@ -129,7 +127,7 @@ export class TenantTypeProfileService {
     private readonly conceptsRepo: CatalogConceptsRepository,
     private readonly diagnosticUnitProvisioning: DiagnosticUnitProvisioningService,
     private readonly addressesRepo: AddressesRepository,
-    private readonly branchesRepo: BranchesRepository,
+    private readonly declaredBranches: DeclaredBranchesService,
     private readonly medicalFacilitiesRepo: TenantMedicalFacilitiesRepository,
   ) {}
 
@@ -454,17 +452,15 @@ export class TenantTypeProfileService {
         input.diagnosticUnit,
         actorUserId,
       );
-      if (
-        resolveDiagnosticUnitType(input.diagnosticUnit) ===
-        DUNIT.UNIT_TYPE_LABORATORY
-      ) {
-        this.registerLaboratoryBranches(
-          tx,
-          tenantId,
-          input.diagnosticUnit,
-          actorUserId,
-        );
-      }
+      // Laboratory and imaging (v4.2.91: imaging too, so its Branches screen
+      // starts with the head office on the map). An imaging unit declares no
+      // branches (`assertProfileMatchesType`): for it only the central site.
+      await this.registerDiagnosticCenterBranches(
+        tx,
+        tenantId,
+        input.diagnosticUnit,
+        actorUserId,
+      );
       return provisioned.unitId;
     }
 
@@ -525,7 +521,7 @@ export class TenantTypeProfileService {
         latitude?: number;
         longitude?: number;
       },
-    ): void => {
+    ) =>
       this.medicalFacilitiesRepo.createSite(tx, {
         tenantId,
         medicalFacilityId: created.id,
@@ -537,94 +533,131 @@ export class TenantTypeProfileService {
         longitude: site.longitude,
         actorUserId,
       });
-    };
     if (facility.headquarters)
       addSite('headquarters', 0, facility.headquarters);
-    (facility.branches ?? []).forEach((branch, index) =>
-      addSite('branch', index + 1, branch),
+    const branches = (facility.branches ?? []).map((branch, index) => ({
+      site: addSite('branch', index + 1, branch),
+      hours: branch.openingHours ?? [],
+    }));
+    // The hours point at their site through a plain uuid FK: flush first.
+    if (branches.some(({ hours }) => hours.length > 0)) await tx.flush();
+    for (const { site, hours } of branches)
+      this.declaredBranches.recordShifts(
+        tx,
+        { tenantId, medicalFacilitySiteId: site.id, actorUserId },
+        hours,
+      );
+    await this.registerMedicalFacilityBranches(
+      tx,
+      tenantId,
+      facility,
+      actorUserId,
     );
     return created.id;
   }
 
   /**
-   * Las sucursales del laboratorio en `directory.branches` (P51, D-4).
+   * The medical facility's sites in `directory.branches` (v4.2.91).
+   *
+   * What was declared stays in `tenant_medical_facility_sites` (it feeds the
+   * verification and is not edited); this adds the same sites to the
+   * organization's branch registry —the one the Branches screen lists, labels,
+   * maps and edits— like the pharmacy and laboratory sign-ups do. The central
+   * site is the head office and each declared one a branch; the declared
+   * address goes to the description. Opening hours stay on the declared sites.
+   * The v4.2.91 patch does the same for medical organizations created before.
+   */
+  private registerMedicalFacilityBranches(
+    tx: EntityManager,
+    tenantId: string,
+    facility: MedicalFacilityDto,
+    actorUserId: string,
+  ): Promise<void> {
+    const toBranch = (
+      site: {
+        name?: string;
+        addressLines: string[];
+        latitude?: number;
+        longitude?: number;
+      },
+      category: 'head_office' | 'branch',
+    ) => {
+      const address = site.addressLines.join(', ').trim();
+      return {
+        name: site.name ?? MEDICAL_FACILITY_HEADQUARTERS_DEFAULT_NAME,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        description: address === '' ? undefined : address.slice(0, 1000),
+        branchType: 'CLINIC' as const,
+        category,
+      };
+    };
+    return this.declaredBranches.register(tx, {
+      tenantId,
+      actorUserId,
+      branches: [
+        ...(facility.headquarters
+          ? [toBranch(facility.headquarters, 'head_office')]
+          : []),
+        ...(facility.branches ?? []).map((branch) =>
+          toBranch(branch, 'branch'),
+        ),
+      ],
+    });
+  }
+
+  /**
+   * Las sucursales del laboratorio y la sede central de imagenología en
+   * `directory.branches` (P51, D-4; imagenología desde v4.2.91).
    *
    * La provisión de la unidad ya las creó como sedes de práctica y de unidad
    * (toma de muestras); esto las suma al registro de sucursales de la
    * organización, que es lo que lista y edita la pestaña Sucursales del
    * portal (`GET /tenants/{id}/branches`) y el único lugar con columna para
    * la descripción y el enlace de mapa (P54). Mismo criterio que el alta de
-   * farmacia: la casa central entra sólo si trae su punto en el mapa; el
-   * código sale del nombre, sin repetirse dentro del alta (el tenant es nuevo,
-   * no hay códigos previos con qué chocar).
+   * farmacia: la casa central entra sólo si trae su punto en el mapa. Cada
+   * sucursal lleva su horario de atención, si lo declaró.
    *
    * @param tx - Transacción del alta.
    * @param tenantId - Tenant recién creado.
    * @param unit - Bloque `diagnosticUnit` declarado.
    * @param actorUserId - Autor de las filas.
    */
-  private registerLaboratoryBranches(
+  private async registerDiagnosticCenterBranches(
     tx: EntityManager,
     tenantId: string,
     unit: DiagnosticUnitProfileDto,
     actorUserId: string,
-  ): void {
-    const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
-    const timeZone = unit.primarySite?.timeZone;
-    const add = (item: {
-      name: string;
-      latitude?: number;
-      longitude?: number;
-      description?: string;
-      locationUrl?: string;
-    }): void => {
-      this.branchesRepo.create(tx, {
-        tenantId,
-        code: codeOf(item.name),
-        name: item.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
-        statusConceptId: DIR.BRANCH_ACTIVE,
-        timeZone,
-        latitude:
-          item.latitude !== undefined ? String(item.latitude) : undefined,
-        longitude:
-          item.longitude !== undefined ? String(item.longitude) : undefined,
-        description: item.description,
-        locationUrl: item.locationUrl,
-        actorUserId,
-      });
-    };
+  ): Promise<void> {
     const central = unit.primarySite?.address;
-    if (central?.latitude !== undefined && central.longitude !== undefined) {
-      add({
-        name: unit.primarySite?.name ?? 'Sede central',
-        latitude: central.latitude,
-        longitude: central.longitude,
-      });
-    }
-    for (const branch of unit.branches ?? []) {
-      add({
-        name: branch.name,
-        latitude: branch.address?.latitude,
-        longitude: branch.address?.longitude,
-        description: branch.description,
-        locationUrl: branch.locationUrl,
-      });
-    }
+    const headquarters =
+      central?.latitude !== undefined && central.longitude !== undefined
+        ? [
+            {
+              name: unit.primarySite?.name ?? 'Sede central',
+              latitude: central.latitude,
+              longitude: central.longitude,
+              category: 'head_office' as const,
+            },
+          ]
+        : [];
+    await this.declaredBranches.register(tx, {
+      tenantId,
+      timeZone: unit.primarySite?.timeZone,
+      actorUserId,
+      branches: [
+        ...headquarters,
+        ...(unit.branches ?? []).map((branch) => ({
+          name: branch.name,
+          latitude: branch.address?.latitude,
+          longitude: branch.address?.longitude,
+          description: branch.description,
+          locationUrl: branch.locationUrl,
+          openingHours: branch.openingHours,
+          category: 'branch' as const,
+        })),
+      ],
+    });
   }
 
   /**

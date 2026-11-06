@@ -2,14 +2,16 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `organization_extensions`.
- * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 51 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const organizationExtensionsForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['facility_licenses', 'clinical_unit_id', 'practice', 'clinical_units', 'id'],
   ['facility_licenses', 'created_by_user_id', 'iam', 'users', 'id'],
   ['facility_licenses', 'evidence_file_id', 'common', 'files', 'id'],
   ['facility_licenses', 'facility_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['facility_licenses', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
   ['facility_licenses', 'issuing_authority_tenant_id', 'directory', 'tenants', 'id'],
   ['facility_licenses', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['facility_licenses', 'license_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -17,6 +19,15 @@ export const organizationExtensionsForeignKeys: readonly ForeignKeyTuple[] = [
   ['facility_licenses', 'tenant_id', 'directory', 'tenants', 'id'],
   ['facility_licenses', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['facility_licenses', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['hospital_service_lines', 'acuity_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['hospital_service_lines', 'clinical_unit_id', 'practice', 'clinical_units', 'id'],
+  ['hospital_service_lines', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['hospital_service_lines', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
+  ['hospital_service_lines', 'hospital_id', 'organization_extensions', 'hospitals', 'id'],
+  ['hospital_service_lines', 'service_line_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['hospital_service_lines', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['hospital_service_lines', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['hospital_service_lines', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['hospitals', 'care_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['hospitals', 'created_by_user_id', 'iam', 'users', 'id'],
   ['hospitals', 'emergency_capability_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -29,15 +40,6 @@ export const organizationExtensionsForeignKeys: readonly ForeignKeyTuple[] = [
   ['hospitals', 'teaching_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['hospitals', 'tenant_id', 'directory', 'tenants', 'id'],
   ['hospitals', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['hospital_service_lines', 'acuity_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['hospital_service_lines', 'clinical_unit_id', 'practice', 'clinical_units', 'id'],
-  ['hospital_service_lines', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['hospital_service_lines', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
-  ['hospital_service_lines', 'hospital_id', 'organization_extensions', 'hospitals', 'id'],
-  ['hospital_service_lines', 'service_line_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['hospital_service_lines', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['hospital_service_lines', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['hospital_service_lines', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['organization_affiliations', 'affiliation_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['organization_affiliations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['organization_affiliations', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],

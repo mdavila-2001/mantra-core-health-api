@@ -95,11 +95,9 @@ export const KIND_BY_TARGET_CONCEPT: Record<string, PublicResultKind> = {
 
 /** Prefijo de ruta corta → tipo de sujeto que ese prefijo promete. */
 export const TARGET_CONCEPT_BY_SLUG_PREFIX: Record<string, string> = {
-  p: COMM.PROFILE_TARGET_PRACTITIONER,
-  o: COMM.PROFILE_TARGET_ORGANIZATION,
-  f: COMM.PROFILE_TARGET_PHARMACY,
-  l: COMM.PROFILE_TARGET_DIAGNOSTIC_UNIT,
-  s: COMM.PROFILE_TARGET_INSURER,
+  p: COMM.PROFILE_TARGET_PRACTITIONER, o: COMM.PROFILE_TARGET_ORGANIZATION,
+  f: COMM.PROFILE_TARGET_PHARMACY, l: COMM.PROFILE_TARGET_DIAGNOSTIC_UNIT,
+  s: COMM.PROFILE_TARGET_INSURER, u: COMM.PROFILE_TARGET_USER,
 };
 
 /**
@@ -139,6 +137,9 @@ export const PUBLIC_RESULT_KEYS = [
 /** Las claves que la ficha pública puede tener. Nada más. */
 export const PUBLIC_PROFILE_KEYS = [
   'kind',
+  // La práctica de una organización: con ella un profesional pide pertenecer.
+  // Es un identificador que ya viaja en `/practices`, no un dato interno.
+  'practiceId',
   'slug',
   'displayName',
   'headline',
@@ -876,19 +877,24 @@ export class CommunityPublicService {
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
     // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
     // pedirlas para el resto sería un viaje que siempre vuelve vacío.
-    const [señales, posts, specialties, trajectory, sites] = await Promise.all([
-      this.signals(em, [profile]),
-      this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-      kind === 'PRACTITIONER'
-        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, string[]>()),
-      kind === 'PRACTITIONER'
-        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
-      kind === 'PRACTITIONER'
-        ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
-    ]);
+    const [señales, posts, specialties, trajectory, sites, practiceId] =
+      await Promise.all([
+        this.signals(em, [profile]),
+        this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+        kind === 'PRACTITIONER'
+          ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, string[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
+        // Sólo una organización tiene práctica a la que pedir pertenecer.
+        kind === 'ORGANIZATION'
+          ? this.repo.practiceIdByTenant(em, profile.targetId)
+          : Promise.resolve<string | null>(null),
+      ]);
     // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
     // comentarios lleva. Un solo viaje para todo el lote.
     const engagement = await this.repo.engagementByPost(
@@ -911,6 +917,7 @@ export class CommunityPublicService {
 
     return {
       kind,
+      practiceId,
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,

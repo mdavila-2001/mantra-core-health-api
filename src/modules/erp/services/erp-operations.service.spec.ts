@@ -851,6 +851,38 @@ describe('ErpOperationsService', () => {
       });
     });
 
+    it('SUPERADMIN acotado a otro tenant no da la vía de RR. HH. aquí; acotado a éste o global sí (#1241)', async () => {
+      const scopedTo = (tenantId: string) =>
+        ({
+          id: 'user-sa',
+          roles: ['SUPERADMIN', 'EMPLOYEE'],
+          scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+        }) as any;
+      const denied = build();
+      denied.operationsRepo.findEmployeeById.mockResolvedValue(
+        employee('user-b'),
+      );
+      await expect(
+        denied.service.requestTimeOff(EMPLOYEE, dto, scopedTo(T2)),
+      ).rejects.toMatchObject({
+        status: 403,
+        reason: ErpErrorReason.ERP_EMPLOYEE_SELF_ONLY,
+      });
+      expect(denied.operationsRepo.createTimeOffRequest).not.toHaveBeenCalled();
+
+      for (const who of [
+        scopedTo(TENANT),
+        { id: 'user-sg', roles: ['SUPERADMIN'] } as any,
+      ]) {
+        const d = build();
+        d.operationsRepo.findEmployeeById.mockResolvedValue(employee('user-b'));
+        d.operationsRepo.findOverlappingTimeOff.mockResolvedValue([]);
+        d.operationsRepo.createTimeOffRequest.mockReturnValue({ id: 'to-1' });
+        await d.service.requestTimeOff(EMPLOYEE, dto, who);
+        expect(d.operationsRepo.createTimeOffRequest).toHaveBeenCalledTimes(1);
+      }
+    });
+
     it('límite: HR_ADMIN de la misma práctica aprueba la solicitud de ese empleado', async () => {
       const d = build();
       const request: any = {

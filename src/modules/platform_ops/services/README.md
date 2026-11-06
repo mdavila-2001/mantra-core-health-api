@@ -29,7 +29,7 @@ Son deliberadas y en una sola dirección:
 Ningún servicio llama a otro servicio: sólo a repositorios. Así una transacción nunca queda repartida
 entre dos dueños.
 
-## Reglas de negocio
+## Business rules
 
 ### Releases
 
@@ -126,7 +126,7 @@ hallazgo ya cerrado, versión de runbook tomada, ejercicio ya cerrado).
 despliegue fallido, reversión, apertura de incidente, SLO incumplido, quema, guardrail cruzado, "no
 go", runbook que no completa y ejercicio que incumple su objetivo.
 
-## Pruebas
+## Tests
 
 - `ops-releases.service.spec.ts` (43): correlativos y colisiones, contención en la ventana,
   segregación de deberes, orden y unicidad del voto, inmutabilidad del artefacto, las tres puertas

@@ -82,11 +82,13 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/health'],
   ['get', '/liveness'],
   ['get', '/readiness'],
+  ['get', '/metrics'],
   ['post', '/iam/auth/activate'],
   ['post', '/iam/auth/login'],
   ['post', '/iam/auth/register-patient'],
   ['post', '/iam/auth/register-organization'],
   ['post', '/iam/auth/register-practitioner'],
+  ['post', '/iam/auth/register-support-staff'],
   ['post', '/iam/auth/resend-verification'],
   ['post', '/iam/auth/forgot-password'],
   ['post', '/iam/auth/reset-password'],
@@ -134,6 +136,8 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // (`clinical-prescriptions-public.controller.ts`, `@Public()`): entró sin
   // sumarse acá y el lint de Redocly lo daba como `security-defined` (18/09).
   ['get', '/public/prescriptions/{id}/verify'],
+  // Verificación pública del informe diagnóstico oficial (QR del PDF), sin PHI.
+  ['get', '/public/diagnostic-reports/{versionId}/verify'],
   // Verificación pública de un certificado de portabilidad de seguros por su
   // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
   // — subtarea 3.3, 2026-09-18).
@@ -159,9 +163,16 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['put', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['delete', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['post', '/telemetry/onboarding-events'],
+  ['post', '/telemetry/client-errors'],
   // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
   // `@Public()`, 2026-10-26).
   ['post', '/public/geo/reverse'],
+  // Receta compartida por enlace (`prescription-shares-public.controller.ts`) y
+  // receptor de webhooks de la pasarela de pagos
+  // (`payments-gateway-webhooks.controller.ts`, firma verificada en el servicio):
+  // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
+  ['get', '/public/prescription-shares/{token}'],
+  ['post', '/payments/gateway-webhooks'],
 ];
 
 function markPublicOperations(document) {

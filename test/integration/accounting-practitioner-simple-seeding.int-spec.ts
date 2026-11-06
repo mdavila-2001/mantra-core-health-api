@@ -175,6 +175,29 @@ describe('Contabilidad simple del doctor · siembra concurrente (DB real)', () =
     });
   });
 
+  it('N altas simultáneas de la misma clase: ninguna choca con el UNIQUE y cada una recibe un código distinto (#995)', async () => {
+    const practiceId = await newPractice('altas');
+    await service.listAccounts(practiceId, actor);
+
+    const results = await Promise.allSettled(
+      Array.from({ length: 6 }, (_, i) =>
+        service.createAccount(
+          { practiceId, name: `Gasto propio ${i}`, accountClass: 'EXPENSE' },
+          actor,
+        ),
+      ),
+    );
+
+    expect(
+      results
+        .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+        .map((r) => String((r.reason as Error)?.message ?? r.reason)),
+    ).toEqual([]);
+    const own = (await accountRows(practiceId)).filter((r) => !r.seeded);
+    expect(own).toHaveLength(6);
+    expect(new Set(own.map((r) => r.code)).size).toBe(6);
+  });
+
   it('no pisa un renombre: una lectura posterior, también concurrente, deja la cuenta renombrada tal cual', async () => {
     const practiceId = await newPractice('renombre');
     const first = await service.listAccounts(practiceId, actor);

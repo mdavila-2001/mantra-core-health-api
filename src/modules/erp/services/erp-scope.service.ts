@@ -342,9 +342,11 @@ export class ErpScopeService {
    * @returns `true` si puede operar sobre empleados ajenos.
    */
   isHrOrAdmin(actor: AuthenticatedUser): boolean {
-    if (actor.roles.includes('SUPERADMIN')) return true;
     const tenantId = requireTenantId();
+    // `SUPERADMIN` global vale en cualquiera; acotado en `scopedRoles`, sólo
+    // en el suyo (#1241).
     return (
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId) ||
       roleAuthorizesInTenant(actor, 'ERP_ADMIN', tenantId) ||
       roleAuthorizesInTenant(actor, 'HR_ADMIN', tenantId)
     );

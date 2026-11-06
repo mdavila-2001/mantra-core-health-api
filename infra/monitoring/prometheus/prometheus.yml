@@ -71,9 +71,9 @@ scrape_configs:
     static_configs:
       - targets:
           # Servidor 62.169.18.132 (desde 2026-10-08; el 173.249.39.237 quedó fuera
-          # de servicio el 2026-10-05). app.alovidasalud.com y demo.* se suman cuando
-          # su DNS apunte a este servidor: hoy no responden desde afuera.
-          - https://test.62.169.18.132.sslip.io/
+          # de servicio el 2026-10-05). app.alovidasalud.com (prod) se vigila desde el
+          # 2026-10-30; demo.* todavía no.
+          - https://app.alovidasalud.com/
           - https://dev.62.169.18.132.sslip.io/
           - https://mockup.62.169.18.132.sslip.io/
           - http://62.169.18.132:8000/api/health

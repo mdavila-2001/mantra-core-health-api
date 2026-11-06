@@ -91,7 +91,7 @@ function build(existing: Existing = {}) {
       return Promise.resolve([]);
     }),
     create: jest.fn(),
-    // La activación: cambia el estado de la ficha y nada más.
+    // Activation: updates facility status without modifying verification credentials.
     findOneOrFail: jest.fn((_entity: unknown, where: any) => {
       if (!store.has(where.id)) {
         store.set(where.id, {
@@ -171,9 +171,9 @@ describe('PadronOrganizationsSeedService', () => {
     expect(actor.id).toBe(SEED_ACTOR_ID);
     expect(fixedIds.tenantId).toBe(padronTenantId(dto.code));
     expect(fixedIds.ownerMembershipId).toBe(padronOwnerMembershipId(dto.code));
-    // Ninguna escritura salvo la del actor semilla pasa por el EntityManager.
+    // No direct entity mutations bypass DirectoryTenantsService.
     expect(em.create).not.toHaveBeenCalled();
-    // Nadie comprobó estas organizaciones: el sello no se pone nunca.
+    // Facilities remain unverified; verify is never invoked automatically.
     expect(tenants.verify).not.toHaveBeenCalled();
   });
 
@@ -190,7 +190,7 @@ describe('PadronOrganizationsSeedService', () => {
     const clinic = PADRON.find((r) => r.tipo === 'CLINICA_PRIVADA')!;
     const card = store.get(padronTenantId(clinic.code));
     expect(card.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
-    // El estado de verificación queda como lo dejó el alta.
+    // Verification status remains unverified as left by initial provisioning.
     expect(card.verificationStatusConceptId).toBeUndefined();
   });
 
@@ -317,7 +317,7 @@ describe('PadronOrganizationsSeedService', () => {
       ([, data]) => data.targetId === padronTenantId(pharmacy.code),
     )!;
     expect(call[1].targetTypeConceptId).toBe(COMM.PROFILE_TARGET_PHARMACY);
-    // La vitrina es de la propia organización, no de la plataforma.
+    // The showcase belongs to the organization itself, not the platform.
     expect(call[1].tenantId).toBe(padronTenantId(pharmacy.code));
   });
 
@@ -419,7 +419,7 @@ describe('PadronOrganizationsSeedService', () => {
       expect(result.adoptedTypeMismatch).toBe(0);
       expect(result.created).toBe(522);
       expect(created(tenants)).not.toContain(clinic.code);
-      // Nada de la adoptada se reescribe: ni dirección, ni vitrina, ni estado.
+      // Adopted organization is immutable: address, showcase, and status are preserved.
       const owners = callsOf(addresses.create).map(([dto]) => dto.ownerId);
       expect(owners).not.toContain('legacy-1');
       expect(owners).not.toContain(padronTenantId(clinic.code));

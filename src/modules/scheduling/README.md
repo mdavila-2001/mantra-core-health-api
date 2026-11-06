@@ -112,8 +112,10 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | POST | `/scheduling/internal/expire-holds` | Internal | `expireHolds` | SYSTEM, SYSTEM_WORKER |
 | POST | `/scheduling/internal/promote-waitlist/:slotId` | Internal | `promoteWaitlist` | SYSTEM, SYSTEM_WORKER |
 | GET | `/scheduling/internal/waitlist-candidates` | Internal | `listWaitlistCandidates` | SYSTEM, SYSTEM_WORKER |
+| GET | `/scheduling/my-resources` | Agenda | `listMine` | PRACTITIONER, SCHEDULING_ADMIN |
 | GET | `/scheduling/resources` | Agenda | `listResources` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
 | POST | `/scheduling/resources` | Scheduling | `createResource` | SCHEDULING_ADMIN, PRACTITIONER |
+| PATCH | `/scheduling/resources/:id` | Agenda | `updateResource` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/close-slots` | Scheduling | `closeSlots` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/delay` | Scheduling | `delayResource` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
 | GET | `/scheduling/resources/:id/exceptions` | Scheduling | `listExceptions` | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
@@ -141,7 +143,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
 no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 
-## Reglas de negocio
+## Business rules
 
 - **Anti-double-booking**: el slot se toma con `SELECT ... FOR UPDATE` antes de decrementar
   `remaining_capacity`; nunca baja de cero. Al llegar a cero el slot pasa a `held`/`booked`.
@@ -156,14 +158,21 @@ no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
   2000 slots por ejecución para no generar lotes inmanejables (se avisa por log).
 - **Promoción de lista de espera**: marca candidatos, **no reserva por ellos**. La cita la confirma
   el paciente por el flujo normal.
+- **Quién acepta una solicitud** (v4.2.88): una solicitud del paciente nace pendiente salvo que lo
+  reservado no exija aceptación. Lo dice la oferta del servicio si el cupo es de un servicio y, si
+  no, la agenda (`schedulable_resources.requires_approval`, que el profesional cambia con
+  `PATCH /scheduling/resources/:id`). Cuando no hace falta, la cita nace confirmada y
+  `FinishAutoConfirmedRequestUseCase` deja lo mismo que una aceptación: el asiento del historial que
+  dice que fue automática, las solicitudes desplazadas (REGLA 2) y los avisos. Rige para las
+  solicitudes nuevas.
 
-## Permisos
+## Permissions
 
 Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprueba **quién** es el
 actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
 agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa
 `FOR UPDATE SKIP LOCKED`. `row_version` da bloqueo optimista automático.
@@ -173,7 +182,7 @@ agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional d
 `operation: 'scheduling.<área>.<acción>'`. Se registran ids y contadores, nunca el `holdToken`
 ni datos personales del paciente. El contexto del logger es ahora el de cada caso de uso.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test --maxWorkers=1 --testPathPatterns 'src/modules/scheduling' 'src/architecture'
@@ -192,7 +201,7 @@ tenants ni nada contra una base real.
 - Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
   `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
-## Límites de la estructura
+## Structural boundaries
 
 - `application/` usa las entidades generadas y los repositorios propios como puerto de
   persistencia (decisión A3: única excepción de capas, declarada en el spec de arquitectura).

@@ -16,6 +16,8 @@ const STEPS = [
   'dynamicEnums',
   'patientPortalProxy',
   'telemetryUxHeatmap',
+  'mutabilityRegistry',
+  'catalogDocumentation',
   'glossary',
   'boGeography',
   'adminDivisions',
@@ -41,6 +43,7 @@ const STEPS = [
   'insurerAccounts',
   'people',
   'directoryNetworks',
+  'practiceInfrastructure',
   'practiceDefaultServices',
   'qaFlows',
   'admissionRequirements',
@@ -97,6 +100,8 @@ function build(
     double.dynamicEnums as never,
     double.patientPortalProxy as never,
     double.telemetryUxHeatmap as never,
+    double.mutabilityRegistry as never,
+    double.catalogDocumentation as never,
     double.glossary as never,
     double.boGeography as never,
     double.adminDivisions as never,
@@ -121,6 +126,7 @@ function build(
     double.clinicalForms as never,
     double.boMedicalSpecialties as never,
     double.practiceDefaultServices as never,
+    double.practiceInfrastructure as never,
     double.people as never,
     double.directoryNetworks as never,
     double.qaFlows as never,
@@ -624,6 +630,27 @@ describe('SeedBootstrapService · seed-cli --only y conteos por paso', () => {
       }),
     ).toBe(5);
     expect(countInserted({ existing: 3 })).toBeNull();
+  });
+
+  it('countInserted no cuenta lo descartado ni lo que ya estaba (mutabilidad y catálogo)', () => {
+    // Segunda corrida real contra Postgres: el registro de mutabilidad informaba
+    // 1430 «insertadas» (las `unchanged`) y el catálogo 462 (aristas descartadas).
+    expect(
+      countInserted({
+        writePolicies: 0,
+        entities: 0,
+        changeLog: 0,
+        unchanged: 1430,
+        drift: 2,
+      }),
+    ).toBe(0);
+    expect(
+      countInserted({
+        inserted: 0,
+        lineageSkippedUncataloged: 462,
+        glossaryDuplicatesDropped: 1,
+      }),
+    ).toBe(0);
   });
 
   it('el código de salida sigue el resumen: un paso pedido que falla cuenta como fallo', async () => {

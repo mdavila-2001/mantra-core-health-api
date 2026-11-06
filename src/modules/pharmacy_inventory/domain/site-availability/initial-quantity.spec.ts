@@ -1,24 +1,4 @@
-import {
-  defaultAvailableQuantity,
-  initialSiteQuantity,
-} from './initial-quantity';
-
-describe('initialSiteQuantity', () => {
-  it.each([
-    [5, false, 5],
-    [0, false, 0],
-    [null, false, 1],
-    [null, true, 0],
-    [4, true, 4],
-  ])(
-    'stockQuantity %p con «no tengo» %p → %p',
-    (stockQuantity, outOfStockDeclared, expected) => {
-      expect(initialSiteQuantity({ stockQuantity, outOfStockDeclared })).toBe(
-        expected,
-      );
-    },
-  );
-});
+import { defaultAvailableQuantity } from './initial-quantity';
 
 describe('defaultAvailableQuantity', () => {
   it.each([

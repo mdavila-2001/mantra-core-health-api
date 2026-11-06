@@ -2,10 +2,12 @@ import type { AuthenticatedUser } from '../../../../../common';
 import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import { BookingMaterializer } from '../support/booking-materializer';
 import {
-  BookingResponseDto,
+  BookingRequestResponseDto,
   RequestBookingDto,
 } from '../../../presentation/dto';
 import { CLIN } from '../../../../clinical/clinical.concepts';
+import { CONCEPTS } from '../../../../../common';
+import { FinishAutoConfirmedRequestUseCase } from './finish-auto-confirmed-request.use-case';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
@@ -17,6 +19,7 @@ export class RequestBookingUseCase {
     private readonly materializer: BookingMaterializer,
     private readonly notifier: BookingChangeNotifier,
     private readonly logger: PinoLogger,
+    private readonly autoConfirmed: FinishAutoConfirmedRequestUseCase,
   ) {
     this.logger.setContext(RequestBookingUseCase.name);
   }
@@ -42,7 +45,7 @@ export class RequestBookingUseCase {
     holdToken: string,
     dto: RequestBookingDto,
     actor: AuthenticatedUser,
-  ): Promise<BookingResponseDto> {
+  ): Promise<BookingRequestResponseDto> {
     this.logger.info(
       {
         operation: 'scheduling.booking.request',
@@ -64,6 +67,13 @@ export class RequestBookingUseCase {
       },
       actor,
     );
+
+    // v4.2.88: the request was born confirmed (agenda or offering does not
+    // require approval), so it gets what an acceptance gets, not a request notice.
+    if (result.statusConceptId === CONCEPTS.BOOKING_CONFIRMED) {
+      const confirmedAt = await this.autoConfirmed.execute(result.id, actor);
+      return confirmedAt === undefined ? result : { ...result, confirmedAt };
+    }
 
     // Fuera de la transacción, como todos los avisos: que no salga la campana
     // no puede deshacer una solicitud que ya existe.

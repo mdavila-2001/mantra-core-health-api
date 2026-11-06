@@ -53,126 +53,134 @@ export class IdentityEvidenceLifecycleService {
     now = new Date(),
   ): Promise<IdentityDispositionOutcome> {
     try {
-      return await this.em.fork().transactional(async (tx) => {
-        const config = await this.config.resolve(
-          tx,
-          tenantId,
-          evidenceTypeCode,
-          operation,
-        );
-        await this.publication.lockNamespace(tx);
-        await this.coordinator.excludeNamespaces(tx, []); // Primary/global visibility even without a binary.
-        await tx
-          .getConnection('write')
-          .execute(
-            'SELECT pg_advisory_xact_lock(hashtextextended(?, 0))',
-            [`identity-evidence-lifecycle:v1:${evidenceId}`],
-            'all',
-            tx.getTransactionContext(),
-          );
-        const graph = await this.repository.graph(
-          tx,
-          evidenceId,
-          tenantId,
-          now,
-        );
-        if (graph.opaqueReference)
-          throw new StorageLifecycleDenied('EXTERNAL_REFERENCE_UNKNOWN');
-        const identities: KnownPhysicalObjectIdentity[] = [];
-        const contentByIdentity = new Map<string, string>();
-        for (const version of graph.versions) {
-          const identity = this.storage.resolvePhysicalIdentity?.(
-            version.storageUri,
-            version.objectVersion,
-          );
-          if (!isKnownPhysicalIdentity(identity))
-            throw new StorageLifecycleDenied('PHYSICAL_IDENTITY_UNKNOWN');
-          if (
-            (version.objectKey &&
-              version.objectKey !== identity.exactObjectKey) ||
-            (version.bucketOrContainer &&
-              version.bucketOrContainer !== identity.physicalContainer)
-          )
-            throw new StorageLifecycleDenied('PHYSICAL_METADATA_CONFLICT');
-          const key = physicalObjectKey(identity);
-          const content = JSON.stringify([
-            version.contentHash,
-            version.sizeBytes,
-          ]);
-          if (
-            contentByIdentity.has(key) &&
-            contentByIdentity.get(key) !== content
-          )
-            throw new StorageLifecycleDenied('PHYSICAL_METADATA_CONFLICT');
-          contentByIdentity.set(key, content);
-          await this.coordinator.assertNoContender(tx, identity);
-          if (
-            !identities.some(
-              (item) => physicalObjectKey(item) === physicalObjectKey(identity),
-            )
-          )
-            identities.push(identity);
-        }
-        const hold = await this.holds.resolveWithObjects(
-          tx,
-          {
+      // Own connection: each disposition commits on its own, like the storage
+      // intents it coordinates.
+      return await this.em
+        .fork({ keepTransactionContext: false })
+        .transactional(async (tx) => {
+          const config = await this.config.resolve(
+            tx,
             tenantId,
-            recordIds: graph.recordIds,
-            registryIds: graph.registryIds,
-            fileHoldUntil: graph.files.map((file) => file.legalHoldUntil),
-            objectHolds: [],
-            objectRetentionLocks: [],
-            coverage: graph.holdCoverage,
-          },
-          identities,
-          this.storage,
-          now,
-        );
-        let references: 'CLEAR' | 'BLOCKED' | 'UNKNOWN' =
-          graph.externalReferenceCount > 0 ? 'BLOCKED' : 'CLEAR';
-        if (identities.length) {
-          const snapshot = await this.references.snapshot(tx, [], []);
-          const targetVersionIds = new Set(
-            graph.versions.map((version) => version.id),
+            evidenceTypeCode,
+            operation,
           );
-          // Planning only. These rows STILL count until retirement is committed.
-          const outside = {
-            ...snapshot,
-            rows: snapshot.rows.filter(
-              (row) =>
-                row.source !== 'common.file_versions' ||
-                !targetVersionIds.has(row.id),
-            ),
-          };
-          for (const identity of identities) {
-            const decision = this.referenceResolver.evaluate(identity, outside);
-            if (decision.state === 'UNKNOWN') references = 'UNKNOWN';
-            else if (
-              decision.state === 'REFERENCED' &&
-              references !== 'UNKNOWN'
+          await this.publication.lockNamespace(tx);
+          await this.coordinator.excludeNamespaces(tx, []); // Primary/global visibility even without a binary.
+          await tx
+            .getConnection('write')
+            .execute(
+              'SELECT pg_advisory_xact_lock(hashtextextended(?, 0))',
+              [`identity-evidence-lifecycle:v1:${evidenceId}`],
+              'all',
+              tx.getTransactionContext(),
+            );
+          const graph = await this.repository.graph(
+            tx,
+            evidenceId,
+            tenantId,
+            now,
+          );
+          if (graph.opaqueReference)
+            throw new StorageLifecycleDenied('EXTERNAL_REFERENCE_UNKNOWN');
+          const identities: KnownPhysicalObjectIdentity[] = [];
+          const contentByIdentity = new Map<string, string>();
+          for (const version of graph.versions) {
+            const identity = this.storage.resolvePhysicalIdentity?.(
+              version.storageUri,
+              version.objectVersion,
+            );
+            if (!isKnownPhysicalIdentity(identity))
+              throw new StorageLifecycleDenied('PHYSICAL_IDENTITY_UNKNOWN');
+            if (
+              (version.objectKey &&
+                version.objectKey !== identity.exactObjectKey) ||
+              (version.bucketOrContainer &&
+                version.bucketOrContainer !== identity.physicalContainer)
             )
-              references = 'BLOCKED';
+              throw new StorageLifecycleDenied('PHYSICAL_METADATA_CONFLICT');
+            const key = physicalObjectKey(identity);
+            const content = JSON.stringify([
+              version.contentHash,
+              version.sizeBytes,
+            ]);
+            if (
+              contentByIdentity.has(key) &&
+              contentByIdentity.get(key) !== content
+            )
+              throw new StorageLifecycleDenied('PHYSICAL_METADATA_CONFLICT');
+            contentByIdentity.set(key, content);
+            await this.coordinator.assertNoContender(tx, identity);
+            if (
+              !identities.some(
+                (item) =>
+                  physicalObjectKey(item) === physicalObjectKey(identity),
+              )
+            )
+              identities.push(identity);
           }
-        }
-        const result = this.eligibility.evaluate(config, {
-          tenantId,
-          ownerResolved: graph.ownerResolved,
-          evidence: graph.evidence,
-          case: graph.case,
-          hold: hold.state,
-          references,
-          now,
+          const hold = await this.holds.resolveWithObjects(
+            tx,
+            {
+              tenantId,
+              recordIds: graph.recordIds,
+              registryIds: graph.registryIds,
+              fileHoldUntil: graph.files.map((file) => file.legalHoldUntil),
+              objectHolds: [],
+              objectRetentionLocks: [],
+              coverage: graph.holdCoverage,
+            },
+            identities,
+            this.storage,
+            now,
+          );
+          let references: 'CLEAR' | 'BLOCKED' | 'UNKNOWN' =
+            graph.externalReferenceCount > 0 ? 'BLOCKED' : 'CLEAR';
+          if (identities.length) {
+            const snapshot = await this.references.snapshot(tx, [], []);
+            const targetVersionIds = new Set(
+              graph.versions.map((version) => version.id),
+            );
+            // Planning only. These rows STILL count until retirement is committed.
+            const outside = {
+              ...snapshot,
+              rows: snapshot.rows.filter(
+                (row) =>
+                  row.source !== 'common.file_versions' ||
+                  !targetVersionIds.has(row.id),
+              ),
+            };
+            for (const identity of identities) {
+              const decision = this.referenceResolver.evaluate(
+                identity,
+                outside,
+              );
+              if (decision.state === 'UNKNOWN') references = 'UNKNOWN';
+              else if (
+                decision.state === 'REFERENCED' &&
+                references !== 'UNKNOWN'
+              )
+                references = 'BLOCKED';
+            }
+          }
+          const result = this.eligibility.evaluate(config, {
+            tenantId,
+            ownerResolved: graph.ownerResolved,
+            evidence: graph.evidence,
+            case: graph.case,
+            hold: hold.state,
+            references,
+            now,
+          });
+          if (!result.eligible)
+            return { status: 'DENIED', reasonCode: result.reasonCode };
+          return this.executor.execute(tx, {
+            operation,
+            graph,
+            config,
+            identities,
+            eligibleAt: result.eligibleAt,
+          });
         });
-        if (!result.eligible)
-          return { status: 'DENIED', reasonCode: result.reasonCode };
-        return this.executor.execute(tx, {
-          operation,
-          graph,
-          config,
-          identities,
-          eligibleAt: result.eligibleAt,
-        });
-      });
     } catch (error) {
       return {
         status: 'DENIED',

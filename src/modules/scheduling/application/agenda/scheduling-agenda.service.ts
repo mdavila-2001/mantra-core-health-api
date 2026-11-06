@@ -18,6 +18,9 @@ import {
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
+  BookableOrganizationsResponseDto,
+  BookableResourcesQueryDto,
+  BookableResourcesResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -29,6 +32,8 @@ import {
   type ResourceType,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
+import { findBookableOrganizations } from './bookable-organizations.query';
+import { findBookableResources } from './bookable-resources.query';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -76,11 +81,28 @@ export class SchedulingAgendaService {
     this.logger.setContext(SchedulingAgendaService.name);
   }
 
+  /**
+   * Organizations a patient can book with today, across tenants
+   * (see `bookable-organizations.query.ts`).
+   */
+  listBookableOrganizations(): Promise<BookableOrganizationsResponseDto> {
+    return findBookableOrganizations(this.em);
+  }
+
+  /** Practitioners or laboratories a patient can book with, across tenants, paged. */
+  listBookableResources(
+    query: BookableResourcesQueryDto,
+  ): Promise<BookableResourcesResponseDto> {
+    return findBookableResources(this.em, query);
+  }
+
   /** Recursos agendables del tenant. */
   async listResources(
     query: ListResourcesQueryDto,
   ): Promise<ListResourcesResponseDto> {
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const resources = await this.agendaRepo.findResources(em, {
       tenantId: query.tenantId,
       practiceId: query.practiceId,
@@ -99,13 +121,18 @@ export class SchedulingAgendaService {
     // una caída.
     let sites = new Map<string, ResourceSiteDto>();
     try {
-      sites = await this.directory.resolveSitesForResources(
-        resources.map((resource) => ({
-          refType: resource.resourceRefType,
-          refId: resource.resourceRefId,
-        })),
-        query.tenantId,
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      sites = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(() =>
+          this.directory.resolveSitesForResources(
+            resources.map((resource) => ({
+              refType: resource.resourceRefType,
+              refId: resource.resourceRefId,
+            })),
+            query.tenantId,
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -119,14 +146,19 @@ export class SchedulingAgendaService {
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
     let names = new Map<string, string>();
     try {
-      names = await this.directory.findPractitionerNames(
-        em,
-        resources
-          .filter((resource) =>
-            PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
-          )
-          .map((resource) => resource.resourceRefId),
-      );
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      names = await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional((tx) =>
+          this.directory.findPractitionerNames(
+            tx,
+            resources
+              .filter((resource) =>
+                PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
+              )
+              .map((resource) => resource.resourceRefId),
+          ),
+        );
     } catch (error) {
       this.logger.warn(
         { operation: 'scheduling.resources.list', err: error },
@@ -154,7 +186,9 @@ export class SchedulingAgendaService {
     this.assertWindow(from, to);
 
     const limit = query.limit ?? DEFAULT_LIMIT;
-    const em = this.em.fork();
+    // Keep the request transaction: scheduling tables are under RLS and a fresh
+    // connection carries no app.current_tenant_id, so every read came back empty.
+    const em = this.em.fork({ keepTransactionContext: true });
     const rows = await this.agendaRepo.findSlots(
       em,
       {

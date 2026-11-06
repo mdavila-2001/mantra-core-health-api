@@ -5,12 +5,10 @@ import * as argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
 import {
   CONCEPTS,
-  ConflictException,
   TokenService,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { IamErrorReason } from '../../iam.error-reasons';
 import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import { PROF } from '../../../profiles/profiles.concepts';
 import {
@@ -31,6 +29,7 @@ import {
   type ProfileRegistrationPort,
 } from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import { assertAssistedRegistrationIsNew } from './assisted-registration-guard';
 
 /** Vida útil del token de activación de un solo uso (72 h). */
 const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
@@ -105,31 +104,20 @@ export class IamAssistedRegistrationService {
       'Assisted patient registration',
     );
     return this.em.transactional(async (tx) => {
-      // Evitar duplicados: si el identificador verificado ya tiene una credencial
-      // viva (activa o pendiente), NO se crea otra cuenta; se sugiere invitar.
-      const existing = await this.credentialsRepo.findLivePasswordBySubject(
-        tx,
-        dto.email,
-      );
-      if (existing) {
-        this.logger.warn(
-          {
-            operation: 'iam.user.assisted-registration',
-            reason: 'identifier-in-use',
-          },
-          'Rejected assisted registration: identifier already exists (prefer invitation)',
-        );
-        throw new ConflictException(
-          'Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado',
-          { email: dto.email, suggestion: 'invitation' },
-          IamErrorReason.IDENTIFIER_ALREADY_REGISTERED_PREFER_INVITATION,
-        );
-      }
-
       // Cuenta en estado PENDING, sin contraseña definitiva y con cambio exigido.
       // El nombre sale de las partes; si el cliente mandó la forma anterior,
       // manda esa.
       const displayName = composeAccountDisplayName(dto);
+      await assertAssistedRegistrationIsNew(
+        tx,
+        {
+          credentialsRepo: this.credentialsRepo,
+          profiles: this.profiles,
+          logger: this.logger,
+        },
+        dto,
+        displayName,
+      );
       const user = this.usersRepo.create(tx, {
         displayName,
         statusConceptId: CONCEPTS.STATE_PENDING,

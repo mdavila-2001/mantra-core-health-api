@@ -76,4 +76,32 @@ export class UserGlobalRolesRepository {
       { orderBy: { createdAt: 'DESC' } },
     );
   }
+
+  /**
+   * Cuántas cuentas ACTIVAS, distintas de `excludeUserId`, tienen alguno de estos roles activos.
+   * Sustenta la guarda de «última cuenta administradora».
+   */
+  async countOtherActiveHolders(
+    em: EntityManager,
+    roleConceptIds: readonly string[],
+    excludeUserId: string,
+  ): Promise<number> {
+    const rows = await em.getConnection().execute<Array<{ n: number }>>(
+      `select count(distinct g.user_id)::int as n
+           from iam.user_global_roles g join iam.users u on u.id = g.user_id
+          where g.state_concept_id = ?::uuid
+            and u.status_concept_id = ?::uuid
+            and g.user_id <> ?::uuid
+            and g.role_concept_id in (select value::uuid from jsonb_array_elements_text(?::jsonb))`,
+      [
+        CONCEPTS.STATE_ACTIVE,
+        CONCEPTS.USER_ACTIVE,
+        excludeUserId,
+        JSON.stringify(roleConceptIds),
+      ],
+      'all',
+      em.getTransactionContext(),
+    );
+    return rows[0]?.n ?? 0;
+  }
 }

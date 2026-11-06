@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BRANCH_CATEGORIES, type BranchCategory } from '../branch-categories';
 
 /** Respuesta pública de una branch (UC-04-04). */
 export class BranchResponseDto {
@@ -62,4 +63,10 @@ export class BranchResponseDto {
 
   @ApiPropertyOptional()
   longitude?: number;
+
+  @ApiProperty({
+    description: 'Categoría de la sede (default, head_office o branch).',
+    enum: BRANCH_CATEGORIES,
+  })
+  category!: BranchCategory;
 }

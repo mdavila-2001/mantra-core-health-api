@@ -268,7 +268,7 @@ flowchart LR
 
 ### Máquina de estados `DEFECT_TRANSITIONS`
 
-Declarada en `src/modules/qa_lab/services/qa-runs.service.ts:106`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/qa_lab/application/services/qa-runs.service.ts:109`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2

@@ -3,6 +3,7 @@ import request from 'supertest';
 import {
   bootstrapTestApp,
   bearer,
+  camposObligatoriosDePaciente,
   type TestContext,
   identidadProfesional,
 } from './harness';
@@ -55,6 +56,12 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
     res.on('end', () => cb(null, Buffer.concat(chunks)));
   }
 
+  /** Claims del JWT, sin verificar la firma (el token lo firmó esta misma app). */
+  function claims(token: string): Record<string, unknown> {
+    const [, cuerpo] = token.split('.');
+    return JSON.parse(Buffer.from(cuerpo, 'base64url').toString('utf8'));
+  }
+
   async function registrarMedico(
     email: string,
     etiqueta: string,
@@ -104,16 +111,29 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
     medicoB.token = b.token;
     medicoB.hpid = b.hpid;
 
-    const paciente = await http()
-      .post('/profiles/patients')
-      .set(bearer(ctx.adminToken))
+    // Desde 764d0d406 (AUTHZ-M01, #735) la huella paciente-tenant sólo cuenta
+    // lo que hace el propio paciente: un perfil dado de alta por un admin, sin
+    // cuenta, no tiene vínculo con el tenant y la relación asistencial
+    // responde 404 AUTHZ_PATIENT_OUT_OF_SCOPE. El paciente se registra solo.
+    const campos = await camposObligatoriosDePaciente(ctx);
+    const nationalId = `FX15-${sufijo}`;
+    await http()
+      .post('/iam/auth/register-patient')
       .send({
-        patientCode: `PAC-FX15-${sufijo}`,
+        ...campos,
+        nationalId,
+        password: PASSWORD,
         displayName: `Paciente FX-15 ${sufijo}`,
-        birthDate: '1988-02-20',
+        email: `fx15-pac-${sufijo}@example.test`,
       })
       .expect(201);
-    patientProfileId = paciente.body.profileId;
+    const loginPaciente = await http()
+      .post('/iam/auth/login')
+      .send({ nationalId, password: PASSWORD })
+      .expect(200);
+    patientProfileId = claims(loginPaciente.body.accessToken as string)[
+      'pid'
+    ] as string;
 
     // `ClinicalRecordAccessGuard` (commit 604cb64d) exige, para escribir en el
     // expediente, un turno de hoy o una relación asistencial vigente —A es

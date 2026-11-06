@@ -100,7 +100,7 @@ INVESTIGACIÓN
     └─ /revoke ─────────────────> expired (fin de plazo) ≠ revoked (decisión)
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La zona no es una etiqueta descriptiva, es una frontera.** `curated` sólo admite dato ya
   de-identificado, y es lo que impide que dato clínico en claro acabe en una zona desde la que se
@@ -160,7 +160,7 @@ la primera cohorte de un proyecto nuevo, sin una llamada previa que el modelo no
 
 Si el código ya lo tiene otro agregado, se rechaza: la clave natural manda sobre el id de la ruta.
 
-## Permisos
+## Permissions
 
 `DATA_PLATFORM_ENGINEER` define zonas, catálogos y datasets. `DATA_PRODUCT_OWNER` publica versiones
 de producto. `TRANSFORMATION_WORKER` y `DEIDENTIFICATION_WORKER` ejecutan. `DATA_STEWARD` evalúa
@@ -176,7 +176,7 @@ que se le den.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el producto y el proyecto al hacer upsert, sobre la versión vigente que se
 supersede, sobre el dataset al evaluar calidad —porque puede quedar en cuarentena—, sobre la
@@ -192,7 +192,7 @@ entonces abrir otra.
 release y su cierre — los tres momentos en que algo deja de servirse o alguien accede a datos de
 pacientes. No se loguean valores de partición, contratos ni expresiones de cohorte.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test src/modules/lakehouse --runInBand --silent

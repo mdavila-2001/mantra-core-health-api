@@ -61,6 +61,6 @@ necesariamente quien queda registrado: los pasos y las escrituras se atribuyen a
 del agente. La excepción es la decisión de la aprobación, que se atribuye a la persona: es el único
 punto donde el sentido de la operación es que la tomó un humano.
 
-## Pruebas
+## Tests
 
 16 pruebas de delegación en `automation-controllers.spec.ts`.

@@ -36,15 +36,22 @@ function build() {
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
+    findOne: mockFn().mockResolvedValue(null),
   };
+  // The savepoint (`fork({ keepTransactionContext: true }).transactional`) runs
+  // its callback on the same fork.
+  const emFork: any = {
+    flush: mockFn().mockResolvedValue(undefined),
+  };
+  emFork.transactional = mockFn((cb: any) => cb(emFork));
   const em = {
-    fork: mockFn().mockReturnValue({}),
+    fork: mockFn().mockReturnValue(emFork),
     transactional: mockFn((cb: any) => cb(tx)),
   };
   const serviceCatalogRepo = {
-    findByCode: mockFn(),
+    findByCode: mockFn().mockResolvedValue(null),
     findById: mockFn(),
-    create: mockFn(),
+    create: mockFn().mockReturnValue(item),
     searchPage: mockFn(),
   };
   const practiceTenantLookup = {
@@ -75,6 +82,15 @@ function build() {
     }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El repositorio de servicios: por omisión sólo conoce `concept-1`.
+  const serviceRepository = {
+    resolveImportable: mockFn(async (ids: string[]) => {
+      const known = new Map(Object.entries(REPOSITORY));
+      return new Map(
+        ids.filter((id) => known.has(id)).map((id) => [id, known.get(id)]),
+      );
+    }),
+  };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
@@ -82,11 +98,13 @@ function build() {
     attachableFiles as any,
     fileUpload as any,
     logger as any,
+    serviceRepository as any,
   );
   return {
     service,
     tx,
     em,
+    serviceRepository,
     serviceCatalogRepo,
     practiceTenantLookup,
     attachableFiles,
@@ -94,6 +112,22 @@ function build() {
     logger,
   };
 }
+
+/** Conceptos que el doble del repositorio reconoce como importables. */
+const REPOSITORY: Record<string, any> = {
+  'concept-1': {
+    id: 'concept-1',
+    code: 'CONS-01',
+    display: 'Consulta general',
+    code_system: null,
+  },
+  'concept-eco': {
+    id: 'concept-eco',
+    code: '881234',
+    display: 'Ecocardiograma transtorácico',
+    code_system: 'cups',
+  },
+};
 
 /** Una fila editable del catálogo, con los campos que el servicio toca. */
 function catalogRow(overrides: Record<string, unknown> = {}) {
@@ -184,6 +218,7 @@ describe('BillingServiceCatalogService', () => {
           code: 'CONS-01',
           name: 'Consulta general',
           defaultPrice: '100.00',
+          serviceConceptId: 'concept-1',
         },
         actor,
       );
@@ -207,6 +242,7 @@ describe('BillingServiceCatalogService', () => {
         code: 'NEBU-01',
         name: 'Nebulización',
         defaultPrice: '80.00',
+        serviceConceptId: 'concept-1',
       };
 
       it('un profesional da de alta un servicio en su consultorio propio', async () => {
@@ -265,6 +301,7 @@ describe('BillingServiceCatalogService', () => {
               code: 'CONS-01',
               name: 'Consulta general',
               defaultPrice: '100.00',
+              serviceConceptId: 'concept-1',
             },
             doctor,
           ),
@@ -286,6 +323,7 @@ describe('BillingServiceCatalogService', () => {
             code: 'CONS-01',
             name: 'Consulta general',
             defaultPrice: '100.00',
+            serviceConceptId: 'concept-1',
           },
           actor,
         );
@@ -308,6 +346,7 @@ describe('BillingServiceCatalogService', () => {
               code: 'CONS-01',
               name: 'Consulta general',
               defaultPrice: price,
+              serviceConceptId: 'concept-1',
             },
             actor,
           )
@@ -337,11 +376,211 @@ describe('BillingServiceCatalogService', () => {
             code: 'CONS-01',
             name: 'Consulta general',
             defaultPrice: '100.00',
+            serviceConceptId: 'concept-1',
           },
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * El catálogo ya no admite texto libre: todo servicio sale del repositorio.
+   * Es el pedido explícito («no se debe permitir crearlo porque se hace un caos
+   * la catalogación»), así que se prueba la puerta cerrada y no sólo la abierta.
+   */
+  describe('alta sólo desde el repositorio', () => {
+    it('sin serviceConceptId responde 422 con su motivo y no crea nada', async () => {
+      const d = build();
+
+      const err = await d.service
+        .create(
+          {
+            practiceId: 'pr1',
+            name: 'Mi servicio inventado',
+            defaultPrice: '10.00',
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as PreconditionFailedException).reason).toBe(
+        'SERVICE_CATALOG_CONCEPT_REQUIRED',
+      );
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con un concepto que no es del repositorio responde 422 y no crea nada', async () => {
+      const d = build();
+
+      const err = await d.service
+        .create(
+          {
+            practiceId: 'pr1',
+            serviceConceptId: 'concept-ajeno',
+            defaultPrice: '10.00',
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect((err as PreconditionFailedException).reason).toBe(
+        'SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY',
+      );
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el nombre y el código los pone el repositorio, no el cuerpo', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(item);
+
+      await d.service.create(
+        {
+          practiceId: 'pr1',
+          code: 'LO-QUE-SEA',
+          name: 'eco cardio',
+          serviceConceptId: 'concept-eco',
+          defaultPrice: '300.00',
+        },
+        actor,
+      );
+
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          code: 'cups:881234',
+          name: 'Ecocardiograma transtorácico',
+          serviceConceptId: 'concept-eco',
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+        }),
+      );
+    });
+  });
+
+  describe('importServices', () => {
+    const created = (id: string) => ({ ...item, id });
+
+    it('importa lo nuevo y devuelve lo que ya estaba sin duplicarlo', async () => {
+      const d = build();
+      // `concept-1` ya está enlazado en la práctica; `concept-eco` no.
+      d.tx.findOne.mockImplementation(async (_e: unknown, where: any) =>
+        where.serviceConceptId === 'concept-1' ? { id: 'ya-estaba' } : null,
+      );
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(created('nuevo'));
+
+      const res = await d.service.importServices(
+        {
+          practiceId: 'pr1',
+          items: [
+            { conceptId: 'concept-1', defaultPrice: '100.00' },
+            { conceptId: 'concept-eco', defaultPrice: '300.00' },
+          ],
+        },
+        actor,
+      );
+
+      expect(res.items).toEqual([
+        {
+          conceptId: 'concept-1',
+          outcome: 'ALREADY_IMPORTED',
+          serviceCatalogId: 'ya-estaba',
+        },
+        {
+          conceptId: 'concept-eco',
+          outcome: 'CREATED',
+          serviceCatalogId: 'nuevo',
+        },
+      ]);
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('el mismo concepto dos veces en el lote nace una sola vez', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(created('nuevo'));
+
+      const res = await d.service.importServices(
+        {
+          practiceId: 'pr1',
+          items: [
+            { conceptId: 'concept-eco', defaultPrice: '300.00' },
+            { conceptId: 'concept-eco', defaultPrice: '350.00' },
+          ],
+        },
+        actor,
+      );
+
+      expect(res.items.map((i) => i.outcome)).toEqual([
+        'CREATED',
+        'ALREADY_IMPORTED',
+      ]);
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('si uno no es del repositorio no entra ninguno, y dice cuál', async () => {
+      const d = build();
+
+      const err = await d.service
+        .importServices(
+          {
+            practiceId: 'pr1',
+            items: [
+              { conceptId: 'concept-eco', defaultPrice: '300.00' },
+              { conceptId: 'inventado', defaultPrice: '1.00' },
+            ],
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as PreconditionFailedException).details).toEqual({
+        conceptIds: ['inventado'],
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+    });
+
+    it('un precio en 0 responde 422 y no entra ninguno del lote (FAC-06)', async () => {
+      const d = build();
+      const error = await d.service
+        .importServices(
+          {
+            practiceId: 'pr1',
+            items: [
+              { conceptId: 'concept-1', defaultPrice: '100.00' },
+              { conceptId: 'concept-eco', defaultPrice: '0.00' },
+            ],
+          },
+          actor,
+        )
+        .then(
+          () => null,
+          (e: unknown) => e,
+        );
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as PreconditionFailedException).reason).toBe(
+        BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
+      );
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('en una organización ajena responde 404 antes de mirar el repositorio', async () => {
+      const d = build();
+
+      await expect(
+        d.service.importServices(
+          {
+            practiceId: 'pr1',
+            items: [{ conceptId: 'concept-eco', defaultPrice: '1.00' }],
+          },
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceRepository.resolveImportable).not.toHaveBeenCalled();
     });
   });
 
@@ -695,6 +934,7 @@ describe('BillingServiceCatalogService', () => {
       code: 'CONS-01',
       name: 'Consulta general',
       defaultPrice: '100.00',
+      serviceConceptId: 'concept-1',
       imageFileId: 'file-1',
     } as any;
 
@@ -795,6 +1035,120 @@ describe('BillingServiceCatalogService', () => {
       );
 
       expect(d.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
+    });
+  });
+});
+
+/**
+ * Rol administrativo acotado a un tenant (`scopedRoles`, MCH-001): figura en
+ * `roles`, pero sólo opera el catálogo de las prácticas de su tenant (#1241).
+ */
+describe('BillingServiceCatalogService · administración acotada a un tenant', () => {
+  const scopedTo = (role: string) =>
+    ({
+      id: 'admin-a',
+      roles: [role],
+      scopedRoles: { 'tenant-a': [role] },
+    }) as any;
+  const dto = {
+    practiceId: 'pr1',
+    code: 'NEBU-01',
+    name: 'Nebulización',
+    defaultPrice: '80.00',
+    serviceConceptId: 'concept-1',
+  };
+
+  /** Da de alta en `pr1`, práctica del tenant indicado. */
+  const createAs = (
+    actorUser: unknown,
+    practiceTenant: string | null,
+    contextTenant?: string,
+  ) => {
+    const d = build();
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      practiceTenant,
+    );
+    d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+    d.serviceCatalogRepo.create.mockReturnValue(item);
+    const run = () => d.service.create(dto, actorUser as any);
+    return {
+      d,
+      result:
+        contextTenant === undefined ? run() : runWithTenant(contextTenant, run),
+    };
+  };
+
+  it('acotado a A no da de alta en una práctica de B, con B en contexto ni sin tenant', async () => {
+    for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+      for (const context of ['tenant-b', undefined]) {
+        const { d, result } = createAs(scopedTo(role), 'tenant-b', context);
+        await expect(result).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      }
+      // Una práctica inexistente tampoco se le abre.
+      const { result } = createAs(scopedTo(role), null, 'tenant-a');
+      await expect(result).rejects.toBeInstanceOf(ResourceNotFoundException);
+    }
+  });
+
+  it('acotado a A da de alta en su tenant; el global, en cualquiera sin consultar el tenant', async () => {
+    for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+      const own = createAs(scopedTo(role), 'tenant-a', 'tenant-a');
+      await expect(own.result).resolves.toEqual(item);
+
+      const global = createAs(
+        { id: 'admin-g', roles: [role] },
+        'tenant-b',
+        'tenant-b',
+      );
+      await expect(global.result).resolves.toEqual(item);
+      expect(
+        global.d.practiceTenantLookup.findTenantOfPractice,
+      ).not.toHaveBeenCalled();
+    }
+  });
+
+  /** Corrige `s1`, servicio de `pr1`, práctica del tenant indicado. */
+  const updateAs = (
+    actorUser: unknown,
+    practiceTenant: string,
+    contextTenant?: string,
+  ) => {
+    const d = build();
+    d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      practiceTenant,
+    );
+    const run = () =>
+      d.service.update('s1', { defaultPrice: '90.00' }, actorUser as any);
+    return contextTenant === undefined
+      ? run()
+      : runWithTenant(contextTenant, run);
+  };
+
+  it('SECURITY_ADMIN acotado a A no corrige un servicio de B, con B en contexto ni sin tenant', async () => {
+    const scoped = scopedTo('SECURITY_ADMIN');
+    await expect(
+      updateAs(scoped, 'tenant-b', 'tenant-b'),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    await expect(updateAs(scoped, 'tenant-b')).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+  });
+
+  it('SECURITY_ADMIN acotado a A corrige los de A; el global, los de cualquiera', async () => {
+    const scoped = scopedTo('SECURITY_ADMIN');
+    await expect(
+      updateAs(scoped, 'tenant-a', 'tenant-a'),
+    ).resolves.toMatchObject({ defaultPrice: '90.00' });
+    await expect(updateAs(scoped, 'tenant-a')).resolves.toMatchObject({
+      defaultPrice: '90.00',
+    });
+    await expect(
+      updateAs(actor, 'tenant-b', 'tenant-b'),
+    ).resolves.toMatchObject({ defaultPrice: '90.00' });
+    await expect(updateAs(actor, 'tenant-b')).resolves.toMatchObject({
+      defaultPrice: '90.00',
     });
   });
 });

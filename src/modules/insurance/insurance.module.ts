@@ -114,6 +114,12 @@ import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repo
 import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
 import { PractitionerInsuranceNetworksController } from './presentation/controllers/practitioner-insurance-networks.controller';
 import { PractitionerInsuranceNetworksService } from './application/services/practitioner-insurance-networks.service';
+import {
+  InsurerPractitionerRequestsController,
+  PractitionerInsurerRequestsController,
+} from './presentation/controllers/practitioner-insurer-requests.controller';
+import { PractitionerInsurerRequestsService } from './application/services/practitioner-insurer-requests.service';
+import { PractitionerInsurerRequestsRepository } from './infrastructure/repositories/practitioner-insurer-requests.repository';
 import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { PatientCareRelationshipAdapter } from './infrastructure/adapters/patient-care-relationship.adapter';
@@ -168,6 +174,8 @@ import {
   ],
   controllers: [
     PractitionerInsuranceNetworksController,
+    PractitionerInsurerRequestsController,
+    InsurerPractitionerRequestsController,
     MyClaimsController,
     InsuranceBackboneController,
     CoverageController,
@@ -255,6 +263,8 @@ import {
       useExisting: DirectoryTenantAdministrationAdapter,
     },
     PractitionerInsuranceNetworksService,
+    PractitionerInsurerRequestsService,
+    PractitionerInsurerRequestsRepository,
     MyClaimsService,
     PatientChargeBreakdownService,
     // Repositorios
@@ -322,7 +332,10 @@ import {
   // `DeclaredCoveragesReader` lo leen `profiles` (GET /profiles/patients/me)
   // y `clinical` (el PDF oficial de receta, subtarea B.3): es la misma
   // consulta de coberturas declaradas y no puede tener dos dueños.
+  // `PractitionerInsurerRequestsService` lo usa `iam`: el alta del profesional
+  // pide sus aseguradoras dentro de su propia transacción.
   exports: [
+    PractitionerInsurerRequestsService,
     InsuranceBackboneService,
     CatalogRepository,
     CoverageRepository,

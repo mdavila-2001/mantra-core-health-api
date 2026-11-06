@@ -87,6 +87,9 @@ function build() {
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const taxIdentifiers = {
+    currentValue: mockFn(async (): Promise<string | undefined> => undefined),
+  };
 
   const service = new DirectoryReadService(
     em,
@@ -101,6 +104,7 @@ function build() {
     identifiersRepo as any,
     contactPointsRepo as any,
     concepts as any,
+    taxIdentifiers as any,
     logger as any,
   );
   return {
@@ -116,6 +120,7 @@ function build() {
     identifiersRepo,
     contactPointsRepo,
     concepts,
+    taxIdentifiers,
   };
 }
 
@@ -590,6 +595,30 @@ describe('DirectoryReadService.listMemberships', () => {
           { role: 'COMMERCE_REGISTRY_DOC', verificationStatus: 'PENDIENTE' },
         ]);
         expect(output.items[0]).not.toHaveProperty('taxIdentifier');
+      });
+
+      it('publishes the NIT recorded on its own even without any paper', async () => {
+        const d = build();
+        conTenant(d);
+        d.taxIdentifiers.currentValue.mockResolvedValue('1023456029');
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0]).not.toHaveProperty('legalDocuments');
+        expect(output.items[0].taxIdentifier).toBe('1023456029');
+      });
+
+      it('the NIT recorded on its own wins over the tax document number', async () => {
+        const d = build();
+        conTenant(d);
+        d.taxIdentifiers.currentValue.mockResolvedValue('999888777');
+        d.legalRepo.listAffiliationDocsByTenant.mockResolvedValue([
+          doc({ documentNumber: '1020304050' }),
+        ]);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].taxIdentifier).toBe('999888777');
       });
     });
 

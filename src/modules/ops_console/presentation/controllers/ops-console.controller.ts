@@ -1,3 +1,4 @@
+import { PlatformScopeOptional } from '../../../../common/tenant/platform-scope';
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../../common';
@@ -22,6 +23,7 @@ export const OPS_READ_ROLES = [
 /** Consola de operación del portal: sólo lectura (módulos 11, 36, 46, 67, 68). */
 @ApiTags('ops-console')
 @ApiBearerAuth()
+@PlatformScopeOptional()
 @Controller('admin/ops')
 export class OpsConsoleController {
   constructor(

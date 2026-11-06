@@ -1,0 +1,325 @@
+{
+  "generatedBy": "tools/catalogacion/generar-notas-boveda.mjs",
+  "source": {
+    "vault": "SALUD/Entidades",
+    "sha256": "444e8dfe4edf9e79158c00b6badab0470777dcf23ab371ad4d8f1a812bfd0c0a",
+    "templateThreshold": 3,
+    "notasDeEntidad": 2551,
+    "conjuntosDeIndices": 1220,
+    "tablasConTextoPropio": 59,
+    "camposPropios": 74,
+    "camposPlantilla": 3911
+  },
+  "tables": {
+    "accounting.asset_assignments": {
+      "reference": "SALUD/Entidades/E accounting.asset_assignments.md",
+      "sha256": "a58eab8674678a96baa30544f3186647f8f116a48c76d5bf766d74ab5b388855",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`assets`, `asset_components`): el sistema no podría representar cómo se vinculan realmente en la operación, y la organización no podría facturar, cobrar, conciliar con aseguradoras ni cuadrar su contabilidad."
+    },
+    "audit.dsar_requests": {
+      "reference": "SALUD/Entidades/E audit.dsar_requests.md",
+      "sha256": "7bc923f9053b55d9a7f79d9c7e072cd9a390ceae733266fe8366c809c1665a0e",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, la organización no podría demostrar cumplimiento ante auditores, aseguradoras ni reguladores."
+    },
+    "authz.break_glass_sessions": {
+      "reference": "SALUD/Entidades/E authz.break_glass_sessions.md",
+      "sha256": "65dde4576c7f37042086ae3e18d39b0610d31f5fe489cd28a8887513a5b52094",
+      "example": "Cuando un paciente llega inconsciente a urgencias y el médico de turno necesita ver una historia que normalmente no puede, ese acceso de emergencia —con justificación obligatoria— queda en break_glass_sessions."
+    },
+    "authz.care_relationships": {
+      "reference": "SALUD/Entidades/E authz.care_relationships.md",
+      "sha256": "5eb454fa677abf9a4af9902dfaf29c23ae3438c333c7c299a1234cdf589f291d",
+      "business": "care_relationships registra el vínculo asistencial vigente entre un profesional y un paciente.",
+      "example": "Cuando un médico abre la historia de un paciente, el PDP busca acá una relación vigente (tratante, consultor o emergencia) que lo autorice.",
+      "existence": "Sin ella el control de acceso clínico queda sin su premisa: no habría forma de distinguir al profesional que atiende a ese paciente de cualquier otro profesional del tenant. Es fail-closed — sin fila vigente, no hay acceso."
+    },
+    "authz.ip_access_rules": {
+      "reference": "SALUD/Entidades/E authz.ip_access_rules.md",
+      "sha256": "523a37af7d07ca90fac8781f46c77ac90823c9c4cb267aa0d872bf6fd3ac5c96",
+      "example": "Cuando una clínica exige que su panel de administración solo se abra desde la IP del consultorio, esa lista de rangos permitidos vive en ip_access_rules."
+    },
+    "authz.patient_legal_representations": {
+      "reference": "SALUD/Entidades/E authz.patient_legal_representations.md",
+      "sha256": "c2f01121e6a5c9bca1870afa66d1fd6272151c9edd4172381108e13c53a9e0e4",
+      "business": "patient_legal_representations registra quién puede actuar legalmente en nombre de un paciente.",
+      "example": "Cuando la madre de un menor pide un turno o consulta un resultado, el sistema comprueba acá que su representación esté vigente.",
+      "existence": "Es el único registro que separa «actuar por uno mismo» de «actuar por otro». Sin él, o se niega el acceso a todo representante legítimo, o se abre el acceso a terceros sin acreditación."
+    },
+    "billing.billing_document_links": {
+      "reference": "SALUD/Entidades/E billing.billing_document_links.md",
+      "sha256": "20470b3faa474ec8eb7c94d218745010a964e5d1264af612c8632d74c3059028",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (otras entidades del módulo): el sistema no podría representar cómo se vinculan realmente en la operación, y la organización no podría facturar, cobrar, conciliar con aseguradoras ni cuadrar su contabilidad."
+    },
+    "clinical.prescription_signature_policies": {
+      "reference": "SALUD/Entidades/E clinical.prescription_signature_policies.md",
+      "sha256": "58fc31630cb5bd2b38755f268256e5429bf08e76753198c2c1dede21b7d491cc",
+      "business": "prescription_signature_policies registra cuándo una receta exige firma, de forma configurable por tenant.",
+      "example": "En una jurisdicción los psicotrópicos emitidos por telemedicina exigen firma y los analgésicos comunes no; esa diferencia se declara acá, no en el código.",
+      "existence": "La obligatoriedad de firma depende de jurisdicción, tipo de medicamento y canal, y cambia por norma. Cablearla en el código obligaría a desplegar la aplicación cada vez que cambia una regulación."
+    },
+    "delegated_access.practitioner_delegate_assignments": {
+      "reference": "SALUD/Entidades/E delegated_access.practitioner_delegate_assignments.md",
+      "sha256": "35a8f5f2baeef945dd7c9984d0277364321fdf93d43738b8b3f6232b8e8c3a71",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`delegated_access_grants`, `delegated_access_approval_requests`, `delegation_events`): el sistema no podría representar cómo se vinculan realmente en la operación, y el sistema no podría probar quién accedió a qué ni bajo qué autorización, y dejaría de ser vendible a cualquier organización regulada."
+    },
+    "diagnostics.diagnostic_provenance_links": {
+      "reference": "SALUD/Entidades/E diagnostics.diagnostic_provenance_links.md",
+      "sha256": "d4f0c0fc441ab8cfdb5e9ffc09f62c80840956dedbab4cd182b26077d2279cb0",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (otras entidades del módulo): el sistema no podría representar cómo se vinculan realmente en la operación, y se perdería parte de la historia médica del paciente — el activo más crítico y regulado del producto."
+    },
+    "directory.branch_memberships": {
+      "reference": "SALUD/Entidades/E directory.branch_memberships.md",
+      "sha256": "26756759b02f00d7f6dff34a97219da8738aa798a0cb05c97b75897fa137422b",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`tenant_memberships`, `branches`): el sistema no podría representar cómo se vinculan realmente en la operación, y los demás módulos se quedarían sin una base común y tendrían que reinventar identidad, catálogos o separación por organización."
+    },
+    "directory.tenant_affiliation_documents": {
+      "reference": "SALUD/Entidades/E directory.tenant_affiliation_documents.md",
+      "sha256": "d147fcafe4235f0171cae32a4f8b499cd43c0b93f9a5c3e0008f7532b3ecbe36",
+      "example": "Cuando una empresa se afilia y sube su Escritura de Constitución, el Poder del Representante Legal, su SEPREC vigente o el documento de exhibición del NIT, cada uno de esos documentos —con su tipo, autoridad emisora (SEPREC/SIAT) y vigencia— se registra en tenant_affiliation_documents."
+    },
+    "directory.tenant_legal_representatives": {
+      "reference": "SALUD/Entidades/E directory.tenant_legal_representatives.md",
+      "sha256": "0d59e6deac3081702cd3cce38255932f70c871756573a32f4695890cd7c0b74a",
+      "example": "Cuando una empresa designa a la persona que la representa legalmente y adjunta su CI y su Poder, ese vínculo persona↔empresa con rol legal se registra en tenant_legal_representatives."
+    },
+    "directory.tenant_memberships": {
+      "reference": "SALUD/Entidades/E directory.tenant_memberships.md",
+      "sha256": "7d32db424a4af825e1dd7df53b1394810abde9d2cc35987ed556fcc1160b5e89",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`branch_memberships`, `tenants`): el sistema no podría representar cómo se vinculan realmente en la operación, y los demás módulos se quedarían sin una base común y tendrían que reinventar identidad, catálogos o separación por organización."
+    },
+    "directory.tenant_web_configs": {
+      "reference": "SALUD/Entidades/E directory.tenant_web_configs.md",
+      "sha256": "fd14b7884f6436f2331c499cca09fae19d3429d27e7f5ca2f7e3ee27175a65b2",
+      "example": "Cuando la empresa define el dominio de su página web y el idioma/lenguaje con que se construye, esa configuración se guarda en tenant_web_configs."
+    },
+    "erp.time_off_requests": {
+      "reference": "SALUD/Entidades/E erp.time_off_requests.md",
+      "sha256": "c319661a6852a03da495fbcd1c6aa3a3b4b8303ca42d53b1c0ed11bdc8c15a3f",
+      "example": "Cuando un profesional se toma vacaciones y su agenda debe bloquearse para que nadie le reserve, ese bloqueo se registra en time_off_requests."
+    },
+    "forms.field_assignments": {
+      "reference": "SALUD/Entidades/E forms.field_assignments.md",
+      "sha256": "74dbb1c367e698dd57b748b4fb6fa75bfbfff924ee3e639dc8c676cbef62dd79",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`field_values`, `dynamic_field_definitions`, `dynamic_field_sections`): el sistema no podría representar cómo se vinculan realmente en la operación, y se perdería parte de la historia médica del paciente — el activo más crítico y regulado del producto."
+    },
+    "health_data.canonical_resource_relationships": {
+      "reference": "SALUD/Entidades/E health_data.canonical_resource_relationships.md",
+      "sha256": "1e108ecae011b10e5526b9dfd3a6fc48d2f3ad9345ab421248f42286f63cdad7",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`canonical_health_resources`): el sistema no podría representar cómo se vinculan realmente en la operación, y se perdería el puente entre la fuente canónica y los stores especializados (búsqueda, IA, imágenes, analítica)."
+    },
+    "health_data.patient_identity_members": {
+      "reference": "SALUD/Entidades/E health_data.patient_identity_members.md",
+      "sha256": "61a7a5f3f377ee60f883780626b2edbe795e6a57f1e43228bc3e9de46469ab17",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`patient_identity_clusters`): el sistema no podría representar cómo se vinculan realmente en la operación, y se perdería el puente entre la fuente canónica y los stores especializados (búsqueda, IA, imágenes, analítica)."
+    },
+    "iam.account_activations": {
+      "reference": "SALUD/Entidades/E iam.account_activations.md",
+      "sha256": "322890e74011253db18f18fcd60cce2f83d58e13e58f04cd4c05b2a79c2ec8c3",
+      "business": "account_activations registra el token de un solo uso con que un paciente activa la cuenta que le crearon.",
+      "example": "Un clínico registra a un paciente mayor que no usa computadora; el paciente recibe un enlace de activación y fija su propia contraseña al entrar.",
+      "existence": "Es lo que hace que el registro asistido no sea una cuenta cuya contraseña conoce un tercero. Sin esta tabla, quien crea la cuenta conserva la credencial del titular, que es exactamente lo que C-18 prohíbe."
+    },
+    "iam.account_lockouts": {
+      "reference": "SALUD/Entidades/E iam.account_lockouts.md",
+      "sha256": "717e70cb5a94ec8892fc7e775df93f0f069e1a39f57c3d3210a527dee8fe4c69",
+      "example": "Cuando alguien intenta adivinar la contraseña de un médico probando cientos de veces, el bloqueo temporal de esa cuenta se registra en account_lockouts."
+    },
+    "iam.api_key_scopes": {
+      "reference": "SALUD/Entidades/E iam.api_key_scopes.md",
+      "sha256": "6c17300d8489896583e24f8ec45f7e267d0571a0ce28182420ac9ea3e2284cb6",
+      "example": "Cuando un consultorio del plan MAX integra su propio software y necesita una credencial para llamar a la API sin usuario/contraseña, esa clave (solo su hash) y sus permisos viven en api_key_scopes."
+    },
+    "iam.api_keys": {
+      "reference": "SALUD/Entidades/E iam.api_keys.md",
+      "sha256": "8fac302e89fd705e945fd32c04a04f7ac5dc977fce0f12aae617a27056a4edaf",
+      "example": "Cuando un consultorio del plan MAX integra su propio software y necesita una credencial para llamar a la API sin usuario/contraseña, esa clave (solo su hash) y sus permisos viven en api_keys."
+    },
+    "iam.email_verifications": {
+      "reference": "SALUD/Entidades/E iam.email_verifications.md",
+      "sha256": "e401319b800552f7bfddbb2a06064a190e831a22944a5b28b8b864bac942eb46",
+      "business": "email_verifications registra el token de un solo uso con que alguien prueba que el correo que declaró es suyo.",
+      "example": "Una paciente se registra con su carnet y agrega su correo para recibir los resultados; le llega un enlace y, al abrirlo, ese correo queda probado. Mientras tanto ya puede usar la aplicación.",
+      "existence": "Es lo que separa un correo *declarado* de un correo *probado*. Sin esta tabla no hay forma de saber si la dirección a la que se mandan resultados clínicos pertenece a quien dice, y basta un tipeo para que un informe médico llegue a un desconocido."
+    },
+    "iam.password_resets": {
+      "reference": "SALUD/Entidades/E iam.password_resets.md",
+      "sha256": "b7573d24c89113aaae6ced41a2e83f21647119c8d99d293fdf63bfc215295a70",
+      "business": "password_resets registra el token de un solo uso con que alguien que olvidó su contraseña fija una nueva.",
+      "example": "Un médico no recuerda su clave, pide restablecerla desde la pantalla de ingreso, y con el enlace que le llega elige una nueva. Las sesiones abiertas en otros equipos se cierran.",
+      "existence": "Es el único camino por el que alguien recupera su cuenta sin que un tercero le fabrique una contraseña y la conozca. Sin la tabla, restablecer una clave vuelve a ser un favor que pide por teléfono al administrador."
+    },
+    "iam.users": {
+      "reference": "SALUD/Entidades/E iam.users.md",
+      "sha256": "86fa3033476fc59659a5f915127a43c6d0b7dcfa8b498719f749314a5cad70ed",
+      "existence": "Si se eliminara, no habría forma de separar la cuenta técnica de la persona real ni de gestionar accesos federados, múltiples roles y cumplimiento de identidad — el sistema no podría probar quién accedió a qué ni bajo qué autorización, y dejaría de ser vendible a cualquier organización regulada. Es la piedra angular de la seguridad, por eso no puede quitarse."
+    },
+    "insurance.claim_reversals": {
+      "reference": "SALUD/Entidades/E insurance.claim_reversals.md",
+      "sha256": "9af759d157fd6b9394aaa8925ec566fd380bad71c0d2fa691d847be2619577e1",
+      "example": "Cuando se cancela un procedimiento ya pagado y hay que devolver el dinero, esa devolución se registra en claim_reversals."
+    },
+    "integrations.integration_field_mappings": {
+      "reference": "SALUD/Entidades/E integrations.integration_field_mappings.md",
+      "sha256": "baeb6b8917ff57f042a4a798793f72cc3eece379870742c3d5507eb52a1826cf",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`integration_endpoints`): el sistema no podría representar cómo se vinculan realmente en la operación, y se romperían las integraciones con partners, aseguradoras y canales, y los eventos podrían perderse o duplicarse."
+    },
+    "messaging.adapter_event_mappings": {
+      "reference": "SALUD/Entidades/E messaging.adapter_event_mappings.md",
+      "sha256": "369c0ed9cb613d1438c609bfa0a4094544c5cc2375454cb4abfd56803dc85133",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (otras entidades del módulo): el sistema no podría representar cómo se vinculan realmente en la operación, y se romperían las integraciones con partners, aseguradoras y canales, y los eventos podrían perderse o duplicarse."
+    },
+    "messaging.message_channels": {
+      "reference": "SALUD/Entidades/E messaging.message_channels.md",
+      "sha256": "0ab0996402482b6916943d32b7442d48898bf688d6ebe98b3a2a1b709fea6d2d",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`provider_channel_configs`, `message_templates`, `notification_requests`): el sistema no podría representar cómo se vinculan realmente en la operación, y se romperían las integraciones con partners, aseguradoras y canales, y los eventos podrían perderse o duplicarse."
+    },
+    "organization_extensions.data_use_agreements": {
+      "reference": "SALUD/Entidades/E organization_extensions.data_use_agreements.md",
+      "sha256": "4d787279381d36b1277151b53d60e96d3aa0c93ec1e94fd920eb66d66aaeee5c",
+      "example": "Cuando dos organizaciones afiliadas o un contrato de integración habilitan intercambio de datos clínicos, el DUA que fija propósito, límites y vigencia vive en data_use_agreements.",
+      "existence": "Sin esta tabla, las claves foráneas que la referencian (`integration_contracts`, `organization_affiliations`) quedan colgantes y el modelo pierde la entidad concreta que esos registros necesitan apuntar. Su existencia se justifica por cerrar esa referencia de forma canónica en vez de dejar un identificador huérfano."
+    },
+    "payments.cash_registers": {
+      "reference": "SALUD/Entidades/E payments.cash_registers.md",
+      "sha256": "1a7ebce930d92f714f130e56fe61ba5a398360ab69751335c3fbd99fe17ef871",
+      "example": "Cuando el cajero de una clínica abre su turno y cobra en efectivo una consulta, la caja física donde se concilia ese efectivo vive en cash_registers."
+    },
+    "payments.gateway_payment_channel_mappings": {
+      "reference": "SALUD/Entidades/E payments.gateway_payment_channel_mappings.md",
+      "sha256": "4ec72435efa33cf2f513edeb327bb8e84d9bf98e183f3348f8f26b06f2cdc5ba",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`payment_channel_catalog`, `gateway_connections`): el sistema no podría representar cómo se vinculan realmente en la operación, y la organización no podría facturar, cobrar, conciliar con aseguradoras ni cuadrar su contabilidad."
+    },
+    "payments.plan_eligibility_rules": {
+      "reference": "SALUD/Entidades/E payments.plan_eligibility_rules.md",
+      "sha256": "103330a22adfdfc49bfea9cfe7df8fbe7d906b08314d0e6d793aaa73cb01d5b8",
+      "example": "Cuando se decide que solo los consultorios y enfermerías pueden contratar estos planes (y las farmacias no), esa regla de elegibilidad se guarda en plan_eligibility_rules."
+    },
+    "payments.plan_features": {
+      "reference": "SALUD/Entidades/E payments.plan_features.md",
+      "sha256": "3c51cdb0968a0a6e146b50ec928f15ae5df9729e33bf012f53d6bdc779599136",
+      "example": "Cuando el plan MAX desbloquea el asistente clínico con IA y la telemedicina que el plan Free no tiene, ese desbloqueo por plan se define en plan_features."
+    },
+    "payments.plan_prices": {
+      "reference": "SALUD/Entidades/E payments.plan_prices.md",
+      "sha256": "9b4a7cd34c8c3f34c1b4f5db0d9b24b751eafac95fc0a8731f0467585a5c8873",
+      "example": "Cuando el plan PRO cuesta un precio en Bolivia y otro en dólares, o distinto mensual vs anual, cada uno de esos precios del plan vive en plan_prices."
+    },
+    "payments.plan_quotas": {
+      "reference": "SALUD/Entidades/E payments.plan_quotas.md",
+      "sha256": "bead4d0dff422252f0f9c947e42ababfaf0925ae36b3550c3d0524214fd8f751",
+      "example": "Cuando el plan Free permite hasta 2 profesionales y 100 citas al mes y el PRO sube esos topes, esos límites por plan viven en plan_quotas."
+    },
+    "payments.refunds": {
+      "reference": "SALUD/Entidades/E payments.refunds.md",
+      "sha256": "9040ef5a6cbaf212b8dc8fd92ef27813a13940cc669f32c7825da11da96750f9",
+      "example": "Cuando se cancela un procedimiento ya pagado y hay que devolver el dinero, esa devolución se registra en refunds."
+    },
+    "payments.subscription_usage_counters": {
+      "reference": "SALUD/Entidades/E payments.subscription_usage_counters.md",
+      "sha256": "ac10e1e57d64bd6d6a44a9c655a8a5a0465f04480ab115524625fe771c47df46",
+      "example": "Cuando un consultorio en plan Free ya lleva 87 de sus 100 citas del mes, ese consumo acumulado —igual que el medidor de uso de una cuenta de IA— se registra en subscription_usage_counters."
+    },
+    "pharmacy_inventory.inventory_recall_holds": {
+      "reference": "SALUD/Entidades/E pharmacy_inventory.inventory_recall_holds.md",
+      "sha256": "b53c651b510155f07fc2e3e0e10026657fa0f18783e081cb63773e5b6ca3e869",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, la farmacia no podría controlar stock ni trazar qué medicamento se entregó a quién."
+    },
+    "pharmacy_inventory.purchase_quotations": {
+      "reference": "SALUD/Entidades/E pharmacy_inventory.purchase_quotations.md",
+      "sha256": "f3cd5277495e74472ff467b6f69a25cdd29cc5ddb1adf1198cfcab19113f7e12",
+      "example": "Cuando la farmacia pide precios a un proveedor antes de reservar stock para reponer un medicamento, esa cotización con su vigencia vive en purchase_quotations."
+    },
+    "pharmacy.pharmacy_external_product_mappings": {
+      "reference": "SALUD/Entidades/E pharmacy.pharmacy_external_product_mappings.md",
+      "sha256": "5d0fcbf1d94869809efafbc5cbe7da06c69a69b6e51a83cf1ffbfd5421cf75c4",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`pharmacy_integration_connections`, `pharmacy_products`): el sistema no podría representar cómo se vinculan realmente en la operación, y la farmacia no podría controlar stock ni trazar qué medicamento se entregó a quién."
+    },
+    "polyglot_storage.key_rotation_policies": {
+      "reference": "SALUD/Entidades/E polyglot_storage.key_rotation_policies.md",
+      "sha256": "1edceacd14a3c8b56e9f05819e3d52c05e892ce56033fe6c907c86b7db53056b",
+      "example": "Cuando se sospecha que una llave de cifrado pudo filtrarse y se rota de urgencia, ese evento de rotación queda registrado para auditoría en key_rotation_policies."
+    },
+    "practice.practitioner_role_assignments": {
+      "reference": "SALUD/Entidades/E practice.practitioner_role_assignments.md",
+      "sha256": "2c23737cf26c7dea1d9c0d795a019bfbb411e3d6de40e89b80d72b09c8479c47",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`): el sistema no podría representar cómo se vinculan realmente en la operación, y no se podría organizar quién atiende, dónde, ni reservar o bloquear citas sin choques."
+    },
+    "practice.practitioner_support_assignments": {
+      "reference": "SALUD/Entidades/E practice.practitioner_support_assignments.md",
+      "sha256": "723704d8e1e14aa06e26065bad7294ddafd7c90cbe8d4c3369a7c83d93932bde",
+      "existence": "Si se eliminara, se perdería la relación muchos-a-muchos que conecta a estas entidades (`practitioner_role_assignments`): el sistema no podría representar cómo se vinculan realmente en la operación, y no se podría organizar quién atiende, dónde, ni reservar o bloquear citas sin choques."
+    },
+    "procedures_perioperative.instrument_sets": {
+      "reference": "SALUD/Entidades/E procedures_perioperative.instrument_sets.md",
+      "sha256": "37bc84b3bae903099158aaf5af33b0c3c5e20ba29d501819805547e59e9edbb3",
+      "example": "Cuando enfermería verifica que la bandeja de instrumental está completa y estéril antes de abrir la cirugía, ese set catalogado vive en instrument_sets."
+    },
+    "procedures_perioperative.sterilization_loads": {
+      "reference": "SALUD/Entidades/E procedures_perioperative.sterilization_loads.md",
+      "sha256": "5d9cebfedfc3932e07a5f3234af778967ab027d5e88a1c64eeaffb56a1e0ff3e",
+      "example": "Cuando se corre un ciclo de autoclave y hay que demostrar qué instrumental se esterilizó junto y con qué resultado, ese ciclo vive en sterilization_loads."
+    },
+    "profiles.patient_merge_events": {
+      "reference": "SALUD/Entidades/E profiles.patient_merge_events.md",
+      "sha256": "599b7d1b51dc8bd8cc51a73f56985bc81d6e82feedb2187d86ee01f6d1957130",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, los demás módulos se quedarían sin una base común y tendrían que reinventar identidad, catálogos o separación por organización."
+    },
+    "scheduling.appointment_bookings": {
+      "reference": "SALUD/Entidades/E scheduling.appointment_bookings.md",
+      "sha256": "d590cf47dfb5182230fabfc5ef28580a91365f97f3d24a47eb68c4f34744024a",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, no se podría organizar quién atiende, dónde, ni reservar o bloquear citas sin choques."
+    },
+    "scheduling.booking_confirmation_rules": {
+      "reference": "SALUD/Entidades/E scheduling.booking_confirmation_rules.md",
+      "sha256": "625b6dbf874df729733937e192beab351960641b21d42d18047fc9242ed39581",
+      "business": "booking_confirmation_rules registra las reglas que deciden si una reserva se confirma sola.",
+      "example": "Una solicitud de un paciente conocido para un turno estándar se auto-confirma; una de primera vez para un procedimiento va a revisión manual.",
+      "existence": "Es el registro de la decisión automática. Sin él, o todo se confirma a mano —inviable a escala— o el criterio queda enterrado en el código y nadie puede auditarlo ni explicárselo a un paciente."
+    },
+    "scheduling.calendar_absences": {
+      "reference": "SALUD/Entidades/E scheduling.calendar_absences.md",
+      "sha256": "bd4ec84b725636833759a58b26cf06e6b44ecbee2e0de8bafa83d49f1e537cd0",
+      "example": "Cuando un profesional se toma vacaciones y su agenda debe bloquearse para que nadie le reserve, ese bloqueo se registra en calendar_absences."
+    },
+    "scheduling.slot_holds": {
+      "reference": "SALUD/Entidades/E scheduling.slot_holds.md",
+      "sha256": "bbe6642171efd657e4aa3cee9fa90c5fe071330c34cb815bb6c43d90d69f3a50",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, no se podría organizar quién atiende, dónde, ni reservar o bloquear citas sin choques."
+    },
+    "system_ops.accepted_risks": {
+      "reference": "SALUD/Entidades/E system_ops.accepted_risks.md",
+      "sha256": "ba17fd235019aeda3edcd5dd368d865f3764c2c31f3faaf17920f6c1e101b3e3",
+      "example": "Cuando una evaluación de control deja un riesgo residual que la dirección decide aceptar en vez de mitigar, esa decisión con su fecha de revisión vive en accepted_risks."
+    },
+    "system_ops.breach_notifications": {
+      "reference": "SALUD/Entidades/E system_ops.breach_notifications.md",
+      "sha256": "fa3b4a83fd721a1665efc6d8bf4d46239c49f1343d56f40e93fedfe678ad4a88",
+      "example": "Cuando una fuga afecta datos personales y la ley obliga a avisar a la autoridad en 72 horas (GDPR) o 60 días (HIPAA), esa notificación regulatoria se controla desde breach_notifications."
+    },
+    "system_ops.encryption_keys": {
+      "reference": "SALUD/Entidades/E system_ops.encryption_keys.md",
+      "sha256": "04016b9a5b648b001fcd2ae54b6d75d7d9b90b4273a70808ddb8d44928e69a1d",
+      "example": "Cuando hay que cifrar las historias clínicas en reposo y rotar la llave cada 90 días sin exponer el material criptográfico, ese registro de llaves (con su referencia al KMS) vive en encryption_keys."
+    },
+    "system_ops.key_rotation_events": {
+      "reference": "SALUD/Entidades/E system_ops.key_rotation_events.md",
+      "sha256": "a9772dac97ced70878ff9a19c1c9ae59ed6e23349be3ad3b630fe6205e0163bb",
+      "example": "Cuando se sospecha que una llave de cifrado pudo filtrarse y se rota de urgencia, ese evento de rotación queda registrado para auditoría en key_rotation_events."
+    },
+    "system_ops.partition_specs": {
+      "reference": "SALUD/Entidades/E system_ops.partition_specs.md",
+      "sha256": "b33bc459dab8c50ece7047d4c1ceb8a7d71145440bc7d017ead453708d9d2cd3",
+      "example": "Cuando una tabla de auditoría o de eventos acumula miles de millones de filas y hay que purgar o archivar lo antiguo sin frenar la base, su plan de particionado por fecha y sus tiers hot/warm/cold viven en partition_specs."
+    },
+    "system_ops.security_incidents": {
+      "reference": "SALUD/Entidades/E system_ops.security_incidents.md",
+      "sha256": "debb254d56d3e2cfd6ade9a4db0814d029faf85feddd2913aba5d7604e32c253",
+      "example": "Cuando se detecta un acceso no autorizado a datos de pacientes, el incidente —su severidad, vector y contención— se gestiona desde security_incidents."
+    },
+    "vector_rag.retrieval_feedback_events": {
+      "reference": "SALUD/Entidades/E vector_rag.retrieval_feedback_events.md",
+      "sha256": "c58cfc60906f77e32d17befc32193ba0558a623cb3b9b35ee7b97f6fc8704fc0",
+      "existence": "Si se eliminara, el negocio no tendría dónde registrar el avance de este proceso y perdería la respuesta a '¿en qué punto va esto ahora mismo?'. Sin ese estado en vivo, los usuarios no tendrían un canal formal para reportar fallos o quejas y la organización perdería esa retroalimentación para mejorar el servicio."
+    }
+  }
+}

@@ -155,6 +155,36 @@
     "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
+  "PharmacyBulkController_bulkCategories": {
+    "operacion": "POST /pharmacies/:pharmacyId/categories/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: las categorías por `PharmacyCategoriesService.create`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/categories.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkPrices": {
+    "operacion": "POST /pharmacies/:pharmacyId/prices/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: los precios del producto por `PharmacyProductsService.updateProduct`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/prices.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkProducts": {
+    "operacion": "POST /pharmacies/:pharmacyId/products/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: los productos por `PharmacyProductsService.updateProduct` (y sus precios por el manejador de precios), las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/products.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkSites": {
+    "operacion": "POST /pharmacies/:pharmacyId/sites/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: las sedes por `PharmacySitesService.updateSite` y el alta de sede por `PharmacyProvisioningService`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/sites.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "ReverseGeocodingController_reverse": {
+    "operacion": "POST /public/geo/reverse",
+    "motivo": "Traduce un punto del mapa a calle consultando el geocodificador externo (Nominatim, con Photon de respaldo) y guarda la respuesta en una caché en memoria; no consulta la base de datos.",
+    "fuente": "src/modules/geo/reverse-geocoding/reverse-geocoding.service.ts:193",
+    "revision": "manual, 2026-10-30"
+  },
   "SchedulingController_listActivityTypes": {
     "operacion": "GET /scheduling/activity-types",
     "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",

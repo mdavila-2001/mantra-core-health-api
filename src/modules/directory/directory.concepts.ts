@@ -84,6 +84,18 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
       code: 'DIR_ROLE_PRACTITIONER',
       display: 'Tenant practitioner',
     },
+    /**
+     * Personal de apoyo (secretaria) con un vínculo aceptado en la organización.
+     * Abre el tenant para el token y nada más: no administra y no lee la
+     * estructura entera (`TenantAdministrationService.assertCanRead` la
+     * excluye). Lo que ve —sedes, servicios, pisos y doctores— lo dicen sus
+     * vínculos activos. Como `ROLE_PRACTITIONER`, no figura en
+     * `TENANT_ROLE_CONCEPT_BY_CODE`: sólo lo escribe la aceptación de un vínculo.
+     */
+    ROLE_SUPPORT: {
+      code: 'DIR_ROLE_SUPPORT',
+      display: 'Tenant support staff',
+    },
 
     // --- Scopes de acceso (tenant_memberships.access_scope_concept_id) ---
     SCOPE_ALL_TENANT: {

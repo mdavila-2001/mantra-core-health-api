@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
+-- SALUD v4.2.91 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
 
 
@@ -80,6 +80,8 @@ CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_body_site_concept_id" 
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_specimen_type_concept_id" ON "diagnostic_units"."diagnostic_study_offerings" ("specimen_type_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_service_category_id" ON "diagnostic_units"."diagnostic_study_offerings" ("service_category_id");
+
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_status_concept_id" ON "diagnostic_units"."diagnostic_study_offerings" ("status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_created_by_user_id" ON "diagnostic_units"."diagnostic_study_offerings" ("created_by_user_id");
@@ -87,6 +89,12 @@ CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_created_by_user_id" ON
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_offerings_updated_by_user_id" ON "diagnostic_units"."diagnostic_study_offerings" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "gin_diagnostic_study_offerings_search" ON "diagnostic_units"."diagnostic_study_offerings" USING gin (to_tsvector('simple', (coalesce(display_name, '') || ' ' || coalesce(description, ''))));
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_diagnostic_service_categories_unit_name" ON "diagnostic_units"."diagnostic_service_categories" ("diagnostic_unit_id", lower(name));
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_service_categories_created_by_user_id" ON "diagnostic_units"."diagnostic_service_categories" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_service_categories_updated_by_user_id" ON "diagnostic_units"."diagnostic_service_categories" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_study_components_parent_offering_id" ON "diagnostic_units"."diagnostic_study_components" ("parent_offering_id");
 
@@ -139,6 +147,12 @@ CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_operational_status_concept_i
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_created_by_user_id" ON "diagnostic_units"."diagnostic_equipment" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_updated_by_user_id" ON "diagnostic_units"."diagnostic_equipment" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_care_space_id" ON "diagnostic_units"."diagnostic_equipment" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_schedulable_resource_id" ON "diagnostic_units"."diagnostic_equipment" ("schedulable_resource_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_diagnostic_equipment_site_ae_title" ON "diagnostic_units"."diagnostic_equipment" ("diagnostic_unit_site_id", "ae_title") WHERE ae_title IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_unit_accreditations_diagnostic_unit_id" ON "diagnostic_units"."diagnostic_unit_accreditations" ("diagnostic_unit_id");
 

@@ -15,7 +15,17 @@ import { catalogConceptDefinitions } from './common/seed/catalog-concept-definit
 import { loadSeedBootEnv } from './common/seed/seed-boot.env';
 import { SeedCoreState } from './common/seed/seed-core.state';
 
-const READINESS_TIMEOUT_MS = 3_000;
+/** Plazo de cada sonda; lo declara también la sonda de vida de instancias. */
+export const READINESS_TIMEOUT_MS = 3_000;
+
+/**
+ * Una sonda no respondió dentro del plazo. Clase propia para que quien lee las
+ * entradas (`collect()`) distinga «no contestó» de «contestó que no» por el
+ * `name`, sin mirar el mensaje.
+ */
+class ProbeTimeoutError extends Error {
+  override readonly name = 'ProbeTimeoutError';
+}
 
 /**
  * El bootstrap del DDL dejó restricciones de integridad sin aplicar (ORMN-01).
@@ -32,7 +42,7 @@ class SeedCoreIncompleteError extends Error {
   override readonly name = 'SeedCoreIncompleteError';
 }
 
-interface DependencyStatus {
+export interface DependencyStatus {
   status: 'up' | 'down';
   latencyMs: number;
   /** Clase del error de la sonda; sólo para el log, nunca para la respuesta. */
@@ -64,8 +74,13 @@ export class AppReadinessService {
   /** La sonda de contenido del catálogo ya vio todos los conceptos: no se repite. */
   private catalogVerified = false;
 
-  async check(): Promise<ReadinessResult> {
-    const entries = await Promise.all([
+  /**
+   * Ejecuta las cinco sondas en paralelo y devuelve sus resultados **sin
+   * lanzar**: es lo que `check()` convierte en 200/503 y lo que la sonda de
+   * vida de instancias (`ops_console`) consume como dato.
+   */
+  async collect(): Promise<Array<[string, DependencyStatus]>> {
+    return Promise.all([
       this.probe('postgresql', async () => {
         await this.orm.em.getConnection().execute('select 1');
         // ORMN-01: una base con FKs/únicos sin crear no está lista aunque responda.
@@ -78,6 +93,10 @@ export class AppReadinessService {
       this.probe('opensearch', () => this.search.ping()),
       this.probe('rls', () => this.checkRls()),
     ]);
+  }
+
+  async check(): Promise<ReadinessResult> {
+    const entries = await this.collect();
     const checks = Object.fromEntries(entries);
     const timestamp = new Date().toISOString();
     if (Object.values(checks).some((check) => check.status === 'down')) {
@@ -234,7 +253,10 @@ export class AppReadinessService {
         operation(),
         new Promise<never>((_, reject) => {
           timeout = setTimeout(
-            () => reject(new Error(`timeout de ${READINESS_TIMEOUT_MS} ms`)),
+            () =>
+              reject(
+                new ProbeTimeoutError(`timeout de ${READINESS_TIMEOUT_MS} ms`),
+              ),
             READINESS_TIMEOUT_MS,
           );
           timeout.unref();

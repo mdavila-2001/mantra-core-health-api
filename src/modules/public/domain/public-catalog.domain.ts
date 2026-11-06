@@ -26,8 +26,9 @@ export interface PharmacyProductPureRow {
   readonly requiresPrescription: boolean | null;
   /**
    * Sedes activas donde el producto está **disponible** según la regla única
-   * de existencias (`siteProductAvailabilitySql`: lotes si la sede los lleva,
-   * lo declarado en el catálogo si no, y nunca lo marcado «no tengo»).
+   * de existencias (`siteProductAvailabilitySql`: lotes si el producto tiene
+   * posición en la sede, lo declarado en el catálogo si no, y nunca lo marcado
+   * «no tengo»).
    * Ausente = no se consultó.
    */
   readonly availableSites?: string | number;

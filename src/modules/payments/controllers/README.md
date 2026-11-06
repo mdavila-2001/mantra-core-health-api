@@ -40,7 +40,7 @@ liquidación, payout, conciliación). `200 OK` en las que no crean recurso: call
 del intent y `PaymentsTransactionsService` para `POST :id/transactions`, porque esa ruta cuelga
 del intent pero su lógica pertenece al dominio de transacciones.
 
-## Pruebas
+## Tests
 
 `payments-intents.controller.spec.ts` cubre los tres controladores con los servicios mockeados:
 verifica la delegación, los argumentos (incluido el actor autenticado) y la propagación de errores.

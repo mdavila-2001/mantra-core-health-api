@@ -10,10 +10,10 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [dynamic_enum_bindings](#dynamic_enum_bindings) | Asocia enumeraciones con sus consumidores para delimitar dónde aplica cada conjunto de opciones. | 15 | 7 | 7 | COINCIDE |
-| [dynamic_enum_definitions](#dynamic_enum_definitions) | Define enumeraciones controladas que consumidores resuelven desde base de datos en vez de listas hardcodeadas. | 17 | 10 | 10 | COINCIDE |
-| [dynamic_enum_options](#dynamic_enum_options) | Cataloga valores disponibles en versiones de enumeraciones para ofrecer opciones reproducibles. | 11 | 4 | 4 | COINCIDE |
-| [dynamic_enum_versions](#dynamic_enum_versions) | Versiona enumeraciones para preservar qué opciones estaban vigentes al capturar o interpretar datos. | 11 | 5 | 6 | COINCIDE |
+| [dynamic_enum_bindings](#dynamic_enum_bindings) | Asocia enumeraciones con sus consumidores para delimitar dónde aplica cada conjunto de opciones. | 15 | 7 | 8 | COINCIDE |
+| [dynamic_enum_definitions](#dynamic_enum_definitions) | Define enumeraciones controladas que consumidores resuelven desde base de datos en vez de listas hardcodeadas. | 17 | 10 | 11 | COINCIDE |
+| [dynamic_enum_options](#dynamic_enum_options) | Cataloga valores disponibles en versiones de enumeraciones para ofrecer opciones reproducibles. | 11 | 4 | 5 | COINCIDE |
+| [dynamic_enum_versions](#dynamic_enum_versions) | Versiona enumeraciones para preservar qué opciones estaban vigentes al capturar o interpretar datos. | 11 | 5 | 7 | COINCIDE |
 | [system_context_bindings](#system_context_bindings) | Vincula contextos con tenants, agentes o módulos consumidores para determinar su alcance de aplicación. | 16 | 8 | 2 | COINCIDE |
 | [system_context_inputs](#system_context_inputs) | Relaciona entradas y fuentes incluidas en una versión de contexto para conservar procedencia. | 13 | 4 | 1 | COINCIDE |
 | [system_context_refresh_runs](#system_context_refresh_runs) | Registra ejecuciones de actualización de contextos para trazar qué fuente produjo cada cambio. | 12 | 6 | 3 | COINCIDE |
@@ -125,7 +125,7 @@ Asocia enumeraciones con sus consumidores para delimitar dónde aplica cada conj
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_45_system_context.puml: dynamic_enum_bindings`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_45_system_context.puml` · **DDL:** `SQL/45_system_context/02_tables.sql`
 - **Entidad del ORM:** `DynamicEnumBindings` — `src/modules/system_context/entities/dynamic_enum_bindings.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -175,6 +175,7 @@ Asocia enumeraciones con sus consumidores para delimitar dónde aplica cada conj
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /system-context/dynamic-enums | LEE | DIRECTA |
 | GET /system-context/dynamic-enums/bindings | LEE | DIRECTA |
 | POST /system-context/dynamic-enums/definitions/{defId}/bindings | CREA | DIRECTA |
@@ -206,7 +207,7 @@ Define enumeraciones controladas que consumidores resuelven desde base de datos 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_45_system_context.puml: dynamic_enum_definitions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_45_system_context.puml` · **DDL:** `SQL/45_system_context/02_tables.sql`
 - **Entidad del ORM:** `DynamicEnumDefinitions` — `src/modules/system_context/entities/dynamic_enum_definitions.entity.ts`
-- **Resumen:** 17 columnas · 10 índices · 8 FK salientes · 3 entrantes · 10 operaciones
+- **Resumen:** 17 columnas · 10 índices · 8 FK salientes · 3 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -271,6 +272,7 @@ Define enumeraciones controladas que consumidores resuelven desde base de datos 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /system-context/dynamic-enums | LEE | DIRECTA |
 | GET /system-context/dynamic-enums/bindings | LEE | DIRECTA |
 | POST /system-context/dynamic-enums/definitions | CREA | DIRECTA |
@@ -305,7 +307,7 @@ Cataloga valores disponibles en versiones de enumeraciones para ofrecer opciones
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_45_system_context.puml: dynamic_enum_options`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_45_system_context.puml` · **DDL:** `SQL/45_system_context/02_tables.sql`
 - **Entidad del ORM:** `DynamicEnumOptions` — `src/modules/system_context/entities/dynamic_enum_options.entity.ts`
-- **Resumen:** 11 columnas · 4 índices · 3 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 4 índices · 3 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -344,6 +346,7 @@ Cataloga valores disponibles en versiones de enumeraciones para ofrecer opciones
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /system-context/dynamic-enums | LEE | DIRECTA |
 | POST /system-context/dynamic-enums/definitions/{defId}/versions | CREA | DIRECTA |
 | POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish | LEE | DIRECTA |
@@ -372,7 +375,7 @@ Versiona enumeraciones para preservar qué opciones estaban vigentes al capturar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_45_system_context.puml: dynamic_enum_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_45_system_context.puml` · **DDL:** `SQL/45_system_context/02_tables.sql`
 - **Entidad del ORM:** `DynamicEnumVersions` — `src/modules/system_context/entities/dynamic_enum_versions.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 1 entrantes · 6 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 1 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -420,6 +423,7 @@ Versiona enumeraciones para preservar qué opciones estaban vigentes al capturar
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /system-context/dynamic-enums | LEE | DIRECTA |
 | POST /system-context/dynamic-enums/definitions/{defId}/versions | CREA | DIRECTA |
 | POST /system-context/dynamic-enums/definitions/{defId}/versions | LEE | DIRECTA |

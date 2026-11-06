@@ -57,7 +57,7 @@ Entidades (`tableName`, 6 de 6 archivos `*.entity.ts`): `geofence_events`, `geof
 - `geofence_events` — cruces append-only (ENTER/EXIT).
 - `trips` — viajes de una sesión (IN_PROGRESS/COMPLETED).
 
-## Reglas de negocio
+## Business rules
 
 - **Alta única**: no se permite un segundo sujeto ACTIVE con el mismo
   `(tenant, subject_type, subject_id)` → 409.
@@ -85,7 +85,7 @@ proyecciones/worker fuera del alcance de estos endpoints.
 ## Convenciones (idénticas a IAM/Directory)
 
 - Servicios inyectan `EntityManager` (`@mikro-orm/postgresql`); escrituras en
-  `em.transactional`, lecturas en `em.fork()`.
+  `em.transactional`, lecturas en `em.fork()` (que hereda la transacción de la petición, ADR-0029).
 - Repositorios stateless: reciben el `em` activo como primer parámetro.
 - FK planas uuid → `flush` del padre antes de crear hijos; `em.create(..., { partial: true })`.
 - `row_version` nunca se fija (DEFAULT en BD); `createdBy(actor.id)`/`touch` para auditoría.

@@ -12,6 +12,7 @@ import {
 } from '../../../../common';
 import { DIR } from '../../../directory/directory.concepts';
 import type { RegisterOrganizationDto } from '../../presentation/dto';
+import { IamErrorReason } from '../../iam.error-reasons';
 
 const dto: RegisterOrganizationDto = {
   organization: {
@@ -39,7 +40,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      execute: fn().mockResolvedValue(undefined),
+    };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
     };
@@ -48,8 +52,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      lockSubjectForRegistration: fn().mockResolvedValue(undefined),
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
     };
     const rolesRepo = { create: fn() };
@@ -92,6 +96,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
       provision: fn().mockResolvedValue({ pharmacyId: 'pharmacy-1' }),
     };
     const branches = { create: fn(() => undefined) };
+    const openingHours = { createShifts: fn(() => []) };
+    const taxIdentifiers = { register: fn(async () => 'identifier-tax-1') };
 
     const service = new IamOrganizationSelfRegistrationService(
       em as never,
@@ -105,8 +111,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
         tenants: tenantsRepo,
         memberships: membershipsRepo,
         branches,
+        openingHours,
         typeProfile,
         affiliationDocuments,
+        taxIdentifiers,
       }),
       new MessagingEmailNoticeAdapter(notificationsService as never),
       pharmacies as never,
@@ -130,8 +138,61 @@ describe('IamOrganizationSelfRegistrationService', () => {
       representatives,
       pharmacies,
       branches,
+      openingHours,
+      taxIdentifiers,
     };
   }
+
+  describe('horario de atención', () => {
+    const hours = [
+      { dayOfWeek: 1, opensAt: '08:00', closesAt: '12:00' },
+      { dayOfWeek: 1, opensAt: '14:30', closesAt: '19:00' },
+    ];
+
+    it('guarda el horario de la casa central con el tenant recién creado', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, openingHours: hours },
+      });
+
+      expect(d.openingHours.createShifts).toHaveBeenCalledWith(
+        d.tx,
+        { tenantId: 'tenant-1', actorUserId: 'user-1' },
+        hours,
+      );
+    });
+
+    it('guarda el horario de cada sucursal de farmacia con el id de su fila', async () => {
+      const d = build();
+      d.branches.create.mockImplementation(
+        (_tx: unknown, data: { code: string }) => ({ id: `id-${data.code}` }),
+      );
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          code: 'FARM-1',
+          tenantType: 'PHARMACY',
+          pharmacy: {
+            branches: [{ name: 'Sucursal Sur', openingHours: hours }],
+          },
+        },
+      });
+
+      expect(d.openingHours.createShifts).toHaveBeenCalledWith(
+        d.tx,
+        {
+          tenantId: 'tenant-1',
+          branchId: 'id-SUCURSAL-SUR',
+          actorUserId: 'user-1',
+        },
+        hours,
+      );
+    });
+  });
 
   describe('PHARMACY (P50)', () => {
     const pharmacyDto: RegisterOrganizationDto = {
@@ -192,6 +253,23 @@ describe('IamOrganizationSelfRegistrationService', () => {
       // La central (con punto) y la sucursal siguen en `directory.branches`,
       // que es lo que lista el portal de la organización.
       expect(d.branches.create).toHaveBeenCalledTimes(2);
+      // v4.2.91: la central es la casa matriz y la declarada, una sucursal.
+      expect(d.branches.create).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({
+          code: 'CASA-CENTRAL',
+          branchCategory: 'head_office',
+        }),
+      );
+      expect(d.branches.create).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({
+          code: 'SUCURSAL-EQUIPETROL',
+          branchCategory: 'branch',
+        }),
+      );
     });
 
     it('sin bloque pharmacy, la central nace igual (sin dirección ni punto)', async () => {
@@ -236,6 +314,22 @@ describe('IamOrganizationSelfRegistrationService', () => {
       expect(d.representatives.register).toHaveBeenCalled();
     });
 
+    it('records the NIT on its own even without any paper', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(pharmacyDto);
+
+      expect(d.taxIdentifiers.register).toHaveBeenCalledWith(d.tx, {
+        tenantId: 'tenant-1',
+        value: '1023456029',
+        holderName: 'Farmacia Central S.R.L.',
+        actorUserId: expect.any(String),
+      });
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+    });
+
     it('copia el NIT declarado como número del documento tributario', async () => {
       const d = build();
 
@@ -258,7 +352,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
         d.affiliationDocuments.attachRegistrationDocuments,
       ).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ taxIdentifier: '1023456029' }),
+        expect.objectContaining({
+          taxIdentifier: '1023456029',
+          taxIdentifierId: 'identifier-tax-1',
+        }),
       );
     });
 
@@ -522,7 +619,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
 
   it('rejects an owner email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-1',
     });
 
@@ -539,12 +636,33 @@ describe('IamOrganizationSelfRegistrationService', () => {
 
     await d.service.registerOrganization(dto);
 
-    const lock = d.credentialsRepo.lockSubjectForRegistration;
-    const check = d.credentialsRepo.findLivePasswordBySubject;
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
     expect(lock).toHaveBeenCalledWith(d.tx, dto.owner.email);
     expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
       check.mock.invocationCallOrder[0],
     );
+  });
+
+  // #1000: el mismo buzón con otras mayúsculas es la misma cuenta.
+  it('rejects the same owner mailbox written with different case with EMAIL_ALREADY_REGISTERED', async () => {
+    const d = build();
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+      id: 'cred-1',
+    });
+    const upper = {
+      ...dto,
+      owner: { ...dto.owner, email: dto.owner.email.toUpperCase() },
+    };
+
+    await expect(d.service.registerOrganization(upper)).rejects.toMatchObject({
+      reason: IamErrorReason.EMAIL_ALREADY_REGISTERED,
+    });
+    expect(d.credentialsRepo.findLivePasswordByEmail).toHaveBeenCalledWith(
+      d.tx,
+      upper.owner.email,
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
   });
 
   it('keeps the organization when the verification email cannot be queued', async () => {
@@ -665,6 +783,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
         ownerUserId: 'user-1',
         legalEntityType: undefined,
         taxIdentifier: 'NIT-12345',
+        taxIdentifierId: 'identifier-tax-1',
         documents: {
           CONSTITUTION_DOC: 'file-constitution',
           TAX_IDENTIFIER_DOC: 'file-tax',

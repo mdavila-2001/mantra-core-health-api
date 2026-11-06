@@ -38,6 +38,7 @@ function build() {
 
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn(() => Promise.resolve([])),
+    findTenantOfPractice: mockFn(() => Promise.resolve(null)),
   };
   const service = new LedgerReadService(
     em as any,
@@ -493,6 +494,59 @@ describe('LedgerReadService', () => {
         await expect(
           runWithTenant('mi-tenant', () => leer(d, PROPIA)),
         ).resolves.toBeDefined();
+      },
+    );
+
+    /**
+     * Un `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` acotado a otro tenant en
+     * `scopedRoles` no salta la vinculación en esta práctica: el rol se mide en
+     * el tenant de la práctica (#1241).
+     */
+    const acotadoA = (tenant: string, role: string) =>
+      ({
+        ...AJENA,
+        roles: ['PRACTITIONER', role],
+        scopedRoles: { [tenant]: [role] },
+      }) as any;
+
+    it.each(lecturas)(
+      '%s: la administración acotada a otro tenant no salta la vinculación (422)',
+      async (_n, leer) => {
+        for (const role of ['SECURITY_ADMIN', 'ACCOUNTING_APPROVER']) {
+          const d = build();
+          pertenece(d);
+          d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+            'mi-tenant',
+          );
+          await expect(
+            runWithTenant('mi-tenant', () =>
+              leer(d, acotadoA('otro-tenant', role)),
+            ),
+          ).rejects.toMatchObject({ status: 422 });
+        }
+      },
+    );
+
+    it.each(lecturas)(
+      '%s: la administración acotada al tenant de la práctica, o global, la lee',
+      async (_n, leer) => {
+        for (const role of ['SECURITY_ADMIN', 'ACCOUNTING_APPROVER']) {
+          const d = build();
+          pertenece(d);
+          d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+            'mi-tenant',
+          );
+          await expect(
+            runWithTenant('mi-tenant', () =>
+              leer(d, acotadoA('mi-tenant', role)),
+            ),
+          ).resolves.toBeDefined();
+          await expect(
+            runWithTenant('mi-tenant', () =>
+              leer(d, { ...AJENA, roles: ['PRACTITIONER', role] }),
+            ),
+          ).resolves.toBeDefined();
+        }
       },
     );
   });

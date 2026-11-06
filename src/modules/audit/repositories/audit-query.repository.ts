@@ -54,6 +54,8 @@ export interface AuditLogFilter {
   /** Acción exacta pedida por el cliente. */
   action?: string;
   entity?: string;
+  /** Recurso afectado (`entity_id`). */
+  entityId?: string;
   /** Resultado de combinar verbo y ruta; ausente si el cliente no filtró por ninguno. */
   matcher?: ActionMatcher;
   cursor?: TimeCursor;
@@ -76,8 +78,8 @@ export interface DataAccessFilter {
  * Lecturas de `audit.audit_log` y `audit.data_access_log`. Sólo `SELECT`: ambas tablas son WORM
  * y esta clase no escribe. Un elemento de más (`limit + 1`) permite saber si hay otra página.
  *
- * Índices que usan los filtros: usuario, tenant y fecha tienen índice propio; por acción no hay,
- * y por eso la consulta siempre acota por fecha.
+ * Índices que usan los filtros: usuario, tenant y fecha tienen índice propio; por acción, entidad y
+ * recurso (`entity_id`) no hay, y por eso la consulta siempre acota por fecha.
  */
 @Injectable()
 export class AuditQueryRepository {
@@ -105,6 +107,7 @@ export class AuditQueryRepository {
       add('a.outcome_concept_id = ?::uuid', f.outcomeConceptId);
     if (f.action) add('a.action = ?', f.action);
     if (f.entity) add('a.entity = ?', f.entity);
+    if (f.entityId) add('a.entity_id = ?::uuid', f.entityId);
     if (f.matcher) {
       add(
         `(a.action in (select value from jsonb_array_elements_text(?::jsonb))

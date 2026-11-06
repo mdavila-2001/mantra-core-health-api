@@ -1,8 +1,0 @@
-$ eslint consent + clinical_ext + smoke clinical_ext (merge con origin/dev)
-EXIT 0
-
-$ node tools/clinical-forms/build-forms.mjs --check
-374 fichas ({"SPECIFIC":334,"BASE":36,"GENERAL":4}) · 6386 campos · 0 desactualizadas
-EXIT 0
-
-$ yarn lint (repo completo): proceso matado por memoria (exit 129/137), sin salida de reglas

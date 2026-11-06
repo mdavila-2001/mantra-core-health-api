@@ -15,7 +15,11 @@ import {
 } from '@nestjs/swagger';
 import { ParseOptionalLimitPipe, ParseUuidListPipe } from '../../../../common';
 import { PharmacyInventoryReadService, type GeoPoint } from '../../services';
-import { AvailabilityResponseDto, SiteStockResponseDto } from '../dto';
+import {
+  AvailabilityResponseDto,
+  MedicationAvailabilityResponseDto,
+  SiteStockResponseDto,
+} from '../dto';
 
 /**
  * Lecturas de inventario para el directorio sobre `/pharmacy-inventory`
@@ -91,6 +95,56 @@ export class PharmacyInventoryReadController {
     }
     return this.readService.availability(
       productIds,
+      parseOrigin(lat, lng),
+      limit ?? 20,
+    );
+  }
+
+  /**
+   * Qué sedes de toda la red pueden surtir unos medicamentos de una receta:
+   * una sola consulta por receta, no una por producto.
+   */
+  @Get('availability/medications')
+  @ApiOperation({
+    summary: 'Consultar qué sedes de la red pueden surtir unos medicamentos',
+    description:
+      'Por cada medicamento del vademécum considera todos los productos publicados y vendibles de todas las farmacias visibles, con la regla de existencias por sede. Cada sede devuelve un producto por medicamento que tiene disponible (el de menor precio para el paciente) y nombra los medicamentos que le faltan. Orden: las que tienen todos primero; después distancia, total y nombre, como la disponibilidad por producto.',
+  })
+  @ApiQuery({
+    name: 'medications',
+    required: true,
+    description:
+      'Medicamentos solicitados (`medication_concept_id`): UUIDs separados por coma',
+  })
+  @ApiQuery({
+    name: 'lat',
+    required: false,
+    description: 'Latitud WGS84 desde donde medir distancia (va con lng)',
+  })
+  @ApiQuery({
+    name: 'lng',
+    required: false,
+    description: 'Longitud WGS84 desde donde medir distancia (va con lat)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de sedes servidas (por defecto 20)',
+  })
+  @ApiOkResponse({ type: MedicationAvailabilityResponseDto })
+  availabilityByMedication(
+    @Query('medications', new ParseUuidListPipe()) conceptIds?: string[],
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<MedicationAvailabilityResponseDto> {
+    if (!conceptIds) {
+      throw new BadRequestException(
+        'medications es obligatorio: la disponibilidad se consulta para una receta concreta',
+      );
+    }
+    return this.readService.availabilityByMedication(
+      conceptIds,
       parseOrigin(lat, lng),
       limit ?? 20,
     );

@@ -29,6 +29,7 @@ import { loadAgendaNoticesEnv } from '../../scheduling/infrastructure/config/age
 import { drawBrandAlovida, brandHeight } from './alovida-mark';
 import { drawQr } from './prescription-qr';
 import { computePrescriptionHash } from './prescription-seal';
+import { nationalLicenseOf } from './prescriber-identity.reader';
 import type { MedicationRequests } from '../entities';
 
 /** Márgenes y medidas del PDF oficial de la receta, en puntos. */
@@ -623,16 +624,7 @@ export class PrescriptionPdfService {
         em,
         practitionerProfileId,
       );
-    const registration = authorizations.find(
-      (auth) => auth.jurisdictionConceptId === PROF.JURISDICTION_NATIONAL,
-    );
-    if (!registration) return null;
-    return {
-      number: registration.licenseNumber,
-      authority: registration.regulatoryAuthority ?? null,
-      state:
-        registration.stateConceptId === PROF.AUTH_ACTIVE ? 'ACTIVE' : 'PENDING',
-    };
+    return nationalLicenseOf(authorizations);
   }
 
   /**

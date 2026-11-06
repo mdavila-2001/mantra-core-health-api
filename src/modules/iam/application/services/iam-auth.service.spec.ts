@@ -29,7 +29,7 @@ beforeAll(async () => {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn(), find: mockFn(() => []) };
+  const tx = { flush: mockFn(), find: mockFn(() => []), execute: mockFn() };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => ({})),
@@ -69,10 +69,16 @@ function build() {
     purgeExpired: mockFn().mockResolvedValue(0),
   };
   const rolesRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
-  const lockoutsRepo = { create: mockFn(), findActiveForUser: mockFn() };
+  const lockoutsRepo = {
+    create: mockFn(),
+    findActiveForUser: mockFn(),
+    releaseActiveForUser: mockFn(),
+  };
   const eventsRepo = {
     record: mockFn(),
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
+    latestLifecycleAction: mockFn(),
+    lifecycleHistory: mockFn(),
   };
   // Por defecto, una cuenta sin persona vinculada: los claims `pid` y `hpid` se
   // omiten y el token queda igual que antes de que existieran. Los casos que los
@@ -95,6 +101,7 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const sessionValidator = { revokeSession: mockFn() };
 
   const service = new IamAuthService(
     em as any,
@@ -115,6 +122,7 @@ function build() {
     new DirectoryTenantClaimsAdapter(),
     logger as any,
     new TracingService(),
+    sessionValidator as any,
   );
   return {
     effectiveRoles,
@@ -132,6 +140,7 @@ function build() {
     patientProfilesRepo,
     practitionerProfilesRepo,
     logger,
+    sessionValidator,
   };
 }
 
@@ -166,6 +175,35 @@ describe('IamAuthService', () => {
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN }),
       );
+    });
+
+    it('abre el contexto de sistema de RLS antes de leer membresías y roles (sin tenant todavía)', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      const order: string[] = [];
+      d.tx.execute.mockImplementation(async (sql: string) => {
+        order.push(sql);
+      });
+      d.rolesRepo.findActiveForUser.mockImplementation(async () => {
+        order.push('roles');
+        return [];
+      });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+
+      expect(order[0]).toBe(
+        "select set_config('app.system_context', 'true', true)",
+      );
+      expect(order).toContain('roles');
     });
 
     it('repuebla el nombre y el tipo de cada tenant en el token (tenantNames/tenantTypes)', async () => {
@@ -592,6 +630,11 @@ describe('IamAuthService', () => {
 
       expect(user.statusConceptId).toBe(CONCEPTS.USER_LOCKED);
       expect(d.lockoutsRepo.create).toHaveBeenCalled();
+      // El bloqueo vive en una tabla con RLS forzado: se busca y se crea con el
+      // contexto de sistema abierto antes.
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.lockoutsRepo.findActiveForUser.mock.invocationCallOrder[0],
+      );
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -681,6 +724,20 @@ describe('IamAuthService', () => {
     // MCH-005: la comprobación de estado tiene que hacerse sobre la fila
     // bloqueada dentro de la transacción. Una lectura previa fuera de ella deja
     // que dos peticiones con el mismo token la superen y emitan dos sucesores.
+    it('abre el contexto de sistema de RLS antes de leer el refresh token', async () => {
+      const d = build();
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue(null);
+
+      await expect(d.service.refresh('raw')).rejects.toThrow();
+
+      expect(d.tx.execute).toHaveBeenCalledWith(
+        "select set_config('app.system_context', 'true', true)",
+      );
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.refreshRepo.findByHashForUpdate.mock.invocationCallOrder[0],
+      );
+    });
+
     it('reads the token under a row lock inside the transaction, never before it', async () => {
       const d = build();
       d.refreshRepo.findByHashForUpdate.mockResolvedValue({
@@ -807,6 +864,7 @@ describe('IamAuthService', () => {
       const res = await d.service.logout({
         id: 'u1',
         sessionId: 'sid-1',
+        tokenExpiresAt: Math.floor(Date.now() / 1000) + 900,
         roles: [],
       });
 
@@ -814,6 +872,10 @@ describe('IamAuthService', () => {
       expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
       // El refresh token es lo que sobrevive al cierre si no se revoca.
       expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
+      expect(d.sessionValidator.revokeSession).toHaveBeenCalledWith(
+        'sid-1',
+        expect.any(Number),
+      );
     });
 
     it('no revoca la sesión de otro usuario aunque nombre su sid', async () => {

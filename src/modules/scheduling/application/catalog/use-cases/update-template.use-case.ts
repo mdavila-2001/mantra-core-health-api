@@ -1,3 +1,4 @@
+import { TemplateCareSpaceGuard } from '../support/template-care-space-guard';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -30,6 +31,7 @@ export class UpdateTemplateUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaceGuard?: TemplateCareSpaceGuard,
   ) {
     this.logger.setContext(UpdateTemplateUseCase.name);
   }
@@ -108,6 +110,31 @@ export class UpdateTemplateUseCase {
       }
       if (dto.validTo !== undefined) template.validTo = new Date(dto.validTo);
 
+      // F5d: consultorio. Se valida contra las franjas que quedan (las nuevas
+      // si vienen, si no las actuales) y sin contar esta misma plantilla.
+      const careSpaceChanged =
+        dto.careSpaceId !== undefined &&
+        (dto.careSpaceId ?? null) !== (template.careSpaceId ?? null);
+      const effectiveSpace =
+        dto.careSpaceId !== undefined
+          ? (dto.careSpaceId ?? undefined)
+          : template.careSpaceId;
+      if (effectiveSpace && (careSpaceChanged || dto.rules !== undefined)) {
+        const bands =
+          dto.rules ??
+          (await this.catalogRepo.findRulesByTemplate(tx, templateId));
+        await this.careSpaceGuard!.assert(
+          tx,
+          resource,
+          effectiveSpace,
+          bands,
+          template.validFrom ?? undefined,
+          template.id,
+        );
+      }
+      if (dto.careSpaceId !== undefined)
+        template.careSpaceId = dto.careSpaceId ?? undefined;
+
       let ruleCount = (
         await this.catalogRepo.findRulesByTemplate(tx, templateId)
       ).length;
@@ -170,6 +197,14 @@ export class UpdateTemplateUseCase {
 
       touch(template, actor.id);
       await tx.flush();
+      if (careSpaceChanged)
+        await this.careSpaceGuard!.announce(
+          tx,
+          resource.tenantId,
+          template.id,
+          template.careSpaceId ?? null,
+          actor.id,
+        );
 
       return {
         id: template.id,
@@ -177,6 +212,7 @@ export class UpdateTemplateUseCase {
         ruleCount,
         statusConceptId: template.statusConceptId,
         flexibleHours: template.flexibleHours === true,
+        careSpaceId: template.careSpaceId ?? null,
       };
     });
   }

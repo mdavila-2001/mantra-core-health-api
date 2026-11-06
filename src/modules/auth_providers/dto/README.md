@@ -62,7 +62,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`SetAttributeMappingsDto` usa `@ArrayMinSize(1)`**: un mapeo vacío dejaría al proveedor sin forma
   de identificar al sujeto.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

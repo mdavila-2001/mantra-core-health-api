@@ -22,6 +22,34 @@ import { CommonModule } from '../common/common.module';
 // por su membresía, no por un rol del token.
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { LabStaffGuard } from './guards';
+// In-app notices of the written-report flow (`NotificationsService`).
+import { MessagingModule } from '../messaging/messaging.module';
+import { DiagnosticsReportDraftsController } from './controllers/diagnostics-report-drafts.controller';
+import { DiagnosticsReportPublishController } from './controllers/diagnostics-report-publish.controller';
+import { DiagnosticsReportReleaseController } from './controllers/diagnostics-report-release.controller';
+import { DiagnosticsReportVerifyPublicController } from './controllers/diagnostics-report-verify-public.controller';
+import { ReportDraftsRepository } from './repositories/report-drafts.repository';
+import { DiagnosticReportPdfService } from './services/diagnostic-report-pdf.service';
+import { ReportDraftsService } from './services/report-drafts.service';
+import { ReportImmutabilityService } from './services/report-immutability.service';
+import { ReportIssuerSettingsService } from './services/report-issuer-settings.service';
+import { ReportNotificationsService } from './services/report-notifications.service';
+import { ReportPublicationWriter } from './services/report-publication.writer';
+import { ReportPublishService } from './services/report-publish.service';
+import { ReportReleaseService } from './services/report-release.service';
+import { RequesterReportsReader } from './services/requester-reports.reader';
+import { ReportSignersService } from './services/report-signers.service';
+import { DiagnosticsLabPortalController } from './controllers/diagnostics-lab-portal.controller';
+import { DiagnosticsLabResultsController } from './controllers/diagnostics-lab-results.controller';
+import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-uploads.controller';
+import { LabPortalSnapshotService } from './services/lab-portal-snapshot.service';
+import { LabPortalOrderOutcomeService } from './services/lab-portal-order-outcome.service';
+import { LabPortalOrdersService } from './services/lab-portal-orders.service';
+import { LabPortalResultsService } from './services/lab-portal-results.service';
+import { LabPortalResultWritesService } from './services/lab-portal-result-writes.service';
+import { LabPortalSummaryService } from './services/lab-portal-summary.service';
+import { LabPortalUploadsService } from './services/lab-portal-uploads.service';
+import { DiagnosticReportsRepository } from '../clinical/repositories/diagnostic-reports.repository';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
@@ -41,6 +69,7 @@ import {
   DiagnosticsPatientResultsService,
   DiagnosticsPractitionerResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsWorklistService,
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
@@ -54,7 +83,10 @@ import {
   MediaQualityRepository,
   DiagnosticOrdersRepository,
   LabReceptionRepository,
+  ServiceRequestWorklistRepository,
   ClinicalRefsRepository,
+  LabPortalRepository,
+  LabPortalEventsRepository,
 } from './repositories';
 
 /**
@@ -76,6 +108,7 @@ import {
     ClinicalModule,
     CommonModule,
     DirectoryAuthorizationModule,
+    MessagingModule,
   ],
   controllers: [
     DiagnosticsSpecimensController,
@@ -85,6 +118,15 @@ import {
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
+    DiagnosticsLabPortalController,
+    DiagnosticsLabResultsController,
+    DiagnosticsLabUploadsController,
+    // Written report (H1). Drafts first: `GET report-drafts/signers` must be
+    // registered before `GET report-drafts/:id`.
+    DiagnosticsReportDraftsController,
+    DiagnosticsReportPublishController,
+    DiagnosticsReportReleaseController,
+    DiagnosticsReportVerifyPublicController,
   ],
   providers: [
     // Repositorios
@@ -98,6 +140,7 @@ import {
     // `scheduling` provee `AppointmentsRepository`.
     DiagnosticOrdersRepository,
     LabReceptionRepository,
+    ServiceRequestWorklistRepository,
     ClinicalRefsRepository,
     // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
     SuggestedSiteNamesReader,
@@ -113,11 +156,37 @@ import {
     DiagnosticsPatientResultsService,
     DiagnosticsPractitionerResultsService,
     DiagnosticsReceptionService,
+    DiagnosticsWorklistService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.
     DiagnosticsScopeService,
     DiagnosticsPatientAccessService,
     // Guard del personal de laboratorio (recepción y circuito de especímenes).
     LabStaffGuard,
+    // Laboratory portal (`/diagnostics/lab/*`). The clinical report repository
+    // is stateless (it receives the EntityManager), same criterion as above.
+    LabPortalRepository,
+    LabPortalEventsRepository,
+    DiagnosticReportsRepository,
+    LabPortalSnapshotService,
+    LabPortalOrderOutcomeService,
+    LabPortalOrdersService,
+    LabPortalResultsService,
+    LabPortalResultWritesService,
+    LabPortalSummaryService,
+    LabPortalUploadsService,
+    // Written report: draft → published immutable version + official PDF.
+    ReportDraftsRepository,
+    ReportImmutabilityService,
+    ReportSignersService,
+    ReportDraftsService,
+    ReportIssuerSettingsService,
+    DiagnosticReportPdfService,
+    ReportNotificationsService,
+    ReportPublicationWriter,
+    ReportPublishService,
+    ReportReleaseService,
+    // The requester's read of reports its orders got from the laboratory.
+    RequesterReportsReader,
   ],
 })
 export class DiagnosticsModule {}

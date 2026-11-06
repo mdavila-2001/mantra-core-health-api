@@ -139,7 +139,7 @@ cancelar (desde scheduled | ready | in-progress) ──> cancelled + quirófano 
 facturar (sólo completed) ──> cargos + duración real y desviación frente a lo programado
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un quirófano, un caso**: el solape se comprueba dentro de la transacción antes de reservar.
 - **Saltarse la programación electiva exige justificarlo**: un caso urgente o de emergencia sin
@@ -188,7 +188,7 @@ facturar (sólo completed) ──> cargos + duración real y desviación frente 
 - **Sólo se factura un caso completado**, y una sola vez. La consolidación calcula duración real y
   desviación frente a lo programado.
 
-## Permisos
+## Permissions
 
 `PERIOP_ADMIN` cubre el módulo. `SURGERY_SCHEDULER` programa, asigna equipo y cancela. `SURGEON`
 registra diagnósticos, pasos, hallazgos, implantes, muestras y firma el reporte.
@@ -199,7 +199,7 @@ recuperación. `PERIOP_NURSE` responde el checklist, registra implantes e insumo
 Es deliberado que sólo el anestesiólogo dé el alta de recuperación y sólo el cirujano firme el
 reporte: son los actos que comprometen responsabilidad clínica.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el caso en **toda** operación que lo toque —es el agregado que gobierna el
 flujo—, y además sobre checklist, plan de anestesia, reporte, estancia de recuperación y cargos. Las
@@ -265,7 +265,7 @@ integrante podía consultar aquello en lo que participaba. Se añadieron tres:
 El quirófano que exige `POST /procedure-cases` se resuelve con las lecturas de
 `practice` (`GET /practices` → `/practices/:id/sites` → `/sites/:id/care-spaces`).
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID no aplica el alcance de tenant que sí aplica la agenda.
 

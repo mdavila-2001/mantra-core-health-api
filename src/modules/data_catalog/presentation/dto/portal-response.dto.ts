@@ -474,6 +474,37 @@ export class LinajeDto {
   @ApiProperty({ type: [LinajeDominioDto] }) dominios!: LinajeDominioDto[];
 }
 
+export class LinajeNodoDto {
+  @ApiProperty({ example: 'tabla:scheduling.slot_holds' }) id!: string;
+  @ApiProperty({ enum: ['OPERACION', 'TABLA', 'DOMINIO'] }) tipo!: string;
+  @ApiProperty() etiqueta!: string;
+  @ApiPropertyOptional({ nullable: true }) dominio!: string | null;
+  @ApiPropertyOptional({ nullable: true }) riesgo!: string | null;
+}
+
+export class LinajeNodosPaginaDto {
+  @ApiProperty({ type: [LinajeNodoDto] }) items!: LinajeNodoDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty() total!: number;
+}
+
+export class LinajeAristaDto {
+  @ApiProperty() de!: string;
+  @ApiProperty() a!: string;
+  @ApiProperty({
+    enum: ['LEE', 'ESCRIBE', 'BORRA', 'REFERENCIA', 'PERTENECE'],
+  })
+  tipo!: string;
+}
+
+export class LinajeAristasPaginaDto {
+  @ApiProperty({ type: [LinajeAristaDto] }) items!: LinajeAristaDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty() total!: number;
+}
+
 export class LinajeTablaDto {
   @ApiProperty() id!: string;
   @ApiProperty({

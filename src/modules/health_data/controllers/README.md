@@ -60,7 +60,7 @@ que actúa sobre algo existente (cierre del lote, retiro) y en la lectura (13).
 `ParseUUIDPipe` en todos los `:id` de ruta. El `custodian` de `$everything` llega como query
 opcional; sin él la búsqueda no se acota por custodio.
 
-## Permisos
+## Permissions
 
 `HEALTH_DATA_ADMIN` en todo. Además: `INGESTION_WORKER` (01–03, 04, 07),
 `CLINICAL_INFORMATICIAN` (04–06, 13, 14), `DATA_STEWARD` (05, 08), `MPI_STEWARD` (09),
@@ -69,7 +69,7 @@ opcional; sin él la búsqueda no se acota por custodio.
 Ninguna ruta es `@Public()`: `$everything` y `$export` son acceso a datos clínicos y exigen sesión,
 propósito de uso y —fuera de este módulo— autorización y consentimiento.
 
-## Pruebas
+## Tests
 
 - `health-data.controller.spec.ts` (13): una por endpoint, comprobando que delega en el servicio
   correcto y que pasa el id de ruta, el cuerpo y el actor.

@@ -2,13 +2,42 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `procedures_perioperative` (parte 2/2).
- * 89 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 119 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['procedure_case_status_history', 'ix_procedure_case_status_history_workflow_transition_id', ['workflow_transition_id'], false, 'btree'],
+  ['procedure_case_status_history', 'brin_procedure_case_status_history_created_at', ['created_at'], false, 'brin'],
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_procedure_case_id', ['procedure_case_id'], false, 'btree'],
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_team_role_concept_id', ['team_role_concept_id'], false, 'btree'],
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['procedure_case_team_members', 'ix_procedure_case_team_members_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['procedure_case_team_members', 'uk_procedure_case_team_member_role', ['procedure_case_id', 'practitioner_profile_id', 'team_role_concept_id'], true, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_encounter_id', ['encounter_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_service_request_id', ['service_request_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_primary_procedure_id', ['primary_procedure_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_case_type_concept_id', ['case_type_concept_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_priority_concept_id', ['priority_concept_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_surgical_specialty_concept_id', ['surgical_specialty_concept_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_requested_by_profile_id', ['requested_by_profile_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_primary_surgeon_profile_id', ['primary_surgeon_profile_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_anesthesiologist_profile_id', ['anesthesiologist_profile_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_practice_site_id', ['practice_site_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_operating_room_id', ['operating_room_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_cancellation_reason_concept_id', ['cancellation_reason_concept_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['procedure_cases', 'uk_procedure_cases_tenant_number', ['custodian_tenant_id', 'case_number'], true, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_room_schedule', ['operating_room_id', 'scheduled_start_at', 'scheduled_end_at'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_patient_time', ['custodian_tenant_id', 'patient_profile_id', 'scheduled_start_at desc'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_schedulable_resource_id', ['schedulable_resource_id'], false, 'btree'],
+  ['procedure_cases', 'ix_procedure_cases_operating_room_block_id', ['operating_room_block_id'], false, 'btree'],
   ['procedure_charge_items', 'ix_procedure_charge_items_procedure_case_id', ['procedure_case_id'], false, 'btree'],
   ['procedure_charge_items', 'ix_procedure_charge_items_procedure_id', ['procedure_id'], false, 'btree'],
   ['procedure_charge_items', 'ix_procedure_charge_items_charge_item_type_concept_id', ['charge_item_type_concept_id'], false, 'btree'],
@@ -82,6 +111,7 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_coordinator_profile_id', ['coordinator_profile_id'], false, 'btree'],
   ['surgical_safety_checklists', 'uk_surgical_safety_checklists_case_type_version', ['procedure_case_id', 'checklist_type_concept_id', 'checklist_version'], true, 'btree'],
+  ['surgical_safety_checklists', 'ux_surgical_safety_checklists_case_type', ['procedure_case_id', 'checklist_type_concept_id'], true, 'btree'],
   ['surgical_safety_items', 'ix_surgical_safety_items_checklist_type_concept_id', ['checklist_type_concept_id'], false, 'btree'],
   ['surgical_safety_items', 'ix_surgical_safety_items_phase_concept_id', ['phase_concept_id'], false, 'btree'],
   ['surgical_safety_items', 'ix_surgical_safety_items_response_type_concept_id', ['response_type_concept_id'], false, 'btree'],

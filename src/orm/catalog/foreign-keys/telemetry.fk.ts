@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `telemetry`.
- * 73 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 77 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
@@ -25,6 +25,10 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['client_contexts', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['client_contexts', 'session_id', 'iam', 'sessions', 'id'],
   ['client_contexts', 'session_journey_id', 'telemetry', 'session_journeys', 'id'],
+  ['client_error_events', 'error_class_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['client_error_events', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['client_error_events', 'session_id', 'iam', 'sessions', 'id'],
+  ['client_error_events', 'user_id', 'iam', 'users', 'id'],
   ['conversion_events', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['conversion_events', 'completion_event_id', 'telemetry', 'user_activity_events', 'id'],
   ['conversion_events', 'funnel_definition_id', 'telemetry', 'funnel_definitions', 'id'],
@@ -59,6 +63,10 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['tracking_purpose_definitions', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tracking_purpose_definitions', 'purpose_category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tracking_purpose_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_activity_event_properties', 'data_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_activity_event_properties', 'user_activity_event_id', 'telemetry', 'user_activity_events', 'id'],
+  ['user_activity_event_properties', 'value_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_activity_event_properties', 'value_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['user_activity_events', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['user_activity_events', 'device_id', 'iam', 'devices', 'id'],
   ['user_activity_events', 'event_schema_definition_id', 'telemetry', 'activity_event_schema_definitions', 'id'],
@@ -68,10 +76,6 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['user_activity_events', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['user_activity_events', 'tenant_id', 'directory', 'tenants', 'id'],
   ['user_activity_events', 'user_id', 'iam', 'users', 'id'],
-  ['user_activity_event_properties', 'data_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['user_activity_event_properties', 'user_activity_event_id', 'telemetry', 'user_activity_events', 'id'],
-  ['user_activity_event_properties', 'value_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['user_activity_event_properties', 'value_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['web_vitals', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['web_vitals', 'client_context_id', 'telemetry', 'client_contexts', 'id'],
   ['web_vitals', 'metric_concept_id', 'terminology', 'catalog_concepts', 'id'],

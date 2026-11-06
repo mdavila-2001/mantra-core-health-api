@@ -17,7 +17,7 @@ consultas y materialización.
 | `DiagnosticStudyOfferingsRepository` | `diagnostic_study_offerings` | `findByStudyCode` sobre UK (unidad, study_code) |
 | `DiagnosticStudyComponentsRepository` | `diagnostic_study_components` | append-only (solo `created_at`) |
 | `DiagnosticPriceSchedulesRepository` | `diagnostic_price_schedules` | `findByCode` sobre UK (unidad, code) |
-| `DiagnosticStudyPricesRepository` | `diagnostic_study_prices` | versionado append-only: `findActive`, `maxVersion` |
+| `DiagnosticStudyPricesRepository` | `diagnostic_study_prices` | versionado append-only: `findActive`, `lockSchedule`, `maxVersion` (por cronograma) |
 | `DiagnosticEquipmentRepository` | `diagnostic_equipment` | `findBySerial` sobre UK (sitio, serial) |
 
 Convenciones: `em.create(Entity, {...}, { partial: true })`, `createdBy(actorId)`

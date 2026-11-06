@@ -6,3 +6,4 @@ export * from './moderation.service';
 export * from './third-party-access.service';
 export * from './audit-query.service';
 export * from './my-data-access.service';
+export * from './audit-oversight-read.service';

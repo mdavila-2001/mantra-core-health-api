@@ -41,6 +41,16 @@ export enum SystemErrorReason {
   TOKEN_TYPE_INVALID = 'TOKEN_TYPE_INVALID',
   /** 403: ningún rol del actor autoriza la operación en el tenant resuelto. */
   ROLE_INSUFFICIENT = 'ROLE_INSUFFICIENT',
+  /**
+   * 403: `@RequirePermission` en modo `enforce` y el PDP de `authz` no concede
+   * el permiso fino (o no hay actor/tenant con que preguntarle).
+   */
+  PERMISSION_INSUFFICIENT = 'PERMISSION_INSUFFICIENT',
+  /**
+   * 503: `@RequirePermission` en modo `enforce` y el PDP no respondió o no está
+   * registrado. Fail-closed: la operación no se ejecuta.
+   */
+  AUTHZ_DECISION_UNAVAILABLE = 'AUTHZ_DECISION_UNAVAILABLE',
   /** 403: `X-Tenant-Id` nombra un tenant del que el actor no es miembro. */
   TENANT_MEMBERSHIP_REQUIRED = 'TENANT_MEMBERSHIP_REQUIRED',
   /** 403: el actor no tiene tenant y no indicó cuál usar. */

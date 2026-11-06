@@ -21,6 +21,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
+  getCurrentTenantId,
 } from '../../../common';
 import {
   FileDerivativesRepository,
@@ -28,7 +29,11 @@ import {
   FileVersionsRepository,
   FilesRepository,
 } from '../repositories';
-import { canActorMutateOwnFile, canActorReadOwnFile } from './file-access';
+import {
+  canActorMutateOwnFile,
+  canActorReadOwnFile,
+  fileOwnerTenantId,
+} from './file-access';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { CommonErrorReason } from '../common.error-reasons';
 import { FileVersions, Files } from '../entities';
@@ -184,7 +189,7 @@ export class FilesService {
       );
       const file = this.filesRepo.create(tx, {
         ...(publicationContext ? { id: publicationContext.targetId } : {}),
-        tenantId: SEED.tenantId,
+        tenantId: fileOwnerTenantId(actor, getCurrentTenantId(), SEED.tenantId),
         categoryConceptId: CONCEPTS[`FILE_CATEGORY_${dto.category}`],
         sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
@@ -516,7 +521,7 @@ export class FilesService {
    * @returns Las versiones pendientes, de la más antigua a la más nueva.
    */
   async listPendingScan(limit: number): Promise<PendingScanResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const versions = await this.fileVersionsRepo.findPendingScan(em, limit);
     return {
       items: versions.map((version) => ({
@@ -649,7 +654,7 @@ export class FilesService {
       'Generating download URL',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
 
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
@@ -827,7 +832,7 @@ export class FilesService {
       'Listing linked files',
     );
 
-    const forked = this.em.fork();
+    const forked = this.em.fork({ keepTransactionContext: true });
     const ownerTypeConceptId = CONCEPTS[`OWNER_${ownerType}`];
 
     const links = await this.fileLinksRepo.findByOwner(

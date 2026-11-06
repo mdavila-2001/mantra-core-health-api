@@ -25,7 +25,9 @@ describe('ConfirmPaymentReceiptUseCase · confirmar uno basta', () => {
 
     const res = await d.confirm.execute(BOOKING, RECEIPT, practitioner);
 
-    expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    // The first is the use case's transaction; the second is the savepoint
+    // the payment notice runs in afterwards.
+    expect(d.em.transactional).toHaveBeenCalledTimes(2);
     // FOR UPDATE: la cita, el comprobante y la fila de pago.
     expect(d.bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalledWith(
       d.tx,

@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `CrmSalesService` | 01, 02, 03, 04, 07, 08, 09 | Cuentas, equipo, leads y oportunidades |
 | `CrmServiceService` | 05, 06, 10, 11, 12, 13, 14, 15 | Actividades, alianzas, casos, 360 y consentimiento |
 
-## Reglas de negocio
+## Business rules
 
 - **Cuenta (01)**: cuenta + contacto principal + propietario del equipo en la misma transacción.
 - **Equipo (02)**: se rechaza el alta si el usuario ya pertenece a la cuenta.
@@ -52,7 +52,7 @@ cerrada, caso cerrado).
 `operation: 'crm.<área>.<acción>'`. Se registran ids y estados; nunca datos de contacto ni el
 contenido de notas y comentarios.
 
-## Pruebas
+## Tests
 
 `crm-sales.service.spec.ts` (19) y `crm-service.service.spec.ts` (17): camino feliz, precondiciones,
 conflictos y casos límite de cada caso de uso.

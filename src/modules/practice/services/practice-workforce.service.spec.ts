@@ -71,7 +71,10 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => forked),
   };
-  const practicesRepo = { findById: practiceLookupMock() };
+  const practicesRepo = {
+    findById: practiceLookupMock(),
+    findActive: mockFn(),
+  };
   const sitesRepo = { findById: mockFn() };
   const unitsRepo = { findById: mockFn() };
   const servicesRepo = { findById: mockFn() };
@@ -297,6 +300,91 @@ describe('PracticeWorkforceService', () => {
     });
   });
 
+  describe('listJoinablePractices', () => {
+    const professional = { id: 'u1', practitionerProfileId: 'hp1' } as any;
+    const clinic = PRAC.PRACTICE_TYPE_CLINIC;
+
+    it('rejects when the actor has no practitioner profile', async () => {
+      const d = build();
+      await expect(
+        d.service.listJoinablePractices({ id: 'u1' } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('lists active practices across tenants, not only the session tenant', async () => {
+      const d = build();
+      d.practicesRepo.findActive.mockResolvedValue([
+        {
+          id: 'p2',
+          name: 'Clínica Norte',
+          typeConceptId: clinic,
+          tenantId: 'tenant-b',
+        },
+        {
+          id: 'p1',
+          name: 'Hospital Central',
+          typeConceptId: PRAC.PRACTICE_TYPE_HOSPITAL,
+          tenantId: 'tenant-a',
+        },
+      ]);
+      d.rolesRepo.findByPractitioner.mockResolvedValue([]);
+
+      const rows = await d.service.listJoinablePractices(professional);
+
+      expect(d.practicesRepo.findActive).toHaveBeenCalledWith(
+        d.forked,
+        PRAC.PRACTICE_ACTIVE,
+      );
+      expect(rows.map((r) => r.name)).toEqual([
+        'Clínica Norte',
+        'Hospital Central',
+      ]);
+      expect(rows[0]).toEqual({
+        id: 'p2',
+        name: 'Clínica Norte',
+        practiceType: clinic,
+      });
+    });
+
+    it('leaves out personal offices and live links, but offers rejected/ended ones again', async () => {
+      const d = build();
+      const practice = (id: string, name: string, typeConceptId = clinic) => ({
+        id,
+        name,
+        typeConceptId,
+      });
+      d.practicesRepo.findActive.mockResolvedValue([
+        practice('office', 'Consultorio ajeno', PRAC.PRACTICE_TYPE_OFFICE),
+        practice('pending', 'A pendiente'),
+        practice('active', 'B activa'),
+        practice('suspended', 'C suspendida'),
+        practice('rejected', 'D rechazada'),
+        practice('ended', 'E finalizada'),
+        practice('free', 'F libre', PRAC.PRACTICE_TYPE_HOSPITAL),
+      ]);
+      d.rolesRepo.findByPractitioner.mockResolvedValue([
+        {
+          practiceId: 'pending',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+        },
+        { practiceId: 'active', statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE },
+        {
+          practiceId: 'suspended',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+        },
+        {
+          practiceId: 'rejected',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_REJECTED,
+        },
+        { practiceId: 'ended', statusConceptId: PRAC.ROLE_ASSIGNMENT_ENDED },
+      ]);
+
+      const rows = await d.service.listJoinablePractices(professional);
+
+      expect(rows.map((r) => r.id)).toEqual(['rejected', 'ended', 'free']);
+    });
+  });
+
   describe('listPracticeAssignments (CV-14, A-6)', () => {
     it('el administrador de otra organización recibe 403 y no se consulta la lista', async () => {
       const d = build();
@@ -307,6 +395,33 @@ describe('PracticeWorkforceService', () => {
         d.service.listPracticeAssignments('p1', actor, {}),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+
+    it('una práctica de otro tenant responde 404 antes de mirar quién administra (CV-14)', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT_B,
+      });
+      await expect(
+        d.service.listPracticeAssignments('p1', actor, {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      // Ni 403 ni lista: el código de estado no confirma que la práctica ajena exista.
+      expect(
+        d.administration.assertCanAdministerPractice,
+      ).not.toHaveBeenCalled();
+      expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto (plataforma sin cabecera) decide sólo A-6', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT_B,
+      });
+      await d.raw.listPracticeAssignments('p1', actor, {});
+      expect(d.practicesRepo.findById).not.toHaveBeenCalled();
+      expect(d.administration.assertCanAdministerPractice).toHaveBeenCalled();
     });
 
     it('una práctica inexistente responde 404', async () => {

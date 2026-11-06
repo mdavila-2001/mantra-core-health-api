@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Post,
   Put,
 } from '@nestjs/common';
 import {
@@ -19,6 +20,11 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../../common';
+import {
+  BulkRequestDto,
+  BulkResponseDto,
+} from '../../../../common/dto/bulk-load.dto';
+import { BulkSiteAvailabilityUseCase } from '../../application/site-availability/bulk-site-availability.use-case';
 import { SetSiteProductAvailabilityUseCase } from '../../application/site-availability/set-site-product-availability.use-case';
 import { SetSiteAvailabilityDto, SiteAvailabilityResponseDto } from '../dto';
 
@@ -34,6 +40,7 @@ import { SetSiteAvailabilityDto, SiteAvailabilityResponseDto } from '../dto';
 export class PharmacySiteAvailabilityController {
   constructor(
     private readonly setAvailability: SetSiteProductAvailabilityUseCase,
+    private readonly bulkAvailability: BulkSiteAvailabilityUseCase,
   ) {}
 
   /** «Lo tengo / No lo tengo» de un producto en una sede. */
@@ -61,5 +68,35 @@ export class PharmacySiteAvailabilityController {
       dto,
       actor,
     );
+  }
+
+  /**
+   * El stock de una sucursal en lote, con el contrato de la carga masiva del
+   * catálogo: `{ mode, dryRun, rows }`, hasta 1000 filas
+   * `{ productCode, available, quantity? }`, una por producto de esa sede. La
+   * vista previa (`dryRun`) responde lo mismo sin escribir. 200 aunque haya
+   * filas rechazadas; cada una dice su motivo en `results`.
+   */
+  @Audited({
+    action: 'PHARMACY_SITE_AVAILABILITY_BULK_LOADED',
+    dryRunAction: 'PHARMACY_SITE_AVAILABILITY_BULK_PREVIEWED',
+    entity: 'pharmacy_site',
+    entityId: 'param:siteId',
+  })
+  @Post(':pharmacyId/sites/:siteId/availability/bulk')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa',
+  })
+  @ApiOkResponse({ type: BulkResponseDto })
+  bulkSiteAvailability(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: BulkRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BulkResponseDto> {
+    return this.bulkAvailability.execute({ pharmacyId, siteId }, dto, actor);
   }
 }

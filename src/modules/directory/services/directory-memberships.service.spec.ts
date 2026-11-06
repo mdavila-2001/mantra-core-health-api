@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { DirectoryMembershipsService } from './directory-memberships.service';
+import { MembershipInviteService } from './membership-invite.service';
 import { DIR } from '../directory.concepts';
 import {
   ConflictException,
@@ -27,6 +28,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const membershipsRepo = {
     findActiveByUserTenant: mockFn(),
+    findPendingInvitationByUserTenant: mockFn().mockResolvedValue(null),
     findByIdInTenant: mockFn(),
     countActiveByTenantRole: mockFn(),
     create: mockFn(),
@@ -46,6 +48,12 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+  const inviteService = new MembershipInviteService(
+    em as any,
+    membershipsRepo as any,
+    tenantAdmin as never,
+    logger as any,
+  );
   const service = new DirectoryMembershipsService(
     em as any,
     membershipsRepo as any,
@@ -53,6 +61,7 @@ function build() {
     branchesRepo as any,
     tenantAdmin as never,
     logger as any,
+    inviteService,
   );
   return {
     service,
@@ -92,7 +101,8 @@ describe('DirectoryMembershipsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('creates an active membership with defaults', async () => {
+    // Product decision (#1316): the endpoint's invite is pending, not active.
+    it('creates a pending (INVITED) membership with defaults', async () => {
       const d = build();
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue(activeMembership());
@@ -105,8 +115,23 @@ describe('DirectoryMembershipsService', () => {
         expect.objectContaining({
           tenantRoleConceptId: DIR.ROLE_STAFF,
           accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
-          statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+          statusConceptId: DIR.MEMBERSHIP_INVITED,
         }),
+      );
+    });
+
+    it('only an explicit activate creates it active (internal callers)', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue(activeMembership());
+
+      await d.service.invite('t1', { userId: 'u1' }, actor, undefined, {
+        activate: true,
+      });
+
+      expect(d.membershipsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: DIR.MEMBERSHIP_ACTIVE }),
       );
     });
   });

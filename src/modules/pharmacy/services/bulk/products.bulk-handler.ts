@@ -1,16 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { BulkProductUpdateRowDto, CreateProductDto } from '../../dto';
+import { BulkProductCreateRowDto, BulkProductUpdateRowDto } from '../../dto';
 import type { PharmacyProducts } from '../../entities';
 import { PHARM } from '../../pharmacy.concepts';
 import { PharmacyErrorReason } from '../../pharmacy.error-reasons';
-import { PharmacyProductsRepository } from '../../repositories';
+import {
+  PharmacyCatalogRepository,
+  PharmacyProductsRepository,
+} from '../../repositories';
+import { MedicationCatalogResolver } from '../medication-catalog.resolver';
+import { prescriptionWarnings } from '../pharmacy-catalog-rules';
 import { PharmacyProductsService } from '../pharmacy-products.service';
 import {
   rejectRow,
   textField,
   type BulkContext,
   type BulkHandler,
+  type BulkOtherKey,
+  type BulkRowError,
 } from './bulk-handler';
 import { PricesBulkHandler } from './prices.bulk-handler';
 
@@ -22,25 +29,58 @@ type ProductSnapshot = readonly unknown[];
  * `(pharmacy_id, product_code)`: lo garantiza el servicio de alta, y la carga
  * masiva, con su candado por farmacia. El alta y el cambio son los de siempre
  * (`publishProduct` y `updateProduct`), con sus reglas.
+ *
+ * El medicamento se escribe por su nombre (`medicationName`) y se resuelve
+ * contra el catálogo con que se receta: la farmacia nunca tipea un UUID, y un
+ * nombre que no está rechaza la fila ya en la vista previa.
  */
 @Injectable()
 export class ProductsBulkHandler implements BulkHandler<
   PharmacyProducts,
-  CreateProductDto,
+  BulkProductCreateRowDto,
   BulkProductUpdateRowDto
 > {
   readonly keyField = 'productCode';
-  readonly createRow = CreateProductDto;
+  readonly createRow = BulkProductCreateRowDto;
   readonly updateRow = BulkProductUpdateRowDto;
 
   constructor(
     private readonly productsRepo: PharmacyProductsRepository,
     private readonly products: PharmacyProductsService,
     private readonly prices: PricesBulkHandler,
+    private readonly catalog: PharmacyCatalogRepository,
+    private readonly medications: MedicationCatalogResolver,
   ) {}
 
   keyOf(raw: Record<string, unknown>): string | null {
     return textField(raw, 'productCode');
+  }
+
+  /**
+   * El mismo producto del catálogo oficial (y presentación) no puede venir en
+   * dos filas: la vista previa deshace cada fila y daría las dos por buenas,
+   * mientras la carga real rechazaría la segunda.
+   */
+  otherKeysOf(raw: Record<string, unknown>): readonly BulkOtherKey[] {
+    const catalogProductId = textField(raw, 'catalogProductId');
+    if (catalogProductId === null) return [];
+    const presentation = textField(raw, 'catalogPresentationCode') ?? '';
+    return [
+      {
+        field: 'catalogProductId',
+        key: `${catalogProductId.toLowerCase()}|${presentation}`,
+      },
+    ];
+  }
+
+  /** Lo que se avisa con lo que quedó guardado, no con lo que trajo la fila. */
+  async warningsFor(
+    tx: EntityManager,
+    _ctx: BulkContext,
+    id: string,
+  ): Promise<readonly BulkRowError[]> {
+    const product = await this.productsRepo.findById(tx, id);
+    return product === null ? [] : prescriptionWarnings(product);
   }
 
   findExisting(
@@ -54,8 +94,21 @@ export class ProductsBulkHandler implements BulkHandler<
   async create(
     tx: EntityManager,
     ctx: BulkContext,
-    row: CreateProductDto,
+    input: BulkProductCreateRowDto,
   ): Promise<string> {
+    const { medicationName, ...row } = input;
+    if (medicationName !== undefined) {
+      if (row.catalogProductId || row.medicationConceptId) {
+        throw rejectRow(
+          'medicationName',
+          PharmacyErrorReason.MEDICATION_FROM_CATALOG,
+          row.catalogProductId
+            ? 'Un producto del catálogo oficial ya trae su medicamento: deje vacía la columna «medicamento»'
+            : 'El medicamento va por su nombre o por su concepto, no los dos',
+        );
+      }
+      row.medicationConceptId = await this.medicationOf(medicationName);
+    }
     if (row.catalogProductId) {
       const taken = await this.productsRepo.findByPharmacyAndCatalog(
         tx,
@@ -93,7 +146,17 @@ export class ProductsBulkHandler implements BulkHandler<
       );
     }
     const before = await this.snapshot(tx, ctx, existing);
-    const { productCode: _code, ...changes } = row;
+    const { productCode: _code, medicationName, ...changes } = row;
+    if (medicationName !== undefined) {
+      if (changes.medicationConceptId !== undefined) {
+        throw rejectRow(
+          'medicationName',
+          PharmacyErrorReason.MEDICATION_FROM_CATALOG,
+          'El medicamento va por su nombre o por su concepto, no los dos',
+        );
+      }
+      changes.medicationConceptId = await this.medicationOf(medicationName);
+    }
     await this.products.updateProduct(
       ctx.pharmacy.id,
       existing.id,
@@ -125,7 +188,21 @@ export class ProductsBulkHandler implements BulkHandler<
       product.outOfStockDeclared,
       product.statusConceptId,
       product.pharmacyProductCategoryId ?? null,
+      product.medicationConceptId ?? null,
       await this.prices.activeAmount(tx, ctx, product.id),
+      // Sin las imágenes, una fila que sólo cambia fotos daba «sin cambios» y
+      // se deshacía en silencio.
+      (await this.catalog.findImageFileIds(tx, [product.id])).get(product.id) ??
+        [],
     ];
+  }
+
+  /** El concepto del nombre escrito, o el rechazo de la fila con su motivo. */
+  private async medicationOf(name: string): Promise<string> {
+    const resolved = await this.medications.resolveName(name);
+    if (!resolved.found) {
+      throw rejectRow('medicationName', resolved.reason, resolved.message);
+    }
+    return resolved.conceptId;
   }
 }

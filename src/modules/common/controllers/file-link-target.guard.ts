@@ -1,10 +1,16 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import type { AuthenticatedRequest } from '../../../common/auth/authenticated-user.interface';
+import { roleAuthorizesInTenant } from '../../../common/auth/roles.guard';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { CommonErrorReason } from '../common.error-reasons';
 import { OwnerType } from '../dto';
 
-/** Roles de plataforma que pueden elegir cualquier dueño en la ruta genérica. */
+/**
+ * Roles de plataforma que pueden elegir cualquier dueño en la ruta genérica.
+ * Sólo cuentan **globales** (sin ámbito en `scopedRoles`): el dueño de destino
+ * (un usuario, un paciente, otro tenant) no tiene un tenant que esta ruta
+ * conozca, así que no hay contra qué comparar un rol acotado.
+ */
 const PLATFORM_ROLES = ['SUPERADMIN'];
 
 /**
@@ -24,7 +30,10 @@ const PLATFORM_ROLES = ['SUPERADMIN'];
  * `ALLERGY_INTOLERANCE`, `ENCOUNTER`— son historia clínica y se vinculan por la
  * ruta clínica del recurso (`attachFile`), que sí evalúa la relación asistencial
  * con el paciente y llama a `FilesService.createLink` ya autorizada. Un rol de
- * plataforma (`SUPERADMIN`) conserva el acceso total que `RolesGuard` ya le da.
+ * plataforma (`SUPERADMIN`) **global** conserva el acceso total; el concedido
+ * dentro de un tenant (`scopedRoles`, MCH-001) sigue la regla de cualquier
+ * actor: su usuario o su tenant resuelto (`roleAuthorizesInTenant` con tenant
+ * `undefined` sólo es verdadero para el global).
  *
  * Es un guard de ruta y no una comprobación del servicio a propósito: el
  * servicio lo llaman también esas rutas clínicas, que autorizan por su cuenta.
@@ -37,7 +46,12 @@ export class FileLinkTargetGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
     if (!user) return true; // `JwtAuthGuard` ya rechazó lo que no tiene sesión.
-    if (user.roles.some((role) => PLATFORM_ROLES.includes(role))) return true;
+    if (
+      PLATFORM_ROLES.some((role) =>
+        roleAuthorizesInTenant(user, role, undefined),
+      )
+    )
+      return true;
 
     const body = (request.body ?? {}) as {
       ownerType?: unknown;

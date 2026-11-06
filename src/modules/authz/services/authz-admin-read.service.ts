@@ -201,7 +201,7 @@ export class AuthzAdminReadService {
   }
 }
 
-function presentarAsignacion(
+export function presentarAsignacion(
   f: AssignmentRow,
   now: Date,
 ): UserRoleAssignmentDto {

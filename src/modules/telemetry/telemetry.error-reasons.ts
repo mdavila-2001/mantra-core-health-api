@@ -27,4 +27,10 @@ export enum TelemetryErrorReason {
 
   // --- Propiedades de evento (422) ---
   EVENT_PROPERTY_NOT_ALLOWED = 'TELEMETRY_EVENT_PROPERTY_NOT_ALLOWED',
+
+  // --- Esquema de evento reemplazado (412) ---
+  EVENT_SCHEMA_NOT_ACTIVE = 'TELEMETRY_EVENT_SCHEMA_NOT_ACTIVE',
+
+  // --- Evento de uso agregado sin plantilla de ruta válida (422) ---
+  ANONYMOUS_ROUTE_INVALID = 'TELEMETRY_ANONYMOUS_ROUTE_INVALID',
 }

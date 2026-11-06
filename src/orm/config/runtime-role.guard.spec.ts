@@ -3,6 +3,7 @@ import {
   RuntimeRoleGuardService,
   evaluateRuntimeRole,
   inspectRuntimeRole,
+  isRlsEnforcementMissingInProduction,
   shouldVerifyRuntimeRole,
 } from './runtime-role.guard';
 import { loadOrmEnv } from './orm.env';
@@ -65,6 +66,40 @@ describe('shouldVerifyRuntimeRole', () => {
   it('el proceso de migración/seed queda exento aun en producción', () => {
     expect(
       shouldVerifyRuntimeRole({ ...PROD, DB_ROLE_PURPOSE: 'migration' }),
+    ).toBe(false);
+  });
+});
+
+describe('isRlsEnforcementMissingInProduction (C-3)', () => {
+  it.each([
+    ['sin definir', {}],
+    ['false', { RLS_ENFORCE: 'false' }],
+    ['vacío', { RLS_ENFORCE: '' }],
+    ['TRUE en mayúsculas', { RLS_ENFORCE: 'TRUE' }],
+    ['1', { RLS_ENFORCE: '1' }],
+  ])('producción con RLS_ENFORCE %s: falta el aislamiento', (_name, env) => {
+    expect(isRlsEnforcementMissingInProduction({ ...PROD, ...env })).toBe(true);
+  });
+  it('producción con RLS_ENFORCE=true: no falta', () => {
+    expect(
+      isRlsEnforcementMissingInProduction({ ...PROD, RLS_ENFORCE: 'true' }),
+    ).toBe(false);
+  });
+  it('fuera de producción no se exige', () => {
+    expect(
+      isRlsEnforcementMissingInProduction({
+        NODE_ENV: 'development',
+        RLS_ENFORCE: 'false',
+      }),
+    ).toBe(false);
+    expect(isRlsEnforcementMissingInProduction({})).toBe(false);
+  });
+  it('el proceso de migración/seed queda exento aun en producción', () => {
+    expect(
+      isRlsEnforcementMissingInProduction({
+        ...PROD,
+        DB_ROLE_PURPOSE: 'migration',
+      }),
     ).toBe(false);
   });
 });
@@ -136,9 +171,40 @@ describe('RuntimeRoleGuardService (arranque)', () => {
 
   it('producción con la excepción explícita: arranca', async () => {
     process.env.NODE_ENV = 'production';
+    process.env.RLS_ENFORCE = 'true';
     process.env.DB_ALLOW_PRIVILEGED_RUNTIME_ROLE = 'true';
     const { service } = build({ rolsuper: true });
     await expect(service.onApplicationBootstrap()).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ['sin definir', undefined],
+    ['false', 'false'],
+  ])(
+    'producción con rol de aplicación y RLS_ENFORCE %s: rechaza el arranque con SYSTEM_RLS_ENFORCE_DISABLED',
+    async (_name, value) => {
+      process.env.NODE_ENV = 'production';
+      if (value === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = value;
+      const { service } = build({
+        rolsuper: false,
+        rolbypassrls: false,
+        owned_unforced_rls_tables: 0,
+      });
+      await expect(service.onApplicationBootstrap()).rejects.toThrow(
+        'SYSTEM_RLS_ENFORCE_DISABLED',
+      );
+    },
+  );
+
+  it('producción con la excepción explícita y RLS_ENFORCE=false: la válvula no cubre el interruptor', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.RLS_ENFORCE = 'false';
+    process.env.DB_ALLOW_PRIVILEGED_RUNTIME_ROLE = 'true';
+    const { service } = build({ rolsuper: true });
+    await expect(service.onApplicationBootstrap()).rejects.toThrow(
+      'SYSTEM_RLS_ENFORCE_DISABLED',
+    );
   });
 
   it('el proceso de migración (seed-cli) no es rechazado con el rol dueño', async () => {
@@ -199,5 +265,31 @@ describe('credenciales de migración y de runtime separadas (HZ-05)', () => {
         { DB_APP_USER: '', DB_APP_PASSWORD: '' },
       ),
     ).toEqual({ user: 'dueno', password: 'clave-dueno-sintetica' });
+  });
+
+  it('la migración usa el rol dueño aunque llegue DB_APP_USER (Coolify rellena el vacío)', () => {
+    expect(
+      resolveRuntimeCredentials(
+        { user: 'dueno', password: 'clave-dueno-sintetica' },
+        {
+          DB_APP_USER: 'mantra_app',
+          DB_APP_PASSWORD: 'clave-app-sintetica',
+          DB_ROLE_PURPOSE: 'migration',
+        },
+      ),
+    ).toEqual({ user: 'dueno', password: 'clave-dueno-sintetica' });
+  });
+
+  it('otro DB_ROLE_PURPOSE no cambia nada: el runtime sigue con el rol de aplicación', () => {
+    expect(
+      resolveRuntimeCredentials(
+        { user: 'dueno', password: 'clave-dueno-sintetica' },
+        {
+          DB_APP_USER: 'mantra_app',
+          DB_APP_PASSWORD: 'clave-app-sintetica',
+          DB_ROLE_PURPOSE: 'runtime',
+        },
+      ),
+    ).toEqual({ user: 'mantra_app', password: 'clave-app-sintetica' });
   });
 });

@@ -3,12 +3,12 @@
 # Flujos del módulo `surveys`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 18 (18 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 19 (19 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [surveys](../endpoints/surveys.md)
 
 ## Proceso: Módulo Surveys — Cuestionarios y encuestas de satisfacción
 
-- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 18
+- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 19
 - **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/surveys/README.md`
@@ -25,6 +25,7 @@ _Fuente: `src/modules/surveys/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:SurveysAssignmentsController` | Operaciones de SurveysAssignmentsController que el README no asigna a un caso de uso | POST /surveys/assignments | PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | POST /surveys/invitations | PRACTITIONER · CLINICIAN | MEDIO | 16 |
+| `ctrl:SurveysCatalogController` | Operaciones de SurveysCatalogController que el README no asigna a un caso de uso | GET /surveys/catalog | PRACTITIONER · CLINICIAN | MEDIO | 11 |
 | `ctrl:SurveysInsightsController` | Operaciones de SurveysInsightsController que el README no asigna a un caso de uso | GET /surveys/insights | PRACTITIONER · CLINICIAN | BAJO | 11 |
 | `ctrl:SurveysPatientController` | Operaciones de SurveysPatientController que el README no asigna a un caso de uso | GET /surveys/me/invitations | Cualquier sesión válida | BAJO | 9 |
 |  |  | GET /surveys/me/invitations/{id} | Cualquier sesión válida | BAJO | 10 |
@@ -42,12 +43,12 @@ _Fuente: `src/modules/surveys/README.md:3`_
 |  |  | POST /surveys/templates/{id}/versions | PRACTITIONER · CLINICIAN | MEDIO | 3 |
 |  |  | POST /surveys/templates/{id}/versions/{versionNumber}/publish | PRACTITIONER · CLINICIAN | MEDIO | 5 |
 
-### Diagrama — etapas `ctrl:SurveysAssignmentsController`, `ctrl:SurveysInsightsController`, `ctrl:SurveysPatientController`…
+### Diagrama — etapas `ctrl:SurveysAssignmentsController`, `ctrl:SurveysCatalogController`, `ctrl:SurveysInsightsController`…
 
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
-  a17(["Cualquier sesión válida"]):::actor
+  a21(["Cualquier sesión válida"]):::actor
   t3[("billing.service_catalog")]:::tabla
   t4[("practice.practices")]:::tabla
   t5[("scheduling.appointment_bookings")]:::tabla
@@ -55,43 +56,47 @@ flowchart LR
   t7[("scheduling.practitioner_service_offerings")]:::tabla
   t8[("scheduling.schedulable_resources")]:::tabla
   t11[("surveys.survey_assignments")]:::tabla
-  t14[("surveys.survey_answers")]:::tabla
-  t18[("profiles.persons")]:::tabla
-  t23[("surveys.survey_invitations")]:::tabla
-  t24[("surveys.survey_questions")]:::tabla
-  t25[("surveys.survey_responses")]:::tabla
-  t27[("surveys.survey_templates")]:::tabla
-  t28[("surveys.survey_versions")]:::tabla
+  t14[("surveys.survey_questions")]:::tabla
+  t15[("surveys.survey_templates")]:::tabla
+  t18[("surveys.survey_answers")]:::tabla
+  t22[("profiles.persons")]:::tabla
+  t27[("surveys.survey_invitations")]:::tabla
+  t28[("surveys.survey_responses")]:::tabla
+  t30[("surveys.survey_versions")]:::tabla
   t9[("+4 tablas más")]
   t12[("+10 tablas más")]
   subgraph s0["ctrl:SurveysAssignmentsController · Operaciones de SurveysAssignmentsController…"]
     o1["POST /surveys/assignments"]:::op
     o10["POST /surveys/invitations"]:::op
   end
-  t15[("+5 tablas más")]
-  subgraph s1["ctrl:SurveysInsightsController · Operaciones de SurveysInsightsController que e…"]
-    o13["GET /surveys/insights"]:::op
+  t16[("+5 tablas más")]
+  subgraph s1["ctrl:SurveysCatalogController · Operaciones de SurveysCatalogController que el…"]
+    o13["GET /surveys/catalog"]:::op
   end
-  t19[("+3 tablas más")]
-  t21[("+4 tablas más")]
-  subgraph s2["ctrl:SurveysPatientController · Operaciones de SurveysPatientController que el…"]
-    o16["GET /surveys/me/invitations"]:::op
-    o20["GET /surveys/me/invitations/{id}"]:::op
-    o22["POST /surveys/me/invitations/{id}/responses"]:::op
+  t19[("+5 tablas más")]
+  subgraph s2["ctrl:SurveysInsightsController · Operaciones de SurveysInsightsController que e…"]
+    o17["GET /surveys/insights"]:::op
   end
-  subgraph s3["ctrl:SurveysTemplatesController · Operaciones de SurveysTemplatesController que…"]
-    o26["GET /surveys/templates"]:::op
-    o29["POST /surveys/templates"]:::op
-    o30["GET /surveys/templates/{id}"]:::op
-    o31["PATCH /surveys/templates/{id}"]:::op
-    o32["POST /surveys/templates/{id}/deactivate"]:::op
-    o33["POST /surveys/templates/{id}/questions"]:::op
-    o34["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
-    o35["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
-    o36["PUT /surveys/templates/{id}/questions/order"]:::op
-    o37["GET /surveys/templates/{id}/responses"]:::op
-    o38["POST /surveys/templates/{id}/versions"]:::op
-    o39["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
+  t23[("+3 tablas más")]
+  t25[("+4 tablas más")]
+  subgraph s3["ctrl:SurveysPatientController · Operaciones de SurveysPatientController que el…"]
+    o20["GET /surveys/me/invitations"]:::op
+    o24["GET /surveys/me/invitations/{id}"]:::op
+    o26["POST /surveys/me/invitations/{id}/responses"]:::op
+  end
+  subgraph s4["ctrl:SurveysTemplatesController · Operaciones de SurveysTemplatesController que…"]
+    o29["GET /surveys/templates"]:::op
+    o31["POST /surveys/templates"]:::op
+    o32["GET /surveys/templates/{id}"]:::op
+    o33["PATCH /surveys/templates/{id}"]:::op
+    o34["POST /surveys/templates/{id}/deactivate"]:::op
+    o35["POST /surveys/templates/{id}/questions"]:::op
+    o36["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
+    o37["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
+    o38["PUT /surveys/templates/{id}/questions/order"]:::op
+    o39["GET /surveys/templates/{id}/responses"]:::op
+    o40["POST /surveys/templates/{id}/versions"]:::op
+    o41["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -110,92 +115,100 @@ flowchart LR
   o10 -->|"LEE"| t11
   o10 -.-> t12
   a2 --> o13
-  o13 -->|"LEE"| t5
-  o13 -->|"LEE"| t6
-  o13 -->|"LEE"| t7
-  o13 -->|"LEE"| t8
-  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t3
+  o13 -->|"CREA"| t11
   o13 -->|"LEE"| t11
-  o13 -.-> t15
-  a17 --> o16
-  o16 -->|"LEE"| t3
-  o16 -->|"LEE"| t18
-  o16 -->|"LEE"| t5
-  o16 -->|"LEE"| t6
-  o16 -->|"LEE"| t7
-  o16 -->|"LEE"| t8
-  o16 -.-> t19
-  a17 --> o20
+  o13 -->|"CREA"| t14
+  o13 -->|"LEE"| t14
+  o13 -->|"ACTUALIZA"| t15
+  o13 -.-> t16
+  a2 --> o17
+  o17 -->|"LEE"| t5
+  o17 -->|"LEE"| t6
+  o17 -->|"LEE"| t7
+  o17 -->|"LEE"| t8
+  o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t11
+  o17 -.-> t19
+  a21 --> o20
   o20 -->|"LEE"| t3
-  o20 -->|"LEE"| t18
+  o20 -->|"LEE"| t22
   o20 -->|"LEE"| t5
   o20 -->|"LEE"| t6
   o20 -->|"LEE"| t7
   o20 -->|"LEE"| t8
-  o20 -.-> t21
-  a17 --> o22
-  o22 -->|"CREA"| t14
-  o22 -->|"ACTUALIZA"| t23
-  o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"CREA"| t25
-  a2 --> o26
-  o26 -->|"LEE"| t24
+  o20 -.-> t23
+  a21 --> o24
+  o24 -->|"LEE"| t3
+  o24 -->|"LEE"| t22
+  o24 -->|"LEE"| t5
+  o24 -->|"LEE"| t6
+  o24 -->|"LEE"| t7
+  o24 -->|"LEE"| t8
+  o24 -.-> t25
+  a21 --> o26
+  o26 -->|"CREA"| t18
+  o26 -->|"ACTUALIZA"| t27
   o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t28
+  o26 -->|"LEE"| t14
+  o26 -->|"CREA"| t28
   a2 --> o29
-  o29 -->|"CREA"| t27
-  o29 -->|"CREA"| t28
-  a2 --> o30
-  o30 -->|"LEE"| t3
-  o30 -->|"LEE"| t11
-  o30 -->|"LEE"| t24
-  o30 -->|"LEE"| t27
-  o30 -->|"LEE"| t28
+  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t15
+  o29 -->|"LEE"| t30
   a2 --> o31
-  o31 -->|"ACTUALIZA"| t27
-  o31 -->|"LEE"| t27
-  o31 -->|"ACTUALIZA"| t28
-  o31 -->|"LEE"| t28
+  o31 -->|"CREA"| t15
+  o31 -->|"CREA"| t30
   a2 --> o32
-  o32 -->|"ACTUALIZA"| t27
-  o32 -->|"LEE"| t27
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t11
+  o32 -->|"LEE"| t14
+  o32 -->|"LEE"| t15
+  o32 -->|"LEE"| t30
   a2 --> o33
-  o33 -->|"CREA"| t24
-  o33 -->|"LEE"| t24
-  o33 -->|"LEE"| t27
-  o33 -->|"LEE"| t28
+  o33 -->|"ACTUALIZA"| t15
+  o33 -->|"LEE"| t15
+  o33 -->|"ACTUALIZA"| t30
+  o33 -->|"LEE"| t30
   a2 --> o34
-  o34 -->|"BORRA"| t24
-  o34 -->|"LEE"| t24
-  o34 -->|"LEE"| t27
-  o34 -->|"LEE"| t28
+  o34 -->|"ACTUALIZA"| t15
+  o34 -->|"LEE"| t15
   a2 --> o35
-  o35 -->|"ACTUALIZA"| t24
-  o35 -->|"LEE"| t24
-  o35 -->|"LEE"| t27
-  o35 -->|"LEE"| t28
+  o35 -->|"CREA"| t14
+  o35 -->|"LEE"| t14
+  o35 -->|"LEE"| t15
+  o35 -->|"LEE"| t30
   a2 --> o36
-  o36 -->|"LEE"| t24
-  o36 -->|"LEE"| t27
-  o36 -->|"LEE"| t28
+  o36 -->|"BORRA"| t14
+  o36 -->|"LEE"| t14
+  o36 -->|"LEE"| t15
+  o36 -->|"LEE"| t30
   a2 --> o37
+  o37 -->|"ACTUALIZA"| t14
   o37 -->|"LEE"| t14
-  o37 -->|"LEE"| t23
-  o37 -->|"LEE"| t24
-  o37 -->|"LEE"| t25
-  o37 -->|"LEE"| t27
-  o37 -->|"LEE"| t28
+  o37 -->|"LEE"| t15
+  o37 -->|"LEE"| t30
   a2 --> o38
-  o38 -->|"LEE"| t27
-  o38 -->|"CREA"| t28
-  o38 -->|"LEE"| t28
+  o38 -->|"LEE"| t14
+  o38 -->|"LEE"| t15
+  o38 -->|"LEE"| t30
   a2 --> o39
-  o39 -->|"LEE"| t24
-  o39 -->|"ACTUALIZA"| t27
+  o39 -->|"LEE"| t18
   o39 -->|"LEE"| t27
-  o39 -->|"ACTUALIZA"| t28
+  o39 -->|"LEE"| t14
   o39 -->|"LEE"| t28
+  o39 -->|"LEE"| t15
+  o39 -->|"LEE"| t30
+  a2 --> o40
+  o40 -->|"LEE"| t15
+  o40 -->|"CREA"| t30
+  o40 -->|"LEE"| t30
+  a2 --> o41
+  o41 -->|"LEE"| t14
+  o41 -->|"ACTUALIZA"| t15
+  o41 -->|"LEE"| t15
+  o41 -->|"ACTUALIZA"| t30
+  o41 -->|"LEE"| t30
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -325,7 +338,115 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /surveys/insights
+#### 2. GET /surveys/catalog
+
+Catálogo de encuestas con sus servicios
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysCatalogService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a SurveysTemplatesService.listTemplates"]:::llamada
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n4 --> n5
+  n6{"!owner"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a TemplatesRepository.listTemplatesByOwner"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE surveys.survey_templates")]:::efecto
+  n8 --> n9
+  n10["Repite: por cada const template de templates"]:::bucle
+  n9 --> n10
+  n11["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n10 -->|"cada elemento"| n11
+  n12[("LEE surveys.survey_versions")]:::efecto
+  n11 --> n12
+  n13["Llama a TemplatesRepository.countQuestions"]:::llamada
+  n12 --> n13
+  n14[("LEE surveys.survey_questions")]:::efecto
+  n13 --> n14
+  n15["Llama a SurveysTemplatesService.listAssignments"]:::llamada
+  n14 --> n15
+  n10 -->|"al terminar"| n15
+  n16["Llama a TemplatesRepository.listVersions"]:::llamada
+  n15 --> n16
+  n17[("LEE surveys.survey_versions")]:::efecto
+  n16 --> n17
+  n18["Llama a AssignmentsRepository.listActiveByVersions"]:::llamada
+  n17 --> n18
+  n19[("LEE surveys.survey_assignments")]:::efecto
+  n18 --> n19
+  n20["Llama a TargetsRepository.findServiceNames"]:::llamada
+  n19 --> n20
+  n21[("LEE billing.service_catalog")]:::efecto
+  n20 --> n21
+  n22["Llama a SurveysCatalogService.systemEntries"]:::llamada
+  n21 --> n22
+  n23["Repite: por cada const kind de SYSTEM_SURVEY_KINDS"]:::bucle
+  n22 --> n23
+  n24["Llama a SurveysSystemTemplatesService.ensureSystemTemplate"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25["Intenta"]:::intento
+  n24 --> n25
+  n26["Llama a SurveysSystemTemplatesService.materialize"]:::llamada
+  n25 --> n26
+  n27{"!template"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA surveys.survey_templates · ACTUALIZA surveys.survey_templates")]:::efecto
+  n27 -->|"no"| n28
+  n29["Repite: por cada const old de await this.templatesRepo.listVersions(tx, templat…"]:::bucle
+  n27 -->|"sí"| n29
+  n28 --> n29
+  n30{"old.id !== ids.versionId && old.publicationStatusConceptId === SURVEYS.VERSION_PUBLISHED"}:::decision
+  n29 -->|"cada elemento"| n30
+  n31[("ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions")]:::efecto
+  n30 -->|"sí"| n31
+  n32{"!(error instanceof UniqueConstraintViolationException)"}:::decision
+  n25 -->|"si falla"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34{"!created"}:::decision
+  n31 --> n34
+  n30 -->|"no"| n34
+  n29 -->|"al terminar"| n34
+  n32 -->|"no"| n34
+  n35(["500 INTERNAL La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId})"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n34 -->|"no"| n36
+  n37[("LEE surveys.survey_templates")]:::efecto
+  n36 --> n37
+  n38["Llama a TemplatesRepository.countQuestions"]:::llamada
+  n37 --> n38
+  n39[("LEE surveys.survey_questions")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
+  n23 -->|"al terminar"| n40
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /surveys/insights
 
 Resumen general de mis encuestas (agregado, sin pacientes)
 
@@ -432,7 +553,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /surveys/invitations
+#### 4. POST /surveys/invitations
 
 Emitir los cuestionarios de una atención completada
 
@@ -584,7 +705,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /surveys/me/invitations
+#### 5. GET /surveys/me/invitations
 
 Ver mis cuestionarios
 
@@ -628,7 +749,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /surveys/me/invitations/{id}
+#### 6. GET /surveys/me/invitations/{id}
 
 Abrir un cuestionario para responderlo
 
@@ -705,7 +826,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /surveys/me/invitations/{id}/responses
+#### 7. POST /surveys/me/invitations/{id}/responses
 
 Responder el cuestionario
 
@@ -844,7 +965,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /surveys/templates
+#### 8. GET /surveys/templates
 
 Listar mis encuestas
 
@@ -894,7 +1015,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /surveys/templates
+#### 9. POST /surveys/templates
 
 Crear una encuesta para pacientes
 
@@ -940,7 +1061,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. GET /surveys/templates/{id}
+#### 10. GET /surveys/templates/{id}
 
 Ver una encuesta y su cuestionario
 
@@ -1021,7 +1142,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. PATCH /surveys/templates/{id}
+#### 11. PATCH /surveys/templates/{id}
 
 Corregir título, consigna y plazo del borrador
 
@@ -1115,7 +1236,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /surveys/templates/{id}/deactivate
+#### 12. POST /surveys/templates/{id}/deactivate
 
 Desactivar la encuesta
 
@@ -1185,7 +1306,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /surveys/templates/{id}/questions
+#### 13. POST /surveys/templates/{id}/questions
 
 Configurar una pregunta y su tipo de respuesta
 
@@ -1294,7 +1415,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. DELETE /surveys/templates/{id}/questions/{questionId}
+#### 14. DELETE /surveys/templates/{id}/questions/{questionId}
 
 Quitar una pregunta del borrador
 
@@ -1389,7 +1510,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. PATCH /surveys/templates/{id}/questions/{questionId}
+#### 15. PATCH /surveys/templates/{id}/questions/{questionId}
 
 Corregir una pregunta del borrador
 
@@ -1507,7 +1628,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. PUT /surveys/templates/{id}/questions/order
+#### 16. PUT /surveys/templates/{id}/questions/order
 
 Reordenar el cuestionario del borrador
 
@@ -1592,7 +1713,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /surveys/templates/{id}/responses
+#### 17. GET /surveys/templates/{id}/responses
 
 Revisar las respuestas de los pacientes
 
@@ -1656,7 +1777,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /surveys/templates/{id}/versions
+#### 18. POST /surveys/templates/{id}/versions
 
 Abrir una versión nueva del cuestionario
 
@@ -1737,7 +1858,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+#### 19. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 Publicar la encuesta y configurar su vigencia
 

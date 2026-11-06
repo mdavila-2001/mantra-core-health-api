@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 20 · schema diagnostics
+-- SALUD v4.2.91 · módulo 20 · schema diagnostics
 -- Generado de diagram_20_diagnostics.puml — NO editar a mano.
 
 
@@ -248,6 +248,8 @@ CREATE INDEX IF NOT EXISTS "ix_specimen_collection_events_fasting_status_concept
 
 CREATE INDEX IF NOT EXISTS "brin_specimen_collection_events_occurred_at" ON "diagnostics"."specimen_collection_events" USING brin ("occurred_at") WITH (pages_per_range=128);
 
+CREATE INDEX IF NOT EXISTS "ix_specimen_collection_events_collection_care_space_id" ON "diagnostics"."specimen_collection_events" ("collection_care_space_id");
+
 CREATE INDEX IF NOT EXISTS "ix_specimen_containers_specimen_id" ON "diagnostics"."specimen_containers" ("specimen_id");
 
 CREATE INDEX IF NOT EXISTS "ix_specimen_containers_container_type_concept_id" ON "diagnostics"."specimen_containers" ("container_type_concept_id");
@@ -488,6 +490,10 @@ CREATE INDEX IF NOT EXISTS "ix_imaging_procedure_steps_updated_by_user_id" ON "d
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uk_imaging_procedure_steps_study_step" ON "diagnostics"."imaging_procedure_steps" ("imaging_study_id", "step_number");
 
+CREATE INDEX IF NOT EXISTS "ix_imaging_procedure_steps_scheduled_equipment_id" ON "diagnostics"."imaging_procedure_steps" ("scheduled_equipment_id");
+
+CREATE INDEX IF NOT EXISTS "ix_imaging_procedure_steps_scheduled_care_space_id" ON "diagnostics"."imaging_procedure_steps" ("scheduled_care_space_id", "scheduled_start_at");
+
 CREATE INDEX IF NOT EXISTS "ix_imaging_selections_custodian_tenant_id" ON "diagnostics"."imaging_selections" ("custodian_tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_imaging_selections_imaging_study_id" ON "diagnostics"."imaging_selections" ("imaging_study_id");
@@ -603,3 +609,30 @@ CREATE INDEX IF NOT EXISTS "brin_diagnostic_provenance_links_recorded_at" ON "di
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_provenance_target" ON "diagnostics"."diagnostic_provenance_links" ("target_type_concept_id", "target_id", "recorded_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_provenance_source" ON "diagnostics"."diagnostic_provenance_links" ("source_type_concept_id", "source_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_performer_events_service_request_id" ON "diagnostics"."service_request_performer_events" ("service_request_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_performer_events_event_type_concept_id" ON "diagnostics"."service_request_performer_events" ("event_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_performer_events_recorded_by_user_id" ON "diagnostics"."service_request_performer_events" ("recorded_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_performer_events_tenant_request" ON "diagnostics"."service_request_performer_events" ("custodian_tenant_id", "service_request_id", "recorded_at" DESC);
+
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_report_drafts_tenant_request" ON "diagnostics"."report_drafts" ("custodian_tenant_id", "service_request_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_drafts_service_request_id" ON "diagnostics"."report_drafts" ("service_request_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_drafts_diagnostic_report_id" ON "diagnostics"."report_drafts" ("diagnostic_report_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_drafts_signer_profile_id" ON "diagnostics"."report_drafts" ("signer_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_drafts_published_version_id" ON "diagnostics"."report_drafts" ("published_version_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_report_drafts_id_tenant" ON "diagnostics"."report_drafts" ("id", "custodian_tenant_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_report_draft_files_draft_file" ON "diagnostics"."report_draft_files" ("report_draft_id", "file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_draft_files_file_id" ON "diagnostics"."report_draft_files" ("file_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_report_issuer_settings_tenant" ON "diagnostics"."report_issuer_settings" ("custodian_tenant_id");

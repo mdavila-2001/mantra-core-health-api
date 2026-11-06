@@ -81,22 +81,26 @@ export class CommunityGroupNotificationsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.safely('community.group.join.notify', group.id, async () => {
-      const em = this.em.fork();
-      const [profile] = await this.profilesRepo.listByIds(em, [
-        memberProfileId,
-      ]);
-      const recipientUserId = this.resolveRecipientUserId(profile);
-      if (!recipientUserId) return;
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const [profile] = await this.profilesRepo.listByIds(em, [
+            memberProfileId,
+          ]);
+          const recipientUserId = this.resolveRecipientUserId(profile);
+          if (!recipientUserId) return;
 
-      await this.emit({
-        group,
-        recipientUserId,
-        actor,
-        categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_JOIN_APPROVED,
-        subject: `Ya es parte de ${group.name}`,
-        bodyText:
-          'Aceptaron su solicitud de ingreso. Entre para ver lo que se está publicando.',
-      });
+          await this.emit({
+            group,
+            recipientUserId,
+            actor,
+            categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_JOIN_APPROVED,
+            subject: `Ya es parte de ${group.name}`,
+            bodyText:
+              'Aceptaron su solicitud de ingreso. Entre para ver lo que se está publicando.',
+          });
+        });
     });
   }
 
@@ -116,34 +120,41 @@ export class CommunityGroupNotificationsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.safely('community.group.post.notify', group.id, async () => {
-      const em = this.em.fork();
-      const memberProfileIds = await this.groupsRepo.listActiveMemberProfileIds(
-        em,
-        group.id,
-        COMM.GROUP_JOIN_ACTIVE,
-        MAX_POST_RECIPIENTS,
-      );
-      const targets = memberProfileIds.filter((id) => id !== authorProfileId);
-      if (targets.length === 0) return;
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const memberProfileIds =
+            await this.groupsRepo.listActiveMemberProfileIds(
+              em,
+              group.id,
+              COMM.GROUP_JOIN_ACTIVE,
+              MAX_POST_RECIPIENTS,
+            );
+          const targets = memberProfileIds.filter(
+            (id) => id !== authorProfileId,
+          );
+          if (targets.length === 0) return;
 
-      const profiles = await this.profilesRepo.listByIds(em, targets);
-      const recipients = profiles
-        .map((profile) => this.resolveRecipientUserId(profile))
-        .filter((userId): userId is string => !!userId);
+          const profiles = await this.profilesRepo.listByIds(em, targets);
+          const recipients = profiles
+            .map((profile) => this.resolveRecipientUserId(profile))
+            .filter((userId): userId is string => !!userId);
 
-      for (const recipientUserId of new Set(recipients)) {
-        await this.emit({
-          group,
-          recipientUserId,
-          actor,
-          categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_NEW_POST,
-          subject: `Hay algo nuevo en ${group.name}`,
-          // El cuerpo de la publicación no viaja en el asunto: una bandeja se
-          // mira en pantallas que pueden estar a la vista de cualquiera, y en
-          // un grupo de apoyo el título ya diría demasiado.
-          bodyText: 'Se publicó algo nuevo en el grupo. Entre para leerlo.',
+          for (const recipientUserId of new Set(recipients)) {
+            await this.emit({
+              group,
+              recipientUserId,
+              actor,
+              categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_NEW_POST,
+              subject: `Hay algo nuevo en ${group.name}`,
+              // El cuerpo de la publicación no viaja en el asunto: una bandeja se
+              // mira en pantallas que pueden estar a la vista de cualquiera, y en
+              // un grupo de apoyo el título ya diría demasiado.
+              bodyText: 'Se publicó algo nuevo en el grupo. Entre para leerlo.',
+            });
+          }
         });
-      }
     });
   }
 

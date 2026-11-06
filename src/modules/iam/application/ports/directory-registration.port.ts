@@ -1,6 +1,11 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import type { ExecutiveRole } from '../../../../common/constants/legal-representatives';
 import type { RegisterOrganizationDetailsDto } from '../../presentation/dto';
+import type { OpeningHoursShiftDto } from '../../../../common/dto/opening-hours.dto';
+import type {
+  DeclaredBranchesInput,
+  OpeningHoursSite,
+} from '../../../directory/services/declared-branches.service';
 
 /** Un ejecutivo de la organización, con el rol canónico que declara el alta. */
 export interface RegistrationExecutiveInput {
@@ -28,6 +33,8 @@ export interface RegistrationDocumentsInput {
   readonly ownerUserId: string;
   readonly legalEntityType?: string;
   readonly taxIdentifier?: string;
+  /** The NIT's `common.identifiers` row, linked from the tax document. */
+  readonly taxIdentifierId?: string;
   /** Rol canónico del documento → `fileId` ya subido. */
   readonly documents: Readonly<Record<string, string | undefined>>;
 }
@@ -43,11 +50,33 @@ export interface DirectoryRegistrationPort {
   createTenantMembership(tx: EntityManager, data: object): { id: string };
 
   findTenantByCode(tx: EntityManager, code: string): Promise<unknown>;
+  /** Case-insensitive match on legal or trade name (`identifier-exists`). */
+  tenantNameExists(tx: EntityManager, name: string): Promise<boolean>;
   createTenant(
     tx: EntityManager,
     data: object,
   ): { id: string; code: string; statusConceptId: string };
-  createBranch(tx: EntityManager, data: object): unknown;
+  /** The declared branches and their opening hours. */
+  registerDeclaredBranches(
+    tx: EntityManager,
+    input: DeclaredBranchesInput,
+  ): Promise<void>;
+  /** Shifts of an already flushed site, or of the headquarters. */
+  recordOpeningHours(
+    tx: EntityManager,
+    site: OpeningHoursSite,
+    shifts?: readonly OpeningHoursShiftDto[],
+  ): void;
+  /** Records the tenant's NIT on its own, with or without its PDF; returns the identifier id. */
+  registerTaxIdentifier(
+    tx: EntityManager,
+    input: {
+      tenantId: string;
+      value: string;
+      holderName?: string;
+      actorUserId: string;
+    },
+  ): Promise<string>;
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto): void;
   declaredConcepts(

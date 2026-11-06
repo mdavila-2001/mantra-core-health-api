@@ -199,10 +199,15 @@ export class PharmacyInventoryScopePolicy {
       readonly pharmacyProductId: string;
       readonly inventoryLotId?: string;
     },
-  ): Promise<void> {
-    await this.requireLocation(tx, site, key.inventoryLocationId);
+  ): Promise<InventoryLocations> {
+    const location = await this.requireLocation(
+      tx,
+      site,
+      key.inventoryLocationId,
+    );
     await this.requireProduct(tx, site, key.pharmacyProductId);
     await this.requireLot(tx, key.inventoryLotId, key.pharmacyProductId);
+    return location;
   }
 
   /** Producto del cuerpo: debe pertenecer a la farmacia ya administrada. */

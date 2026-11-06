@@ -2,7 +2,7 @@
 
 # Catálogo del schema `telemetry`
 
-- **Tablas:** 14 · **Columnas:** 172 (32 con descripción: 18.6 %) · **Índices:** 83
+- **Tablas:** 15 · **Columnas:** 195 (33 con descripción: 16.9 %) · **Índices:** 95
 - **Dominio:** Operaciones de Plataforma
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,20 +10,21 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [activity_event_schema_definitions](#activity_event_schema_definitions) | Especifica estructura y campos permitidos de eventos de actividad para controlar recolección y compatibilidad analítica. | 14 | 5 | 6 | COINCIDE |
+| [activity_event_schema_definitions](#activity_event_schema_definitions) | Especifica estructura y campos permitidos de eventos de actividad para controlar recolección y compatibilidad analítica. | 14 | 5 | 7 | COINCIDE |
 | [analytics_subjects](#analytics_subjects) | Representa sujetos de analítica cuya actividad se mide bajo propósitos y controles aplicables. | 9 | 6 | 8 | COINCIDE |
-| [client_contexts](#client_contexts) | Conserva contexto técnico del cliente —como plataforma y versión— para interpretar eventos de uso. | 20 | 9 | 3 | COINCIDE |
-| [conversion_events](#conversion_events) | Registra conversiones de producto o negocio para analizar resultados de recorridos y campañas. | 8 | 4 | 3 | COINCIDE |
+| [client_contexts](#client_contexts) | Conserva contexto técnico del cliente —como plataforma y versión— para interpretar eventos de uso. | 20 | 9 | 4 | COINCIDE |
+| [client_error_events](#client_error_events) | sin propósito | 23 | 8 | 9 | COINCIDE |
+| [conversion_events](#conversion_events) | Registra conversiones de producto o negocio para analizar resultados de recorridos y campañas. | 8 | 4 | 4 | COINCIDE |
 | [funnel_definitions](#funnel_definitions) | Define embudos de producto que miden progresión entre etapas de una experiencia digital. | 12 | 7 | 5 | COINCIDE |
 | [funnel_steps](#funnel_steps) | Especifica etapas y eventos que integran cada embudo analítico. | 6 | 2 | 3 | COINCIDE |
-| [session_journeys](#session_journeys) | Agrupa actividad de una sesión para reconstruir recorridos por aplicaciones y flujos del sistema. | 13 | 6 | 13 | COINCIDE |
+| [session_journeys](#session_journeys) | Agrupa actividad de una sesión para reconstruir recorridos por aplicaciones y flujos del sistema. | 13 | 6 | 15 | COINCIDE |
 | [tracking_consents](#tracking_consents) | Conserva estado de autorización de seguimiento para habilitar o bloquear analítica opcional según elecciones del usuario. | 11 | 5 | 5 | COINCIDE |
 | [tracking_disclosure_acceptances](#tracking_disclosure_acceptances) | Registra aceptación de avisos de seguimiento como evidencia de divulgación, sin asumir que constituye por sí sola base legal universal. | 9 | 4 | 2 | COINCIDE |
 | [tracking_disclosure_versions](#tracking_disclosure_versions) | Preserva versiones de avisos de seguimiento para documentar qué se informó a cada usuario. | 11 | 5 | 4 | COINCIDE |
-| [tracking_purpose_definitions](#tracking_purpose_definitions) | Define propósitos de medición de actividad para distinguir analítica opcional de auditoría de seguridad obligatoria. | 15 | 5 | 5 | COINCIDE |
-| [user_activity_event_properties](#user_activity_event_properties) | Detalla propiedades tipadas asociadas a eventos de actividad para preservar contexto analítico controlado. | 12 | 4 | 2 | COINCIDE |
-| [user_activity_events](#user_activity_events) | Conserva eventos de uso para análisis de producto y comercial sujeto a propósito y consentimiento configurados. | 19 | 12 | 12 | COINCIDE |
-| [web_vitals](#web_vitals) | Registra métricas de rendimiento percibido de páginas para detectar degradación de experiencia en interfaces médicas. | 13 | 9 | 2 | COINCIDE |
+| [tracking_purpose_definitions](#tracking_purpose_definitions) | Define propósitos de medición de actividad para distinguir analítica opcional de auditoría de seguridad obligatoria. | 15 | 5 | 7 | COINCIDE |
+| [user_activity_event_properties](#user_activity_event_properties) | Detalla propiedades tipadas asociadas a eventos de actividad para preservar contexto analítico controlado. | 12 | 4 | 6 | COINCIDE |
+| [user_activity_events](#user_activity_events) | Conserva eventos de uso para análisis de producto y comercial sujeto a propósito y consentimiento configurados. | 19 | 16 | 19 | COINCIDE |
+| [web_vitals](#web_vitals) | Registra métricas de rendimiento percibido de páginas para detectar degradación de experiencia en interfaces médicas. | 13 | 9 | 5 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -173,6 +174,10 @@ erDiagram
   telemetry_tracking_disclosure_acceptances }o--|| telemetry_tracking_disclosure_versions : "tracking_disclosure_version_id"
 ```
 
+### Tablas sin relaciones dentro del schema
+
+`telemetry.client_error_events`
+
 ## Fichas
 
 ### activity_event_schema_definitions
@@ -184,7 +189,7 @@ Especifica estructura y campos permitidos de eventos de actividad para controlar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: activity_event_schema_definitions`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `ActivityEventSchemaDefinitions` — `src/modules/telemetry/entities/activity_event_schema_definitions.entity.ts`
-- **Resumen:** 14 columnas · 5 índices · 5 FK salientes · 2 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 5 índices · 5 FK salientes · 2 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -237,6 +242,7 @@ Especifica estructura y campos permitidos de eventos de actividad para controlar
 | POST /telemetry/event-schemas | CREA | DIRECTA |
 | POST /telemetry/event-schemas | LEE | DIRECTA |
 | POST /telemetry/funnels | LEE | DIRECTA |
+| POST /telemetry/retention/purge | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -345,7 +351,7 @@ Conserva contexto técnico del cliente —como plataforma y versión— para int
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: client_contexts`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `ClientContexts` — `src/modules/telemetry/entities/client_contexts.entity.ts`
-- **Resumen:** 20 columnas · 9 índices · 9 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 20 columnas · 9 índices · 9 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -405,9 +411,99 @@ Conserva contexto técnico del cliente —como plataforma y versión— para int
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/analytics/devices | LEE | POR_SQL |
 | GET /admin/analytics/pipeline-health | LEE | POR_SQL |
 | POST /telemetry/client-contexts | CREA | DIRECTA |
 | POST /telemetry/web-vitals | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### client_error_events
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
+- **Entidad del ORM:** `ClientErrorEvents` — `src/modules/telemetry/entities/client_error_events.entity.ts`
+- **Resumen:** 23 columnas · 8 índices · 4 FK salientes · 0 entrantes · 9 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/telemetry/entities/client_error_events.entity.ts:12`)_ | coincide |
+| 2 | `received_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 3 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 4 | `portal_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `actor_tenant_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 6 | `user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 7 | `session_id` | `uuid` | Clave foránea → iam.sessions.id; Opcional | _sin dato_ | coincide |
+| 8 | `route_template` | `varchar(300)` | Opcional | _sin dato_ | coincide |
+| 9 | `fingerprint` | `varchar(32)` | Obligatoria | _sin dato_ | coincide |
+| 10 | `error_class_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `error_type` | `varchar(120)` | Obligatoria | _sin dato_ | coincide |
+| 12 | `sanitized_message` | `varchar(500)` | Opcional | _sin dato_ | coincide |
+| 13 | `http_method` | `varchar(8)` | Opcional | _sin dato_ | coincide |
+| 14 | `api_route_template` | `varchar(300)` | Opcional | _sin dato_ | coincide |
+| 15 | `http_status` | `smallint` | Opcional | _sin dato_ | coincide |
+| 16 | `api_error_code` | `varchar(60)` | Opcional | _sin dato_ | coincide |
+| 17 | `request_id` | `varchar(80)` | Opcional | _sin dato_ | coincide |
+| 18 | `support_code` | `varchar(40)` | Opcional | _sin dato_ | coincide |
+| 19 | `app_version` | `varchar(40)` | Obligatoria | _sin dato_ | coincide |
+| 20 | `build_id` | `varchar(40)` | Opcional | _sin dato_ | coincide |
+| 21 | `screen_size` | `varchar(12)` | Opcional | _sin dato_ | coincide |
+| 22 | `is_online` | `boolean` | Opcional | _sin dato_ | coincide |
+| 23 | `suppressed_count` | `integer = 0` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | portal_type_concept_id | terminology.catalog_concepts (id) | fk_client_error_events_portal_type_concept_id |
+| hacia | user_id | iam.users (id) | fk_client_error_events_user_id |
+| hacia | session_id | iam.sessions (id) | fk_client_error_events_session_id |
+| hacia | error_class_concept_id | terminology.catalog_concepts (id) | fk_client_error_events_error_class_concept_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_client_error_events_received_at` | no | ("received_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_client_error_events_fingerprint_received_at` | no | fingerprint, received_at | _sin uso detectado estáticamente_ |
+| `ix_client_error_events_route_template_received_at` | no | route_template, received_at | _sin uso detectado estáticamente_ |
+| `ix_client_error_events_request_id` | no | request_id | _sin uso detectado estáticamente_ |
+| `ix_client_error_events_portal_type_concept_id` | no | portal_type_concept_id | Soporta la clave foránea fk_client_error_events_portal_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_client_error_events_error_class_concept_id` | no | error_class_concept_id | Soporta la clave foránea fk_client_error_events_error_class_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_client_error_events_user_id` | no | user_id | Soporta la clave foránea fk_client_error_events_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_client_error_events_session_id` | no | session_id | Soporta la clave foránea fk_client_error_events_session_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /admin/analytics/errors | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints/{fingerprint} | LEE | POR_SQL |
+| GET /admin/analytics/errors/routes-not-found | LEE | POR_SQL |
+| GET /admin/analytics/parts | LEE | POR_SQL |
+| GET /admin/analytics/parts/{routeCode} | LEE | POR_SQL |
+| POST /telemetry/client-errors | CREA | POR_SQL |
+| POST /telemetry/retention/purge | BORRA | POR_SQL |
+| POST /telemetry/retention/purge | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -432,7 +528,7 @@ Registra conversiones de producto o negocio para analizar resultados de recorrid
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: conversion_events`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `ConversionEvents` — `src/modules/telemetry/entities/conversion_events.entity.ts`
-- **Resumen:** 8 columnas · 4 índices · 4 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 8 columnas · 4 índices · 4 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -472,6 +568,7 @@ Registra conversiones de producto o negocio para analizar resultados de recorrid
 | GET /admin/analytics/funnels/{funnelId}/report | LEE | POR_SQL |
 | POST /telemetry/conversion-events | CREA | DIRECTA |
 | POST /telemetry/conversion-events | LEE | DIRECTA |
+| POST /telemetry/retention/purge | ACTUALIZA | POR_SQL |
 
 #### Gobierno
 
@@ -637,7 +734,7 @@ Agrupa actividad de una sesión para reconstruir recorridos por aplicaciones y f
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: session_journeys`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `SessionJourneys` — `src/modules/telemetry/entities/session_journeys.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 3 entrantes · 13 operaciones
+- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 3 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -687,15 +784,17 @@ Agrupa actividad de una sesión para reconstruir recorridos por aplicaciones y f
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /admin/analytics/funnels/{funnelId}/report | LEE | POR_SQL |
+| GET /admin/analytics/parts | LEE | POR_SQL |
+| GET /admin/analytics/parts/{routeCode} | LEE | POR_SQL |
 | GET /admin/analytics/sessions | LEE | POR_SQL |
 | GET /admin/analytics/sessions/{id} | LEE | POR_SQL |
 | GET /admin/analytics/web-vitals | LEE | POR_SQL |
-| POST /telemetry/activity-events | ACTUALIZA | POR_TIPO |
 | POST /telemetry/activity-events | CREA | DIRECTA |
 | POST /telemetry/activity-events | LEE | DIRECTA |
 | POST /telemetry/client-contexts | CREA | DIRECTA |
 | POST /telemetry/client-contexts | LEE | DIRECTA |
 | POST /telemetry/conversion-events | LEE | DIRECTA |
+| POST /telemetry/retention/purge | ACTUALIZA | POR_SQL |
 | POST /telemetry/session-journeys/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /telemetry/session-journeys/{id}/close | LEE | DIRECTA |
 | POST /telemetry/web-vitals | LEE | DIRECTA |
@@ -934,7 +1033,7 @@ Define propósitos de medición de actividad para distinguir analítica opcional
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: tracking_purpose_definitions; BIZ note`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `TrackingPurposeDefinitions` — `src/modules/telemetry/entities/tracking_purpose_definitions.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 4 FK salientes · 4 entrantes · 5 operaciones
+- **Resumen:** 15 columnas · 5 índices · 4 FK salientes · 4 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -989,8 +1088,10 @@ Define propósitos de medición de actividad para distinguir analítica opcional
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /telemetry/activity-events | LEE | DIRECTA |
 | POST /telemetry/event-schemas | LEE | DIRECTA |
 | POST /telemetry/funnels | LEE | DIRECTA |
+| POST /telemetry/retention/purge | LEE | POR_SQL |
 | POST /telemetry/tracking-consents | LEE | DIRECTA |
 | POST /telemetry/tracking-purposes | CREA | DIRECTA |
 | POST /telemetry/tracking-purposes | LEE | DIRECTA |
@@ -1018,7 +1119,7 @@ Detalla propiedades tipadas asociadas a eventos de actividad para preservar cont
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: user_activity_event_properties`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `UserActivityEventProperties` — `src/modules/telemetry/entities/user_activity_event_properties.entity.ts`
-- **Resumen:** 12 columnas · 4 índices · 4 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 12 columnas · 4 índices · 4 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1059,8 +1160,12 @@ Detalla propiedades tipadas asociadas a eventos de actividad para preservar cont
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/analytics/heatmap | LEE | POR_SQL |
+| GET /admin/analytics/parts | LEE | POR_SQL |
+| GET /admin/analytics/parts/{routeCode} | LEE | POR_SQL |
 | GET /admin/analytics/sessions/{id} | LEE | POR_SQL |
 | POST /telemetry/activity-events | CREA | DIRECTA |
+| POST /telemetry/retention/purge | BORRA | POR_SQL |
 
 #### Gobierno
 
@@ -1085,7 +1190,7 @@ Conserva eventos de uso para análisis de producto y comercial sujeto a propósi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: user_activity_events; BIZ note`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `UserActivityEvents` — `src/modules/telemetry/entities/user_activity_events.entity.ts`
-- **Resumen:** 19 columnas · 12 índices · 9 FK salientes · 5 entrantes · 12 operaciones
+- **Resumen:** 19 columnas · 16 índices · 9 FK salientes · 5 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -1145,14 +1250,29 @@ Conserva eventos de uso para análisis de producto y comercial sujeto a propósi
 | `ix_user_activity_events_consent_snapshot_id` | no | consent_snapshot_id | _sin uso detectado estáticamente_ |
 | `ix_user_activity_events_security_audit_event_id` | no | security_audit_event_id | Soporta la clave foránea fk_user_activity_events_security_audit_event_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_activity_events_tenant_id_created_at` | no | tenant_id, ("created_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_user_activity_events_occurred_at` | no | occurred_at | _sin uso detectado estáticamente_ |
+| `ix_user_activity_events_route_template_occurred_at` | no | route_template, occurred_at | _sin uso detectado estáticamente_ |
+| `ux_user_activity_events_anonymous_idempotency` | sí | (COALESCE(tenant_id, '00000000-0000-0000-0000-000000000000'::uuid)), event_idempotency_key donde WHERE user_id IS NULL | Garantiza que no se repita la combinación (event_idempotency_key) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE user_id IS NULL _(ESTRUCTURAL)_ |
+| `ix_user_activity_events_user_idempotency` | no | user_id, event_idempotency_key donde WHERE user_id IS NOT NULL | Soporta la clave foránea fk_user_activity_events_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE user_id IS NOT NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `brin_user_activity_events_created_at` | no | created_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_user_activity_events_anonymous_idempotency` | UNIQUE INDEX | UNIQUE INDEX (COALESCE(tenant_id, '00000000-0000-0000-0000-000000000000'::uuid), "event_idempotency_key") WHERE user_id IS NULL |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/analytics/devices | LEE | POR_SQL |
+| GET /admin/analytics/errors | LEE | POR_SQL |
 | GET /admin/analytics/funnels/{funnelId}/report | LEE | POR_SQL |
+| GET /admin/analytics/heatmap | LEE | POR_SQL |
 | GET /admin/analytics/overview | LEE | POR_SQL |
+| GET /admin/analytics/parts | LEE | POR_SQL |
+| GET /admin/analytics/parts/{routeCode} | LEE | POR_SQL |
 | GET /admin/analytics/pipeline-health | LEE | POR_SQL |
 | GET /admin/analytics/sessions | LEE | POR_SQL |
 | GET /admin/analytics/sessions/{id} | LEE | POR_SQL |
@@ -1161,6 +1281,8 @@ Conserva eventos de uso para análisis de producto y comercial sujeto a propósi
 | POST /telemetry/activity-events | CREA | DIRECTA |
 | POST /telemetry/activity-events | LEE | DIRECTA |
 | POST /telemetry/conversion-events | LEE | DIRECTA |
+| POST /telemetry/retention/purge | BORRA | POR_SQL |
+| POST /telemetry/retention/purge | LEE | POR_SQL |
 | POST /telemetry/session-journeys/{id}/close | LEE | DIRECTA |
 | POST /telemetry/web-vitals | LEE | DIRECTA |
 
@@ -1187,7 +1309,7 @@ Registra métricas de rendimiento percibido de páginas para detectar degradaci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_28_telemetry.puml: web_vitals`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_28_telemetry.puml` · **DDL:** `SQL/28_telemetry/02_tables.sql`
 - **Entidad del ORM:** `WebVitals` — `src/modules/telemetry/entities/web_vitals.entity.ts`
-- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1238,7 +1360,10 @@ Registra métricas de rendimiento percibido de páginas para detectar degradaci�
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/analytics/parts | LEE | POR_SQL |
+| GET /admin/analytics/parts/{routeCode} | LEE | POR_SQL |
 | GET /admin/analytics/web-vitals | LEE | POR_SQL |
+| POST /telemetry/retention/purge | ACTUALIZA | POR_SQL |
 | POST /telemetry/web-vitals | CREA | DIRECTA |
 
 #### Gobierno

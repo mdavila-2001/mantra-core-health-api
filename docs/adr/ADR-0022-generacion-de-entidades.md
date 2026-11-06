@@ -39,6 +39,14 @@ generadores, corriendo en este orden:**
    la unión de lo generado más los exports cuyo archivo siga existiendo — así las
    entidades que el `.puml` no materializa (las 6 tablas fantasma de la deriva
    conocida) no desaparecen del ORM en silencio.
+   Desde model#110 (01/11/2026) además **fusiona con la entidad existente**: conserva
+   lo escrito a mano que el `.puml` no contradice (inicializadores, tipo TS de la
+   propiedad —uniones, enums, alias—, imports, opciones del decorador que no
+   maneja, `unique` respaldado por una UK del `.puml`, opcionalidad y orden). Si una
+   tabla ya está mapeada por otra clase u otro archivo, actualiza esa entidad en
+   lugar de crear una nueva. Donde el `.puml` contradice a la entidad (nulabilidad,
+   tipo de columna, `unique`, default), manda el `.puml` y la corrida **lista cada
+   contradicción** al final: si la entidad tenía razón, el cambio va al `.puml`.
 2. **Formato** — `npx prettier --write "src/modules/**/entities/**/*.ts"`. El
    generador emite decoradores en una línea; Prettier los envuelve. Sin este paso
    el diff miente.

@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DIR } from '../../modules/directory/directory.concepts';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { PROVIDER_ACCOUNTS } from './provider-accounts.catalog';
+import { SEED_ACTOR_ID } from './seed-actor';
 
 const INSURER = 'aseguradora.demo@alovida.test';
 const PHARMACY = 'farmacia.demo@alovida.test';
@@ -53,9 +54,10 @@ function build(memberships: Record<string, string> = {}) {
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const users = {
-    createUser: mockFn((input: any) =>
-      Promise.resolve({ id: userId(input.email) }),
-    ),
+    createUser: mockFn((input: any) => {
+      created.push({ entity: 'cuenta', data: { email: input.email } });
+      return Promise.resolve({ id: userId(input.email) });
+    }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ProviderAccountsSeedService(
@@ -79,6 +81,8 @@ function build(memberships: Record<string, string> = {}) {
       );
     },
     row: (email: string) => rows.get(userId(email)),
+    /** Lo escrito, en orden: el actor semilla tiene que ir antes. */
+    created,
   };
 }
 
@@ -96,6 +100,21 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
 
     expect(roleOf(INSURER)).toBe(DIR.ROLE_ADMIN);
     expect(roleOf(PHARMACY)).toBe(DIR.ROLE_STAFF);
+  });
+
+  it('en una base nueva materializa el actor semilla antes de la primera cuenta (api#1230)', async () => {
+    const { service, created } = build();
+
+    await service.run('demo-password', 'development');
+
+    expect(created[0]).toMatchObject({
+      entity: 'Users',
+      data: { id: SEED_ACTOR_ID },
+    });
+    expect(created.filter((c) => c.entity === 'Users')).toHaveLength(1);
+    expect(created.filter((c) => c.entity === 'cuenta')).toHaveLength(
+      PROVIDER_ACCOUNTS.length,
+    );
   });
 
   it('una base ya sembrada sube a la aseguradora de STAFF a ADMIN', async () => {

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
 import { PractitionerVerificationDto } from '../../profiles/presentation/dto/practitioner-verification.dto';
+import { DirectMessageDto } from './direct-message.dto';
 import {
   IsInt,
   IsOptional,
@@ -162,7 +163,7 @@ export class SearchChatContactsRequestDto {
   @IsInt()
   @Min(1)
   @Max(20)
-  limit = 10;
+  limit: number = 10;
 }
 
 /** Persona que se puede elegir para iniciar un chat autenticado. */
@@ -277,53 +278,6 @@ export class ConversationPageDto {
    */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
-}
-
-/** Un mensaje directo. */
-export class DirectMessageDto {
-  /** Identificador del mensaje. */
-  @ApiProperty({ format: 'uuid' })
-  id!: string;
-
-  /** Conversación a la que pertenece. */
-  @ApiProperty({ format: 'uuid' })
-  conversationId!: string;
-
-  /** Perfil que lo envió. */
-  @ApiProperty({ format: 'uuid' })
-  senderProfileId!: string;
-
-  /** Mensaje al que responde, si responde a alguno. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  replyToMessageId?: string | null;
-
-  /** Concept id del tipo de contenido. */
-  @ApiProperty({ format: 'uuid' })
-  contentTypeConceptId!: string;
-
-  /** Cuerpo del mensaje. */
-  @ApiPropertyOptional()
-  bodyText?: string | null;
-
-  /** Adjunto en `common.files`. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  attachmentFileId?: string | null;
-
-  /** Si fue editado (F4.5). */
-  @ApiPropertyOptional()
-  isEdited?: boolean | null;
-
-  /**
-   * Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con
-   * `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se
-   * eliminó este mensaje» en su lugar y no un hueco que descoloca las citas.
-   */
-  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
-  deletedAt?: Date | null;
-
-  /** Cuándo se envió. */
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  sentAt?: Date | null;
 }
 
 /** Página de mensajes de una conversación. */

@@ -18,7 +18,7 @@ declara su desvío del recorrido `.puml → SQL → BD → ORM`.
   find src/modules/medical_groups -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **1 controller, 8 rutas HTTP, 2 entidades y 1 servicio**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **1 controller, 14 rutas HTTP, 2 entidades y 1 servicio**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -29,9 +29,15 @@ Entidades (`tableName`, 2 de 2 archivos `*.entity.ts`): `group_members`, `groups
 | Método y ruta                                               | Acceso                  | Controller       |
 | ----------------------------------------------------------- | ----------------------- | ---------------- |
 | `GET /medical-groups`                                       | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `GET /medical-groups/eligible-members`                      | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `GET /medical-groups/patients/:patientProfileId/conditions` | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `GET /medical-groups/:id`                                   | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `POST /medical-groups`                                      | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `PATCH /medical-groups/:id`                                 | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `DELETE /medical-groups/:id`                                | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `POST /medical-groups/:id/members`                          | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `PATCH /medical-groups/:id/members/:memberId`               | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `DELETE /medical-groups/:id/members/:memberId`              | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `POST /medical-groups/:id/members/:memberId/respond`        | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `POST /medical-groups/:id/reschedule-requests`              | PRACTITIONER, CLINICIAN | `medical-groups` |
 | `POST /medical-groups/:id/reschedule-requests/respond`      | PRACTITIONER, CLINICIAN | `medical-groups` |
@@ -42,16 +48,21 @@ Entidades (`tableName`, 2 de 2 archivos `*.entity.ts`): `group_members`, `groups
 Todos exigen rol `PRACTITIONER` o `CLINICIAN` y una cuenta con perfil
 profesional.
 
-| Método  | Ruta                                                    | Qué hace                                                   |
-| ------- | ------------------------------------------------------- | ---------------------------------------------------------- |
-| `GET`   | `/medical-groups`                                       | Lista por pestaña: `historico`, `enviadas` o `recibidas`.  |
-| `GET`   | `/medical-groups/patients/:patientProfileId/conditions` | Diagnósticos del paciente para el selector del formulario. |
-| `GET`   | `/medical-groups/:id`                                   | Consulta un grupo (formulario de sólo lectura).            |
-| `POST`  | `/medical-groups`                                       | Crea un grupo e invita al equipo.                          |
-| `POST`  | `/medical-groups/:id/members/:memberId/respond`         | El invitado acepta o rechaza su cargo.                     |
-| `POST`  | `/medical-groups/:id/reschedule-requests`               | Propone un cambio de horario.                              |
-| `POST`  | `/medical-groups/:id/reschedule-requests/respond`       | El creador resuelve el cambio propuesto.                   |
-| `PATCH` | `/medical-groups/:id/exercise-notes`                    | Carga o corrige las notas del procedimiento.               |
+| Método   | Ruta                                                    | Qué hace                                                   |
+| -------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| `GET`    | `/medical-groups`                                       | Lista por pestaña: `historico`, `enviadas` o `recibidas`.  |
+| `GET`    | `/medical-groups/patients/:patientProfileId/conditions` | Diagnósticos del paciente para el selector del formulario. |
+| `GET`    | `/medical-groups/:id`                                   | Consulta un grupo (formulario de sólo lectura).            |
+| `POST`   | `/medical-groups`                                       | Crea un grupo e invita al equipo.                          |
+| `PATCH`  | `/medical-groups/:id`                                   | El creador corrige el lugar o las notas.                   |
+| `DELETE` | `/medical-groups/:id`                                   | El creador elimina el grupo y su equipo.                   |
+| `POST`   | `/medical-groups/:id/members`                           | El creador suma un cargo; queda sin responder.             |
+| `PATCH`  | `/medical-groups/:id/members/:memberId`                 | El creador cambia cargo, pago o términos.                  |
+| `DELETE` | `/medical-groups/:id/members/:memberId`                 | El creador quita un cargo.                                 |
+| `POST`   | `/medical-groups/:id/members/:memberId/respond`         | El invitado acepta o rechaza su cargo.                     |
+| `POST`   | `/medical-groups/:id/reschedule-requests`               | Propone un cambio de horario.                              |
+| `POST`   | `/medical-groups/:id/reschedule-requests/respond`       | El creador resuelve el cambio propuesto.                   |
+| `PATCH`  | `/medical-groups/:id/exercise-notes`                    | Carga o corrige las notas del procedimiento.               |
 
 ## Ciclo de vida
 
@@ -64,6 +75,13 @@ profesional.
 
 - Cuando el propio creador propone el cambio de horario, se aplica directo: no
   tiene a quién pedirle aprobación.
+- Editar, eliminar y cambiar el equipo (`PATCH`/`DELETE` del grupo y de sus
+  cargos, `POST …/members`) son del **creador** y sólo antes de la cita: un grupo
+  ya realizado o cerrado responde `422`. Quien integra el equipo y no lo creó
+  recibe `403`; quien no lo ve, `404`.
+- Cambiar el cargo, el pago o los términos de alguien vuelve su invitación a
+  `PENDING` y el grupo a `PENDING_TEAM`; quitar al último pendiente lo deja en
+  `SCHEDULED`. El cargo del creador no se modifica ni se quita.
 - Las notas del procedimiento sólo se cargan **después** de la cita y dentro de
   una ventana de 7 días. Pasada la ventana el grupo se cierra y responde `422`.
 

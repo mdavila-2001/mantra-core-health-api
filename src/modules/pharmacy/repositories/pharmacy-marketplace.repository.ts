@@ -4,6 +4,14 @@ import { CONCEPTS } from '../../../common';
 import { COMM } from '../../community/community.concepts';
 import { PHARM } from '../pharmacy.concepts';
 import { siteProductAvailabilitySql } from '../../pharmacy_inventory/domain/site-product-availability';
+import { VADEMECUM_CODE_SYSTEM } from '../pharmacy-catalog.properties';
+
+/** A vademécum medication: what the showcase can show without an offer. */
+export interface VademecumConcept {
+  conceptId: string;
+  atcCode: string;
+  genericName: string;
+}
 
 /** Una oferta publicada: un producto de una farmacia, con precio y stock. */
 export interface PublishedOffer {
@@ -35,12 +43,12 @@ export interface PublishedOffer {
   price: string;
   /** Código de moneda. */
   currency: string;
-  /** Unidades disponibles hoy (0 si la sede no lleva lotes y no declaró conteo). */
+  /** Unidades disponibles hoy (0 si no tiene posición y no se declaró conteo). */
   availableQuantity: number;
   /**
    * Si la sede lo tiene hoy, según la regla única de existencias
-   * (`siteProductAvailabilitySql`): lotes si la sede los lleva, lo declarado
-   * en el catálogo si no, nunca lo marcado «no tengo».
+   * (`siteProductAvailabilitySql`): lotes si el producto tiene posición en la
+   * sede, lo declarado en el catálogo si no, nunca lo marcado «no tengo».
    */
   inStock: boolean;
   /** La sede entrega a domicilio. */
@@ -80,8 +88,9 @@ export interface PublishedOffer {
 @Injectable()
 export class PharmacyMarketplaceRepository {
   /**
-   * Todas las ofertas publicadas, opcionalmente acotadas por texto o por
-   * medicamento.
+   * Todas las ofertas publicadas, opcionalmente acotadas por medicamento.
+   * El texto ya no se filtra acá: lo resuelve `search/` en memoria, con
+   * tildes, usos terapéuticos y errores de tipeo que `ILIKE` no ve.
    *
    * Es una sola consulta y no una por vertical: el catálogo publicado de todo
    * el país cabe holgadamente en memoria —son productos, no eventos—, y
@@ -89,16 +98,15 @@ export class PharmacyMarketplaceRepository {
    * marcas y las presentaciones de cada tarjeta.
    *
    * @param em - Contexto de persistencia.
-   * @param filter - Texto libre y/o concepto del vademécum.
+   * @param filter - Concepto del vademécum, opcional.
    * @returns Las ofertas crudas, sin agrupar y sin distancias.
    */
   async findPublishedOffers(
     em: EntityManager,
-    filter: { texto?: string; conceptId?: string },
+    filter: { conceptId?: string },
   ): Promise<PublishedOffer[]> {
-    const text = filter.texto?.trim();
     const availability = siteProductAvailabilitySql();
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       Array<{
         concept_id: string;
         atc_code: string;
@@ -185,21 +193,13 @@ export class PharmacyMarketplaceRepository {
                  ORDER BY d.preferred DESC
                  LIMIT 1
               ) es ON true
-    -- La regla única de disponibilidad por sede (A1): lotes si la sede los
-    -- lleva, lo declarado en el catálogo si no.
+    -- La regla única de disponibilidad por sede (A1): lotes si el producto
+    -- tiene posición en la sede, lo declarado en el catálogo si no.
     LEFT JOIN (${availability.sql}) av
            ON av.site_id = site.id
           AND av.product_id = prod.id
         WHERE prod.status_concept_id = ?
           AND (CAST(? AS uuid) IS NULL OR prod.medication_concept_id = CAST(? AS uuid))
-          AND (
-                CAST(? AS text) IS NULL
-             OR med.display   ILIKE '%' || CAST(? AS text) || '%'
-             OR es.value      ILIKE '%' || CAST(? AS text) || '%'
-             OR med.code      ILIKE '%' || CAST(? AS text) || '%'
-             OR prod.brand_name   ILIKE '%' || CAST(? AS text) || '%'
-             OR prod.generic_name ILIKE '%' || CAST(? AS text) || '%'
-          )
         ORDER BY prod.id, (av.product_id IS NOT NULL) DESC,
                  av.available_quantity DESC NULLS LAST`,
       [
@@ -214,12 +214,6 @@ export class PharmacyMarketplaceRepository {
         PHARM.PRODUCT_ACTIVE,
         filter.conceptId ?? null,
         filter.conceptId ?? null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
-        text || null,
       ],
       'all',
     );
@@ -244,6 +238,51 @@ export class PharmacyMarketplaceRepository {
       homeDelivery: row.home_delivery === true,
       pickup: row.pickup === true,
       requiresPrescription: row.requires_prescription === true,
+    }));
+  }
+
+  /**
+   * Every medication of the vademécum (the prescription's catalog), with its
+   * ATC code and Spanish name. The showcase searches it too, so «dolor
+   * abdominal» finds the medication even when no pharmacy publishes it yet.
+   *
+   * @param em - Persistence context.
+   */
+  async findVademecum(em: EntityManager): Promise<VademecumConcept[]> {
+    const rows = await em.execute<
+      Array<{ concept_id: string; atc_code: string; generic_name: string }>
+    >(
+      `SELECT c.id AS concept_id,
+              c.code AS atc_code,
+              COALESCE(es.value, c.display) AS generic_name
+         FROM terminology.catalog_concepts c
+         JOIN terminology.code_system_versions v ON v.id = c.code_system_version_id
+         JOIN terminology.code_systems s ON s.id = v.code_system_id
+    LEFT JOIN LATERAL (
+                SELECT d.value
+                  FROM terminology.concept_designations d
+                  JOIN terminology.catalog_concepts lang
+                    ON lang.id = d.language_concept_id AND lang.code = 'ES'
+                 WHERE d.concept_id = c.id
+                 ORDER BY d.preferred DESC
+                 LIMIT 1
+              ) es ON true
+        WHERE s.internal_code = ?
+        -- Most LINAME presentations first: when a substance has two ATC codes
+        -- (ibuprofen M01AE01 ×2, C01EB16 ×1) the common one comes first.
+        ORDER BY (SELECT jsonb_array_length(p.value_json)
+                    FROM terminology.concept_properties p
+                   WHERE p.concept_id = c.id
+                     AND p.property_code = 'liname_presentations'
+                     AND jsonb_typeof(p.value_json) = 'array') DESC NULLS LAST,
+                 c.code`,
+      [VADEMECUM_CODE_SYSTEM],
+      'all',
+    );
+    return rows.map((row) => ({
+      conceptId: row.concept_id,
+      atcCode: row.atc_code,
+      genericName: row.generic_name,
     }));
   }
 }

@@ -7,6 +7,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -32,6 +33,7 @@ import { FormInstanceOriginValidator } from '../../forms/services/form-instance-
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
+import { assertValidToNotInPast } from './prescription-valid-to';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
@@ -48,6 +50,8 @@ import {
 const RX_AUDIT_ENTITY = 'medication_request';
 /** Clave de la tabla `audit.medication_requests_history` en el registro (§2). */
 const RX_HISTORY_ENTITY = 'medication_requests';
+const NOT_YOUR_RX =
+  'Una receta sólo la modifica su prescriptor: no se edita lo que recetó otro profesional.';
 
 /**
  * UC-08-10 (prescribir) y UC-08-11 (administrar/registrar) de medicación, más la
@@ -59,12 +63,11 @@ const RX_HISTORY_ENTITY = 'medication_requests';
  *                                       └─ replace ────▶ REPLACED (+ nueva DRAFT)
  *                                       renew ─────────▶ nueva DRAFT (original intacta)
  *
- * `prescribe` crea la receta en DRAFT (editable/eliminable por el autor). Al
+ * `prescribe` crea la receta en DRAFT (editable por el autor, y solo por él). Al
  * emitir (`issue`) se sella el contenido: ningún estado ≥ ISSUED admite editar
  * ítems clínicos. Corregir una receta emitida = `invalidate`/`replace` + nueva
- * receta relacionada; renovar = `renew` (nueva receta copiando datos). No hay
- * PATCH/DELETE genérico: solo comandos de negocio. `medication_records` no es el
- * ledger de inventario de farmacia.
+ * receta relacionada; renovar = `renew`. Solo comandos de negocio, sin PATCH/
+ * DELETE genérico. `medication_records` no es el ledger de inventario.
  */
 @Injectable()
 export class MedicationsService {
@@ -99,13 +102,10 @@ export class MedicationsService {
   }
 
   /**
-   * CL-02 (BR-10): el prescriptor sale de la sesión, nunca del cuerpo.
-   *
-   * El DTO conserva `prescriberProfileId` por compatibilidad, pero si declara
-   * un perfil distinto del de la sesión es 403: nadie prescribe en nombre de
-   * otro profesional. Sin perfil profesional en la sesión tampoco se prescribe
-   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN` pasa
-   * con lo que declare, igual que en `assertFirmaElPrescriptor`.
+   * CL-02 (BR-10): el prescriptor sale de la sesión, nunca del cuerpo. Un
+   * perfil distinto del de la sesión es 403, y sin perfil profesional en la
+   * sesión tampoco se prescribe (saldría sin médico ni matrícula).
+   * `SUPERADMIN` global pasa con lo que declare.
    *
    * @param declared - Lo que trajo el cuerpo, si trajo algo.
    * @param actor - La sesión que prescribe.
@@ -115,7 +115,9 @@ export class MedicationsService {
     declared: string | undefined,
     actor: AuthenticatedUser,
   ): string {
-    if (actor.roles.includes('SUPERADMIN')) {
+    // Prescribir por otro es un atajo de plataforma: sólo el `SUPERADMIN`
+    // global (#1241); el acotado prescribe como cualquiera.
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) {
       const chosen = declared ?? actor.practitionerProfileId;
       if (!chosen) {
         throw new ForbiddenException(
@@ -267,43 +269,43 @@ export class MedicationsService {
    * MCH-007: carga la receta y exige poder escribir en la historia de su
    * paciente. Todas las mutaciones de receta llegan con el id en la ruta y sin
    * paciente, así que el guard no las puede evaluar: el paciente sale de la
-   * fila, nunca de la petición.
+   * fila, nunca de la petición. Regla (c): nadie edita lo que recetó otro
+   * profesional (`ownOnly`; firmar tiene su propia comprobación, más abajo).
    */
   private async loadRequestForWrite(
     tx: EntityManager,
     requestId: string,
     actor: AuthenticatedUser,
+    ownOnly = true,
   ): Promise<MedicationRequests> {
     const request = await this.loadRequestOrThrow(tx, requestId);
     await this.clinicalRead.assertCanWriteHistory(
       request.patientProfileId,
       actor,
     );
+    // Sin prescriptor ni creador no hay quién la reclame.
+    if (ownOnly && (request.prescriberProfileId || request.createdByUserId)) {
+      this.assertPrescriberSignature(request, actor, NOT_YOUR_RX);
+    }
     return request;
   }
 
   /**
-   * MCH-007: una receta la firma su prescriptor. Poder escribir en la historia
-   * no es poder firmar por otro profesional — la misma regla que
-   * `ChartNotesService.assertFirmaConPerfilPropio` aplica a las notas.
-   *
-   * Si la receta declara prescriptor, firma ese perfil. Si no lo declara (el
-   * campo es opcional al prescribir), firma quien redactó el borrador.
-   * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   * MCH-007: una receta la firma su prescriptor (poder escribir en la historia
+   * no es poder firmar por otro). Es el perfil declarado o, si no declara
+   * (campo opcional), quien redactó el borrador. `SUPERADMIN` global pasa.
    */
   private assertPrescriberSignature(
     request: MedicationRequests,
     actor: AuthenticatedUser,
+    message = 'Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional.',
   ): void {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Por otro profesional: sólo el `SUPERADMIN` global (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
     const isTheirs = request.prescriberProfileId
       ? request.prescriberProfileId === actor.practitionerProfileId
       : request.createdByUserId === actor.id;
-    if (!isTheirs) {
-      throw new ForbiddenException(
-        'Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional.',
-      );
-    }
+    if (!isTheirs) throw new ForbiddenException(message);
   }
 
   /**
@@ -364,6 +366,11 @@ export class MedicationsService {
       const prescriberProfileId = this.resolvePrescriber(
         dto.prescriberProfileId,
         actor,
+      );
+      // Una receta que nacería vencida se rechaza antes de escribir nada.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
       );
       if (dto.indicationConditionId !== undefined) {
         await this.assertIndicationBelongsToPatient(
@@ -461,7 +468,12 @@ export class MedicationsService {
         request.unitConceptId = dto.unitConceptId;
       if (dto.validFrom !== undefined)
         request.validFrom = new Date(dto.validFrom);
-      if (dto.validTo !== undefined) request.validTo = new Date(dto.validTo);
+      if (dto.validTo !== undefined) {
+        assertValidToNotInPast(new Date(dto.validTo), new Date(), {
+          requestId,
+        });
+        request.validTo = new Date(dto.validTo);
+      }
       if (dto.patientInstructionsText !== undefined)
         request.patientInstructionsText = dto.patientInstructionsText;
       if (dto.indicationConditionId !== undefined) {
@@ -505,7 +517,12 @@ export class MedicationsService {
       'Signing medication request',
     );
     return this.em.transactional(async (tx) => {
-      const request = await this.loadRequestForWrite(tx, requestId, actor);
+      const request = await this.loadRequestForWrite(
+        tx,
+        requestId,
+        actor,
+        false,
+      );
       if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_DRAFT) {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede firmarse antes de emitirse',
@@ -587,6 +604,9 @@ export class MedicationsService {
           );
         }
       }
+
+      // Un borrador cuyo fin de vigencia pasó mientras esperaba no se emite.
+      assertValidToNotInPast(request.validTo, new Date(), { requestId });
 
       if (!request.signedAt) {
         const signatureRequired =
@@ -714,6 +734,14 @@ export class MedicationsService {
         );
       }
 
+      // El reemplazo hereda el fin de vigencia si no trae otro: tampoco nace
+      // vencido.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : original.validTo,
+        new Date(),
+        { requestId },
+      );
+
       const replacement = this.requestsRepo.create(tx, {
         custodianTenantId: original.custodianTenantId,
         patientProfileId: original.patientProfileId,
@@ -800,6 +828,12 @@ export class MedicationsService {
           ClinicalErrorReason.MEDICATION_REQUEST_NOT_RENEWABLE,
         );
       }
+
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
+        { requestId },
+      );
 
       const renewal = this.requestsRepo.create(tx, {
         custodianTenantId: source.custodianTenantId,

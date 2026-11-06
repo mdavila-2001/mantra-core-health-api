@@ -4,37 +4,18 @@ import {
 } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import {
+  ServiceRequestComponentDto,
+  ServiceRequestImagingDto,
+} from '../../clinical/dto/service-request-detail.dto';
 import { IsDate, IsUUID } from 'class-validator';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
 } from '../../clinical/service-request-category';
+import { DiagnosticResultFileDto } from './patient-result-file.dto';
 
-/**
- * Un archivo del informe: lo que se descarga.
- *
- * No transporta el contenido ni una URL firmada. El `fileId` va a
- * `GET /common/files/{id}/content`, que ya resuelve bytes, tipo y nombre y que
- * ya decide si quien pide puede descargarlo. Duplicar acá esa descarga sería
- * una segunda implementación de algo que funciona.
- */
-export class DiagnosticResultFileDto {
-  /** Identificador del enlace informe↔archivo. */
-  @ApiProperty({ format: 'uuid' }) id!: string;
-
-  /** Archivo en `common.files`; se descarga por `/common/files/{id}/content`. */
-  @ApiProperty({ format: 'uuid' }) fileId!: string;
-
-  /** Qué es el archivo dentro del informe (concept id). */
-  @ApiProperty({ format: 'uuid' }) contentRoleConceptId!: string;
-
-  /** Formato de presentación (concept id), si se declaró. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  presentationFormatConceptId?: string;
-
-  /** Posición dentro del informe. */
-  @ApiPropertyOptional() ordinal?: number;
-}
+export { DiagnosticResultFileDto } from './patient-result-file.dto';
 
 /**
  * Un resultado que el paciente puede ver.
@@ -141,11 +122,41 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Identificador de la orden. */
   @ApiProperty({ format: 'uuid' }) id!: string;
 
+  /** Requisición que agrupa lo pedido junto; `null` si se pidió suelto. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  requisitionId!: string | null;
+
+  /** Nombre legible del estudio pedido (castellano si existe). */
+  @ApiProperty({ nullable: true, type: String })
+  codeDisplay!: string | null;
+
+  /** Muestra indicada (concept id), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  specimenTypeConceptId!: string | null;
+
+  /** Nombre de la muestra indicada, o `null`. */
+  @ApiProperty({ nullable: true, type: String })
+  specimenTypeDisplay!: string | null;
+
+  /** Componentes pedidos de un panel, en orden; `[]` si no se especificaron. */
+  @ApiProperty({ type: [ServiceRequestComponentDto] })
+  components!: ServiceRequestComponentDto[];
+
+  /** `true` si el médico marcó componentes (distinto de «ninguno»: el panel completo). */
+  @ApiProperty() componentsSpecified!: boolean;
+
+  /** Detalle de imagen (modalidad, parte del cuerpo, lateralidad, contraste); `null` si no hay. */
+  @ApiProperty({ type: ServiceRequestImagingDto, nullable: true })
+  imaging!: ServiceRequestImagingDto | null;
+
+  /** Resumen legible, igual al de la bandeja del receptor («Hemograma · 3 componentes»). */
+  @ApiProperty() summary!: string;
+
   /** Encuentro en el que se pidió, si se pidió durante uno. */
   @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
 
   /**
-   * El diagnóstico propio para el que se pidió (v4291). Ausente si no se
+   * El diagnóstico propio para el que se pidió (v4292). Ausente si no se
    * indicó. Sólo el id: el portal lo resuelve contra los diagnósticos que el
    * paciente ya ve en su resumen, así que no revela nada que no tenga.
    */

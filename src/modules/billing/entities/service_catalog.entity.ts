@@ -40,6 +40,9 @@ export class ServiceCatalog {
   })
   descriptionText?: string;
 
+  /**
+   * Valor de terms text mantenido por la instancia.
+   */
   @Property({ fieldName: 'terms_text', columnType: 'text', nullable: true })
   termsText?: string;
 

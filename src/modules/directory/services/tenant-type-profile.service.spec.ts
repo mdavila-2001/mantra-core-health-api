@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
+import { DeclaredBranchesService } from './declared-branches.service';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/domain/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
@@ -47,12 +48,16 @@ describe('TenantTypeProfileService', () => {
       create: fn(() => ({ id: 'facility-1' })),
       createSite: fn(() => ({ id: 'site-1' })),
     };
+    const openingHoursRepo = { createShifts: fn(() => []) };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
       diagnosticUnitProvisioning as never,
       addressesRepo as never,
-      branchesRepo as never,
+      new DeclaredBranchesService(
+        branchesRepo as never,
+        openingHoursRepo as never,
+      ),
       medicalFacilitiesRepo as never,
     );
     return {
@@ -63,6 +68,7 @@ describe('TenantTypeProfileService', () => {
       addressesRepo,
       branchesRepo,
       medicalFacilitiesRepo,
+      openingHoursRepo,
       tx: { flush: fn().mockResolvedValue(undefined) } as never,
     };
   }
@@ -814,6 +820,7 @@ describe('TenantTypeProfileService', () => {
           name: 'Casa central',
           latitude: '-17.78',
           longitude: '-63.18',
+          branchCategory: 'head_office',
         }),
       );
       expect(branchesRepo.create).toHaveBeenNthCalledWith(
@@ -825,17 +832,21 @@ describe('TenantTypeProfileService', () => {
           locationUrl: 'https://maps.example/norte',
           latitude: '-17.7',
           longitude: '-63.1',
+          branchCategory: 'branch',
         }),
       );
       // Mismo nombre dos veces: el código no se repite dentro del alta.
       expect(branchesRepo.create).toHaveBeenNthCalledWith(
         3,
         tx,
-        expect.objectContaining({ code: 'SUCURSAL-NORTE-2' }),
+        expect.objectContaining({
+          code: 'SUCURSAL-NORTE-2',
+          branchCategory: 'branch',
+        }),
       );
     });
 
-    it('no registra sucursales de directorio para una unidad de imágenes', async () => {
+    it('registra sólo la sede central de una unidad de imágenes, como casa matriz (v4.2.91)', async () => {
       const { service, branchesRepo, tx } = build();
 
       await service.materializeProfile(
@@ -860,7 +871,20 @@ describe('TenantTypeProfileService', () => {
         'actor-1',
       );
 
-      expect(branchesRepo.create).not.toHaveBeenCalled();
+      // Antes de v4.2.91 imagenología no entraba al registro de sucursales y su
+      // pantalla Sucursales arrancaba vacía; ahora la sede central es la casa matriz.
+      expect(branchesRepo.create).toHaveBeenCalledTimes(1);
+      expect(branchesRepo.create).toHaveBeenCalledWith(
+        tx,
+        expect.objectContaining({
+          tenantId: 'tenant-8',
+          code: 'SEDE-CENTRAL',
+          name: 'Sede central',
+          latitude: '-17.78',
+          longitude: '-63.18',
+          branchCategory: 'head_office',
+        }),
+      );
     });
 
     it('no crea la unidad si DIAGNOSTIC_CENTER no declaró diagnosticUnit', async () => {
@@ -1088,6 +1112,47 @@ describe('TenantTypeProfileService', () => {
       expect(order).toEqual(['create', 'flush', 'site', 'site', 'site']);
     });
 
+    it('suma las sedes declaradas al registro de sucursales: casa central como casa matriz (v4.2.91)', async () => {
+      const { service, branchesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, medicalFacility: facility },
+        'owner-1',
+      );
+
+      const branches = branchesRepo.create.mock.calls.map(
+        ([, data]: [unknown, Record<string, unknown>]) => data,
+      );
+      expect(branches).toEqual([
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          code: 'CASA-CENTRAL',
+          name: 'Casa central',
+          description: 'Av. San Martín 123',
+          latitude: '-17.78',
+          longitude: '-63.18',
+          branchCategory: 'head_office',
+          actorUserId: 'owner-1',
+        }),
+        expect.objectContaining({
+          code: 'SUCURSAL-EQUIPETROL',
+          name: 'Sucursal Equipetrol',
+          description: 'Calle 1, Edificio 2',
+          latitude: '-17.7',
+          longitude: '-63.1',
+          branchCategory: 'branch',
+        }),
+        expect.objectContaining({
+          code: 'SUCURSAL-NORTE',
+          latitude: undefined,
+          longitude: undefined,
+          branchCategory: 'branch',
+        }),
+      ]);
+    });
+
     it('la casa central lleva ordinal 0 y las sucursales 1..n en el orden declarado', async () => {
       const { service, medicalFacilitiesRepo, tx } = build();
 
@@ -1197,6 +1262,111 @@ describe('TenantTypeProfileService', () => {
       expect(id).toBeUndefined();
       expect(medicalFacilitiesRepo.create).not.toHaveBeenCalled();
       expect(medicalFacilitiesRepo.createSite).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('materializeProfile · horario de atención de las sucursales', () => {
+    const hours = [
+      { dayOfWeek: 1, opensAt: '08:00', closesAt: '12:00' },
+      { dayOfWeek: 1, opensAt: '14:30', closesAt: '19:00' },
+    ];
+
+    it('el laboratorio guarda el horario de cada sucursal con su branchId', async () => {
+      const { service, branchesRepo, openingHoursRepo, tx } = build();
+      branchesRepo.create.mockImplementation(
+        (_tx: unknown, data: { code: string }) => ({ id: `id-${data.code}` }),
+      );
+
+      await service.materializeProfile(
+        tx,
+        'tenant-7',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_LABORATORY],
+            branches: [{ name: 'Sucursal Norte', openingHours: hours }],
+          },
+        },
+        'actor-1',
+      );
+
+      expect(openingHoursRepo.createShifts).toHaveBeenCalledWith(
+        tx,
+        {
+          tenantId: 'tenant-7',
+          branchId: 'id-SUCURSAL-NORTE',
+          actorUserId: 'actor-1',
+        },
+        hours,
+      );
+    });
+
+    it('el establecimiento médico vuelca sus sedes y después guarda el horario de cada sucursal', async () => {
+      const { service, medicalFacilitiesRepo, openingHoursRepo, tx } = build();
+      const order: string[] = [];
+      (
+        tx as unknown as { flush: ReturnType<typeof fn> }
+      ).flush.mockImplementation(async () => {
+        order.push('flush');
+      });
+      let next = 0;
+      medicalFacilitiesRepo.createSite.mockImplementation(() => {
+        next += 1;
+        order.push(`site-${next}`);
+        return { id: `site-${next}` };
+      });
+      openingHoursRepo.createShifts.mockImplementation(
+        (_tx: unknown, site: { medicalFacilitySiteId: string }) => {
+          order.push(`hours:${site.medicalFacilitySiteId}`);
+          return [];
+        },
+      );
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        {
+          tenantType: 'CLINIC',
+          legalName: 'Clínica Z S.R.L.',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          medicalFacility: {
+            taxIdentifierNumber: '1023456789',
+            healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+            medicalDirector: {
+              name: 'Ana',
+              lastName: 'Rojas',
+              professionalLicenseNumber: 'MAT-12345',
+              email: 'dir@clinica.bo',
+            },
+            headquarters: { addressLines: ['Av. San Martín 123'] },
+            branches: [
+              { name: 'Norte', addressLines: ['Calle 1'], openingHours: hours },
+            ],
+          },
+        },
+        'owner-1',
+      );
+
+      expect(order).toEqual([
+        'flush',
+        'site-1',
+        'site-2',
+        'flush',
+        'hours:site-2',
+      ]);
+      expect(openingHoursRepo.createShifts).toHaveBeenCalledWith(
+        tx,
+        {
+          tenantId: 'tenant-1',
+          medicalFacilitySiteId: 'site-2',
+          actorUserId: 'owner-1',
+        },
+        hours,
+      );
     });
   });
 });

@@ -34,6 +34,7 @@ import {
   GLOSSARY_TAG_PREFIX,
 } from '../glossary.constants';
 import { LANGUAGE_CONCEPT_BY_CODE } from '../terminology.constants';
+import { normalizeSearchText } from '../../../common/text/normalize-search-text';
 
 /** Versión inicial que recibe todo conjunto de valores recién creado. */
 const INITIAL_VALUE_SET_VERSION = '1.0.0';
@@ -511,6 +512,12 @@ export class ValueSetsService {
        * unidad— y sin esto pintarlos obliga a pedir un detalle por fila.
        */
       includeProperties?: boolean;
+      /**
+       * Texto libre del `filter` de FHIR `ValueSet/$expand`: se conservan los
+       * miembros cuyo código, rótulo o designación contiene todas sus palabras,
+       * sin distinguir tildes ni mayúsculas. Vacío o sólo espacios = sin filtro.
+       */
+      filter?: string;
     },
   ): Promise<ReadValueSetExpansionResponseDto> {
     const valueSet = await this.valueSetsRepo.findById(this.em, valueSetId);
@@ -547,6 +554,7 @@ export class ValueSetsService {
     const after = options.cursor
       ? decodeExpansionCursor(options.cursor)
       : undefined;
+    const filterTokens = parseExpansionFilter(options.filter);
 
     // Se pide una fila de más para saber si hay página siguiente sin contar el
     // total: un `COUNT` sobre la expansión entera en cada página cuesta más que
@@ -556,6 +564,8 @@ export class ValueSetsService {
       version.id,
       after,
       options.limit + 1,
+      // Sin `filter` la llamada queda idéntica a la de siempre.
+      ...(filterTokens.length > 0 ? [filterTokens] : []),
     );
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
@@ -824,6 +834,24 @@ function decodeExpansionCursor(cursor: string): {
     throw new BadRequestException('El cursor de paginación no es válido');
   }
   return { ordinal, conceptId };
+}
+
+/** Tope del `filter`: acota el costo de la consulta y evita patrones absurdos. */
+const MAX_EXPANSION_FILTER_LENGTH = 100;
+const MAX_EXPANSION_FILTER_TOKENS = 6;
+
+/** Palabras normalizadas del `filter`; `[]` si no hay texto. 400 si se pasa del tope. */
+function parseExpansionFilter(filter?: string): string[] {
+  if (filter === undefined) return [];
+  if (filter.length > MAX_EXPANSION_FILTER_LENGTH) {
+    throw new BadRequestException(
+      `filter admite hasta ${MAX_EXPANSION_FILTER_LENGTH} caracteres`,
+    );
+  }
+  return normalizeSearchText(filter)
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, MAX_EXPANSION_FILTER_TOKENS);
 }
 
 /** Forma textual de un `value_json` para compararlo con el `value` de una regla. */

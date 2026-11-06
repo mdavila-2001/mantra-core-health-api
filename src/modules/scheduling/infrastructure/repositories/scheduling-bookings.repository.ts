@@ -546,10 +546,12 @@ export class SchedulingBookingsRepository {
     em: EntityManager,
     filters: {
       /**
-       * Tenant activo. Obligatorio y parte del `where`: filtrar después de
-       * cargar las filas ya habría leído citas de otra organización.
+       * Tenant activo, parte del `where`: filtrar después de cargar las filas
+       * ya habría leído citas de otra organización. Sólo se omite cuando la
+       * lectura es de una cuenta de paciente sobre **sus** perfiles, que ve sus
+       * citas de todas las organizaciones.
        */
-      tenantId: string;
+      tenantId?: string;
       /** Paciente titular de la cita. */
       patientProfileId?: string;
       /**
@@ -573,7 +575,8 @@ export class SchedulingBookingsRepository {
     /** `true` si la lectura previa al filtro por ventana agotó su tope. */
     fetchCapReached: boolean;
   }> {
-    const where: Record<string, unknown> = { tenantId: filters.tenantId };
+    const where: Record<string, unknown> = {};
+    if (filters.tenantId) where.tenantId = filters.tenantId;
     if (filters.patientProfileId) {
       where.patientProfileId = filters.patientProfileId;
     } else if (filters.patientProfileIds) {
@@ -865,7 +868,7 @@ export class SchedulingBookingsRepository {
   > {
     if (states.length === 0) return [];
 
-    return em.getConnection().execute(
+    return em.execute(
       `SELECT b.id,
               s.start_at        AS "startAt",
               s.end_at          AS "endAt",
@@ -938,7 +941,7 @@ export class SchedulingBookingsRepository {
       resourceName: string | null;
       timeZone: string | null;
       patientProfileId: string;
-    }[] = await em.getConnection().execute(
+    }[] = await em.execute(
       // El recurso sale del CUPO (`bookable_slots.resource_id`, NOT NULL), igual
       // que el horario: `appointment_bookings.resource_id` es NULLable y la
       // reprogramación lo dejaba en el recurso viejo, así que unir por ahí
@@ -1027,7 +1030,7 @@ export class SchedulingBookingsRepository {
     patientProfileId: string,
     inProgressState: string,
   ): Promise<boolean> {
-    const rows: { exists: number }[] = await em.getConnection().execute(
+    const rows: { exists: number }[] = await em.execute(
       `SELECT 1 AS "existe"
          FROM scheduling.appointment_bookings b
          JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
@@ -1051,9 +1054,8 @@ export class SchedulingBookingsRepository {
   ): Promise<{ startAt: Date; timeZone: string | null }[]> {
     if (states.length === 0) return [];
 
-    const rows: { startAt: Date | string; timeZone: string | null }[] = await em
-      .getConnection()
-      .execute(
+    const rows: { startAt: Date | string; timeZone: string | null }[] =
+      await em.execute(
         `SELECT s.start_at AS "startAt",
                 r.time_zone AS "timeZone"
            FROM scheduling.appointment_bookings b
@@ -1114,7 +1116,7 @@ export class SchedulingBookingsRepository {
       reason: string | null;
       resourceName: string | null;
       timeZone: string | null;
-    }[] = await em.getConnection().execute(
+    }[] = await em.execute(
       `SELECT e.id,
               e.start_at  AS "startAt",
               e.end_at    AS "endAt",

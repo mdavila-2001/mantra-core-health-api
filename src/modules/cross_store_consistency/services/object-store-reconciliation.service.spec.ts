@@ -40,13 +40,7 @@ function build(options: {
     inventario: inventory = { estado: 'COMPLETO', objetos: [] },
   } = options;
 
-  const em = {
-    fork: () => ({
-      getConnection: () => ({
-        execute: mockFn().mockResolvedValue(references),
-      }),
-    }),
-  };
+  const em = { execute: mockFn().mockResolvedValue(references) };
   const reader = {
     stat: mockFn(async ({ key }: { key: string }) => {
       if (unverifiable.includes(key)) {

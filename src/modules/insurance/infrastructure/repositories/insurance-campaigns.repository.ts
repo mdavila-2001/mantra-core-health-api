@@ -163,7 +163,7 @@ export class InsuranceCampaignsRepository {
     em: EntityManager,
     code: string,
   ): Promise<string | null> {
-    const rows = await em.getConnection().execute<{ id: string }[]>(
+    const rows = await em.execute<{ id: string }[]>(
       `select cc.id
          from terminology.catalog_concepts cc
          join terminology.code_system_versions csv on csv.id = cc.code_system_version_id
@@ -229,7 +229,7 @@ export class InsuranceCampaignsRepository {
       params.push(filters.after.createdAt, filters.after.id);
     }
     params.push(filters.limit);
-    return em.getConnection().execute<CampaignRow[]>(
+    return em.execute<CampaignRow[]>(
       `select ${CAMPAIGN_COLUMNS}
          from insurance.insurance_campaigns c
          left join terminology.catalog_concepts cond on cond.id = c.target_condition_concept_id
@@ -251,7 +251,7 @@ export class InsuranceCampaignsRepository {
     patientProfileId: string,
     referenceDate: string,
   ): Promise<string[]> {
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         carrier_id: string;
         status_concept_id: string | null;
@@ -306,7 +306,7 @@ export class InsuranceCampaignsRepository {
     referenceDate: string,
   ): Promise<PatientCampaignRow[]> {
     if (insuranceCarrierIds.length === 0) return Promise.resolve([]);
-    return em.getConnection().execute<PatientCampaignRow[]>(
+    return em.execute<PatientCampaignRow[]>(
       `select ${CAMPAIGN_COLUMNS}, ca.legal_name as carrier_name
          from insurance.insurance_campaigns c
          join insurance.insurance_carriers ca on ca.id = c.insurance_carrier_id
@@ -349,7 +349,7 @@ export class InsuranceCampaignsRepository {
       where.push('c.insurance_carrier_id = ?');
       params.push(carrierId);
     }
-    return em.getConnection().execute<PatientCampaignRow[]>(
+    return em.execute<PatientCampaignRow[]>(
       `select ${CAMPAIGN_COLUMNS}, ca.legal_name as carrier_name
          from insurance.insurance_campaigns c
          join insurance.insurance_carriers ca on ca.id = c.insurance_carrier_id
@@ -370,7 +370,7 @@ export class InsuranceCampaignsRepository {
     networkProviderMembershipId: string,
     insuranceCarrierId: string,
   ): Promise<boolean> {
-    const rows = await em.getConnection().execute<{ ok: number }[]>(
+    const rows = await em.execute<{ ok: number }[]>(
       `select 1 as ok
          from insurance.network_provider_memberships m
          join insurance.provider_networks n on n.id = m.provider_network_id

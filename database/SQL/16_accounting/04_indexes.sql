@@ -1,6 +1,12 @@
--- SALUD v4.0.10 · módulo 16 · schema accounting
+-- SALUD v4.2.91 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_report_presentation_templates_audience_code" ON "accounting"."report_presentation_templates" ("user_type", "code");
+
+CREATE INDEX IF NOT EXISTS "ix_report_presentation_templates_created_by_user_id" ON "accounting"."report_presentation_templates" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_report_presentation_templates_updated_by_user_id" ON "accounting"."report_presentation_templates" ("updated_by_user_id");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_controlling_areas_tenant_id_code" ON "accounting"."controlling_areas" ("tenant_id", "code");
 
@@ -560,6 +566,14 @@ CREATE INDEX IF NOT EXISTS "ix_cost_centers_created_by_user_id" ON "accounting".
 
 CREATE INDEX IF NOT EXISTS "ix_cost_centers_updated_by_user_id" ON "accounting"."cost_centers" ("updated_by_user_id");
 
+CREATE INDEX IF NOT EXISTS "ix_cost_centers_tenant_id" ON "accounting"."cost_centers" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_cost_centers_clinical_unit_id" ON "accounting"."cost_centers" ("clinical_unit_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_cost_centers_tenant_id_id" ON "accounting"."cost_centers" ("tenant_id", "id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_cost_centers_unit_active" ON "accounting"."cost_centers" ("clinical_unit_id") WHERE clinical_unit_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19';
+
 CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_practice_id" ON "accounting"."cost_center_maps" ("practice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_cost_center_maps_source_type_concept_id" ON "accounting"."cost_center_maps" ("source_type_concept_id");
@@ -701,6 +715,10 @@ CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_status_concept_id" ON "accou
 CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_created_by_user_id" ON "accounting"."infrastructure_items" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_updated_by_user_id" ON "accounting"."infrastructure_items" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_tenant_id" ON "accounting"."infrastructure_items" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_infrastructure_items_care_space_id" ON "accounting"."infrastructure_items" ("care_space_id");
 
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_employee_id" ON "accounting"."employee_payments" ("employee_id");
 

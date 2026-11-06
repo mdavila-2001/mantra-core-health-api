@@ -12,6 +12,7 @@ import { PracticeSites } from '../../../practice/entities';
 import {
   BookableSlots,
   SchedulableResources,
+  ScheduleTemplates,
 } from '../../../scheduling/entities';
 import type {
   PractitionerActivityCounts,
@@ -28,12 +29,19 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
     const resources = await em.find(SchedulableResources, {
       resourceRefId: profileId,
     });
-    const slotCount = resources.length
-      ? await em.count(BookableSlots, {
-          resourceId: { $in: resources.map((resource) => resource.id) },
-        })
-      : 0;
-    return { resources, slotCount };
+    const resourceIds = resources.map((resource) => resource.id);
+    const [slotCount, activeTemplates] = resourceIds.length
+      ? await Promise.all([
+          em.count(BookableSlots, {
+            resourceId: { $in: resourceIds },
+          }),
+          em.count(ScheduleTemplates, {
+            resourceId: { $in: resourceIds },
+            statusConceptId: { $ne: CONCEPTS.TEMPLATE_RETIRED },
+          }),
+        ])
+      : [0, 0];
+    return { resources, slotCount, activeTemplates };
   }
 
   async activity(
@@ -66,10 +74,8 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
     const output = new Map<string, PractitionerDirectoryStats>();
     if (profileIds.length === 0) return output;
     const ids = [...profileIds];
-    const connection = em.getConnection();
-
     const [activityRows, ratingRows] = await Promise.all([
-      connection.execute<
+      em.execute<
         {
           person_id: string;
           encounters: string;
@@ -93,7 +99,7 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
         [ids, PROF.ACCOUNT_LINK_ACTIVE],
         'all',
       ),
-      connection.execute<{ target_id: string; avg: string; total: string }[]>(
+      em.execute<{ target_id: string; avg: string; total: string }[]>(
         `SELECT p.target_id, AVG(r.overall_rating)::numeric AS avg, COUNT(*) AS total
            FROM community.public_profiles p
            JOIN community.service_reviews r

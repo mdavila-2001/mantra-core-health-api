@@ -43,6 +43,14 @@ export class PharmacyDirectoryAdapter implements PharmacyDirectoryPort {
     return this.pharmacy.findSellableProductsByIds(...args);
   }
 
+  findSellableProductsByMedicationConcepts(
+    ...args: Parameters<
+      PharmacyReadRepository['findSellableProductsByMedicationConcepts']
+    >
+  ) {
+    return this.pharmacy.findSellableProductsByMedicationConcepts(...args);
+  }
+
   findCurrentPublicPriceLists(
     ...args: Parameters<PharmacyReadRepository['findCurrentPublicPriceLists']>
   ) {

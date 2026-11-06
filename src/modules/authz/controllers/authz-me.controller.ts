@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -7,15 +8,32 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
+  PatientAnyTenant,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
-import { AuthzMeService } from '../services';
-import { AuthzStatusResultDto, MyClinicalAccessResponseDto } from '../dto';
+import {
+  AuthzAccessRequestsReadService,
+  AuthzMeService,
+  AuthzPrimaryCareService,
+} from '../services';
+import {
+  AccessRequestItemDto,
+  AuthzIdResponseDto,
+  AuthzStatusResultDto,
+  MyClinicalAccessResponseDto,
+  RequestPrimaryPractitionerDto,
+} from '../dto';
 
 /**
  * «Quién ve mi historia» (BR-20): el titular lista y revoca los accesos a su
@@ -30,8 +48,14 @@ import { AuthzStatusResultDto, MyClinicalAccessResponseDto } from '../dto';
 export class AuthzMeController {
   /**
    * @param service - Lectura y revocación del titular.
+   * @param primaryCare - Pedido de médico de cabecera.
+   * @param accessRequests - Buzón unificado de solicitudes.
    */
-  constructor(private readonly service: AuthzMeService) {}
+  constructor(
+    private readonly service: AuthzMeService,
+    private readonly primaryCare: AuthzPrimaryCareService,
+    private readonly accessRequests: AuthzAccessRequestsReadService,
+  ) {}
 
   /** Relaciones asistenciales y accesos clínicos sobre mi historia. */
   @Get('access')
@@ -74,5 +98,35 @@ export class AuthzMeController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AuthzStatusResultDto> {
     return this.service.revokeMyClinicalGrant(actor, grantId);
+  }
+
+  /** Buzón unificado: solicitudes recibidas y enviadas, de cabecera y granulares. */
+  @Get('access-requests')
+  @ApiOkResponse({ type: AccessRequestItemDto, isArray: true })
+  @ApiOperation({ summary: 'Mis solicitudes de acceso, recibidas y enviadas' })
+  listAccessRequests(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AccessRequestItemDto[]> {
+    return this.accessRequests.listForPatient(actor);
+  }
+
+  /** Pide a un profesional que sea mi médico de cabecera (el tenant va en `X-Tenant-Id`). */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_REQUESTED',
+    entity: 'care_relationship',
+    entityId: 'result.id',
+  })
+  @Post('primary-practitioner-requests')
+  @ApiCreatedResponse({ type: AuthzIdResponseDto })
+  @PatientAnyTenant()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Pedir a un profesional que sea mi médico de cabecera',
+  })
+  requestPrimaryPractitioner(
+    @Body() dto: RequestPrimaryPractitionerDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AuthzIdResponseDto> {
+    return this.primaryCare.requestAsPatient(dto, actor);
   }
 }

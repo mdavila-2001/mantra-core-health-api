@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 20 · schema diagnostics
+-- SALUD v4.2.91 · módulo 20 · schema diagnostics
 -- Generado de diagram_20_diagnostics.puml — NO editar a mano.
 
 
@@ -249,6 +249,65 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."specimen_parent_links" (
     CONSTRAINT "pk_specimen_parent_links" PRIMARY KEY ("id")
 );
 
+CREATE TABLE IF NOT EXISTS "diagnostics"."service_request_performer_events" (
+    "id" uuid NOT NULL,
+    "service_request_id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "event_type_concept_id" uuid NOT NULL,
+    "reason_text" text,
+    "recorded_at" timestamptz NOT NULL,
+    "recorded_by_user_id" uuid NOT NULL,
+    CONSTRAINT "pk_service_request_performer_events" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "diagnostics"."report_drafts" (
+    "id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "service_request_id" uuid NOT NULL,
+    "diagnostic_report_id" uuid,
+    "body_json" jsonb NOT NULL,
+    "conclusion_text" text,
+    "signer_profile_id" uuid,
+    "patient_visibility_code" varchar(8) NOT NULL,
+    "status_code" varchar(10) NOT NULL,
+    "published_version_id" uuid,
+    "published_at" timestamptz,
+    "published_by_user_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_report_drafts" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "diagnostics"."report_draft_files" (
+    "id" uuid NOT NULL,
+    "report_draft_id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "file_id" uuid NOT NULL,
+    "role_code" varchar(10) NOT NULL,
+    "ordinal" integer NOT NULL DEFAULT 0,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_report_draft_files" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "diagnostics"."report_issuer_settings" (
+    "id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "signature_file_id" uuid,
+    "seal_file_id" uuid,
+    "responsible_name" varchar(120),
+    "responsible_title" varchar(120),
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_report_issuer_settings" PRIMARY KEY ("id")
+);
+
 CREATE TABLE IF NOT EXISTS "diagnostics"."specimen_collection_events" (
     "id" uuid NOT NULL,
     "specimen_id" uuid NOT NULL,
@@ -262,6 +321,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."specimen_collection_events" (
     "condition_json" jsonb,
     "notes" text,
     "created_at" timestamptz NOT NULL,
+    "collection_care_space_id" uuid,
     CONSTRAINT "pk_specimen_collection_events" PRIMARY KEY ("id")
 );
 
@@ -495,6 +555,9 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."imaging_procedure_steps" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "scheduled_equipment_id" uuid,
+    "scheduled_care_space_id" uuid,
+    "scheduled_start_at" timestamptz,
     CONSTRAINT "pk_imaging_procedure_steps" PRIMARY KEY ("id")
 );
 

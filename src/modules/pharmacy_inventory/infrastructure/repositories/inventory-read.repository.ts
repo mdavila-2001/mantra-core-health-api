@@ -46,11 +46,12 @@ export class InventoryReadRepository {
 
   /**
    * Qué productos están **disponibles** en cada sede, con la regla única de
-   * existencias ({@link siteProductAvailabilitySql}): lotes si la sede los
-   * lleva, lo declarado en el catálogo si no. Sólo devuelve filas disponibles.
+   * existencias ({@link siteProductAvailabilitySql}): lotes si el producto
+   * tiene posición en la sede, lo declarado en el catálogo si no. Sólo devuelve
+   * filas disponibles.
    *
-   * @returns `availableQuantity` como texto numérico, o `null` si la sede no
-   *   lleva lotes y el producto se declaró sin conteo («hay / no hay»).
+   * @returns `availableQuantity` como texto numérico, o `null` si el producto
+   *   no tiene posición en la sede y se declaró sin conteo («hay / no hay»).
    */
   findSiteProductAvailability(
     em: EntityManager,

@@ -3,9 +3,9 @@
 # Endpoints del módulo `audit`
 
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
-- **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 10 · BAJO 3
-- **Tablas distintas que tocan:** 16
+- **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 1 · MEDIO 10 · BAJO 7
+- **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/audit.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,17 +15,21 @@
 | 1 | POST | `/audit/anomaly/scan` | Detectar acceso anómalo | MEDIO | 4 | SECURITY_ADMIN |
 | 2 | GET | `/audit/data-access` | Lecturas de datos sensibles (`audit.data_access_log`), con filtros | BAJO | 1 | AUDITOR, DPO, SECURITY_ADMIN |
 | 3 | POST | `/audit/data-access` | Registrar acceso/lectura clínica (accounting WORM) | MEDIO | 5 | SECURITY_ADMIN |
-| 4 | POST | `/audit/events` | Registrar provenance de un cambio y sellar la cadena hash | MEDIO | 3 | SECURITY_ADMIN |
-| 5 | GET | `/audit/history/{entity}/{id}` | Consultar historial / línea de tiempo de un registro | MEDIO | 4 | SECURITY_ADMIN |
-| 6 | POST | `/audit/integrity/verify` | Verificar integridad tamper-evidence de la cadena | MEDIO | 3 | SECURITY_ADMIN |
-| 7 | GET | `/audit/log` | Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud | BAJO | 1 | AUDITOR, DPO, SECURITY_ADMIN |
-| 8 | GET | `/audit/me/data-access` | Quién accedió a mi historia y con qué finalidad | BAJO | 5 | PATIENT |
-| 9 | POST | `/audit/retention/apply` | Aplicar retención / archivado / litigation-hold | ALTO | 4 | SECURITY_ADMIN |
-| 10 | POST | `/audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | MEDIO | 7 | SECURITY_ADMIN |
-| 11 | POST | `/compliance/audit-export` | Exportar evidencia de auditoría para cumplimiento | MEDIO | 5 | SECURITY_ADMIN |
-| 12 | POST | `/moderation/decisions` | Registrar decisión de moderación / gobernanza analítica | MEDIO | 6 | SECURITY_ADMIN |
-| 13 | POST | `/privacy/dsar` | Tramitar DSAR (solicitud del titular) | MEDIO | 5 | SECURITY_ADMIN |
-| 14 | PATCH | `/privacy/dsar/{id}` | Avanzar la máquina de estados de una solicitud DSAR | MEDIO | 5 | SECURITY_ADMIN |
+| 4 | GET | `/audit/data-access/summary` | Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación | BAJO | 2 | ...AUDIT_SUMMARY_ROLES |
+| 5 | POST | `/audit/events` | Registrar provenance de un cambio y sellar la cadena hash | MEDIO | 3 | SECURITY_ADMIN |
+| 6 | GET | `/audit/history/{entity}/{id}` | Consultar historial / línea de tiempo de un registro | MEDIO | 4 | SECURITY_ADMIN |
+| 7 | POST | `/audit/integrity/verify` | Verificar integridad tamper-evidence de la cadena | MEDIO | 3 | SECURITY_ADMIN |
+| 8 | GET | `/audit/log` | Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud | BAJO | 1 | AUDITOR, DPO, SECURITY_ADMIN |
+| 9 | GET | `/audit/log/filter-catalog` | Filtros que acepta la bitácora, sus límites y lo que no se puede consultar | BAJO | 0 | AUDITOR, DPO, SECURITY_ADMIN |
+| 10 | GET | `/audit/me/data-access` | Quién accedió a mi historia y con qué finalidad | BAJO | 5 | PATIENT |
+| 11 | POST | `/audit/retention/apply` | Aplicar retención / archivado / litigation-hold | ALTO | 4 | SECURITY_ADMIN |
+| 12 | POST | `/audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | MEDIO | 7 | SECURITY_ADMIN |
+| 13 | POST | `/compliance/audit-export` | Exportar evidencia de auditoría para cumplimiento | MEDIO | 5 | SECURITY_ADMIN |
+| 14 | POST | `/moderation/decisions` | Registrar decisión de moderación / gobernanza analítica | MEDIO | 6 | SECURITY_ADMIN |
+| 15 | GET | `/privacy/dsar` | Solicitudes DSAR, la más reciente primero | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
+| 16 | POST | `/privacy/dsar` | Tramitar DSAR (solicitud del titular) | MEDIO | 5 | SECURITY_ADMIN |
+| 17 | GET | `/privacy/dsar/{id}` | Una solicitud DSAR (sin el archivo resultante) | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
+| 18 | PATCH | `/privacy/dsar/{id}` | Avanzar la máquina de estados de una solicitud DSAR | MEDIO | 5 | SECURITY_ADMIN |
 
 ---
 
@@ -42,7 +46,7 @@
 
 Detectar acceso anómalo. Caso de uso UC-10-10: Detectar acceso anómalo. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -54,10 +58,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -133,32 +137,32 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.dataAccess` — `src/modules/audit/controllers/audit-query.controller.ts:54`
+- **Implementación:** `AuditQueryController.dataAccess` — `src/modules/audit/controllers/audit-query.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
 Lecturas de datos sensibles (`audit.data_access_log`), con filtros. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/data-access` la atiende `AuditQueryController.dataAccess` (src/modules/audit/controllers/audit-query.controller.ts:54). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.dataAccess`. Lee audit.data_access_log.
+`GET /audit/data-access` la atiende `AuditQueryController.dataAccess` (src/modules/audit/controllers/audit-query.controller.ts:120). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.dataAccess`. Lee audit.data_access_log.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:120` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.data_access_log` | LEE | LEE | POR_SQL | AuditQueryController.dataAccess → AuditQueryService.dataAccess → AuditQueryRepository.dataAccess | `src/modules/audit/repositories/audit-query.repository.ts:159` |
+| `audit.data_access_log` | LEE | LEE | POR_SQL | AuditQueryController.dataAccess → AuditQueryService.dataAccess → AuditQueryRepository.dataAccess | `src/modules/audit/repositories/audit-query.repository.ts:162` |
 
 ### Parámetros
 
@@ -216,7 +220,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar acceso/lectura clínica (accounting WORM). Caso de uso UC-10-01: Registrar acceso/lectura clínica (accounting WORM) + provenance. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -228,10 +232,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -316,7 +320,82 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 4. POST /audit/events
+## 4. GET /audit/data-access/summary
+
+- **Origen:** CONTRATO
+- **Nombre:** Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación
+- **Bloque:** Auditoría y Reporting
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuditQueryController.dataAccessSummary` — `src/modules/audit/controllers/audit-query.controller.ts:103`
+
+### Qué es y para qué sirve (negocio)
+
+Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+
+### Cómo se atiende (sistema)
+
+`GET /audit/data-access/summary` la atiende `AuditQueryController.dataAccessSummary` (src/modules/audit/controllers/audit-query.controller.ts:103). Exige sesión con alguno de los roles ...AUDIT_SUMMARY_ROLES. Delega en `AuditOversightReadService.dataAccessSummary`. Lee audit.data_access_log, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ...AUDIT_SUMMARY_ROLES | `src/modules/audit/controllers/audit-query.controller.ts:103` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.data_access_log` | LEE | LEE | POR_SQL | AuditQueryController.dataAccessSummary → AuditOversightReadService.dataAccessSummary → AuditOversightReadRepository.accessTotals | `src/modules/audit/repositories/audit-oversight-read.repository.ts:81` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AuditQueryController.dataAccessSummary → AuditOversightReadService.dataAccessSummary → AuditOversightReadRepository.accessBuckets | `src/modules/audit/repositories/audit-oversight-read.repository.ts:99` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | No | `string` | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días |
+| `to` | query | No | `string` | Hasta (ISO 8601, excluido) |
+| `minSample` | query | No | `number` | Un grupo con menos eventos que esto no se muestra: se suma a `suppressed`. El mínimo es 5 (piso del servidor) |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/audit/controllers/audit-oversight.controller.spec.ts:252` |
+
+### Flujos
+
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `ctrl:AuditQueryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /audit/events
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar provenance de un cambio y sellar la cadena hash
@@ -329,7 +408,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar provenance de un cambio y sellar la cadena hash. Caso de uso UC-10-04: Registrar provenance de un cambio y sellar la cadena hash (incluye UC-10-03). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -341,10 +420,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -427,7 +506,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 5. GET /audit/history/{entity}/{id}
+## 6. GET /audit/history/{entity}/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar historial / línea de tiempo de un registro
@@ -440,7 +519,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Consultar historial / línea de tiempo de un registro. Caso de uso UC-10-05: Consultar historial / línea de tiempo (audita la propia lectura). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -452,9 +531,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/audit.controller.ts:102` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -522,7 +601,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 6. POST /audit/integrity/verify
+## 7. POST /audit/integrity/verify
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar integridad tamper-evidence de la cadena
@@ -535,7 +614,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Verificar integridad tamper-evidence de la cadena. Caso de uso UC-10-06: Verificar integridad tamper-evidence y atestar. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -547,10 +626,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -619,39 +698,39 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 7. GET /audit/log
+## 8. GET /audit/log
 
 - **Origen:** CONTRATO
 - **Nombre:** Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuditQueryController.log` — `src/modules/audit/controllers/audit-query.controller.ts:40`
+- **Implementación:** `AuditQueryController.log` — `src/modules/audit/controllers/audit-query.controller.ts:76`
 
 ### Qué es y para qué sirve (negocio)
 
 Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/log` la atiende `AuditQueryController.log` (src/modules/audit/controllers/audit-query.controller.ts:40). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.log`. Lee audit.audit_log.
+`GET /audit/log` la atiende `AuditQueryController.log` (src/modules/audit/controllers/audit-query.controller.ts:76). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.log`. Lee audit.audit_log.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:76` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | LEE | LEE | POR_SQL | AuditQueryController.log → AuditQueryService.log → AuditQueryRepository.auditLog | `src/modules/audit/repositories/audit-query.repository.ts:125` |
+| `audit.audit_log` | LEE | LEE | POR_SQL | AuditQueryController.log → AuditQueryService.log → AuditQueryRepository.auditLog | `src/modules/audit/repositories/audit-query.repository.ts:128` |
 
 ### Parámetros
 
@@ -668,6 +747,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `method` | query | No | `string` | Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar |
 | `route` | query | No | `string` | Plantilla exacta de la ruta, con `:parámetros` |
 | `entity` | query | No | `string` | Entidad afectada |
+| `entityId` | query | No | `string` | Recurso afectado (`entity_id`): la historia de un registro concreto. Sin índice propio: la consulta siempre queda acotada por la ventana de fechas |
 
 ### Cuerpo
 
@@ -698,7 +778,68 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. GET /audit/me/data-access
+## 9. GET /audit/log/filter-catalog
+
+- **Origen:** CONTRATO
+- **Nombre:** Filtros que acepta la bitácora, sus límites y lo que no se puede consultar
+- **Bloque:** Auditoría y Reporting
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuditQueryController.filterCatalog` — `src/modules/audit/controllers/audit-query.controller.ts:90`
+
+### Qué es y para qué sirve (negocio)
+
+Filtros que acepta la bitácora, sus límites y lo que no se puede consultar. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+
+### Cómo se atiende (sistema)
+
+`GET /audit/log/filter-catalog` la atiende `AuditQueryController.filterCatalog` (src/modules/audit/controllers/audit-query.controller.ts:90). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditQueryService.filterCatalog`. No se determinaron tablas para esta operación.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/audit-query.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `ctrl:AuditQueryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. GET /audit/me/data-access
 
 - **Origen:** CONTRATO
 - **Nombre:** Quién accedió a mi historia y con qué finalidad
@@ -711,7 +852,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Quién accedió a mi historia y con qué finalidad. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -723,8 +864,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/audit/controllers/audit-me.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -790,7 +931,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 9. POST /audit/retention/apply
+## 11. POST /audit/retention/apply
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar retención / archivado / litigation-hold
@@ -803,7 +944,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Aplicar retención / archivado / litigation-hold. Caso de uso UC-10-09: Aplicar retención / archivado / litigation-hold. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -815,10 +956,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -888,7 +1029,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 10. POST /audit/third-party-access
+## 12. POST /audit/third-party-access
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar acceso delegado / de tercero gobernado
@@ -901,7 +1042,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar acceso delegado / de tercero gobernado. Caso de uso UC-10-12: Registrar acceso delegado / de tercero gobernado. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -913,10 +1054,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1012,7 +1153,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 11. POST /compliance/audit-export
+## 13. POST /compliance/audit-export
 
 - **Origen:** CONTRATO
 - **Nombre:** Exportar evidencia de auditoría para cumplimiento
@@ -1025,7 +1166,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Exportar evidencia de auditoría para cumplimiento. Caso de uso UC-10-07: Exportar evidencia de auditoría (idempotente por query_hash). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1037,10 +1178,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/compliance.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1118,7 +1259,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 12. POST /moderation/decisions
+## 14. POST /moderation/decisions
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar decisión de moderación / gobernanza analítica
@@ -1131,7 +1272,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar decisión de moderación / gobernanza analítica. Caso de uso UC-10-11: Registrar decisión de moderación / gobernanza. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1143,10 +1284,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/moderation.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1232,35 +1373,111 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 13. POST /privacy/dsar
+## 15. GET /privacy/dsar
 
 - **Origen:** CONTRATO
-- **Nombre:** Tramitar DSAR (solicitud del titular)
+- **Nombre:** Solicitudes DSAR, la más reciente primero
 - **Bloque:** Auditoría y Reporting
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrivacyController.createDsar` — `src/modules/audit/controllers/privacy.controller.ts:34`
+- **Implementación:** `PrivacyController.listDsar` — `src/modules/audit/controllers/privacy.controller.ts:49`
 
 ### Qué es y para qué sirve (negocio)
 
-Tramitar DSAR (solicitud del titular). Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+Solicitudes DSAR, la más reciente primero. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /privacy/dsar` la atiende `PrivacyController.createDsar` (src/modules/audit/controllers/privacy.controller.ts:34). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDsarDto` (3 campos, 1 obligatorio). Delega en `ComplianceService.createDsar`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.dsar_requests. Lee audit.audit_log, iam.sessions.
+`GET /privacy/dsar` la atiende `PrivacyController.listDsar` (src/modules/audit/controllers/privacy.controller.ts:49). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditOversightReadService.dsarList`. Lee audit.dsar_requests, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:49` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.dsar_requests` | LEE | LEE | POR_SQL | PrivacyController.listDsar → AuditOversightReadService.dsarList → AuditOversightReadRepository.dsarList → AuditOversightReadRepository.dsarSelect | `src/modules/audit/repositories/audit-oversight-read.repository.ts:121` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PrivacyController.listDsar → AuditOversightReadService.dsarList → AuditOversightReadRepository.dsarList → AuditOversightReadRepository.dsarSelect | `src/modules/audit/repositories/audit-oversight-read.repository.ts:121` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `status` | query | No | `string` | — |
+| `type` | query | No | `string` | — |
+| `from` | query | No | `string` | Solicitada desde (ISO 8601, incluido) |
+| `to` | query | No | `string` | Solicitada hasta (ISO 8601, excluido) |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `ctrl:PrivacyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. POST /privacy/dsar
+
+- **Origen:** CONTRATO
+- **Nombre:** Tramitar DSAR (solicitud del titular)
+- **Bloque:** Auditoría y Reporting
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrivacyController.createDsar` — `src/modules/audit/controllers/privacy.controller.ts:70`
+
+### Qué es y para qué sirve (negocio)
+
+Tramitar DSAR (solicitud del titular). Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+
+### Cómo se atiende (sistema)
+
+`POST /privacy/dsar` la atiende `PrivacyController.createDsar` (src/modules/audit/controllers/privacy.controller.ts:70). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDsarDto` (3 campos, 1 obligatorio). Delega en `ComplianceService.createDsar`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.dsar_requests. Lee audit.audit_log, iam.sessions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1336,36 +1553,109 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ---
 
-## 14. PATCH /privacy/dsar/{id}
+## 17. GET /privacy/dsar/{id}
 
 - **Origen:** CONTRATO
-- **Nombre:** Avanzar la máquina de estados de una solicitud DSAR
+- **Nombre:** Una solicitud DSAR (sin el archivo resultante)
 - **Bloque:** Auditoría y Reporting
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrivacyController.updateDsar` — `src/modules/audit/controllers/privacy.controller.ts:51`
+- **Implementación:** `PrivacyController.getDsar` — `src/modules/audit/controllers/privacy.controller.ts:59`
 
 ### Qué es y para qué sirve (negocio)
 
-Avanzar la máquina de estados de una solicitud DSAR. Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+Una solicitud DSAR (sin el archivo resultante). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /privacy/dsar/{id}` la atiende `PrivacyController.updateDsar` (src/modules/audit/controllers/privacy.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateDsarDto` (2 campos, 1 obligatorio). Delega en `ComplianceService.updateDsar`. Crea filas en audit.audit_log. Actualiza audit.dsar_requests. Lee audit.audit_log, audit.dsar_requests, iam.sessions.
+`GET /privacy/dsar/{id}` la atiende `PrivacyController.getDsar` (src/modules/audit/controllers/privacy.controller.ts:59). Exige sesión con alguno de los roles AUDITOR, DPO, SECURITY_ADMIN. Delega en `AuditOversightReadService.dsar`. Lee audit.dsar_requests, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/privacy.controller.ts:51` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: AUDITOR, DPO, SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:59` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/privacy.controller.ts:59` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.dsar_requests` | LEE | LEE | POR_SQL | PrivacyController.getDsar → AuditOversightReadService.dsar → AuditOversightReadRepository.dsarById → AuditOversightReadRepository.dsarSelect | `src/modules/audit/repositories/audit-oversight-read.repository.ts:121` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PrivacyController.getDsar → AuditOversightReadService.dsar → AuditOversightReadRepository.dsarById → AuditOversightReadRepository.dsarSelect | `src/modules/audit/repositories/audit-oversight-read.repository.ts:121` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud DSAR no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `ctrl:PrivacyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 18. PATCH /privacy/dsar/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Avanzar la máquina de estados de una solicitud DSAR
+- **Bloque:** Auditoría y Reporting
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrivacyController.updateDsar` — `src/modules/audit/controllers/privacy.controller.ts:87`
+
+### Qué es y para qué sirve (negocio)
+
+Avanzar la máquina de estados de una solicitud DSAR. Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /privacy/dsar/{id}` la atiende `PrivacyController.updateDsar` (src/modules/audit/controllers/privacy.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateDsarDto` (2 campos, 1 obligatorio). Delega en `ComplianceService.updateDsar`. Crea filas en audit.audit_log. Actualiza audit.dsar_requests. Lee audit.audit_log, audit.dsar_requests, iam.sessions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/privacy.controller.ts:87` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

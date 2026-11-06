@@ -9,3 +9,4 @@ export * from './diagnostics-reception.service';
 export * from './diagnostics-scope.service';
 export * from './diagnostics-patient-access.service';
 export * from './diagnostics-practitioner-results.service';
+export * from './diagnostics-worklist.service';

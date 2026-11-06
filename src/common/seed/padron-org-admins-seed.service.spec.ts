@@ -21,10 +21,7 @@ const OPEN: DemoGateEnv = {
 interface Existing {
   credentials?: string[];
   memberships?: boolean;
-  /**
-   * Organizaciones con un administrador de una carga anterior: su membresía
-   * ADMIN activa y el correo con que ese usuario entra.
-   */
+  /** Organizations with pre-existing legacy administrators: active ADMIN membership and login email. */
   legacyAdmins?: { tenantIds: string[]; email: string };
 }
 
@@ -41,7 +38,7 @@ function build(existing: Existing = {}) {
       if (entity === TenantMemberships) {
         return Promise.resolve(existing.memberships ? { id: 'm' } : null);
       }
-      // El actor semilla.
+      // Seed actor mock.
       return Promise.resolve({ id: SEED_ACTOR_ID });
     }),
     find: jest.fn((entity: unknown, where: any) => {
@@ -174,12 +171,16 @@ describe('PadronOrgAdminsSeedService', () => {
 
     await service.run(OPEN, true);
 
-    const [tenantId, dto, actor, membershipId] = calls(memberships.invite)[0];
+    const [tenantId, dto, actor, membershipId, options] = calls(
+      memberships.invite,
+    )[0];
     expect(tenantId).toMatch(/^[0-9a-f-]{36}$/);
     expect(dto.role).toBe('ADMIN');
     expect(dto.accessScope).toBe('ALL_TENANT');
     expect(actor.id).toBe(SEED_ACTOR_ID);
     expect(membershipId).toMatch(/^[0-9a-f-]{36}$/);
+    // Seeded admins skip the invitation: they must have access right away.
+    expect(options).toEqual({ activate: true });
 
     const again = build();
     await again.service.run(OPEN, true);

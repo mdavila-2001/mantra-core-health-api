@@ -92,6 +92,14 @@ describe('AuditQueryService.log', () => {
     expect(filtro.matcher).toBeUndefined();
   });
 
+  it('con sólo `to`, la ventana por omisión termina en `to` (no en ahora)', async () => {
+    const { service, repo } = armar();
+    await service.log({ to: '2026-08-01T00:00:00.000Z' }, AHORA);
+    const filtro = repo.auditLog.mock.calls[0][1];
+    expect(filtro.from.toISOString()).toBe('2026-07-02T00:00:00.000Z');
+    expect(filtro.to.toISOString()).toBe('2026-08-01T00:00:00.000Z');
+  });
+
   it('traduce el resultado a su concepto y pasa actor, tenant, acción y entidad', async () => {
     const { service, repo } = armar();
     await service.log(
@@ -113,6 +121,14 @@ describe('AuditQueryService.log', () => {
       action: 'X_DONE',
       entity: 'x',
     });
+  });
+
+  it('filtra por recurso (`entityId`) y no lo inventa si no viene', async () => {
+    const { service, repo } = armar();
+    await service.log({ entityId: USUARIO }, AHORA);
+    expect(repo.auditLog.mock.calls[0][1].entityId).toBe(USUARIO);
+    await service.log({}, AHORA);
+    expect(repo.auditLog.mock.calls[1][1].entityId).toBeUndefined();
   });
 
   it('un rango invertido es un error del cliente', async () => {
@@ -246,14 +262,14 @@ describe('AuditQueryService.log', () => {
         {
           cursor: encodeKeysetCursor({
             t: '2026-10-24T10:00:00.000000Z',
-            i: 'a9',
+            i: '00000000-0000-4000-8000-0000000000a9',
           }),
         },
         AHORA,
       );
       expect(repo.auditLog.mock.calls[0][1].cursor).toEqual({
         t: '2026-10-24T10:00:00.000000Z',
-        i: 'a9',
+        i: '00000000-0000-4000-8000-0000000000a9',
       });
     });
   });
@@ -311,5 +327,33 @@ describe('AuditQueryService.dataAccess', () => {
     expect((await service.dataAccess({}, AHORA)).items[0].healthRisk).toBe(
       'LOW',
     );
+  });
+});
+
+describe('AuditQueryService.filterCatalog', () => {
+  it('no lee la bitácora y declara lo que no se mide', () => {
+    const { service, repo } = armar();
+    const catalogo = service.filterCatalog();
+    expect(repo.auditLog).not.toHaveBeenCalled();
+    expect(catalogo.notMeasured.map((n) => n.field)).toEqual([
+      'requestId',
+      'correlationId',
+    ]);
+    expect(catalogo.maxPageSize).toBe(200);
+    expect(catalogo.defaultWindowDays).toBe(30);
+  });
+
+  it('las opciones de los filtros salen de las mismas listas que valida el DTO', () => {
+    const { service } = armar();
+    const porNombre = new Map(
+      service.filterCatalog().filters.map((f) => [f.name, f]),
+    );
+    expect(porNombre.get('result')?.options).toEqual(['SUCCESS', 'FAILURE']);
+    expect(porNombre.get('method')?.options).toEqual([
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+    ]);
   });
 });

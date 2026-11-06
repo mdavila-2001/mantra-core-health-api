@@ -10,23 +10,13 @@ import {
   TENANT_ROLE_CONCEPT_BY_CODE,
 } from '../../modules/directory/directory.concepts';
 import { IamUsersService } from '../../modules/iam/application/services';
-import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
+import { CONCEPTS, SEED } from '../constants/concepts';
+import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 import { createdBy, touch } from '../persistence/audit-fields';
 import {
   PROVIDER_ACCOUNTS,
   type ProviderAccountSeed,
 } from './provider-accounts.catalog';
-
-/**
- * Actor determinista al que apuntan los `created_by_user_id` de estas altas.
- *
- * Es el mismo mecanismo que usa el administrador de arranque: el alta escribe
- * `created_by_user_id = actor.id`, que es FK a `iam.users`, así que quien crea
- * tiene que existir antes. Se reutiliza el actor de arranque en vez de inventar
- * otro: es el mismo hecho —«esto lo sembró la plataforma»— y dos actores para
- * lo mismo obligarían a explicar la diferencia.
- */
-const SEED_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
 
 /** Lo que el seed dejó hecho. */
 export interface ProviderAccountsResult {
@@ -115,6 +105,9 @@ export class ProviderAccountsSeedService {
     }
 
     const em = this.orm.em.fork();
+    // Toda cuenta y membresía que siembra cita al actor por `created_by_user_id`
+    // (FK a `iam.users`): en una base nueva tiene que existir antes (api#1230).
+    await ensureSeedActor(em);
     let created = 0;
     for (const account of PROVIDER_ACCOUNTS) {
       if (await this.ensureAccount(em, account, password)) created += 1;

@@ -119,7 +119,7 @@ deidentification-runs ──> procedencia DEIDENTIFY + linaje versión → manif
 /fhir/r5/Patient/:id/$everything ──> versiones vigentes, expandidas por el clúster del MPI
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un lote no se reabre**: el mismo identificador en la misma conexión es el mismo lote, y
   reabrirlo duplicaría todo lo que trae dentro.
@@ -178,7 +178,7 @@ Tipo de recurso, modo de ingesta, formato de payload, tipo y rol de relación, e
 rol de binding, propósito de uso, tipo de exportación, tipo de evento y visibilidad son catálogos
 abiertos y llegan como `*ConceptId`.
 
-## Permisos
+## Permissions
 
 `HEALTH_DATA_ADMIN` cubre el módulo. `INGESTION_WORKER` abre lotes, registra, cierra, proyecta y
 valida. `CLINICAL_INFORMATICIAN` enlaza al dominio y retira. `DATA_STEWARD` relaciona recursos y
@@ -187,7 +187,7 @@ exporta. `INTEROP_CONSUMER` consume `$everything`. `SYSTEM` proyecta la línea d
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la conexión al abrir el lote, sobre el lote al añadir registros y al cerrarlo,
 sobre el registro al proyectarlo, sobre el recurso en todo lo que lo versione, cuarentene, enlace o
@@ -203,7 +203,7 @@ calidad fallida, fusión de perfiles, de-identificación fallida, **toda exporta
 servicio de `$everything`**: los dos últimos son acceso a datos clínicos y quedan siempre
 registrados. No se loguean payloads, valores observados ni resúmenes clínicos.
 
-## Pruebas
+## Tests
 
 `yarn test --testPathPatterns=health_data` — 98 pruebas (82 de servicio + 16 de delegación de los dos
 controladores).

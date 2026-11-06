@@ -74,7 +74,8 @@ export class CredentialsRepository {
   /**
    * La credencial de contraseña activa para un identificador de **login**: el
    * sujeto exacto (documento o correo de alta) o, si es un correo, el mismo
-   * correo con otras mayúsculas o el correo de contacto de un paciente.
+   * correo con otras mayúsculas o el correo de contacto de un paciente o de una
+   * persona de apoyo (secretaria).
    *
    * El paciente se da de alta con su **documento** como sujeto y el correo queda
    * sólo como dato de contacto; sin este rodeo, la pantalla de ingreso —que
@@ -105,8 +106,15 @@ export class CredentialsRepository {
     if (bySubject.length === 1) return bySubject[0];
     if (bySubject.length > 1) return null;
 
+    // Patients and practitioners keep their email as an `OWNER_PATIENT` contact;
+    // support staff (a secretary created from «Mi equipo») keep it as an
+    // `OWNER_PERSON` contact, since they have no patient profile. Both count:
+    // only persons with an active account link resolve to a user below, so a
+    // third person a patient declared (also `OWNER_PERSON`) never logs anyone in.
     const contacts = await em.find(ContactPoints, {
-      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerTypeConceptId: {
+        $in: [CONCEPTS.OWNER_PATIENT, CONCEPTS.OWNER_PERSON],
+      },
       systemConceptId: CONCEPTS.CONTACT_EMAIL,
       value: { $ilike: email },
     });
@@ -201,6 +209,41 @@ export class CredentialsRepository {
         $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING],
       },
     });
+  }
+
+  /**
+   * El cerrojo de {@link lockSubjectForRegistration} para un **correo**: la
+   * clave va en minúsculas y sin espacios, así que «Juan@…» y «juan@…» esperan
+   * en la misma cola (#1000).
+   */
+  lockEmailForRegistration(em: EntityManager, email: string): Promise<unknown> {
+    return this.lockSubjectForRegistration(em, email.trim().toLowerCase());
+  }
+
+  /**
+   * Como {@link findLivePasswordBySubject}, pero para un **correo** y sin
+   * distinguir mayúsculas (#1000): el ingreso ya acepta el correo con otras
+   * mayúsculas (`findActivePasswordByLoginIdentifier`), así que dos cuentas
+   * cuyo sujeto sólo difiere en eso serían el mismo buzón y el ingreso no
+   * sabría a cuál entrar. Detecta también los sujetos guardados antes con
+   * mayúsculas; `_` y `%` se buscan literales.
+   */
+  async findLivePasswordByEmail(
+    em: EntityManager,
+    email: string,
+  ): Promise<AuthenticationCredentials | null> {
+    const [found] = await em.find(
+      AuthenticationCredentials,
+      {
+        methodConceptId: CONCEPTS.CRED_PASSWORD,
+        externalSubject: { $ilike: escapeLike(email.trim()) },
+        stateConceptId: {
+          $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING],
+        },
+      },
+      { limit: 1 },
+    );
+    return found ?? null;
   }
 
   /** Credencial de contraseña PENDIENTE (sin secreto) de un usuario; para su activación. */

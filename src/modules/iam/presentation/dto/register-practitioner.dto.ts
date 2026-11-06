@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsEmail,
@@ -34,6 +35,12 @@ import {
 // importa el archivo hoja, no el barrel de `practice/dto`, para no arrastrar
 // DTOs ajenos a este alta.
 import { CreateOwnSiteDto } from '../../../../common/dto/create-own-site.dto';
+
+/** Cuántas instituciones se pueden elegir en el alta. */
+export const MAX_REGISTRATION_INSTITUTIONS = 10;
+
+/** Cuántas aseguradoras se pueden elegir en el alta. */
+export const MAX_REGISTRATION_INSURERS = 20;
 
 /** Formato aceptado por los cuatro campos telefónicos del alta. */
 const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
@@ -802,6 +809,51 @@ export class RegisterPractitionerDto {
   credentials?: RegisterPractitionerCredentialDto[];
 
   /**
+   * Las instituciones de la plataforma con las que dice trabajar (propietario,
+   * 2026-10-28), por el slug con que aparecen en el buscador público
+   * (`GET /public/search/organizations`).
+   *
+   * Cada una crea un vínculo atado a la sede de esa organización, con el mismo
+   * estado inicial que `POST /profiles/practitioners/me/affiliations`:
+   * **pendiente** hasta que la organización lo apruebe —ése es su sello
+   * oficial—, o declarado si no tiene quién decida. Viaja en el alta por lo
+   * mismo que {@link ownSite}: aquella ruta exige sesión.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    maxItems: MAX_REGISTRATION_INSTITUTIONS,
+    description:
+      'Slugs públicos de organizaciones; cada una recibe un pedido de vínculo pendiente de su aprobación',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_REGISTRATION_INSTITUTIONS)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MaxLength(200, { each: true })
+  institutionSlugs?: string[];
+
+  /**
+   * Las aseguradoras con las que dice trabajar, del catálogo público
+   * (`GET /insurance-carrier-catalog`). Cada una recibe una solicitud
+   * pendiente (`insurance.practitioner_insurer_requests`) que aprueba o rechaza
+   * desde su bandeja.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    maxItems: MAX_REGISTRATION_INSURERS,
+    description:
+      'Aseguradoras del catálogo público; cada una recibe una solicitud pendiente de su aprobación',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_REGISTRATION_INSURERS)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  insurerCarrierIds?: string[];
+
+  /**
    * Atestación del solicitante: declara que lo que envía es verdadero y que
    * autoriza a la plataforma a verificarlo contra los documentos y registros
    * que corresponda. Se guarda con la fecha y la versión del texto que aceptó
@@ -1043,6 +1095,21 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   ownSiteId?: string;
+
+  /**
+   * Los vínculos pedidos a {@link RegisterPractitionerDto.institutionSlugs},
+   * en el mismo orden. Ausente si no eligió ninguna.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  affiliationIds?: string[];
+
+  /**
+   * Las solicitudes creadas para
+   * {@link RegisterPractitionerDto.insurerCarrierIds}. Ausente si no eligió
+   * ninguna.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  insurerRequestIds?: string[];
 }
 
 /**

@@ -11,6 +11,7 @@ import {
   IsUUID,
   Matches,
   MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -108,6 +109,48 @@ export class CreateMedicalGroupDto {
   @ValidateNested({ each: true })
   @Type(() => MedicalGroupMemberInputDto)
   members!: MedicalGroupMemberInputDto[];
+}
+
+/** Cuerpo de `PATCH /medical-groups/:id`: lo que el creador puede corregir. */
+export class UpdateMedicalGroupDto {
+  @ApiPropertyOptional({ description: 'Lugar de realización' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  locationText?: string;
+
+  @ApiPropertyOptional({
+    description: 'Notas adicionales; una cadena vacía las borra',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  notesText?: string;
+}
+
+/** Cuerpo de `PATCH /medical-groups/:id/members/:memberId`. */
+export class UpdateMedicalGroupMemberDto {
+  @ApiPropertyOptional({ description: 'Cargo/función dentro del grupo' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  roleTitle?: string;
+
+  @ApiPropertyOptional({ example: '500.00' })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
+  agreedPaymentAmount?: string;
+
+  @ApiPropertyOptional({
+    description: 'Términos adicionales del cargo; una cadena vacía los borra',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  additionalTermsText?: string;
 }
 
 /** Cuerpo de `POST /medical-groups/:id/reschedule-requests`. */

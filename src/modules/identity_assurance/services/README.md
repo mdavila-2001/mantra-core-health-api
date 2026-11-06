@@ -2,28 +2,28 @@
 
 Casos de uso, reglas de negocio y coordinación transaccional.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `identity-assertions.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-assertions.service.ts` | Casos de uso y reglas de negocio. |
+| `identity-assertions.service.ts` | Use cases and business rules. |
 | `identity-authorities.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-authorities.service.ts` | Casos de uso y reglas de negocio. |
+| `identity-authorities.service.ts` | Use cases and business rules. |
 | `identity-cases.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-cases.service.ts` | Casos de uso y reglas de negocio. |
+| `identity-cases.service.ts` | Use cases and business rules. |
 | `identity-checks.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-checks.service.ts` | Casos de uso y reglas de negocio. |
+| `identity-checks.service.ts` | Use cases and business rules. |
 | `identity-manual-review.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-manual-review.service.ts` | Casos de uso y reglas de negocio. |
+| `identity-manual-review.service.ts` | Use cases and business rules. |
 | `identity-policies.service.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `identity-policies.service.ts` | Casos de uso y reglas de negocio. |
-| `index.ts` | Punto de exportación pública de la carpeta. |
+| `identity-policies.service.ts` | Use cases and business rules. |
+| `index.ts` | Public export barrel for this folder. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

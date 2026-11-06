@@ -82,7 +82,7 @@ inscripción (active, 0%) ── lesson-progress (append-only) ──> % recalcu
                                                                     └─ revoke ──> revoked + CME reversed
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El curso se publica entero**: módulos y lecciones se crean en la misma transacción, numerados en
   el orden recibido, y la duración se **deriva** sumando las lecciones.
@@ -115,7 +115,7 @@ inscripción (active, 0%) ── lesson-progress (append-only) ──> % recalcu
   transacción; uno revocado cuyos créditos siguieran contando dejaría acreditación sin respaldo.
 - **Una reseña por autor y curso**, atribuida al usuario autenticado.
 
-## Permisos
+## Permissions
 
 `EDUCATION_ADMIN` cubre el módulo. `COURSE_AUTHOR` publica cursos, versiones y evaluaciones.
 `LEARNER` se inscribe, registra progreso, hace intentos y reseña. `SYSTEM` completa inscripciones,
@@ -137,7 +137,7 @@ ajeno responde `403` `LEARNER_ENROLLMENT_OWNER_REQUIRED`; el progreso, los inten
 finalización de la inscripción o el intento de otra persona responden `404`. El administrador
 debe indicar a quién inscribe.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre curso (serializa el versionado), cohorte (la capacidad), inscripción, intento y
 certificado. Los intentos previos de una evaluación se leen bloqueados: de ahí sale el número del
@@ -148,7 +148,7 @@ siguiente. `row_version` aporta bloqueo optimista automático.
 `operation: 'education.<área>.<acción>'`. Nivel `warn` al revocar un certificado. No se loguean
 respuestas de evaluación ni datos del aprendiz más allá del identificador.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/education --runInBand --silent` — 3 suites y 84
 pruebas aprobadas durante la revisión. Son pruebas unitarias con repositorios

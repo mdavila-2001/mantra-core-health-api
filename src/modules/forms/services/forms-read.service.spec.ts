@@ -54,6 +54,8 @@ function build() {
   const assignmentsRepo = {
     findAssignments: mockFn().mockResolvedValue([]),
     findSectionsByIds: mockFn().mockResolvedValue([]),
+    findActivePolicyForTenant: mockFn().mockResolvedValue(null),
+    countActiveAssignments: mockFn().mockResolvedValue(0),
   };
   const instancesRepo = {
     findById: mockFn(),
@@ -77,6 +79,7 @@ function build() {
   );
   return {
     service,
+    em,
     clinicalRead,
     emFork,
     setsRepo,
@@ -755,6 +758,24 @@ describe('FormsReadService', () => {
       expect(res.items).toHaveLength(1);
       expect(res.sections[0].name).toBe('Sección');
       expect(res.truncated).toBe(true);
+      // Under RLS a bare fork would not see the tenant set on the request.
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+    });
+  });
+
+  describe('getExtensionBudget', () => {
+    it('lee la política y el consumo sobre la transacción de la petición (RLS)', async () => {
+      const d = build();
+
+      const res = await d.service.getExtensionBudget('rt', TENANT);
+
+      expect(res).toEqual({
+        targetResourceConceptId: 'rt',
+        allowTenantFields: false,
+        used: 0,
+      });
+      expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
+      expect(d.em.fork).not.toHaveBeenCalledWith();
     });
   });
 });

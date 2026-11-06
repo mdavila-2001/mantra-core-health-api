@@ -7,6 +7,7 @@ import {
   encodeKeysetCursor,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
@@ -41,6 +42,7 @@ import {
   SelfRequestRoleAssignmentDto,
   RoleAssignmentTransitionDto,
   MyRoleAssignmentResponseDto,
+  JoinablePracticeResponseDto,
   ListPracticeRoleAssignmentsResponseDto,
 } from '../dto';
 
@@ -382,6 +384,64 @@ export class PracticeWorkforceService {
   }
 
   /**
+   * Las organizaciones a las que el profesional puede pedir vincularse.
+   *
+   * ## Por qué no es `GET /practices`
+   *
+   * Esa lectura se acota al tenant de la sesión: devuelve «las prácticas de mi
+   * organización activa». Quien quiere unirse a una organización **nueva** no
+   * pertenece a su tenant todavía, así que el selector de «Pedir una
+   * vinculación» salía siempre vacío. El autoservicio de
+   * {@link selfRequestAffiliation} ya cruza tenants a propósito (el profesional
+   * pide, la organización decide); la lista para elegir tiene que cruzarlos
+   * igual.
+   *
+   * Sólo devuelve id, nombre y tipo, y deja fuera:
+   * - los consultorios propios (`OFFICE`): son personales, no una organización
+   *   a la que uno se postule;
+   * - las organizaciones donde ya hay una vinculación viva (pendiente, activa o
+   *   suspendida), para no ofrecer una solicitud duplicada. Rechazadas y
+   *   finalizadas sí se ofrecen: volver a pedir es legítimo.
+   */
+  async listJoinablePractices(
+    actor: AuthenticatedUser,
+  ): Promise<JoinablePracticeResponseDto[]> {
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    const em = this.em.fork();
+    const [practices, assignments] = await Promise.all([
+      this.practicesRepo.findActive(em, PRAC.PRACTICE_ACTIVE),
+      this.rolesRepo.findByPractitioner(em, actor.practitionerProfileId),
+    ]);
+    const liveStatuses: string[] = [
+      PRAC.ROLE_ASSIGNMENT_PENDING,
+      PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+    ];
+    const alreadyLinked = new Set(
+      assignments
+        .filter((a) => liveStatuses.includes(a.statusConceptId))
+        .map((a) => a.practiceId),
+    );
+    return practices
+      .filter(
+        (p) =>
+          p.typeConceptId !== PRAC.PRACTICE_TYPE_OFFICE &&
+          !alreadyLinked.has(p.id),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        practiceType: p.typeConceptId,
+      }));
+  }
+
+  /**
    * URL pública de un archivo, o `null`. Nunca el identificador interno: ver
    * el mismo criterio en `CommunityPublicService.fileUrl`.
    */
@@ -393,13 +453,21 @@ export class PracticeWorkforceService {
    * CV-14 — página de vinculaciones profesional-organización de una práctica,
    * para que su administrador deje de aprobar a ciegas.
    *
-   * Autorización: la lista es de quien administra **esa** organización
-   * (A-6). Una práctica inexistente responde 404; el administrador de otra
-   * organización recibe 403.
+   * Aislamiento primero: si hay tenant en el contexto (`X-Tenant-Id` o la
+   * membresía única) y la práctica no es de él, 404 igual que una inexistente,
+   * **antes** de mirar quién administra — un 403 ahí confirmaría que la
+   * práctica de la otra organización existe (CV-14). 188588ccb había cambiado
+   * este corte por la regla A-6 sola, y con ella un administrador de plataforma
+   * dentro del tenant B leía las vinculaciones de una práctica del tenant A.
+   *
+   * Autorización, ya dentro del tenant: la lista es de quien administra **esa**
+   * organización (A-6); el resto recibe 403. Sin tenant en el contexto (un
+   * actor de plataforma sin cabecera, modo sistema) decide sólo A-6.
    *
    * @param practiceId - Práctica cuyas vinculaciones se listan.
    * @param actor - Quien pide la lista: administrador de esa organización.
    * @param options - Filtro de estado, cursor y tope de página.
+   * @throws ResourceNotFoundException si la práctica no existe o es de otro tenant.
    * @throws ForbiddenException si el actor no administra esa organización (A-6).
    */
   async listPracticeAssignments(
@@ -408,6 +476,16 @@ export class PracticeWorkforceService {
     options: { statusConceptId?: string; cursor?: string; limit?: number },
   ): Promise<ListPracticeRoleAssignmentsResponseDto> {
     const em = this.em.fork();
+    const contextTenantId = getCurrentTenantId();
+    if (contextTenantId !== undefined) {
+      const practice = await this.practicesRepo.findById(em, practiceId);
+      assertPracticeScope(
+        practice,
+        practice?.tenantId,
+        contextTenantId,
+        'Práctica no encontrada',
+      );
+    }
     await this.administration.assertCanAdministerPractice(
       em,
       practiceId,

@@ -132,6 +132,15 @@ export class AuditLogQueryDto extends AuditPageQueryDto {
   @IsString()
   @MaxLength(100)
   entity?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Recurso afectado (`entity_id`): la historia de un registro concreto. Sin índice propio: la consulta siempre queda acotada por la ventana de fechas',
+  })
+  @IsOptional()
+  @IsUUID()
+  entityId?: string;
 }
 
 /** Filtros de `GET /audit/data-access` (lecturas de datos sensibles). */
@@ -218,4 +227,38 @@ export class DataAccessPageDto {
   @ApiProperty({ type: [DataAccessEntryDto] }) items!: DataAccessEntryDto[];
   @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
   @ApiProperty() limit!: number;
+}
+
+/** Un filtro que `GET /audit/log` acepta. */
+export class AuditFilterDto {
+  @ApiProperty({ example: 'userId' }) name!: string;
+  @ApiProperty({ enum: ['uuid', 'datetime', 'enum', 'text'] }) type!: string;
+  @ApiProperty({ description: 'Qué filtra, para la etiqueta de la pantalla' })
+  description!: string;
+  @ApiProperty({
+    type: [String],
+    description: 'Valores admitidos (vacío si el filtro es libre)',
+  })
+  options!: string[];
+}
+
+/** Un dato que se pidió y esta API no puede dar, con el motivo. */
+export class AuditNotMeasuredDto {
+  @ApiProperty({ example: 'correlationId' }) field!: string;
+  @ApiProperty() reason!: string;
+}
+
+/** Respuesta de `GET /audit/log/filter-catalog`. */
+export class AuditFilterCatalogDto {
+  @ApiProperty({ type: [AuditFilterDto] }) filters!: AuditFilterDto[];
+  @ApiProperty() defaultWindowDays!: number;
+  @ApiProperty() defaultPageSize!: number;
+  @ApiProperty() maxPageSize!: number;
+  @ApiProperty({
+    example: 'recorded_at desc, id desc',
+    description: 'Orden fijo y determinista; no admite otro',
+  })
+  order!: string;
+  @ApiProperty({ type: [AuditNotMeasuredDto] })
+  notMeasured!: AuditNotMeasuredDto[];
 }

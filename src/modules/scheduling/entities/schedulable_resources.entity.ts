@@ -95,4 +95,18 @@ export class SchedulableResources {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a care space.
+   */
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
+  /**
+   * Whether patient booking requests wait for the practitioner to accept them
+   * (v4.2.88). `false` makes them born confirmed. A service slot still follows
+   * its offering's own `requires_approval`.
+   */
+  @Property({ fieldName: 'requires_approval', type: 'boolean', default: true })
+  requiresApproval: boolean = true;
 }

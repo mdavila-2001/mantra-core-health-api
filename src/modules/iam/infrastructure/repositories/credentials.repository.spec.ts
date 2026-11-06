@@ -115,6 +115,42 @@ describe('CredentialsRepository.findActivePasswordByLoginIdentifier', () => {
     ).resolves.toBe(cred);
   });
 
+  it('support staff log in with the email of their person contact (OWNER_PERSON)', async () => {
+    const cred = { id: 'c2', userId: 'u2' };
+    const d = build({
+      contacts: [{ ownerId: 'p2' }],
+      links: [{ userId: 'u2' }],
+      byUser: cred,
+    });
+
+    await expect(
+      d.repo.findActivePasswordByLoginIdentifier(
+        d.em,
+        'secretaria@example.com',
+      ),
+    ).resolves.toBe(cred);
+    expect(d.find).toHaveBeenCalledWith(
+      ContactPoints,
+      expect.objectContaining({
+        ownerTypeConceptId: {
+          $in: [CONCEPTS.OWNER_PATIENT, CONCEPTS.OWNER_PERSON],
+        },
+      }),
+    );
+  });
+
+  it('a person contact without an account (a declared third person) does not log anyone in', async () => {
+    const d = build({
+      contacts: [{ ownerId: 'tercero' }],
+      links: [],
+      byUser: { id: 'c1' },
+    });
+
+    await expect(
+      d.repo.findActivePasswordByLoginIdentifier(d.em, 'tercero@example.com'),
+    ).resolves.toBeNull();
+  });
+
   it('un correo de contacto compartido por dos cuentas no entra', async () => {
     const d = build({
       contacts: [{ ownerId: 'p1' }, { ownerId: 'p2' }],
@@ -125,5 +161,51 @@ describe('CredentialsRepository.findActivePasswordByLoginIdentifier', () => {
     await expect(
       d.repo.findActivePasswordByLoginIdentifier(d.em, 'familia@example.com'),
     ).resolves.toBeNull();
+  });
+});
+
+/** #1000: el alta detecta el mismo buzón aunque cambien las mayúsculas. */
+describe('CredentialsRepository: correo de alta sin distinguir mayúsculas', () => {
+  it('findLivePasswordByEmail busca con ILIKE literal, viva o pendiente', async () => {
+    const cred = { id: 'c1' };
+    const d = build({ bySubject: [cred] });
+
+    await expect(
+      d.repo.findLivePasswordByEmail(d.em, ' Ana_Perez@Example.COM '),
+    ).resolves.toBe(cred);
+    expect(d.find).toHaveBeenCalledWith(
+      AuthenticationCredentials,
+      {
+        methodConceptId: CONCEPTS.CRED_PASSWORD,
+        externalSubject: { $ilike: 'Ana\\_Perez@Example.COM' },
+        stateConceptId: {
+          $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING],
+        },
+      },
+      { limit: 1 },
+    );
+  });
+
+  it('findLivePasswordByEmail devuelve null si no hay ninguna', async () => {
+    const d = build();
+
+    await expect(
+      d.repo.findLivePasswordByEmail(d.em, 'nadie@example.com'),
+    ).resolves.toBeNull();
+  });
+
+  it('lockEmailForRegistration toma el cerrojo sobre el correo en minúsculas', async () => {
+    const execute = fn().mockResolvedValue([]);
+    const repo = new CredentialsRepository();
+
+    await repo.lockEmailForRegistration(
+      { execute } as never,
+      ' Ana@Example.COM ',
+    );
+
+    expect(execute).toHaveBeenCalledWith(
+      'SELECT pg_advisory_xact_lock(hashtext(?))',
+      ['iam:credential-subject:ana@example.com'],
+    );
   });
 });

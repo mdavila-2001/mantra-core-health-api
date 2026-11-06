@@ -39,8 +39,10 @@ import {
   ListReferralTargetServicesQueryDto,
   RespondReferralDto,
   RespondReferralResultDto,
+  ReferralArrivalDto,
   ReferralListItemDto,
   ReferralResponseDto,
+  ReferralTransferDto,
   ReferralTargetListDto,
   ReferralTargetServiceListDto,
   SearchReferralTargetsQueryDto,
@@ -136,6 +138,44 @@ export class ReferralsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ReferralResponseDto> {
     return this.referralsService.counterReferral(id, dto, actor);
+  }
+
+  /** v4274: quien deriva completa o corrige los datos de salida del traslado. */
+  @Audited({
+    action: 'REFERRAL_TRANSFER_UPDATED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/transfer')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Completar o corregir el traslado de una derivación',
+  })
+  @ApiOkResponse({ type: ReferralResponseDto })
+  updateTransfer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReferralTransferDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.updateTransfer(id, dto, actor);
+  }
+
+  /** v4274: el destino registra la llegada del paciente. */
+  @Audited({
+    action: 'REFERRAL_ARRIVAL_RECORDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/arrival')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Registrar la llegada del paciente derivado' })
+  @ApiOkResponse({ type: ReferralResponseDto })
+  recordArrival(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReferralArrivalDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.recordArrival(id, dto, actor);
   }
 
   /** v4266: anula una derivación pendiente o aceptada. */

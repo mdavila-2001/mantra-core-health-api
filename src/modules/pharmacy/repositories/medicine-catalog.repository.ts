@@ -83,8 +83,8 @@ export class MedicineCatalogRepository {
          join terminology.code_system_versions v on v.id = c.code_system_version_id
          join terminology.code_systems s on s.id = v.code_system_id
         where c.id = ?
-          and s.internal_code = any(?::text[])`,
-      [id, [...MEDICINE_CODE_SYSTEMS]],
+          and s.internal_code in (${markers(MEDICINE_CODE_SYSTEMS)})`,
+      [id, ...MEDICINE_CODE_SYSTEMS],
     );
     if (rows.length === 0) return null;
     const [product] = await this.hydrate(em, [rows[0].id]);
@@ -101,6 +101,13 @@ export class MedicineCatalogRepository {
     query: MedicineCatalogSearch,
   ): Promise<MedicineCatalogPage> {
     const text = query.text?.trim() ?? '';
+    const systems = sourceCodeSystems(query.source);
+    if (systems.length === 0) return { items: [], truncated: false };
+    const searched = [
+      MEDICINE_PROPERTY.INGREDIENTS,
+      MEDICINE_PROPERTY.ATC,
+      MEDICINE_PROPERTY.HOLDER,
+    ];
     const pattern = `%${escapeLike(text)}%`;
     const prefix = `${escapeLike(text)}%`;
     const rows = await em.execute<{ id: string }[]>(
@@ -108,38 +115,34 @@ export class MedicineCatalogRepository {
          from terminology.catalog_concepts c
          join terminology.code_system_versions v on v.id = c.code_system_version_id
          join terminology.code_systems s on s.id = v.code_system_id
-        where s.internal_code = any(?::text[])
+        where s.internal_code in (${markers(systems)})
           and (?::text = '' or c.display ilike ? or c.code ilike ?
                or exists (
                  select 1 from terminology.concept_properties p
                   where p.concept_id = c.id
-                    and p.property_code = any(?::text[])
+                    and p.property_code in (${markers(searched)})
                     and p.value_json::text ilike ?))
           and (?::text is null or exists (
                  select 1 from terminology.concept_properties p
                   where p.concept_id = c.id
                     and p.property_code = ?
                     and p.value_json @> to_jsonb(?::text)))
-        order by array_position(?::text[], s.internal_code),
+        order by array_position(array[${markers(MEDICINE_CODE_SYSTEMS)}]::text[], s.internal_code),
                  (c.display ilike ?) desc,
                  c.display,
                  c.id
         limit ?`,
       [
-        sourceCodeSystems(query.source),
+        ...systems,
         text,
         pattern,
         pattern,
-        [
-          MEDICINE_PROPERTY.INGREDIENTS,
-          MEDICINE_PROPERTY.ATC,
-          MEDICINE_PROPERTY.HOLDER,
-        ],
+        ...searched,
         pattern,
         query.atc ?? null,
         MEDICINE_PROPERTY.ATC,
         query.atc ?? null,
-        [...MEDICINE_CODE_SYSTEMS],
+        ...MEDICINE_CODE_SYSTEMS,
         prefix,
         // Uno de más: si vuelve, la lista fue recortada.
         query.limit + 1,
@@ -148,6 +151,31 @@ export class MedicineCatalogRepository {
     const truncated = rows.length > query.limit;
     const ids = rows.slice(0, query.limit).map((r) => r.id);
     return { items: await this.hydrate(em, ids), truncated };
+  }
+
+  /** Products whose ATC starts with a prefix («A03B»): symptom searches. */
+  async searchByAtcPrefixes(
+    em: EntityManager,
+    prefixes: readonly string[],
+    limit: number,
+  ): Promise<MedicineCatalogProduct[]> {
+    if (prefixes.length === 0) return [];
+    const like = prefixes.map((prefix) => `${escapeLike(prefix)}%`);
+    const rows = await em.execute<{ id: string }[]>(
+      `select c.id from terminology.catalog_concepts c
+         join terminology.code_system_versions v on v.id = c.code_system_version_id
+         join terminology.code_systems s on s.id = v.code_system_id
+         join terminology.concept_properties p on p.concept_id = c.id and p.property_code = ?
+        where s.internal_code in (${markers(MEDICINE_CODE_SYSTEMS)})
+          and exists (select 1 from jsonb_array_elements_text(p.value_json) a
+                       where a.value like any (array[${markers(like)}]::text[]))
+        order by c.display, c.id limit ?`,
+      [MEDICINE_PROPERTY.ATC, ...MEDICINE_CODE_SYSTEMS, ...like, limit],
+    );
+    return this.hydrate(
+      em,
+      rows.map((row) => row.id),
+    );
   }
 
   /**
@@ -166,10 +194,10 @@ export class MedicineCatalogRepository {
          join terminology.code_system_versions v on v.id = c.code_system_version_id
          join terminology.code_systems s on s.id = v.code_system_id
         where s.internal_code = ?
-          and c.code = any(?::text[])
+          and c.code in (${markers(atc)})
         order by c.code
         limit 1`,
-      [VADEMECUM_CODE_SYSTEM, [...atc]],
+      [VADEMECUM_CODE_SYSTEM, ...atc],
     );
     return rows[0]?.id ?? null;
   }
@@ -209,6 +237,17 @@ function sourceCodeSystems(source: MedicineSource | undefined): string[] {
   return source === undefined
     ? [...MEDICINE_CODE_SYSTEMS]
     : MEDICINE_CODE_SYSTEMS.filter((cs) => cs === `${source}-medicamentos`);
+}
+
+/**
+ * Un marcador por valor, para `in (…)` y `array[…]`. El driver no convierte un
+ * arreglo de JavaScript en uno de Postgres: `any(?::text[])` con un arreglo
+ * llegaba como lista separada por comas y la consulta fallaba con un error de
+ * sintaxis (la búsqueda del catálogo oficial respondía 500). Los valores siguen
+ * yendo como parámetros, nunca dentro del SQL.
+ */
+function markers(values: readonly unknown[]): string {
+  return values.map(() => '?').join(', ');
 }
 
 /** `%` y `_` escritos por la persona son letras, no comodines. */

@@ -56,6 +56,49 @@ Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): `accession_specimens`,
 | `POST /diagnostics/specimens/:id/containers` | sesión | `diagnostics-specimens` |
 | `POST /diagnostics/containers/:id/custody-events` | sesión | `diagnostics-specimens` |
 
+## Portal del laboratorio y del centro de imagen (`/diagnostics/lab/*`)
+
+Tres controllers (`diagnostics-lab-portal`, `diagnostics-lab-results`, `diagnostics-lab-uploads`),
+todos con `LabStaffGuard` y acotados al tenant activo. El catálogo de servicios del mismo prefijo
+(`/diagnostics/lab/services`, `/categories`) vive en `diagnostic_units`.
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `GET /diagnostics/lab/summary` | Resumen: ofertas de la unidad del tenant, órdenes sin resultado, archivos y actividad |
+| `GET /diagnostics/lab/orders` | Órdenes con `performer_tenant_id` = tenant (laboratorio, patología, imagen), hasta 500 |
+| `POST /diagnostics/lab/orders/:orderId/transitions` | `RECEIVE`, `PROCESS`, `REJECT`, `CANCEL` (estas dos con `reason` obligatorio); paso fuera de orden: 409 |
+| `GET /diagnostics/lab/result-targets` | Órdenes procesadas a las que se adjunta un resultado |
+| `GET /diagnostics/lab/result-files` | Archivos subidos (`kind`, `orderId`, `includeWithdrawn`), sin búsqueda por texto en la URL |
+| `POST /diagnostics/lab/result-files/search` | Lo mismo con `q` en el cuerpo (puede ser un nombre de paciente) |
+| `GET /diagnostics/lab/result-files/:id/content` | Bytes del archivo |
+| `POST /diagnostics/lab/result-files/:id/withdrawal` | Retira el archivo con motivo; queda en el historial |
+| `POST /diagnostics/lab/result-uploads` | Abre una subida por partes (orden procesada; tamaño ≤ `FILE_STORAGE_MAX_SIZE_BYTES`) |
+| `PUT /diagnostics/lab/result-uploads/:uploadId/parts/:index` | Una parte en `application/octet-stream` |
+| `POST /diagnostics/lab/result-uploads/:uploadId/complete` | Guarda el archivo y lo publica en el informe |
+| `DELETE /diagnostics/lab/result-uploads/:uploadId` | Cancela la subida |
+
+El estado de la orden no se guarda como tal: se deriva de filas del ejecutor. `RECEIVED` es una acesión
+(`ACC_RECEIVED`; en laboratorio con tipo de muestra, también el espécimen recibido), `PROCESSED`
+una orden de trabajo completada (`WO_COMPLETED` o `completed_at`), `UPLOADED` un archivo en la
+última versión del informe y `CANCELLED` la orden revocada por quien la pidió.
+
+`CANCEL` (desde `DRAFT` o `RECEIVED`) y `REJECT` (desde `RECEIVED`) valen para toda orden, imagen
+incluida, y exigen `reason`. La orden es del tenant solicitante y el ejecutor sólo la lee, así que
+cada uno agrega una fila propia a `diagnostics.service_request_performer_events` (append-only,
+`custodian_tenant_id` = ejecutor, tipos `PERF_CANCELLED` / `PERF_REJECTED`); el evento más reciente
+decide `CANCELLED` o `REJECTED` y su motivo. `REJECT` además rechaza los espécimenes recibidos, si
+los hay (`specimen_rejection_events`, igual que UC-20-02). Una orden cancelada o rechazada deja de
+poder reservarse, y un paso que el estado no admite responde 409.
+
+`GET /diagnostics/lab/summary` cuenta `unavailable` (servicios apagados con «disponible hoy») y
+agrupa `byCategory` por las categorías del laboratorio (`diagnostic_service_categories`).
+
+Un archivo subido entra por `FileUploadService.upload` y se publica en una versión nueva de
+`clinical.diagnostic_reports` del ejecutor, liberada y visible al paciente (la que lee
+`GET /diagnostic-results/me`). Retirarlo publica otra versión sin él, con el motivo en
+`amendment_reason_text`. Las partes de una subida viven en la memoria del proceso hasta `complete`:
+una subida no sobrevive a un reinicio ni cambia de instancia.
+
 ## Endpoints (UC → ruta / método)
 
 | UC | Método y ruta | Descripción |

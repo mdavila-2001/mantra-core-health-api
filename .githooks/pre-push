@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Pre-push gate: nothing leaves this machine without a valid proof for the exact commit
+# being pushed (branch contains the current dev, the merge result builds, the change was
+# exercised against the real database). See .claude/skills/pre-push-gate/SKILL.md and
+# docs/trabajo/2026-11-05-historial-regresiones/INFORME.md.
+#
+# `git push --no-verify` skips this hook: that cannot be prevented client-side, so the real
+# lock must be server-side (required CI check + "branch up to date with dev").
+
+set -eu
+
+es_cero() {
+  case "$1" in
+    *[!0]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+while read -r ref_local sha_local ref_remota sha_remoto; do
+  # Deleting a remote branch pushes no code.
+  if es_cero "$sha_local"; then
+    continue
+  fi
+  if ! node scripts/pre-push-gate.mjs verify --base "${GATE_BASE:-dev}" --sha "$sha_local"; then
+    echo ""
+    echo "  ✗ pre-push-gate blocks the push. Run: node scripts/pre-push-gate.mjs run --int <spec>"
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0

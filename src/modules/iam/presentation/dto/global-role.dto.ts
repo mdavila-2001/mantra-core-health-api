@@ -21,7 +21,13 @@ export type GlobalRole =
    * No se concede al registrarse: la matrícula nace `PENDING` y declararla no
    * es probarla. Lo concede un administrador, que es el acto que la verifica.
    */
-  | 'CLINICIAN';
+  | 'CLINICIAN'
+  /**
+   * Secretaria (personal de apoyo hospitalario). Lo da su alta; concederlo a
+   * mano no abre ningún hospital: sin perfil de secretaria ni vínculos
+   * aceptados, sus rutas responden 403 o vacío.
+   */
+  | 'SUPPORT_STAFF';
 /** Acción sobre el rol. */
 export type RoleAction = 'GRANT' | 'REVOKE';
 
@@ -38,6 +44,7 @@ export class GlobalRoleDto {
       'PATIENT',
       'PRACTITIONER',
       'CLINICIAN',
+      'SUPPORT_STAFF',
     ],
   })
   @IsIn([
@@ -47,6 +54,7 @@ export class GlobalRoleDto {
     'PATIENT',
     'PRACTITIONER',
     'CLINICIAN',
+    'SUPPORT_STAFF',
   ])
   role!: GlobalRole;
 

@@ -71,6 +71,9 @@ export class InventoryReservationLines {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
+  /**
+   * Valor de unit price amount mantenido por la instancia.
+   */
   @Property({
     fieldName: 'unit_price_amount',
     columnType: 'numeric',
@@ -78,6 +81,9 @@ export class InventoryReservationLines {
   })
   unitPriceAmount?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   currencyConceptId?: string;
 

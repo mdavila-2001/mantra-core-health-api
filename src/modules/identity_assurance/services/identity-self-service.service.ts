@@ -38,6 +38,10 @@ import {
   EmailVerifications,
 } from '../../iam/entities';
 import type { IdentityVerificationCases } from '../entities';
+import {
+  assertIsPractitioner,
+  assertNotPractitioner,
+} from './practitioner-identity-path';
 import type {
   CaseCheckDto,
   RequestLicenseVerificationDto,
@@ -137,6 +141,7 @@ export class IdentitySelfServiceService {
   ): Promise<VerificationRequestResponseDto> {
     return this.em.transactional(async (tx) => {
       const personId = await this.resolvePersonId(tx, actor.id);
+      await assertNotPractitioner(this.practitionersRepo, tx, personId);
       return this.openVerification(
         tx,
         IDENTITY_CARD_VERTICAL,
@@ -154,7 +159,7 @@ export class IdentitySelfServiceService {
   ): Promise<VerificationRequestResponseDto> {
     return this.em.transactional(async (tx) => {
       const personId = await this.resolvePersonId(tx, actor.id);
-      await this.assertIsPractitioner(tx, personId);
+      await assertIsPractitioner(this.practitionersRepo, tx, personId);
       return this.openVerification(
         tx,
         PRACTITIONER_IDENTITY_VERTICAL,
@@ -177,7 +182,7 @@ export class IdentitySelfServiceService {
   ): Promise<VerificationRequestResponseDto> {
     return this.em.transactional(async (tx) => {
       const personId = await this.resolvePersonId(tx, actor.id);
-      await this.assertIsPractitioner(tx, personId);
+      await assertIsPractitioner(this.practitionersRepo, tx, personId);
 
       if (!dto.jurisdictionAuthorizationId) {
         throw new PreconditionFailedException(
@@ -585,25 +590,6 @@ export class IdentitySelfServiceService {
       );
     }
     return link.personId;
-  }
-
-  /**
-   * Comprueba que la persona tenga perfil profesional.
-   *
-   * @param tx - Contexto de persistencia o transacción activa.
-   * @param personId - Persona a comprobar.
-   * @throws PreconditionFailedException si no es profesional.
-   */
-  private async assertIsPractitioner(
-    tx: EntityManager,
-    personId: string,
-  ): Promise<void> {
-    const practitioner = await this.practitionersRepo.findById(tx, personId);
-    if (!practitioner) {
-      throw new PreconditionFailedException(
-        'La cuenta no tiene un perfil profesional',
-      );
-    }
   }
 
   /**

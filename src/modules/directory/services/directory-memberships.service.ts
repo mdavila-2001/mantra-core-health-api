@@ -29,6 +29,7 @@ import {
   TransferMembershipDto,
 } from '../dto';
 import { TenantAdministrationService } from './tenant-administration.service';
+import { MembershipInviteService } from './membership-invite.service';
 
 /**
  * Casos de uso sobre membresías: incorporación (UC-04-05), asignación a branch
@@ -53,79 +54,34 @@ export class DirectoryMembershipsService {
     private readonly branchesRepo: BranchesRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
+    private readonly inviteService: MembershipInviteService,
   ) {
     this.logger.setContext(DirectoryMembershipsService.name);
   }
 
   /**
-   * UC-04-05: incorpora un usuario al tenant (evita membresía activa duplicada).
+   * UC-04-05: invites a user to the tenant. The membership is created
+   * `MEMBERSHIP_INVITED` and grants nothing until the invitee accepts it.
    *
-   * @param tenantId - Organización a la que se incorpora.
-   * @param dto - Usuario, rol y alcance.
-   * @param actor - Quién invita.
-   * @param membershipId - Id fijo de la membresía. Solo lo pasa un proceso
-   *   interno (los seeds); el endpoint nunca lo recibe del cliente.
+   * @param tenantId - Organization the user joins.
+   * @param dto - User, role and scope.
+   * @param actor - Who invites.
+   * @param membershipId - Fixed membership id; internal processes (seeds) only.
+   * @param options - `{ activate: true }` creates it already active; trusted
+   *   internal callers only, the endpoint never passes it.
    */
   async invite(
     tenantId: string,
     dto: CreateMembershipDto,
     actor: AuthenticatedUser,
     membershipId?: string,
+    options: { activate?: boolean } = {},
   ): Promise<MembershipResponseDto> {
-    this.logger.info(
-      { operation: 'directory.membership.invite', tenantId, actorId: actor.id },
-      'Inviting member',
-    );
-    return this.em.transactional(async (tx) => {
-      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
-      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
-      // registrada no podía gestionar a su propia gente.
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
-      // Incorporar a alguien como OWNER es cambiar quién es dueño: lo decide un
-      // OWNER o la plataforma, nunca un ADMIN.
-      if (dto.role === 'OWNER') {
-        await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
-      }
-      const existing = await this.membershipsRepo.findActiveByUserTenant(
-        tx,
-        dto.userId,
-        tenantId,
-        DIR.MEMBERSHIP_ACTIVE,
-      );
-      if (existing) {
-        throw new ConflictException(
-          'El usuario ya tiene una membresía activa en el tenant',
-          {
-            tenantId,
-            userId: dto.userId,
-          },
-        );
-      }
-
-      const membership = this.membershipsRepo.create(tx, {
-        id: membershipId,
-        userId: dto.userId,
-        tenantId,
-        tenantRoleConceptId: TENANT_ROLE_CONCEPT_BY_CODE[dto.role ?? 'STAFF'],
-        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
-        accessScopeConceptId:
-          ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope ?? 'ALL_TENANT'],
-        primaryBranchId: dto.primaryBranchId,
-        startDate: new Date(),
-        invitedByUserId: actor.id,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'directory.membership.invite',
-          membershipId: membership.id,
-        },
-        'Member invited',
-      );
-      return this.toResponse(membership);
+    const membership = await this.inviteService.invite(tenantId, dto, actor, {
+      membershipId,
+      activate: options.activate,
     });
+    return this.toResponse(membership);
   }
 
   /**

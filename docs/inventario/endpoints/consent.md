@@ -5,7 +5,7 @@
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 27 (27 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 19 · BAJO 8
-- **Tablas distintas que tocan:** 41
+- **Tablas distintas que tocan:** 43
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/consent.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -16,8 +16,8 @@
 | 2 | POST | `/consent/consents` | Capturar consentimiento de directiva de privacidad | MEDIO | 7 | SECURITY_ADMIN |
 | 3 | PATCH | `/consent/consents/{id}/provisions` | Actualizar provisiones granulares (data class / actor / acción) | MEDIO | 5 | SECURITY_ADMIN |
 | 4 | POST | `/consent/consents/{id}/withdraw` | Revocar/retirar consentimiento y disparar re-evaluación de accesos | MEDIO | 7 | SECURITY_ADMIN |
-| 5 | GET | `/consent/encounters/{encounterId}/informed-consent` | Consentimientos informados registrados en el encuentro | BAJO | 20 | CLINICIAN, PRACTITIONER |
-| 6 | POST | `/consent/encounters/{encounterId}/informed-consent` | Registrar el consentimiento informado del encuentro | MEDIO | 21 | CLINICIAN, PRACTITIONER |
+| 5 | GET | `/consent/encounters/{encounterId}/informed-consent` | Consentimientos informados registrados en el encuentro | BAJO | 22 | CLINICIAN, PRACTITIONER |
+| 6 | POST | `/consent/encounters/{encounterId}/informed-consent` | Registrar el consentimiento informado del encuentro | MEDIO | 23 | CLINICIAN, PRACTITIONER |
 | 7 | POST | `/consent/hipaa-authorizations` | Otorgar autorización HIPAA de divulgación | MEDIO | 5 | SECURITY_ADMIN |
 | 8 | POST | `/consent/hipaa-authorizations/{id}/revoke` | Revocar autorización HIPAA | MEDIO | 2 | SECURITY_ADMIN |
 | 9 | POST | `/consent/internal/expiration-sweep` | Expirar consentimientos y autorizaciones vencidas (barrido) | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
@@ -33,12 +33,12 @@
 | 19 | GET | `/consent/practitioner-access-requests/mine` | Mis solicitudes de vínculo pendientes de decisión | BAJO | 4 | PATIENT |
 | 20 | POST | `/consent/privacy-restrictions` | Aplicar restricción de privacidad que afecta RLS clínico | MEDIO | 3 | SECURITY_ADMIN |
 | 21 | POST | `/consent/processing-legal-bases` | Establecer/versionar base legal de procesamiento | MEDIO | 3 | SECURITY_ADMIN |
-| 22 | GET | `/consent/treatment-informed-consents` | Listar consentimientos informados de tratamiento | BAJO | 20 | CLINICIAN, PRACTITIONER |
-| 23 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 21 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
-| 24 | GET | `/consent/treatment-informed-consents/{id}` | Leer un consentimiento informado de tratamiento | BAJO | 20 | CLINICIAN, PRACTITIONER |
-| 25 | POST | `/consent/treatment-informed-consents/{id}/evidence` | Adjuntar evidencia de firma al consentimiento de tratamiento | MEDIO | 18 | CLINICIAN, PRACTITIONER |
-| 26 | PATCH | `/consent/treatment-informed-consents/{id}/post-emergency-information` | Registrar la información posterior a una emergencia | MEDIO | 19 | CLINICIAN, PRACTITIONER |
-| 27 | PATCH | `/consent/treatment-informed-consents/{id}/withdraw` | Revocar un consentimiento informado de tratamiento | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 22 | GET | `/consent/treatment-informed-consents` | Listar consentimientos informados de tratamiento | BAJO | 22 | CLINICIAN, PRACTITIONER |
+| 23 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 23 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
+| 24 | GET | `/consent/treatment-informed-consents/{id}` | Leer un consentimiento informado de tratamiento | BAJO | 22 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/consent/treatment-informed-consents/{id}/evidence` | Adjuntar evidencia de firma al consentimiento de tratamiento | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/consent/treatment-informed-consents/{id}/post-emergency-information` | Registrar la información posterior a una emergencia | MEDIO | 21 | CLINICIAN, PRACTITIONER |
+| 27 | PATCH | `/consent/treatment-informed-consents/{id}/withdraw` | Revocar un consentimiento informado de tratamiento | MEDIO | 24 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -67,10 +67,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consent-evidence.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -172,10 +172,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -321,11 +321,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consents.controller.ts:83` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -446,11 +446,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consents.controller.ts:62` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -539,7 +539,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.list` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:61). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `EncounterInformedConsentsService.listForEncounter`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+`GET /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.list` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:61). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `EncounterInformedConsentsService.listForEncounter`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
@@ -547,9 +547,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -563,18 +563,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter | `src/modules/consent/services/encounter-informed-consents.service.ts:112` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -638,7 +640,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (31 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (31 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -646,11 +648,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:42` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -664,19 +666,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral | `src/modules/consent/services/treatment-informed-consents.service.ts:634` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:182` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -870,10 +874,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -987,9 +991,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:54` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1063,8 +1067,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/consent/controllers/consent-sweep.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1137,8 +1141,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1218,11 +1222,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consent-me.controller.ts:83` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1322,8 +1326,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1401,8 +1405,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1478,8 +1482,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1551,10 +1555,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/patient-objections.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1661,11 +1665,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/patient-objections.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/patient-objections.controller.ts:57` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1765,10 +1769,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1790,7 +1794,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -1892,11 +1896,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1921,7 +1925,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -2027,8 +2031,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2102,10 +2106,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/privacy-restrictions.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2212,10 +2216,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/processing-legal-bases.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2310,7 +2314,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.list` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:73). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+`GET /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.list` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:73). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
@@ -2318,9 +2322,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2334,18 +2338,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → TreatmentInformedConsentsRepository.findByPatient | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:160` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2453,7 +2459,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (34 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.create`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (34 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.create`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -2461,10 +2467,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2478,19 +2484,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral | `src/modules/consent/services/treatment-informed-consents.service.ts:634` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:182` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Cuerpo — DTO `CreateTreatmentInformedConsentDto` · `application/json`
 
@@ -2678,7 +2686,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /consent/treatment-informed-consents/{id}` la atiende `TreatmentInformedConsentsController.get` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:85). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+`GET /consent/treatment-informed-consents/{id}` la atiende `TreatmentInformedConsentsController.get` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:85). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
@@ -2686,9 +2694,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2702,18 +2710,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2819,7 +2829,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/treatment-informed-consents/{id}/evidence` la atiende `TreatmentInformedConsentsController.recordEvidence` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:143). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecordTreatmentConsentEvidenceDto` (6 campos, 0 obligatorios). Delega en `TreatmentInformedConsentsService.recordEvidence`. Crea filas en consent.consent_evidence. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
+`POST /consent/treatment-informed-consents/{id}/evidence` la atiende `TreatmentInformedConsentsController.recordEvidence` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:143). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecordTreatmentConsentEvidenceDto` (6 campos, 0 obligatorios). Delega en `TreatmentInformedConsentsService.recordEvidence`. Crea filas en consent.consent_evidence. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
 
 ### Requerimientos
 
@@ -2827,11 +2837,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2845,16 +2855,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `consent.consent_evidence` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ConsentEvidenceService.record → ConsentEvidenceRepository.create | `src/modules/consent/repositories/consent-evidence.repository.ts:82` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2943,7 +2955,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /consent/treatment-informed-consents/{id}/post-emergency-information` la atiende `TreatmentInformedConsentsController.postEmergencyInformation` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:120). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `PostEmergencyInformationDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.recordPostEmergencyInformation`. Actualiza consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`PATCH /consent/treatment-informed-consents/{id}/post-emergency-information` la atiende `TreatmentInformedConsentsController.postEmergencyInformation` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:120). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `PostEmergencyInformationDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.recordPostEmergencyInformation`. Actualiza consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
@@ -2951,11 +2963,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2969,17 +2981,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
 | `consent.treatment_informed_consents` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation | `src/modules/consent/services/treatment-informed-consents.service.ts:456` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -3107,7 +3121,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /consent/treatment-informed-consents/{id}/withdraw` la atiende `TreatmentInformedConsentsController.withdraw` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:100). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `WithdrawTreatmentInformedConsentDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.withdraw`. Crea filas en consent.consent_events. Actualiza clinical_ext.referrals, consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /consent/treatment-informed-consents/{id}/withdraw` la atiende `TreatmentInformedConsentsController.withdraw` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:100). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `WithdrawTreatmentInformedConsentDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.withdraw`. Crea filas en consent.consent_events. Actualiza clinical_ext.referrals, consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -3115,11 +3129,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3133,20 +3147,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:386` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:384` |
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
 | `consent.treatment_informed_consents` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:378` |
 | `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 

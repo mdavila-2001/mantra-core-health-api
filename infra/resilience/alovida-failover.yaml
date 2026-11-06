@@ -52,30 +52,14 @@ http:
         certResolver: letsencrypt
       service: alovida-ha-mockup
 
-    alovida-ha-test-http:
-      rule: Host(`app.alovidasalud.arauzsoftware.com`) || Host(`www.app.alovidasalud.arauzsoftware.com`) || Host(`test.62.169.18.132.sslip.io`)
-      entryPoints: [http]
-      priority: 100000
-      middlewares: [alovida-redirect-https@file]
-      service: alovida-ha-test
-    alovida-ha-test-https:
-      rule: Host(`app.alovidasalud.arauzsoftware.com`) || Host(`www.app.alovidasalud.arauzsoftware.com`) || Host(`test.62.169.18.132.sslip.io`)
-      entryPoints: [https]
-      priority: 100000
-      middlewares: [alovida-ha-mark, alovida-ha-retry]
-      tls:
-        certResolver: letsencrypt
-      service: alovida-ha-test
-
-
     alovida-ha-dev-http:
-      rule: Host(`app.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`)
+      rule: Host(`dev.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`) || Host(`dev.alovida.arauzsoftware.com`)
       entryPoints: [http]
       priority: 100000
       middlewares: [alovida-redirect-https@file]
       service: alovida-ha-dev
     alovida-ha-dev-https:
-      rule: Host(`app.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`)
+      rule: Host(`dev.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`) || Host(`dev.alovida.arauzsoftware.com`)
       entryPoints: [https]
       priority: 100000
       middlewares: [alovida-ha-mark, alovida-ha-retry]
@@ -83,6 +67,31 @@ http:
         certResolver: letsencrypt
       service: alovida-ha-dev
 
+
+    # Producción (master). /ai/ sigue yendo al servicio de IA, como manda su regla
+    # de Coolify para este dominio; sin este router el failover se lo quitaría.
+    alovida-ha-prod-ai:
+      rule: Host(`app.alovidasalud.com`) && PathPrefix(`/ai/`)
+      entryPoints: [https]
+      priority: 100001
+      middlewares: [alovida-ai-strip@file]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-ai@docker
+    alovida-ha-prod-http:
+      rule: Host(`app.alovidasalud.com`)
+      entryPoints: [http]
+      priority: 100000
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-ha-prod
+    alovida-ha-prod-https:
+      rule: Host(`app.alovidasalud.com`)
+      entryPoints: [https]
+      priority: 100000
+      middlewares: [alovida-ha-mark, alovida-ha-retry]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-ha-prod
   services:
     alovida-ha-mockup:
       failover:
@@ -102,24 +111,6 @@ http:
         healthCheck: { path: /auth, hostname: demo.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
         servers: [{ url: "http://alovida-standby-mockup:4000" }]
 
-    alovida-ha-test:
-      failover:
-        healthCheck: {}
-        service: alovida-ha-test-live
-        fallback: alovida-ha-test-standby
-    alovida-ha-test-live:
-      loadBalancer:
-        passHostHeader: true
-        serversTransport: alovida-fast-dial
-        healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 2s, timeout: 2s }
-        servers: [{ url: "http://alovida-live-test:80" }]
-    alovida-ha-test-standby:
-      loadBalancer:
-        passHostHeader: true
-        serversTransport: alovida-fast-dial
-        healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
-        servers: [{ url: "http://alovida-standby-test:80" }]
-
     alovida-ha-dev:
       failover:
         healthCheck: {}
@@ -129,11 +120,29 @@ http:
       loadBalancer:
         passHostHeader: true
         serversTransport: alovida-fast-dial
-        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 2s, timeout: 2s }
+        healthCheck: { path: /auth, hostname: dev.62.169.18.132.sslip.io, interval: 2s, timeout: 2s }
         servers: [{ url: "http://alovida-live-dev:80" }]
     alovida-ha-dev-standby:
       loadBalancer:
         passHostHeader: true
         serversTransport: alovida-fast-dial
-        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 5s, timeout: 3s }
+        healthCheck: { path: /auth, hostname: dev.62.169.18.132.sslip.io, interval: 5s, timeout: 3s }
         servers: [{ url: "http://alovida-standby-dev:80" }]
+
+    alovida-ha-prod:
+      failover:
+        healthCheck: {}
+        service: alovida-ha-prod-live
+        fallback: alovida-ha-prod-standby
+    alovida-ha-prod-live:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 2s, timeout: 2s }
+        servers: [{ url: "http://alovida-live-prod:80" }]
+    alovida-ha-prod-standby:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 5s, timeout: 3s }
+        servers: [{ url: "http://alovida-standby-prod:80" }]

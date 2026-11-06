@@ -184,7 +184,7 @@ DEBIT/CREDIT, estados de periodo, roles de subledger, componentes de pasivo,
 monedas, etc.). Para columnas `*_concept_id` cuyo valor ya existe en el catálogo
 transversal se usa `CONCEPTS.STATE_ACTIVE` / `CONCEPTS.FILE_CATEGORY_DOCUMENT`.
 
-## Permisos
+## Permissions
 
 Guard global de auth, sin `@Public()`. Los comandos administrativos exigen
 `SECURITY_ADMIN`; el flujo de borrador, clasificación y adjuntos admite además

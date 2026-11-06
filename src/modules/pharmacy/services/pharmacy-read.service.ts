@@ -33,6 +33,7 @@ import {
   type ProductSearchFilter,
 } from '../repositories';
 import { catalogStatusOf, isInStock } from './pharmacy-catalog-rules';
+import { searchProductRows } from '../search/product-search';
 
 /**
  * Lecturas del directorio de farmacias del tenant activo (carril E2).
@@ -62,7 +63,7 @@ export class PharmacyReadService {
   /** El directorio: farmacias publicadas del tenant, con sus números. */
   async listPharmacies(): Promise<PharmacyDirectoryResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
 
@@ -100,7 +101,7 @@ export class PharmacyReadService {
   /** El perfil de una farmacia: su ficha y sus sedes con dirección resuelta. */
   async getPharmacy(id: string): Promise<PharmacyDetailDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacy = await this.readRepo.findVisibleById(em, tenantId, id);
     // 404 también para la de otro tenant o la no publicada: confirmar que ese
     // uuid existe ya filtra información.
@@ -231,7 +232,7 @@ export class PharmacyReadService {
     now: Date = new Date(),
   ): Promise<PharmacySiteListResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
 
@@ -313,21 +314,18 @@ export class PharmacyReadService {
   /**
    * Búsqueda de productos publicados en los catálogos del tenant.
    *
-   * `conceptId` acota por el medicamento del vademécum: es el mismo
-   * `medication_concept_id` con que la receta identifica el fármaco, así que
-   * una prescripción encuentra sus productos sin traducir nada. `pharmacyId`
-   * acota a lo publicado por una sola farmacia — una no visible o ajena no
-   * existe para esta lectura, así que devuelve vacío sin filtrar información.
+   * `conceptId`: medicamento de la receta; `pharmacyId`: una farmacia (ajena →
+   * vacío). El texto (nombre, uso, tipeo) lo resuelve `searchProductRows`.
    *
    * @param filter - Texto, medicamento del vademécum, y farmacia puntual.
    * @param limit - Tope del listado.
    */
   async searchProducts(
-    filter: ProductSearchFilter & { pharmacyId?: string },
+    filter: ProductSearchFilter & { pharmacyId?: string; exact?: boolean },
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) {
       return { items: [], limit, truncated: false };
@@ -342,7 +340,8 @@ export class PharmacyReadService {
       return { items: [], limit, truncated: false };
     }
 
-    const rows = await this.readRepo.findActiveProducts(
+    const { rows, correctedQuery } = await searchProductRows(
+      this.readRepo,
       em,
       pharmacyIds,
       filter,
@@ -359,6 +358,7 @@ export class PharmacyReadService {
       items: await this.toCatalogDtos(em, page, nameByPharmacy, false),
       limit,
       truncated,
+      correctedQuery,
     };
   }
 
@@ -445,7 +445,7 @@ export class PharmacyReadService {
     productId?: string,
   ): Promise<PharmacySitePricesResponseDto> {
     const tenantId = marketplaceTenantScope();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     const site = await this.readRepo.findActiveSiteById(em, siteId);
     const pharmacy = site
@@ -473,10 +473,16 @@ export class PharmacyReadService {
       now,
     );
 
-    // Lo marcado «no tengo» (o con conteo en 0) no se ofrece en la sede (P47).
-    const products = await this.readRepo.findSellableProductsByIds(
-      em,
-      unique(prices.map((price) => price.pharmacyProductId)),
+    // Lo marcado «no tengo» no se ofrece (P47), y de lo demás sólo lo que la
+    // sede tiene según la regla por sede: la misma que leen el buscador y el
+    // pedido, así un precio no ofrece lo que la sede no puede vender.
+    const priced = unique(prices.map((price) => price.pharmacyProductId));
+    const [sellable, availableAtSite] = await Promise.all([
+      this.readRepo.findSellableProductsByIds(em, priced),
+      this.readRepo.findAvailableProductIdsAtSite(em, site.id, priced),
+    ]);
+    const products = sellable.filter((product) =>
+      availableAtSite.has(product.id),
     );
     const concepts = await this.readRepo.findConcepts(
       em,
@@ -703,6 +709,7 @@ export function toProductReadDto(
         status: catalogStatusOf(row.statusConceptId),
         stock: row.stockQuantity ?? null,
         minStock: row.minStockQuantity ?? null,
+        outOfStockDeclared: row.outOfStockDeclared ?? false,
         imageFileIds: [...(extras.imageFileIds ?? [])],
       }
     : {};

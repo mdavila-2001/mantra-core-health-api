@@ -1,21 +1,21 @@
 # src / common / errors
 
-Agrupa los componentes relacionados con **errors** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **errors**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `domain.exception.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `error-codes.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `domain.exception.ts` | Support implementation or resource for this folder. |
+| `error-codes.ts` | Support implementation or resource for this folder. |
 | `system-error-reasons.ts` | Catálogo de `reason` de sistema (guards, pipes de query, readiness, secretos). `code` dice el tipo HTTP; `reason` dice cuál fue. |
 | `reasoned-http-exceptions.ts` | Fábricas `badRequestWithReason`/`forbiddenWithReason`/`unauthorizedWithReason`/`serviceUnavailableWithReason`: devuelven la clase de Nest (los `instanceof` existentes siguen valiendo) con cuerpo `{ code, message, reason, details }`. |
 | `secret-cipher.error.ts` | `SecretCipherError`: secreto cifrado ilegible; el filtro lo sirve como 500 `INTERNAL` con `reason: SECRET_CIPHER_INVALID`. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

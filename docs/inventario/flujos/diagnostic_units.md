@@ -3,12 +3,12 @@
 # Flujos del módulo `diagnostic_units`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 21 (17 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 24 (20 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [diagnostic_units](../endpoints/diagnostic_units.md)
 
 ## Proceso: Módulo 23 — Diagnostic Units, Studies, Specialists and Prices
 
-- **Código:** `diagnostic_units` · **Agrupación:** MIXTO · **Operaciones:** 21
+- **Código:** `diagnostic_units` · **Agrupación:** MIXTO · **Operaciones:** 24
 - **Actores:** Cualquier sesión válida · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/diagnostic_units/README.md`
@@ -35,12 +35,15 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | `UC-23-07` | Fijar/versionar precio (append-only) | POST /price-schedules/{scheduleId}/study-prices | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-23-08` | Retirar (soft-delete) oferta | DELETE /diagnostic-study-offerings/{id} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /study-prices/{priceId}/close | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-23-09` | Actualizar estado/calibración de equipo | PATCH /diagnostic-equipment/{id} | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-23-09` | Actualizar estado/calibración de equipo | PATCH /diagnostic-equipment/{id} | Cualquier sesión válida | ALTO | 14 |
 |  |  | POST /diagnostic-unit-sites/{siteId}/equipment | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-23-10` | Asignar especialista | POST /diagnostic-units/{id}/practitioner-assignments | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-23-11` | Renovar acreditación | POST /diagnostic-unit-accreditations/{id}/renew | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /diagnostic-units/{id}/accreditations | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-23-12` | Reconstruir proyección del perfil público | POST /diagnostic-units/{id}/reproject | SECURITY_ADMIN | BAJO | 1 |
+| `ctrl:DiagnosticEquipmentController` | Operaciones de DiagnosticEquipmentController que el README no asigna a un caso de uso | GET /diagnostic-equipment/{id} | Cualquier sesión válida | BAJO | 12 |
+|  |  | GET /diagnostic-equipment/{id}/mwl-station | Cualquier sesión válida | BAJO | 11 |
+|  |  | POST /diagnostic-equipment/{id}/resource | Cualquier sesión válida | ALTO | 16 |
 | `ctrl:DiagnosticUnitsController` | Operaciones de DiagnosticUnitsController que el README no asigna a un caso de uso | GET /diagnostic-units/{id}/administration | SECURITY_ADMIN | BAJO | 11 |
 |  |  | GET /diagnostic-units/administration | SECURITY_ADMIN | BAJO | 5 |
 |  |  | GET /diagnostic-units/search | Cualquier sesión válida | BAJO | 10 |
@@ -63,7 +66,12 @@ flowchart LR
   t19[("community.public_profiles")]:::tabla
   t20[("diagnostic_units.diagnostic_unit_specialties")]:::tabla
   t24[("diagnostic_units.diagnostic_study_components")]:::tabla
-  t32[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
+  t30[("delegated_access.organization_user_assignments")]:::tabla
+  t31[("directory.branch_memberships")]:::tabla
+  t32[("directory.tenant_memberships")]:::tabla
+  e34>"diagnostic_units.equipment.located"]:::evento
+  e35>"diagnostic_units.equipment.status_changed"]:::evento
+  t38[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
   t13[("+4 tablas más")]
   subgraph s0["Directorio P3 · Listar unidades activas y verificadas del tenant activo"]
     o1["GET /diagnostic-units"]:::op
@@ -96,19 +104,20 @@ flowchart LR
     o27["DELETE /diagnostic-study-offerings/{id}"]:::op
     o28["POST /study-prices/{priceId}/close"]:::op
   end
+  t33[("+8 tablas más")]
   subgraph s9["UC-23-09 · Actualizar estado/calibración de equipo"]
     o29["PATCH /diagnostic-equipment/{id}"]:::op
-    o30["POST /diagnostic-unit-sites/{siteId}/equipment"]:::op
+    o36["POST /diagnostic-unit-sites/{siteId}/equipment"]:::op
   end
   subgraph s10["UC-23-10 · Asignar especialista"]
-    o31["POST /diagnostic-units/{id}/practitioner-assignments"]:::op
+    o37["POST /diagnostic-units/{id}/practitioner-assignments"]:::op
   end
   subgraph s11["UC-23-11 · Renovar acreditación"]
-    o33["POST /diagnostic-unit-accreditations/{id}/renew"]:::op
-    o34["POST /diagnostic-units/{id}/accreditations"]:::op
+    o39["POST /diagnostic-unit-accreditations/{id}/renew"]:::op
+    o40["POST /diagnostic-units/{id}/accreditations"]:::op
   end
   subgraph s12["UC-23-12 · Reconstruir proyección del perfil público"]
-    o35["POST /diagnostic-units/{id}/reproject"]:::op
+    o41["POST /diagnostic-units/{id}/reproject"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -176,64 +185,81 @@ flowchart LR
   o28 -->|"ACTUALIZA"| t11
   o28 -->|"LEE"| t11
   o28 -->|"LEE"| t6
-  a15 --> o29
-  o29 -->|"ACTUALIZA"| t3
+  a2 --> o29
+  o29 -->|"LEE"| t30
   o29 -->|"LEE"| t3
   o29 -->|"LEE"| t5
   o29 -->|"LEE"| t6
-  a15 --> o30
-  o30 -->|"CREA"| t3
-  o30 -->|"LEE"| t3
-  o30 -->|"ACTUALIZA"| t5
-  o30 -->|"LEE"| t5
-  o30 -->|"LEE"| t6
-  a15 --> o31
-  o31 -->|"CREA"| t32
-  o31 -->|"LEE"| t32
-  o31 -->|"LEE"| t5
-  o31 -->|"CREA"| t20
-  o31 -->|"LEE"| t20
-  o31 -->|"LEE"| t6
-  a15 --> o33
-  o33 -->|"ACTUALIZA"| t12
-  o33 -->|"CREA"| t12
-  o33 -->|"LEE"| t12
-  o33 -->|"LEE"| t6
-  a15 --> o34
-  o34 -->|"CREA"| t12
-  o34 -->|"LEE"| t5
-  o34 -->|"LEE"| t6
-  a15 --> o35
-  o35 -->|"LEE"| t6
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t32
+  o29 -.-> t33
+  o29 -->|"evento"| e34
+  o29 -->|"evento"| e35
+  a15 --> o36
+  o36 -->|"CREA"| t3
+  o36 -->|"LEE"| t3
+  o36 -->|"ACTUALIZA"| t5
+  o36 -->|"LEE"| t5
+  o36 -->|"LEE"| t6
+  a15 --> o37
+  o37 -->|"CREA"| t38
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t5
+  o37 -->|"CREA"| t20
+  o37 -->|"LEE"| t20
+  o37 -->|"LEE"| t6
+  a15 --> o39
+  o39 -->|"ACTUALIZA"| t12
+  o39 -->|"CREA"| t12
+  o39 -->|"LEE"| t12
+  o39 -->|"LEE"| t6
+  a15 --> o40
+  o40 -->|"CREA"| t12
+  o40 -->|"LEE"| t5
+  o40 -->|"LEE"| t6
+  a15 --> o41
+  o41 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:DiagnosticUnitsController`
+### Diagrama 2 de 2 — etapas `ctrl:DiagnosticEquipmentController`, `ctrl:DiagnosticUnitsController`
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN"]):::actor
-  a15(["Cualquier sesión válida"]):::actor
-  t3[("diagnostic_units.diagnostic_equipment")]:::tabla
-  t4[("diagnostic_units.diagnostic_price_schedules")]:::tabla
-  t5[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t6[("diagnostic_units.diagnostic_study_prices")]:::tabla
-  t7[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
-  t8[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
-  t11[("diagnostic_units.diagnostic_unit_sites")]:::tabla
-  t12[("diagnostic_units.diagnostic_units")]:::tabla
-  t13[("terminology.catalog_concepts")]:::tabla
-  t16[("common.addresses")]:::tabla
-  t17[("community.service_reviews")]:::tabla
-  t9[("+5 tablas más")]
-  t18[("+4 tablas más")]
-  subgraph s0["ctrl:DiagnosticUnitsController · Operaciones de DiagnosticUnitsController que e…"]
-    o1["GET /diagnostic-units/{id}/administration"]:::op
-    o10["GET /diagnostic-units/administration"]:::op
-    o14["GET /diagnostic-units/search"]:::op
+  a2(["Cualquier sesión válida"]):::actor
+  a16(["SECURITY_ADMIN"]):::actor
+  t3[("delegated_access.organization_user_assignments")]:::tabla
+  t4[("diagnostic_units.diagnostic_equipment")]:::tabla
+  t5[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t6[("diagnostic_units.diagnostic_units")]:::tabla
+  t7[("directory.branch_memberships")]:::tabla
+  t8[("directory.tenant_memberships")]:::tabla
+  e14>"diagnostic_units.equipment.resource_linked"]:::evento
+  t17[("diagnostic_units.diagnostic_price_schedules")]:::tabla
+  t18[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t19[("diagnostic_units.diagnostic_study_prices")]:::tabla
+  t20[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
+  t21[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
+  t24[("terminology.catalog_concepts")]:::tabla
+  t26[("common.addresses")]:::tabla
+  t27[("community.service_reviews")]:::tabla
+  t9[("+6 tablas más")]
+  t11[("+5 tablas más")]
+  t13[("+10 tablas más")]
+  subgraph s0["ctrl:DiagnosticEquipmentController · Operaciones de DiagnosticEquipmentControll…"]
+    o1["GET /diagnostic-equipment/{id}"]:::op
+    o10["GET /diagnostic-equipment/{id}/mwl-station"]:::op
+    o12["POST /diagnostic-equipment/{id}/resource"]:::op
+  end
+  t22[("+5 tablas más")]
+  t28[("+4 tablas más")]
+  subgraph s1["ctrl:DiagnosticUnitsController · Operaciones de DiagnosticUnitsController que e…"]
+    o15["GET /diagnostic-units/{id}/administration"]:::op
+    o23["GET /diagnostic-units/administration"]:::op
+    o25["GET /diagnostic-units/search"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -245,18 +271,43 @@ flowchart LR
   o1 -.-> t9
   a2 --> o10
   o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t4
   o10 -->|"LEE"| t5
-  o10 -->|"LEE"| t11
-  o10 -->|"LEE"| t12
-  o10 -->|"LEE"| t13
-  a15 --> o14
-  o14 -->|"LEE"| t16
-  o14 -->|"LEE"| t17
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t4
-  o14 -->|"LEE"| t5
-  o14 -->|"LEE"| t6
-  o14 -.-> t18
+  o10 -->|"LEE"| t6
+  o10 -->|"LEE"| t7
+  o10 -->|"LEE"| t8
+  o10 -.-> t11
+  a2 --> o12
+  o12 -->|"LEE"| t3
+  o12 -->|"LEE"| t4
+  o12 -->|"LEE"| t5
+  o12 -->|"LEE"| t6
+  o12 -->|"LEE"| t7
+  o12 -->|"LEE"| t8
+  o12 -.-> t13
+  o12 -->|"evento"| e14
+  a16 --> o15
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  o15 -->|"LEE"| t19
+  o15 -->|"LEE"| t20
+  o15 -->|"LEE"| t21
+  o15 -.-> t22
+  a16 --> o23
+  o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t18
+  o23 -->|"LEE"| t5
+  o23 -->|"LEE"| t6
+  o23 -->|"LEE"| t24
+  a2 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t17
+  o25 -->|"LEE"| t18
+  o25 -->|"LEE"| t19
+  o25 -.-> t28
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -269,7 +320,104 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. PATCH /diagnostic-equipment/{id}
+#### 1. GET /diagnostic-equipment/{id}
+
+Detalle de un equipo con su sala (F5a)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a EquipmentF5aService.detail"]:::llamada
+  n2 --> n3
+  n4["Llama a EquipmentF5aService.authorize"]:::llamada
+  n3 --> n4
+  n5["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
+  n4 --> n5
+  n6["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n6 --> n7
+  n8[("LEE diagnostic_units.diagnostic_unit_sites · LEE diagnostic_units.diagnostic_units · LEE practice.practice_si…")]:::efecto
+  n7 --> n8
+  n9{"equipment.careSpaceId"}:::decision
+  n8 --> n9
+  n10["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n10 --> n11
+  n12{"'careSpaceId' in target"}:::decision
+  n11 --> n12
+  n13{"!found || found.tenantId !== tenantId"}:::decision
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15{"'unitId' in target"}:::decision
+  n12 -->|"no"| n15
+  n16{"!found || found.tenantId !== tenantId"}:::decision
+  n15 -->|"sí"| n16
+  n17(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18{"!site || site.tenantId !== tenantId"}:::decision
+  n13 -->|"no"| n18
+  n16 -->|"no"| n18
+  n15 -->|"no"| n18
+  n19(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a InfrastructureAccessService.decide"]:::llamada
+  n18 -->|"no"| n20
+  n21(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n20 --> n21
+  n22["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n9 -->|"no"| n22
+  n23["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n22 --> n23
+  n24{"'careSpaceId' in target"}:::decision
+  n23 --> n24
+  n25{"!found || found.tenantId !== tenantId"}:::decision
+  n24 -->|"sí"| n25
+  n26(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"'unitId' in target"}:::decision
+  n24 -->|"no"| n27
+  n28{"!found || found.tenantId !== tenantId"}:::decision
+  n27 -->|"sí"| n28
+  n29(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n28 -->|"sí"| n29
+  n30{"!site || site.tenantId !== tenantId"}:::decision
+  n25 -->|"no"| n30
+  n28 -->|"no"| n30
+  n27 -->|"no"| n30
+  n31(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a InfrastructureAccessService.decide"]:::llamada
+  n30 -->|"no"| n32
+  n33(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n32 --> n33
+  n34["Llama a EquipmentF5aService.view"]:::llamada
+  n35[("LEE terminology.catalog_concepts · LEE practice.care_spaces")]:::efecto
+  n34 --> n35
+  n36(("200 Responde con éxito")):::ok
+  n35 --> n36
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. PATCH /diagnostic-equipment/{id}
 
 Actualizar estado/calibración de un equipo
 
@@ -278,8 +426,10 @@ Actualizar estado/calibración de un equipo
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 409 | `CONFLICT` | ConflictException: El AE Title ya está en uso en la sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sala es de otra sede; PreconditionFailedException: El espacio no aloja equipos; PreconditionFailedException: AE Title inválido (≤ 16 caracteres ASCII, sin barra invertida) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -291,55 +441,148 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
+  n5["Llama a EquipmentF5aService.authorize"]:::llamada
   n4 --> n5
-  n6["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
+  n6["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
   n5 --> n6
-  n7[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n7["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
   n6 --> n7
-  n8["Llama a DiagnosticUnitScopeService.siteOrFail"]:::llamada
+  n8[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
   n7 --> n8
-  n9["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n9[("LEE diagnostic_units.diagnostic_unit_sites · LEE diagnostic_units.diagnostic_units · LEE practice.practice_si…")]:::efecto
   n8 --> n9
-  n10(["404 NOT_FOUND {message}"]):::error
+  n10{"equipment.careSpaceId"}:::decision
   n9 --> n10
-  n11{"!siteId"}:::decision
-  n12["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
-  n11 -->|"sí"| n12
-  n13(["404 NOT_FOUND {message}"]):::error
+  n11["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n11 --> n12
+  n13{"'careSpaceId' in target"}:::decision
   n12 --> n13
-  n14["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
-  n11 -->|"no"| n14
-  n15(["404 NOT_FOUND {message}"]):::error
-  n14 --> n15
-  n16{"dto.manufacturer !== undefined"}:::decision
-  n17[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n14{"!found || found.tenantId !== tenantId"}:::decision
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16{"'unitId' in target"}:::decision
+  n13 -->|"no"| n16
+  n17{"!found || found.tenantId !== tenantId"}:::decision
   n16 -->|"sí"| n17
-  n18[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n17 --> n18
-  n16 -->|"no"| n18
-  n19{"dto.model !== undefined"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n18(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n17 -->|"sí"| n18
+  n19{"!site || site.tenantId !== tenantId"}:::decision
+  n14 -->|"no"| n19
+  n17 -->|"no"| n19
+  n16 -->|"no"| n19
+  n20(["404 NOT_FOUND Sitio no encontrado"]):::error
   n19 -->|"sí"| n20
-  n21{"dto.lastCalibrationAt !== undefined"}:::decision
-  n20 --> n21
+  n21["Llama a InfrastructureAccessService.decide"]:::llamada
   n19 -->|"no"| n21
-  n22[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n21 -->|"sí"| n22
-  n23{"dto.nextCalibrationDueAt !== undefined"}:::decision
-  n22 --> n23
-  n21 -->|"no"| n23
-  n24[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n23 -->|"sí"| n24
-  n25{"dto.operationalStatusConceptId !== undefined"}:::decision
+  n22(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n21 --> n22
+  n23["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n10 -->|"no"| n23
+  n24["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n23 --> n24
+  n25{"'careSpaceId' in target"}:::decision
   n24 --> n25
-  n23 -->|"no"| n25
-  n26[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n26{"!found || found.tenantId !== tenantId"}:::decision
   n25 -->|"sí"| n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
-  n25 -->|"no"| n27
+  n27(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"'unitId' in target"}:::decision
+  n25 -->|"no"| n28
+  n29{"!found || found.tenantId !== tenantId"}:::decision
+  n28 -->|"sí"| n29
+  n30(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n29 -->|"sí"| n30
+  n31{"!site || site.tenantId !== tenantId"}:::decision
+  n26 -->|"no"| n31
+  n29 -->|"no"| n31
+  n28 -->|"no"| n31
+  n32(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a InfrastructureAccessService.decide"]:::llamada
+  n31 -->|"no"| n33
+  n34(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n33 --> n34
+  n35{"dto.careSpaceId !== undefined"}:::decision
+  n36{"dto.careSpaceId"}:::decision
+  n35 -->|"sí"| n36
+  n37["Llama a DiagnosticEquipmentService.assertRoom"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.care_spaces")]:::efecto
+  n37 --> n38
+  n39{"!row || row.tenant_id !== tenantId"}:::decision
+  n38 --> n39
+  n40(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n39 -->|"sí"| n40
+  n41{"row.practice_site_id !== row.unit_practice_site_id"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED La sala es de otra sede"]):::error
+  n41 -->|"sí"| n42
+  n43{"!code || !FUNCTION_PROFILE_BY_CODE.get(code)?.hostsEquipment"}:::decision
+  n41 -->|"no"| n43
+  n44(["422 PRECONDITION_FAILED El espacio no aloja equipos"]):::error
+  n43 -->|"sí"| n44
+  n45["Llama a EquipmentF5aService.authorizeDestination"]:::llamada
+  n43 -->|"no"| n45
+  n36 -->|"no"| n45
+  n46{"!careSpaceId"}:::decision
+  n45 --> n46
+  n47["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n46 -->|"sí"| n47
+  n48["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n47 --> n48
+  n49{"'careSpaceId' in target"}:::decision
+  n48 --> n49
+  n50{"!found || found.tenantId !== tenantId"}:::decision
+  n49 -->|"sí"| n50
+  n51(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n50 -->|"sí"| n51
+  n52{"'unitId' in target"}:::decision
+  n49 -->|"no"| n52
+  n53{"!found || found.tenantId !== tenantId"}:::decision
+  n52 -->|"sí"| n53
+  n54(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n53 -->|"sí"| n54
+  n55{"!site || site.tenantId !== tenantId"}:::decision
+  n50 -->|"no"| n55
+  n53 -->|"no"| n55
+  n52 -->|"no"| n55
+  n56(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n55 -->|"sí"| n56
+  n57["Llama a InfrastructureAccessService.decide"]:::llamada
+  n55 -->|"no"| n57
+  n58(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n57 --> n58
+  n59["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n46 -->|"no"| n59
+  n60["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n59 --> n60
+  n61{"'careSpaceId' in target"}:::decision
+  n60 --> n61
+  n62{"!found || found.tenantId !== tenantId"}:::decision
+  n61 -->|"sí"| n62
+  n63(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n62 -->|"sí"| n63
+  n64{"'unitId' in target"}:::decision
+  n61 -->|"no"| n64
+  n65{"!found || found.tenantId !== tenantId"}:::decision
+  n64 -->|"sí"| n65
+  n66(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n65 -->|"sí"| n66
+  n67{"!site || site.tenantId !== tenantId"}:::decision
+  n62 -->|"no"| n67
+  n65 -->|"no"| n67
+  n64 -->|"no"| n67
+  n68(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n67 -->|"sí"| n68
+  n69["Llama a InfrastructureAccessService.decide"]:::llamada
+  n67 -->|"no"| n69
+  n70(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n69 --> n70
+  n71["… el resto del árbol (24 nodos) está en el JSON del inventario"]:::corte
+  n35 -->|"no"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -348,7 +591,232 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. DELETE /diagnostic-study-offerings/{id}
+#### 3. GET /diagnostic-equipment/{id}/mwl-station
+
+Estación MWL del equipo (F5a)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a EquipmentF5aService.mwlStation"]:::llamada
+  n2 --> n3
+  n4["Llama a EquipmentF5aService.authorize"]:::llamada
+  n3 --> n4
+  n5["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
+  n4 --> n5
+  n6["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n6 --> n7
+  n8[("LEE diagnostic_units.diagnostic_unit_sites · LEE diagnostic_units.diagnostic_units · LEE practice.practice_si…")]:::efecto
+  n7 --> n8
+  n9{"equipment.careSpaceId"}:::decision
+  n8 --> n9
+  n10["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n10 --> n11
+  n12{"'careSpaceId' in target"}:::decision
+  n11 --> n12
+  n13{"!found || found.tenantId !== tenantId"}:::decision
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15{"'unitId' in target"}:::decision
+  n12 -->|"no"| n15
+  n16{"!found || found.tenantId !== tenantId"}:::decision
+  n15 -->|"sí"| n16
+  n17(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18{"!site || site.tenantId !== tenantId"}:::decision
+  n13 -->|"no"| n18
+  n16 -->|"no"| n18
+  n15 -->|"no"| n18
+  n19(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a InfrastructureAccessService.decide"]:::llamada
+  n18 -->|"no"| n20
+  n21(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n20 --> n21
+  n22["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n9 -->|"no"| n22
+  n23["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n22 --> n23
+  n24{"'careSpaceId' in target"}:::decision
+  n23 --> n24
+  n25{"!found || found.tenantId !== tenantId"}:::decision
+  n24 -->|"sí"| n25
+  n26(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"'unitId' in target"}:::decision
+  n24 -->|"no"| n27
+  n28{"!found || found.tenantId !== tenantId"}:::decision
+  n27 -->|"sí"| n28
+  n29(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n28 -->|"sí"| n29
+  n30{"!site || site.tenantId !== tenantId"}:::decision
+  n25 -->|"no"| n30
+  n28 -->|"no"| n30
+  n27 -->|"no"| n30
+  n31(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a InfrastructureAccessService.decide"]:::llamada
+  n30 -->|"no"| n32
+  n33(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n32 --> n33
+  n34[("LEE practice.care_spaces")]:::efecto
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /diagnostic-equipment/{id}/resource
+
+Crear el recurso agendable del equipo (F5a)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 409 | `CONFLICT` | ConflictException: El equipo ya tiene un recurso agendable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a EquipmentF5aService.createResource"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a EquipmentF5aService.authorize"]:::llamada
+  n4 --> n5
+  n6["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
+  n5 --> n6
+  n7["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n7 --> n8
+  n9[("LEE diagnostic_units.diagnostic_unit_sites · LEE diagnostic_units.diagnostic_units · LEE practice.practice_si…")]:::efecto
+  n8 --> n9
+  n10{"equipment.careSpaceId"}:::decision
+  n9 --> n10
+  n11["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n11 --> n12
+  n13{"'careSpaceId' in target"}:::decision
+  n12 --> n13
+  n14{"!found || found.tenantId !== tenantId"}:::decision
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16{"'unitId' in target"}:::decision
+  n13 -->|"no"| n16
+  n17{"!found || found.tenantId !== tenantId"}:::decision
+  n16 -->|"sí"| n17
+  n18(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n17 -->|"sí"| n18
+  n19{"!site || site.tenantId !== tenantId"}:::decision
+  n14 -->|"no"| n19
+  n17 -->|"no"| n19
+  n16 -->|"no"| n19
+  n20(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a InfrastructureAccessService.decide"]:::llamada
+  n19 -->|"no"| n21
+  n22(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n21 --> n22
+  n23["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n10 -->|"no"| n23
+  n24["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n23 --> n24
+  n25{"'careSpaceId' in target"}:::decision
+  n24 --> n25
+  n26{"!found || found.tenantId !== tenantId"}:::decision
+  n25 -->|"sí"| n26
+  n27(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"'unitId' in target"}:::decision
+  n25 -->|"no"| n28
+  n29{"!found || found.tenantId !== tenantId"}:::decision
+  n28 -->|"sí"| n29
+  n30(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n29 -->|"sí"| n30
+  n31{"!site || site.tenantId !== tenantId"}:::decision
+  n26 -->|"no"| n31
+  n29 -->|"no"| n31
+  n28 -->|"no"| n31
+  n32(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a InfrastructureAccessService.decide"]:::llamada
+  n31 -->|"no"| n33
+  n34(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n33 --> n34
+  n35[("LEE scheduling.schedulable_resources")]:::efecto
+  n36{"equipment.schedulableResourceId || existing"}:::decision
+  n35 --> n36
+  n37(["409 CONFLICT El equipo ya tiene un recurso agendable"]):::error
+  n36 -->|"sí"| n37
+  n38[("CREA scheduling.schedulable_resources")]:::efecto
+  n36 -->|"no"| n38
+  n39["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n38 --> n39
+  n40["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n39 --> n40
+  n41["Transacción: startActiveSpan(…)"]:::transaccion
+  n40 --> n41
+  n42["Intenta"]:::intento
+  n41 --> n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"si falla"| n43
+  n44["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n42 --> n44
+  n45["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n44 --> n45
+  n46[("LEE messaging.outbox_messages")]:::efecto
+  n45 --> n46
+  n47["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n46 --> n47
+  n48[("CREA messaging.domain_events")]:::efecto
+  n47 --> n48
+  n49["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n48 --> n49
+  n50[("CREA messaging.outbox_messages")]:::efecto
+  n49 --> n50
+  n51>"Evento diagnostic_units.equipment.resource_linked"]:::evento
+  n50 --> n51
+  n52(("201 Responde con éxito")):::ok
+  n51 --> n52
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. DELETE /diagnostic-study-offerings/{id}
 
 Retirar (soft-delete) una oferta de estudio
 
@@ -398,7 +866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. PATCH /diagnostic-unit-sites/{siteId}
+#### 6. PATCH /diagnostic-unit-sites/{siteId}
 
 Actualizar un sitio operativo de la unidad
 
@@ -461,7 +929,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /diagnostic-unit-sites/{siteId}/equipment
+#### 7. POST /diagnostic-unit-sites/{siteId}/equipment
 
 Registrar equipamiento y calibración del sitio
 
@@ -530,7 +998,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /diagnostic-units
+#### 8. POST /diagnostic-units
 
 Alta de unidad diagnóstica con sitios y acreditaciones
 
@@ -595,7 +1063,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /diagnostic-units/{id}
+#### 9. GET /diagnostic-units/{id}
 
 Consultar el perfil de una unidad diagnóstica
 
@@ -669,7 +1137,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /diagnostic-units/{id}/accreditations
+#### 10. POST /diagnostic-units/{id}/accreditations
 
 Registrar una acreditación con evidencia
 
@@ -733,7 +1201,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /diagnostic-units/{id}/administration
+#### 11. GET /diagnostic-units/{id}/administration
 
 Consola de administración de una unidad diagnóstica
 
@@ -811,7 +1279,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /diagnostic-units/{id}/practitioner-assignments
+#### 12. POST /diagnostic-units/{id}/practitioner-assignments
 
 Asignar un especialista a la unidad/sitio
 
@@ -898,7 +1366,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /diagnostic-units/{id}/price-schedules
+#### 13. POST /diagnostic-units/{id}/price-schedules
 
 Crear un cronograma de precios
 
@@ -969,7 +1437,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /diagnostic-units/{id}/sites
+#### 14. POST /diagnostic-units/{id}/sites
 
 Registrar un sitio operativo de la unidad
 
@@ -1017,7 +1485,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PUT /diagnostic-units/{id}/specialties
+#### 15. PUT /diagnostic-units/{id}/specialties
 
 Declarar las especialidades de la unidad
 
@@ -1093,7 +1561,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /diagnostic-units/{id}/study-offerings
+#### 16. POST /diagnostic-units/{id}/study-offerings
 
 Publicar oferta de estudio con componentes (panel)
 
@@ -1190,7 +1658,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /diagnostic-units/{id}/verify-and-publish
+#### 17. POST /diagnostic-units/{id}/verify-and-publish
 
 Verificar la unidad y publicar su perfil público
 
@@ -1280,7 +1748,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /diagnostic-units/search
+#### 18. GET /diagnostic-units/search
 
 Buscar centros de diagnóstico, laboratorio e imagen
 
@@ -1447,7 +1915,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /price-schedules/{scheduleId}/study-prices
+#### 19. POST /price-schedules/{scheduleId}/study-prices
 
 Fijar/versionar el precio de un estudio (append-only)
 
@@ -1528,7 +1996,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /study-prices/{priceId}/close
+#### 20. POST /study-prices/{priceId}/close
 
 Cerrar una versión de precio vigente
 

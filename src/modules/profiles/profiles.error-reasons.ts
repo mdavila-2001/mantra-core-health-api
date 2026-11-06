@@ -15,6 +15,10 @@ export enum ProfilesErrorReason {
   // --- Pacientes (profiles-patients.service.ts) ---------------------------
   /** El `patient_code` declarado ya pertenece a otro paciente. */
   PATIENT_CODE_ALREADY_IN_USE = 'PATIENT_CODE_ALREADY_IN_USE',
+  /** A live patient with the same name (and birth date, if given) exists. */
+  POSSIBLE_DUPLICATE_PATIENT = 'POSSIBLE_DUPLICATE_PATIENT',
+  /** Only the merged loser has an own account: pick it as the survivor. */
+  MERGE_SURVIVOR_WITHOUT_ACCOUNT = 'MERGE_SURVIVOR_WITHOUT_ACCOUNT',
   /** La cuenta de la sesión no tiene una persona vinculada (`person_account_links`). */
   ACCOUNT_WITHOUT_LINKED_PERSON = 'ACCOUNT_WITHOUT_LINKED_PERSON',
   /** No existe el perfil de paciente pedido (o la persona vinculada no lo tiene). */
@@ -142,6 +146,10 @@ export enum ProfilesErrorReason {
   ADMISSION_RESUBMISSION_LIMIT = 'ADMISSION_RESUBMISSION_LIMIT',
   /** Reenviar exige aceptar la declaración (`attested: true` y su versión): faltó o fue `false`. */
   ADMISSION_ATTESTATION_REQUIRED = 'ADMISSION_ATTESTATION_REQUIRED',
+  /** Ya tiene una solicitud de verificación: se reenvía con `resubmit`, no se abre otra. */
+  ADMISSION_ALREADY_EXISTS = 'ADMISSION_ALREADY_EXISTS',
+  /** El perfil ya no está pendiente de verificación: no hay nada que enviar. */
+  ADMISSION_NOT_PENDING = 'ADMISSION_NOT_PENDING',
   /** La verificación ya venció: no se repone, se renueva. */
   ADMISSION_VALIDITY_LAPSED = 'ADMISSION_VALIDITY_LAPSED',
   /** El rol del actor no alcanza para esta acción de admisiones. */

@@ -37,6 +37,10 @@ function build() {
   };
   const rolesRepo = { create: mockFn().mockReturnValue({ id: 'role-1' }) };
   const addressesRepo = { create: mockFn().mockReturnValue({ id: 'addr-1' }) };
+  const serviceCatalogRepo = {
+    findByCode: mockFn().mockResolvedValue(null),
+    create: mockFn().mockReturnValue({ id: 'service-1' }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new OwnSiteProvisioningService(
@@ -44,6 +48,7 @@ function build() {
     sitesRepo as any,
     rolesRepo as any,
     addressesRepo as any,
+    serviceCatalogRepo as any,
     logger as any,
   );
   return {
@@ -53,6 +58,7 @@ function build() {
     sitesRepo,
     rolesRepo,
     addressesRepo,
+    serviceCatalogRepo,
     logger,
   };
 }
@@ -133,6 +139,14 @@ describe('OwnSiteProvisioningService', () => {
           adminUserId: OWNER.userId,
           statusConceptId: PRAC.PRACTICE_ACTIVE,
           actorUserId: OWNER.userId,
+        }),
+      );
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'pr-own-1',
+          code: 'CITA_MEDICA',
+          defaultPrice: '0.00',
         }),
       );
       expect(d.sitesRepo.create).toHaveBeenCalledWith(
@@ -377,8 +391,8 @@ describe('OwnSiteProvisioningService', () => {
         OWNER.userId,
       );
 
-      // Práctica, dirección, sede y rol: cuatro filas con FK a la anterior.
-      expect(d.tx.flush).toHaveBeenCalledTimes(4);
+      // Práctica, dirección, sede, rol y servicio por defecto: cinco filas con flush.
+      expect(d.tx.flush).toHaveBeenCalledTimes(5);
     });
   });
 });

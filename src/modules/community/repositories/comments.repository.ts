@@ -170,18 +170,18 @@ export class CommentsRepository {
     // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
     // arreglo de Postgres. Ver la nota en `ReactionsRepository`.
     const markers = commentableRefIds.map(() => '?').join(', ');
-    const rows = await em
-      .getConnection()
-      .execute<Array<{ commentable_ref_id: string; count: number }>>(
-        `select commentable_ref_id, count(*)::int as count
+    const rows = await em.execute<
+      Array<{ commentable_ref_id: string; count: number }>
+    >(
+      `select commentable_ref_id, count(*)::int as count
            from community.comments
           where commentable_type_concept_id=?
             and commentable_ref_id in (${markers})
             and status_concept_id=?
           group by commentable_ref_id`,
-        [commentableTypeConceptId, ...commentableRefIds, activeStatusConceptId],
-        'all',
-      );
+      [commentableTypeConceptId, ...commentableRefIds, activeStatusConceptId],
+      'all',
+    );
 
     return rows.map((row) => ({
       commentableRefId: row.commentable_ref_id,

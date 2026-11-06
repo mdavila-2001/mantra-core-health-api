@@ -42,6 +42,19 @@ const EXPLICITLY_WIRED_SOURCES = new Set([
   // único servicio que escribe `clinical.conditions`. Sin esta entrada cada
   // cambio dejaba DOS revisiones (la del servicio y la del espejo).
   'clinical.conditions',
+  // F0/F1 de infraestructura hospitalaria: `practice` versiona sede, unidad y
+  // espacio con `appendStructureRevision` (con `tenant_id` y, en los cambios de
+  // ciclo de vida, el motivo). Sin estas entradas cada alta dejaba DOS
+  // revisiones —la del servicio y la del espejo—; lo detectó el E2E de F1.
+  'practice.practice_sites',
+  'practice.clinical_units',
+  'practice.care_spaces',
+  // F2 (CONTRATO-F2-F5 §0.1): bloqueos y órdenes de limpieza se versionan
+  // en cada caso de uso con `HistoryRepository.append` (con `tenant_id`); el
+  // espejo duplicaría. Las demás tablas de F3–F5 las versiona el espejo (el
+  // trigger `trg_fill_tenant` de cada historia completa el tenant).
+  'practice.care_space_blocks',
+  'practice.cleaning_orders',
 ]);
 
 /**

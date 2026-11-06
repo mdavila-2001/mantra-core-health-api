@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
+-- SALUD v4.2.91 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
 
 
@@ -95,6 +95,9 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_study_offerings" (
     "requires_medical_order" boolean,
     "requires_prior_authorization" boolean,
     "home_collection_eligible" boolean,
+    "specimen_description" text,
+    "service_category_id" uuid,
+    "available" boolean NOT NULL DEFAULT true,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
@@ -102,6 +105,18 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_study_offerings" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_study_offerings" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_service_categories" (
+    "id" uuid NOT NULL,
+    "diagnostic_unit_id" uuid NOT NULL,
+    "name" varchar(60) NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_diagnostic_service_categories" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_study_components" (
@@ -172,6 +187,10 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_equipment" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
+    "ae_title" varchar(16),
+    "station_name" varchar(16),
+    "schedulable_resource_id" uuid,
     CONSTRAINT "pk_diagnostic_equipment" PRIMARY KEY ("id")
 );
 

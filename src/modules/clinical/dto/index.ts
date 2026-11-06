@@ -16,3 +16,6 @@ export * from './received-services.dto';
 export * from './prescription-verification.dto';
 export * from './prescription-expiry-notice.dto';
 export * from './procedure-centers.dto';
+export * from './service-request-detail.dto';
+export * from './requisition.dto';
+export * from './scoped-read-response.dto';

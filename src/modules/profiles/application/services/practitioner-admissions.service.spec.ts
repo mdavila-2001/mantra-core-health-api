@@ -5,6 +5,7 @@ import {
   ConcurrencyConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../../common';
 import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
 import { PROF } from '../../profiles.concepts';
@@ -473,6 +474,71 @@ describe('PractitionerAdmissionsService', () => {
         d.service.claim('adm-1', 4, caller(SUPER)),
       ).resolves.toBeDefined();
       expect(d.events[0].actorRoleCode).toBe('SUPERADMIN');
+    });
+  });
+
+  /**
+   * La admisión es de la plataforma (sin tenant; roles `ADMISSIONS_*` con
+   * ámbito `GLOBAL`): un rol acotado en `scopedRoles` no cuenta, ni siquiera
+   * dentro de su propio tenant (#1241).
+   */
+  describe('roles acotados a un tenant (la admisión no tiene tenant)', () => {
+    const scopedTo = (role: string) =>
+      ({
+        id: `u-scoped-${role}`,
+        roles: [role],
+        scopedRoles: { 'tenant-a': [role] },
+      }) as never;
+
+    it.each(['SUPERADMIN', 'ADMISSIONS_REVIEWER', 'SECURITY_ADMIN'])(
+      '%s acotado a A no toma una admisión: 403, en su tenant y sin tenant',
+      async (role) => {
+        for (const inTenantA of [true, false]) {
+          const d = build({ admission: admission('ENVIADA') });
+          const claim = () =>
+            d.service.claim('adm-1', 4, caller(scopedTo(role)));
+          const error = await failure(
+            inTenantA ? runWithTenant('tenant-a', claim) : claim(),
+          );
+          expect(error).toBeInstanceOf(InsufficientRoleException);
+          expect(reasonOf(error)).toBe(
+            ProfilesErrorReason.ADMISSION_ROLE_REQUIRED,
+          );
+          expect(d.events).toHaveLength(0);
+        }
+      },
+    );
+
+    it('ADMISSIONS_APPROVER acotado a A no resuelve: 403', async () => {
+      const d = build();
+      const error = await failure(
+        runWithTenant('tenant-a', () =>
+          d.service.decide(
+            'adm-1',
+            {
+              decision: 'REJECTED',
+              reason: 'x',
+              expectedRowVersion: 4,
+            } as never,
+            caller(scopedTo('ADMISSIONS_APPROVER')),
+          ),
+        ),
+      );
+      expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_ROLE_REQUIRED);
+    });
+
+    it.each([
+      ['SUPERADMIN', SUPER],
+      ['ADMISSIONS_REVIEWER', REVIEWER],
+      ['SECURITY_ADMIN', SECADMIN],
+    ])('%s global sí toma la admisión', async (role, user) => {
+      const d = build({ admission: admission('ENVIADA') });
+      await expect(
+        runWithTenant('tenant-a', () =>
+          d.service.claim('adm-1', 4, caller(user)),
+        ),
+      ).resolves.toBeDefined();
+      expect(d.events[0].actorRoleCode).toBe(role);
     });
   });
 

@@ -102,6 +102,11 @@ export interface CreateParticipantData {
  */
 export interface CreateLocationData {
   /**
+   * Tenant del encuentro. NOT NULL desde F3 y atado por la FK compuesta
+   * `(tenant_id, encounter_id)`: sin él, el check-in falla con 23502.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a encounter.
    */
   encounterId: string;
@@ -237,6 +242,7 @@ export class EncountersRepository {
     return em.create(
       EncounterLocations,
       {
+        tenantId: data.tenantId,
         encounterId: data.encounterId,
         practiceSiteId: data.practiceSiteId,
         clinicalUnitId: data.clinicalUnitId,

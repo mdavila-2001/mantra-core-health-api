@@ -2,44 +2,964 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 25 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 31 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `terminology`
-- **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
+- **Etiquetas OpenAPI:** `admin-catalogs-glossary`, `terminology`
+- **Controladores:** `AdminGlossaryController`, `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [GET /terminology/code-systems](#1-get-terminology-code-systems) — Sistemas de códigos registrados
-2. [POST /terminology/code-systems](#2-post-terminology-code-systems) — UC-03-01: crea un sistema de códigos y su fuente
-3. [GET /terminology/code-systems/{id}/versions](#3-get-terminology-code-systems-id-versions) — Versiones de un sistema de códigos
-4. [POST /terminology/code-systems/{id}/versions](#4-post-terminology-code-systems-id-versions) — UC-03-02: crea una versión (borrador) de un sistema de códigos
-5. [GET /terminology/CodeSystem/$lookup](#5-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
-6. [POST /terminology/ConceptMap/$translate](#6-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
-7. [GET /terminology/concepts](#7-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
-8. [GET /terminology/concepts/{conceptId}](#8-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
-9. [POST /terminology/concepts/{conceptId}/$deprecate](#9-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
-10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-11. [GET /terminology/concepts/{conceptId}/glossary-article](#11-get-terminology-concepts-conceptid-glossary-article) — Lee el artículo enciclopédico de un término del glosario
-12. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#12-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
-13. [POST /terminology/concepts/{conceptId}/properties](#13-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-14. [POST /terminology/concepts/{conceptId}/relationships](#14-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-15. [GET /terminology/concepts/glossary-graph](#15-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
-16. [GET /terminology/import-template](#16-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
-17. [PUT /terminology/tenants/{tenantId}/catalog-policies](#17-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-18. [GET /terminology/value-sets](#18-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-19. [POST /terminology/value-sets](#19-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-20. [GET /terminology/value-sets/{id}/$expand](#20-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-21. [GET /terminology/value-sets/$glossary-facets](#21-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
-22. [POST /terminology/ValueSet/{id}/$expand](#22-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-23. [POST /terminology/versions/{versionId}/import](#23-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-24. [POST /terminology/versions/{versionId}/import-file](#24-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
-25. [POST /terminology/versions/{versionId}/publish](#25-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+1. [GET /admin/catalogs/glossary](#1-get-admin-catalogs-glossary) — Listar términos del glosario por tipo de usuario
+2. [POST /admin/catalogs/glossary](#2-post-admin-catalogs-glossary) — Crear un término (idempotente por slug)
+3. [GET /admin/catalogs/glossary/{conceptId}](#3-get-admin-catalogs-glossary-conceptid) — Ver un término con su versión
+4. [PATCH /admin/catalogs/glossary/{conceptId}](#4-patch-admin-catalogs-glossary-conceptid) — Editar un término con precondición de versión
+5. [POST /admin/catalogs/glossary/{conceptId}/deactivate](#5-post-admin-catalogs-glossary-conceptid-deactivate) — Retirar un término (no se borra)
+6. [POST /admin/catalogs/glossary/{conceptId}/reactivate](#6-post-admin-catalogs-glossary-conceptid-reactivate) — Reactivar un término retirado
+7. [GET /terminology/code-systems](#7-get-terminology-code-systems) — Sistemas de códigos registrados
+8. [POST /terminology/code-systems](#8-post-terminology-code-systems) — UC-03-01: crea un sistema de códigos y su fuente
+9. [GET /terminology/code-systems/{id}/versions](#9-get-terminology-code-systems-id-versions) — Versiones de un sistema de códigos
+10. [POST /terminology/code-systems/{id}/versions](#10-post-terminology-code-systems-id-versions) — UC-03-02: crea una versión (borrador) de un sistema de códigos
+11. [GET /terminology/CodeSystem/$lookup](#11-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
+12. [POST /terminology/ConceptMap/$translate](#12-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
+13. [GET /terminology/concepts](#13-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
+14. [GET /terminology/concepts/{conceptId}](#14-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
+15. [POST /terminology/concepts/{conceptId}/$deprecate](#15-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
+16. [POST /terminology/concepts/{conceptId}/designations](#16-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
+17. [GET /terminology/concepts/{conceptId}/glossary-article](#17-get-terminology-concepts-conceptid-glossary-article) — Lee el artículo enciclopédico de un término del glosario
+18. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#18-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+19. [POST /terminology/concepts/{conceptId}/properties](#19-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+20. [POST /terminology/concepts/{conceptId}/relationships](#20-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+21. [GET /terminology/concepts/glossary-graph](#21-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
+22. [GET /terminology/import-template](#22-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
+23. [PUT /terminology/tenants/{tenantId}/catalog-policies](#23-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+24. [GET /terminology/value-sets](#24-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+25. [POST /terminology/value-sets](#25-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+26. [GET /terminology/value-sets/{id}/$expand](#26-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+27. [GET /terminology/value-sets/$glossary-facets](#27-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
+28. [POST /terminology/ValueSet/{id}/$expand](#28-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+29. [POST /terminology/versions/{versionId}/import](#29-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+30. [POST /terminology/versions/{versionId}/import-file](#30-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+31. [POST /terminology/versions/{versionId}/publish](#31-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
-## 1. GET /terminology/code-systems
+## 1. GET /admin/catalogs/glossary
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Listar términos del glosario por tipo de usuario
+- **Operation ID:** `AdminGlossaryController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.list](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Listar términos del glosario por tipo de usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/catalogs/glossary` en `AdminGlossaryController_list`. El controlador delega en `AdminGlossaryService.list`. No recibe body. El tipo de retorno estático es `Promise<AdminGlossaryPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `audience` | query | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en OpenAPI. | `patient` |
+| `state` | query | No | `string` | valores: `active`, `retired` | Sin descripción específica en OpenAPI. | `active` |
+| `q` | query | No | `string` | longitud máxima 100 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | No | `string` | longitud máxima 512 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/catalogs/glossary?audience=patient HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPERADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/catalogs/glossary?audience=patient&state=active&q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AdminGlossaryPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "slug": "valor-ejemplo",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo",
+      "nameEs": "Nombre de ejemplo",
+      "state": {},
+      "audience": {},
+      "text": {
+        "es": "valor-ejemplo",
+        "en": "valor-ejemplo"
+      },
+      "rowVersion": 1,
+      "updatedAt": "2026-07-31T12:00:00.000Z",
+      "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AdminGlossaryTermDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","nameEs":"Nombre de ejemplo","state":{},"audience":{},"text":{"es":"valor-ejemplo","en":"valor-ejemplo"},"rowVersion":1,"updatedAt":"2026-07-31T12:00:00.000Z","updatedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `items[].audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `items[].text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `items[].text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary"
+}
+```
+
+---
+
+## 2. POST /admin/catalogs/glossary
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Crear un término (idempotente por slug)
+- **Operation ID:** `AdminGlossaryController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.create](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Crear un término (idempotente por slug). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/catalogs/glossary` en `AdminGlossaryController_create`. El controlador delega en `AdminGlossaryService.create`. Valida el body como `AdminCreateGlossaryTermDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdminGlossaryTermDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AdminCreateGlossaryTermDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/catalogs/glossary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "slug": "hipertension-arterial",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo"
+  }
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `slug` | Sí | `string` | longitud máxima 80; patrón runtime `/^[a-z0-9]+(?:-[a-z0-9]+)*$/` | Sin descripción específica en el contrato OpenAPI. | `hipertension-arterial` |
+| `display` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre canónico (`display` del concepto) | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Designación preferida en español | `Nombre de ejemplo` |
+| `audience` | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en el contrato OpenAPI. | `patient` |
+| `text` | Sí | `AdminGlossaryTextDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/catalogs/glossary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "slug": "hipertension-arterial",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryTermDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "code": "CODIGO_EJEMPLO",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "state": {},
+  "audience": {},
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "rowVersion": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya existe un término del glosario con ese slug | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El glosario no está inicializado | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary"
+}
+```
+
+---
+
+## 3. GET /admin/catalogs/glossary/{conceptId}
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Ver un término con su versión
+- **Operation ID:** `AdminGlossaryController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.get](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Ver un término con su versión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/catalogs/glossary/{conceptId}` en `AdminGlossaryController_get`. El controlador delega en `AdminGlossaryService.get`. No recibe body. El tipo de retorno estático es `Promise<AdminGlossaryTermDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `audience` | query | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en OpenAPI. | `patient` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001?audience=patient HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPERADMIN`.
+- Deben ser UUID válidos: `conceptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001?audience=patient HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryTermDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "code": "CODIGO_EJEMPLO",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "state": {},
+  "audience": {},
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "rowVersion": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Término no encontrado | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary/{conceptId}"
+}
+```
+
+---
+
+## 4. PATCH /admin/catalogs/glossary/{conceptId}
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Editar un término con precondición de versión
+- **Operation ID:** `AdminGlossaryController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.update](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Editar un término con precondición de versión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /admin/catalogs/glossary/{conceptId}` en `AdminGlossaryController_update`. El controlador delega en `AdminGlossaryService.update`. Valida el body como `AdminUpdateGlossaryTermDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdminGlossaryTermDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AdminUpdateGlossaryTermDto`; los campos opcionales se omiten.
+
+```http
+PATCH /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- Deben ser UUID válidos: `conceptId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `audience` | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en el contrato OpenAPI. | `patient` |
+| `text` | No | `AdminGlossaryTextDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | No | `string` | longitud mínima 1; longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient",
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "nameEs": "Nombre de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryTermDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "code": "CODIGO_EJEMPLO",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "state": {},
+  "audience": {},
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "rowVersion": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | No hay nada que cambiar: envíe text o nameEs | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Término no encontrado | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary/{conceptId}"
+}
+```
+
+---
+
+## 5. POST /admin/catalogs/glossary/{conceptId}/deactivate
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Retirar un término (no se borra)
+- **Operation ID:** `AdminGlossaryController_deactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.deactivate](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Retirar un término (no se borra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/catalogs/glossary/{conceptId}/deactivate` en `AdminGlossaryController_deactivate`. El controlador delega en `AdminGlossaryService.setActive`. Valida el body como `AdminGlossaryStateChangeDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdminGlossaryTermDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AdminGlossaryStateChangeDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001/deactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- Deben ser UUID válidos: `conceptId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `audience` | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en el contrato OpenAPI. | `patient` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001/deactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryTermDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "code": "CODIGO_EJEMPLO",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "state": {},
+  "audience": {},
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "rowVersion": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Término no encontrado | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary/{conceptId}/deactivate"
+}
+```
+
+---
+
+## 6. POST /admin/catalogs/glossary/{conceptId}/reactivate
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `admin-catalogs-glossary`
+- **Nombre:** Reactivar un término retirado
+- **Operation ID:** `AdminGlossaryController_reactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminGlossaryController.reactivate](../../src/modules/terminology/controllers/admin-glossary.controller.ts)
+
+### Descripción de negocio
+
+Reactivar un término retirado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/catalogs/glossary/{conceptId}/reactivate` en `AdminGlossaryController_reactivate`. El controlador delega en `AdminGlossaryService.setActive`. Valida el body como `AdminGlossaryStateChangeDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdminGlossaryTermDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AdminGlossaryStateChangeDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SUPERADMIN`.
+- Deben ser UUID válidos: `conceptId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `audience` | Sí | `string` | valores: `patient`, `professional` | Sin descripción específica en el contrato OpenAPI. | `patient` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/catalogs/glossary/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "audience": "patient"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdminGlossaryTermDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdminGlossaryTermDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "code": "CODIGO_EJEMPLO",
+  "display": "valor-ejemplo",
+  "nameEs": "Nombre de ejemplo",
+  "state": {},
+  "audience": {},
+  "text": {
+    "es": "valor-ejemplo",
+    "en": "valor-ejemplo"
+  },
+  "rowVersion": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "updatedByUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nameEs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `state` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_STATES)[number] | `{}` |
+| `audience` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GLOSSARY_ADMIN_AUDIENCES)[number] | `{}` |
+| `text` | Sí | `object` | admite null | Texto de ese tipo de usuario, o `null` si todavía no tiene. | `{"es":"valor-ejemplo","en":"valor-ejemplo"}` |
+| `text.es` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `text.en` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedByUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SUPERADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Término no encontrado | Excepción explícita en src/modules/terminology/services/admin-glossary.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalogs/glossary/{conceptId}/reactivate"
+}
+```
+
+---
+
+## 7. GET /terminology/code-systems
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -153,7 +1073,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /terminology/code-systems
+## 8. POST /terminology/code-systems
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -291,7 +1211,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /terminology/code-systems/{id}/versions
+## 9. GET /terminology/code-systems/{id}/versions
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -414,7 +1334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /terminology/code-systems/{id}/versions
+## 10. POST /terminology/code-systems/{id}/versions
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -547,7 +1467,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /terminology/CodeSystem/$lookup
+## 11. GET /terminology/CodeSystem/$lookup
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -699,7 +1619,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /terminology/ConceptMap/$translate
+## 12. POST /terminology/ConceptMap/$translate
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -851,7 +1771,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /terminology/concepts
+## 13. GET /terminology/concepts
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1023,7 +1943,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /terminology/concepts/{conceptId}
+## 14. GET /terminology/concepts/{conceptId}
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1236,7 +2156,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /terminology/concepts/{conceptId}/$deprecate
+## 15. POST /terminology/concepts/{conceptId}/$deprecate
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1371,7 +2291,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /terminology/concepts/{conceptId}/designations
+## 16. POST /terminology/concepts/{conceptId}/designations
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1526,7 +2446,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /terminology/concepts/{conceptId}/glossary-article
+## 17. GET /terminology/concepts/{conceptId}/glossary-article
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1622,7 +2542,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+## 18. GET /terminology/concepts/{conceptId}/glossary-neighborhood
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1805,7 +2725,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/concepts/{conceptId}/properties
+## 19. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1949,7 +2869,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /terminology/concepts/{conceptId}/relationships
+## 20. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2091,7 +3011,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /terminology/concepts/glossary-graph
+## 21. GET /terminology/concepts/glossary-graph
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2234,7 +3154,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /terminology/import-template
+## 22. GET /terminology/import-template
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2329,7 +3249,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 23. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2497,7 +3417,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /terminology/value-sets
+## 24. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2630,7 +3550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /terminology/value-sets
+## 25. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2777,7 +3697,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /terminology/value-sets/{id}/$expand
+## 26. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2805,6 +3725,7 @@ NestJS resuelve `GET /terminology/value-sets/{id}/$expand` en `TerminologyValueS
 | `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Miembros por página (por defecto 50) | `1` |
 | `includeProperties` | query | No | `boolean` | Sin restricción adicional declarada | Trae también las propiedades de cada concepto. Opt-in: hay catálogos cuyo dato útil vive ahí (el nomenclador guarda especialidad, precio y unidad como propiedades). | `true` |
+| `filter` | query | No | `string` | Sin restricción adicional declarada | Texto libre (parámetro `filter` de FHIR ValueSet/$expand): deja los miembros cuyo código, rótulo o designación contiene todas sus palabras, sin distinguir tildes ni mayúsculas. Hasta 100 caracteres. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -2830,7 +3751,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand?valueSetVersionId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1&includeProperties=true HTTP/1.1
+GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand?valueSetVersionId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1&includeProperties=true&filter=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2924,7 +3845,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /terminology/value-sets/$glossary-facets
+## 27. GET /terminology/value-sets/$glossary-facets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3069,7 +3990,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /terminology/ValueSet/{id}/$expand
+## 28. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3212,7 +4133,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /terminology/versions/{versionId}/import
+## 29. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3357,7 +4278,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /terminology/versions/{versionId}/import-file
+## 30. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3524,7 +4445,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /terminology/versions/{versionId}/publish
+## 31. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

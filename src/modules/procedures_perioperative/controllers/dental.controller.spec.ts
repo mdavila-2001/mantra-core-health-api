@@ -67,13 +67,14 @@ describe('DentalController', () => {
     expect(d.dentalService.record).not.toHaveBeenCalled();
   });
 
-  it('delega el histórico con sus filtros', async () => {
+  it('delega el histórico con sus filtros y quien lo pide', async () => {
     const d = build();
     const query = { patientProfileId: PATIENT, limit: 10 };
+    const actor = { id: 'user-1', roles: ['CLINICIAN'] };
 
-    await d.controller.listByPatient(query as any);
+    await d.controller.listByPatient(query as any, actor as any);
 
-    expect(d.dentalService.listByPatient).toHaveBeenCalledWith(query);
+    expect(d.dentalService.listByPatient).toHaveBeenCalledWith(query, actor);
   });
 
   it('sirve el catálogo', () => {

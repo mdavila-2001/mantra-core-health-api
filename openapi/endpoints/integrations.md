@@ -289,7 +289,7 @@ Ejemplo de error normalizado:
 
 Encolar un mensaje saliente (idempotente). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-12-05. Productor de negocio (usuario autenticado).
+Contexto declarado en el controlador: UC-12-05. El actor del caso de uso es un servicio de negocio (productor), no una persona: lo encola el sistema o la administración de seguridad, igual que el resto de las acciones de esta clase. Sin `@Roles`, cualquier sesión con tenant activo podía encolar un mensaje sobre una conexión del tenant.
 
 ### Descripción del sistema
 
@@ -319,6 +319,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -399,7 +400,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | La clave de idempotencia ya está en uso | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La conexión no está activa | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
@@ -1480,7 +1481,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
-| `connectionId` | Sí | `string` | formato `uuid` | Identificador asociado a connection. | `00000000-0000-4000-8000-000000000001` |
+| `connectionId` | Sí | `string` | formato `uuid`; admite null | Conexión registrada en integraciones; nulo mientras la farmacia no tiene configurado su sistema externo. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 

@@ -201,7 +201,7 @@ export class BookingMaterializer {
         : null;
       const effective = ofService
         ? planForService(plan, ofService.offering.requiresApproval)
-        : plan;
+        : planForService(plan, resource?.requiresApproval ?? true);
 
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
         policyId: policy?.id,
@@ -218,7 +218,12 @@ export class BookingMaterializer {
       // La cita clínica que respalda la reserva. Se crea **antes** para poder
       // enlazarla: `appointment_id` es una columna uuid suelta, así que el orden
       // lo garantiza esto y no la unidad de trabajo.
+      const careSpaceId = await this.clinicalSync.careSpaceFor(tx, {
+        templateId: slot.scheduleTemplateId,
+        resourceCareSpaceId: resource?.careSpaceId,
+      });
       const appointment = this.clinicalSync.createClinicalAppointment(tx, {
+        careSpaceId,
         tenantId: plan.tenantId,
         patientProfileId: plan.patientProfileId,
         resourceRefType: resource?.resourceRefType,

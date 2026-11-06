@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `integration_contracts`.
- * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const integrationContractsIndexes: readonly IndexTuple[] = [
@@ -18,15 +18,6 @@ export const integrationContractsIndexes: readonly IndexTuple[] = [
   ['integration_auth_profiles', 'ix_integration_auth_profiles_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['integration_auth_profiles', 'ix_integration_auth_profiles_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['integration_auth_profiles', 'ix_integration_auth_profiles_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_external_provider_id', ['external_provider_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_capability_concept_id', ['capability_concept_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_data_classification_concept_id', ['data_classification_concept_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_allowed_purpose_value_set_id', ['allowed_purpose_value_set_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_data_use_agreement_id', ['data_use_agreement_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['integration_contracts', 'ix_integration_contracts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['integration_contract_versions', 'ix_integration_contract_versions_integration_contract_id', ['integration_contract_id'], false, 'btree'],
   ['integration_contract_versions', 'ix_integration_contract_versions_request_schema_file_id', ['request_schema_file_id'], false, 'btree'],
   ['integration_contract_versions', 'ix_integration_contract_versions_response_schema_file_id', ['response_schema_file_id'], false, 'btree'],
@@ -35,6 +26,17 @@ export const integrationContractsIndexes: readonly IndexTuple[] = [
   ['integration_contract_versions', 'ix_integration_contract_versions_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['integration_contract_versions', 'ix_integration_contract_versions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['integration_contract_versions', 'uq_integration_contract_versions_integration_contract__74f90c0c', ['integration_contract_id', 'version_number'], true, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_tenant_id', ['tenant_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_external_provider_id', ['external_provider_id'], false, 'btree'],
+  ['integration_contracts', 'uq_integration_contracts_tenant_provider_code', ['tenant_id', 'external_provider_id', 'contract_code'], true, 'btree', 'tenant_id IS NOT NULL'],
+  ['integration_contracts', 'ix_integration_contracts_capability_concept_id', ['capability_concept_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_data_classification_concept_id', ['data_classification_concept_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_allowed_purpose_value_set_id', ['allowed_purpose_value_set_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_data_use_agreement_id', ['data_use_agreement_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['integration_contracts', 'ix_integration_contracts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['integration_exchange_attempts', 'ix_integration_exchange_attempts_integration_exchange_record_id', ['integration_exchange_record_id'], false, 'btree'],
   ['integration_exchange_attempts', 'ix_integration_exchange_attempts_endpoint_id', ['endpoint_id'], false, 'btree'],
   ['integration_exchange_attempts', 'ix_integration_exchange_attempts_retry_decision_concept_id', ['retry_decision_concept_id'], false, 'btree'],

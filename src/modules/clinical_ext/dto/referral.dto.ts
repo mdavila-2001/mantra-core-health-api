@@ -8,8 +8,14 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import type { ReferralStatus } from '../referral.enums';
+import {
+  ReferralTransferDto,
+  ReferralTransferResponseDto,
+} from './referral-transfer.dto';
 
 /** Tipos de derivación: qué se le pide al destino. */
 export const REFERRAL_TYPES = [
@@ -275,6 +281,16 @@ export class CreateReferralDto {
   @IsOptional()
   @IsUUID()
   targetServiceCatalogId?: string;
+
+  /**
+   * v4274: datos de traslado (medio, acompañantes, estado y signos vitales al
+   * salir, aviso al receptor y salida). Opcional.
+   */
+  @ApiPropertyOptional({ type: ReferralTransferDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ReferralTransferDto)
+  transfer?: ReferralTransferDto;
 }
 
 /** Query de `GET /referrals/targets`. */
@@ -413,7 +429,7 @@ export class RespondReferralDto {
   rejectReason?: string;
 
   /**
-   * v4291: la atención en la que el destino recibe al paciente. Sólo al
+   * v4292: la atención en la que el destino recibe al paciente. Sólo al
    * aceptar; tiene que ser del mismo paciente y del tenant destino que acepta.
    */
   @ApiPropertyOptional({
@@ -642,7 +658,7 @@ export class ReferralResponseDto {
   counterReferralAt?: Date;
 
   /**
-   * v4291: la atención en la que el destino recibió al paciente; ausente si
+   * v4292: la atención en la que el destino recibió al paciente; ausente si
    * no se registró.
    */
   @ApiPropertyOptional({
@@ -651,6 +667,13 @@ export class ReferralResponseDto {
     format: 'uuid',
   })
   targetEncounterId?: string;
+
+  /**
+   * v4274: traslado y llegada, o `null` si la derivación no tiene datos de
+   * traslado.
+   */
+  @ApiProperty({ type: ReferralTransferResponseDto, nullable: true })
+  transfer!: ReferralTransferResponseDto | null;
 
   /**
    * Última actualización.

@@ -5,14 +5,22 @@ import {
   PaymentsIntentsController,
   PaymentsTransactionsController,
   PaymentsOperationsController,
+  PaymentsGatewayWebhooksController,
+  PaymentsGatewayDispatchesController,
 } from './controllers';
 import {
   PaymentsIntentsService,
   PaymentsCheckoutService,
   PaymentsTransactionsService,
   PaymentsOperationsService,
+  PaymentsGatewayChargeService,
+  PaymentsGatewayWebhookService,
   WalletsService,
 } from './services';
+import {
+  PAYMENTS_GATEWAY_CONFIG,
+  loadPaymentsGatewayConfig,
+} from './gateway/payments-gateway.env';
 import {
   PaymentIntentsRepository,
   PaymentFlowRepository,
@@ -32,8 +40,17 @@ import {
     PaymentsIntentsController,
     PaymentsTransactionsController,
     PaymentsOperationsController,
+    PaymentsGatewayWebhooksController,
+    PaymentsGatewayDispatchesController,
   ],
   providers: [
+    // Pasarela como PSP (`payments.via_gateway`, apagado por defecto). Se lee y
+    // valida al construir el módulo: con el flag encendido y sin URL, clave o
+    // secreto de webhook el proceso no arranca.
+    {
+      provide: PAYMENTS_GATEWAY_CONFIG,
+      useFactory: () => loadPaymentsGatewayConfig(),
+    },
     // Repositorios
     PaymentIntentsRepository,
     PaymentFlowRepository,
@@ -46,6 +63,8 @@ import {
     PaymentsCheckoutService,
     PaymentsTransactionsService,
     PaymentsOperationsService,
+    PaymentsGatewayChargeService,
+    PaymentsGatewayWebhookService,
     WalletsService,
   ],
   // Contrato entre dominios para acreditar saldo sin acceso directo a las tablas

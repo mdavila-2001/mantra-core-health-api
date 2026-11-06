@@ -828,6 +828,7 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
     name: 'Pollos Copacabana',
     sector: 'Comercio y retail',
   },
+  { code: 'SALTORE', name: 'Saltore', sector: 'Comercio y retail' },
   { code: 'TIENDAS_TIA', name: 'Tiendas Tía', sector: 'Comercio y retail' },
   { code: 'TOYOSA', name: 'Toyosa', sector: 'Comercio y retail' },
 
@@ -1857,6 +1858,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   { code: 'UNITEL', name: 'Unitel', sector: 'Medios y comunicación' },
 
   /* --- Servicios profesionales y tecnología --- */
+  {
+    code: 'ALOVIDA',
+    name: 'AloVida',
+    sector: 'Servicios profesionales y tecnología',
+  },
   {
     code: 'ASSURESOFT',
     name: 'AssureSoft',

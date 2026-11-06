@@ -1,7 +1,11 @@
 import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
+import { AFFILIATION_INVITATION_CONCEPT_SEEDS } from '../../modules/directory/affiliation-invitation.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
+import { AUTHZ_GOVERNANCE_CONCEPT_SEEDS } from '../../modules/authz/authz-governance.concepts';
+import { GOVERNANCE_ADMIN_CONCEPT_SEEDS } from '../../modules/governance_admin/governance_admin.constants';
+import { RUNTIME_PIECES_CONCEPT_SEEDS } from '../../modules/platform_ops/runtime_pieces/runtime-pieces.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
@@ -16,10 +20,13 @@ import { ACCOUNTING_CONCEPT_SEEDS } from '../../modules/accounting/accounting.co
 import { BILLING_CONCEPT_SEEDS } from '../../modules/billing/billing.concepts';
 import { CLINICAL_EXT_CONCEPT_SEEDS } from '../../modules/clinical_ext/clinical_ext.concepts';
 import { COMMUNITY_CONCEPT_SEEDS } from '../../modules/community/community.concepts';
+import { MESSAGE_CONTENT_CONCEPT_SEEDS } from '../../modules/community/message-content-type';
 import { ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS } from '../../modules/organization_extensions/organization_extensions.concepts';
 import { DIAGNOSTIC_UNITS_CONCEPT_SEEDS } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { PHARMACY_CONCEPT_SEEDS } from '../../modules/pharmacy/pharmacy.concepts';
 import { DIAGNOSTICS_CONCEPT_SEEDS } from '../../modules/diagnostics/diagnostics.concepts';
+import { LAB_PORTAL_CONCEPT_SEEDS } from '../../modules/diagnostics/lab-portal.concepts';
+import { REPORT_DRAFT_CONCEPT_SEEDS } from '../../modules/diagnostics/report-drafts.concepts';
 import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/domain/insurance.concepts';
 import { IDENTITY_ASSURANCE_CONCEPT_SEEDS } from '../../modules/identity_assurance/identity_assurance.concepts';
@@ -30,7 +37,9 @@ import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_c
 import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/domain/scheduling.concepts';
 import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures_perioperative/procedures_perioperative.concepts';
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
+import { PLATFORM_OPS_CONCEPT_SEEDS } from '../../modules/platform_ops/platform_ops.concepts';
 import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
+import { STUDY_CATALOG_CONCEPT_SEEDS } from '../../modules/study_catalog/study_catalog.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -45,8 +54,12 @@ import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
 
 export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DIRECTORY_CONCEPT_SEEDS,
+  ...AFFILIATION_INVITATION_CONCEPT_SEEDS,
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
+  ...AUTHZ_GOVERNANCE_CONCEPT_SEEDS,
+  ...GOVERNANCE_ADMIN_CONCEPT_SEEDS,
+  ...RUNTIME_PIECES_CONCEPT_SEEDS,
   ...CONSENT_CONCEPT_SEEDS,
   ...FORMS_CONCEPT_SEEDS,
   ...CLINICAL_CONCEPT_SEEDS,
@@ -60,10 +73,13 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...BILLING_CONCEPT_SEEDS,
   ...CLINICAL_EXT_CONCEPT_SEEDS,
   ...COMMUNITY_CONCEPT_SEEDS,
+  ...MESSAGE_CONTENT_CONCEPT_SEEDS,
   ...ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS,
   ...DIAGNOSTIC_UNITS_CONCEPT_SEEDS,
   ...PHARMACY_CONCEPT_SEEDS,
   ...DIAGNOSTICS_CONCEPT_SEEDS,
+  ...LAB_PORTAL_CONCEPT_SEEDS,
+  ...REPORT_DRAFT_CONCEPT_SEEDS,
   ...PHARMACY_INVENTORY_CONCEPT_SEEDS,
   ...INSURANCE_CONCEPT_SEEDS,
   ...IDENTITY_ASSURANCE_CONCEPT_SEEDS,
@@ -76,4 +92,6 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...PHARMA_LAB_CONCEPT_SEEDS,
   ...SURVEYS_CONCEPT_SEEDS,
   ...ALLERGY_CONCEPT_SEEDS,
+  ...PLATFORM_OPS_CONCEPT_SEEDS,
+  ...STUDY_CATALOG_CONCEPT_SEEDS,
 ];

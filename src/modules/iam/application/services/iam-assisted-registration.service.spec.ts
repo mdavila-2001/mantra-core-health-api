@@ -32,7 +32,8 @@ function build() {
   };
   const usersRepo = { create: mockFn(), findById: mockFn() };
   const credentialsRepo = {
-    findLivePasswordBySubject: mockFn(),
+    findLivePasswordByEmail: mockFn(),
+    lockEmailForRegistration: mockFn().mockResolvedValue(undefined),
     createPendingPassword: mockFn(),
     findPendingPasswordByUser: mockFn(),
   };
@@ -41,7 +42,10 @@ function build() {
   const eventsRepo = { record: mockFn() };
   const personsRepo = { create: mockFn(() => ({ id: 'person-1' })) };
   const personProfilesRepo = { create: mockFn() };
-  const patientProfilesRepo = { create: mockFn() };
+  const patientProfilesRepo = {
+    create: mockFn(),
+    findHomonyms: mockFn().mockResolvedValue([]),
+  };
   const accountLinksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -82,7 +86,7 @@ describe('IamAssistedRegistrationService', () => {
   describe('assistedRegistration (C-18)', () => {
     it('creates a pending account, returns a one-time token and NEVER a password', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       d.usersRepo.create.mockReturnValue({ id: 'u1' });
 
       const res = await d.service.assistedRegistration(
@@ -135,7 +139,7 @@ describe('IamAssistedRegistrationService', () => {
 
     it('creates the person, its patient profile and the SELF account link in the same transaction (#820)', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       d.usersRepo.create.mockReturnValue({ id: 'u1' });
 
       await d.service.assistedRegistration(
@@ -189,7 +193,7 @@ describe('IamAssistedRegistrationService', () => {
 
     it('does not create any person when the identifier is already in use (#820)', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
         id: 'c1',
       });
 
@@ -203,9 +207,35 @@ describe('IamAssistedRegistrationService', () => {
       expect(d.accountLinksRepo.create).not.toHaveBeenCalled();
     });
 
+    it('rejects a homonym of a live patient unless the operator confirms it', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
+      d.usersRepo.create.mockReturnValue({ id: 'u1' });
+      d.patientProfilesRepo.findHomonyms.mockResolvedValue(['leo-1']);
+      const dto = {
+        name: 'leonardo',
+        lastName: 'Loayza Vargas',
+        email: 'leo@x.io',
+        reason: 'r',
+      };
+
+      const err = await d.service
+        .assistedRegistration(dto, actor)
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect((err as any).reason).toBe('POSSIBLE_DUPLICATE_PATIENT');
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+
+      await d.service.assistedRegistration(
+        { ...dto, allowHomonym: true },
+        actor,
+      );
+      expect(d.personsRepo.create).toHaveBeenCalled();
+    });
+
     it('keeps honouring displayName for clients that still send it', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       d.usersRepo.create.mockReturnValue({ id: 'u1' });
 
       await d.service.assistedRegistration(
@@ -226,7 +256,7 @@ describe('IamAssistedRegistrationService', () => {
 
     it('rejects when the verified identifier already exists (prefer invitation)', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
         id: 'c1',
       });
 
@@ -240,6 +270,30 @@ describe('IamAssistedRegistrationService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo correo con otras mayúsculas choca igual, bajo el cerrojo (#1000)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+        id: 'c1',
+      });
+
+      await expect(
+        d.service.assistedRegistration(
+          { name: 'A', lastName: 'B', email: 'Paciente@X.io', reason: 'r' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.credentialsRepo.lockEmailForRegistration).toHaveBeenCalledWith(
+        d.tx,
+        'Paciente@X.io',
+      );
+      expect(
+        d.credentialsRepo.lockEmailForRegistration.mock.invocationCallOrder[0],
+      ).toBeLessThan(
+        d.credentialsRepo.findLivePasswordByEmail.mock.invocationCallOrder[0],
+      );
       expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
   });

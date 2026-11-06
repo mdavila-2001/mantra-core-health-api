@@ -75,10 +75,10 @@ export class PatientInvoiceIssuedDto {
   @ApiProperty({ example: '500.00' })
   billedAmount!: string;
 
-  @ApiPropertyOptional({ example: '80', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '80', nullable: true })
   coveragePercent!: string | null;
 
-  @ApiPropertyOptional({ example: '50.00', nullable: true })
+  @ApiPropertyOptional({ type: String, example: '50.00', nullable: true })
   copayAmount!: string | null;
 
   @ApiProperty({ example: '140.00', description: 'Lo que paga el paciente' })

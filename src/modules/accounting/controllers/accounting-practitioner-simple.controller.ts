@@ -37,6 +37,7 @@ import {
   SimpleTransactionInputDto,
   SimpleTransactionsResponseDto,
 } from '../dto';
+import { RequirePermission } from '../../../common/auth/require-permission.decorator';
 
 /**
  * P49 — la contabilidad simple del doctor: los tres números de arriba, las
@@ -136,6 +137,9 @@ export class AccountingPractitionerSimpleController {
   })
   @Delete('accounts/:id')
   @Roles('PRACTITIONER')
+  @RequirePermission('accounting.simple_accounts.delete', {
+    resourceIdParam: 'id',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Borrar una cuenta propia',
@@ -208,6 +212,9 @@ export class AccountingPractitionerSimpleController {
   })
   @Delete('records/:id')
   @Roles('PRACTITIONER')
+  @RequirePermission('accounting.simple_records.delete', {
+    resourceIdParam: 'id',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Borrar un gasto, un activo o una deuda' })
   deleteRecord(
@@ -275,6 +282,9 @@ export class AccountingPractitionerSimpleController {
   })
   @Delete('transactions/:id')
   @Roles('PRACTITIONER')
+  @RequirePermission('accounting.simple_transactions.delete', {
+    resourceIdParam: 'id',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Borrar una transacción debe/haber' })
   deleteTransaction(

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `system_ops`.
- * 169 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 178 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -37,6 +37,13 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['breach_notifications', 'security_incident_id', 'system_ops', 'security_incidents', 'id'],
   ['breach_notifications', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['breach_notifications', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batch_rows', 'batch_id', 'system_ops', 'bulk_import_batches', 'id'],
+  ['bulk_import_batch_rows', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['bulk_import_batches', 'approval_request_id', 'delegated_access', 'four_eyes_requests', 'id'],
+  ['bulk_import_batches', 'confirmed_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batches', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['bulk_import_batches', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['bulk_import_batches', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['cross_border_transfer_events', 'approved_by_user_id', 'iam', 'users', 'id'],
   ['cross_border_transfer_events', 'data_category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cross_border_transfer_events', 'destination_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -86,6 +93,8 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['governance_change_log', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['governance_change_log', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['governance_change_log', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['governance_policy_revisions', 'decided_by_user_id', 'iam', 'users', 'id'],
+  ['governance_policy_revisions', 'submitted_by_user_id', 'iam', 'users', 'id'],
   ['key_rotation_events', 'encryption_key_id', 'system_ops', 'encryption_keys', 'id'],
   ['key_rotation_events', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['key_rotation_events', 'performed_by_user_id', 'iam', 'users', 'id'],
@@ -95,16 +104,16 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['legal_holds', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['legal_holds', 'tenant_id', 'directory', 'tenants', 'id'],
   ['legal_holds', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['operational_frameworks', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['operational_frameworks', 'provider_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['operational_frameworks', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['operational_frameworks', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['operational_framework_controls', 'created_by_user_id', 'iam', 'users', 'id'],
   ['operational_framework_controls', 'operational_framework_id', 'system_ops', 'operational_frameworks', 'id'],
   ['operational_framework_controls', 'parent_control_id', 'system_ops', 'operational_framework_controls', 'id'],
   ['operational_framework_controls', 'pillar_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['operational_framework_controls', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['operational_framework_controls', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['operational_frameworks', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['operational_frameworks', 'provider_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['operational_frameworks', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['operational_frameworks', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['partition_specs', 'archive_target_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['partition_specs', 'created_by_user_id', 'iam', 'users', 'id'],
   ['partition_specs', 'entity_registry_id', 'system_ops', 'entity_registry', 'id'],
@@ -113,8 +122,8 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['partition_specs', 'retention_policy_id', 'system_ops', 'retention_policies', 'id'],
   ['partition_specs', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['partition_specs', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['record_revisions', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['record_revisions', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['record_revisions', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['record_revisions', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['record_revisions', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['remediation_actions', 'assessment_finding_id', 'system_ops', 'assessment_findings', 'id'],
@@ -174,6 +183,6 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['write_policies', 'delete_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['write_policies', 'insert_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['write_policies', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['write_policies', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['write_policies', 'update_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['write_policies', 'updated_by_user_id', 'iam', 'users', 'id'],
 ];

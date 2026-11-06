@@ -4,11 +4,11 @@ Capa fina: `@ApiTags`/`@ApiBearerAuth`, `@HttpCode` correcto, `@Roles('SECURITY_
 `@CurrentUser() actor` y `@Param('id', ParseUUIDPipe)`. Delegan en el servicio y
 devuelven un DTO de respuesta.
 
-| Controlador | Prefijo | Endpoints |
-|-------------|---------|-----------|
-| `AuditController` | `/audit` | `data-access`, `events`, `history/{entity}/{id}`, `integrity/verify`, `retention/apply`, `anomaly/scan`, `third-party-access` |
-| `ComplianceController` | `/compliance` | `audit-export` |
-| `PrivacyController` | `/privacy` | `dsar` (POST), `dsar/{id}` (PATCH) |
-| `ModerationController` | `/moderation` | `decisions` |
-| `AuditQueryController` | `/audit` | `log`, `data-access` (GET, roles de auditoría) |
-| `AuditMeController` | `/audit/me` | `data-access` (GET, `PATIENT`; sólo el registro de la propia historia) |
+| Controlador            | Prefijo       | Endpoints                                                                                                                     |
+| ---------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `AuditController`      | `/audit`      | `data-access`, `events`, `history/{entity}/{id}`, `integrity/verify`, `retention/apply`, `anomaly/scan`, `third-party-access` |
+| `ComplianceController` | `/compliance` | `audit-export`                                                                                                                |
+| `PrivacyController`    | `/privacy`    | `dsar` (POST), `dsar/{id}` (PATCH)                                                                                            |
+| `ModerationController` | `/moderation` | `decisions`                                                                                                                   |
+| `AuditQueryController` | `/audit`      | `log`, `data-access` (GET, roles de auditoría)                                                                                |
+| `AuditMeController`    | `/audit/me`   | `data-access` (GET, `PATIENT`; sólo el registro de la propia historia)                                                        |

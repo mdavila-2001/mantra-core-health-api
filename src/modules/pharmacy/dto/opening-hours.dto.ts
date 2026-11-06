@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
-import { IsBoolean, IsString, Matches, ValidateIf } from 'class-validator';
+import { IsString, Matches, ValidateIf } from 'class-validator';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 import { ISO_INSTANT_WITH_OFFSET } from '../services/opening-hours.time';
 
 /** Quién declaró el turno (P34, D1). */
@@ -28,7 +29,7 @@ export class SetOpen24hDto {
       '`true`: abre las 24 h · `false`: no · `null`: retira la declaración (vuelve a «no declarado»)',
   })
   @ValidateIf((dto: SetOpen24hDto) => dto.open24h !== null)
-  @IsBoolean()
+  @IsStrictBoolean()
   open24h!: boolean | null;
 }
 

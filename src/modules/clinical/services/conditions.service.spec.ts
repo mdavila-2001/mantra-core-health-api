@@ -40,6 +40,7 @@ function build() {
   const filesService = { createLink: mockFn() };
   const clinicalRead = {
     assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+    resolveReadScope: mockFn().mockResolvedValue({ kind: 'FULL' }),
   };
   // BR-14 (CL-07): por defecto el encuentro no está sellado, así que la
   // guarda no rechaza nada salvo que el test la sobreescriba.
@@ -902,7 +903,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
   });
 });
 
-describe('ConditionsService.verify · replacedByConditionId (v4291)', () => {
+describe('ConditionsService.verify · replacedByConditionId (v4292)', () => {
   const medical = {
     id: 'user-1',
     roles: ['PRACTITIONER'],
@@ -1065,5 +1066,110 @@ describe('ConditionsService.verify · replacedByConditionId (v4291)', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect((d.tx as any).findOne).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Regla (c): verificar o cambiar el estado de un diagnóstico que registró otro
+ * profesional exige acceso completo a la historia; lo propio no pide más.
+ */
+describe('ConditionsService · diagnóstico de otro profesional (regla c)', () => {
+  const medical = {
+    id: 'user-1',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'prac-1',
+  } as any;
+  const SPECIALTIES = {
+    kind: 'SPECIALTIES',
+    specialtyConceptIds: ['esp-1'],
+  };
+
+  const condition = (recordedByUserId?: string) => ({
+    id: 'cond-1',
+    patientProfileId: 'p1',
+    custodianTenantId: 't1',
+    clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+    verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
+    recordedByUserId,
+    createdAt: new Date('2026-09-01T10:00:00Z'),
+  });
+  const change = (d: ReturnType<typeof build>) =>
+    d.service.changeClinicalStatus(
+      'cond-1',
+      {
+        newClinicalStatusConceptId: CLIN.CONDITION_INACTIVE,
+        reasonText: 'Sin síntomas',
+      },
+      medical,
+    );
+  const refute = (d: ReturnType<typeof build>) =>
+    d.service.verify(
+      'cond-1',
+      { outcome: 'REFUTED', reasonText: 'No es compatible' } as any,
+      medical,
+    );
+
+  it.each([
+    ['changeClinicalStatus', change],
+    ['verify', refute],
+  ])(
+    '%s sobre lo de otro con alcance por especialidades responde 403',
+    async (_name, operate) => {
+      const d = build();
+      const row = condition('user-otro');
+      d.conditionsRepo.findById.mockResolvedValue(row);
+      d.clinicalRead.resolveReadScope.mockResolvedValue(SPECIALTIES);
+
+      await expect(operate(d)).rejects.toThrow(/acceso completo/);
+      expect(d.clinicalRead.resolveReadScope).toHaveBeenCalledWith(
+        'p1',
+        medical,
+      );
+      expect(row.clinicalStatusConceptId).toBe(CLIN.CONDITION_ACTIVE);
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ['changeClinicalStatus', change],
+    ['verify', refute],
+  ])(
+    '%s sobre lo de otro con acceso completo se permite y queda auditado con quién',
+    async (_name, operate) => {
+      const d = build();
+      d.conditionsRepo.findById.mockResolvedValue(condition('user-otro'));
+
+      await operate(d);
+
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        medical,
+        expect.anything(),
+      );
+      expect(d.historyRepo.append.mock.calls[0][3].changedByUserId).toBe(
+        'user-1',
+      );
+    },
+  );
+
+  it('lo que registró el propio actor no consulta el alcance', async () => {
+    const d = build();
+    d.conditionsRepo.findById.mockResolvedValue(condition('user-1'));
+
+    await change(d);
+
+    expect(d.clinicalRead.resolveReadScope).not.toHaveBeenCalled();
+  });
+
+  it('adjuntar un archivo no exige acceso completo', async () => {
+    const d = build();
+    d.conditionsRepo.findById.mockResolvedValue(condition('user-otro'));
+    d.clinicalRead.resolveReadScope.mockResolvedValue(SPECIALTIES);
+    d.filesService.createLink.mockResolvedValue({ id: 'link-1' });
+
+    await d.service.attachFile('cond-1', { fileId: 'f-1' } as any, medical);
+
+    expect(d.clinicalRead.resolveReadScope).not.toHaveBeenCalled();
   });
 });

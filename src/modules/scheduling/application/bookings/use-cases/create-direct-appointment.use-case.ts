@@ -296,7 +296,14 @@ export class CreateDirectAppointmentUseCase {
     await tx.flush();
 
     // La cita clínica que la respalda, ya reservada.
+    const careSpaceId = await this.clinicalSync.careSpaceFor(tx, {
+      resourceCareSpaceId: resource.careSpaceId,
+      resourceId: resource.id,
+      at: startAt,
+      timeZone: resource.timeZone,
+    });
     const appointment = this.clinicalSync.createClinicalAppointment(tx, {
+      careSpaceId,
       tenantId: resource.tenantId,
       patientProfileId: dto.patientProfileId,
       resourceRefType: resource.resourceRefType,

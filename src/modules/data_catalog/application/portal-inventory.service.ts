@@ -2,6 +2,8 @@ import { relative } from 'node:path';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type {
   BusquedaQueryDto,
+  LinajeAristasQueryDto,
+  LinajeNodosQueryDto,
   OperacionesQueryDto,
   PaginacionQueryDto,
   ProcesosQueryDto,
@@ -14,7 +16,9 @@ import type {
   GrafoDto,
   HallazgoDetalleDto,
   HallazgoResumenDto,
+  LinajeAristasPaginaDto,
   LinajeDto,
+  LinajeNodosPaginaDto,
   LinajeTablaDto,
   MapaPaginaDto,
   OperacionDetalleDto,
@@ -442,6 +446,55 @@ export class PortalInventoryService {
         .filter((a) => a.tipo === 'REFERENCIA' && a.a === nodo)
         .map((a) => tablaDe(a.de))
         .sort(),
+    };
+  }
+
+  /**
+   * Nodos del linaje (operaciones, tablas, dominios), en orden de id. Sin datos: son nombres del
+   * inventario generado del código y del modelo.
+   */
+  linajeNodos(query: LinajeNodosQueryDto): LinajeNodosPaginaDto {
+    const filtrados = this.inventory
+      .linaje()
+      .nodos.filter(
+        (n) =>
+          (!query.tipo || n.tipo === query.tipo) &&
+          (!query.dominio || n.dominio === query.dominio) &&
+          coincide(query.q, n.id, n.etiqueta),
+      )
+      .sort((a, b) => compararClaves(a.id, b.id));
+    const pagina = paginar(filtrados, (n) => n.id, query);
+    return {
+      ...pagina,
+      items: pagina.items.map((n) => ({
+        id: n.id,
+        tipo: n.tipo,
+        etiqueta: n.etiqueta,
+        dominio: n.dominio ?? null,
+        riesgo: n.riesgo ?? null,
+      })),
+    };
+  }
+
+  /**
+   * Aristas del linaje en orden `de|a|tipo`: la clave completa de una arista, así que el cursor no
+   * salta ni repite aunque dos aristas compartan origen.
+   */
+  linajeAristas(query: LinajeAristasQueryDto): LinajeAristasPaginaDto {
+    const filtradas = this.inventory
+      .linaje()
+      .aristas.filter(
+        (e) =>
+          (!query.tipo || e.tipo === query.tipo) &&
+          (!query.de || e.de === query.de) &&
+          (!query.a || e.a === query.a),
+      )
+      .map((e) => ({ ...e, clave: `${e.de}|${e.a}|${e.tipo}` }))
+      .sort((a, b) => compararClaves(a.clave, b.clave));
+    const pagina = paginar(filtradas, (e) => e.clave, query);
+    return {
+      ...pagina,
+      items: pagina.items.map(({ de, a, tipo }) => ({ de, a, tipo })),
     };
   }
 

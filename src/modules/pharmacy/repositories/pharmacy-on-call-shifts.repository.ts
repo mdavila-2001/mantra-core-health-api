@@ -150,7 +150,7 @@ export class PharmacyOnCallShiftsRepository {
     filter: { now: Date; mode: 'any' | '24h' | 'on-call'; city?: string },
   ): Promise<OpenNowRow[]> {
     const city = filter.city?.trim() || null;
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       Array<{
         site_id: string;
         site_name: string;

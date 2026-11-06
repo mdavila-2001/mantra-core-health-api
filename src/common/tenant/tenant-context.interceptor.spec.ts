@@ -29,7 +29,12 @@ function reflector(isPublic = false): any {
 
 const handler = (value: unknown) => ({ handle: () => of(value) });
 
-const em = { transactional: jest.fn(), execute: jest.fn() } as any;
+const em = {
+  getTransactionContext: () => undefined,
+  isInTransaction: () => false,
+  transactional: jest.fn(),
+  execute: jest.fn(),
+} as any;
 
 /** Interceptor con el RLS de base desactivado (el default de desarrollo). */
 function build(isPublic = false): TenantContextInterceptor {
@@ -292,11 +297,18 @@ describe('TenantContextInterceptor', () => {
       const execute = jest
         .fn<() => Promise<void>>()
         .mockResolvedValue(undefined);
-      const transactional = jest.fn(async (callback: () => Promise<unknown>) =>
-        callback(),
+      const tx = { getTransactionContext: () => undefined };
+      const transactional = jest.fn(
+        async (callback: (value: typeof tx) => Promise<unknown>) =>
+          callback(tx),
       );
       const interceptor = new TenantContextInterceptor(
-        { execute, transactional } as any,
+        {
+          execute,
+          transactional,
+          getTransactionContext: () => undefined,
+          isInTransaction: () => false,
+        } as any,
         reflector(),
       );
       if (previous === undefined) delete process.env.RLS_ENFORCE;
@@ -313,6 +325,80 @@ describe('TenantContextInterceptor', () => {
         "select set_config('app.system_context', 'true', true)",
       );
     });
+  });
+
+  describe('espectador del mercado de farmacias (H-01)', () => {
+    /** Interceptor con RLS activo; devuelve los `set_config` que ejecutó. */
+    async function runWithRls(user: unknown): Promise<string[]> {
+      const previous = process.env.RLS_ENFORCE;
+      process.env.RLS_ENFORCE = 'true';
+      const calls: string[] = [];
+      const execute = jest
+        .fn<(sql: string, params?: unknown[]) => Promise<void>>()
+        .mockImplementation(async (sql, params) => {
+          calls.push(params ? `${sql} <- ${String(params[0])}` : sql);
+        });
+      const tx = { getTransactionContext: () => undefined };
+      const interceptor = new TenantContextInterceptor(
+        {
+          execute,
+          transactional: jest.fn(
+            async (callback: (value: typeof tx) => Promise<unknown>) =>
+              callback(tx),
+          ),
+          getTransactionContext: () => undefined,
+          isInTransaction: () => false,
+        } as any,
+        reflector(),
+      );
+      if (previous === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = previous;
+      await lastValueFrom(
+        interceptor.intercept(
+          httpContext({ 'x-tenant-id': 'tenant-A' }, user),
+          handler('ok'),
+        ) as any,
+      );
+      return calls;
+    }
+    const MARKETPLACE =
+      "select set_config('app.marketplace_viewer', 'true', true)";
+
+    it('un paciente declara el GUC dentro de la transacción del request', async () => {
+      const calls = await runWithRls({
+        id: 'p',
+        roles: ['PATIENT'],
+        tenantIds: ['tenant-A'],
+      });
+      expect(calls).toContain(MARKETPLACE);
+      expect(calls).toContain(
+        "select set_config('app.current_tenant_id', ?, true) <- tenant-A",
+      );
+    });
+
+    it.each([['PHARMACY_STAFF'], ['SECURITY_ADMIN'], ['SUPERADMIN']])(
+      'un paciente que además es %s NO lo recibe',
+      async (extra) => {
+        const calls = await runWithRls({
+          id: 'p',
+          roles: ['PATIENT', extra],
+          tenantIds: ['tenant-A'],
+        });
+        expect(calls).not.toContain(MARKETPLACE);
+      },
+    );
+
+    it.each([['DOCTOR'], ['OWNER'], ['ADMIN']])(
+      'un sujeto con rol %s y sin PATIENT NO lo recibe',
+      async (role) => {
+        const calls = await runWithRls({
+          id: 'u',
+          roles: [role],
+          tenantIds: ['tenant-A'],
+        });
+        expect(calls).not.toContain(MARKETPLACE);
+      },
+    );
   });
 
   describe('tenant en parámetros de ruta', () => {

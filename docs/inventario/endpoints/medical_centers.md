@@ -44,7 +44,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/medical_centers/controllers/medical-centers.controller.ts:45` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/medical_centers/controllers/medical-centers.controller.ts:45` |
 | PARAMETRO_QUERY | procedureConceptIds (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -120,7 +120,7 @@ El árbol de decisión completo está en [flujos](../flujos/medical_centers.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:527` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:583` |
 | CONTROLADOR | `src/modules/medical_centers/controllers/medical-centers.controller.spec.ts:37` |
 
 ### Flujos
@@ -154,9 +154,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/medical_centers/controllers/medical-centers.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | serviceRequestIds (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -234,7 +234,7 @@ El árbol de decisión completo está en [flujos](../flujos/medical_centers.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/medical-centers.int-spec.ts:947` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:1010` |
 | CONTROLADOR | `src/modules/medical_centers/controllers/medical-centers.controller.spec.ts:38` |
 
 ### Flujos

@@ -83,6 +83,7 @@ function build(
     logger as any,
     {} as any,
     {} as any,
+    {} as any,
     fileUpload as any,
   );
   return { service, fileUpload };

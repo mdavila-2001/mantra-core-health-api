@@ -135,7 +135,11 @@ export {
   SlotListItemDto,
   SlotPriceDto,
   ListSlotsResponseDto,
+  BookableOrganizationDto,
+  BookableOrganizationsResponseDto,
 } from './scheduling-agenda.dto';
+export * from './bookable-resources-query.dto';
+export * from './bookable-resources.dto';
 export * from './tenant-agenda.dto';
 
 export {
@@ -152,3 +156,4 @@ export {
   BookingBillingLinkDto,
   type BookingBillingReason,
 } from './booking-billing-link.dto';
+export * from './resource-approval.dto';

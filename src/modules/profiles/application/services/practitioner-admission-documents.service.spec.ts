@@ -173,6 +173,38 @@ describe('PractitionerAdmissionDocumentsService', () => {
     }
   });
 
+  it('un rol de plataforma acotado a una organización no abre documentos de admisiones (#1241)', async () => {
+    const d = build();
+    for (const role of [
+      'ADMISSIONS_REVIEWER',
+      'ADMISSIONS_APPROVER',
+      'SECURITY_ADMIN',
+      'SUPERADMIN',
+    ]) {
+      const acotado = {
+        id: 'u-acotado',
+        roles: [role],
+        scopedRoles: { 'tenant-a': [role] },
+      } as never;
+      const error = await d.service
+        .issueUrl('adm-1', 'f1', acotado, NOW)
+        .catch((e: Error) => e);
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+    }
+  });
+
+  it('el mismo rol global sí abre documentos de admisiones', async () => {
+    const d = build();
+    const global = {
+      id: 'u-global',
+      roles: ['SECURITY_ADMIN'],
+      scopedRoles: { 'tenant-a': ['PRACTITIONER'] },
+    } as never;
+    await expect(
+      d.service.issueUrl('adm-1', 'f1', global, NOW),
+    ).resolves.toMatchObject({ name: 'f1.pdf' });
+  });
+
   it('abre el documento con una firma válida y devuelve los bytes por el camino de contexto autorizado', async () => {
     const d = build();
     const issued = await d.service.issueUrl('adm-1', 'f1', REVIEWER, NOW);

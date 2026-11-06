@@ -224,6 +224,60 @@ describe('ClinicalFormsSeedService', () => {
     expect(log.slice(section, template)).toContain('<flush>');
   });
 
+  it('escribe el catálogo por niveles, con un flush por nivel y no uno por fila', async () => {
+    const { service, bitacora } = build();
+
+    await service.run();
+
+    // api#1245: un flush por campo y por asignación llevaba la siembra de una
+    // base nueva a más de un cuarto de hora. Con el catálogo entero de una vez
+    // quedan, como mucho, los flush de especialidades, value set (3), política
+    // (2), secciones, plantillas, definiciones y asignaciones.
+    const log = bitacora();
+    const flushes = log.filter((entity) => entity === '<flush>').length;
+    expect(flushes).toBeLessThanOrEqual(10);
+
+    // Y el orden entre niveles es el que piden las FK planas.
+    const lastOf = (entity: string) => log.lastIndexOf(entity);
+    const firstOf = (entity: string) => log.indexOf(entity);
+    expect(lastOf('DynamicFieldSections')).toBeLessThan(
+      firstOf('SpecialtyChartTemplates'),
+    );
+    expect(lastOf('SpecialtyChartTemplates')).toBeLessThan(
+      firstOf('DynamicFieldDefinitions'),
+    );
+    expect(lastOf('DynamicFieldDefinitions')).toBeLessThan(
+      firstOf('FieldAssignments'),
+    );
+  });
+
+  it('una corrida cortada entre niveles se completa sin reescribir lo que ya entró', async () => {
+    const first = build();
+    await first.service.run();
+
+    // Una base a medio sembrar: secciones y la mitad de las definiciones de
+    // campo, sin plantillas —lo que deja cortada la versión anterior, que
+    // escribía formulario por formulario—.
+    const definitions = first.rowsOf('DynamicFieldDefinitions');
+    const half = definitions.slice(0, Math.floor(definitions.length / 2));
+    const alreadyPresent = new Set<string>([
+      ...first.rowsOf('DynamicFieldSections').map((row) => row.id),
+      ...half.map((row) => row.id),
+    ]);
+    const second = build(alreadyPresent);
+
+    const result = await second.service.run();
+
+    expect(result.templates).toBe(STANDARD_FORMS.length);
+    expect(second.rowsOf('DynamicFieldSections')).toHaveLength(0);
+    const written = second.rowsOf('DynamicFieldDefinitions').map((r) => r.id);
+    expect(written).toHaveLength(definitions.length - half.length);
+    expect(written.some((id) => alreadyPresent.has(id))).toBe(false);
+    expect(second.rowsOf('FieldAssignments')).toHaveLength(
+      first.rowsOf('FieldAssignments').length,
+    );
+  });
+
   it('corrido dos veces no duplica nada', async () => {
     const first = build();
     await first.service.run();

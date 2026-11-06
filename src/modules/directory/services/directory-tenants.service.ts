@@ -358,14 +358,23 @@ export class DirectoryTenantsService {
       // (nacida en borrador al registrarse) se activa, se marca verificada y se
       // enlaza a la vitrina. Sin esto el portal de la farmacia decía «todavía no
       // tiene una farmacia publicada» para siempre (P50).
+      //
+      // También se enlaza la que ya opera sin vitrina: la que se aprobó por la
+      // verificación de su licencia antes de que la organización tuviera
+      // vitrina. Activa y verificada, sin el enlace no aparecía en el buscador.
       if (tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
         const pharmacies = await tx.find(Pharmacies, {
           tenantId: tenant.id,
-          statusConceptId: PHARM.PHARMACY_DRAFT,
+          $or: [
+            { statusConceptId: PHARM.PHARMACY_DRAFT },
+            { statusConceptId: PHARM.PHARMACY_ACTIVE, publicProfileId: null },
+          ],
         });
         for (const pharmacy of pharmacies) {
-          pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
-          pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
+          if (pharmacy.statusConceptId === PHARM.PHARMACY_DRAFT) {
+            pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
+            pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
+          }
           pharmacy.publicProfileId = publicProfileId;
           touch(pharmacy, actor.id);
         }

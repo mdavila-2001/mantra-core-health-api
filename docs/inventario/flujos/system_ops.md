@@ -3,13 +3,13 @@
 # Flujos del módulo `system_ops`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 24 (23 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 35 (31 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [system_ops](../endpoints/system_ops.md)
 
 ## Proceso: Módulo `system_ops` (11) — Data Governance & System Operations
 
-- **Código:** `system_ops` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 24
-- **Actores:** SECURITY_ADMIN
+- **Código:** `system_ops` · **Agrupación:** MIXTO · **Operaciones:** 35
+- **Actores:** AUDITOR · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD · DPO · GOVERNANCE_ADMIN · PLATFORM_ADMIN · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/system_ops/README.md`
 
@@ -23,7 +23,7 @@ _Fuente: `src/modules/system_ops/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-11-01` | Registrar dominio, clasificación y catalogar entidad + campos | POST /admin/governance/entity-registry | SECURITY_ADMIN | MEDIO | 7 |
+| `UC-11-01` | Registrar dominio, clasificación y catalogar entidad + campos | POST /admin/governance/entity-registry | SECURITY_ADMIN | MEDIO | 9 |
 | `UC-11-02` | Vincular política de escritura a una entidad | PATCH /admin/governance/entity-registry/{id}/write-policy | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /admin/governance/write-policies | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-11-03` | Aplicar retención a una entidad (razón obligatoria) | PATCH /admin/governance/entity-registry/{id}/retention | SECURITY_ADMIN | MEDIO | 4 |
@@ -47,6 +47,17 @@ _Fuente: `src/modules/system_ops/README.md:3`_
 |  |  | POST /admin/governance/remediation-actions/{id}/verify | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-11-15` | Guardar draft genérico | POST /admin/governance/drafts | SECURITY_ADMIN | MEDIO | 1 |
 |  |  | POST /admin/governance/drafts/{id}/publish | SECURITY_ADMIN | MEDIO | 3 |
+| `ctrl:GovernanceOperationsReadController` | Operaciones de GovernanceOperationsReadController que el README no asigna a un caso de uso | GET /admin/governance/domains | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 2 |
+|  |  | GET /admin/governance/legal-holds | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DPO · AUDITOR | BAJO | 2 |
+|  |  | GET /admin/governance/retention-executions | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
+| `ctrl:GovernanceReadController` | Operaciones de GovernanceReadController que el README no asigna a un caso de uso | GET /admin/governance/change-log | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 2 |
+|  |  | GET /admin/governance/entity-registry | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 6 |
+|  |  | GET /admin/governance/entity-registry/{id}/fields | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 5 |
+|  |  | GET /admin/governance/policies | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 5 |
+|  |  | GET /admin/governance/policies/{policyType}/{id} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 8 |
+| `ctrl:MutabilityController` | Operaciones de MutabilityController que el README no asigna a un caso de uso | GET /admin/governance/mutability | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 1 |
+|  |  | GET /admin/governance/mutability/{schema}/{table} | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 1 |
+|  |  | GET /admin/governance/mutability/summary | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 1 |
 
 ### Diagrama 1 de 2 — etapas `UC-11-01`, `UC-11-02`, `UC-11-03`…
 
@@ -56,11 +67,11 @@ flowchart LR
   t3[("system_ops.data_classifications")]:::tabla
   t4[("system_ops.data_domains")]:::tabla
   t5[("system_ops.entity_registry")]:::tabla
-  t6[("system_ops.field_registry")]:::tabla
-  t9[("system_ops.governance_change_log")]:::tabla
-  t10[("system_ops.write_policies")]:::tabla
-  t13[("system_ops.retention_policies")]:::tabla
-  t16[("system_ops.anonymization_rules")]:::tabla
+  t8[("system_ops.governance_change_log")]:::tabla
+  t9[("system_ops.write_policies")]:::tabla
+  t12[("system_ops.retention_policies")]:::tabla
+  t15[("system_ops.anonymization_rules")]:::tabla
+  t17[("system_ops.field_registry")]:::tabla
   t19[("audio_assets.audio_assets")]:::tabla
   t20[("common.file_derivatives")]:::tabla
   t21[("common.file_versions")]:::tabla
@@ -81,21 +92,21 @@ flowchart LR
   t48[("system_ops.assessment_findings")]:::tabla
   t50[("system_ops.remediation_actions")]:::tabla
   t51[("system_ops.remediation_plans")]:::tabla
-  t7[("+1 tablas más")]
+  t6[("+3 tablas más")]
   subgraph s0["UC-11-01 · Registrar dominio, clasificación y catalogar entidad + campos"]
     o1["POST /admin/governance/entity-registry"]:::op
   end
   subgraph s1["UC-11-02 · Vincular política de escritura a una entidad"]
-    o8["PATCH /admin/governance/entity-registry/{id}/write-policy"]:::op
-    o11["POST /admin/governance/write-policies"]:::op
+    o7["PATCH /admin/governance/entity-registry/{id}/write-policy"]:::op
+    o10["POST /admin/governance/write-policies"]:::op
   end
   subgraph s2["UC-11-03 · Aplicar retención a una entidad (razón obligatoria)"]
-    o12["PATCH /admin/governance/entity-registry/{id}/retention"]:::op
-    o14["POST /admin/governance/retention-policies"]:::op
+    o11["PATCH /admin/governance/entity-registry/{id}/retention"]:::op
+    o13["POST /admin/governance/retention-policies"]:::op
   end
   subgraph s3["UC-11-04 · Definir regla de anonimización"]
-    o15["POST /admin/governance/anonymization-rules"]:::op
-    o17["PATCH /admin/governance/field-registry/{id}"]:::op
+    o14["POST /admin/governance/anonymization-rules"]:::op
+    o16["PATCH /admin/governance/field-registry/{id}"]:::op
   end
   t23[("+32 tablas más")]
   subgraph s4["UC-11-05 · Ejecutar barrido de retención (excluye objetivos bajo legal hold)"]
@@ -135,34 +146,34 @@ flowchart LR
   o1 -->|"CREA"| t4
   o1 -->|"LEE"| t4
   o1 -->|"CREA"| t5
-  o1 -->|"CREA"| t6
-  o1 -.-> t7
-  a2 --> o8
-  o8 -->|"ACTUALIZA"| t5
-  o8 -->|"LEE"| t5
-  o8 -->|"CREA"| t9
-  o8 -->|"LEE"| t10
+  o1 -->|"LEE"| t5
+  o1 -.-> t6
+  a2 --> o7
+  o7 -->|"ACTUALIZA"| t5
+  o7 -->|"LEE"| t5
+  o7 -->|"CREA"| t8
+  o7 -->|"LEE"| t9
+  a2 --> o10
+  o10 -->|"CREA"| t8
+  o10 -->|"CREA"| t9
+  o10 -->|"LEE"| t9
   a2 --> o11
-  o11 -->|"CREA"| t9
-  o11 -->|"CREA"| t10
-  o11 -->|"LEE"| t10
-  a2 --> o12
-  o12 -->|"ACTUALIZA"| t5
-  o12 -->|"LEE"| t5
-  o12 -->|"CREA"| t9
-  o12 -->|"LEE"| t13
+  o11 -->|"ACTUALIZA"| t5
+  o11 -->|"LEE"| t5
+  o11 -->|"CREA"| t8
+  o11 -->|"LEE"| t12
+  a2 --> o13
+  o13 -->|"CREA"| t8
+  o13 -->|"CREA"| t12
+  o13 -->|"LEE"| t12
   a2 --> o14
-  o14 -->|"CREA"| t9
-  o14 -->|"CREA"| t13
-  o14 -->|"LEE"| t13
-  a2 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  o15 -->|"CREA"| t9
-  a2 --> o17
-  o17 -->|"ACTUALIZA"| t6
-  o17 -->|"LEE"| t6
-  o17 -->|"CREA"| t9
+  o14 -->|"CREA"| t15
+  o14 -->|"LEE"| t15
+  o14 -->|"CREA"| t8
+  a2 --> o16
+  o16 -->|"ACTUALIZA"| t17
+  o16 -->|"LEE"| t17
+  o16 -->|"CREA"| t8
   a2 --> o18
   o18 -->|"LEE"| t19
   o18 -->|"BORRA"| t20
@@ -174,7 +185,7 @@ flowchart LR
   a2 --> o24
   o24 -->|"CREA"| t25
   o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t9
+  o24 -->|"CREA"| t8
   a2 --> o26
   o26 -->|"LEE"| t27
   o26 -->|"LEE"| t28
@@ -184,11 +195,11 @@ flowchart LR
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
   a2 --> o33
-  o33 -->|"CREA"| t9
+  o33 -->|"CREA"| t8
   o33 -->|"CREA"| t34
   o33 -->|"LEE"| t34
   a2 --> o35
-  o35 -->|"CREA"| t9
+  o35 -->|"CREA"| t8
   o35 -->|"ACTUALIZA"| t34
   o35 -->|"LEE"| t34
   a2 --> o36
@@ -224,16 +235,31 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `UC-11-14`, `UC-11-15`
+### Diagrama 2 de 2 — etapas `UC-11-14`, `UC-11-15`, `ctrl:GovernanceOperationsReadController`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
+  a12(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_G…"]):::actor
+  a16(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_G…"]):::actor
+  a23(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_P…"]):::actor
   t3[("system_ops.assessment_findings")]:::tabla
   t5[("system_ops.remediation_actions")]:::tabla
   t6[("system_ops.remediation_plans")]:::tabla
   t8[("system_ops.draft_records")]:::tabla
   t10[("system_ops.record_revisions")]:::tabla
+  t13[("system_ops.data_domains")]:::tabla
+  t14[("system_ops.entity_registry")]:::tabla
+  t17[("system_ops.legal_holds")]:::tabla
+  t18[("terminology.catalog_concepts")]:::tabla
+  t20[("system_ops.retention_executions")]:::tabla
+  t21[("system_ops.retention_policies")]:::tabla
+  t24[("system_ops.governance_change_log")]:::tabla
+  t26[("system_ops.data_classifications")]:::tabla
+  t27[("system_ops.field_registry")]:::tabla
+  t28[("system_ops.write_policies")]:::tabla
+  t30[("system_ops.anonymization_rules")]:::tabla
+  t32[("system_ops.data_residency_policies")]:::tabla
   subgraph s0["UC-11-14 · Actualizar hallazgo"]
     o1["PATCH /admin/governance/findings/{id}"]:::op
     o4["POST /admin/governance/remediation-actions/{id}/verify"]:::op
@@ -241,6 +267,24 @@ flowchart LR
   subgraph s1["UC-11-15 · Guardar draft genérico"]
     o7["POST /admin/governance/drafts"]:::op
     o9["POST /admin/governance/drafts/{id}/publish"]:::op
+  end
+  subgraph s2["ctrl:GovernanceOperationsReadController · Operaciones de GovernanceOperationsRe…"]
+    o11["GET /admin/governance/domains"]:::op
+    o15["GET /admin/governance/legal-holds"]:::op
+    o19["GET /admin/governance/retention-executions"]:::op
+  end
+  t34[("+2 tablas más")]
+  subgraph s3["ctrl:GovernanceReadController · Operaciones de GovernanceReadController que el…"]
+    o22["GET /admin/governance/change-log"]:::op
+    o25["GET /admin/governance/entity-registry"]:::op
+    o29["GET /admin/governance/entity-registry/{id}/fields"]:::op
+    o31["GET /admin/governance/policies"]:::op
+    o33["GET /admin/governance/policies/{policyType}/{id}"]:::op
+  end
+  subgraph s4["ctrl:MutabilityController · Operaciones de MutabilityController que el README n…"]
+    o35["GET /admin/governance/mutability"]:::op
+    o36["GET /admin/governance/mutability/{schema}/{table}"]:::op
+    o37["GET /admin/governance/mutability/summary"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -258,6 +302,53 @@ flowchart LR
   o9 -->|"ACTUALIZA"| t8
   o9 -->|"LEE"| t8
   o9 -->|"CREA"| t10
+  a12 --> o11
+  o11 -->|"LEE"| t13
+  o11 -->|"LEE"| t14
+  a16 --> o15
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  a12 --> o19
+  o19 -->|"LEE"| t14
+  o19 -->|"LEE"| t20
+  o19 -->|"LEE"| t21
+  o19 -->|"LEE"| t18
+  a23 --> o22
+  o22 -->|"LEE"| t24
+  o22 -->|"LEE"| t18
+  a23 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t13
+  o25 -->|"LEE"| t14
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t21
+  o25 -->|"LEE"| t28
+  a23 --> o29
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t26
+  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t27
+  o29 -->|"LEE"| t18
+  a23 --> o31
+  o31 -->|"LEE"| t30
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t21
+  o31 -->|"LEE"| t28
+  o31 -->|"LEE"| t18
+  a23 --> o33
+  o33 -->|"LEE"| t30
+  o33 -->|"LEE"| t26
+  o33 -->|"LEE"| t32
+  o33 -->|"LEE"| t14
+  o33 -->|"LEE"| t27
+  o33 -->|"LEE"| t21
+  o33 -.-> t34
+  a12 --> o35
+  o35 -->|"LEE"| t14
+  a12 --> o36
+  o36 -->|"LEE"| t14
+  a12 --> o37
+  o37 -->|"LEE"| t14
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -439,7 +530,44 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /admin/governance/cross-border-transfers
+#### 4. GET /admin/governance/change-log
+
+Cambios de gobierno de datos: quién cambió qué y cuándo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceReadService.changeLog"]:::llamada
+  n2 --> n3
+  n4{"to && to ‹= from"}:::decision
+  n3 --> n4
+  n5(["400 VALIDATION_FAILED «to» debe ser posterior a «from»"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a GovernanceReadRepository.changeLog"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE system_ops.governance_change_log · LEE terminology.catalog_concepts")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /admin/governance/cross-border-transfers
 
 Registrar una transferencia transfronteriza (append-only)
 
@@ -483,7 +611,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /admin/governance/drafts/{id}/publish
+#### 6. POST /admin/governance/drafts/{id}/publish
 
 Publicar un draft record y materializarlo
 
@@ -538,7 +666,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /admin/governance/entity-registry
+#### 7. POST /admin/governance/entity-registry
 
 Registrar dominio, clasificación y catalogar entidad + campos
 
@@ -580,24 +708,32 @@ flowchart TD
   n12 -->|"sí"| n13
   n14[("CREA system_ops.data_classifications")]:::efecto
   n13 --> n14
-  n15["Llama a GovernanceRepository.createEntity"]:::llamada
+  n15["Llama a GovernanceRepository.findEntityByTable"]:::llamada
   n14 --> n15
   n12 -->|"no"| n15
-  n16[("CREA system_ops.entity_registry")]:::efecto
+  n16[("LEE system_ops.entity_registry")]:::efecto
   n15 --> n16
-  n17["Repite: por cada const f de dto.fields"]:::bucle
+  n17["Llama a GovernanceRepository.createEntity"]:::llamada
   n16 --> n17
-  n18["Llama a GovernanceRepository.createField"]:::llamada
-  n17 -->|"cada elemento"| n18
-  n19[("CREA system_ops.field_registry")]:::efecto
+  n18[("CREA system_ops.entity_registry")]:::efecto
+  n17 --> n18
+  n19["Llama a GovernanceRepository.findFieldsByEntity"]:::llamada
   n18 --> n19
-  n20["Llama a GovernanceRepository.recordChange"]:::llamada
+  n20[("LEE system_ops.field_registry")]:::efecto
   n19 --> n20
-  n17 -->|"al terminar"| n20
-  n21[("CREA system_ops.governance_change_log")]:::efecto
+  n21["Repite: por cada const f de dto.fields"]:::bucle
   n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
+  n22["Llama a GovernanceRepository.createField"]:::llamada
+  n21 -->|"cada elemento"| n22
+  n23[("CREA system_ops.field_registry")]:::efecto
+  n22 --> n23
+  n24["Llama a GovernanceRepository.recordChange"]:::llamada
+  n23 --> n24
+  n21 -->|"al terminar"| n24
+  n25[("CREA system_ops.governance_change_log")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -606,7 +742,48 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. PATCH /admin/governance/entity-registry/{id}/retention
+#### 8. GET /admin/governance/entity-registry/{id}/fields
+
+Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entidad del registro no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceReadService.fieldRegistry"]:::llamada
+  n2 --> n3
+  n4["Llama a GovernanceReadRepository.entityExists"]:::llamada
+  n3 --> n4
+  n5[("LEE system_ops.entity_registry")]:::efecto
+  n4 --> n5
+  n6{"!(await this.repo.entityExists(em, entityId))"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Entidad del registro no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a GovernanceReadRepository.fieldRegistry"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE system_ops.field_registry · LEE system_ops.data_classifications · LEE terminology.catalog_concepts · LEE…")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. PATCH /admin/governance/entity-registry/{id}/retention
 
 Aplicar una política de retención a una entidad
 
@@ -660,7 +837,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. PATCH /admin/governance/entity-registry/{id}/write-policy
+#### 10. PATCH /admin/governance/entity-registry/{id}/write-policy
 
 Vincular una política de escritura a una entidad
 
@@ -714,7 +891,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PATCH /admin/governance/field-registry/{id}
+#### 11. PATCH /admin/governance/field-registry/{id}
 
 Asignar regla de anonimización / masking a un campo
 
@@ -782,7 +959,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. PATCH /admin/governance/findings/{id}
+#### 12. PATCH /admin/governance/findings/{id}
 
 Actualizar un hallazgo (estado / owner)
 
@@ -839,7 +1016,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /admin/governance/legal-holds
+#### 13. POST /admin/governance/legal-holds
 
 Colocar un legal hold sobre un objetivo
 
@@ -887,7 +1064,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /admin/governance/legal-holds/{id}/release
+#### 14. POST /admin/governance/legal-holds/{id}/release
 
 Levantar un legal hold ACTIVE
 
@@ -938,7 +1115,120 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /admin/governance/operational-frameworks
+#### 15. GET /admin/governance/mutability
+
+Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MutabilityCatalogService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a MutabilityCatalogService.registeredKeys"]:::llamada
+  n3 --> n4
+  n5["Llama a MutabilityRegistryReader.registeredKeys"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7[("LEE system_ops.entity_registry")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /admin/governance/mutability/{schema}/{table}
+
+Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La tabla no está en el catálogo de mutabilidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MutabilityCatalogService.detail"]:::llamada
+  n2 --> n3
+  n4{"!record"}:::decision
+  n3 --> n4
+  n5(["404 NOT_FOUND La tabla no está en el catálogo de mutabilidad"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a MutabilityCatalogService.registeredKeys"]:::llamada
+  n4 -->|"no"| n6
+  n7["Llama a MutabilityRegistryReader.registeredKeys"]:::llamada
+  n6 --> n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9[("LEE system_ops.entity_registry")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. GET /admin/governance/mutability/summary
+
+Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MutabilityCatalogService.summary"]:::llamada
+  n2 --> n3
+  n4["Llama a MutabilityCatalogService.registeredKeys"]:::llamada
+  n3 --> n4
+  n5["Llama a MutabilityRegistryReader.registeredKeys"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7[("LEE system_ops.entity_registry")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /admin/governance/operational-frameworks
 
 Publicar un framework operativo con sus controles
 
@@ -1000,7 +1290,89 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /admin/governance/remediation-actions/{id}/verify
+#### 19. GET /admin/governance/policies
+
+Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceReadService.policies"]:::llamada
+  n2 --> n3
+  n4{"q.cursor"}:::decision
+  n3 --> n4
+  n5{"k.m !== `${sort}:${order}`"}:::decision
+  n4 -->|"sí"| n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a GovernanceReadRepository.policies"]:::llamada
+  n5 -->|"no"| n7
+  n4 -->|"no"| n7
+  n8["Llama a GovernanceReadRepository.policiesCte"]:::llamada
+  n7 --> n8
+  n9[("LEE system_ops.write_policies · LEE terminology.catalog_concepts · LEE system_ops.retention_policies · LEE sy…")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. GET /admin/governance/policies/{policyType}/{id}
+
+Una política: ajustes, estado y a qué tablas o columnas se aplica
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceReadService.policy"]:::llamada
+  n2 --> n3
+  n4["Llama a GovernanceReadRepository.policyDetail"]:::llamada
+  n3 --> n4
+  n5[("LEE system_ops.write_policies · LEE terminology.catalog_concepts · LEE system_ops.retention_policies · LEE sy…")]:::efecto
+  n4 --> n5
+  n6{"!fila"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Política no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a GovernanceReadRepository.appliedTo"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE system_ops.entity_registry · LEE system_ops.field_registry")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. POST /admin/governance/remediation-actions/{id}/verify
 
 Verificar y cerrar una acción de remediación
 
@@ -1083,7 +1455,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /admin/governance/residency-policies
+#### 22. POST /admin/governance/residency-policies
 
 Definir una política de residencia de datos
 
@@ -1131,7 +1503,44 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /admin/governance/retention-policies
+#### 23. GET /admin/governance/retention-executions
+
+Ejecuciones de políticas de retención: estado, tiempos y conteos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a GovernanceOperationsReadService.retentionExecutions"]:::llamada
+  n2 --> n3
+  n4{"from && to && to ‹= from"}:::decision
+  n3 --> n4
+  n5(["400 VALIDATION_FAILED «to» debe ser posterior a «from»"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a GovernanceOperationsReadRepository.retentionExecutions"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE system_ops.retention_executions · LEE system_ops.retention_policies · LEE system_ops.entity_registry · LE…")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 24. POST /admin/governance/retention-policies
 
 Definir una política de retención con base legal
 
@@ -1179,7 +1588,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /admin/governance/tenant-residency-bindings
+#### 25. POST /admin/governance/tenant-residency-bindings
 
 Vincular un tenant a una política de residencia
 
@@ -1244,7 +1653,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /admin/governance/workload-assessments
+#### 26. POST /admin/governance/workload-assessments
 
 Iniciar una evaluación de workload
 
@@ -1293,7 +1702,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. PUT /admin/governance/workload-assessments/{id}/control-results
+#### 27. PUT /admin/governance/workload-assessments/{id}/control-results
 
 Registrar (UPSERT) resultados de control de una evaluación
 
@@ -1349,7 +1758,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /admin/governance/write-policies
+#### 28. POST /admin/governance/write-policies
 
 Definir una política de escritura
 
@@ -1397,7 +1806,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /admin/ops/backup-policies
+#### 29. POST /admin/ops/backup-policies
 
 Definir una política de backup (RPO/RTO/inmutabilidad)
 
@@ -1437,7 +1846,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /internal/governance/retention-executions/run
+#### 30. POST /internal/governance/retention-executions/run
 
 Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
 
@@ -1571,7 +1980,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /internal/ops/restore-test-runs
+#### 31. POST /internal/ops/restore-test-runs
 
 Registrar una prueba de restauración con evidencia
 
@@ -1626,4 +2035,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| GET /admin/governance/domains | 200, 401, 403, 429 | 2 |
 | POST /admin/governance/drafts | 201, 400, 401, 403, 429 | 1 |
+| GET /admin/governance/entity-registry | 200, 401, 403, 429 | 6 |
+| GET /admin/governance/legal-holds | 200, 401, 403, 429 | 2 |

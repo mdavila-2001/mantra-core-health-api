@@ -80,30 +80,34 @@ export class CommunityMessageNotificationsService {
     actorUserId: string | undefined,
   ): Promise<void> {
     try {
-      const em = this.em.fork();
-      const sender = await this.profilesRepo.findById(em, senderProfileId);
-      // El nombre de quien escribe es lo único que hace útil el aviso: «Mensaje
-      // nuevo» a secas obliga a abrir el hilo para saber si vale la pena.
-      const ofWhom = sender?.displayName ?? 'Alguien';
+      // Savepoint: a swallowed failure must not abort the request transaction.
+      await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (em) => {
+          const sender = await this.profilesRepo.findById(em, senderProfileId);
+          // El nombre de quien escribe es lo único que hace útil el aviso: «Mensaje
+          // nuevo» a secas obliga a abrir el hilo para saber si vale la pena.
+          const ofWhom = sender?.displayName ?? 'Alguien';
 
-      for (const recipient of recipientProfileIds) {
-        for (const recipientUserId of await this.accounts(em, recipient)) {
-          // Quien escribió como la organización no se avisa a sí mismo.
-          if (recipientUserId === actorUserId) continue;
-          await this.notifications.emitInApp({
-            recipientUserId,
-            category: 'MESSAGES',
-            subject: `${ofWhom} le escribió`,
-            bodyText: 'Tiene un mensaje nuevo.',
-            destination: { type: 'CONVERSATION', id: conversationId },
-            // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
-            // La clave incluye al destinatario: si no, el rebote de uno taparía
-            // el aviso del otro en una conversación de tres.
-            debounceKey: `conversation:${conversationId}:${recipientUserId}`,
-            actorUserId,
-          });
-        }
-      }
+          for (const recipient of recipientProfileIds) {
+            for (const recipientUserId of await this.accounts(em, recipient)) {
+              // Quien escribió como la organización no se avisa a sí mismo.
+              if (recipientUserId === actorUserId) continue;
+              await this.notifications.emitInApp({
+                recipientUserId,
+                category: 'MESSAGES',
+                subject: `${ofWhom} le escribió`,
+                bodyText: 'Tiene un mensaje nuevo.',
+                destination: { type: 'CONVERSATION', id: conversationId },
+                // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
+                // La clave incluye al destinatario: si no, el rebote de uno taparía
+                // el aviso del otro en una conversación de tres.
+                debounceKey: `conversation:${conversationId}:${recipientUserId}`,
+                actorUserId,
+              });
+            }
+          }
+        });
     } catch (error) {
       this.logger.error(
         { operation: 'community.message.notify', conversationId, err: error },

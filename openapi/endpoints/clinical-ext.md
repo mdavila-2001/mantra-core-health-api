@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 32 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 34 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
 - **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
@@ -34,15 +34,17 @@ Referencia exhaustiva de 32 operación(es) del módulo `clinical_ext`, derivada 
 21. [GET /referrals](#21-get-referrals) — Listar derivaciones de un paciente
 22. [POST /referrals](#22-post-referrals) — Emitir una referencia desde un encuentro
 23. [GET /referrals/{id}](#23-get-referrals-id) — Leer una derivación
-24. [PATCH /referrals/{id}/cancel](#24-patch-referrals-id-cancel) — Anular una derivación
-25. [PATCH /referrals/{id}/counter-referral](#25-patch-referrals-id-counter-referral) — Registrar la contrarreferencia de una derivación
-26. [PATCH /referrals/{id}/respond](#26-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-27. [GET /referrals/me](#27-get-referrals-me) — Mis derivaciones
-28. [GET /referrals/target-services](#28-get-referrals-target-services) — Servicios activos de un destino de derivación
-29. [GET /referrals/targets](#29-get-referrals-targets) — Buscar destinos de derivación
-30. [POST /virtual-encounters](#30-post-virtual-encounters) — Iniciar una sesión de telesalud
-31. [PATCH /virtual-encounters/{id}/end](#31-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-32. [PATCH /virtual-encounters/{id}/join](#32-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+24. [PATCH /referrals/{id}/arrival](#24-patch-referrals-id-arrival) — Registrar la llegada del paciente derivado
+25. [PATCH /referrals/{id}/cancel](#25-patch-referrals-id-cancel) — Anular una derivación
+26. [PATCH /referrals/{id}/counter-referral](#26-patch-referrals-id-counter-referral) — Registrar la contrarreferencia de una derivación
+27. [PATCH /referrals/{id}/respond](#27-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
+28. [PATCH /referrals/{id}/transfer](#28-patch-referrals-id-transfer) — Completar o corregir el traslado de una derivación
+29. [GET /referrals/me](#29-get-referrals-me) — Mis derivaciones
+30. [GET /referrals/target-services](#30-get-referrals-target-services) — Servicios activos de un destino de derivación
+31. [GET /referrals/targets](#31-get-referrals-targets) — Buscar destinos de derivación
+32. [POST /virtual-encounters](#32-post-virtual-encounters) — Iniciar una sesión de telesalud
+33. [PATCH /virtual-encounters/{id}/end](#33-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+34. [PATCH /virtual-encounters/{id}/join](#34-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -2835,6 +2837,34 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "rejectReason": "Texto descriptivo de ejemplo",
     "counterReferralText": "valor-ejemplo",
     "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "transfer": {
+      "required": true,
+      "transportMode": "AMBULANCE_BASIC",
+      "transportDetail": "valor-ejemplo",
+      "companionName": "Nombre de ejemplo",
+      "companionRelationship": "valor-ejemplo",
+      "companionPhone": "+59170000000",
+      "escortProfessionalName": "Nombre de ejemplo",
+      "escortProfessionalRole": "valor-ejemplo",
+      "departureCondition": "STABLE",
+      "vitals": {
+        "recordedAt": "2026-07-31T12:00:00.000Z",
+        "systolicBp": 1,
+        "diastolicBp": 1,
+        "heartRate": 1,
+        "respiratoryRate": 1,
+        "temperatureC": 1,
+        "oxygenSaturation": 1,
+        "glasgow": 1
+      },
+      "receiverContacted": true,
+      "receiverContactName": "Nombre de ejemplo",
+      "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+      "departedAt": "2026-07-31T12:00:00.000Z",
+      "arrivedAt": "2026-07-31T12:00:00.000Z",
+      "arrivalCondition": "STABLE",
+      "arrivalNotes": "Texto descriptivo de ejemplo"
+    },
     "updatedAt": "2026-07-31T12:00:00.000Z",
     "createdAt": "2026-07-31T12:00:00.000Z",
     "createdByUserId": "00000000-0000-4000-8000-000000000001",
@@ -2945,6 +2975,29 @@ Content-Type: application/json
 | `treatmentGivenText` | No | `string` | longitud máxima 4000 | Tratamiento realizado antes de derivar | `valor-ejemplo` |
 | `informedConsentId` | No | `string` | formato `uuid` | NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>. | `00000000-0000-4000-8000-000000000001` |
 | `targetServiceCatalogId` | No | `string` | formato `uuid` | Servicio del catálogo del destino | `00000000-0000-4000-8000-000000000001` |
+| `transfer` | No | `ReferralTransferDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"required":true,"transportMode":"AMBULANCE_BASIC","transportDetail":"valor-ejemplo","companionName":"Nombre de ejemplo","companionRelationship":"valor-ejemplo","companionPhone":"+59170000000","escortProfessionalName":"Nombre de ejemplo","escortProfessionalRole":"valor-ejemplo","departureCondition":"STABLE","vitals":{"recordedAt":"2026-07-31T12:00:00.000Z","systolicBp":40,"diastolicBp":20,"heartRate":20,"respiratoryRate":4,"temperatureC":30,"oxygenSaturation":50,"glasgow":3},"receiverContacted":true,"receiverContactName":"Nombre de ejemplo","receiverContactedAt":"2026-07-31T12:00:00.000Z","departedAt":"2026-07-31T12:00:00.000Z"}` |
+| `transfer.required` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `transfer.transportMode` | No | `string` | valores: `AMBULANCE_BASIC`, `AMBULANCE_ADVANCED`, `AIR_AMBULANCE`, `RIVER`, `PRIVATE_VEHICLE`, `PUBLIC_TRANSPORT`, `ON_FOOT`, `OTHER`; admite null | Sin descripción específica en el contrato OpenAPI. | `AMBULANCE_BASIC` |
+| `transfer.transportDetail` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `transfer.companionName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `transfer.companionRelationship` | No | `string` | longitud mínima 1; longitud máxima 80; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `transfer.companionPhone` | No | `string` | longitud mínima 1; longitud máxima 40; admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `transfer.escortProfessionalName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `transfer.escortProfessionalRole` | No | `string` | longitud mínima 1; longitud máxima 80; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `transfer.departureCondition` | No | `string` | valores: `STABLE`, `UNSTABLE`, `CRITICAL`; admite null | Sin descripción específica en el contrato OpenAPI. | `STABLE` |
+| `transfer.vitals` | No | `ReferralTransferVitalsDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"recordedAt":"2026-07-31T12:00:00.000Z","systolicBp":40,"diastolicBp":20,"heartRate":20,"respiratoryRate":4,"temperatureC":30,"oxygenSaturation":50,"glasgow":3}` |
+| `transfer.vitals.recordedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `transfer.vitals.systolicBp` | No | `number` | mínimo 40; máximo 300; admite null | Sin descripción específica en el contrato OpenAPI. | `40` |
+| `transfer.vitals.diastolicBp` | No | `number` | mínimo 20; máximo 200; admite null | Sin descripción específica en el contrato OpenAPI. | `20` |
+| `transfer.vitals.heartRate` | No | `number` | mínimo 20; máximo 300; admite null | Sin descripción específica en el contrato OpenAPI. | `20` |
+| `transfer.vitals.respiratoryRate` | No | `number` | mínimo 4; máximo 80; admite null | Sin descripción específica en el contrato OpenAPI. | `4` |
+| `transfer.vitals.temperatureC` | No | `number` | mínimo 30; máximo 45; admite null | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `transfer.vitals.oxygenSaturation` | No | `number` | mínimo 50; máximo 100; admite null | Sin descripción específica en el contrato OpenAPI. | `50` |
+| `transfer.vitals.glasgow` | No | `number` | mínimo 3; máximo 15; admite null | Sin descripción específica en el contrato OpenAPI. | `3` |
+| `transfer.receiverContacted` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `transfer.receiverContactName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `transfer.receiverContactedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `transfer.departedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
 
@@ -2977,7 +3030,32 @@ Content-Type: application/json
   "clinicalSummary": "valor-ejemplo",
   "treatmentGivenText": "valor-ejemplo",
   "informedConsentId": "00000000-0000-4000-8000-000000000001",
-  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001"
+  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "transfer": {
+    "required": true,
+    "transportMode": "AMBULANCE_BASIC",
+    "transportDetail": "valor-ejemplo",
+    "companionName": "Nombre de ejemplo",
+    "companionRelationship": "valor-ejemplo",
+    "companionPhone": "+59170000000",
+    "escortProfessionalName": "Nombre de ejemplo",
+    "escortProfessionalRole": "valor-ejemplo",
+    "departureCondition": "STABLE",
+    "vitals": {
+      "recordedAt": "2026-07-31T12:00:00.000Z",
+      "systolicBp": 40,
+      "diastolicBp": 20,
+      "heartRate": 20,
+      "respiratoryRate": 4,
+      "temperatureC": 30,
+      "oxygenSaturation": 50,
+      "glasgow": 3
+    },
+    "receiverContacted": true,
+    "receiverContactName": "Nombre de ejemplo",
+    "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+    "departedAt": "2026-07-31T12:00:00.000Z"
+  }
 }
 ```
 
@@ -3026,6 +3104,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Sede destino no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 404 | `NOT_FOUND` | Organización destino no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -3177,7 +3256,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. PATCH /referrals/{id}/cancel
+## 24. PATCH /referrals/{id}/arrival
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Registrar la llegada del paciente derivado
+- **Operation ID:** `ReferralsController_recordArrival`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.recordArrival](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Registrar la llegada del paciente derivado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4274: el destino registra la llegada del paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /referrals/{id}/arrival` en `ReferralsController_recordArrival`. El controlador delega en `ReferralsService.recordArrival`. Valida el body como `ReferralArrivalDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReferralResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReferralArrivalDto`; los campos opcionales se omiten.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/arrival HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "arrivedAt": "2026-07-31T12:00:00.000Z",
+  "arrivalCondition": "STABLE"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `arrivedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `arrivalCondition` | Sí | `string` | valores: `STABLE`, `UNSTABLE`, `CRITICAL`, `DECEASED` | Sin descripción específica en el contrato OpenAPI. | `STABLE` |
+| `arrivalNotes` | No | `string` | longitud mínima 1; longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/arrival HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "arrivedAt": "2026-07-31T12:00:00.000Z",
+  "arrivalCondition": "STABLE",
+  "arrivalNotes": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "referralCode": "CODIGO_EJEMPLO",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `referralCode` | Sí | `string` | Sin restricción adicional declarada | Código a compartir | `CODIGO_EJEMPLO` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La derivación ya está cerrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La llegada ya está registrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/{id}/arrival"
+}
+```
+
+---
+
+## 25. PATCH /referrals/{id}/cancel
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3294,7 +3511,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. PATCH /referrals/{id}/counter-referral
+## 26. PATCH /referrals/{id}/counter-referral
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3426,7 +3643,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /referrals/{id}/respond
+## 27. PATCH /referrals/{id}/respond
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3554,7 +3771,181 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /referrals/me
+## 28. PATCH /referrals/{id}/transfer
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Completar o corregir el traslado de una derivación
+- **Operation ID:** `ReferralsController_updateTransfer`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.updateTransfer](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Completar o corregir el traslado de una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4274: quien deriva completa o corrige los datos de salida del traslado.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /referrals/{id}/transfer` en `ReferralsController_updateTransfer`. El controlador delega en `ReferralsService.updateTransfer`. Valida el body como `ReferralTransferDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReferralResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReferralTransferDto`; los campos opcionales se omiten.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/transfer HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `required` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `transportMode` | No | `string` | valores: `AMBULANCE_BASIC`, `AMBULANCE_ADVANCED`, `AIR_AMBULANCE`, `RIVER`, `PRIVATE_VEHICLE`, `PUBLIC_TRANSPORT`, `ON_FOOT`, `OTHER`; admite null | Sin descripción específica en el contrato OpenAPI. | `AMBULANCE_BASIC` |
+| `transportDetail` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `companionName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `companionRelationship` | No | `string` | longitud mínima 1; longitud máxima 80; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `companionPhone` | No | `string` | longitud mínima 1; longitud máxima 40; admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `escortProfessionalName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `escortProfessionalRole` | No | `string` | longitud mínima 1; longitud máxima 80; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `departureCondition` | No | `string` | valores: `STABLE`, `UNSTABLE`, `CRITICAL`; admite null | Sin descripción específica en el contrato OpenAPI. | `STABLE` |
+| `vitals` | No | `ReferralTransferVitalsDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"recordedAt":"2026-07-31T12:00:00.000Z","systolicBp":40,"diastolicBp":20,"heartRate":20,"respiratoryRate":4,"temperatureC":30,"oxygenSaturation":50,"glasgow":3}` |
+| `vitals.recordedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `vitals.systolicBp` | No | `number` | mínimo 40; máximo 300; admite null | Sin descripción específica en el contrato OpenAPI. | `40` |
+| `vitals.diastolicBp` | No | `number` | mínimo 20; máximo 200; admite null | Sin descripción específica en el contrato OpenAPI. | `20` |
+| `vitals.heartRate` | No | `number` | mínimo 20; máximo 300; admite null | Sin descripción específica en el contrato OpenAPI. | `20` |
+| `vitals.respiratoryRate` | No | `number` | mínimo 4; máximo 80; admite null | Sin descripción específica en el contrato OpenAPI. | `4` |
+| `vitals.temperatureC` | No | `number` | mínimo 30; máximo 45; admite null | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `vitals.oxygenSaturation` | No | `number` | mínimo 50; máximo 100; admite null | Sin descripción específica en el contrato OpenAPI. | `50` |
+| `vitals.glasgow` | No | `number` | mínimo 3; máximo 15; admite null | Sin descripción específica en el contrato OpenAPI. | `3` |
+| `receiverContacted` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `receiverContactName` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `receiverContactedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `departedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/transfer HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "required": true,
+  "transportMode": "AMBULANCE_BASIC",
+  "transportDetail": "valor-ejemplo",
+  "companionName": "Nombre de ejemplo",
+  "companionRelationship": "valor-ejemplo",
+  "companionPhone": "+59170000000",
+  "escortProfessionalName": "Nombre de ejemplo",
+  "escortProfessionalRole": "valor-ejemplo",
+  "departureCondition": "STABLE",
+  "vitals": {
+    "recordedAt": "2026-07-31T12:00:00.000Z",
+    "systolicBp": 40,
+    "diastolicBp": 20,
+    "heartRate": 20,
+    "respiratoryRate": 4,
+    "temperatureC": 30,
+    "oxygenSaturation": 50,
+    "glasgow": 3
+  },
+  "receiverContacted": true,
+  "receiverContactName": "Nombre de ejemplo",
+  "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+  "departedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "referralCode": "CODIGO_EJEMPLO",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `referralCode` | Sí | `string` | Sin restricción adicional declarada | Código a compartir | `CODIGO_EJEMPLO` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La derivación ya está cerrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La llegada ya está registrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/{id}/transfer"
+}
+```
+
+---
+
+## 29. GET /referrals/me
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3655,6 +4046,34 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "rejectReason": "Texto descriptivo de ejemplo",
     "counterReferralText": "valor-ejemplo",
     "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "transfer": {
+      "required": true,
+      "transportMode": "AMBULANCE_BASIC",
+      "transportDetail": "valor-ejemplo",
+      "companionName": "Nombre de ejemplo",
+      "companionRelationship": "valor-ejemplo",
+      "companionPhone": "+59170000000",
+      "escortProfessionalName": "Nombre de ejemplo",
+      "escortProfessionalRole": "valor-ejemplo",
+      "departureCondition": "STABLE",
+      "vitals": {
+        "recordedAt": "2026-07-31T12:00:00.000Z",
+        "systolicBp": 1,
+        "diastolicBp": 1,
+        "heartRate": 1,
+        "respiratoryRate": 1,
+        "temperatureC": 1,
+        "oxygenSaturation": 1,
+        "glasgow": 1
+      },
+      "receiverContacted": true,
+      "receiverContactName": "Nombre de ejemplo",
+      "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+      "departedAt": "2026-07-31T12:00:00.000Z",
+      "arrivedAt": "2026-07-31T12:00:00.000Z",
+      "arrivalCondition": "STABLE",
+      "arrivalNotes": "Texto descriptivo de ejemplo"
+    },
     "updatedAt": "2026-07-31T12:00:00.000Z",
     "createdAt": "2026-07-31T12:00:00.000Z",
     "createdByUserId": "00000000-0000-4000-8000-000000000001",
@@ -3695,7 +4114,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /referrals/target-services
+## 30. GET /referrals/target-services
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3804,6 +4223,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Destino no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique targetProfileId o targetTenantId. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(REFERRAL_TARGETS_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3822,7 +4242,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /referrals/targets
+## 31. GET /referrals/targets
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3943,7 +4363,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /virtual-encounters
+## 32. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -4078,7 +4498,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. PATCH /virtual-encounters/{id}/end
+## 33. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -4210,7 +4630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PATCH /virtual-encounters/{id}/join
+## 34. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`

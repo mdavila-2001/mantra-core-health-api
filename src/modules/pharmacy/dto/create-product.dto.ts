@@ -12,7 +12,6 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
-  IsBoolean,
   IsInt,
   Max,
   Min,
@@ -25,6 +24,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Tipos de identificador soportados. */
 export type IdentifierTypeCode = 'GTIN' | 'NDC';
@@ -189,7 +189,7 @@ export class CreateProductDto {
    */
   @ApiPropertyOptional({ description: 'Requiere receta' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   requiresPrescription?: boolean;
 
   /**
@@ -197,7 +197,7 @@ export class CreateProductDto {
    */
   @ApiPropertyOptional({ description: 'Requiere cadena de frío' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   coldChainRequired?: boolean;
 
   /**
@@ -261,7 +261,7 @@ export class CreateProductDto {
       '`false` = «no lo tengo» (sin conteo). Junto con `stock` es 422: dirían dos cosas a la vez.',
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   inStock?: boolean;
 
   /** Publicado (por defecto) o borrador. */

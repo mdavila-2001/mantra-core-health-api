@@ -64,6 +64,6 @@ Estas tablas no tienen columnas `created_by_user_id`/`updated_by_user_id`, así 
 `createdBy()`. La trazabilidad va por otras vías: `placed_by_user_id` en la retención legal,
 `principal_id` en el log de accesos, y el nivel `warn` de los logs para lo demás.
 
-## Pruebas
+## Tests
 
 Los repositorios no tienen suite propia; se ejercitan como dobles desde los tres servicios.

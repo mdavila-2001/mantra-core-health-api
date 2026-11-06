@@ -407,6 +407,15 @@ export class PublicDirectoryProfileDto {
   @ApiProperty()
   kind!: Exclude<PublicResultKind, 'MEDICATION'>;
 
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    format: 'uuid',
+    description:
+      'Práctica detrás de una organización: con ella el profesional puede pedir pertenecer (`POST /practices/{practiceId}/role-assignments/self-request`). `null` si la ficha no es de una organización o su tenant no tiene una única práctica',
+  })
+  practiceId?: string | null;
+
   @ApiProperty()
   slug!: string;
 

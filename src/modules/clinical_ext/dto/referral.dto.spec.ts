@@ -20,7 +20,7 @@ async function errors(body: unknown): Promise<string[]> {
   return validationErrors.map((e) => e.property).sort();
 }
 
-describe('RespondReferralDto · targetEncounterId (v4291)', () => {
+describe('RespondReferralDto · targetEncounterId (v4292)', () => {
   it('la respuesta de siempre, sin el campo, sigue siendo válida', async () => {
     expect(await errors({ decision: 'ACCEPT' })).toEqual([]);
   });

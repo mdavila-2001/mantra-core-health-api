@@ -4,8 +4,8 @@
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 28 (28 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 5 · MEDIO 17 · BAJO 6
-- **Tablas distintas que tocan:** 56
+- **Riesgo:** ALTO 7 · MEDIO 15 · BAJO 6
+- **Tablas distintas que tocan:** 65
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/identity-assurance.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -16,8 +16,8 @@
 | 2 | POST | `/identity/authorities` | Registrar una autoridad de identidad | MEDIO | 1 | SECURITY_ADMIN |
 | 3 | POST | `/identity/authorities/{id}/endpoints` | Publicar un endpoint de verificación de la autoridad | MEDIO | 4 | SECURITY_ADMIN |
 | 4 | POST | `/identity/checks/{id}/attempts` | Ejecutar un intento contra la autoridad externa (idempotente) | MEDIO | 8 | SECURITY_ADMIN |
-| 5 | POST | `/identity/checks/{id}/results` | Registrar el resultado inmutable del check (con supersede) | MEDIO | 33 | SECURITY_ADMIN |
-| 6 | POST | `/identity/manual-review/{id}/decision` | Resolver una revisión manual (decisión) | MEDIO | 35 | SECURITY_ADMIN |
+| 5 | POST | `/identity/checks/{id}/results` | Registrar el resultado inmutable del check (con supersede) | ALTO | 50 | SECURITY_ADMIN |
+| 6 | POST | `/identity/manual-review/{id}/decision` | Resolver una revisión manual (decisión) | MEDIO | 31 | SECURITY_ADMIN |
 | 7 | POST | `/identity/me/identity-verification` | Solicitar la verificación de la propia identidad (paciente) | ALTO | 15 | sesión (sin roles) |
 | 8 | POST | `/identity/me/practitioner/identity-verification` | Solicitar la verificación de la propia identidad (profesional) | ALTO | 16 | sesión (sin roles) |
 | 9 | POST | `/identity/me/practitioner/license-verification` | Solicitar la verificación de la propia matrícula | ALTO | 17 | sesión (sin roles) |
@@ -36,7 +36,7 @@
 | 22 | POST | `/identity/verification-cases/expire-sweep` | Expirar por lote los casos vencidos (job programado) | MEDIO | 11 | SYSTEM, SECURITY_ADMIN |
 | 23 | POST | `/identity/verification-policies` | Crear una política de verificación de identidad (IAL/AAL) | MEDIO | 1 | SECURITY_ADMIN |
 | 24 | POST | `/internal/identity/checks/{id}/attempts` | Registrar el intento del worker contra la autoridad externa | MEDIO | 8 | SYSTEM, SECURITY_ADMIN |
-| 25 | POST | `/internal/identity/checks/{id}/results` | Registrar el veredicto que devolvió la autoridad externa | MEDIO | 33 | SYSTEM, SECURITY_ADMIN |
+| 25 | POST | `/internal/identity/checks/{id}/results` | Registrar el veredicto que devolvió la autoridad externa | ALTO | 50 | SYSTEM, SECURITY_ADMIN |
 | 26 | GET | `/internal/identity/checks/dispatchable` | Listar los checks que el worker debe atender en este tick | BAJO | 6 | SYSTEM, SECURITY_ADMIN |
 | 27 | POST | `/internal/identity/evidence/lifecycle-scan` | Evaluate configured evidence lifecycle; destructive runtime remains blocked | ALTO | 36 | SYSTEM |
 | 28 | POST | `/internal/identity/evidence/storage-purge-review` | Recheck retired evidence objects; never grants physical delete | MEDIO | 21 | SYSTEM |
@@ -68,18 +68,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:249` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
@@ -183,10 +183,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -288,11 +288,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -400,11 +400,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:38` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -500,7 +500,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el resultado inmutable del check (con supersede)
 - **Bloque:** Identidad y Seguridad
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `IdentityChecksController.recordResult` — `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58`
 
@@ -512,7 +512,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/checks/{id}/results` la atiende `IdentityChecksController.recordResult` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:58). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee common.addresses, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units, directory.tenant_affiliation_documents, directory.tenant_memberships, directory.tenants, identity_assurance.identity_authority_endpoints y 13 más.
+`POST /identity/checks/{id}/results` la atiende `IdentityChecksController.recordResult` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:58). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews y 2 más. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units y 24 más.
 
 ### Requerimientos
 
@@ -520,27 +520,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
 | `common.addresses` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:327` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:175` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
-| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
-| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
+| `common.contact_points` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
+| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.kindOf | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:221` |
 | `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.liveDocumentsByType → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:230` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:282` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:294` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `identity_assurance.identity_assertions` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAssertionsRepository.create | `src/modules/identity_assurance/repositories/identity-assertions.repository.ts:171` |
 | `identity_assurance.identity_authority_endpoints` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAuthorityEndpointsRepository.findById | `src/modules/identity_assurance/repositories/identity-authorities.repository.ts:140` |
@@ -554,15 +558,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:193` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:323` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:201` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:191` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1210` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:221` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:208` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:221` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `profiles.persons` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -655,7 +672,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/manual-review/{id}/decision` la atiende `IdentityManualReviewController.decide` (src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReviewDecisionDto` (2 campos, 1 obligatorio). Delega en `IdentityManualReviewService.decide`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee common.addresses, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units, directory.tenant_affiliation_documents, directory.tenant_memberships, directory.tenants, identity_assurance.identity_authority_endpoints y 15 más.
+`POST /identity/manual-review/{id}/decision` la atiende `IdentityManualReviewController.decide` (src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReviewDecisionDto` (5 campos, 4 obligatorios). Delega en `IdentityManualReviewService.decide`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews. Lee common.addresses, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units, directory.tenant_memberships, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results y 11 más.
 
 ### Requerimientos
 
@@ -663,27 +680,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
 | `common.addresses` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:327` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:175` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
-| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
-| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
+| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.kindOf | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:221` |
-| `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.liveDocumentsByType → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:230` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:282` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:294` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `identity_assurance.identity_assertions` | ESCRIBE | CREA | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAssertionsRepository.create | `src/modules/identity_assurance/repositories/identity-assertions.repository.ts:171` |
 | `identity_assurance.identity_authority_endpoints` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAuthorityEndpointsRepository.findById | `src/modules/identity_assurance/repositories/identity-authorities.repository.ts:140` |
@@ -699,15 +715,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityCaseScope.findAuthorizedCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:193` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:323` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:201` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:191` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1210` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:221` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:208` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:221` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
 
 ### Parámetros
 
@@ -719,14 +732,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | Decisión del revisor | `src/modules/identity_assurance/dto/review-decision.dto.ts:17` |
-| `decisionReason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo de la decisión | `src/modules/identity_assurance/dto/review-decision.dto.ts:26` |
+| `revisionNo` | `number` | Sí | — | — | — | sin fuente |
+| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | — | `src/modules/identity_assurance/dto/review-decision.dto.ts:17` |
+| `comment` | `object` | No | admite null | — | — | sin fuente |
+| `reviewerUserId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `decidedAt` | `string` | Sí | formato date-time | — | — | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "decision": "APPROVED"
+  "revisionNo": 1,
+  "decision": "APPROVED",
+  "reviewerUserId": "00000000-0000-4000-8000-000000000001",
+  "decidedAt": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -734,8 +753,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
+  "revisionNo": 1,
   "decision": "APPROVED",
-  "decisionReason": "Texto descriptivo de ejemplo"
+  "comment": {},
+  "reviewerUserId": "00000000-0000-4000-8000-000000000001",
+  "decidedAt": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -766,7 +788,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:178` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:195` |
 | CONTROLADOR | `src/modules/identity_assurance/controllers/identity-endpoints.controller.spec.ts:68` |
 
 ### Flujos
@@ -800,10 +822,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -885,7 +907,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:115` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:132` |
 
 ### Flujos
 
@@ -918,10 +940,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1037,10 +1059,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1157,11 +1179,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1280,8 +1302,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1337,7 +1359,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:160` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:177` |
 
 ### Flujos
 
@@ -1370,9 +1392,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: caseId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1468,8 +1490,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1540,8 +1562,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1592,7 +1614,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:36` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:41` |
 
 ### Flujos
 
@@ -1625,10 +1647,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1703,7 +1725,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:65` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:82` |
 | CONTROLADOR | `src/modules/identity_assurance/controllers/identity-cases.controller.spec.ts:38` |
 
 ### Flujos
@@ -1737,9 +1759,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:90` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1819,11 +1841,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:212` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:212` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1934,11 +1956,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:158` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:158` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2020,7 +2042,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:83` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:100` |
 | CONTROLADOR | `src/modules/identity_assurance/controllers/identity-cases.controller.spec.ts:58` |
 
 ### Flujos
@@ -2054,11 +2076,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2176,11 +2198,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:176` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2289,11 +2311,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:194` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2365,7 +2387,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:165` |
+| INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:182` |
 | CONTROLADOR | `src/modules/identity_assurance/controllers/identity-cases.controller.spec.ts:78` |
 
 ### Flujos
@@ -2399,15 +2421,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:249` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
@@ -2477,10 +2499,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-policies.controller.ts:31` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2588,11 +2610,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:110` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2675,7 +2697,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:128` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:145` |
 
 ### Flujos
 
@@ -2688,7 +2710,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el veredicto que devolvió la autoridad externa
 - **Bloque:** Identidad y Seguridad
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `IdentityWorkerController.recordResult` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:133`
 
@@ -2700,7 +2722,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/identity/checks/{id}/results` la atiende `IdentityWorkerController.recordResult` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:133). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee common.addresses, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units, directory.tenant_affiliation_documents, directory.tenant_memberships, directory.tenants, identity_assurance.identity_authority_endpoints y 13 más.
+`POST /internal/identity/checks/{id}/results` la atiende `IdentityWorkerController.recordResult` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:133). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews y 2 más. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles, community.verified_badges, diagnostic_units.diagnostic_units y 24 más.
 
 ### Requerimientos
 
@@ -2708,27 +2730,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:133` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:133` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
 | `common.addresses` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:327` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:175` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
-| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
-| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
+| `common.contact_points` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
+| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.kindOf | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:221` |
 | `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.liveDocumentsByType → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:230` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:282` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:294` |
 | `directory.tenants` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `identity_assurance.identity_assertions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAssertionsRepository.create | `src/modules/identity_assurance/repositories/identity-assertions.repository.ts:171` |
 | `identity_assurance.identity_authority_endpoints` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityChecksService.issueAssertion → IdentityAuthorityEndpointsRepository.findById | `src/modules/identity_assurance/repositories/identity-authorities.repository.ts:140` |
@@ -2742,15 +2768,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:193` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:323` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:201` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:191` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1210` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:221` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:208` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.loadCheck → IdentityCaseScope.findAuthorizedCase → IdentityCaseScope.subjectInTenant | `src/modules/identity_assurance/services/identity-case-scope.service.ts:221` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `profiles.persons` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → PractitionerAdmissionsService.recordExternalLicenseVerification → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.verifyTenant → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -2818,7 +2857,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:147` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:164` |
 
 ### Flujos
 
@@ -2851,9 +2890,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2935,10 +2974,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2974,11 +3013,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:235` |
 | `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findAnonymizationRuleById | `src/modules/system_ops/repositories/governance.repository.ts:31` |
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:160` |
-| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:276` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects → IdentityEvidenceHoldResolver.resolve → LegalHoldRepository.findForLifecycleGraph | `src/modules/system_ops/repositories/legal-hold.repository.ts:17` |
 | `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
 | `system_ops.record_revisions` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute | `src/modules/identity_assurance/services/identity-evidence-disposition.executor.ts:63` |
-| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:419` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:450` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan | `src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:204` |
 
 ### Cuerpo — DTO `EvidenceLifecycleScanDto` · `application/json`
@@ -3043,8 +3082,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3065,11 +3104,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `object_storage.object_versions` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
 | `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findAnonymizationRuleById | `src/modules/system_ops/repositories/governance.repository.ts:31` |
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:160` |
-| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:276` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects → IdentityEvidenceHoldResolver.resolve → LegalHoldRepository.findForLifecycleGraph | `src/modules/system_ops/repositories/legal-hold.repository.ts:17` |
 | `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
 | `system_ops.record_revisions` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review | `src/modules/identity_assurance/services/identity-evidence-storage-purge.service.ts:143` |
-| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:419` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:450` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:184` |
 
 ### Cuerpo

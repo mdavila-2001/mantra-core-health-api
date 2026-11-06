@@ -10,22 +10,22 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [archive_manifests](#archive_manifests) | Describe conjuntos archivados y sus objetos para mantener inventario de contenido trasladado a archivo. | 9 | 2 | 2 | DIVERGE |
-| [dicom_instance_manifests](#dicom_instance_manifests) | Registra instancias DICOM y sus ubicaciones para resolver objetos individuales de imagenología. | 9 | 3 | 5 | DIVERGE |
+| [archive_manifests](#archive_manifests) | Describe conjuntos archivados y sus objetos para mantener inventario de contenido trasladado a archivo. | 9 | 2 | 2 | COINCIDE |
+| [dicom_instance_manifests](#dicom_instance_manifests) | Registra instancias DICOM y sus ubicaciones para resolver objetos individuales de imagenología. | 9 | 3 | 5 | COINCIDE |
 | [dicom_series_manifests](#dicom_series_manifests) | Cataloga series DICOM dentro de estudios para organizar referencias a imágenes diagnósticas. | 8 | 2 | 6 | DIVERGE |
-| [dicom_study_manifests](#dicom_study_manifests) | Registra manifests de estudios DICOM para localizar y gobernar imágenes médicas en PACS u object storage. | 11 | 3 | 6 | DIVERGE |
+| [dicom_study_manifests](#dicom_study_manifests) | Registra manifests de estudios DICOM para localizar y gobernar imágenes médicas en PACS u object storage. | 11 | 3 | 6 | COINCIDE |
 | [dicomweb_access_logs](#dicomweb_access_logs) | Traza accesos por DICOMweb a objetos de imagen médica para auditoría y control de uso. | 10 | 3 | 3 | COINCIDE |
 | [large_payload_manifests](#large_payload_manifests) | Cataloga payloads grandes almacenados fuera de PostgreSQL y permite resolver su contenido por referencias. | 9 | 2 | 2 | COINCIDE |
 | [multipart_uploads](#multipart_uploads) | Gestiona cargas fragmentadas de objetos grandes para completar transferencias de forma recuperable. | 10 | 3 | 7 | COINCIDE |
-| [object_checksums](#object_checksums) | Conserva hashes de objetos para verificar integridad durante carga, copia y lectura. | 7 | 2 | 6 | DIVERGE |
+| [object_checksums](#object_checksums) | Conserva hashes de objetos para verificar integridad durante carga, copia y lectura. | 7 | 2 | 6 | COINCIDE |
 | [object_deletion_markers](#object_deletion_markers) | Marca objetos eliminados de manera lógica para propagar borrados y conservar trazabilidad de la operación. | 7 | 2 | 2 | COINCIDE |
 | [object_encryption_envelopes](#object_encryption_envelopes) | Registra metadata de claves y envolturas de cifrado usadas para proteger objetos almacenados. | 8 | 2 | 3 | COINCIDE |
 | [object_integrity_checks](#object_integrity_checks) | Registra verificaciones de integridad de objetos para detectar alteraciones o daños en contenido almacenado. | 8 | 2 | 1 | COINCIDE |
-| [object_legal_holds](#object_legal_holds) | Mantiene retenciones legales sobre objetos para impedir su eliminación mientras exista una obligación vigente. | 7 | 2 | 9 | DIVERGE |
-| [object_locations](#object_locations) | Registra ubicaciones físicas o remotas donde se guarda cada objeto binario. | 8 | 2 | 10 | DIVERGE |
-| [object_manifests](#object_manifests) | Cataloga metadata de objetos binarios —incluidos medios médicos y documentos— mientras el contenido reside en object storage o PACS. | 11 | 3 | 23 | DIVERGE |
+| [object_legal_holds](#object_legal_holds) | Mantiene retenciones legales sobre objetos para impedir su eliminación mientras exista una obligación vigente. | 7 | 2 | 9 | COINCIDE |
+| [object_locations](#object_locations) | Registra ubicaciones físicas o remotas donde se guarda cada objeto binario. | 8 | 2 | 10 | COINCIDE |
+| [object_manifests](#object_manifests) | Cataloga metadata de objetos binarios —incluidos medios médicos y documentos— mientras el contenido reside en object storage o PACS. | 11 | 3 | 23 | COINCIDE |
 | [object_namespaces](#object_namespaces) | Define espacios de nombres aislados para organizar objetos binarios por tenant y propósito. | 10 | 2 | 5 | COINCIDE |
-| [object_retention_locks](#object_retention_locks) | Aplica bloqueos de retención a objetos que deben preservarse durante un período definido. | 7 | 2 | 7 | DIVERGE |
+| [object_retention_locks](#object_retention_locks) | Aplica bloqueos de retención a objetos que deben preservarse durante un período definido. | 7 | 2 | 7 | COINCIDE |
 | [object_versions](#object_versions) | Preserva versiones de objetos para mantener referencias a documentos y medios inmutables o versionados. | 12 | 4 | 15 | COINCIDE |
 
 ### Tablas sin relaciones dentro del schema
@@ -57,7 +57,7 @@ Describe conjuntos archivados y sus objetos para mantener inventario de contenid
 | 6 | `record_count` | `bigint` | Obligatoria | _sin dato_ | coincide |
 | 7 | `manifest_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/object_storage/entities/archive_manifests.entity.ts:58`)_ | coincide |
-| 9 | `verified_at` | `timestamptz` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 9 | `verified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 
@@ -105,12 +105,12 @@ Registra instancias DICOM y sus ubicaciones para resolver objetos individuales d
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/object_storage/entities/dicom_instance_manifests.entity.ts:12`)_ | coincide |
 | 2 | `dicom_series_manifest_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 3 | `sop_instance_uid` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 4 | `sop_class_uid` | `varchar` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
-| 5 | `instance_number` | `integer` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
-| 6 | `transfer_syntax_uid` | `varchar` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 4 | `sop_class_uid` | `varchar` | Opcional | _sin dato_ | coincide |
+| 5 | `instance_number` | `integer` | Opcional | _sin dato_ | coincide |
+| 6 | `transfer_syntax_uid` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `object_manifest_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
-| 8 | `frame_count` | `integer` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
-| 9 | `metadata_json` | `jsonb` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 8 | `frame_count` | `integer` | Opcional | _sin dato_ | coincide |
+| 9 | `metadata_json` | `jsonb` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 
@@ -164,9 +164,9 @@ Cataloga series DICOM dentro de estudios para organizar referencias a imágenes 
 | 3 | `series_instance_uid` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `modality` | `varchar` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
 | 5 | `series_number` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 6 | `body_part_examined` | `varchar` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 6 | `body_part_examined` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `instance_count` | `integer` | Obligatoria | _sin dato_ | coincide |
-| 8 | `thumbnail_object_manifest_id` | `uuid` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 8 | `thumbnail_object_manifest_id` | `uuid` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 
@@ -221,8 +221,8 @@ Registra manifests de estudios DICOM para localizar y gobernar imágenes médica
 | 4 | `imaging_study_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 5 | `study_instance_uid` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `accession_number` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 7 | `study_date` | `date` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
-| 8 | `modality_codes` | `varchar[]` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 7 | `study_date` | `date` | Opcional | _sin dato_ | coincide |
+| 8 | `modality_codes` | `varchar[]` | Opcional | _sin dato_ | coincide |
 | 9 | `series_count` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 10 | `instance_count` | `integer` | Obligatoria | _sin dato_ | coincide |
 | 11 | `lifecycle_state` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -449,7 +449,7 @@ Conserva hashes de objetos para verificar integridad durante carga, copia y lect
 | 3 | `algorithm` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `checksum` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `source` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 6 | `verified_at` | `timestamptz` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 6 | `verified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 7 | `verification_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
@@ -660,7 +660,7 @@ Mantiene retenciones legales sobre objetos para impedir su eliminación mientras
 | 4 | `hold_state` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `placed_by_user_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 6 | `placed_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 7 | `released_at` | `timestamptz` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 7 | `released_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 
@@ -719,7 +719,7 @@ Registra ubicaciones físicas o remotas donde se guarda cada objeto binario.
 | 5 | `provider_uri` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `storage_class` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 7 | `replication_state` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 8 | `verified_at` | `timestamptz` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 8 | `verified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 
@@ -777,10 +777,10 @@ Cataloga metadata de objetos binarios —incluidos medios médicos y documentos�
 | 3 | `namespace_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 4 | `logical_object_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
 | 5 | `object_type` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 6 | `patient_profile_id` | `uuid` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
-| 7 | `current_version_id` | `uuid` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 6 | `patient_profile_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 7 | `current_version_id` | `uuid` | Opcional | _sin dato_ | coincide |
 | 8 | `lifecycle_state` | `varchar` | Obligatoria | _sin dato_ | coincide |
-| 9 | `retention_policy_code` | `varchar` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 9 | `retention_policy_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/object_storage/entities/object_manifests.entity.ts:70`)_ | coincide |
 | 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/object_storage/entities/object_manifests.entity.ts:76`)_ | coincide |
 
@@ -912,7 +912,7 @@ Aplica bloqueos de retención a objetos que deben preservarse durante un períod
 | 4 | `retain_until` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 | 5 | `policy_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 6 | `applied_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
-| 7 | `released_at` | `timestamptz` | Obligatoria | _sin dato_ | **NULABILIDAD_DIVERGE** — el modelo dice obligatoria y la entidad opcional |
+| 7 | `released_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 
 #### Índices
 

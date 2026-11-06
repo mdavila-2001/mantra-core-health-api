@@ -244,6 +244,12 @@ export class TerminologyValueSetsController {
     description:
       'Trae también las propiedades de cada concepto. Opt-in: hay catálogos cuyo dato útil vive ahí (el nomenclador guarda especialidad, precio y unidad como propiedades).',
   })
+  @ApiQuery({
+    name: 'filter',
+    required: false,
+    description:
+      'Texto libre (parámetro `filter` de FHIR ValueSet/$expand): deja los miembros cuyo código, rótulo o designación contiene todas sus palabras, sin distinguir tildes ni mayúsculas. Hasta 100 caracteres.',
+  })
   readExpansion(
     @Param('id', ParseUUIDPipe) id: string,
     @Query('valueSetVersionId', new ParseUUIDPipe({ optional: true }))
@@ -253,12 +259,14 @@ export class TerminologyValueSetsController {
     // Sin `ParseBoolPipe`: el parámetro es opcional y un pipe estricto haría
     // fallar la petición que no lo manda, que es la mayoría.
     @Query('includeProperties') includeProperties?: string,
+    @Query('filter') filter?: string,
   ): Promise<ReadValueSetExpansionResponseDto> {
     return this.valueSetsService.readExpansion(id, {
       valueSetVersionId,
       cursor,
       limit: limit ?? DEFAULT_EXPANSION_PAGE_SIZE,
       includeProperties: includeProperties === 'true',
+      filter,
     });
   }
 }

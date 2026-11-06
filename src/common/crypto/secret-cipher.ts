@@ -71,6 +71,29 @@ function deriveKey(salt: Buffer | string): Buffer {
 }
 
 /**
+ * Si hay una passphrase real para cifrar un secreto que se guarda.
+ *
+ * Es más estricta que `deriveKey` a propósito: fuera de producción `deriveKey`
+ * cae a una clave de desarrollo pública para que MFA arranque sin `.env`, pero
+ * un secreto de un tercero (la clave del sistema de una farmacia) cifrado con
+ * una clave que está en el repositorio es lo mismo que guardarlo en claro. Quien
+ * guarda credenciales ajenas debe preguntar esto **antes** de llamar a nadie y
+ * negarse si es `false`.
+ *
+ * Falso si `MFA_ENCRYPTION_KEY` falta o está en blanco, y, en producción, si es
+ * la clave de desarrollo.
+ *
+ * @param source - Entorno a evaluar; parametrizado para probarlo sin tocar `process.env`.
+ */
+export function isSecretCipherConfigured(
+  source: NodeJS.ProcessEnv = process.env,
+): boolean {
+  const passphrase = source.MFA_ENCRYPTION_KEY;
+  if (passphrase === undefined || passphrase.trim() === '') return false;
+  return !(source.NODE_ENV === 'production' && passphrase === INSECURE_DEV_KEY);
+}
+
+/**
  * Cifra un secreto en claro y devuelve
  * `base64(salt).base64(iv).base64(tag).base64(ciphertext)`. Cada llamada usa una
  * sal y un IV aleatorios distintos, por lo que dos cifrados del mismo secreto

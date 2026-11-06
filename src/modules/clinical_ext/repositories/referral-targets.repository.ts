@@ -66,6 +66,13 @@ export class ReferralTargetsRepository {
   /**
    * Profesionales listables cuyo nombre contiene el texto.
    *
+   * Quedan fuera los que tienen la práctica principal en un tenant que no está
+   * `TENANT_ACTIVE`: la búsqueda los devolvería con ese `tenantId` y
+   * `POST /referrals` los rechaza (#1201). Un profesional sin práctica vigente
+   * (`tenantId` nulo) sigue saliendo: derivarle sin organización es válido.
+   * `practice.practices.tenant_id` tiene FK a `directory.tenants`, así que un
+   * `tenantId` sin fila de tenant no existe.
+   *
    * @param em - Contexto de persistencia.
    * @param q - Texto ya recortado (mínimo dos caracteres, lo valida el DTO).
    * @param activeAssignmentConceptId - Estado vigente de la asignación a práctica.
@@ -79,7 +86,7 @@ export class ReferralTargetsRepository {
     limit: number,
   ): Promise<PractitionerTargetRow[]> {
     const pattern = containsPattern(normalizeSearchText(q));
-    const rows = await em.getConnection().execute<
+    const rows = await em.execute<
       {
         profileId: string;
         professionalTitle: string | null;
@@ -107,6 +114,12 @@ export class ReferralTargetsRepository {
           AND ${sqlSearchKey(
             `concat_ws(' ', p.display_name, p.name, p.middle_name, p.last_name, p.mother_last_name)`,
           )} LIKE ?
+          AND NOT EXISTS (
+              SELECT 1
+                FROM directory.tenants tn
+               WHERE tn.id = pr.tenant_id
+                 AND tn.status_concept_id IS DISTINCT FROM ?
+          )
         ORDER BY coalesce(p.display_name, p.last_name, p.name) ASC, hp.profile_id ASC
         LIMIT ?`,
       [
@@ -115,6 +128,7 @@ export class ReferralTargetsRepository {
         COMM.PROFILE_VISIBILITY_PUBLIC,
         CONCEPTS.STATE_ACTIVE,
         pattern,
+        CONCEPTS.TENANT_ACTIVE,
         limit,
       ],
       'all',
@@ -142,12 +156,10 @@ export class ReferralTargetsRepository {
     limit: number,
   ): Promise<OrganizationTargetRow[]> {
     const pattern = containsPattern(normalizeSearchText(q));
-    const rows = await em
-      .getConnection()
-      .execute<
-        { tenantId: string; legalName: string; tradeName: string | null }[]
-      >(
-        `SELECT t.id         AS "tenantId",
+    const rows = await em.execute<
+      { tenantId: string; legalName: string; tradeName: string | null }[]
+    >(
+      `SELECT t.id         AS "tenantId",
               t.legal_name AS "legalName",
               t.trade_name AS "tradeName"
          FROM directory.tenants t
@@ -157,21 +169,100 @@ export class ReferralTargetsRepository {
                OR ${sqlSearchKey("coalesce(t.trade_name, '')")} LIKE ?)
         ORDER BY coalesce(t.trade_name, t.legal_name) ASC, t.id ASC
         LIMIT ?`,
-        [
-          CONCEPTS.TENANT_ACTIVE,
-          COMM.PROFILE_TARGET_ORGANIZATION,
-          COMM.PROFILE_VISIBILITY_PUBLIC,
-          CONCEPTS.STATE_ACTIVE,
-          pattern,
-          pattern,
-          limit,
-        ],
-        'all',
-      );
+      [
+        CONCEPTS.TENANT_ACTIVE,
+        COMM.PROFILE_TARGET_ORGANIZATION,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        pattern,
+        pattern,
+        limit,
+      ],
+      'all',
+    );
     return rows.map((row) => ({
       tenantId: row.tenantId,
       legalName: row.legalName,
       tradeName: row.tradeName ?? null,
     }));
+  }
+
+  /**
+   * ¿Saldría este profesional en {@link searchPractitioners}? Misma regla de
+   * visibilidad, sin el filtro por nombre.
+   *
+   * @param em - Contexto de persistencia.
+   * @param profileId - `health_practitioner_profiles.profile_id`.
+   * @returns `true` sólo si tiene vitrina pública activa de profesional.
+   */
+  async isListablePractitioner(
+    em: EntityManager,
+    profileId: string,
+  ): Promise<boolean> {
+    const rows = await em.execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM profiles.health_practitioner_profiles hp
+        WHERE hp.profile_id = ?
+          AND ${LISTABLE_PROFILE_SQL.replace('%TARGET%', 'hp.profile_id')}`,
+      [
+        profileId,
+        COMM.PROFILE_TARGET_PRACTITIONER,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * ¿Está activo el tenant? Es lo que se exige a la organización cuando el
+   * destino es un profesional: la búsqueda lo devuelve con el tenant de su
+   * práctica principal, que no necesita vitrina de organización.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - `directory.tenants.id`.
+   * @returns `true` sólo si el tenant existe y está activo.
+   */
+  async isActiveTenant(em: EntityManager, tenantId: string): Promise<boolean> {
+    const rows = await em.execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM directory.tenants t
+        WHERE t.id = ?
+          AND t.status_concept_id = ?`,
+      [tenantId, CONCEPTS.TENANT_ACTIVE],
+      'all',
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * ¿Saldría esta organización en {@link searchOrganizations}? Tenant activo y
+   * vitrina pública activa de organización, sin el filtro por nombre.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - `directory.tenants.id`.
+   * @returns `true` sólo si es un destino listable.
+   */
+  async isListableOrganization(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<boolean> {
+    const rows = await em.execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM directory.tenants t
+        WHERE t.id = ?
+          AND t.status_concept_id = ?
+          AND ${LISTABLE_PROFILE_SQL.replace('%TARGET%', 't.id')}`,
+      [
+        tenantId,
+        CONCEPTS.TENANT_ACTIVE,
+        COMM.PROFILE_TARGET_ORGANIZATION,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return rows.length > 0;
   }
 }

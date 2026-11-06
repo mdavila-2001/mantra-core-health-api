@@ -200,7 +200,7 @@ describe('CreateServiceRequestDto · ejecutor de la orden', () => {
   });
 });
 
-describe('CreateServiceRequestDto — reasonConditionId (v4291)', () => {
+describe('CreateServiceRequestDto — reasonConditionId (v4292)', () => {
   it('acepta el diagnóstico que motiva el estudio como uuid opcional', async () => {
     expect(
       await validateCreation(dtoBase({ reasonConditionId: REPORT })),
