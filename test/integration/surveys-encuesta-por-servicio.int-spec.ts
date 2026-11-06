@@ -85,13 +85,12 @@ import {
  * (`assertCanWriteHistory`), el sello y el aviso del cierre, el historial de
  * transiciones de agenda y la sincronía con `clinical.appointments`.
  *
- * Opt-in con `SURVEYS_IT_DB_URL` (base **desechable**: el nombre debe contener
+ * Requiere `SURVEYS_IT_DB_URL` (base **desechable**: el nombre debe contener
  * `test`, `it`, `ci`, `tmp`, `scratch`, `disposable` o `smoke`). Recrea los
  * esquemas `surveys`, `scheduling`, `billing`, `practice`, `profiles`,
  * `clinical` e `integrity`; no aplica las FK entre esquemas.
  */
 const DB_URL = process.env.SURVEYS_IT_DB_URL;
-const describeIfDb = DB_URL ? describe : describe.skip;
 const root = process.cwd();
 
 const silent = {
@@ -119,7 +118,7 @@ const patient = {
   patientProfileId: PATIENT,
 } as AuthenticatedUser;
 
-describeIfDb(
+describe(
   'Encuesta por servicio y cierre de la consulta (integración real)',
   () => {
     let client: pg.Client;
@@ -358,7 +357,13 @@ describeIfDb(
       );
 
     beforeAll(async () => {
-      const name = new URL(DB_URL as string).pathname.replace(/^\//, '');
+      // Fail loudly instead of skipping: a silent skip would read as green.
+      if (!DB_URL) {
+        throw new Error(
+          'SURVEYS_IT_DB_URL no está definida: esta prueba necesita una base PostgreSQL desechable',
+        );
+      }
+      const name = new URL(DB_URL).pathname.replace(/^\//, '');
       if (
         !/(^|[_-])(test|it|ci|tmp|scratch|disposable|smoke)([_-]|$)/i.test(name)
       ) {
