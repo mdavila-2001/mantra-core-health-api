@@ -21,15 +21,17 @@ import {
 } from '../service-request-category';
 import {
   ImagingDetailDto,
+  ImagingFlatInputDto,
   ServiceRequestComponentDto,
   ServiceRequestImagingDto,
+  ServiceRequestImagingFlatDto,
 } from './service-request-detail.dto';
 
 /** Tope de notas citadas por orden: más es un listado, no un motivo. */
 export const MAX_BASED_ON_NOTES = 20;
 
 /** Cuerpo de `POST /clinical/service-requests` (UC-08-05). */
-export class CreateServiceRequestDto {
+export class CreateServiceRequestDto extends ImagingFlatInputDto {
   /**
    * Identificador asociado a custodian tenant.
    */
@@ -197,9 +199,7 @@ export class CreateServiceRequestDto {
   @IsUUID()
   suggestedPracticeSiteId?: string;
 
-  /**
-   * v4.2.82: muestra pedida (laboratorio / anatomía patológica).
-   */
+  /** v4.2.82: muestra pedida (laboratorio / anatomía patológica). */
   @ApiPropertyOptional({
     description:
       'Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica ' +
@@ -210,9 +210,7 @@ export class CreateServiceRequestDto {
   @IsConceptId()
   specimenTypeConceptId?: string;
 
-  /**
-   * v4.2.82: componentes marcados del panel.
-   */
+  /** v4.2.82: componentes marcados del panel. */
   @ApiPropertyOptional({
     description:
       'Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige ' +
@@ -228,9 +226,7 @@ export class CreateServiceRequestDto {
   @IsConceptId({ each: true })
   componentConceptIds?: string[];
 
-  /**
-   * v4.2.82: modalidad, región, lateralidad y contraste de un estudio de imagen.
-   */
+  /** v4.2.82: modalidad, región, lateralidad y contraste de un estudio de imagen. */
   @ApiPropertyOptional({ type: () => ImagingDetailDto })
   @IsOptional()
   @ValidateNested()
@@ -303,7 +299,7 @@ export class CreateServiceRequestDto {
 }
 
 /** Respuesta tras crear una orden de servicio. */
-export class ServiceRequestResponseDto {
+export class ServiceRequestResponseDto extends ServiceRequestImagingFlatDto {
   /**
    * Identificador único de la instancia.
    */

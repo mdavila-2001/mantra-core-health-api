@@ -44,6 +44,9 @@ function fingerprint(dto: CreateRequisitionDto): string {
     b: i.imaging?.bodySiteConceptId ?? null,
     l: i.imaging?.lateralityConceptId ?? null,
     x: i.imaging?.contrastConceptId ?? null,
+    u: i.imaging?.bodyStructureUberon ?? null,
+    m: i.imaging?.bodyMeshId ?? null,
+    t: i.imaging?.boneTypeConceptId ?? null,
   }));
   return createHash('sha256').update(JSON.stringify(items)).digest('hex');
 }
@@ -166,7 +169,9 @@ export class RequisitionsService {
           (other.imaging?.bodySiteConceptId ?? null) ===
             (item.imaging?.bodySiteConceptId ?? null) &&
           (other.imaging?.lateralityConceptId ?? null) ===
-            (item.imaging?.lateralityConceptId ?? null);
+            (item.imaging?.lateralityConceptId ?? null) &&
+          (other.imaging?.bodyStructureUberon ?? null) ===
+            (item.imaging?.bodyStructureUberon ?? null);
         const a = other.componentConceptIds ?? [];
         const b = item.componentConceptIds ?? [];
         const overlap =
@@ -213,6 +218,9 @@ export class RequisitionsService {
       b: r.bodySiteConceptId ?? null,
       l: r.lateralityConceptId ?? null,
       x: r.contrastConceptId ?? null,
+      u: r.bodyStructureUberon ?? null,
+      m: r.bodyMeshId ?? null,
+      t: r.boneTypeConceptId ?? null,
     }));
     return createHash('sha256').update(JSON.stringify(items)).digest('hex');
   }
