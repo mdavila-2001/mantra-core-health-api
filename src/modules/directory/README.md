@@ -31,6 +31,8 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `branch_memberships`, `b
 | `GET /tenants/:tenantId/logo` | sesión | `organization-logo` |
 | `PUT /tenants/:tenantId/logo` | sesión | `organization-logo` |
 | `GET /tenants/:tenantId/logo/content` | sesión | `organization-logo` |
+| `PATCH /tenants/:tenantId/representatives/:role/name` | sesión (owner/admin) | `tenant-representatives` |
+| `POST /tenants/:tenantId/branches/location-preview` | sesión (owner/admin) | `branch-location` |
 | `GET /tenants/me` | sesión | `tenants` |
 | `PATCH /tenants/:tenantId` | sesión | `tenants` |
 | `GET /tenants/:tenantId` | sesión | `tenants` |
