@@ -14,6 +14,15 @@ import type {
 import { SURVEYS, isSystemOwnerType } from '../surveys.concepts';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
+import { isCatalogTemplate } from './invitation-candidates';
+
+/** Si la emisión la manda: plantilla del catálogo estándar y activa. */
+function isIssuable(owned: OwnedServiceAssignment): boolean {
+  return (
+    isCatalogTemplate(owned.template) &&
+    owned.template.statusConceptId !== SURVEYS.TEMPLATE_INACTIVE
+  );
+}
 
 /** Una asignación activa de servicio del profesional, con lo que la describe. */
 export interface OwnedServiceAssignment {
@@ -124,7 +133,14 @@ export class ServiceSurveyOwnership {
       .map((s) => ({ id: s.id, name: s.name }));
   }
 
-  /** La asignación vigente (la más reciente) de cada servicio del profesional. */
+  /**
+   * La encuesta que de verdad sale para cada servicio del profesional: su
+   * asignación activa más reciente de una plantilla **del catálogo** y activa.
+   * Una asignación escrita a mano (anterior al catálogo) o de una plantilla
+   * desactivada no cuenta, porque la emisión no la manda
+   * (`SurveysAssignmentsService.issue`): el servicio usa la base de servicio y
+   * se informa `assignment: null`. No se modifica ninguna fila.
+   */
   async currentByService(
     em: EntityManager,
     tenantId: string,
@@ -138,6 +154,7 @@ export class ServiceSurveyOwnership {
       practitionerProfileId,
       serviceIds,
     )) {
+      if (!isIssuable(owned)) continue;
       // La lista viene de la más reciente a la más antigua.
       if (!result.has(owned.assignment.targetId)) {
         result.set(owned.assignment.targetId, owned);

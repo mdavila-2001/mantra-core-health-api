@@ -314,6 +314,37 @@ describe('SurveysServiceAssignmentsService', () => {
       expect(res.services[0].assignment).toBeNull();
     });
 
+    it('una asignación escrita a mano (no del catálogo) no cuenta: la emisión no la manda, el servicio usa la base', async () => {
+      const d = build();
+      ownedAssignment(d);
+      d.templatesRepo.findTemplatesByIds.mockResolvedValue([
+        {
+          id: 'tpl-old',
+          title: 'Satisfacción con el servicio',
+          ownerPractitionerId: DOCTOR,
+          standardCatalogCode: undefined,
+        },
+      ]);
+      const res = await inTenant(() => d.service.listServiceAssignments(actor));
+      expect(res.services[0].assignment).toBeNull();
+    });
+
+    it('una del catálogo con la plantilla desactivada tampoco cuenta', async () => {
+      const d = build();
+      ownedAssignment(d);
+      d.templatesRepo.findTemplatesByIds.mockResolvedValue([
+        {
+          id: 'tpl-old',
+          title: 'X',
+          ownerPractitionerId: DOCTOR,
+          standardCatalogCode: 'STD_LAB_V1',
+          statusConceptId: SURVEYS.TEMPLATE_INACTIVE,
+        },
+      ]);
+      const res = await inTenant(() => d.service.listServiceAssignments(actor));
+      expect(res.services[0].assignment).toBeNull();
+    });
+
     it('sin perfil profesional responde 412', async () => {
       const d = build();
       await expect(
@@ -435,6 +466,27 @@ describe('SurveysServiceAssignmentsService', () => {
         DOCTOR,
         SERVICE,
       );
+    });
+
+    it('importar reemplaza una escrita a mano activa en el servicio, y la respuesta trae la del catálogo', async () => {
+      const d = build();
+      const legacy = ownedAssignment(d);
+      d.templatesRepo.findTemplatesByIds.mockResolvedValue([
+        {
+          id: 'tpl-old',
+          title: 'Satisfacción con el servicio',
+          ownerPractitionerId: DOCTOR,
+          standardCatalogCode: undefined,
+        },
+      ]);
+
+      const row = await inTenant(() =>
+        d.service.importServiceSurvey(SERVICE, { catalogCode: CODE }, actor),
+      );
+
+      expect(legacy.active).toBe(false);
+      expect(d.assignmentsRepo.create).toHaveBeenCalledTimes(1);
+      expect(row.assignment).toMatchObject({ catalogCode: CODE });
     });
 
     it('si el servicio ya tiene esa misma encuesta, no la reemplaza', async () => {
