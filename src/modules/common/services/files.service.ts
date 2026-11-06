@@ -21,6 +21,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
+  getCurrentTenantId,
 } from '../../../common';
 import {
   FileDerivativesRepository,
@@ -28,7 +29,11 @@ import {
   FileVersionsRepository,
   FilesRepository,
 } from '../repositories';
-import { canActorMutateOwnFile, canActorReadOwnFile } from './file-access';
+import {
+  canActorMutateOwnFile,
+  canActorReadOwnFile,
+  fileOwnerTenantId,
+} from './file-access';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { CommonErrorReason } from '../common.error-reasons';
 import { FileVersions, Files } from '../entities';
@@ -184,7 +189,7 @@ export class FilesService {
       );
       const file = this.filesRepo.create(tx, {
         ...(publicationContext ? { id: publicationContext.targetId } : {}),
-        tenantId: SEED.tenantId,
+        tenantId: fileOwnerTenantId(actor, getCurrentTenantId(), SEED.tenantId),
         categoryConceptId: CONCEPTS[`FILE_CATEGORY_${dto.category}`],
         sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,

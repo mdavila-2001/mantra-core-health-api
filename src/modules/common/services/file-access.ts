@@ -88,3 +88,26 @@ export function canActorMutateOwnFile(
   }
   return actor.roles.some((role) => FILE_WRITER_ROLES.includes(role));
 }
+
+/**
+ * Tenant dueño de un archivo que se está por crear.
+ *
+ * Con actor, el tenant de la petición (`TenantContextInterceptor` ya verificó
+ * la membresía): con `RLS_ENFORCE=true` la política `tenant_isolation` exige
+ * que lo que se escribe sea de ese tenant, y registrar el archivo en el tenant
+ * DEFAULT hacía fallar con 500 toda subida de alguien que trabaja en su propia
+ * organización (farmacia, laboratorio, imagenología). También es lo que
+ * esperan los lectores que comprueban pertenencia (`file.tenantId ===
+ * tenantId`, p. ej. la imagen de un servicio facturable).
+ *
+ * Sin actor (pre-carga anónima) o sin tenant en el contexto, el DEFAULT: es el
+ * único tenant del que `AttachableFileService.claimAnonymousUpload` acepta
+ * reclamar, y el contexto sin tenant corre en elevación SYSTEM.
+ */
+export function fileOwnerTenantId(
+  actor: AuthenticatedUser | null,
+  currentTenantId: string | undefined,
+  defaultTenantId: string,
+): string {
+  return actor && currentTenantId ? currentTenantId : defaultTenantId;
+}
