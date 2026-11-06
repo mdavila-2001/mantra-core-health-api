@@ -23,7 +23,8 @@ borde interior) y, por celda, `alt`: las palabras de `pdftotext -bbox` (poppler,
 otro extractor) cuyo centro cae en la misma celda. La tabla queda marcada si un
 glifo o una palabra de su área no cae en ninguna celda (`unassigned`), si está
 dentro de otra tabla (`nested`) o si una celda tiene un trazo que no es borde
-(`graphic`). Una línea dentro de una grilla que pdfplumber no reconoce como
+(`graphic`). Una «tabla» con un título de sección en una celda es un marco
+alrededor del texto: se descarta y sus líneas quedan como filas. Una línea dentro de una grilla que pdfplumber no reconoce como
 tabla, o fuera de la grilla pero a la altura de una tabla, sigue marcada
 `table`, sin celdas, y su sección no se publica.
 Cada fila lleva también `alt`: las palabras de `pdftotext -bbox` cuyo centro cae
@@ -241,6 +242,8 @@ def count_chars(container):
 
 
 GRID_SETTINGS = {'vertical_strategy': 'lines', 'horizontal_strategy': 'lines'}
+# Título de sección de la ficha («1.», …, «10.», «4.1» a «6.9», seguidos de mayúscula) o del anexo.
+QRD_HEADING = re.compile(r'^\s*(?:(?:10|[1-9])\.|[4-6]\.[1-9]\.?)\s+[A-ZÁÉÍÓÚÑÜ]|^\s*ANEXO I{1,2}\s*$')
 
 
 def _boundaries(values):
@@ -349,6 +352,11 @@ def _cell_out(c):
         out['graphic'] = True
     out['alt'] = ' '.join(c['alt'])
     return out
+
+
+def is_frame(table):
+    """Una «tabla» con un título de sección en una celda es un marco alrededor del texto (p. ej. Imaavy, pág. 2), no una tabla."""
+    return any(QRD_HEADING.match(line) for c in table['cells'] for line in _cell_out(c)['text'].split('\n'))
 
 
 def page_rows(page, tables=(), words=()):
@@ -539,14 +547,20 @@ def extract_pdf(symbol_path, pdf):
                 continue
             started = True
             page_words = words[n - 1] if n - 1 < len(words) else []
-            tables = []
+            tables, pp = [], None
             if table_boxes(layout):
                 pp = plumber.pages[n - 1]
                 # Sólo con el mismo sistema de coordenadas en los dos (sin rotación ni origen corrido); si no, la tabla queda sin celdas.
                 if pp.rotation == 0 and tuple(round(v, 1) for v in pp.bbox) == (0.0, 0.0, round(layout.width, 1), round(layout.height, 1)) and layout.bbox[:2] == (0, 0):
                     tables = grid_tables(pp, layout.height)
-                pp.close()
             rows, alt_unassigned = page_rows(layout, tables, page_words)
+            frames = [i for i, t in enumerate(tables) if is_frame(t)]
+            if frames:
+                # Sin los marcos: sus líneas vuelven a ser filas, como si no hubiera grilla.
+                tables = [t for i, t in enumerate(grid_tables(pp, layout.height)) if i not in frames]
+                rows, alt_unassigned = page_rows(layout, tables, page_words)
+            if pp is not None:
+                pp.close()
             pages.append({'page': n, 'rows': rows, **({'altUnassigned': alt_unassigned} if alt_unassigned else {})})
             for r in rows:
                 chars += len(r['text'])

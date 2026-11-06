@@ -160,5 +160,14 @@ class CellBorders(unittest.TestCase):
         self.assertFalse(x._on_border((40, 70, 46, 78), self.TABLE), 'un símbolo dibujado dentro de la celda no es borde')
 
 
+class Frames(unittest.TestCase):
+    def test_titulo_de_seccion_en_una_celda(self):
+        """Una «tabla» con un título de sección dentro es un marco (Imaavy, pág. 2; Constella, 5.3)."""
+        for line in ('1.\tNOMBRE DEL MEDICAMENTO', '4.2\tPosología y forma de administración', '5.3  Datos preclínicos sobre seguridad', 'ANEXO I'):
+            self.assertTrue(x.QRD_HEADING.match(line), line)
+        for line in ('1 Independientemente de la gravedad', '11. La aleatorización fue estratificada', '4.5 mg/kg', '30\tPlacebo'):
+            self.assertFalse(x.QRD_HEADING.match(line), f'nota al pie o celda de datos: {line}')
+
+
 if __name__ == '__main__':
     unittest.main()
