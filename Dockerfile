@@ -77,6 +77,13 @@ COPY --chown=nodeapp:nodeapp --from=build /app/dist ./dist
 # `tools/inventario/*.mjs` y que se leen de `process.cwd()/inventario`. Sin esta
 # copia la imagen no los trae y todas las rutas del portal responden 503.
 COPY --chown=nodeapp:nodeapp --from=build /app/inventario ./inventario
+# Study catalog loader (LOINC análisis with sections and components, plus
+# imaging). `api-migrate` runs it right after `seed-cli`: without it a fresh or
+# upgraded database only has the ~47 basic boot análisis, all under «Otros
+# análisis», with no LOINC nor components. Only the files it reads travel.
+COPY --chown=nodeapp:nodeapp --from=build /app/tools/study-catalogs ./tools/study-catalogs
+COPY --chown=nodeapp:nodeapp --from=build /app/tools/terminology-import/lib/glossary-es/common.mjs /app/tools/terminology-import/lib/glossary-es/load-plan.mjs ./tools/terminology-import/lib/glossary-es/
+COPY --chown=nodeapp:nodeapp --from=build /app/src/modules/study_catalog/data ./src/modules/study_catalog/data
 
 # `FILE_STORAGE_LOCAL_DIR` (default ./storage/uploads) y la cache de MikroORM
 # (node_modules/.cache) se escriben en tiempo de ejecución: sin este mkdir

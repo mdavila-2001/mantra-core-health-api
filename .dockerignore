@@ -23,4 +23,12 @@ graphify-out
 # `runtime` copia solo `dist` e `inventario`, y `docker/db-init/Dockerfile`
 # copia solo `database/` y sus scripts. Fuera del contexto, cada despliegue
 # deja de empaquetarlos, transferirlos y hashearlos en el `COPY . .`.
-tools/terminology-import
+tools/terminology-import/*
+# Except the two id helpers the study catalog loader imports (`api-migrate`
+# runs it): 2 small files, no outputs.
+!tools/terminology-import/lib
+tools/terminology-import/lib/*
+!tools/terminology-import/lib/glossary-es
+tools/terminology-import/lib/glossary-es/*
+!tools/terminology-import/lib/glossary-es/common.mjs
+!tools/terminology-import/lib/glossary-es/load-plan.mjs
