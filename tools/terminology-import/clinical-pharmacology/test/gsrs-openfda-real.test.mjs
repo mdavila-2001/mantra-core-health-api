@@ -291,3 +291,66 @@ test('EMA PDF: consenso de dos extractores (pdfminer verificado y pdftotext) —
   assert.equal(extractorsAgree('(≥ 7', '(³ 7'), false, 'una lectura distinta del símbolo no es «perderlo»');
   assert.equal(extractorsAgree('clase 2', 'clase ≥ 2'), false, 'pdfminer no puede perder lo que pdftotext tiene');
 });
+
+import { cellsAgree, emaPiSection, gridHtml, sectionConsensus, withheldReason } from '../lib/ema-pi.mjs';
+
+/** Filas del extractor con una tabla de la grilla (forma de py/ema_pi_extract.py) dentro de la sección 4.2. */
+const gridDoc = ({ grid = {}, page2 = null, altUnassigned = 0, cellAlt = null } = {}) => {
+  const cell = (text, extra = {}) => ({ text, alt: text.replace(/\n/g, ' '), ...extra });
+  const rows = [
+    { text: 'ANEXO I', table: false, alt: 'ANEXO I' },
+    { text: '1.\tNOMBRE DEL MEDICAMENTO', table: false, alt: '1. NOMBRE DEL MEDICAMENTO' },
+    { text: 'Medicamento X', table: false, alt: 'Medicamento X' },
+    { text: '4.2\tPosología y forma de administración', table: false, alt: '4.2 Posología y forma de administración' },
+    { text: 'Tabla 1 Dosis según el peso', table: false, alt: 'Tabla 1 Dosis según el peso' },
+    {
+      text: 'Peso\tDosis\n< 40 kg\t10 mg/kg\n≥ 40 kg\t400 mg',
+      table: true,
+      grid: {
+        rows: [
+          [cell('Peso'), cell('Dosis')],
+          [cell('< 40 kg'), cellAlt ? { text: '10 mg/kg', alt: cellAlt } : cell('10 mg/kg')],
+          [cell('≥ 40 kg'), cell('400 mg', { html: '400 mg<sup>a</sup>' })],
+        ],
+        ...grid,
+      },
+    },
+  ];
+  const pages = [{ page: 1, rows, ...(altUnassigned ? { altUnassigned } : {}) }];
+  if (page2) pages.push({ page: 2, rows: page2 });
+  pages.push({ page: 3, rows: [{ text: '4.3\tContraindicaciones', table: false, alt: '4.3 Contraindicaciones' }, { text: 'Hipersensibilidad.', table: false, alt: 'Hipersensibilidad.' }, { text: 'ANEXO II', table: false, alt: 'ANEXO II' }] });
+  return { pages };
+};
+const sec42 = (doc) => {
+  const [sm] = piSmpcsFromRows(doc);
+  const s = sm.sections.get('4.2');
+  s.consensus = sectionConsensus(s, undefined);
+  return { sm, s: piMonographSections(sm).find((x) => x.number === '4.2') };
+};
+
+test('EMA PDF, tablas de la grilla: celda por celda en html y tables; se publican sólo si cada fila y celda coincide con pdftotext', () => {
+  const { sm, s } = sec42(gridDoc());
+  assert.equal(withheldReason(s), null);
+  assert.equal(s.text, 'Tabla 1 Dosis según el peso\nPeso\tDosis\n< 40 kg\t10 mg/kg\n≥ 40 kg\t400 mg');
+  assert.match(s.html, /^Tabla 1 Dosis según el peso\n<table><tr><td>Peso<\/td><td>Dosis<\/td><\/tr><tr><td>&lt; 40 kg<\/td>/);
+  assert.match(s.html, /<td>400 mg<sup>a<\/sup><\/td><\/tr><\/table>$/, 'superíndice de la celda en html');
+  const row = emaPiSection({ productNumber: 'EMEA/H/C/000001', name: 'X', atc5: ['A01AA01'] }, sm, s, { url: 'https://example.invalid/x.pdf', retrievedAt: '2026-11-06T00:00:00Z', license: 'l' });
+  assert.deepEqual(row.tables, [{ rows: [[{ text: 'Peso' }, { text: 'Dosis' }], [{ text: '< 40 kg' }, { text: '10 mg/kg' }], [{ text: '≥ 40 kg' }, { text: '400 mg' }]] }]);
+  assert.match(row.extraction, /celda por celda/);
+  assert.equal(gridHtml({ rows: [[{ text: 'a', colspan: 2 }], [{ text: 'b\nc' }, { text: '' }]] }), '<table><tr><td colspan="2">a</td></tr><tr><td>b<br>c</td><td></td></tr></table>');
+});
+
+test('EMA PDF, tablas de la grilla: casos que no se publican', () => {
+  assert.equal(withheldReason(sec42(gridDoc({ cellAlt: '1O mg/kg' })).s), 'pdftotext no coincide', 'una celda distinta en pdftotext');
+  assert.equal(withheldReason(sec42(gridDoc({ altUnassigned: 1 })).s), 'pdftotext no coincide', 'una palabra de pdftotext fuera de toda fila y celda');
+  assert.equal(withheldReason(sec42(gridDoc({ grid: { nested: true } })).s), 'tabla dentro de otra tabla');
+  assert.equal(withheldReason(sec42(gridDoc({ grid: { unassigned: 2 } })).s), 'glifos fuera de las celdas');
+  const split = gridDoc({ page2: [{ text: '\tsigue la celda', table: true, grid: { rows: [[{ text: '', alt: '' }, { text: 'sigue la celda', alt: 'sigue la celda' }]] } }] });
+  assert.equal(withheldReason(sec42(split).s), 'tabla partida entre páginas', 'tabla al pie de una página y otra al principio de la siguiente');
+  const drawn = gridDoc();
+  drawn.pages[0].rows[5].grid.rows[1][1].graphic = true;
+  assert.equal(withheldReason(sec42(drawn).s), 'trazo dibujado dentro del texto', 'un trazo que no es borde dentro de una celda');
+  assert.equal(cellsAgree('≥ 40 kg', '40 kg'), true, 'sólo se admite el símbolo no latino que pdftotext deja en blanco');
+  assert.equal(cellsAgree('•\tTexto', '• Texto'), true, 'las viñetas cuentan en los dos lados');
+  assert.equal(cellsAgree('Texto', null), false, 'sin palabras de pdftotext no hay consenso');
+});

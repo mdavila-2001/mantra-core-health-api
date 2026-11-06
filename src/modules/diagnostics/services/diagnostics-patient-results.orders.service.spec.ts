@@ -147,6 +147,19 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     );
   });
 
+  it('v4295: la orden trae el diagnóstico para el que se pidió y, si es null, no trae el campo', async () => {
+    const { service, ordersRepo } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
+      { ...order('o1'), reasonConditionId: 'cond-1' },
+      { ...order('o2'), reasonConditionId: null },
+    ]);
+
+    const res = await service.listOwnOrders(USER, 50);
+
+    expect(res.items[0].reasonConditionId).toBe('cond-1');
+    expect('reasonConditionId' in res.items[1]).toBe(false);
+  });
+
   it('P40: cada orden trae su categoría textual y ninguna nota del médico', async () => {
     const { service, ordersRepo } = build();
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([

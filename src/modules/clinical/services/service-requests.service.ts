@@ -38,6 +38,7 @@ import {
   type PreparedStudyDetail,
 } from './service-request-detail.service';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
+import { Conditions } from '../entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { PerformerSelectionValidator } from './performer-selection.validator';
@@ -259,6 +260,34 @@ export class ServiceRequestsService {
   }
 
   /**
+   * v4295: el diagnóstico que motiva el estudio tiene que existir y ser del
+   * mismo paciente que la orden. Responde 422 (la precondición que falla es
+   * del cuerpo, como `MEDICATION_INDICATION_INVALID`), y un diagnóstico ajeno
+   * responde igual que uno inexistente: distinguirlos diría que ese id existe
+   * en otra historia.
+   */
+  private async assertReasonConditionBelongsToPatient(
+    tx: EntityManager,
+    dto: CreateServiceRequestDto,
+  ): Promise<void> {
+    if (dto.reasonConditionId === undefined) return;
+    // Mismo custodio que la orden, igual que `assertEncounterBelongsToPatient`:
+    // un diagnóstico de otro tenant responde el mismo 422 que uno inexistente.
+    const condition = await tx.findOne(Conditions, {
+      id: dto.reasonConditionId,
+      patientProfileId: dto.patientProfileId,
+      custodianTenantId: dto.custodianTenantId,
+    });
+    if (!condition) {
+      throw new PreconditionFailedException(
+        'El diagnóstico indicado no existe o no es de esta persona',
+        { field: 'reasonConditionId' },
+        ClinicalErrorReason.SERVICE_REQUEST_REASON_CONDITION_INVALID,
+      );
+    }
+  }
+
+  /**
    * P40: el `category_concept_id` que se guarda. El texto (`category`) se
    * resuelve a su concepto; si viaja con `categoryConceptId`, tienen que
    * coincidir —un concepto que el texto no nombra (p. ej. procedimiento) es
@@ -305,6 +334,8 @@ export class ServiceRequestsService {
         : this.em.transactional(work);
     return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // v4295: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
+      await this.assertReasonConditionBelongsToPatient(tx, dto);
       // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
       const prepared = await this.detail.prepare(
         tx,
@@ -319,6 +350,7 @@ export class ServiceRequestsService {
         { catalog: options.catalog },
       );
       const categoryConceptId = prepared.categoryConceptId;
+      // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
       if (basedOnNoteIds.length > 0) {
         await this.basedOnNotes.assertUsable(
           tx,
@@ -384,6 +416,7 @@ export class ServiceRequestsService {
         suggestedCareSpaceId: point?.id,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
+        reasonConditionId: dto.reasonConditionId,
         requisitionId: options.requisitionId,
         ...detailColumnsOf(prepared),
         actorUserId: actor.id,
@@ -475,6 +508,9 @@ export class ServiceRequestsService {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
         formInstanceId: sr.formInstanceId ?? null,
+        ...(sr.reasonConditionId
+          ? { reasonConditionId: sr.reasonConditionId }
+          : {}),
         requisitionId: sr.requisitionId ?? null,
         codeConceptId: sr.codeConceptId,
         codeDisplay: view?.codeDisplay,

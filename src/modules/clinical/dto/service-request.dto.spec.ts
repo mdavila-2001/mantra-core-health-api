@@ -200,6 +200,20 @@ describe('CreateServiceRequestDto · ejecutor de la orden', () => {
   });
 });
 
+describe('CreateServiceRequestDto — reasonConditionId (v4295)', () => {
+  it('acepta el diagnóstico que motiva el estudio como uuid opcional', async () => {
+    expect(
+      await validateCreation(dtoBase({ reasonConditionId: REPORT })),
+    ).toEqual([]);
+  });
+
+  it('rechaza un diagnóstico que no es uuid', async () => {
+    expect(
+      await validateCreation(dtoBase({ reasonConditionId: 'cond-1' })),
+    ).toEqual(['reasonConditionId']);
+  });
+});
+
 describe('CreateServiceRequestDto · región marcada en el modelo 3D', () => {
   const UUID = '55555555-5555-4555-8555-555555555555';
 

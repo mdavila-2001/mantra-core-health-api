@@ -77,6 +77,14 @@ export enum ClinicalExtErrorReason {
    */
   REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
 
+  // --- Red clínica (v4295) ---
+  /** `targetEncounterId` sólo se admite al aceptar (`decision: ACCEPT`). */
+  REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED = 'REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED',
+  /**
+   * `targetEncounterId` no existe, es de otro paciente o no es del tenant
+   * destino que acepta (indistinguibles a propósito).
+   */
+  REFERRAL_TARGET_ENCOUNTER_INVALID = 'REFERRAL_TARGET_ENCOUNTER_INVALID',
   // --- Datos de traslado (v4274) ---
   /** Con `required=true` hacen falta `transportMode` y `departureCondition`. */
   TRANSFER_INCOMPLETE = 'TRANSFER_INCOMPLETE',

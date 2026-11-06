@@ -115,6 +115,45 @@ describe('RequesterReportsReader', () => {
     expect(out.hidden).toBe(3);
   });
 
+  it('readIssued reaches one report only through the rule of the list, and runs work with that report', async () => {
+    const t = build();
+    t.tx.findOne = mockFn(async () => ({ id: 'r-lab' }));
+    const work = mockFn(async (_em: unknown, report: any) => report.id);
+
+    const out = await t.reader.readIssued(CLINIC, PATIENT, 'r-lab', null, work);
+
+    expect(t.tx.findOne).toHaveBeenCalledWith(DiagnosticReports, {
+      $and: [
+        { id: 'r-lab' },
+        {
+          patientProfileId: PATIENT,
+          currentReleasedVersionId: { $ne: null },
+          $or: [{ serviceRequestId: 'sr1', custodianTenantId: LAB }],
+        },
+      ],
+    });
+    expect(work).toHaveBeenCalledWith(t.tx, { id: 'r-lab' });
+    expect(out).toEqual({ value: 'r-lab' });
+  });
+
+  it('readIssued without a visible issued order reads no report and runs nothing', async () => {
+    const t = build({ visible: [] });
+    t.tx.findOne = mockFn(async () => ({ id: 'r-lab' }));
+    const work = mockFn(async () => 'x');
+
+    const out = await t.reader.readIssued(
+      CLINIC,
+      PATIENT,
+      'r-lab',
+      FILTER,
+      work,
+    );
+
+    expect(out).toBeNull();
+    expect(t.tx.findOne).not.toHaveBeenCalled();
+    expect(work).not.toHaveBeenCalled();
+  });
+
   it('the latest release event of each version decides HELD or VISIBLE', async () => {
     const t = build();
     t.reports.findReleaseEventsByVersions.mockResolvedValue([

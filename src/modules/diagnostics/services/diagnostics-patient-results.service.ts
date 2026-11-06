@@ -249,6 +249,9 @@ export class DiagnosticsPatientResultsService {
         summary: summaryOf(codeDisplay, view),
         ...(settlements.get(order.id) ?? unavailableSettlement()),
         encounterId: order.encounterId,
+        ...(order.reasonConditionId
+          ? { reasonConditionId: order.reasonConditionId }
+          : {}),
         codeConceptId: order.codeConceptId,
         categoryConceptId: order.categoryConceptId,
         category: analysisCategoryOf(order.categoryConceptId),

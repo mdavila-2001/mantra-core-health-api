@@ -371,6 +371,76 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     expect(summary.encounters[0].rowVersion).toBe(3);
   });
 
+  it('v4295: la condición trae el diagnóstico que la reemplazó y, si es null, no trae el campo', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([
+        {
+          id: 'cond-1',
+          codeConceptId: 'code-1',
+          replacedByConditionId: 'cond-2',
+          createdAt: new Date(),
+        },
+        {
+          id: 'cond-2',
+          codeConceptId: 'code-2',
+          replacedByConditionId: null,
+          createdAt: new Date(),
+        },
+      ]) // conditions
+      .mockResolvedValueOnce([]) // allergies
+      .mockResolvedValueOnce([]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+
+    const summary = await d.service.getPatientSummary(
+      HOLDER_PERSON,
+      50,
+      medical,
+      FULL,
+    );
+
+    expect(summary.conditions[0].replacedByConditionId).toBe('cond-2');
+    expect('replacedByConditionId' in summary.conditions[1]).toBe(false);
+  });
+
+  it('la receta trae la que la reemplazó y, si es null, no trae el campo', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([]) // conditions
+      .mockResolvedValueOnce([]) // allergies
+      .mockResolvedValueOnce([
+        {
+          id: 'med-1',
+          medicationConceptId: 'levo-25',
+          statusConceptId: 'st',
+          replacedByRequestId: 'med-2',
+          createdAt: new Date(),
+        },
+        {
+          id: 'med-2',
+          medicationConceptId: 'levo-50',
+          statusConceptId: 'st',
+          replacedByRequestId: null,
+          createdAt: new Date(),
+        },
+      ]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+
+    const summary = await d.service.getPatientSummary(
+      HOLDER_PERSON,
+      50,
+      medical,
+      FULL,
+    );
+
+    expect(summary.medicationRequests[0].replacedByRequestId).toBe('med-2');
+    expect('replacedByRequestId' in summary.medicationRequests[1]).toBe(false);
+  });
+
   it('la receta del resumen trae su cantidad recetada como número, y sin cantidad no la trae', async () => {
     const d = build();
     d.vacio.findByPatient

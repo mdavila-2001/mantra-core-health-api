@@ -1132,6 +1132,90 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   });
 });
 
+describe('ServiceRequestsService · reasonConditionId (v4295)', () => {
+  const registration = {
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    codeConceptId: 'code1',
+  };
+
+  /** La orden que devuelve el repositorio, con el diagnóstico que se guardó. */
+  function setup() {
+    const d = build();
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) => ({
+      id: where.id,
+      patientProfileId: where.patientProfileId,
+    }));
+    d.serviceRequestsRepo.create.mockImplementation(
+      (_tx: unknown, data: any) => ({
+        id: 'sr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        reasonConditionId: data.reasonConditionId,
+        createdAt: new Date(),
+      }),
+    );
+    return d;
+  }
+
+  it('valida el diagnóstico contra el paciente, lo guarda y lo devuelve', async () => {
+    const d = setup();
+    const res = await d.service.create(
+      { ...registration, reasonConditionId: 'cond-1' },
+      actor,
+    );
+    expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
+      id: 'cond-1',
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+    });
+    expect(
+      d.serviceRequestsRepo.create.mock.calls[0][1].reasonConditionId,
+    ).toBe('cond-1');
+    expect(res.reasonConditionId).toBe('cond-1');
+  });
+
+  it('sin diagnóstico no consulta nada y el campo queda ausente de la respuesta', async () => {
+    const d = setup();
+    const res = await d.service.create(registration, actor);
+    expect((d.tx as any).findOne).not.toHaveBeenCalled();
+    expect('reasonConditionId' in res).toBe(false);
+  });
+
+  it('422 SERVICE_REQUEST_REASON_CONDITION_INVALID si el diagnóstico es de otro paciente (o no existe), sin crear la orden', async () => {
+    const d = setup();
+    (d.tx as any).findOne.mockResolvedValue(null);
+    const err = await d.service
+      .create({ ...registration, reasonConditionId: 'cond-ajena' }, actor)
+      .catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(PreconditionFailedException);
+    expect((err as any).getStatus()).toBe(422);
+    expect((err as any).getResponse().reason).toBe(
+      'SERVICE_REQUEST_REASON_CONDITION_INVALID',
+    );
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+  });
+
+  it('422 igual que uno inexistente si el diagnóstico es del paciente pero de otro tenant', async () => {
+    const d = setup();
+    // La base sólo lo encuentra en t2: el filtro por custodio lo deja afuera.
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) =>
+      where.custodianTenantId === undefined || where.custodianTenantId === 't2'
+        ? { id: where.id, patientProfileId: where.patientProfileId }
+        : null,
+    );
+    const err = await d.service
+      .create({ ...registration, reasonConditionId: 'cond-otro-tenant' }, actor)
+      .catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(PreconditionFailedException);
+    expect((err as any).getResponse().reason).toBe(
+      'SERVICE_REQUEST_REASON_CONDITION_INVALID',
+    );
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+  });
+});
+
 describe('ServiceRequestsService · solicitante de la orden (regla c)', () => {
   const doctor = { id: 'u1', practitionerProfileId: 'doc-1' } as any;
   const dto = (requesterProfileId?: string): any => ({
