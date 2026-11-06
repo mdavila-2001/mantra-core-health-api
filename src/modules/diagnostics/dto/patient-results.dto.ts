@@ -144,6 +144,13 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Encuentro en el que se pidió, si se pidió durante uno. */
   @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
 
+  /**
+   * El diagnóstico propio para el que se pidió (v4291). Ausente si no se
+   * indicó. Sólo el id: el portal lo resuelve contra los diagnósticos que el
+   * paciente ya ve en su resumen, así que no revela nada que no tenga.
+   */
+  @ApiPropertyOptional({ format: 'uuid' }) reasonConditionId?: string;
+
   /** Qué se pidió (concept id). */
   @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
 
