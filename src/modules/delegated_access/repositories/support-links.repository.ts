@@ -563,6 +563,9 @@ export class SupportLinksRepository {
    * @param practitionerProfileId - El doctor (dueño del recurso de agenda).
    * @param from - Desde (incluido).
    * @param to - Hasta (excluido).
+   * @param limit - Cuántas filas como máximo se leen. El tope lo decide quien
+   *   llama (el servicio pide una de más para saber si hubo truncado): aquí no
+   *   se fija uno, para que no se corte nada sin que nadie lo sepa.
    */
   async findPractitionerAgenda(
     em: EntityManager,
@@ -570,6 +573,7 @@ export class SupportLinksRepository {
     practitionerProfileId: string,
     from: Date,
     to: Date,
+    limit: number,
   ): Promise<
     {
       bookingId: string;
@@ -600,8 +604,8 @@ export class SupportLinksRepository {
         WHERE b.tenant_id = ? AND r.resource_ref_id = ?
           AND s.start_at >= ? AND s.start_at < ?
         ORDER BY s.start_at
-        LIMIT 500`,
-      [tenantId, practitionerProfileId, from, to],
+        LIMIT ?`,
+      [tenantId, practitionerProfileId, from, to, limit],
     );
     return rows.map((row) => ({
       bookingId: row.id,
