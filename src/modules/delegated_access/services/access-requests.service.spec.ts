@@ -289,6 +289,79 @@ describe('AccessRequestsService', () => {
       expect(d.requestsRepo.create).not.toHaveBeenCalled();
     });
 
+    it('decide: solicitud ajena e inexistente responden exactamente igual (sin oráculo de existencia)', async () => {
+      const missing = build();
+      missing.requestsRepo.findById.mockResolvedValue(null);
+      const absent = await thrown(
+        missing.service.decide('r1', { decision: 'APPROVED' } as any, actor),
+      );
+
+      const foreign = build();
+      foreign.setsRepo.findById.mockResolvedValue({
+        id: 'set9',
+        tenantId: 't2',
+        statusConceptId: STATUS.ACTIVE,
+      });
+      foreign.requestsRepo.findById.mockResolvedValue({
+        id: 'r1',
+        statusConceptId: DELEG.REQUEST_OPEN,
+        practitionerDelegateAssignmentId: 'del1',
+      });
+      const other = await thrown(
+        foreign.service.decide('r1', { decision: 'APPROVED' } as any, actor),
+      );
+
+      expect(other.getStatus()).toBe(absent.getStatus());
+      expect(other.getResponse()).toEqual(absent.getResponse());
+      expect(other.message).toBe('Solicitud no encontrada');
+    });
+
+    it('decide: una delegación huérfana de la solicitud tampoco se distingue de una solicitud inexistente', async () => {
+      const missing = build();
+      missing.requestsRepo.findById.mockResolvedValue(null);
+      const absent = await thrown(
+        missing.service.decide('r1', { decision: 'APPROVED' } as any, actor),
+      );
+      const orphan = build();
+      orphan.delegatesRepo.findById.mockResolvedValue(null);
+      orphan.requestsRepo.findById.mockResolvedValue({
+        id: 'r1',
+        statusConceptId: DELEG.REQUEST_OPEN,
+        practitionerDelegateAssignmentId: 'del1',
+      });
+      const other = await thrown(
+        orphan.service.decide('r1', { decision: 'APPROVED' } as any, actor),
+      );
+      expect(other.getResponse()).toEqual(absent.getResponse());
+    });
+
+    it('requestAccess: delegación ajena e inexistente responden exactamente igual', async () => {
+      const missing = build();
+      missing.delegatesRepo.findById.mockResolvedValue(null);
+      const absent = await thrown(
+        missing.service.requestAccess(
+          'del1',
+          { requestedPermissionId: 'p1' },
+          actor,
+        ),
+      );
+      const foreign = build();
+      foreign.setsRepo.findById.mockResolvedValue({
+        id: 'set9',
+        tenantId: 't2',
+        statusConceptId: STATUS.ACTIVE,
+      });
+      const other = await thrown(
+        foreign.service.requestAccess(
+          'del1',
+          { requestedPermissionId: 'p1' },
+          actor,
+        ),
+      );
+      expect(other.getStatus()).toBe(absent.getStatus());
+      expect(other.getResponse()).toEqual(absent.getResponse());
+    });
+
     it('decide: una solicitud de otra organización responde 404 uniforme aunque esté cerrada, sin grant ni evento', async () => {
       const d = build();
       d.setsRepo.findById.mockResolvedValue({
@@ -308,8 +381,7 @@ describe('AccessRequestsService', () => {
       );
       // Mismo 404 que una inexistente: no revela que el id existe (ni su estado).
       expect(err).toBeInstanceOf(ResourceNotFoundException);
-      expect(err.message).toBe(NOT_FOUND.message);
-      expect(err.reason).toBe(NOT_FOUND.reason);
+      expect(err.message).toBe('Solicitud no encontrada');
       expect(d.grantsRepo.create).not.toHaveBeenCalled();
       expect(d.eventsRepo.record).not.toHaveBeenCalled();
       expect(request.statusConceptId).toBe(DELEG.REQUEST_CLOSED);

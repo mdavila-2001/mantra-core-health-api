@@ -28,6 +28,10 @@ import {
   STATUS,
 } from './concept-maps';
 
+/** El 404 de una solicitud inexistente o ajena: idéntico en ambos casos. */
+const requestNotFound = (): ResourceNotFoundException =>
+  new ResourceNotFoundException('Solicitud no encontrada');
+
 /**
  * UC-29-04 (solicitar acceso delegado con aprobación previa) y UC-29-05
  * (aprobar/denegar y emitir grant scoped). Al aprobar, el grant se emite en la
@@ -165,19 +169,24 @@ export class AccessRequestsService {
     const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
       const request = await this.requestsRepo.findById(tx, requestId);
-      if (!request) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          requestId,
-        });
-      }
+      if (!request) throw requestNotFound();
       // El alcance se prueba ANTES de mirar el estado: una solicitud de otra
-      // organización responde como una inexistente (404 uniforme), nunca con su
-      // estado (un 412 «no está abierta» confirmaría que el id existe).
-      await this.scope.loadDelegationInTenant(
-        tx,
-        request.practitionerDelegateAssignmentId,
-        tenantId,
-      );
+      // organización responde como una inexistente (404 uniforme: mismo
+      // mensaje, mismo `reason`, sin `details`), nunca con su estado (un 412
+      // «no está abierta» confirmaría que el id existe) ni con el 404 de la
+      // delegación (que distinguiría «ajena» de «inexistente»).
+      try {
+        await this.scope.loadDelegationInTenant(
+          tx,
+          request.practitionerDelegateAssignmentId,
+          tenantId,
+        );
+      } catch (error) {
+        if (error instanceof ResourceNotFoundException) {
+          throw requestNotFound();
+        }
+        throw error;
+      }
       if (request.statusConceptId !== DELEG.REQUEST_OPEN) {
         throw new PreconditionFailedException('La solicitud no está abierta', {
           requestId,
