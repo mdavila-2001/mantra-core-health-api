@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { NotificationsService } from './notifications.service';
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
 import { NOTIFICATION_CATEGORY_CONCEPT } from '../notifications.contract';
 
 const actor = { id: 'user-1', roles: ['USER'] };
@@ -17,6 +17,8 @@ const CHANNEL = '11111111-1111-1111-1111-111111111111';
 const REQUEST = '33333333-3333-3333-3333-333333333333';
 const RECIPIENT = '44444444-4444-4444-4444-444444444444';
 const CONFIG = '66666666-6666-6666-6666-666666666666';
+const TENANT = '77777777-7777-7777-7777-777777777777';
+const OTHER_TENANT = '88888888-8888-8888-8888-888888888888';
 
 /**
  * Construye el servicio con un repositorio doblado y el canal in-app resuelto.
@@ -42,6 +44,7 @@ function build() {
     // se queda así, así que aquel criterio dejaba una conversación avisando una
     // sola vez en toda su historia. Lo encontró el journey funcional.
     findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+    listActiveTenantIds: mockFn(() => Promise.resolve([])),
     // Carril P9: el emisor lee todas las preferencias del canal y elige la
     // fila que corresponde, porque la ventana de silencio vive en la fila sin
     // categoría y la lectura por categoría no la encontraba nunca.
@@ -150,6 +153,106 @@ describe('NotificationsService · carril P1 (campana)', () => {
         .calls[0] as any[];
       expect(inApp.statusConceptId).toBe(CONCEPTS.INAPP_UNREAD);
       expect(inApp.notificationDeliveryId).toBe('delivery-1');
+    });
+
+    it("writes in the recipient's tenant when the caller does not declare one", async () => {
+      const d = build();
+      d.notificationsRepo.listActiveTenantIds.mockResolvedValue([OTHER_TENANT]);
+
+      await runWithTenant(TENANT, () =>
+        d.service.emitInApp({
+          recipientUserId: RECIPIENT,
+          category: 'MESSAGES',
+          subject: 'Ana le escribió',
+          destination: { type: 'CONVERSATION', id: 'conversation-1' },
+        }),
+      );
+
+      const [, request] = d.notificationsRepo.createNotificationRequest.mock
+        .calls[0] as any[];
+      const [, inApp] = d.notificationsRepo.createInAppNotification.mock
+        .calls[0] as any[];
+      expect(d.notificationsRepo.listActiveTenantIds).toHaveBeenCalledWith(
+        expect.anything(),
+        RECIPIENT,
+      );
+      expect(request.tenantId).toBe(OTHER_TENANT);
+      expect(inApp.tenantId).toBe(OTHER_TENANT);
+    });
+
+    it('keeps the tenant the caller declares over the request tenant', async () => {
+      const d = build();
+
+      await runWithTenant(TENANT, () =>
+        d.service.emitInApp({
+          recipientUserId: RECIPIENT,
+          tenantId: OTHER_TENANT,
+          category: 'CLINICAL',
+          subject: 'Su receta está lista',
+          destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+        }),
+      );
+
+      const [, request] = d.notificationsRepo.createNotificationRequest.mock
+        .calls[0] as any[];
+      const [, inApp] = d.notificationsRepo.createInAppNotification.mock
+        .calls[0] as any[];
+      expect(d.notificationsRepo.listActiveTenantIds).not.toHaveBeenCalled();
+      expect(request.tenantId).toBe(OTHER_TENANT);
+      expect(inApp.tenantId).toBe(OTHER_TENANT);
+    });
+
+    it('flushes the notice before the tenant scope comes back under RLS', async () => {
+      const previous = process.env.RLS_ENFORCE;
+      process.env.RLS_ENFORCE = 'true';
+      try {
+        const d = build();
+        const steps: string[] = [];
+        const tx: any = d.tx;
+        tx.isInTransaction = () => true;
+        tx.flush = mockFn(() => {
+          steps.push('flush');
+          return Promise.resolve();
+        });
+        tx.execute = mockFn((sql: string, params?: string[]) => {
+          if (sql.includes('current_setting')) {
+            return Promise.resolve([{ value: 'false' }]);
+          }
+          steps.push(`system_context=${params?.[0] ?? 'true'}`);
+          return Promise.resolve([]);
+        });
+
+        const res = await runWithTenant(TENANT, () =>
+          d.service.emitInApp({
+            recipientUserId: RECIPIENT,
+            category: 'MESSAGES',
+            subject: 'Ana le escribió',
+            destination: { type: 'CONVERSATION', id: 'conversation-1' },
+          }),
+        );
+
+        expect(res.inAppNotificationId).toBe('in-app-1');
+        expect(steps[0]).toBe('system_context=true');
+        expect(steps.slice(-2)).toEqual(['flush', 'system_context=false']);
+      } finally {
+        if (previous === undefined) delete process.env.RLS_ENFORCE;
+        else process.env.RLS_ENFORCE = previous;
+      }
+    });
+
+    it('leaves the tenant empty for an account with no tenant', async () => {
+      const d = build();
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Su receta está lista',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+
+      const [, request] = d.notificationsRepo.createNotificationRequest.mock
+        .calls[0] as any[];
+      expect(request.tenantId).toBeUndefined();
     });
 
     it('registra la solicitud pero no entrega nada cuando la preferencia la silencia', async () => {
@@ -423,6 +526,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
           }),
         ),
         findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+        listActiveTenantIds: mockFn(() => Promise.resolve([])),
         findPreferences: mockFn(() => Promise.resolve([])),
         createNotificationRequest: mockFn((_em: any, data: any) => ({
           id: REQUEST,
