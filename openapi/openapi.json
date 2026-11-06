@@ -132948,6 +132948,16 @@
             "type": "string",
             "description": "Código TOTP de la app autenticadora. Obligatorio cuando verify=true.",
             "example": "123456"
+          },
+          "currentPassword": {
+            "type": "string",
+            "description": "Contraseña actual (o `mfaCode`): obligatoria para dar de alta un factor propio",
+            "maxLength": 200
+          },
+          "mfaCode": {
+            "type": "string",
+            "description": "Código de un factor ya verificado (o `currentPassword`): reautentica el alta de un factor propio",
+            "example": "123456"
           }
         },
         "additionalProperties": false

@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Ip,
   Param,
   ParseUUIDPipe,
   Post,
@@ -436,8 +437,9 @@ export class IamUsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: MfaFactorDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Ip() ip: string,
   ): Promise<MfaFactorResponseDto> {
-    return this.mfaService.enrollOrVerify(id, dto, actor);
+    return this.mfaService.enrollOrVerify(id, dto, actor, ip);
   }
 
   /** UC-01-05. */

@@ -23,7 +23,8 @@ injected `em` is never used directly for a unit of work.
 | --- | --- |
 | `IamUsersService` | UC-01-01 create user, UC-01-07 lock, UC-01-10 global roles, UC-01-12 anonymize (DSAR). |
 | `IamCredentialsService` | UC-01-02 link federated credential, UC-01-09 revoke credential. |
-| `IamMfaService` | UC-01-03 enroll / verify MFA factor. |
+| `IamMfaService` | UC-01-03 enroll / verify MFA factor; enrolling your own requires re-authentication (`assertReauthenticated`). |
+| `IamTotpService` | One-time TOTP codes: last accepted time step per factor, per-user lock. |
 | `IamDevicesService` | UC-01-05 register device (optionally trusted). |
 | `IamAuthService` | UC-01-04 login, UC-01-06 refresh (reuse detection), UC-01-08 logout-all, UC-01-11 purge sessions. |
 
