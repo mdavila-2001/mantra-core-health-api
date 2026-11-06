@@ -33,6 +33,9 @@ export class OrgSupportStaffProvisioningController {
     entity: 'organization_user_assignment',
     entityId: 'result.linkId',
   })
+  // `@Roles()` vacío: sin rol global. Lo decide el servicio, que exige ser
+  // OWNER/ADMIN activo de la organización del contexto o tener
+  // SECURITY_ADMIN/SUPERADMIN válido en ella (uno acotado a otra no sirve).
   @Post('org/support-staff')
   @Roles()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -40,11 +43,6 @@ export class OrgSupportStaffProvisioningController {
   @ApiOperation({
     summary:
       'Crear cuenta de secretaria y vincularla a la organización de inmediato',
-    description:
-      '`@Roles()` vacío: sin rol global. Lo decide el servicio, que exige ser ' +
-      'OWNER/ADMIN activo de la organización del contexto o tener ' +
-      'SECURITY_ADMIN/SUPERADMIN válido en ella (un rol acotado a otra ' +
-      'organización no sirve).',
   })
   create(
     @Body() dto: CreateOrgSupportStaffDto,
