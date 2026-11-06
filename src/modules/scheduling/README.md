@@ -172,6 +172,41 @@ Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprue
 actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
 agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
+### El oficio se lee en la organización de la cita
+
+«Opera cualquier agenda» y «atiende» no son atributos globales del token: se evalúan en la
+organización del recurso (la de la cita, la agenda o la sede) con la misma regla que el `RolesGuard`
+(`scopedRoles`: un rol con ámbito rige solo donde se asignó; uno sin ámbito es global). El perfil
+profesional del token (`practitionerProfileId`) identifica a la persona, no su oficio en una clínica:
+solo cuenta junto con el rol `PRACTITIONER`/`CLINICIAN` en esa organización
+(`domain/booking/agenda-actors.ts`: `operatesAnyAgenda`, `attendsIn`, `isPatientActor`).
+
+Quién puede **cancelar o reprogramar** una cita (`BookingAccess.assertMayChangeBooking`) y quién
+puede **leerla** por id:
+
+| Actor, en la organización de la cita | Alcance |
+|---|---|
+| Mostrador / administración de agenda (`SCHEDULING_AGENT`, `SCHEDULING_ADMIN`) o `SUPERADMIN` | Cualquier cita de esa organización |
+| Profesional (`PRACTITIONER`/`CLINICIAN` con perfil profesional) | Las citas de su propia agenda, las de la que él es el paciente y las de quien representa |
+| Cuenta de paciente, o quien trae el rol de agenda o de profesional solo en otra organización | Únicamente las citas donde es titular o apoderado vigente |
+
+Cambios de comportamiento público (SEG V-1 / S1-A4), todos hacia 403 donde antes se respondía 2xx:
+
+- `POST /scheduling/bookings/:id/cancel` y `/reschedule`: un profesional ya no cancela ni mueve la
+  cita de un paciente que no es suyo ni de su agenda; antes bastaba el rol `PRACTITIONER` del
+  `@Roles`. El rechazo de una solicitud (`/reject`) usa el mismo camino de cancelación.
+- `GET /scheduling/bookings?patientProfileId=`: un profesional que lista por un paciente que no es
+  él ni su representado recibe solo las citas de su agenda (antes, todas las del paciente en la
+  organización). Con `resourceId` se mantiene la regla de siempre: solo su propia agenda. Si hubo
+  más filas que `limit`, `truncated` sigue en `true` aunque la página filtrada quede corta.
+- `GET /scheduling/bookings/:id`: un profesional lee también la cita donde él o su representado es
+  el paciente, además de las de su agenda.
+- Quien es mostrador, administración de agenda o `SUPERADMIN` con ámbito en otra organización pasa
+  a ser, en esta, una cuenta de paciente: operar, leer, listar por paciente, la lista de espera
+  (`/scheduling/waitlist`), las demoras (`/delay`), los horarios flexibles y las ofertas de servicio
+  exigen ser titular o apoderado. Un rol sin ámbito (global) se comporta como antes.
+- Sin organización indicada, un rol con ámbito falla cerrado (no cuenta como rol de agenda).
+
 ## Concurrency
 
 `FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa

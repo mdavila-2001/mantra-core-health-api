@@ -9,7 +9,7 @@
 # Módulo `scheduling`
 
 **Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/scheduling/README.md)
-· 8 controllers · 16 services · 8 repositories · 19 entidades · 10 DTO
+· 8 controllers · 16 services · 8 repositories · 19 entidades · 13 DTO
 
 ---
 
@@ -127,8 +127,10 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | POST | `/scheduling/internal/expire-holds` | Internal | `expireHolds` | SYSTEM, SYSTEM_WORKER |
 | POST | `/scheduling/internal/promote-waitlist/:slotId` | Internal | `promoteWaitlist` | SYSTEM, SYSTEM_WORKER |
 | GET | `/scheduling/internal/waitlist-candidates` | Internal | `listWaitlistCandidates` | SYSTEM, SYSTEM_WORKER |
+| GET | `/scheduling/my-resources` | Agenda | `listMine` | PRACTITIONER, SCHEDULING_ADMIN |
 | GET | `/scheduling/resources` | Agenda | `listResources` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
 | POST | `/scheduling/resources` | Scheduling | `createResource` | SCHEDULING_ADMIN, PRACTITIONER |
+| PATCH | `/scheduling/resources/:id` | Agenda | `updateResource` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/close-slots` | Scheduling | `closeSlots` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/delay` | Scheduling | `delayResource` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
 | GET | `/scheduling/resources/:id/exceptions` | Scheduling | `listExceptions` | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
@@ -156,7 +158,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
 no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 
-## Reglas de negocio
+## Business rules
 
 - **Anti-double-booking**: el slot se toma con `SELECT ... FOR UPDATE` antes de decrementar
   `remaining_capacity`; nunca baja de cero. Al llegar a cero el slot pasa a `held`/`booked`.
@@ -171,14 +173,56 @@ no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
   2000 slots por ejecución para no generar lotes inmanejables (se avisa por log).
 - **Promoción de lista de espera**: marca candidatos, **no reserva por ellos**. La cita la confirma
   el paciente por el flujo normal.
+- **Quién acepta una solicitud** (v4.2.88): una solicitud del paciente nace pendiente salvo que lo
+  reservado no exija aceptación. Lo dice la oferta del servicio si el cupo es de un servicio y, si
+  no, la agenda (`schedulable_resources.requires_approval`, que el profesional cambia con
+  `PATCH /scheduling/resources/:id`). Cuando no hace falta, la cita nace confirmada y
+  `FinishAutoConfirmedRequestUseCase` deja lo mismo que una aceptación: el asiento del historial que
+  dice que fue automática, las solicitudes desplazadas (REGLA 2) y los avisos. Rige para las
+  solicitudes nuevas.
 
-## Permisos
+## Permissions
 
 Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprueba **quién** es el
 actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
 agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
-## Concurrencia
+### El oficio se lee en la organización de la cita
+
+«Opera cualquier agenda» y «atiende» no son atributos globales del token: se evalúan en la
+organización del recurso (la de la cita, la agenda o la sede) con la misma regla que el `RolesGuard`
+(`scopedRoles`: un rol con ámbito rige solo donde se asignó; uno sin ámbito es global). El perfil
+profesional del token (`practitionerProfileId`) identifica a la persona, no su oficio en una clínica:
+solo cuenta junto con el rol `PRACTITIONER`/`CLINICIAN` en esa organización
+(`domain/booking/agenda-actors.ts`: `operatesAnyAgenda`, `attendsIn`, `isPatientActor`).
+
+Quién puede **cancelar o reprogramar** una cita (`BookingAccess.assertMayChangeBooking`) y quién
+puede **leerla** por id:
+
+| Actor, en la organización de la cita | Alcance |
+|---|---|
+| Mostrador / administración de agenda (`SCHEDULING_AGENT`, `SCHEDULING_ADMIN`) o `SUPERADMIN` | Cualquier cita de esa organización |
+| Profesional (`PRACTITIONER`/`CLINICIAN` con perfil profesional) | Las citas de su propia agenda, las de la que él es el paciente y las de quien representa |
+| Cuenta de paciente, o quien trae el rol de agenda o de profesional solo en otra organización | Únicamente las citas donde es titular o apoderado vigente |
+
+Cambios de comportamiento público (SEG V-1 / S1-A4), todos hacia 403 donde antes se respondía 2xx:
+
+- `POST /scheduling/bookings/:id/cancel` y `/reschedule`: un profesional ya no cancela ni mueve la
+  cita de un paciente que no es suyo ni de su agenda; antes bastaba el rol `PRACTITIONER` del
+  `@Roles`. El rechazo de una solicitud (`/reject`) usa el mismo camino de cancelación.
+- `GET /scheduling/bookings?patientProfileId=`: un profesional que lista por un paciente que no es
+  él ni su representado recibe solo las citas de su agenda (antes, todas las del paciente en la
+  organización). Con `resourceId` se mantiene la regla de siempre: solo su propia agenda. Si hubo
+  más filas que `limit`, `truncated` sigue en `true` aunque la página filtrada quede corta.
+- `GET /scheduling/bookings/:id`: un profesional lee también la cita donde él o su representado es
+  el paciente, además de las de su agenda.
+- Quien es mostrador, administración de agenda o `SUPERADMIN` con ámbito en otra organización pasa
+  a ser, en esta, una cuenta de paciente: operar, leer, listar por paciente, la lista de espera
+  (`/scheduling/waitlist`), las demoras (`/delay`), los horarios flexibles y las ofertas de servicio
+  exigen ser titular o apoderado. Un rol sin ámbito (global) se comporta como antes.
+- Sin organización indicada, un rol con ámbito falla cerrado (no cuenta como rol de agenda).
+
+## Concurrency
 
 `FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa
 `FOR UPDATE SKIP LOCKED`. `row_version` da bloqueo optimista automático.
@@ -188,7 +232,7 @@ agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional d
 `operation: 'scheduling.<área>.<acción>'`. Se registran ids y contadores, nunca el `holdToken`
 ni datos personales del paciente. El contexto del logger es ahora el de cada caso de uso.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test --maxWorkers=1 --testPathPatterns 'src/modules/scheduling' 'src/architecture'
@@ -207,7 +251,7 @@ tenants ni nada contra una base real.
 - Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
   `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
-## Límites de la estructura
+## Structural boundaries
 
 - `application/` usa las entidades generadas y los repositorios propios como puerto de
   persistencia (decisión A3: única excepción de capas, declarada en el spec de arquitectura).

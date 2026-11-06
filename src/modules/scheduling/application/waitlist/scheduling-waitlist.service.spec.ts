@@ -10,7 +10,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingWaitlistService } from './scheduling-waitlist.service';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS, runWithTenant } from '../../../../common';
 
 const SLOT_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -649,6 +649,67 @@ describe('SchedulingWaitlistService', () => {
           intruder,
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
+  /**
+   * SEG S1-A4 · el rol de agenda se lee en la organización activa: un
+   * mostrador de OTRA organización no ve la cola de pacientes de esta.
+   */
+  describe('el oficio de agenda se lee en la organización activa', () => {
+    const TENANT_A = 'tenant-a';
+    const TENANT_B = 'tenant-b';
+    /** Mostrador de B que además trae cuenta de paciente. */
+    const deskOfB = {
+      id: 'user-mostrador-b',
+      roles: ['PATIENT', 'SCHEDULING_AGENT'],
+      scopedRoles: { [TENANT_B]: ['SCHEDULING_AGENT'] },
+      patientProfileId: 'pat-propio',
+    } as any;
+
+    it('el mostrador de otra organización no lee la cola de un paciente ajeno', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT_A, () =>
+          d.service.listForPatient({ patientProfileId: 'pat-ajeno' }, deskOfB),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.reader.findEntriesForPatient).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de otra organización no anota a un paciente ajeno', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT_A, () =>
+          d.service.enroll(
+            { tenantId: TENANT_A, patientProfileId: 'pat-ajeno' } as any,
+            deskOfB,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.writer.enroll).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de otra organización no ve quién espera una agenda de esta', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT_A, () =>
+          d.service.listForResource('res-1', {}, deskOfB),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.reader.findEntriesForResource).not.toHaveBeenCalled();
+    });
+
+    it('en su propia organización el mostrador sigue viendo cualquier cola', async () => {
+      const d = build();
+
+      await runWithTenant(TENANT_B, () =>
+        d.service.listForPatient({ patientProfileId: 'pat-ajeno' }, deskOfB),
+      );
+
+      expect(d.reader.findEntriesForPatient).toHaveBeenCalled();
     });
   });
 });

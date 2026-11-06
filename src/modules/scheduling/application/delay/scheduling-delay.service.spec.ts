@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingDelayService } from './scheduling-delay.service';
 import { SCHED } from '../../domain/scheduling.concepts';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS, runWithTenant } from '../../../../common';
 import { AuditBookingHistoryAdapter } from '../../infrastructure/adapters/audit-booking-history.adapter';
 
 const BOOKING = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -245,6 +245,48 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
 
       expect(result).toMatchObject({ affected: 2, notified: 1 });
       expect(result.detail).toMatch(/1 pacientes recibieron el aviso/);
+    });
+  });
+  /**
+   * SEG S1-A4 · el rol de agenda se lee en la organización activa: ser
+   * mostrador de otra organización no autoriza a avisar demoras en esta.
+   */
+  describe('el oficio de agenda se lee en la organización activa', () => {
+    const deskOfB = {
+      id: 'user-mostrador-b',
+      roles: ['PATIENT', 'SCHEDULING_AGENT'],
+      scopedRoles: { 'tenant-b': ['SCHEDULING_AGENT'] },
+    } as any;
+
+    it('el mostrador de otra organización no avisa la demora de una cita de esta', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant('tenant-a', () =>
+          d.service.delayBooking(BOOKING, { delayMinutes: 10 }, deskOfB),
+        ),
+      ).rejects.toThrow(/otro profesional/i);
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de otra organización no avisa la demora de una agenda de esta', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant('tenant-a', () =>
+          d.service.delayResource(RESOURCE, { delayMinutes: 10 }, deskOfB),
+        ),
+      ).rejects.toThrow(/otro profesional/i);
+    });
+
+    it('en su propia organización sí avisa', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant('tenant-b', () =>
+          d.service.delayBooking(BOOKING, { delayMinutes: 10 }, deskOfB),
+        ),
+      ).resolves.toMatchObject({ affected: 1 });
     });
   });
 });
