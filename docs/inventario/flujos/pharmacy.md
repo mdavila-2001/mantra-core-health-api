@@ -32,7 +32,7 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 | `UC-24-04` | Publicar producto con identificadores (GTIN/NDC) | POST /pharmacies/{pharmacyId}/products | SECURITY_ADMIN · PHARMACY_STAFF | ALTO | 20 |
 | `UC-24-05` | Crear lista de precios (pública / por aseguradora) | POST /pharmacies/{pharmacyId}/price-lists | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-06` | Fijar/versionar precio | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 5 |
-| `UC-24-07` | Establecer conexión de integración | POST /pharmacies/{pharmacyId}/integration-connections | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 2 |
+| `UC-24-07` | Establecer conexión de integración | POST /pharmacies/{pharmacyId}/integration-connections | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
 | `UC-24-08` | Mapear producto a código externo | POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-09` | Retirar (soft-delete) producto en cascada | DELETE /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 6 |
 | `UC-24-10` | Cerrar/expirar lista de precios | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
@@ -50,7 +50,7 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 |  |  | GET /pharmacies/{pharmacyId}/opening-hours | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 3 |
 |  |  | POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 |  |  | PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
-| `ctrl:PharmacyPublicController` | Operaciones de PharmacyPublicController que el README no asigna a un caso de uso | GET /public/medications | Público (sin sesión) | BAJO | 9 |
+| `ctrl:PharmacyPublicController` | Operaciones de PharmacyPublicController que el README no asigna a un caso de uso | GET /public/medications | Público (sin sesión) | BAJO | 12 |
 |  |  | GET /public/medications/{conceptId}/availability | Público (sin sesión) | BAJO | 9 |
 |  |  | GET /public/pharmacies/open-now | Público (sin sesión) | BAJO | 6 |
 | `ctrl:PharmacyReadController` | Operaciones de PharmacyReadController que el README no asigna a un caso de uso | GET /pharmacy/catalog-products | Cualquier sesión válida | BAJO | 4 |
@@ -181,6 +181,7 @@ flowchart LR
   o25 -->|"LEE"| t10
   a2 --> o27
   o27 -->|"CREA"| t28
+  o27 -->|"LEE"| t28
   o27 -->|"LEE"| t16
   a2 --> o29
   o29 -->|"CREA"| t6
@@ -256,7 +257,7 @@ flowchart LR
     o16["POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts"]:::op
     o17["PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h"]:::op
   end
-  t25[("+3 tablas más")]
+  t25[("+6 tablas más")]
   t27[("+3 tablas más")]
   subgraph s1["ctrl:PharmacyPublicController · Operaciones de PharmacyPublicController que el…"]
     o18["GET /public/medications"]:::op
@@ -708,6 +709,7 @@ Establecer conexión de integración externa
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La sucursal ya tiene una conexión de stock activa / La farmacia ya tiene una conexión general de stock activa |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -730,13 +732,24 @@ flowchart TD
   n7 -->|"sí"| n8
   n9[("LEE pharmacy.pharmacy_sites")]:::efecto
   n8 --> n9
-  n10["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
+  n10{"dto.supportsStockQuery === true"}:::decision
   n9 --> n10
   n7 -->|"no"| n10
-  n11[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
-  n10 --> n11
-  n12(("201 Responde con éxito")):::ok
+  n11["Llama a PharmacyIntegrationConnectionsRepository.findActiveStockInScope"]:::llamada
+  n10 -->|"sí"| n11
+  n12[("LEE pharmacy.pharmacy_integration_connections")]:::efecto
   n11 --> n12
+  n13{"taken.length › 0"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT La sucursal ya tiene una conexión de stock activa / La farmacia ya tiene una conexión general de…"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
+  n13 -->|"no"| n15
+  n10 -->|"no"| n15
+  n16[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
+  n15 --> n16
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2474,30 +2487,26 @@ flowchart TD
   n31 --> n32
   n33[("LEE pharmacy.pharmacies")]:::efecto
   n32 --> n33
-  n34["Llama a PharmacyReadRepository.findActiveProducts"]:::llamada
+  n34["Llama a PharmacyReadService.toCatalogDtos"]:::llamada
   n33 --> n34
-  n35[("LEE pharmacy.pharmacy_products")]:::efecto
+  n35["Llama a PharmacyReadRepository.findConcepts"]:::llamada
   n34 --> n35
-  n36["Llama a PharmacyReadService.toCatalogDtos"]:::llamada
+  n36[("LEE terminology.catalog_concepts")]:::efecto
   n35 --> n36
-  n37["Llama a PharmacyReadRepository.findConcepts"]:::llamada
+  n37["Llama a PharmacyCatalogRepository.findCurrentPrices"]:::llamada
   n36 --> n37
-  n38[("LEE terminology.catalog_concepts")]:::efecto
+  n38[("LEE pharmacy.pharmacy_product_prices · LEE pharmacy.pharmacy_price_lists · LEE terminology.catalog_concepts")]:::efecto
   n37 --> n38
-  n39["Llama a PharmacyCatalogRepository.findCurrentPrices"]:::llamada
+  n39["Llama a PharmacyCatalogRepository.findCategoriesByIds"]:::llamada
   n38 --> n39
-  n40[("LEE pharmacy.pharmacy_product_prices · LEE pharmacy.pharmacy_price_lists · LEE terminology.catalog_concepts")]:::efecto
+  n40[("LEE pharmacy.pharmacy_product_categories")]:::efecto
   n39 --> n40
-  n41["Llama a PharmacyCatalogRepository.findCategoriesByIds"]:::llamada
+  n41["Llama a PharmacyCatalogRepository.findImageFileIds"]:::llamada
   n40 --> n41
-  n42[("LEE pharmacy.pharmacy_product_categories")]:::efecto
+  n42[("LEE pharmacy.pharmacy_product_images")]:::efecto
   n41 --> n42
-  n43["Llama a PharmacyCatalogRepository.findImageFileIds"]:::llamada
+  n43(("200 Responde con éxito")):::ok
   n42 --> n43
-  n44[("LEE pharmacy.pharmacy_product_images")]:::efecto
-  n43 --> n44
-  n45(("200 Responde con éxito")):::ok
-  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2715,4 +2724,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | 200, 400, 401, 403, 429 | 4 |
 | GET /pharmacy/catalog-products | 200, 401, 403, 429 | 4 |
 | GET /pharmacy/pharmacies | 200, 401, 403, 429 | 4 |
-| GET /public/medications | 200, 401, 429 | 9 |
+| GET /public/medications | 200, 401, 429 | 12 |

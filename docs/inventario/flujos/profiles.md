@@ -3,12 +3,12 @@
 # Flujos del módulo `profiles`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 85 (70 con decisiones propias, 15 sin ellas)
+- **Operaciones:** 86 (68 con decisiones propias, 18 sin ellas)
 - Inventario de endpoints del módulo: [profiles](../endpoints/profiles.md)
 
 ## Proceso: Profiles Module (05)
 
-- **Código:** `profiles` · **Agrupación:** MIXTO · **Operaciones:** 85
+- **Código:** `profiles` · **Agrupación:** MIXTO · **Operaciones:** 86
 - **Actores:** ADMISSIONS_APPROVER · ADMISSIONS_REVIEWER · CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SUPERADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/profiles/README.md`
@@ -24,31 +24,32 @@ _Fuente: `src/modules/profiles/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `H4 §C` | Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI masked) | GET /profiles/patients/me/dependent-candidates | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 16 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 15 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 14 |
+|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 14 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 13 |
 |  |  | GET /profiles/patients/me/dependent-requests/incoming | Cualquier sesión válida | BAJO | 4 |
-|  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 6 |
+|  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 0 |
 | `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | BAJO | 16 |
 |  |  | PUT /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | BAJO | 16 |
 | `ctrl:AdmissionsController` | Operaciones de AdmissionsController que el README no asigna a un caso de uso | DESCONOCIDO /admissions | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /admissions | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 17 |
 |  |  | GET /admissions/{id} | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 18 |
-|  |  | POST /admissions/{id}/claim | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 40 |
-|  |  | POST /admissions/{id}/decision | ADMISSIONS_APPROVER · SECURITY_ADMIN | ALTO | 50 |
+|  |  | POST /admissions/{id}/claim | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 39 |
+|  |  | POST /admissions/{id}/decision | ADMISSIONS_APPROVER · SECURITY_ADMIN | ALTO | 49 |
 |  |  | GET /admissions/{id}/documents/{fileId}/content | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 12 |
 |  |  | POST /admissions/{id}/documents/{fileId}/download-url | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 12 |
 |  |  | POST /admissions/{id}/items/{itemId}/review | ADMISSIONS_REVIEWER · SECURITY_ADMIN | MEDIO | 20 |
 |  |  | POST /admissions/{id}/reassign | ADMISSIONS_APPROVER · SECURITY_ADMIN | ALTO | 27 |
-|  |  | POST /admissions/{id}/reinstate | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 44 |
+|  |  | POST /admissions/{id}/reinstate | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 43 |
 |  |  | POST /admissions/{id}/release | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 20 |
-|  |  | POST /admissions/{id}/request-info | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 40 |
-|  |  | POST /admissions/{id}/suspend | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 40 |
-|  |  | POST /admissions/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 25 |
+|  |  | POST /admissions/{id}/request-info | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 39 |
+|  |  | POST /admissions/{id}/suspend | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 39 |
+|  |  | POST /admissions/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 24 |
 |  |  | POST /admissions/search | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 17 |
 | `ctrl:OwnAdmissionController` | Operaciones de OwnAdmissionController que el README no asigna a un caso de uso | GET /profiles/practitioners/me/admission | Cualquier sesión válida | BAJO | 16 |
-|  |  | POST /profiles/practitioners/me/admission/resubmit | Cualquier sesión válida | ALTO | 38 |
-|  |  | POST /profiles/practitioners/me/admission/withdraw | Cualquier sesión válida | ALTO | 32 |
+|  |  | POST /profiles/practitioners/me/admission/resubmit | Cualquier sesión válida | ALTO | 37 |
+|  |  | POST /profiles/practitioners/me/admission/submit | Cualquier sesión válida | ALTO | 37 |
+|  |  | POST /profiles/practitioners/me/admission/withdraw | Cualquier sesión válida | ALTO | 31 |
 | `ctrl:PatientAddressBookController` | Operaciones de PatientAddressBookController que el README no asigna a un caso de uso | GET /profiles/patients/me/addresses | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /profiles/patients/me/addresses | Cualquier sesión válida | BAJO | 3 |
 |  |  | DELETE /profiles/patients/me/addresses/{id} | Cualquier sesión válida | ALTO | 4 |
@@ -60,7 +61,7 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | GET /profiles/patients/me/primary-practitioner | Cualquier sesión válida | BAJO | 4 |
 |  |  | PUT /profiles/patients/me/primary-practitioner | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /profiles/practitioners/me/primary-patients | Cualquier sesión válida | BAJO | 5 |
-| `ctrl:ProfilesPatientsController` | Operaciones de ProfilesPatientsController que el README no asigna a un caso de uso | GET /profiles/patients | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 6 |
+| `ctrl:ProfilesPatientsController` | Operaciones de ProfilesPatientsController que el README no asigna a un caso de uso | GET /profiles/patients | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 0 |
 |  |  | POST /profiles/patients | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /profiles/patients/{profileId} | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | BAJO | 3 |
 |  |  | POST /profiles/patients/{profileId}/identity-links | SECURITY_ADMIN | MEDIO | 5 |
@@ -73,7 +74,7 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | DELETE /profiles/patients/me/photo | Cualquier sesión válida | BAJO | 14 |
 |  |  | PUT /profiles/patients/me/photo | Cualquier sesión válida | BAJO | 16 |
 |  |  | GET /profiles/patients/me/summary | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /profiles/patients/merge | SECURITY_ADMIN | MEDIO | 8 |
+|  |  | POST /profiles/patients/merge | SECURITY_ADMIN | BAJO | 0 |
 |  |  | GET /profiles/patients/merge-events | SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /profiles/patients/merge/{eventId}/reverse | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | POST /profiles/persons/{personId}/account-links | SECURITY_ADMIN | MEDIO | 3 |
@@ -83,13 +84,13 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | GET /profiles/practitioners | Cualquier sesión válida | BAJO | 12 |
 |  |  | POST /profiles/practitioners | SECURITY_ADMIN | ALTO | 35 |
 |  |  | PATCH /profiles/practitioners/{profileId} | Cualquier sesión válida | ALTO | 27 |
-|  |  | POST /profiles/practitioners/{profileId}/affiliations | SECURITY_ADMIN | MEDIO | 25 |
+|  |  | POST /profiles/practitioners/{profileId}/affiliations | SECURITY_ADMIN | MEDIO | 24 |
 |  |  | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | Cualquier sesión válida | ALTO | 5 |
 |  |  | POST /profiles/practitioners/{profileId}/specialties | Cualquier sesión válida | ALTO | 9 |
 |  |  | GET /profiles/practitioners/{profileId}/summary | Cualquier sesión válida | BAJO | 16 |
 |  |  | PATCH /profiles/practitioners/me | Cualquier sesión válida | ALTO | 27 |
 |  |  | GET /profiles/practitioners/me/affiliations | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 25 |
+|  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 24 |
 |  |  | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /profiles/practitioners/me/credentials | Cualquier sesión válida | BAJO | 0 |
@@ -105,9 +106,9 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 16 |
 |  |  | GET /profiles/practitioners/specialty-counts | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 19 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 19 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 19 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 18 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 18 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 18 |
 
 ### Diagrama 1 de 5 — etapas `H4 §C`, `P5 §3`, `ctrl:AdmissionsController`…
 
@@ -115,41 +116,38 @@ _Fuente: `src/modules/profiles/README.md:3`_
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a20(["SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER"]):::actor
-  a36(["ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
-  a45(["ADMISSIONS_REVIEWER · SECURITY_ADMIN"]):::actor
-  a48(["ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
-  a71(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a33(["ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
+  a42(["ADMISSIONS_REVIEWER · SECURITY_ADMIN"]):::actor
+  a45(["ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
+  a68(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("common.identifiers")]:::tabla
   t4[("profiles.patient_portal_proxies")]:::tabla
   t5[("profiles.patient_profiles")]:::tabla
   t6[("profiles.person_account_links")]:::tabla
   t7[("profiles.persons")]:::tabla
-  t9[("iam.devices")]:::tabla
-  t10[("messaging.in_app_notifications")]:::tabla
-  t11[("messaging.message_channels")]:::tabla
-  t14[("messaging.messaging_providers")]:::tabla
-  t21[("terminology.value_set_members")]:::tabla
-  t22[("terminology.value_set_versions")]:::tabla
-  t23[("terminology.value_sets")]:::tabla
-  t25[("chart.clinical_note_headers")]:::tabla
-  t26[("chart.document_records")]:::tabla
-  t27[("clinical.encounters")]:::tabla
-  t28[("clinical.medication_requests")]:::tabla
-  t29[("common.addresses")]:::tabla
-  t30[("common.contact_points")]:::tabla
-  t37[("common.file_versions")]:::tabla
-  t38[("common.files")]:::tabla
-  t39[("iam.users")]:::tabla
-  t40[("practice.practice_sites")]:::tabla
-  t49[("audit.verified_badges_history")]:::tabla
-  t50[("authz.roles")]:::tabla
-  t51[("authz.user_role_assignments")]:::tabla
-  t54[("practice.practitioner_role_assignments")]:::tabla
-  t72[("community.public_profiles")]:::tabla
-  t73[("community.verified_badges")]:::tabla
-  t12[("+10 tablas más")]
-  t15[("+9 tablas más")]
-  t17[("+8 tablas más")]
+  t9[("messaging.in_app_notifications")]:::tabla
+  t10[("messaging.message_channels")]:::tabla
+  t11[("messaging.messaging_providers")]:::tabla
+  t14[("messaging.notification_deliveries")]:::tabla
+  t22[("chart.clinical_note_headers")]:::tabla
+  t23[("chart.document_records")]:::tabla
+  t24[("clinical.encounters")]:::tabla
+  t25[("clinical.medication_requests")]:::tabla
+  t26[("common.addresses")]:::tabla
+  t27[("common.contact_points")]:::tabla
+  t34[("common.file_versions")]:::tabla
+  t35[("common.files")]:::tabla
+  t36[("iam.users")]:::tabla
+  t37[("practice.practice_sites")]:::tabla
+  t46[("audit.verified_badges_history")]:::tabla
+  t47[("authz.roles")]:::tabla
+  t48[("authz.user_role_assignments")]:::tabla
+  t51[("practice.practitioner_role_assignments")]:::tabla
+  t69[("community.public_profiles")]:::tabla
+  t70[("community.verified_badges")]:::tabla
+  t12[("+9 tablas más")]
+  t15[("+8 tablas más")]
+  t17[("+7 tablas más")]
   subgraph s0["H4 §C · Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI…"]
     o1["GET /profiles/patients/me/dependent-candidates"]:::op
     o8["POST /profiles/patients/me/dependent-requests"]:::op
@@ -158,50 +156,52 @@ flowchart LR
     o18["GET /profiles/patients/me/dependent-requests/incoming"]:::op
     o19["POST /profiles/patients/search"]:::op
   end
-  t31[("+10 tablas más")]
-  t33[("+10 tablas más")]
+  t28[("+10 tablas más")]
+  t30[("+10 tablas más")]
   subgraph s1["P5 §3 · Clear the practitioner profile photo (the file is not deleted)"]
-    o24["DELETE /profiles/practitioners/{profileId}/photo"]:::op
-    o32["PUT /profiles/practitioners/{profileId}/photo"]:::op
+    o21["DELETE /profiles/practitioners/{profileId}/photo"]:::op
+    o29["PUT /profiles/practitioners/{profileId}/photo"]:::op
   end
-  t41[("+11 tablas más")]
-  t43[("+12 tablas más")]
-  t46[("+34 tablas más")]
-  t52[("+44 tablas más")]
-  t55[("+6 tablas más")]
-  t57[("+6 tablas más")]
-  t59[("+14 tablas más")]
-  t61[("+21 tablas más")]
-  t63[("+38 tablas más")]
-  t65[("+14 tablas más")]
-  t67[("+34 tablas más")]
-  t69[("+34 tablas más")]
-  t74[("+19 tablas más")]
-  t76[("+11 tablas más")]
+  t38[("+11 tablas más")]
+  t40[("+12 tablas más")]
+  t43[("+33 tablas más")]
+  t49[("+43 tablas más")]
+  t52[("+6 tablas más")]
+  t54[("+6 tablas más")]
+  t56[("+14 tablas más")]
+  t58[("+21 tablas más")]
+  t60[("+37 tablas más")]
+  t62[("+14 tablas más")]
+  t64[("+33 tablas más")]
+  t66[("+33 tablas más")]
+  t71[("+18 tablas más")]
+  t73[("+11 tablas más")]
   subgraph s2["ctrl:AdmissionsController · Operaciones de AdmissionsController que el README n…"]
-    o34["DESCONOCIDO /admissions"]:::op
-    o35["GET /admissions"]:::op
-    o42["GET /admissions/{id}"]:::op
-    o44["POST /admissions/{id}/claim"]:::op
-    o47["POST /admissions/{id}/decision"]:::op
-    o53["GET /admissions/{id}/documents/{fileId}/content"]:::op
-    o56["POST /admissions/{id}/documents/{fileId}/download-url"]:::op
-    o58["POST /admissions/{id}/items/{itemId}/review"]:::op
-    o60["POST /admissions/{id}/reassign"]:::op
-    o62["POST /admissions/{id}/reinstate"]:::op
-    o64["POST /admissions/{id}/release"]:::op
-    o66["POST /admissions/{id}/request-info"]:::op
-    o68["POST /admissions/{id}/suspend"]:::op
-    o70["POST /admissions/expire-sweep"]:::op
-    o75["POST /admissions/search"]:::op
+    o31["DESCONOCIDO /admissions"]:::op
+    o32["GET /admissions"]:::op
+    o39["GET /admissions/{id}"]:::op
+    o41["POST /admissions/{id}/claim"]:::op
+    o44["POST /admissions/{id}/decision"]:::op
+    o50["GET /admissions/{id}/documents/{fileId}/content"]:::op
+    o53["POST /admissions/{id}/documents/{fileId}/download-url"]:::op
+    o55["POST /admissions/{id}/items/{itemId}/review"]:::op
+    o57["POST /admissions/{id}/reassign"]:::op
+    o59["POST /admissions/{id}/reinstate"]:::op
+    o61["POST /admissions/{id}/release"]:::op
+    o63["POST /admissions/{id}/request-info"]:::op
+    o65["POST /admissions/{id}/suspend"]:::op
+    o67["POST /admissions/expire-sweep"]:::op
+    o72["POST /admissions/search"]:::op
   end
-  t78[("+10 tablas más")]
-  t80[("+32 tablas más")]
-  t82[("+26 tablas más")]
+  t75[("+10 tablas más")]
+  t77[("+31 tablas más")]
+  t79[("+31 tablas más")]
+  t81[("+25 tablas más")]
   subgraph s3["ctrl:OwnAdmissionController · Operaciones de OwnAdmissionController que el READ…"]
-    o77["GET /profiles/practitioners/me/admission"]:::op
-    o79["POST /profiles/practitioners/me/admission/resubmit"]:::op
-    o81["POST /profiles/practitioners/me/admission/withdraw"]:::op
+    o74["GET /profiles/practitioners/me/admission"]:::op
+    o76["POST /profiles/practitioners/me/admission/resubmit"]:::op
+    o78["POST /profiles/practitioners/me/admission/submit"]:::op
+    o80["POST /profiles/practitioners/me/admission/withdraw"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -212,26 +212,26 @@ flowchart LR
   a2 --> o8
   o8 -->|"LEE"| t3
   o8 -->|"ACTUALIZA"| t9
+  o8 -->|"CREA"| t9
   o8 -->|"LEE"| t9
-  o8 -->|"CREA"| t10
   o8 -->|"LEE"| t10
   o8 -->|"LEE"| t11
   o8 -.-> t12
   a2 --> o13
   o13 -->|"ACTUALIZA"| t9
+  o13 -->|"CREA"| t9
   o13 -->|"LEE"| t9
-  o13 -->|"CREA"| t10
   o13 -->|"LEE"| t10
   o13 -->|"LEE"| t11
-  o13 -->|"LEE"| t14
+  o13 -->|"CREA"| t14
   o13 -.-> t15
   a2 --> o16
   o16 -->|"ACTUALIZA"| t9
+  o16 -->|"CREA"| t9
   o16 -->|"LEE"| t9
-  o16 -->|"CREA"| t10
   o16 -->|"LEE"| t10
   o16 -->|"LEE"| t11
-  o16 -->|"LEE"| t14
+  o16 -->|"CREA"| t14
   o16 -.-> t17
   a2 --> o18
   o18 -->|"LEE"| t4
@@ -239,165 +239,167 @@ flowchart LR
   o18 -->|"LEE"| t6
   o18 -->|"LEE"| t7
   a20 --> o19
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t5
-  o19 -->|"LEE"| t7
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -->|"LEE"| t23
-  a2 --> o24
-  o24 -->|"LEE"| t25
-  o24 -->|"LEE"| t26
-  o24 -->|"LEE"| t27
-  o24 -->|"LEE"| t28
-  o24 -->|"LEE"| t29
-  o24 -->|"LEE"| t30
-  o24 -.-> t31
-  a2 --> o32
-  o32 -->|"LEE"| t25
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t24
+  o21 -->|"LEE"| t25
+  o21 -->|"LEE"| t26
+  o21 -->|"LEE"| t27
+  o21 -.-> t28
+  a2 --> o29
+  o29 -->|"LEE"| t22
+  o29 -->|"LEE"| t23
+  o29 -->|"LEE"| t24
+  o29 -->|"LEE"| t25
+  o29 -->|"LEE"| t26
+  o29 -->|"LEE"| t27
+  o29 -.-> t30
+  a2 --> o31
+  a33 --> o32
   o32 -->|"LEE"| t26
-  o32 -->|"LEE"| t27
-  o32 -->|"LEE"| t28
-  o32 -->|"LEE"| t29
-  o32 -->|"LEE"| t30
-  o32 -.-> t33
-  a2 --> o34
-  a36 --> o35
-  o35 -->|"LEE"| t29
-  o35 -->|"LEE"| t37
-  o35 -->|"LEE"| t38
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t39
-  o35 -->|"LEE"| t40
-  o35 -.-> t41
-  a36 --> o42
-  o42 -->|"LEE"| t29
-  o42 -->|"LEE"| t30
-  o42 -->|"LEE"| t37
-  o42 -->|"LEE"| t38
-  o42 -->|"LEE"| t3
-  o42 -->|"LEE"| t39
-  o42 -.-> t43
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t35
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t36
+  o32 -->|"LEE"| t37
+  o32 -.-> t38
+  a33 --> o39
+  o39 -->|"LEE"| t26
+  o39 -->|"LEE"| t27
+  o39 -->|"LEE"| t34
+  o39 -->|"LEE"| t35
+  o39 -->|"LEE"| t3
+  o39 -->|"LEE"| t36
+  o39 -.-> t40
+  a42 --> o41
+  o41 -->|"LEE"| t26
+  o41 -->|"LEE"| t27
+  o41 -->|"LEE"| t34
+  o41 -->|"LEE"| t35
+  o41 -->|"LEE"| t3
+  o41 -->|"LEE"| t36
+  o41 -.-> t43
   a45 --> o44
-  o44 -->|"LEE"| t29
-  o44 -->|"LEE"| t30
-  o44 -->|"LEE"| t37
-  o44 -->|"LEE"| t38
-  o44 -->|"LEE"| t3
-  o44 -->|"ACTUALIZA"| t9
-  o44 -.-> t46
-  a48 --> o47
-  o47 -->|"CREA"| t49
-  o47 -->|"LEE"| t50
-  o47 -->|"CREA"| t51
-  o47 -->|"LEE"| t51
-  o47 -->|"LEE"| t29
-  o47 -->|"LEE"| t30
-  o47 -.-> t52
-  a36 --> o53
-  o53 -->|"LEE"| t29
-  o53 -->|"LEE"| t37
-  o53 -->|"LEE"| t38
+  o44 -->|"CREA"| t46
+  o44 -->|"LEE"| t47
+  o44 -->|"CREA"| t48
+  o44 -->|"LEE"| t48
+  o44 -->|"LEE"| t26
+  o44 -->|"LEE"| t27
+  o44 -.-> t49
+  a33 --> o50
+  o50 -->|"LEE"| t26
+  o50 -->|"LEE"| t34
+  o50 -->|"LEE"| t35
+  o50 -->|"LEE"| t3
+  o50 -->|"LEE"| t37
+  o50 -->|"LEE"| t51
+  o50 -.-> t52
+  a33 --> o53
+  o53 -->|"LEE"| t26
+  o53 -->|"LEE"| t34
+  o53 -->|"LEE"| t35
   o53 -->|"LEE"| t3
-  o53 -->|"LEE"| t40
-  o53 -->|"LEE"| t54
-  o53 -.-> t55
-  a36 --> o56
-  o56 -->|"LEE"| t29
-  o56 -->|"LEE"| t37
-  o56 -->|"LEE"| t38
-  o56 -->|"LEE"| t3
-  o56 -->|"LEE"| t40
-  o56 -->|"LEE"| t54
-  o56 -.-> t57
-  a45 --> o58
-  o58 -->|"LEE"| t29
-  o58 -->|"LEE"| t30
-  o58 -->|"LEE"| t37
-  o58 -->|"LEE"| t38
-  o58 -->|"LEE"| t3
-  o58 -->|"LEE"| t39
-  o58 -.-> t59
-  a48 --> o60
-  o60 -->|"LEE"| t29
-  o60 -->|"LEE"| t30
-  o60 -->|"LEE"| t37
-  o60 -->|"LEE"| t38
-  o60 -->|"LEE"| t3
-  o60 -->|"LEE"| t39
-  o60 -.-> t61
-  a48 --> o62
-  o62 -->|"CREA"| t49
-  o62 -->|"LEE"| t50
-  o62 -->|"CREA"| t51
-  o62 -->|"LEE"| t51
-  o62 -->|"LEE"| t29
-  o62 -->|"LEE"| t30
-  o62 -.-> t63
-  a36 --> o64
-  o64 -->|"LEE"| t29
-  o64 -->|"LEE"| t30
-  o64 -->|"LEE"| t37
-  o64 -->|"LEE"| t38
-  o64 -->|"LEE"| t3
-  o64 -->|"LEE"| t39
-  o64 -.-> t65
-  a45 --> o66
-  o66 -->|"LEE"| t29
-  o66 -->|"LEE"| t30
-  o66 -->|"LEE"| t37
-  o66 -->|"LEE"| t38
-  o66 -->|"LEE"| t3
-  o66 -->|"ACTUALIZA"| t9
-  o66 -.-> t67
-  a48 --> o68
-  o68 -->|"CREA"| t49
-  o68 -->|"LEE"| t29
-  o68 -->|"LEE"| t30
-  o68 -->|"LEE"| t37
-  o68 -->|"LEE"| t38
-  o68 -->|"LEE"| t3
-  o68 -.-> t69
-  a71 --> o70
-  o70 -->|"CREA"| t49
-  o70 -->|"LEE"| t30
-  o70 -->|"ACTUALIZA"| t72
-  o70 -->|"LEE"| t72
-  o70 -->|"ACTUALIZA"| t73
-  o70 -->|"LEE"| t73
-  o70 -.-> t74
-  a36 --> o75
-  o75 -->|"LEE"| t29
-  o75 -->|"LEE"| t37
-  o75 -->|"LEE"| t38
-  o75 -->|"LEE"| t3
-  o75 -->|"LEE"| t39
-  o75 -->|"LEE"| t40
-  o75 -.-> t76
-  a2 --> o77
-  o77 -->|"LEE"| t29
-  o77 -->|"LEE"| t37
-  o77 -->|"LEE"| t38
-  o77 -->|"LEE"| t3
-  o77 -->|"LEE"| t40
-  o77 -->|"LEE"| t54
-  o77 -.-> t78
-  a2 --> o79
-  o79 -->|"LEE"| t29
-  o79 -->|"LEE"| t30
-  o79 -->|"LEE"| t37
-  o79 -->|"LEE"| t38
-  o79 -->|"LEE"| t3
-  o79 -->|"ACTUALIZA"| t9
-  o79 -.-> t80
-  a2 --> o81
-  o81 -->|"LEE"| t29
-  o81 -->|"LEE"| t30
-  o81 -->|"LEE"| t37
-  o81 -->|"LEE"| t38
-  o81 -->|"LEE"| t3
-  o81 -->|"ACTUALIZA"| t9
-  o81 -.-> t82
+  o53 -->|"LEE"| t37
+  o53 -->|"LEE"| t51
+  o53 -.-> t54
+  a42 --> o55
+  o55 -->|"LEE"| t26
+  o55 -->|"LEE"| t27
+  o55 -->|"LEE"| t34
+  o55 -->|"LEE"| t35
+  o55 -->|"LEE"| t3
+  o55 -->|"LEE"| t36
+  o55 -.-> t56
+  a45 --> o57
+  o57 -->|"LEE"| t26
+  o57 -->|"LEE"| t27
+  o57 -->|"LEE"| t34
+  o57 -->|"LEE"| t35
+  o57 -->|"LEE"| t3
+  o57 -->|"LEE"| t36
+  o57 -.-> t58
+  a45 --> o59
+  o59 -->|"CREA"| t46
+  o59 -->|"LEE"| t47
+  o59 -->|"CREA"| t48
+  o59 -->|"LEE"| t48
+  o59 -->|"LEE"| t26
+  o59 -->|"LEE"| t27
+  o59 -.-> t60
+  a33 --> o61
+  o61 -->|"LEE"| t26
+  o61 -->|"LEE"| t27
+  o61 -->|"LEE"| t34
+  o61 -->|"LEE"| t35
+  o61 -->|"LEE"| t3
+  o61 -->|"LEE"| t36
+  o61 -.-> t62
+  a42 --> o63
+  o63 -->|"LEE"| t26
+  o63 -->|"LEE"| t27
+  o63 -->|"LEE"| t34
+  o63 -->|"LEE"| t35
+  o63 -->|"LEE"| t3
+  o63 -->|"LEE"| t36
+  o63 -.-> t64
+  a45 --> o65
+  o65 -->|"CREA"| t46
+  o65 -->|"LEE"| t26
+  o65 -->|"LEE"| t27
+  o65 -->|"LEE"| t34
+  o65 -->|"LEE"| t35
+  o65 -->|"LEE"| t3
+  o65 -.-> t66
+  a68 --> o67
+  o67 -->|"CREA"| t46
+  o67 -->|"LEE"| t27
+  o67 -->|"ACTUALIZA"| t69
+  o67 -->|"LEE"| t69
+  o67 -->|"ACTUALIZA"| t70
+  o67 -->|"LEE"| t70
+  o67 -.-> t71
+  a33 --> o72
+  o72 -->|"LEE"| t26
+  o72 -->|"LEE"| t34
+  o72 -->|"LEE"| t35
+  o72 -->|"LEE"| t3
+  o72 -->|"LEE"| t36
+  o72 -->|"LEE"| t37
+  o72 -.-> t73
+  a2 --> o74
+  o74 -->|"LEE"| t26
+  o74 -->|"LEE"| t34
+  o74 -->|"LEE"| t35
+  o74 -->|"LEE"| t3
+  o74 -->|"LEE"| t37
+  o74 -->|"LEE"| t51
+  o74 -.-> t75
+  a2 --> o76
+  o76 -->|"LEE"| t26
+  o76 -->|"LEE"| t27
+  o76 -->|"LEE"| t34
+  o76 -->|"LEE"| t35
+  o76 -->|"LEE"| t3
+  o76 -->|"ACTUALIZA"| t9
+  o76 -.-> t77
+  a2 --> o78
+  o78 -->|"LEE"| t26
+  o78 -->|"LEE"| t27
+  o78 -->|"LEE"| t34
+  o78 -->|"LEE"| t35
+  o78 -->|"LEE"| t3
+  o78 -->|"ACTUALIZA"| t9
+  o78 -.-> t79
+  a2 --> o80
+  o80 -->|"LEE"| t26
+  o80 -->|"LEE"| t27
+  o80 -->|"LEE"| t34
+  o80 -->|"LEE"| t35
+  o80 -->|"LEE"| t3
+  o80 -->|"ACTUALIZA"| t9
+  o80 -.-> t81
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -500,164 +502,147 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER"]):::actor
-  a10(["SECURITY_ADMIN"]):::actor
-  a13(["SECURITY_ADMIN · CLINICIAN · PRACTITIONER"]):::actor
-  a20(["Cualquier sesión válida"]):::actor
-  t3[("common.identifiers")]:::tabla
-  t4[("profiles.patient_profiles")]:::tabla
-  t5[("profiles.persons")]:::tabla
-  t6[("terminology.value_set_members")]:::tabla
-  t7[("terminology.value_set_versions")]:::tabla
-  t8[("terminology.value_sets")]:::tabla
-  t11[("profiles.person_profiles")]:::tabla
-  t14[("profiles.related_persons")]:::tabla
-  t16[("profiles.patient_identity_links")]:::tabla
-  t18[("profiles.patient_portal_proxies")]:::tabla
-  t21[("profiles.person_account_links")]:::tabla
-  t23[("common.addresses")]:::tabla
-  t24[("common.contact_points")]:::tabla
-  t25[("insurance.insurance_carriers")]:::tabla
-  t26[("insurance.insurance_plan_benefits")]:::tabla
-  t27[("insurance.insurance_plans")]:::tabla
-  t37[("common.file_versions")]:::tabla
-  t38[("common.files")]:::tabla
-  t42[("profiles.patient_merge_events")]:::tabla
-  t28[("+8 tablas más")]
-  t30[("+14 tablas más")]
-  t33[("+7 tablas más")]
-  t35[("+8 tablas más")]
-  t39[("+10 tablas más")]
-  t43[("+2 tablas más")]
+  a4(["SECURITY_ADMIN"]):::actor
+  a9(["SECURITY_ADMIN · CLINICIAN · PRACTITIONER"]):::actor
+  a16(["Cualquier sesión válida"]):::actor
+  t5[("profiles.patient_profiles")]:::tabla
+  t6[("profiles.person_profiles")]:::tabla
+  t7[("profiles.persons")]:::tabla
+  t10[("profiles.related_persons")]:::tabla
+  t12[("profiles.patient_identity_links")]:::tabla
+  t14[("profiles.patient_portal_proxies")]:::tabla
+  t17[("profiles.person_account_links")]:::tabla
+  t19[("common.addresses")]:::tabla
+  t20[("common.contact_points")]:::tabla
+  t21[("common.identifiers")]:::tabla
+  t22[("insurance.insurance_carriers")]:::tabla
+  t23[("insurance.insurance_plan_benefits")]:::tabla
+  t24[("insurance.insurance_plans")]:::tabla
+  t34[("common.file_versions")]:::tabla
+  t35[("common.files")]:::tabla
+  t40[("profiles.patient_merge_events")]:::tabla
+  t25[("+8 tablas más")]
+  t27[("+14 tablas más")]
+  t30[("+7 tablas más")]
+  t32[("+8 tablas más")]
+  t36[("+10 tablas más")]
   subgraph s0["ctrl:ProfilesPatientsController · Operaciones de ProfilesPatientsController que…"]
     o1["GET /profiles/patients"]:::op
-    o9["POST /profiles/patients"]:::op
-    o12["GET /profiles/patients/{profileId}"]:::op
-    o15["POST /profiles/patients/{profileId}/identity-links"]:::op
-    o17["POST /profiles/patients/{profileId}/portal-proxies"]:::op
-    o19["POST /profiles/patients/{profileId}/related-persons"]:::op
-    o22["GET /profiles/patients/me"]:::op
-    o29["PATCH /profiles/patients/me"]:::op
-    o31["GET /profiles/patients/me/dependents"]:::op
-    o32["POST /profiles/patients/me/dependents"]:::op
-    o34["DELETE /profiles/patients/me/photo"]:::op
-    o36["PUT /profiles/patients/me/photo"]:::op
-    o40["GET /profiles/patients/me/summary"]:::op
-    o41["POST /profiles/patients/merge"]:::op
-    o44["GET /profiles/patients/merge-events"]:::op
-    o45["POST /profiles/patients/merge/{eventId}/reverse"]:::op
-    o46["POST /profiles/persons/{personId}/account-links"]:::op
-    o47["POST /profiles/persons/{personId}/decease"]:::op
+    o3["POST /profiles/patients"]:::op
+    o8["GET /profiles/patients/{profileId}"]:::op
+    o11["POST /profiles/patients/{profileId}/identity-links"]:::op
+    o13["POST /profiles/patients/{profileId}/portal-proxies"]:::op
+    o15["POST /profiles/patients/{profileId}/related-persons"]:::op
+    o18["GET /profiles/patients/me"]:::op
+    o26["PATCH /profiles/patients/me"]:::op
+    o28["GET /profiles/patients/me/dependents"]:::op
+    o29["POST /profiles/patients/me/dependents"]:::op
+    o31["DELETE /profiles/patients/me/photo"]:::op
+    o33["PUT /profiles/patients/me/photo"]:::op
+    o37["GET /profiles/patients/me/summary"]:::op
+    o38["POST /profiles/patients/merge"]:::op
+    o39["GET /profiles/patients/merge-events"]:::op
+    o41["POST /profiles/patients/merge/{eventId}/reverse"]:::op
+    o42["POST /profiles/persons/{personId}/account-links"]:::op
+    o43["POST /profiles/persons/{personId}/decease"]:::op
   end
   a2 --> o1
-  o1 -->|"LEE"| t3
-  o1 -->|"LEE"| t4
-  o1 -->|"LEE"| t5
-  o1 -->|"LEE"| t6
-  o1 -->|"LEE"| t7
-  o1 -->|"LEE"| t8
-  a10 --> o9
-  o9 -->|"CREA"| t4
-  o9 -->|"LEE"| t4
-  o9 -->|"CREA"| t11
-  o9 -->|"CREA"| t5
-  a13 --> o12
-  o12 -->|"LEE"| t4
-  o12 -->|"LEE"| t5
-  o12 -->|"LEE"| t14
-  a10 --> o15
-  o15 -->|"ACTUALIZA"| t16
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  o15 -->|"ACTUALIZA"| t4
-  o15 -->|"LEE"| t4
-  a10 --> o17
-  o17 -->|"ACTUALIZA"| t18
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t4
-  o17 -->|"LEE"| t14
-  a20 --> o19
-  o19 -->|"LEE"| t4
-  o19 -->|"LEE"| t21
-  o19 -->|"CREA"| t5
-  o19 -->|"LEE"| t5
-  o19 -->|"CREA"| t14
-  o19 -->|"LEE"| t14
-  a20 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"LEE"| t3
-  o22 -->|"LEE"| t25
-  o22 -->|"LEE"| t26
-  o22 -->|"LEE"| t27
-  o22 -.-> t28
-  a20 --> o29
-  o29 -->|"ACTUALIZA"| t23
-  o29 -->|"LEE"| t23
-  o29 -->|"ACTUALIZA"| t24
-  o29 -->|"CREA"| t24
-  o29 -->|"LEE"| t24
-  o29 -->|"CREA"| t3
+  a4 --> o3
+  o3 -->|"CREA"| t5
+  o3 -->|"LEE"| t5
+  o3 -->|"CREA"| t6
+  o3 -->|"CREA"| t7
+  a9 --> o8
+  o8 -->|"LEE"| t5
+  o8 -->|"LEE"| t7
+  o8 -->|"LEE"| t10
+  a4 --> o11
+  o11 -->|"ACTUALIZA"| t12
+  o11 -->|"CREA"| t12
+  o11 -->|"LEE"| t12
+  o11 -->|"ACTUALIZA"| t5
+  o11 -->|"LEE"| t5
+  a4 --> o13
+  o13 -->|"ACTUALIZA"| t14
+  o13 -->|"CREA"| t14
+  o13 -->|"LEE"| t5
+  o13 -->|"LEE"| t10
+  a16 --> o15
+  o15 -->|"LEE"| t5
+  o15 -->|"LEE"| t17
+  o15 -->|"CREA"| t7
+  o15 -->|"LEE"| t7
+  o15 -->|"CREA"| t10
+  o15 -->|"LEE"| t10
+  a16 --> o18
+  o18 -->|"LEE"| t19
+  o18 -->|"LEE"| t20
+  o18 -->|"LEE"| t21
+  o18 -->|"LEE"| t22
+  o18 -->|"LEE"| t23
+  o18 -->|"LEE"| t24
+  o18 -.-> t25
+  a16 --> o26
+  o26 -->|"ACTUALIZA"| t19
+  o26 -->|"LEE"| t19
+  o26 -->|"ACTUALIZA"| t20
+  o26 -->|"CREA"| t20
+  o26 -->|"LEE"| t20
+  o26 -->|"CREA"| t21
+  o26 -.-> t27
+  a16 --> o28
+  o28 -->|"LEE"| t21
+  o28 -->|"LEE"| t14
+  o28 -->|"LEE"| t5
+  o28 -->|"LEE"| t7
+  o28 -->|"LEE"| t10
+  a16 --> o29
+  o29 -->|"CREA"| t21
+  o29 -->|"LEE"| t21
+  o29 -->|"CREA"| t14
+  o29 -->|"CREA"| t5
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t17
   o29 -.-> t30
-  a20 --> o31
-  o31 -->|"LEE"| t3
-  o31 -->|"LEE"| t18
-  o31 -->|"LEE"| t4
-  o31 -->|"LEE"| t5
-  o31 -->|"LEE"| t14
-  a20 --> o32
-  o32 -->|"CREA"| t3
-  o32 -->|"LEE"| t3
-  o32 -->|"CREA"| t18
-  o32 -->|"CREA"| t4
-  o32 -->|"LEE"| t4
-  o32 -->|"LEE"| t21
-  o32 -.-> t33
-  a20 --> o34
-  o34 -->|"LEE"| t23
-  o34 -->|"LEE"| t24
-  o34 -->|"LEE"| t3
-  o34 -->|"LEE"| t25
-  o34 -->|"LEE"| t26
-  o34 -->|"LEE"| t27
-  o34 -.-> t35
-  a20 --> o36
-  o36 -->|"LEE"| t23
-  o36 -->|"LEE"| t24
-  o36 -->|"LEE"| t37
-  o36 -->|"LEE"| t38
-  o36 -->|"LEE"| t3
-  o36 -->|"LEE"| t25
-  o36 -.-> t39
-  a20 --> o40
-  o40 -->|"LEE"| t4
-  o40 -->|"LEE"| t21
-  o40 -->|"LEE"| t5
-  a10 --> o41
-  o41 -->|"ACTUALIZA"| t16
-  o41 -->|"CREA"| t42
-  o41 -->|"ACTUALIZA"| t18
-  o41 -->|"ACTUALIZA"| t4
-  o41 -->|"LEE"| t4
+  a16 --> o31
+  o31 -->|"LEE"| t19
+  o31 -->|"LEE"| t20
+  o31 -->|"LEE"| t21
+  o31 -->|"LEE"| t22
+  o31 -->|"LEE"| t23
+  o31 -->|"LEE"| t24
+  o31 -.-> t32
+  a16 --> o33
+  o33 -->|"LEE"| t19
+  o33 -->|"LEE"| t20
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t21
+  o33 -->|"LEE"| t22
+  o33 -.-> t36
+  a16 --> o37
+  o37 -->|"LEE"| t5
+  o37 -->|"LEE"| t17
+  o37 -->|"LEE"| t7
+  a4 --> o38
+  a4 --> o39
+  o39 -->|"LEE"| t40
+  a4 --> o41
+  o41 -->|"CREA"| t40
+  o41 -->|"LEE"| t40
   o41 -->|"ACTUALIZA"| t5
-  o41 -.-> t43
-  a10 --> o44
-  o44 -->|"LEE"| t42
-  a10 --> o45
-  o45 -->|"CREA"| t42
-  o45 -->|"LEE"| t42
-  o45 -->|"ACTUALIZA"| t4
-  o45 -->|"LEE"| t4
-  o45 -->|"ACTUALIZA"| t5
-  o45 -->|"LEE"| t5
-  a10 --> o46
-  o46 -->|"ACTUALIZA"| t21
-  o46 -->|"CREA"| t21
-  o46 -->|"LEE"| t5
-  a10 --> o47
-  o47 -->|"ACTUALIZA"| t18
-  o47 -->|"ACTUALIZA"| t21
-  o47 -->|"ACTUALIZA"| t5
-  o47 -->|"LEE"| t5
+  o41 -->|"LEE"| t5
+  o41 -->|"ACTUALIZA"| t7
+  o41 -->|"LEE"| t7
+  a4 --> o42
+  o42 -->|"ACTUALIZA"| t17
+  o42 -->|"CREA"| t17
+  o42 -->|"LEE"| t7
+  a4 --> o43
+  o43 -->|"ACTUALIZA"| t14
+  o43 -->|"ACTUALIZA"| t17
+  o43 -->|"ACTUALIZA"| t7
+  o43 -->|"LEE"| t7
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -684,10 +669,10 @@ flowchart LR
   t18[("community.public_profiles")]:::tabla
   t19[("community.service_reviews")]:::tabla
   t26[("directory.tenant_memberships")]:::tabla
-  t27[("iam.devices")]:::tabla
-  t28[("messaging.in_app_notifications")]:::tabla
-  t29[("messaging.message_channels")]:::tabla
-  t30[("messaging.message_templates")]:::tabla
+  t27[("messaging.in_app_notifications")]:::tabla
+  t28[("messaging.message_channels")]:::tabla
+  t29[("messaging.message_templates")]:::tabla
+  t30[("messaging.messaging_providers")]:::tabla
   t33[("profiles.health_practitioner_profiles")]:::tabla
   t34[("profiles.jurisdiction_authorizations")]:::tabla
   t35[("profiles.person_account_links")]:::tabla
@@ -703,11 +688,11 @@ flowchart LR
   t20[("+6 tablas más")]
   t22[("+29 tablas más")]
   t24[("+21 tablas más")]
-  t31[("+19 tablas más")]
+  t31[("+18 tablas más")]
   t38[("+3 tablas más")]
   t40[("+10 tablas más")]
   t42[("+21 tablas más")]
-  t46[("+19 tablas más")]
+  t46[("+18 tablas más")]
   t62[("+2 tablas más")]
   t67[("+10 tablas más")]
   subgraph s0["ctrl:ProfilesPractitionersController · Operaciones de ProfilesPractitionersCont…"]
@@ -775,8 +760,8 @@ flowchart LR
   a2 --> o25
   o25 -->|"LEE"| t26
   o25 -->|"ACTUALIZA"| t27
-  o25 -->|"LEE"| t27
-  o25 -->|"CREA"| t28
+  o25 -->|"CREA"| t27
+  o25 -->|"LEE"| t28
   o25 -->|"LEE"| t29
   o25 -->|"LEE"| t30
   o25 -.-> t31
@@ -817,8 +802,8 @@ flowchart LR
   a13 --> o45
   o45 -->|"LEE"| t26
   o45 -->|"ACTUALIZA"| t27
-  o45 -->|"LEE"| t27
-  o45 -->|"CREA"| t28
+  o45 -->|"CREA"| t27
+  o45 -->|"LEE"| t28
   o45 -->|"LEE"| t29
   o45 -->|"LEE"| t30
   o45 -.-> t46
@@ -881,12 +866,12 @@ flowchart LR
   t5[("profiles.jurisdiction_authorizations")]:::tabla
   t6[("profiles.persons")]:::tabla
   t7[("profiles.practitioner_affiliations")]:::tabla
-  t9[("iam.devices")]:::tabla
-  t10[("messaging.in_app_notifications")]:::tabla
-  t11[("messaging.message_channels")]:::tabla
-  t12[("+13 tablas más")]
-  t14[("+13 tablas más")]
-  t16[("+13 tablas más")]
+  t9[("messaging.in_app_notifications")]:::tabla
+  t10[("messaging.message_channels")]:::tabla
+  t11[("messaging.message_templates")]:::tabla
+  t12[("+12 tablas más")]
+  t14[("+12 tablas más")]
+  t16[("+12 tablas más")]
   subgraph s0["ctrl:TenantPractitionerRequestsController · Operaciones de TenantPractitionerRe…"]
     o1["GET /tenants/{tenantId}/practitioner-requests"]:::op
     o8["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve"]:::op
@@ -903,24 +888,24 @@ flowchart LR
   o8 -->|"CREA"| t3
   o8 -->|"LEE"| t3
   o8 -->|"ACTUALIZA"| t9
-  o8 -->|"LEE"| t9
-  o8 -->|"CREA"| t10
+  o8 -->|"CREA"| t9
+  o8 -->|"LEE"| t10
   o8 -->|"LEE"| t11
   o8 -.-> t12
   a2 --> o13
   o13 -->|"CREA"| t3
   o13 -->|"LEE"| t3
   o13 -->|"ACTUALIZA"| t9
-  o13 -->|"LEE"| t9
-  o13 -->|"CREA"| t10
+  o13 -->|"CREA"| t9
+  o13 -->|"LEE"| t10
   o13 -->|"LEE"| t11
   o13 -.-> t14
   a2 --> o15
   o15 -->|"CREA"| t3
   o15 -->|"LEE"| t3
   o15 -->|"ACTUALIZA"| t9
-  o15 -->|"LEE"| t9
-  o15 -->|"CREA"| t10
+  o15 -->|"CREA"| t9
+  o15 -->|"LEE"| t10
   o15 -->|"LEE"| t11
   o15 -.-> t16
   classDef op fill:#fff,stroke:#446
@@ -2917,73 +2902,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /profiles/patients
-
-UC-05-13: listado paginado de pacientes
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes; PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPatientsService.searchPatients"]:::llamada
-  n2 --> n3
-  n4{"searchRequiresCriterion(actor) && !options.query && !options.nationalId"}:::decision
-  n3 --> n4
-  n5(["422 PRECONDITION_FAILED Busque por nombre, código o documento: no se puede listar el padrón completo de pacie…"]):::error
-  n4 -->|"sí"| n5
-  n6{"options.issuerAdministrativeAreaConceptId"}:::decision
-  n4 -->|"no"| n6
-  n7["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n6 -->|"sí"| n7
-  n8["Llama a AdministrativeAreaCatalogService.listMemberIds"]:::llamada
-  n7 --> n8
-  n9{"members === null"}:::decision
-  n8 --> n9
-  n10(["422 PRECONDITION_FAILED El catálogo de departamentos no está disponible"]):::error
-  n9 -->|"sí"| n10
-  n11{"!members.has(conceptId)"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a PatientProfilesRepository.searchPage"]:::llamada
-  n11 -->|"no"| n13
-  n6 -->|"no"| n13
-  n14{"criteria.query"}:::decision
-  n13 --> n14
-  n15[("LEE profiles.persons")]:::efecto
-  n14 -->|"sí"| n15
-  n16{"criteria.nationalId"}:::decision
-  n15 --> n16
-  n14 -->|"no"| n16
-  n17[("LEE common.identifiers")]:::efecto
-  n16 -->|"sí"| n17
-  n18[("LEE profiles.patient_profiles")]:::efecto
-  n17 --> n18
-  n16 -->|"no"| n18
-  n19["Llama a PersonsRepository.findByIds"]:::llamada
-  n18 --> n19
-  n20[("LEE profiles.persons")]:::efecto
-  n19 --> n20
-  n21(("200 Responde con éxito")):::ok
-  n20 --> n21
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 17. POST /profiles/patients
+#### 16. POST /profiles/patients
 
 Alta de persona y perfil de paciente
 
@@ -3035,7 +2954,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /profiles/patients/{profileId}
+#### 17. GET /profiles/patients/{profileId}
 
 UC-05-14: ficha de filiación de un paciente (F-01)
 
@@ -3089,7 +3008,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /profiles/patients/{profileId}/identity-links
+#### 18. POST /profiles/patients/{profileId}/identity-links
 
 Vincular identidad externa de paciente (MPI)
 
@@ -3144,7 +3063,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /profiles/patients/{profileId}/portal-proxies
+#### 19. POST /profiles/patients/{profileId}/portal-proxies
 
 Otorgar proxy de portal a un representante
 
@@ -3204,7 +3123,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /profiles/patients/{profileId}/related-persons
+#### 20. POST /profiles/patients/{profileId}/related-persons
 
 Registrar persona relacionada / contacto de emergencia
 
@@ -3282,7 +3201,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /profiles/patients/me
+#### 21. GET /profiles/patients/me
 
 Consultar los propios datos de filiación
 
@@ -3392,7 +3311,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. PATCH /profiles/patients/me
+#### 22. PATCH /profiles/patients/me
 
 Editar los propios datos de filiación
 
@@ -3569,7 +3488,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /profiles/patients/me/addresses
+#### 23. GET /profiles/patients/me/addresses
 
 Listar las propias direcciones (la preferida primero)
 
@@ -3623,7 +3542,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /profiles/patients/me/addresses
+#### 24. POST /profiles/patients/me/addresses
 
 Guardar una dirección nueva
 
@@ -3666,7 +3585,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. DELETE /profiles/patients/me/addresses/{id}
+#### 25. DELETE /profiles/patients/me/addresses/{id}
 
 Quitar una dirección guardada o la del trabajo
 
@@ -3715,7 +3634,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. PATCH /profiles/patients/me/addresses/{id}
+#### 26. PATCH /profiles/patients/me/addresses/{id}
 
 Corregir una dirección (cierra la vigente y abre otra)
 
@@ -3783,7 +3702,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. PUT /profiles/patients/me/addresses/{id}/preferred
+#### 27. PUT /profiles/patients/me/addresses/{id}/preferred
 
 Marcar la dirección que se ofrece primero
 
@@ -3821,7 +3740,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /profiles/patients/me/dependent-candidates
+#### 28. GET /profiles/patients/me/dependent-candidates
 
 Buscar por nombre a quién pedirle que deje representarla
 
@@ -3871,7 +3790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /profiles/patients/me/dependent-requests
+#### 29. POST /profiles/patients/me/dependent-requests
 
 Pedir representar a una persona que ya tiene cuenta
 
@@ -4007,17 +3926,15 @@ flowchart TD
   n57 -->|"no"| n59
   n60(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
   n59 -->|"sí"| n60
-  n61{"!result.suppressed && result.inAppNotificationId && result.availableAt && new Date(result.availableAt).getTim…"}:::decision
+  n61[("ACTUALIZA messaging.in_app_notifications")]:::efecto
   n59 -->|"no"| n61
-  n62["Llama a WebPushService.pushToUser"]:::llamada
-  n61 -->|"sí"| n62
-  n63["Intenta"]:::intento
-  n62 --> n63
-  n64[("LEE iam.devices")]:::efecto
+  n62{"availableAt › now"}:::decision
+  n61 --> n62
+  n63[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n62 -->|"sí"| n63
+  n64(("201 Responde con éxito")):::ok
   n63 --> n64
-  n65(("201 Responde con éxito")):::ok
-  n64 --> n65
-  n61 -->|"no"| n65
+  n62 -->|"no"| n64
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4026,7 +3943,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /profiles/patients/me/dependent-requests/{id}/accept
+#### 30. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 Aceptar una solicitud de dependiente
 
@@ -4107,7 +4024,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /profiles/patients/me/dependent-requests/{id}/reject
+#### 31. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 Rechazar una solicitud de dependiente
 
@@ -4168,7 +4085,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /profiles/patients/me/dependents
+#### 32. POST /profiles/patients/me/dependents
 
 Registrar un dependiente (menor o adulto mayor tutelado)
 
@@ -4289,7 +4206,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. DELETE /profiles/patients/me/photo
+#### 33. DELETE /profiles/patients/me/photo
 
 Quitar la propia foto de perfil
 
@@ -4417,7 +4334,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. PUT /profiles/patients/me/photo
+#### 34. PUT /profiles/patients/me/photo
 
 Fijar la propia foto de perfil
 
@@ -4582,7 +4499,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. DELETE /profiles/patients/me/primary-practitioner
+#### 35. DELETE /profiles/patients/me/primary-practitioner
 
 Quitar el propio médico de cabecera
 
@@ -4623,7 +4540,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /profiles/patients/me/primary-practitioner
+#### 36. GET /profiles/patients/me/primary-practitioner
 
 Consultar el propio médico de cabecera
 
@@ -4683,7 +4600,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. PUT /profiles/patients/me/primary-practitioner
+#### 37. PUT /profiles/patients/me/primary-practitioner
 
 Elegir o cambiar el propio médico de cabecera
 
@@ -4743,7 +4660,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /profiles/patients/me/summary
+#### 38. GET /profiles/patients/me/summary
 
 Consultar el resumen propio
 
@@ -4795,92 +4712,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. POST /profiles/patients/merge
-
-Fusionar pacientes duplicados
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente sobreviviente no encontrado; ResourceNotFoundException: Paciente a fusionar no encontrado |
-| 409 | `CONFLICT` | ConflictException: El paciente ya fue fusionado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede fusionar un paciente consigo mismo |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPatientsService.mergePatients"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5{"dto.survivingPatientProfileId === dto.mergedPatientProfileId"}:::decision
-  n4 --> n5
-  n6(["422 PRECONDITION_FAILED No se puede fusionar un paciente consigo mismo"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a PatientProfilesRepository.findById"]:::llamada
-  n5 -->|"no"| n7
-  n8[("LEE profiles.patient_profiles")]:::efecto
-  n7 --> n8
-  n9{"!surviving"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Paciente sobreviviente no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a PatientProfilesRepository.findById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE profiles.patient_profiles")]:::efecto
-  n11 --> n12
-  n13{"!merged"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Paciente a fusionar no encontrado"]):::error
-  n13 -->|"sí"| n14
-  n15{"merged.recordLinkageStatusConceptId === PROF.LINKAGE_MERGED"}:::decision
-  n13 -->|"no"| n15
-  n16(["409 CONFLICT El paciente ya fue fusionado"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PatientMergeEventsRepository.create"]:::llamada
-  n15 -->|"no"| n17
-  n18[("CREA profiles.patient_merge_events")]:::efecto
-  n17 --> n18
-  n19[("ACTUALIZA profiles.patient_profiles")]:::efecto
-  n18 --> n19
-  n20["Llama a PersonsRepository.findById"]:::llamada
-  n19 --> n20
-  n21[("LEE profiles.persons")]:::efecto
-  n20 --> n21
-  n22{"mergedPerson"}:::decision
-  n21 --> n22
-  n23[("ACTUALIZA profiles.persons · ACTUALIZA profiles.persons")]:::efecto
-  n22 -->|"sí"| n23
-  n24["Llama a PatientIdentityLinksRepository.reassignPatientProfile"]:::llamada
-  n23 --> n24
-  n22 -->|"no"| n24
-  n25[("ACTUALIZA profiles.patient_identity_links")]:::efecto
-  n24 --> n25
-  n26["Llama a RelatedPersonsRepository.reassignPatientProfile"]:::llamada
-  n25 --> n26
-  n27[("ACTUALIZA profiles.related_persons")]:::efecto
-  n26 --> n27
-  n28["Llama a PatientPortalProxiesRepository.reassignPatientProfile"]:::llamada
-  n27 --> n28
-  n29[("ACTUALIZA profiles.patient_portal_proxies")]:::efecto
-  n28 --> n29
-  n30(("201 Responde con éxito")):::ok
-  n29 --> n30
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 41. POST /profiles/patients/merge/{eventId}/reverse
+#### 39. POST /profiles/patients/merge/{eventId}/reverse
 
 Revertir una fusión de pacientes
 
@@ -4956,76 +4788,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /profiles/patients/search
-
-UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes; PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a ProfilesPatientsController.searchPatients"]:::llamada
-  n2 --> n3
-  n4["Llama a ProfilesPatientsService.searchPatients"]:::llamada
-  n3 --> n4
-  n5{"searchRequiresCriterion(actor) && !options.query && !options.nationalId"}:::decision
-  n4 --> n5
-  n6(["422 PRECONDITION_FAILED Busque por nombre, código o documento: no se puede listar el padrón completo de pacie…"]):::error
-  n5 -->|"sí"| n6
-  n7{"options.issuerAdministrativeAreaConceptId"}:::decision
-  n5 -->|"no"| n7
-  n8["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n7 -->|"sí"| n8
-  n9["Llama a AdministrativeAreaCatalogService.listMemberIds"]:::llamada
-  n8 --> n9
-  n10{"members === null"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El catálogo de departamentos no está disponible"]):::error
-  n10 -->|"sí"| n11
-  n12{"!members.has(conceptId)"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a PatientProfilesRepository.searchPage"]:::llamada
-  n12 -->|"no"| n14
-  n7 -->|"no"| n14
-  n15{"criteria.query"}:::decision
-  n14 --> n15
-  n16[("LEE profiles.persons")]:::efecto
-  n15 -->|"sí"| n16
-  n17{"criteria.nationalId"}:::decision
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18[("LEE common.identifiers")]:::efecto
-  n17 -->|"sí"| n18
-  n19[("LEE profiles.patient_profiles")]:::efecto
-  n18 --> n19
-  n17 -->|"no"| n19
-  n20["Llama a PersonsRepository.findByIds"]:::llamada
-  n19 --> n20
-  n21[("LEE profiles.persons")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 43. POST /profiles/persons/{personId}/account-links
+#### 40. POST /profiles/persons/{personId}/account-links
 
 Vincular cuenta de portal a una persona
 
@@ -5078,7 +4841,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /profiles/persons/{personId}/decease
+#### 41. POST /profiles/persons/{personId}/decease
 
 Registrar defunción y anonimización de una persona
 
@@ -5138,7 +4901,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /profiles/practitioners
+#### 42. GET /profiles/practitioners
 
 Listar profesionales para la guía, con sus especialidades
 
@@ -5210,7 +4973,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. POST /profiles/practitioners
+#### 43. POST /profiles/practitioners
 
 Alta de profesional de salud (workforce generalista)
 
@@ -5379,7 +5142,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. PATCH /profiles/practitioners/{profileId}
+#### 44. PATCH /profiles/practitioners/{profileId}
 
 Corregir el perfil profesional de otro (titular o plataforma)
 
@@ -5561,7 +5324,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. POST /profiles/practitioners/{profileId}/affiliations
+#### 45. POST /profiles/practitioners/{profileId}/affiliations
 
 Registrar un consultorio de un profesional sin cuenta
 
@@ -5692,7 +5455,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+#### 46. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 Registrar/renovar autorización jurisdiccional (licencia)
 
@@ -5793,7 +5556,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. DELETE /profiles/practitioners/{profileId}/photo
+#### 47. DELETE /profiles/practitioners/{profileId}/photo
 
 Quitar la foto del perfil profesional
 
@@ -5863,7 +5626,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. PUT /profiles/practitioners/{profileId}/photo
+#### 48. PUT /profiles/practitioners/{profileId}/photo
 
 Fijar la foto del perfil profesional
 
@@ -5933,7 +5696,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /profiles/practitioners/{profileId}/specialties
+#### 49. POST /profiles/practitioners/{profileId}/specialties
 
 Agregar especialidad con credencial de soporte
 
@@ -6040,7 +5803,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. GET /profiles/practitioners/{profileId}/summary
+#### 50. GET /profiles/practitioners/{profileId}/summary
 
 Consultar el perfil profesional de un colega (ficha de la guía)
 
@@ -6138,7 +5901,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. PATCH /profiles/practitioners/me
+#### 51. PATCH /profiles/practitioners/me
 
 Editar la presentación del propio perfil profesional
 
@@ -6321,7 +6084,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. GET /profiles/practitioners/me/admission
+#### 52. GET /profiles/practitioners/me/admission
 
 Estado de mi verificación
 
@@ -6379,7 +6142,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. POST /profiles/practitioners/me/admission/resubmit
+#### 53. POST /profiles/practitioners/me/admission/resubmit
 
 Reenviar mi solicitud
 
@@ -6555,7 +6318,182 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. POST /profiles/practitioners/me/admission/withdraw
+#### 54. POST /profiles/practitioners/me/admission/submit
+
+Enviarme a verificación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya tiene una solicitud de verificación: reenvíela en lugar de abrir otra |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Debe aceptar la declaración para enviar la solicitud; PreconditionFailedException: Su perfil ya no está pendiente de verificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionSubmitService.submitOwn"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsReadService.ownPersonId"]:::llamada
+  n4 --> n5
+  n6["Llama a PersonAccountLinksRepository.findSelfActiveByUser"]:::llamada
+  n5 --> n6
+  n7[("LEE profiles.person_account_links")]:::efecto
+  n6 --> n7
+  n8[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7 --> n8
+  n9{"!personId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11{"!attestation"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED Debe aceptar la declaración para enviar la solicitud"]):::error
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerAdmissionsReadService.currentOf"]:::llamada
+  n13 --> n14
+  n15["Llama a PractitionerAdmissionsReadService.ownPersonId"]:::llamada
+  n14 --> n15
+  n16["Llama a PersonAccountLinksRepository.findSelfActiveByUser"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.person_account_links")]:::efecto
+  n16 --> n17
+  n18[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n17 --> n18
+  n19["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.practitioner_admissions")]:::efecto
+  n19 --> n20
+  n21{"await this.read.currentOf(tx, actor)"}:::decision
+  n20 --> n21
+  n22(["409 CONFLICT Ya tiene una solicitud de verificación: reenvíela en lugar de abrir otra"]):::error
+  n21 -->|"sí"| n22
+  n23{"profile?.verificationStatusConceptId !== PROF.PRACT_VERIF_PENDING"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED Su perfil ya no está pendiente de verificación"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a PractitionerAdmissionsService.openForRegistration"]:::llamada
+  n23 -->|"no"| n25
+  n26["Llama a PractitionerAdmissionsRepository.findOpenByPractitioner"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.practitioner_admissions")]:::efecto
+  n26 --> n27
+  n28["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n27 --> n28
+  n29[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n28 --> n29
+  n30["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n29 --> n30
+  n31[("LEE common.identifiers")]:::efecto
+  n30 --> n31
+  n32["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n31 --> n32
+  n33[("LEE profiles.persons")]:::efecto
+  n32 --> n33
+  n34["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n33 --> n34
+  n35[("LEE common.identifiers")]:::efecto
+  n34 --> n35
+  n36["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n35 --> n36
+  n37[("LEE common.contact_points")]:::efecto
+  n36 --> n37
+  n38["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n37 --> n38
+  n39[("LEE common.addresses")]:::efecto
+  n38 --> n39
+  n40[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n39 --> n40
+  n41["Llama a PractitionerAdmissionsRepository.create"]:::llamada
+  n40 --> n41
+  n42[("CREA profiles.practitioner_admissions")]:::efecto
+  n41 --> n42
+  n43["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n43 --> n44
+  n45[("CREA profiles.practitioner_admission_events")]:::efecto
+  n44 --> n45
+  n46["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n45 --> n46
+  n47["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n46 --> n47
+  n48["Repite: por cada const item de row.items"]:::bucle
+  n47 -->|"cada elemento"| n48
+  n49{"!item.review"}:::decision
+  n48 -->|"cada elemento"| n49
+  n50["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n49 -->|"sí"| n50
+  n51[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n50 --> n51
+  n52{"mustReset"}:::decision
+  n51 --> n52
+  n49 -->|"no"| n52
+  n53["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n52 -->|"sí"| n53
+  n54[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n53 --> n54
+  n55["Llama a PractitionerAdmissionChecklistService.applyEntityDecision"]:::llamada
+  n54 --> n55
+  n56{"type === 'LICENSE'"}:::decision
+  n55 --> n56
+  n57[("LEE profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations")]:::efecto
+  n56 -->|"sí"| n57
+  n58{"decision === 'PENDING'"}:::decision
+  n57 --> n58
+  n59[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n58 -->|"sí"| n59
+  n60[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n58 -->|"no"| n60
+  n61{"type === 'CREDENTIAL'"}:::decision
+  n56 -->|"no"| n61
+  n62[("LEE profiles.professional_credentials · ACTUALIZA profiles.professional_credentials")]:::efecto
+  n61 -->|"sí"| n62
+  n63{"decision === 'PENDING'"}:::decision
+  n62 --> n63
+  n64[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n63 -->|"sí"| n64
+  n65[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n63 -->|"no"| n65
+  n66{"type === 'SPECIALTY'"}:::decision
+  n61 -->|"no"| n66
+  n67[("LEE profiles.practitioner_specialties · ACTUALIZA profiles.practitioner_specialties · ACTUALIZA profiles.prac…")]:::efecto
+  n66 -->|"sí"| n67
+  n68["Repite: por cada const review de view.reviews"]:::bucle
+  n59 --> n68
+  n60 --> n68
+  n64 --> n68
+  n65 --> n68
+  n67 --> n68
+  n66 -->|"no"| n68
+  n52 -->|"no"| n68
+  n48 -->|"al terminar"| n68
+  n47 -->|"al terminar"| n68
+  n69{"!wanted.has(`${review.requirementId}:${review.itemId}`)"}:::decision
+  n68 -->|"cada elemento"| n69
+  n70["Llama a PractitionerAdmissionReviewsRepository.remove"]:::llamada
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 55. POST /profiles/practitioners/me/admission/withdraw
 
 Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
 
@@ -6670,7 +6608,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. GET /profiles/practitioners/me/affiliations
+#### 56. GET /profiles/practitioners/me/affiliations
 
 Historial laboral propio (instituciones donde trabajó)
 
@@ -6718,7 +6656,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. POST /profiles/practitioners/me/affiliations
+#### 57. POST /profiles/practitioners/me/affiliations
 
 Registrar una afiliación institucional en el historial propio
 
@@ -6849,7 +6787,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+#### 58. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 Quitar una afiliación del historial laboral propio
 
@@ -6905,7 +6843,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+#### 59. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 Corregir una afiliación del historial laboral propio
 
@@ -6978,7 +6916,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. GET /profiles/practitioners/me/onboarding
+#### 60. GET /profiles/practitioners/me/onboarding
 
 Qué le falta al profesional para completar su alta
 
@@ -7039,7 +6977,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 63. GET /profiles/practitioners/me/primary-patients
+#### 61. GET /profiles/practitioners/me/primary-patients
 
 Listar los pacientes que me eligieron como médico de cabecera
 
@@ -7092,7 +7030,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 64. GET /profiles/practitioners/me/signature-assets
+#### 62. GET /profiles/practitioners/me/signature-assets
 
 Consultar las imágenes de firma y sello propias
 
@@ -7143,7 +7081,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 65. PUT /profiles/practitioners/me/signature-assets
+#### 63. PUT /profiles/practitioners/me/signature-assets
 
 Guardar o quitar las imágenes de firma y sello propias
 
@@ -7261,7 +7199,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 66. GET /profiles/practitioners/me/summary
+#### 64. GET /profiles/practitioners/me/summary
 
 Consultar el perfil profesional propio (trayectoria y actividad)
 
@@ -7363,7 +7301,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 67. GET /tenants/{tenantId}/practitioner-requests
+#### 65. GET /tenants/{tenantId}/practitioner-requests
 
 Solicitudes de médicos que piden atender en la organización
 
@@ -7409,7 +7347,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+#### 66. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 Aprobar la solicitud de un profesional
 
@@ -7491,7 +7429,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+#### 67. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 Rechazar la solicitud de un profesional
 
@@ -7573,7 +7511,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 70. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+#### 68. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 Dar de baja un vínculo ya aprobado
 
@@ -7663,9 +7601,12 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 |---|---|---|
 | DESCONOCIDO /admissions | 200, 401, 403, 429 | 0 |
 | GET /profiles/credentials | 200, 401, 403, 429 | 1 |
+| GET /profiles/patients | 200, 401, 403, 429 | 0 |
 | GET /profiles/patients/me/dependent-requests/incoming | 200, 401, 403, 429 | 4 |
 | GET /profiles/patients/me/dependents | 200, 401, 403, 429 | 5 |
+| POST /profiles/patients/merge | 201, 400, 401, 403, 429 | 0 |
 | GET /profiles/patients/merge-events | 200, 401, 403, 429 | 1 |
+| POST /profiles/patients/search | 200, 400, 401, 403, 429 | 0 |
 | POST /profiles/practitioners/me/credentials | 201, 400, 401, 403, 429 | 0 |
 | DELETE /profiles/practitioners/me/credentials/{credentialId} | 204, 400, 401, 403, 429 | 0 |
 | PATCH /profiles/practitioners/me/credentials/{credentialId} | 204, 400, 401, 403, 429 | 0 |

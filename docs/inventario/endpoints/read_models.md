@@ -5,7 +5,7 @@
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 - **Operaciones:** 15 (15 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 9 · BAJO 5
-- **Tablas distintas que tocan:** 37
+- **Tablas distintas que tocan:** 39
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/read-models.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,8 +13,8 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/portals/{portalCode}/routes/{routeCode}/views` | Publicar el contrato de una vista de página | MEDIO | 12 | SECURITY_ADMIN |
-| 2 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` | Derivar available_actions_json (estado + permiso + purpose) | BAJO | 27 | sesión (sin roles) |
-| 3 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` | Servir el read model al frontend (consent-aware, masking heredado) | BAJO | 32 | sesión (sin roles) |
+| 2 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` | Derivar available_actions_json (estado + permiso + purpose) | BAJO | 29 | sesión (sin roles) |
+| 3 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` | Servir el read model al frontend (consent-aware, masking heredado) | BAJO | 34 | sesión (sin roles) |
 | 4 | GET | `/public/{slug}` | Servir una proyección pública por slug | BAJO | 1 | pública |
 | 5 | GET | `/public/directory` | Servir el directorio público (solo campos aprobados) | BAJO | 1 | pública |
 | 6 | POST | `/read-models/{definitionId}/backfill` | Backfill inicial de una nueva materialized view | MEDIO | 2 | SECURITY_ADMIN |
@@ -55,10 +55,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/frontend-views.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -294,7 +294,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Cómo se atiende (sistema)
 
-`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` la atiende `FrontendViewsController.deriveActions` (src/modules/read_models/controllers/frontend-views.controller.ts:113). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.deriveAvailableActions`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 19 más.
+`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` la atiende `FrontendViewsController.deriveActions` (src/modules/read_models/controllers/frontend-views.controller.ts:113). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.deriveAvailableActions`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 21 más.
 
 ### Requerimientos
 
@@ -302,39 +302,41 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | purposeOfUse (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:128` |
 | `authz.roles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:104` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:139` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
 | `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
 | `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:434` |
 | `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:191` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:185` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:180` |
@@ -403,7 +405,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Cómo se atiende (sistema)
 
-`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` la atiende `FrontendViewsController.serveData` (src/modules/read_models/controllers/frontend-views.controller.ts:72). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.serveData`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
+`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` la atiende `FrontendViewsController.serveData` (src/modules/read_models/controllers/frontend-views.controller.ts:72). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.serveData`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
 
 ### Requerimientos
 
@@ -411,30 +413,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:128` |
 | `authz.roles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:104` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:139` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
 | `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
 | `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:434` |
@@ -444,9 +448,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
 | `read_models.read_model_definitions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ReadModelDefinitionsRepository.findById | `src/modules/read_models/repositories/read-model-definitions.repository.ts:99` |
 | `read_models.read_model_refresh_runs` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ReadModelRefreshRunsRepository.findLatestByDefinition | `src/modules/read_models/repositories/read-model-refresh-runs.repository.ts:56` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:191` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:185` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:180` |
@@ -538,7 +542,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:35` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -611,7 +615,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:22` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -679,9 +683,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:119` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -764,9 +768,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:136` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -849,9 +853,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -934,9 +938,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:100` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1019,10 +1023,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1175,9 +1179,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:195` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1255,9 +1259,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:178` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1334,10 +1338,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1476,8 +1480,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1551,11 +1555,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: frontendPageViewId | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

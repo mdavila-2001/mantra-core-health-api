@@ -46,7 +46,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:52` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:52` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -122,7 +122,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:65` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:65` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -196,7 +196,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:79` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -294,7 +294,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:105` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -369,7 +369,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:114` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

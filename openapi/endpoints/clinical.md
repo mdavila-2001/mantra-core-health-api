@@ -1758,6 +1758,7 @@ Content-Type: application/json
 | `basedOn.encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `basedOn.serviceRequestId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `basedOn.diagnosticReportId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `replacedByConditionId` | No | `string` | formato `uuid` | Sólo al refutar: diagnóstico (clinical.conditions) que reemplaza a éste. 422 CONDITION_REPLACEMENT_REQUIRES_REFUTED con CONFIRMED, 422 CONDITION_REPLACEMENT_SELF si es el mismo, 422 CONDITION_REPLACEMENT_INVALID si no existe o es de otro paciente | `00000000-0000-4000-8000-000000000001` |
 | `onsetAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `expectedResolutionAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `clinicalCourseConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1782,6 +1783,7 @@ Content-Type: application/json
     "serviceRequestId": "00000000-0000-4000-8000-000000000001",
     "diagnosticReportId": "00000000-0000-4000-8000-000000000001"
   },
+  "replacedByConditionId": "00000000-0000-4000-8000-000000000001",
   "onsetAt": "2026-07-31T12:00:00.000Z",
   "expectedResolutionAt": "2026-07-31T12:00:00.000Z",
   "clinicalCourseConceptId": "00000000-0000-4000-8000-000000000001"
@@ -1835,6 +1837,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "diagnosticReportId": "00000000-0000-4000-8000-000000000001"
     }
   },
+  "replacedByConditionId": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -1868,6 +1871,7 @@ Campos de la respuesta:
 | `verification.basedOn.encounterId` | No | `string` | formato `uuid` | Encuentro de la nota. | `00000000-0000-4000-8000-000000000001` |
 | `verification.basedOn.serviceRequestId` | No | `string` | formato `uuid` | Orden de estudio. | `00000000-0000-4000-8000-000000000001` |
 | `verification.basedOn.diagnosticReportId` | No | `string` | formato `uuid` | Informe del estudio. | `00000000-0000-4000-8000-000000000001` |
+| `replacedByConditionId` | No | `string` | formato `uuid` | Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -1885,6 +1889,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ese diagnóstico ya fue decidido: sólo un presuntivo se confirma o se rechaza | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Escriba el motivo o elija una evidencia: al menos uno de los dos. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo un diagnóstico descartado puede indicar el diagnóstico que lo reemplaza. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un diagnóstico no puede reemplazarse a sí mismo. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El diagnóstico que lo reemplaza no existe o no es de esta persona. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique desde cuándo la persona presenta la condición. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El inicio de la condición no puede ser futuro. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El curso clínico no es uno del catálogo. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
@@ -2914,7 +2921,7 @@ Cerrar un encuentro en curso (gatilla facturación). Requiere JWT y los roles o 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /clinical/encounters/{id}/close` en `ClinicalEncountersController_close`. El controlador delega en `EncountersService.close`. Valida el body como `CloseEncounterDto` y consume `application/json`. El tipo de retorno estático es `Promise<EncounterResponseDto>`.
+NestJS resuelve `POST /clinical/encounters/{id}/close` en `ClinicalEncountersController_close`. El controlador delega en `EncounterCloseService.close`. Valida el body como `CloseEncounterDto` y consume `application/json`. El tipo de retorno estático es `Promise<EncounterResponseDto>`.
 
 ### Parámetros
 
@@ -5092,6 +5099,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 403 | `FORBIDDEN` | Una receta necesita un profesional prescriptor. | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que prescribir. | Excepción explícita en src/modules/clinical/services/medications.service.ts |
@@ -5240,6 +5248,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -5373,6 +5382,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5527,6 +5537,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -5689,6 +5700,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -5819,8 +5831,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | message | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
-| 403 | `FORBIDDEN` | Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional. | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo un borrador (DRAFT) puede firmarse antes de emitirse | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -6565,6 +6577,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "diagnosticReportId": "00000000-0000-4000-8000-000000000001"
         }
       },
+      "replacedByConditionId": "00000000-0000-4000-8000-000000000001",
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
@@ -6604,6 +6617,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "patientInstructionsText": "valor-ejemplo",
       "indicationConditionId": "00000000-0000-4000-8000-000000000001",
       "indicationText": "valor-ejemplo",
+      "replacedByRequestId": "00000000-0000-4000-8000-000000000001",
       "signedAt": "2026-07-31T12:00:00.000Z",
       "issuedAt": "2026-07-31T12:00:00.000Z",
       "createdAt": "2026-07-31T12:00:00.000Z"
@@ -6662,7 +6676,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `conditions` | Sí | `array<ConditionItemDto>` | Sin restricción adicional declarada | Valor de conditions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","clinicalCourseConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","expectedResolutionAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","noteText":"valor-ejemplo","lastStatusChangeReasonText":"Texto descriptivo de ejemplo","verification":{"outcome":"CONFIRMED","decidedAt":"2026-07-31T12:00:00.000Z","decidedByProfileId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","basedOn":{"kind":"NOTE","noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","diagnosticReportId":"00000000-0000-4000-8000-000000000001"}},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `conditions` | Sí | `array<ConditionItemDto>` | Sin restricción adicional declarada | Valor de conditions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","clinicalCourseConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","expectedResolutionAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","noteText":"valor-ejemplo","lastStatusChangeReasonText":"Texto descriptivo de ejemplo","verification":{"outcome":"CONFIRMED","decidedAt":"2026-07-31T12:00:00.000Z","decidedByProfileId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","basedOn":{"kind":"NOTE","noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","diagnosticReportId":"00000000-0000-4000-8000-000000000001"}},"replacedByConditionId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `conditions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].codeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a code concept. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].categoryConceptId` | No | `string` | formato `uuid` | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
@@ -6688,6 +6702,7 @@ Campos de la respuesta:
 | `conditions[].verification.basedOn.encounterId` | No | `string` | formato `uuid` | Encuentro de la nota. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].verification.basedOn.serviceRequestId` | No | `string` | formato `uuid` | Orden de estudio. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].verification.basedOn.diagnosticReportId` | No | `string` | formato `uuid` | Informe del estudio. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].replacedByConditionId` | No | `string` | formato `uuid` | Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 | `allergies` | Sí | `array<AllergyItemDto>` | Sin restricción adicional declarada | Valor de allergies mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","substanceConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","criticalityConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","reactions":[{"id":"00000000-0000-4000-8000-000000000001","manifestationConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo"}],"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `allergies[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
@@ -6703,7 +6718,7 @@ Campos de la respuesta:
 | `allergies[].reactions[].severityConceptId` | No | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `allergies[].reactions[].description` | No | `string` | Sin restricción adicional declarada | Descripción libre de la reacción. | `Texto descriptivo de ejemplo` |
 | `allergies[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
-| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","quantityDecimal":1,"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","patientInstructionsText":"valor-ejemplo","indicationConditionId":"00000000-0000-4000-8000-000000000001","indicationText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","quantityDecimal":1,"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","patientInstructionsText":"valor-ejemplo","indicationConditionId":"00000000-0000-4000-8000-000000000001","indicationText":"valor-ejemplo","replacedByRequestId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `medicationRequests[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -6718,6 +6733,7 @@ Campos de la respuesta:
 | `medicationRequests[].patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta (Patch v4.1.3). | `valor-ejemplo` |
 | `medicationRequests[].indicationConditionId` | No | `string` | formato `uuid` | Condición que motiva la prescripción — para qué es la receta (Patch v4.1.6). | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].indicationText` | No | `string` | Sin restricción adicional declarada | Motivo escrito a mano cuando no hay condición codificada (P24). | `valor-ejemplo` |
+| `medicationRequests[].replacedByRequestId` | No | `string` | formato `uuid` | La receta que sustituyó a ésta (cambio de dosis o de fármaco). Ausente si no fue reemplazada. Lo usa la red clínica para encadenar las recetas. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].signedAt` | No | `string` | formato `date-time` | Valor de signed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].issuedAt` | No | `string` | formato `date-time` | Valor de issued at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
@@ -6765,6 +6781,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7749,17 +7766,20 @@ Content-Type: application/json
 | `performerTenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `performerPractitionerProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `suggestedPracticeSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<RequisitionItemDto>` | mínimo 1 elemento(s); máximo 30 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"codeConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","categoryConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","componentConceptIds":["00000000-0000-4000-8000-000000000001"],"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"},"duplicateDecision":{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","reusePreviousReport":true,"duplicateOverrideReason":"Texto descriptivo de ejemplo"}}]` |
+| `items` | Sí | `array<RequisitionItemDto>` | mínimo 1 elemento(s); máximo 30 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"codeConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","categoryConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","componentConceptIds":["00000000-0000-4000-8000-000000000001"],"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001","bodyStructureUberon":"UBERON:0000955","bodyMeshId":"BP44","boneTypeConceptId":"00000000-0000-4000-8000-000000000001"},"duplicateDecision":{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","reusePreviousReport":true,"duplicateOverrideReason":"Texto descriptivo de ejemplo"}}]` |
 | `items[].codeConceptId` | Sí | `string` | formato `uuid` | Estudio pedido (concept id de service-request-code) | `00000000-0000-4000-8000-000000000001` |
 | `items[].category` | No | `string` | valores: `LAB`, `IMAGING`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
 | `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].specimenTypeConceptId` | No | `string` | formato `uuid` | Muestra (specimen-type); sólo laboratorio/patología | `00000000-0000-4000-8000-000000000001` |
 | `items[].componentConceptIds` | No | `array<string>` | máximo 500 elemento(s) | Componentes MARCADOS del panel. Obligatorio y no vacío si el estudio es un panel desplegable | `["00000000-0000-4000-8000-000000000001"]` |
-| `items[].imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001","bodyStructureUberon":"UBERON:0000955","bodyMeshId":"BP44","boneTypeConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `items[].imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.bodyStructureUberon` | No | `string` | longitud máxima 64 | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `UBERON:0000955` |
+| `items[].imaging.bodyMeshId` | No | `string` | longitud máxima 64 | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `BP44` |
+| `items[].imaging.boneTypeConceptId` | No | `string` | formato `uuid` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `00000000-0000-4000-8000-000000000001` |
 | `items[].duplicateDecision` | No | `RequisitionDuplicateDecisionDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","reusePreviousReport":true,"duplicateOverrideReason":"Texto descriptivo de ejemplo"}` |
 | `items[].duplicateDecision.previousDiagnosticReportId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].duplicateDecision.reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo | `true` |
@@ -7803,7 +7823,10 @@ Content-Type: application/json
         "modalityConceptId": "00000000-0000-4000-8000-000000000001",
         "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
         "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-        "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodyStructureUberon": "UBERON:0000955",
+        "bodyMeshId": "BP44",
+        "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
       },
       "duplicateDecision": {
         "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
@@ -7841,6 +7864,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "patientProfileId": "00000000-0000-4000-8000-000000000001",
       "formInstanceId": "00000000-0000-4000-8000-000000000001",
+      "reasonConditionId": "00000000-0000-4000-8000-000000000001",
       "category": {},
       "basedOnNoteIds": [
         "valor-ejemplo"
@@ -7877,7 +7901,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
         "lateralityDisplay": "valor-ejemplo",
         "contrastConceptId": "00000000-0000-4000-8000-000000000001",
-        "contrastDisplay": "valor-ejemplo"
+        "contrastDisplay": "valor-ejemplo",
+        "bodyStructureUberon": "valor-ejemplo",
+        "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeDisplay": "valor-ejemplo"
       },
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
@@ -7891,10 +7919,11 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `requisitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `replayed` | Sí | `boolean` | Sin restricción adicional declarada | true si la Idempotency-Key ya había creado esta requisición: se devuelve la existente sin escribir nada | `true` |
-| `items` | Sí | `array<ServiceRequestResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"status":"00000000-0000-4000-8000-000000000001","intent":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"requisitionId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<ServiceRequestResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","reasonConditionId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"status":"00000000-0000-4000-8000-000000000001","intent":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"requisitionId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `items[].formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonConditionId` | No | `string` | formato `uuid` | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `00000000-0000-4000-8000-000000000001` |
 | `items[].category` | No | `object` | Sin restricción adicional declarada | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `{}` |
 | `items[].basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | Notas médicas que motivan la orden (vacío = ninguna) | `["valor-ejemplo"]` |
 | `items[].status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -7917,7 +7946,7 @@ Campos de la respuesta:
 | `items[].components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
 | `items[].components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
 | `items[].componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
-| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"}` |
 | `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -7926,6 +7955,10 @@ Campos de la respuesta:
 | `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -7944,6 +7977,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | error.message | Excepción explícita en src/modules/clinical/services/requisitions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mismo estudio se pide dos veces en la requisición | Excepción explícita en src/modules/clinical/services/requisitions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La categoría indicada no corresponde al concepto de categoría | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El diagnóstico indicado no existe o no es de esta persona | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
@@ -8028,10 +8062,17 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `modalityConceptId` | No | `string` | formato `uuid` | Equivale a `imaging.modalityConceptId` | `00000000-0000-4000-8000-000000000001` |
+| `bodySiteConceptId` | No | `string` | formato `uuid` | Equivale a `imaging.bodySiteConceptId` | `00000000-0000-4000-8000-000000000001` |
+| `lateralityConceptId` | No | `string` | formato `uuid` | Equivale a `imaging.lateralityConceptId` | `00000000-0000-4000-8000-000000000001` |
+| `bodyStructureUberon` | No | `string` | longitud máxima 64 | Equivale a `imaging.bodyStructureUberon` | `valor-ejemplo` |
+| `bodyMeshId` | No | `string` | longitud máxima 64 | Equivale a `imaging.bodyMeshId` | `00000000-0000-4000-8000-000000000001` |
+| `boneTypeConceptId` | No | `string` | formato `uuid` | Equivale a `imaging.boneTypeConceptId` | `00000000-0000-4000-8000-000000000001` |
 | `custodianTenantId` | Sí | `string` | formato `uuid` | Tenant custodio (directory.tenants) | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente (profiles.patient_profiles) | `00000000-0000-4000-8000-000000000001` |
 | `encounterId` | No | `string` | formato `uuid` | Encuentro en curso | `00000000-0000-4000-8000-000000000001` |
 | `formInstanceId` | No | `string` | formato `uuid` | Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no) | `00000000-0000-4000-8000-000000000001` |
+| `reasonConditionId` | No | `string` | formato `uuid` | Diagnóstico (clinical.conditions) que el estudio se pide para confirmar, descartar o seguir. Debe ser del mismo paciente que la orden (si no, o si no existe: 422 SERVICE_REQUEST_REASON_CONDITION_INVALID, sin distinguir el motivo) | `00000000-0000-4000-8000-000000000001` |
 | `codeConceptId` | Sí | `string` | formato `uuid` | Código del servicio pedido (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `categoryConceptId` | No | `string` | formato `uuid` | Categoría (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `category` | No | `string` | valores: `LAB`, `IMAGING`, `OTHER` | Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH | `LAB` |
@@ -8044,11 +8085,14 @@ Content-Type: application/json
 | `suggestedPracticeSiteId` | No | `string` | formato `uuid` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `00000000-0000-4000-8000-000000000001` |
 | `specimenTypeConceptId` | No | `string` | formato `uuid` | Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica (422 SPECIMEN_NOT_ALLOWED_FOR_CATEGORY / SPECIMEN_TYPE_NOT_IN_CATALOG, con details.reason) | `00000000-0000-4000-8000-000000000001` |
 | `componentConceptIds` | No | `array<string>` | máximo 500 elemento(s) | Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige la lista y no vacía (422 COMPONENTS_EMPTY); un estudio que no es panel la prohíbe (COMPONENTS_NOT_SELECTABLE); uno ajeno al panel: COMPONENT_NOT_IN_PANEL | `["00000000-0000-4000-8000-000000000001"]` |
-| `imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001","bodyStructureUberon":"UBERON:0000955","bodyMeshId":"BP44","boneTypeConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
 | `imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
 | `imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
 | `imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodyStructureUberon` | No | `string` | longitud máxima 64 | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `UBERON:0000955` |
+| `imaging.bodyMeshId` | No | `string` | longitud máxima 64 | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `BP44` |
+| `imaging.boneTypeConceptId` | No | `string` | formato `uuid` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `00000000-0000-4000-8000-000000000001` |
 | `suggestedCareSpaceId` | No | `string` | formato `uuid` | Punto de toma sugerido (F5b) | `00000000-0000-4000-8000-000000000001` |
 | `previousDiagnosticReportId` | No | `string` | formato `uuid` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `00000000-0000-4000-8000-000000000001` |
 | `reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo detectado en vez de repetir el estudio | `true` |
@@ -8065,10 +8109,17 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
+  "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+  "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+  "bodyStructureUberon": "valor-ejemplo",
+  "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+  "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "custodianTenantId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "encounterId": "00000000-0000-4000-8000-000000000001",
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "reasonConditionId": "00000000-0000-4000-8000-000000000001",
   "codeConceptId": "00000000-0000-4000-8000-000000000001",
   "categoryConceptId": "00000000-0000-4000-8000-000000000001",
   "category": "LAB",
@@ -8089,7 +8140,10 @@ Content-Type: application/json
     "modalityConceptId": "00000000-0000-4000-8000-000000000001",
     "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
     "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-    "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodyStructureUberon": "UBERON:0000955",
+    "bodyMeshId": "BP44",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
   },
   "suggestedCareSpaceId": "00000000-0000-4000-8000-000000000001",
   "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
@@ -8120,6 +8174,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "reasonConditionId": "00000000-0000-4000-8000-000000000001",
   "category": {},
   "basedOnNoteIds": [
     "valor-ejemplo"
@@ -8156,7 +8211,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
     "lateralityDisplay": "valor-ejemplo",
     "contrastConceptId": "00000000-0000-4000-8000-000000000001",
-    "contrastDisplay": "valor-ejemplo"
+    "contrastDisplay": "valor-ejemplo",
+    "bodyStructureUberon": "valor-ejemplo",
+    "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "boneTypeDisplay": "valor-ejemplo"
   },
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
@@ -8169,6 +8228,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
+| `reasonConditionId` | No | `string` | formato `uuid` | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `00000000-0000-4000-8000-000000000001` |
 | `category` | No | `object` | Sin restricción adicional declarada | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `{}` |
 | `basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | Notas médicas que motivan la orden (vacío = ninguna) | `["valor-ejemplo"]` |
 | `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -8191,7 +8251,7 @@ Campos de la respuesta:
 | `components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
 | `components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
 | `componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
-| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"}` |
 | `imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -8200,6 +8260,10 @@ Campos de la respuesta:
 | `imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -8215,6 +8279,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La categoría indicada no corresponde al concepto de categoría | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El diagnóstico indicado no existe o no es de esta persona | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
@@ -8325,6 +8390,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "reasonConditionId": "00000000-0000-4000-8000-000000000001",
   "category": {},
   "basedOnNoteIds": [
     "valor-ejemplo"
@@ -8361,7 +8427,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
     "lateralityDisplay": "valor-ejemplo",
     "contrastConceptId": "00000000-0000-4000-8000-000000000001",
-    "contrastDisplay": "valor-ejemplo"
+    "contrastDisplay": "valor-ejemplo",
+    "bodyStructureUberon": "valor-ejemplo",
+    "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "boneTypeDisplay": "valor-ejemplo"
   },
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
@@ -8374,6 +8444,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
+| `reasonConditionId` | No | `string` | formato `uuid` | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `00000000-0000-4000-8000-000000000001` |
 | `category` | No | `object` | Sin restricción adicional declarada | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `{}` |
 | `basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | Notas médicas que motivan la orden (vacío = ninguna) | `["valor-ejemplo"]` |
 | `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -8396,7 +8467,7 @@ Campos de la respuesta:
 | `components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
 | `components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
 | `componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `true` |
-| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"}` |
 | `imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -8405,6 +8476,10 @@ Campos de la respuesta:
 | `imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `imaging.bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging.boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

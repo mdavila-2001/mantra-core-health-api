@@ -10,17 +10,17 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [affiliation_invitation_uses](#affiliation_invitation_uses) | Deja rastro de cada uso, aceptado o rechazado, de una invitación de afiliación para auditar quién la canjeó y con qué resultado. | 6 | 6 | 0 | COINCIDE |
-| [affiliation_invitations](#affiliation_invitations) | Conserva las invitaciones por enlace o QR con las que una organización afilia a un profesional o a personal de apoyo, guardando solo el hash del secreto, el tope de usos y el vencimiento. | 15 | 8 | 0 | COINCIDE |
+| [affiliation_invitation_uses](#affiliation_invitation_uses) | Deja rastro de cada uso, aceptado o rechazado, de una invitación de afiliación para auditar quién la canjeó y con qué resultado. | 6 | 6 | 1 | COINCIDE |
+| [affiliation_invitations](#affiliation_invitations) | Conserva las invitaciones por enlace o QR con las que una organización afilia a un profesional o a personal de apoyo, guardando solo el hash del secreto, el tope de usos y el vencimiento. | 15 | 8 | 5 | COINCIDE |
 | [branch_memberships](#branch_memberships) | Relaciona miembros con sedes específicas para representar su asignación operativa dentro de una organización. | 12 | 8 | 77 | COINCIDE |
-| [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 16 | 7 | 25 | COINCIDE |
-| [tenant_affiliation_documents](#tenant_affiliation_documents) | Conserva documentos que respaldan afiliaciones de tenants con organizaciones o redes del sistema médico. | 23 | 8 | 12 | COINCIDE |
-| [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 4 | COINCIDE |
+| [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 16 | 7 | 25 | DIVERGE |
+| [tenant_affiliation_documents](#tenant_affiliation_documents) | Conserva documentos que respaldan afiliaciones de tenants con organizaciones o redes del sistema médico. | 23 | 8 | 13 | COINCIDE |
+| [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 5 | COINCIDE |
 | [tenant_medical_facilities](#tenant_medical_facilities) | sin propósito | 16 | 5 | 3 | COINCIDE |
 | [tenant_medical_facility_sites](#tenant_medical_facility_sites) | sin propósito | 14 | 6 | 3 | COINCIDE |
-| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 18 | 14 | 323 | COINCIDE |
+| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 18 | 14 | 344 | COINCIDE |
 | [tenant_web_configs](#tenant_web_configs) | Almacena configuración web por tenant para presentar y dirigir servicios institucionales bajo sus dominios. | 18 | 3 | 0 | COINCIDE |
-| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 173 | COINCIDE |
+| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 181 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -154,7 +154,7 @@ Deja rastro de cada uso, aceptado o rechazado, de una invitación de afiliación
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: affiliation_invitation_uses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `AffiliationInvitationUses` — `src/modules/directory/entities/affiliation_invitation_uses.entity.ts`
-- **Resumen:** 6 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 6 columnas · 6 índices · 4 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -195,7 +195,9 @@ Deja rastro de cada uso, aceptado o rechazado, de una invitación de afiliación
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /affiliation-invitations/redeem | CREA | POR_SQL |
 
 #### Gobierno
 
@@ -220,7 +222,7 @@ Conserva las invitaciones por enlace o QR con las que una organización afilia a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: affiliation_invitations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `AffiliationInvitations` — `src/modules/directory/entities/affiliation_invitations.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 1 entrantes · 0 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -277,7 +279,13 @@ Conserva las invitaciones por enlace o QR con las que una organización afilia a
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /affiliation-invitations/redeem | ACTUALIZA | POR_SQL |
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
+| GET /org/affiliation-invitations | LEE | POR_SQL |
+| POST /org/affiliation-invitations | CREA | POR_SQL |
+| POST /org/affiliation-invitations/{id}/revoke | ACTUALIZA | POR_SQL |
 
 #### Gobierno
 
@@ -458,7 +466,7 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:12`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:13`)_ | coincide |
 | 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
@@ -468,12 +476,12 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 | 8 | `latitude` | `numeric` | Opcional | _sin dato_ | coincide |
 | 9 | `longitude` | `numeric` | Opcional | _sin dato_ | coincide |
 | 10 | `description` | `text` | Opcional | + v4.2.43 (P54 carga masiva de sucursales · P50 alta pública de farmacia): la sucursal declarada en el alta o subida en lote trae un texto de descripción y el enlace de mapa tal como se pegó. Ambas opcionales, sin backfill. Estaban en el parche 2026-10-11_v4243 y en la copia de la API, pero no en el modelo. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_04_directory.puml:53`)_ | coincide |
-| 11 | `location_url` | `varchar(2000)` | Opcional | Enlace de mapa tal como lo pegó la persona (http/https). _(JSDOC_ENTIDAD, `src/modules/directory/entities/branches.entity.ts:68`)_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:78`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:84`)_ | coincide |
+| 11 | `location_url` | `varchar(2000)` | Opcional | Enlace de mapa tal como lo pegó la persona (http/https). _(JSDOC_ENTIDAD, `src/modules/directory/entities/branches.entity.ts:69`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:90`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/directory/entities/branches.entity.ts:96`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/directory/entities/branches.entity.ts:102`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/directory/entities/branches.entity.ts:114`)_ | coincide |
 
 #### Relaciones
 
@@ -513,7 +521,7 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_branches_tenant_id` | no | tenant_id | Soporta la clave foránea fk_branches_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_branches_tenant_id` | no | tenant_id | Soporta la clave foránea fk_branches_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_branches_branch_type_concept_id` | no | branch_type_concept_id | Soporta la clave foránea fk_branches_branch_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_branches_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_branches_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_branches_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_branches_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -574,7 +582,7 @@ Conserva documentos que respaldan afiliaciones de tenants con organizaciones o r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_affiliation_documents`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantAffiliationDocuments` — `src/modules/directory/entities/tenant_affiliation_documents.entity.ts`
-- **Resumen:** 23 columnas · 8 índices · 11 FK salientes · 1 entrantes · 12 operaciones
+- **Resumen:** 23 columnas · 8 índices · 11 FK salientes · 1 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -654,6 +662,7 @@ Conserva documentos que respaldan afiliaciones de tenants con organizaciones o r
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 
@@ -680,7 +689,7 @@ Identifica representantes legales asociados a organizaciones para sostener trám
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_legal_representatives`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantLegalRepresentatives` — `src/modules/directory/entities/tenant_legal_representatives.entity.ts`
-- **Resumen:** 16 columnas · 4 índices · 8 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 16 columnas · 4 índices · 8 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -736,6 +745,7 @@ Identifica representantes legales asociados a organizaciones para sostener trám
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
@@ -927,7 +937,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_memberships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantMemberships` — `src/modules/directory/entities/tenant_memberships.entity.ts`
-- **Resumen:** 18 columnas · 14 índices · 12 FK salientes · 2 entrantes · 323 operaciones
+- **Resumen:** 18 columnas · 14 índices · 12 FK salientes · 2 entrantes · 344 operaciones
 
 #### Columnas
 
@@ -975,11 +985,11 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_tenant_memberships_user_id` | no | user_id | Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 15 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_tenant_memberships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_tenant_memberships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 15 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_user_id` | no | user_id | Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 19 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_tenant_memberships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 18 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenant_memberships_primary_branch_id` | no | primary_branch_id | Soporta la clave foránea fk_tenant_memberships_primary_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_tenant_memberships_tenant_role_concept_id` | no | tenant_role_concept_id | Soporta la clave foránea fk_tenant_memberships_tenant_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_role_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_tenant_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenant_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 13 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_tenant_role_concept_id` | no | tenant_role_concept_id | Soporta la clave foránea fk_tenant_memberships_tenant_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «tenant_role_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenant_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 16 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenant_memberships_access_scope_concept_id` | no | access_scope_concept_id | Soporta la clave foránea fk_tenant_memberships_access_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_invited_by_user_id` | no | invited_by_user_id | Soporta la clave foránea fk_tenant_memberships_invited_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_tenant_memberships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -988,7 +998,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | `ix_tenant_memberships_workday_concept_id` | no | workday_concept_id | Soporta la clave foránea fk_tenant_memberships_workday_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_responsible_user_id` | no | responsible_user_id | Soporta la clave foránea fk_tenant_memberships_responsible_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_origin_concept_id` | no | origin_concept_id | Soporta la clave foránea fk_tenant_memberships_origin_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_tenant_memberships_active_user_tenant` | sí | user_id, tenant_id donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' | Garantiza que no se repita la combinación (user_id, tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' _(ESTRUCTURAL)_; 15 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_tenant_memberships_active_user_tenant` | sí | user_id, tenant_id donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' | Garantiza que no se repita la combinación (user_id, tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' _(ESTRUCTURAL)_; 19 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -1050,6 +1060,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
@@ -1090,6 +1101,8 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | GET /approvals/pending | LEE | POR_SQL |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
@@ -1113,6 +1126,9 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /me/support-engagements/{id}/leave | ACTUALIZA | POR_TIPO |
 | POST /me/support-engagements/{id}/leave | LEE | DIRECTA |
 | POST /org/{tenantMembershipId}/user-assignments | LEE | POR_SQL |
+| GET /org/affiliation-invitations | LEE | POR_SQL |
+| POST /org/affiliation-invitations | LEE | POR_SQL |
+| POST /org/affiliation-invitations/{id}/revoke | LEE | POR_SQL |
 | GET /org/support-catalog | LEE | POR_SQL |
 | GET /org/support-engagement-requests | LEE | POR_SQL |
 | POST /org/support-engagement-requests/{id}/decision | ACTUALIZA | POR_TIPO |
@@ -1140,6 +1156,12 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
 | GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
 | POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/signers | LEE | DIRECTA |
+| GET /diagnostics/report-issuer-settings | LEE | DIRECTA |
+| PUT /diagnostics/report-issuer-settings | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/suspend | ACTUALIZA | POR_TIPO |
 | POST /admin/tenants/{tenantId}/suspend | LEE | DIRECTA |
@@ -1149,6 +1171,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /tenants/{tenantId}/branches | LEE | DIRECTA |
 | POST /tenants/{tenantId}/branches | LEE | DIRECTA |
 | PATCH /tenants/{tenantId}/branches/{branchId} | LEE | DIRECTA |
+| POST /tenants/{tenantId}/branches/location-preview | LEE | DIRECTA |
 | GET /tenants/{tenantId}/child-tenants | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
@@ -1168,7 +1191,13 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | ACTUALIZA | POR_TIPO |
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
+| GET /tenants/me/membership-invitations | LEE | DIRECTA |
+| POST /tenants/me/membership-invitations/{membershipId}/accept | ACTUALIZA | POR_TIPO |
+| POST /tenants/me/membership-invitations/{membershipId}/accept | LEE | DIRECTA |
+| POST /tenants/me/membership-invitations/{membershipId}/decline | ACTUALIZA | POR_TIPO |
+| POST /tenants/me/membership-invitations/{membershipId}/decline | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
@@ -1207,6 +1236,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /insurance-carriers/{id} | LEE | DIRECTA |
 | PUT /insurance-carriers/{id}/contact-channels | LEE | DIRECTA |
 | POST /insurance-claims | LEE | DIRECTA |
+| POST /insurance-claims/{id}/adjudications | LEE | DIRECTA |
 | POST /insurance-claims/{id}/eob | LEE | DIRECTA |
 | POST /insurance-claims/{id}/reversals | LEE | DIRECTA |
 | POST /insurance-plans/{planId}/benefits | LEE | DIRECTA |
@@ -1316,6 +1346,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
@@ -1423,7 +1454,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenants`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Tenants` — `src/modules/directory/entities/tenants.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 372 entrantes · 173 operaciones
+- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 372 entrantes · 181 operaciones
 
 #### Columnas
 
@@ -1894,6 +1925,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
@@ -1930,6 +1962,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
 | PUT /community/reactions | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | GET /approvals/pending | LEE | POR_SQL |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
@@ -1953,9 +1986,13 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
 | POST /support-engagement-requests | LEE | POR_SQL |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
+| GET /public/diagnostic-reports/{versionId}/verify | LEE | DIRECTA |
 | GET /admin/tenants | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
@@ -1981,6 +2018,8 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
+| GET /tenants/me/membership-invitations | LEE | DIRECTA |
+| GET /iam/auth/identifier-exists | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
@@ -2015,13 +2054,13 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
-| GET /scheduling/bookable-organizations | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |

@@ -5417,7 +5417,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "displayName": "Nombre de ejemplo",
       "birthDate": "2026-07-31",
       "personStatusConceptId": "00000000-0000-4000-8000-000000000001",
-      "deceased": true
+      "deceased": true,
+      "nationalIdMasked": "valor-ejemplo",
+      "hasAccount": true
     }
   ],
   "count": 1,
@@ -5430,7 +5432,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
+| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true,"nationalIdMasked":"valor-ejemplo","hasAccount":true}]` |
 | `items[].profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientCode` | Sí | `string` | Sin restricción adicional declarada | Código único de paciente | `CODIGO_EJEMPLO` |
@@ -5438,6 +5440,8 @@ Campos de la respuesta:
 | `items[].birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].personStatusConceptId` | No | `string` | formato `uuid` | Concept id del estado de la persona | `00000000-0000-4000-8000-000000000001` |
 | `items[].deceased` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `true` |
+| `items[].nationalIdMasked` | No | `string` | admite null | Documento enmascarado (sólo los últimos dígitos), para distinguir homónimos | `valor-ejemplo` |
+| `items[].hasAccount` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona tiene cuenta propia en la plataforma: sin ella, una solicitud de vinculación no le llega | `true` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 | `nextCursor` | No | `object` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `{}` |
@@ -5451,9 +5455,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5524,6 +5525,7 @@ Content-Type: application/json
 | `administrativeGenderConceptId` | No | `string` | formato `uuid` | Concept id de género administrativo | `00000000-0000-4000-8000-000000000001` |
 | `sexAtBirthConceptId` | No | `string` | formato `uuid` | Concept id de sexo al nacer | `00000000-0000-4000-8000-000000000001` |
 | `masterPatientIndexCode` | No | `string` | longitud máxima 100 | Código MPI maestro (UK) | `CODIGO_EJEMPLO` |
+| `allowHomonym` | No | `boolean` | Sin restricción adicional declarada | Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT) | `true` |
 
 ### Payload completo de ejemplo
 
@@ -5541,7 +5543,8 @@ Content-Type: application/json
   "birthDate": "2026-07-31",
   "administrativeGenderConceptId": "00000000-0000-4000-8000-000000000001",
   "sexAtBirthConceptId": "00000000-0000-4000-8000-000000000001",
-  "masterPatientIndexCode": "CODIGO_EJEMPLO"
+  "masterPatientIndexCode": "CODIGO_EJEMPLO",
+  "allowHomonym": true
 }
 ```
 
@@ -8145,6 +8148,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "birthDate": "2018-03-14",
     "ageYears": 1,
     "nationalId": "00000000-0000-4000-8000-000000000001",
+    "sexAtBirth": "MALE",
     "relationshipCode": "CHILD",
     "relationshipDisplay": "Hijo/a",
     "isLegalGuardian": true
@@ -8292,6 +8296,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2018-03-14",
   "ageYears": 1,
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "sexAtBirth": "MALE",
   "relationshipCode": "CHILD",
   "relationshipDisplay": "Hijo/a",
   "isLegalGuardian": true
@@ -8311,6 +8316,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2018-03-14` |
 | `ageYears` | No | `number` | Sin restricción adicional declarada | Edad cumplida en años | `1` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
 | `relationshipCode` | Sí | `string` | valores: `CHILD`, `PARENT`, `SPOUSE`, `WARD`, `OTHER` | Parentesco visto desde el dependiente | `CHILD` |
 | `relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Rótulo en castellano | `Hijo/a` |
 | `isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Si el vínculo afirma la tutela legal | `true` |
@@ -9523,11 +9529,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente sobreviviente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
-| 404 | `NOT_FOUND` | Paciente a fusionar no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | El paciente ya fue fusionado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No se puede fusionar un paciente consigo mismo | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -9904,7 +9906,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "displayName": "Nombre de ejemplo",
       "birthDate": "2026-07-31",
       "personStatusConceptId": "00000000-0000-4000-8000-000000000001",
-      "deceased": true
+      "deceased": true,
+      "nationalIdMasked": "valor-ejemplo",
+      "hasAccount": true
     }
   ],
   "count": 1,
@@ -9917,7 +9921,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
+| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true,"nationalIdMasked":"valor-ejemplo","hasAccount":true}]` |
 | `items[].profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientCode` | Sí | `string` | Sin restricción adicional declarada | Código único de paciente | `CODIGO_EJEMPLO` |
@@ -9925,6 +9929,8 @@ Campos de la respuesta:
 | `items[].birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].personStatusConceptId` | No | `string` | formato `uuid` | Concept id del estado de la persona | `00000000-0000-4000-8000-000000000001` |
 | `items[].deceased` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `true` |
+| `items[].nationalIdMasked` | No | `string` | admite null | Documento enmascarado (sólo los últimos dígitos), para distinguir homónimos | `valor-ejemplo` |
+| `items[].hasAccount` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona tiene cuenta propia en la plataforma: sin ella, una solicitud de vinculación no le llega | `true` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 | `nextCursor` | No | `object` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `{}` |

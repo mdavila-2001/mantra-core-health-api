@@ -45,8 +45,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_ADMIN, PLATFORM_ADMIN | `src/modules/document_store/controllers/document-store.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -74,10 +74,10 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `data` | `array<object>` | Sí | — | — | Valor de data mantenido por la instancia. | `src/common/dto/page-response.dto.ts:33` |
 | `meta` | `PageMetaDto` | Sí | — | — | Valor de meta mantenido por la instancia. | `src/common/dto/page-response.dto.ts:39` |
-| `meta.page` | `number` | Sí | — | — | Valor de page mantenido por la instancia. | `src/common/dto/page-response.dto.ts:8` |
-| `meta.pageSize` | `number` | Sí | — | — | Valor de page size mantenido por la instancia. | `src/common/dto/page-response.dto.ts:12` |
-| `meta.total` | `number` | Sí | — | — | Valor de total mantenido por la instancia. | `src/common/dto/page-response.dto.ts:16` |
-| `meta.totalPages` | `number` | Sí | — | — | Valor de total pages mantenido por la instancia. | `src/common/dto/page-response.dto.ts:20` |
+| `meta.page` | `number` | Sí | — | — | — | `src/common/dto/page-response.dto.ts:8` |
+| `meta.pageSize` | `number` | Sí | — | — | — | `src/common/dto/page-response.dto.ts:12` |
+| `meta.total` | `number` | Sí | — | — | — | `src/common/dto/page-response.dto.ts:16` |
+| `meta.totalPages` | `number` | Sí | — | — | — | `src/common/dto/page-response.dto.ts:20` |
 
 ### Respuestas posibles
 
@@ -125,10 +125,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_ADMIN, PLATFORM_ADMIN | `src/modules/document_store/controllers/document-store.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -233,8 +233,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_ADMIN, PLATFORM_ADMIN | `src/modules/document_store/controllers/document-store.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -311,8 +311,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_ADMIN, PLATFORM_ADMIN | `src/modules/document_store/controllers/document-store.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -389,10 +389,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_ADMIN, PLATFORM_ADMIN | `src/modules/document_store/controllers/document-store.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

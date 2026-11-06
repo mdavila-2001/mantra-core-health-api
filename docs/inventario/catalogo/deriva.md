@@ -7,20 +7,27 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1370 |
-| Entidades del ORM | 1405 |
+| Entidades del ORM | 1412 |
 | Tablas del DDL con entidad | 1370 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 35 |
+| Entidades del ORM **sin** tabla en el DDL | 42 |
 | Columnas del DDL ausentes en su entidad | 0 |
 | Columnas con nulabilidad divergente | 8 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 0 |
+| Columnas de la entidad que el DDL no tiene | 16 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
+| `community.message_reactions` | MessageReactions | **en ninguna fuente de DDL del modelo** |
+| `diagnostic_units.diagnostic_service_categories` | DiagnosticServiceCategories | **en ninguna fuente de DDL del modelo** |
+| `diagnostics.report_draft_files` | ReportDraftFiles | **en ninguna fuente de DDL del modelo** |
+| `diagnostics.report_drafts` | ReportDrafts | **en ninguna fuente de DDL del modelo** |
+| `diagnostics.report_issuer_settings` | ReportIssuerSettings | **en ninguna fuente de DDL del modelo** |
+| `diagnostics.service_request_performer_events` | ServiceRequestPerformerEvents | **en ninguna fuente de DDL del modelo** |
+| `directory.tenant_opening_hours` | TenantOpeningHours | **en ninguna fuente de DDL del modelo** |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |

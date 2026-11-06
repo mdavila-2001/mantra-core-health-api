@@ -52,7 +52,7 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 |---|---|---|---|---|---|
 | `UC-53-01` | Programar caso y reservar quirófano | POST /procedure-cases | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 14 |
 | `UC-53-02` | Diagnósticos y equipo | POST /procedure-cases/{id}/diagnoses | SURGEON · PERIOP_ADMIN | MEDIO | 11 |
-| `UC-53-03` | Valoración y riesgo | POST /procedure-cases/{id}/preoperative-assessments | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 11 |
+| `UC-53-03` | Valoración y riesgo | POST /procedure-cases/{id}/preoperative-assessments | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 21 |
 | `UC-53-04` | Clearance de órdenes | POST /procedure-cases/{id}/preoperative-orders/verify | ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 | `UC-53-05` | Checklist por fases | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
 | `UC-53-06` | Plan de anestesia | POST /procedure-cases/{id}/anesthesia-plans | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 3 |
@@ -64,24 +64,24 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 | `UC-53-12` | Recuperación | POST /procedure-cases/{id}/pacu-stays | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-13` | Cancelar y liberar quirófano | POST /procedure-cases/{id}/cancel | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-14` | Cargos y utilización | POST /procedure-cases/{id}/charge-items/post | PERIOP_ADMIN · BILLING | MEDIO | 3 |
-| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 26 |
+| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 28 |
 |  |  | GET /dental-procedures/catalog | CLINICIAN · PRACTITIONER | BAJO | 0 |
 | `ctrl:PeriopController` | Operaciones de PeriopController que el README no asigna a un caso de uso | POST /pacu-stays/{stayId}/assessments | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | POST /pacu-stays/{stayId}/discharge | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
 |  |  | GET /procedure-cases | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 5 |
-|  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 44 |
-|  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 16 |
+|  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 46 |
+|  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 26 |
 |  |  | POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
-|  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 9 |
+|  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 19 |
 |  |  | POST /procedure-cases/{id}/findings | SURGEON · PERIOP_ADMIN | MEDIO | 4 |
 |  |  | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | SURGEON · PERIOP_ADMIN | MEDIO | 7 |
 |  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 37 |
 |  |  | POST /procedure-cases/{id}/specimens | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | GET /procedure-cases/{id}/team-members | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
-|  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 8 |
+|  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 18 |
 |  |  | POST /procedure-cases/{id}/team-members/{memberId}/accept | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
-|  |  | POST /procedure-cases/{id}/team-members/{memberId}/respond | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | MEDIO | 7 |
+|  |  | POST /procedure-cases/{id}/team-members/{memberId}/respond | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | MEDIO | 17 |
 | `ctrl:PeriopOrController` | Operaciones de PeriopOrController que el README no asigna a un caso de uso | POST /internal/periop/or-blocks-release-tick | SYSTEM · SYSTEM_WORKER | MEDIO | 3 |
 |  |  | POST /or-blocks/{id}/cancel | Cualquier sesión válida | ALTO | 10 |
 |  |  | POST /or-blocks/{id}/release | Cualquier sesión válida | ALTO | 10 |
@@ -100,13 +100,13 @@ flowchart LR
   a2(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
   a11(["SURGEON · PERIOP_ADMIN"]):::actor
   a17(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
-  a25(["ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
-  a29(["PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
-  a35(["ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
-  a42(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
-  a56(["PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
-  a62(["PERIOP_ADMIN · BILLING"]):::actor
-  a65(["CLINICIAN · PRACTITIONER"]):::actor
+  a26(["ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a30(["PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a36(["ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a43(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a57(["PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a63(["PERIOP_ADMIN · BILLING"]):::actor
+  a66(["CLINICIAN · PRACTITIONER"]):::actor
   t3[("clinical.encounter_locations")]:::tabla
   t4[("practice.care_space_blocks")]:::tabla
   t5[("practice.care_spaces")]:::tabla
@@ -117,38 +117,39 @@ flowchart LR
   t13[("audit.conditions_history")]:::tabla
   t14[("clinical.conditions")]:::tabla
   t18[("messaging.domain_events")]:::tabla
-  t19[("messaging.outbox_messages")]:::tabla
-  t20[("procedures_perioperative.preoperative_assessments")]:::tabla
-  t21[("procedures_perioperative.preoperative_risk_scores")]:::tabla
+  t19[("messaging.in_app_notifications")]:::tabla
+  t20[("messaging.message_channels")]:::tabla
+  t21[("messaging.messaging_providers")]:::tabla
   e23>"periop.case.reacceptance_required"]:::evento
-  t26[("procedures_perioperative.preoperative_orders")]:::tabla
-  t27[("procedures_perioperative.procedure_case_status_hi…")]:::tabla
-  t30[("procedures_perioperative.procedure_case_milestones")]:::tabla
-  t31[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
-  t32[("procedures_perioperative.surgical_safety_items")]:::tabla
-  t33[("procedures_perioperative.surgical_safety_responses")]:::tabla
-  t36[("procedures_perioperative.anesthesia_airway_assess…")]:::tabla
-  t37[("procedures_perioperative.anesthesia_plans")]:::tabla
-  t39[("procedures_perioperative.anesthesia_events")]:::tabla
-  t40[("procedures_perioperative.operating_room_utilizati…")]:::tabla
-  t43[("procedures_perioperative.operative_steps")]:::tabla
-  t45[("procedures_perioperative.implant_identifiers")]:::tabla
-  t46[("procedures_perioperative.procedure_devices")]:::tabla
-  t47[("procedures_perioperative.procedure_implants")]:::tabla
-  t49[("procedures_perioperative.procedure_medication_uses")]:::tabla
-  t51[("clinical.procedures")]:::tabla
-  t52[("clinical.received_services")]:::tabla
-  t53[("clinical.service_requests")]:::tabla
-  t57[("procedures_perioperative.pacu_stays")]:::tabla
-  t58[("procedures_perioperative.procedure_case_locations")]:::tabla
-  t60[("procedures_perioperative.procedure_cancellations")]:::tabla
-  t63[("procedures_perioperative.procedure_charge_items")]:::tabla
-  t66[("authz.access_policies")]:::tabla
-  t67[("authz.care_relationships")]:::tabla
-  t68[("authz.clinical_access_grants")]:::tabla
-  t69[("authz.field_permissions")]:::tabla
-  t70[("authz.patient_legal_representations")]:::tabla
-  t71[("authz.permissions")]:::tabla
+  e24>"~null"]:::evento
+  t27[("procedures_perioperative.preoperative_orders")]:::tabla
+  t28[("procedures_perioperative.procedure_case_status_hi…")]:::tabla
+  t31[("procedures_perioperative.procedure_case_milestones")]:::tabla
+  t32[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
+  t33[("procedures_perioperative.surgical_safety_items")]:::tabla
+  t34[("procedures_perioperative.surgical_safety_responses")]:::tabla
+  t37[("procedures_perioperative.anesthesia_airway_assess…")]:::tabla
+  t38[("procedures_perioperative.anesthesia_plans")]:::tabla
+  t40[("procedures_perioperative.anesthesia_events")]:::tabla
+  t41[("procedures_perioperative.operating_room_utilizati…")]:::tabla
+  t44[("procedures_perioperative.operative_steps")]:::tabla
+  t46[("procedures_perioperative.implant_identifiers")]:::tabla
+  t47[("procedures_perioperative.procedure_devices")]:::tabla
+  t48[("procedures_perioperative.procedure_implants")]:::tabla
+  t50[("procedures_perioperative.procedure_medication_uses")]:::tabla
+  t52[("clinical.procedures")]:::tabla
+  t53[("clinical.received_services")]:::tabla
+  t54[("clinical.service_requests")]:::tabla
+  t58[("procedures_perioperative.pacu_stays")]:::tabla
+  t59[("procedures_perioperative.procedure_case_locations")]:::tabla
+  t61[("procedures_perioperative.procedure_cancellations")]:::tabla
+  t64[("procedures_perioperative.procedure_charge_items")]:::tabla
+  t67[("authz.access_policies")]:::tabla
+  t68[("authz.care_relationships")]:::tabla
+  t69[("authz.clinical_access_grants")]:::tabla
+  t70[("authz.field_permissions")]:::tabla
+  t71[("authz.patient_legal_representations")]:::tabla
+  t72[("authz.permissions")]:::tabla
   t9[("+8 tablas más")]
   subgraph s0["UC-53-01 · Programar caso y reservar quirófano"]
     o1["POST /procedure-cases"]:::op
@@ -157,50 +158,50 @@ flowchart LR
   subgraph s1["UC-53-02 · Diagnósticos y equipo"]
     o10["POST /procedure-cases/{id}/diagnoses"]:::op
   end
-  t22[("+5 tablas más")]
+  t22[("+15 tablas más")]
   subgraph s2["UC-53-03 · Valoración y riesgo"]
     o16["POST /procedure-cases/{id}/preoperative-assessments"]:::op
   end
   subgraph s3["UC-53-04 · Clearance de órdenes"]
-    o24["POST /procedure-cases/{id}/preoperative-orders/verify"]:::op
+    o25["POST /procedure-cases/{id}/preoperative-orders/verify"]:::op
   end
   subgraph s4["UC-53-05 · Checklist por fases"]
-    o28["POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses"]:::op
+    o29["POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses"]:::op
   end
   subgraph s5["UC-53-06 · Plan de anestesia"]
-    o34["POST /procedure-cases/{id}/anesthesia-plans"]:::op
+    o35["POST /procedure-cases/{id}/anesthesia-plans"]:::op
   end
   subgraph s6["UC-53-07 · Eventos intraoperatorios"]
-    o38["POST /procedure-cases/{id}/anesthesia-events"]:::op
+    o39["POST /procedure-cases/{id}/anesthesia-events"]:::op
   end
   subgraph s7["UC-53-08 · Pasos y hallazgos"]
-    o41["POST /procedure-cases/{id}/operative-steps"]:::op
+    o42["POST /procedure-cases/{id}/operative-steps"]:::op
   end
   subgraph s8["UC-53-09 · Implantes con UDI, lote y serie"]
-    o44["POST /procedure-cases/{id}/implants"]:::op
+    o45["POST /procedure-cases/{id}/implants"]:::op
   end
   subgraph s9["UC-53-10 · Insumos y muestras"]
-    o48["POST /procedure-cases/{id}/medication-uses"]:::op
+    o49["POST /procedure-cases/{id}/medication-uses"]:::op
   end
-  t54[("+4 tablas más")]
+  t55[("+4 tablas más")]
   subgraph s10["UC-53-11 · Reporte operatorio"]
-    o50["POST /procedure-cases/{id}/operative-reports"]:::op
+    o51["POST /procedure-cases/{id}/operative-reports"]:::op
   end
   subgraph s11["UC-53-12 · Recuperación"]
-    o55["POST /procedure-cases/{id}/pacu-stays"]:::op
+    o56["POST /procedure-cases/{id}/pacu-stays"]:::op
   end
   subgraph s12["UC-53-13 · Cancelar y liberar quirófano"]
-    o59["POST /procedure-cases/{id}/cancel"]:::op
+    o60["POST /procedure-cases/{id}/cancel"]:::op
   end
   subgraph s13["UC-53-14 · Cargos y utilización"]
-    o61["POST /procedure-cases/{id}/charge-items/post"]:::op
+    o62["POST /procedure-cases/{id}/charge-items/post"]:::op
   end
-  t72[("+16 tablas más")]
-  t74[("+20 tablas más")]
+  t73[("+18 tablas más")]
+  t75[("+22 tablas más")]
   subgraph s14["ctrl:DentalController · Operaciones de DentalController que el README no asigna…"]
-    o64["GET /dental-procedures"]:::op
-    o73["POST /dental-procedures"]:::op
-    o75["GET /dental-procedures/catalog"]:::op
+    o65["GET /dental-procedures"]:::op
+    o74["POST /dental-procedures"]:::op
+    o76["GET /dental-procedures/catalog"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -220,81 +221,82 @@ flowchart LR
   o10 -.-> t15
   a17 --> o16
   o16 -->|"CREA"| t18
+  o16 -->|"ACTUALIZA"| t19
   o16 -->|"CREA"| t19
   o16 -->|"LEE"| t19
-  o16 -->|"CREA"| t20
   o16 -->|"LEE"| t20
-  o16 -->|"CREA"| t21
+  o16 -->|"LEE"| t21
   o16 -.-> t22
   o16 -->|"evento"| e23
-  a25 --> o24
-  o24 -->|"LEE"| t26
-  o24 -->|"CREA"| t27
-  a29 --> o28
-  o28 -->|"CREA"| t30
-  o28 -->|"ACTUALIZA"| t31
-  o28 -->|"LEE"| t31
-  o28 -->|"LEE"| t32
-  o28 -->|"CREA"| t33
-  o28 -->|"LEE"| t33
-  a35 --> o34
-  o34 -->|"CREA"| t36
-  o34 -->|"CREA"| t37
-  o34 -->|"LEE"| t37
-  a25 --> o38
-  o38 -->|"CREA"| t39
-  o38 -->|"LEE"| t37
-  o38 -->|"CREA"| t40
-  o38 -->|"CREA"| t30
-  o38 -->|"LEE"| t30
-  o38 -->|"CREA"| t27
-  a42 --> o41
-  o41 -->|"CREA"| t43
-  o41 -->|"LEE"| t43
-  a42 --> o44
-  o44 -->|"CREA"| t45
-  o44 -->|"CREA"| t46
-  o44 -->|"CREA"| t47
-  a25 --> o48
-  o48 -->|"LEE"| t43
-  o48 -->|"CREA"| t49
-  a11 --> o50
-  o50 -->|"CREA"| t51
-  o50 -->|"LEE"| t51
-  o50 -->|"CREA"| t52
-  o50 -->|"LEE"| t52
-  o50 -->|"ACTUALIZA"| t53
-  o50 -->|"LEE"| t53
-  o50 -.-> t54
-  a56 --> o55
-  o55 -->|"CREA"| t57
-  o55 -->|"LEE"| t57
-  o55 -->|"CREA"| t58
-  a2 --> o59
-  o59 -->|"CREA"| t40
-  o59 -->|"CREA"| t60
-  o59 -->|"CREA"| t27
-  a62 --> o61
-  o61 -->|"CREA"| t40
-  o61 -->|"CREA"| t63
-  o61 -->|"LEE"| t63
-  a65 --> o64
-  o64 -->|"LEE"| t66
-  o64 -->|"LEE"| t67
-  o64 -->|"LEE"| t68
-  o64 -->|"LEE"| t69
-  o64 -->|"LEE"| t70
-  o64 -->|"LEE"| t71
-  o64 -.-> t72
-  a65 --> o73
-  o73 -->|"CREA"| t12
-  o73 -->|"LEE"| t12
-  o73 -->|"LEE"| t66
-  o73 -->|"LEE"| t67
-  o73 -->|"LEE"| t68
-  o73 -->|"LEE"| t69
-  o73 -.-> t74
-  a65 --> o75
+  o16 -->|"evento"| e24
+  a26 --> o25
+  o25 -->|"LEE"| t27
+  o25 -->|"CREA"| t28
+  a30 --> o29
+  o29 -->|"CREA"| t31
+  o29 -->|"ACTUALIZA"| t32
+  o29 -->|"LEE"| t32
+  o29 -->|"LEE"| t33
+  o29 -->|"CREA"| t34
+  o29 -->|"LEE"| t34
+  a36 --> o35
+  o35 -->|"CREA"| t37
+  o35 -->|"CREA"| t38
+  o35 -->|"LEE"| t38
+  a26 --> o39
+  o39 -->|"CREA"| t40
+  o39 -->|"LEE"| t38
+  o39 -->|"CREA"| t41
+  o39 -->|"CREA"| t31
+  o39 -->|"LEE"| t31
+  o39 -->|"CREA"| t28
+  a43 --> o42
+  o42 -->|"CREA"| t44
+  o42 -->|"LEE"| t44
+  a43 --> o45
+  o45 -->|"CREA"| t46
+  o45 -->|"CREA"| t47
+  o45 -->|"CREA"| t48
+  a26 --> o49
+  o49 -->|"LEE"| t44
+  o49 -->|"CREA"| t50
+  a11 --> o51
+  o51 -->|"CREA"| t52
+  o51 -->|"LEE"| t52
+  o51 -->|"CREA"| t53
+  o51 -->|"LEE"| t53
+  o51 -->|"ACTUALIZA"| t54
+  o51 -->|"LEE"| t54
+  o51 -.-> t55
+  a57 --> o56
+  o56 -->|"CREA"| t58
+  o56 -->|"LEE"| t58
+  o56 -->|"CREA"| t59
+  a2 --> o60
+  o60 -->|"CREA"| t41
+  o60 -->|"CREA"| t61
+  o60 -->|"CREA"| t28
+  a63 --> o62
+  o62 -->|"CREA"| t41
+  o62 -->|"CREA"| t64
+  o62 -->|"LEE"| t64
+  a66 --> o65
+  o65 -->|"LEE"| t67
+  o65 -->|"LEE"| t68
+  o65 -->|"LEE"| t69
+  o65 -->|"LEE"| t70
+  o65 -->|"LEE"| t71
+  o65 -->|"LEE"| t72
+  o65 -.-> t73
+  a66 --> o74
+  o74 -->|"CREA"| t12
+  o74 -->|"LEE"| t12
+  o74 -->|"LEE"| t67
+  o74 -->|"LEE"| t68
+  o74 -->|"LEE"| t69
+  o74 -->|"LEE"| t70
+  o74 -.-> t75
+  a66 --> o76
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -309,13 +311,13 @@ flowchart LR
   a6(["ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
   a11(["SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDUL…"]):::actor
   a26(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
-  a41(["SURGEON · PERIOP_ADMIN"]):::actor
-  a52(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
-  a62(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
-  a75(["SYSTEM · SYSTEM_WORKER"]):::actor
-  a77(["Cualquier sesión válida"]):::actor
-  a86(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST"]):::actor
-  a91(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST ·…"]):::actor
+  a42(["SURGEON · PERIOP_ADMIN"]):::actor
+  a53(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
+  a64(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a77(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a79(["Cualquier sesión válida"]):::actor
+  a88(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST"]):::actor
+  a93(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST ·…"]):::actor
   t3[("procedures_perioperative.pacu_assessments")]:::tabla
   t4[("procedures_perioperative.pacu_stays")]:::tabla
   t7[("procedures_perioperative.postoperative_followups")]:::tabla
@@ -334,83 +336,86 @@ flowchart LR
   t23[("authz.permissions")]:::tabla
   t27[("clinical.encounter_locations")]:::tabla
   t28[("messaging.domain_events")]:::tabla
-  t29[("messaging.outbox_messages")]:::tabla
-  t30[("practice.care_space_blocks")]:::tabla
+  t29[("messaging.in_app_notifications")]:::tabla
+  t30[("messaging.message_channels")]:::tabla
   e32>"periop.case.reacceptance_required"]:::evento
-  t34[("procedures_perioperative.anesthesia_plans")]:::tabla
-  t36[("audit.audit_log")]:::tabla
-  t37[("iam.sessions")]:::tabla
-  e39>"periop.case.confirmation_blocked"]:::evento
-  t42[("procedures_perioperative.operative_findings")]:::tabla
-  t43[("procedures_perioperative.operative_steps")]:::tabla
-  t44[("procedures_perioperative.procedure_body_sites")]:::tabla
-  t46[("clinical.procedures")]:::tabla
-  t47[("clinical.received_services")]:::tabla
-  t48[("procedures_perioperative.operative_reports")]:::tabla
-  t49[("procedures_perioperative.procedure_case_milestones")]:::tabla
-  t53[("billing.service_catalog")]:::tabla
-  t54[("chart.clinical_note_headers")]:::tabla
-  t55[("clinical.diagnostic_reports")]:::tabla
-  t56[("clinical.encounters")]:::tabla
-  t57[("clinical.service_request_components")]:::tabla
-  e59>"ServiceRequestPlaced"]:::evento
-  e60>"clinical.service_request.collection_point_suggest…"]:::evento
-  t63[("procedures_perioperative.procedure_specimens")]:::tabla
-  t65[("procedures_perioperative.procedure_case_team_memb…")]:::tabla
-  t67[("procedures_perioperative.procedure_case_status_hi…")]:::tabla
-  t70[("profiles.professional_credentials")]:::tabla
-  e73>"periop.case.team_participation_declined"]:::evento
-  t78[("delegated_access.organization_user_assignments")]:::tabla
-  t79[("directory.branch_memberships")]:::tabla
-  t80[("directory.tenant_memberships")]:::tabla
-  t81[("practice.practice_sites")]:::tabla
-  t87[("practice.care_space_status_events")]:::tabla
-  t88[("practice.cleaning_orders")]:::tabla
-  t92[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
-  t93[("procedures_perioperative.surgical_safety_items")]:::tabla
-  t94[("procedures_perioperative.surgical_safety_responses")]:::tabla
-  t24[("+38 tablas más")]
-  t31[("+10 tablas más")]
-  t38[("+3 tablas más")]
-  t50[("+1 tablas más")]
-  t58[("+31 tablas más")]
-  t68[("+2 tablas más")]
-  t72[("+1 tablas más")]
+  e33>"~null"]:::evento
+  t35[("procedures_perioperative.anesthesia_plans")]:::tabla
+  t37[("audit.audit_log")]:::tabla
+  t38[("iam.sessions")]:::tabla
+  e40>"periop.case.confirmation_blocked"]:::evento
+  t43[("procedures_perioperative.operative_findings")]:::tabla
+  t44[("procedures_perioperative.operative_steps")]:::tabla
+  t45[("procedures_perioperative.procedure_body_sites")]:::tabla
+  t47[("clinical.procedures")]:::tabla
+  t48[("clinical.received_services")]:::tabla
+  t49[("procedures_perioperative.operative_reports")]:::tabla
+  t50[("procedures_perioperative.procedure_case_milestones")]:::tabla
+  t54[("billing.service_catalog")]:::tabla
+  t55[("chart.clinical_note_headers")]:::tabla
+  t56[("clinical.conditions")]:::tabla
+  t57[("clinical.diagnostic_reports")]:::tabla
+  t58[("clinical.encounters")]:::tabla
+  t59[("clinical.service_request_components")]:::tabla
+  e61>"ServiceRequestPlaced"]:::evento
+  e62>"clinical.service_request.collection_point_suggest…"]:::evento
+  t65[("procedures_perioperative.procedure_specimens")]:::tabla
+  t67[("procedures_perioperative.procedure_case_team_memb…")]:::tabla
+  t69[("messaging.messaging_providers")]:::tabla
+  t72[("profiles.professional_credentials")]:::tabla
+  e75>"periop.case.team_participation_declined"]:::evento
+  t80[("delegated_access.organization_user_assignments")]:::tabla
+  t81[("directory.branch_memberships")]:::tabla
+  t82[("directory.tenant_memberships")]:::tabla
+  t83[("practice.practice_sites")]:::tabla
+  t89[("practice.care_space_status_events")]:::tabla
+  t90[("practice.cleaning_orders")]:::tabla
+  t94[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
+  t95[("procedures_perioperative.surgical_safety_items")]:::tabla
+  t96[("procedures_perioperative.surgical_safety_responses")]:::tabla
+  t103[("practice.care_space_blocks")]:::tabla
+  t24[("+40 tablas más")]
+  t31[("+20 tablas más")]
+  t39[("+13 tablas más")]
+  t51[("+1 tablas más")]
+  t60[("+31 tablas más")]
+  t70[("+12 tablas más")]
+  t74[("+11 tablas más")]
   subgraph s0["ctrl:PeriopController · Operaciones de PeriopController que el README no asigna…"]
     o1["POST /pacu-stays/{stayId}/assessments"]:::op
     o5["POST /pacu-stays/{stayId}/discharge"]:::op
     o10["GET /procedure-cases"]:::op
     o17["GET /procedure-cases/{id}"]:::op
     o25["PATCH /procedure-cases/{id}"]:::op
-    o33["POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve"]:::op
-    o35["POST /procedure-cases/{id}/confirm"]:::op
-    o40["POST /procedure-cases/{id}/findings"]:::op
-    o45["POST /procedure-cases/{id}/operative-reports/{reportId}/sign"]:::op
-    o51["POST /procedure-cases/{id}/preoperative-orders"]:::op
-    o61["POST /procedure-cases/{id}/specimens"]:::op
-    o64["GET /procedure-cases/{id}/team-members"]:::op
-    o66["POST /procedure-cases/{id}/team-members"]:::op
-    o69["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
-    o71["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
+    o34["POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve"]:::op
+    o36["POST /procedure-cases/{id}/confirm"]:::op
+    o41["POST /procedure-cases/{id}/findings"]:::op
+    o46["POST /procedure-cases/{id}/operative-reports/{reportId}/sign"]:::op
+    o52["POST /procedure-cases/{id}/preoperative-orders"]:::op
+    o63["POST /procedure-cases/{id}/specimens"]:::op
+    o66["GET /procedure-cases/{id}/team-members"]:::op
+    o68["POST /procedure-cases/{id}/team-members"]:::op
+    o71["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
+    o73["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
   end
-  t82[("+4 tablas más")]
   t84[("+4 tablas más")]
-  t89[("+6 tablas más")]
-  t97[("+6 tablas más")]
-  t99[("+4 tablas más")]
-  t101[("+6 tablas más")]
-  t103[("+4 tablas más")]
+  t86[("+4 tablas más")]
+  t91[("+6 tablas más")]
+  t99[("+6 tablas más")]
+  t101[("+4 tablas más")]
+  t104[("+6 tablas más")]
+  t106[("+4 tablas más")]
   subgraph s1["ctrl:PeriopOrController · Operaciones de PeriopOrController que el README no as…"]
-    o74["POST /internal/periop/or-blocks-release-tick"]:::op
-    o76["POST /or-blocks/{id}/cancel"]:::op
-    o83["POST /or-blocks/{id}/release"]:::op
-    o85["POST /procedure-cases/{id}/room-events"]:::op
-    o90["POST /procedure-cases/{id}/safety-checklists"]:::op
-    o95["GET /procedure-cases/{id}/safety-checklists/{checklistId}"]:::op
-    o96["GET /sites/{siteId}/operating-rooms"]:::op
-    o98["GET /sites/{siteId}/or-blocks"]:::op
-    o100["POST /sites/{siteId}/or-blocks"]:::op
-    o102["GET /sites/{siteId}/or-utilization"]:::op
+    o76["POST /internal/periop/or-blocks-release-tick"]:::op
+    o78["POST /or-blocks/{id}/cancel"]:::op
+    o85["POST /or-blocks/{id}/release"]:::op
+    o87["POST /procedure-cases/{id}/room-events"]:::op
+    o92["POST /procedure-cases/{id}/safety-checklists"]:::op
+    o97["GET /procedure-cases/{id}/safety-checklists/{checklistId}"]:::op
+    o98["GET /sites/{siteId}/operating-rooms"]:::op
+    o100["GET /sites/{siteId}/or-blocks"]:::op
+    o102["POST /sites/{siteId}/or-blocks"]:::op
+    o105["GET /sites/{siteId}/or-utilization"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -439,144 +444,148 @@ flowchart LR
   a26 --> o25
   o25 -->|"LEE"| t27
   o25 -->|"CREA"| t28
+  o25 -->|"ACTUALIZA"| t29
   o25 -->|"CREA"| t29
   o25 -->|"LEE"| t29
   o25 -->|"LEE"| t30
-  o25 -->|"LEE"| t12
   o25 -.-> t31
   o25 -->|"evento"| e32
-  a6 --> o33
-  o33 -->|"ACTUALIZA"| t34
-  o33 -->|"LEE"| t34
-  a26 --> o35
-  o35 -->|"CREA"| t36
-  o35 -->|"LEE"| t36
-  o35 -->|"LEE"| t37
-  o35 -->|"CREA"| t28
-  o35 -->|"CREA"| t29
-  o35 -->|"LEE"| t29
-  o35 -.-> t38
-  o35 -->|"evento"| e39
-  a41 --> o40
-  o40 -->|"CREA"| t42
-  o40 -->|"LEE"| t43
-  o40 -->|"CREA"| t44
-  o40 -->|"LEE"| t44
-  a41 --> o45
-  o45 -->|"LEE"| t46
-  o45 -->|"CREA"| t47
-  o45 -->|"LEE"| t47
-  o45 -->|"ACTUALIZA"| t48
-  o45 -->|"LEE"| t48
-  o45 -->|"CREA"| t49
-  o45 -.-> t50
-  a52 --> o51
-  o51 -->|"LEE"| t53
-  o51 -->|"LEE"| t54
-  o51 -->|"LEE"| t55
-  o51 -->|"LEE"| t56
-  o51 -->|"CREA"| t57
-  o51 -->|"LEE"| t57
-  o51 -.-> t58
-  o51 -->|"evento"| e59
-  o51 -->|"evento"| e60
-  a62 --> o61
-  o61 -->|"LEE"| t43
-  o61 -->|"CREA"| t63
-  a11 --> o64
-  o64 -->|"LEE"| t65
-  o64 -->|"LEE"| t15
-  a26 --> o66
-  o66 -->|"CREA"| t28
-  o66 -->|"CREA"| t29
-  o66 -->|"LEE"| t29
-  o66 -->|"CREA"| t67
-  o66 -->|"ACTUALIZA"| t65
-  o66 -->|"CREA"| t65
-  o66 -.-> t68
-  o66 -->|"evento"| e32
-  a11 --> o69
-  o69 -->|"LEE"| t65
-  o69 -->|"LEE"| t70
+  o25 -->|"evento"| e33
+  a6 --> o34
+  o34 -->|"ACTUALIZA"| t35
+  o34 -->|"LEE"| t35
+  a26 --> o36
+  o36 -->|"CREA"| t37
+  o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t38
+  o36 -->|"CREA"| t28
+  o36 -->|"ACTUALIZA"| t29
+  o36 -->|"CREA"| t29
+  o36 -.-> t39
+  o36 -->|"evento"| e40
+  o36 -->|"evento"| e33
+  a42 --> o41
+  o41 -->|"CREA"| t43
+  o41 -->|"LEE"| t44
+  o41 -->|"CREA"| t45
+  o41 -->|"LEE"| t45
+  a42 --> o46
+  o46 -->|"LEE"| t47
+  o46 -->|"CREA"| t48
+  o46 -->|"LEE"| t48
+  o46 -->|"ACTUALIZA"| t49
+  o46 -->|"LEE"| t49
+  o46 -->|"CREA"| t50
+  o46 -.-> t51
+  a53 --> o52
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t55
+  o52 -->|"LEE"| t56
+  o52 -->|"LEE"| t57
+  o52 -->|"LEE"| t58
+  o52 -->|"CREA"| t59
+  o52 -.-> t60
+  o52 -->|"evento"| e61
+  o52 -->|"evento"| e62
+  a64 --> o63
+  o63 -->|"LEE"| t44
+  o63 -->|"CREA"| t65
+  a11 --> o66
+  o66 -->|"LEE"| t67
+  o66 -->|"LEE"| t15
+  a26 --> o68
+  o68 -->|"CREA"| t28
+  o68 -->|"ACTUALIZA"| t29
+  o68 -->|"CREA"| t29
+  o68 -->|"LEE"| t29
+  o68 -->|"LEE"| t30
+  o68 -->|"LEE"| t69
+  o68 -.-> t70
+  o68 -->|"evento"| e32
+  o68 -->|"evento"| e33
   a11 --> o71
-  o71 -->|"CREA"| t36
-  o71 -->|"LEE"| t36
-  o71 -->|"LEE"| t37
-  o71 -->|"CREA"| t28
-  o71 -->|"CREA"| t29
-  o71 -->|"LEE"| t29
-  o71 -.-> t72
-  o71 -->|"evento"| e73
-  a75 --> o74
-  o74 -->|"ACTUALIZA"| t14
-  o74 -->|"LEE"| t14
-  o74 -->|"LEE"| t15
+  o71 -->|"LEE"| t67
+  o71 -->|"LEE"| t72
+  a11 --> o73
+  o73 -->|"CREA"| t37
+  o73 -->|"LEE"| t37
+  o73 -->|"LEE"| t38
+  o73 -->|"CREA"| t28
+  o73 -->|"ACTUALIZA"| t29
+  o73 -->|"CREA"| t29
+  o73 -.-> t74
+  o73 -->|"evento"| e75
+  o73 -->|"evento"| e33
   a77 --> o76
-  o76 -->|"LEE"| t78
-  o76 -->|"LEE"| t79
-  o76 -->|"LEE"| t80
-  o76 -->|"LEE"| t12
-  o76 -->|"LEE"| t13
-  o76 -->|"LEE"| t81
-  o76 -.-> t82
-  a77 --> o83
-  o83 -->|"LEE"| t78
-  o83 -->|"LEE"| t79
-  o83 -->|"LEE"| t80
-  o83 -->|"LEE"| t12
-  o83 -->|"LEE"| t13
-  o83 -->|"LEE"| t81
-  o83 -.-> t84
-  a86 --> o85
-  o85 -->|"LEE"| t27
-  o85 -->|"CREA"| t87
-  o85 -->|"ACTUALIZA"| t12
+  o76 -->|"ACTUALIZA"| t14
+  o76 -->|"LEE"| t14
+  o76 -->|"LEE"| t15
+  a79 --> o78
+  o78 -->|"LEE"| t80
+  o78 -->|"LEE"| t81
+  o78 -->|"LEE"| t82
+  o78 -->|"LEE"| t12
+  o78 -->|"LEE"| t13
+  o78 -->|"LEE"| t83
+  o78 -.-> t84
+  a79 --> o85
+  o85 -->|"LEE"| t80
+  o85 -->|"LEE"| t81
+  o85 -->|"LEE"| t82
   o85 -->|"LEE"| t12
-  o85 -->|"CREA"| t88
-  o85 -->|"ACTUALIZA"| t88
-  o85 -.-> t89
-  a91 --> o90
-  o90 -->|"CREA"| t92
-  o90 -->|"LEE"| t92
-  o90 -->|"CREA"| t93
-  o90 -->|"LEE"| t93
-  o90 -->|"LEE"| t94
-  a91 --> o95
-  o95 -->|"LEE"| t92
-  o95 -->|"LEE"| t93
-  o95 -->|"LEE"| t94
-  a77 --> o96
-  o96 -->|"LEE"| t27
-  o96 -->|"LEE"| t78
-  o96 -->|"LEE"| t79
-  o96 -->|"LEE"| t80
-  o96 -->|"LEE"| t12
-  o96 -->|"LEE"| t13
-  o96 -.-> t97
-  a77 --> o98
-  o98 -->|"LEE"| t78
-  o98 -->|"LEE"| t79
+  o85 -->|"LEE"| t13
+  o85 -->|"LEE"| t83
+  o85 -.-> t86
+  a88 --> o87
+  o87 -->|"LEE"| t27
+  o87 -->|"CREA"| t89
+  o87 -->|"ACTUALIZA"| t12
+  o87 -->|"LEE"| t12
+  o87 -->|"CREA"| t90
+  o87 -->|"ACTUALIZA"| t90
+  o87 -.-> t91
+  a93 --> o92
+  o92 -->|"CREA"| t94
+  o92 -->|"LEE"| t94
+  o92 -->|"CREA"| t95
+  o92 -->|"LEE"| t95
+  o92 -->|"LEE"| t96
+  a93 --> o97
+  o97 -->|"LEE"| t94
+  o97 -->|"LEE"| t95
+  o97 -->|"LEE"| t96
+  a79 --> o98
+  o98 -->|"LEE"| t27
   o98 -->|"LEE"| t80
+  o98 -->|"LEE"| t81
+  o98 -->|"LEE"| t82
   o98 -->|"LEE"| t12
   o98 -->|"LEE"| t13
-  o98 -->|"LEE"| t81
   o98 -.-> t99
-  a77 --> o100
-  o100 -->|"LEE"| t78
-  o100 -->|"LEE"| t79
+  a79 --> o100
   o100 -->|"LEE"| t80
-  o100 -->|"LEE"| t30
+  o100 -->|"LEE"| t81
+  o100 -->|"LEE"| t82
   o100 -->|"LEE"| t12
   o100 -->|"LEE"| t13
+  o100 -->|"LEE"| t83
   o100 -.-> t101
-  a77 --> o102
-  o102 -->|"LEE"| t78
-  o102 -->|"LEE"| t79
+  a79 --> o102
   o102 -->|"LEE"| t80
+  o102 -->|"LEE"| t81
+  o102 -->|"LEE"| t82
+  o102 -->|"LEE"| t103
   o102 -->|"LEE"| t12
   o102 -->|"LEE"| t13
-  o102 -->|"LEE"| t81
-  o102 -.-> t103
+  o102 -.-> t104
+  a79 --> o105
+  o105 -->|"LEE"| t80
+  o105 -->|"LEE"| t81
+  o105 -->|"LEE"| t82
+  o105 -->|"LEE"| t12
+  o105 -->|"LEE"| t13
+  o105 -->|"LEE"| t83
+  o105 -.-> t106
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -610,65 +619,45 @@ flowchart TD
   n2 --> n3
   n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
   n3 --> n4
-  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n5["Llama a ClinicalReadService.resolveReadScope"]:::llamada
   n4 --> n5
-  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n5 -->|"sí"| n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
+  n6{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n5 --> n6
+  n7["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n6 -->|"sí"| n7
+  n8{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n7 --> n8
-  n9["Llama a PatientProfilesRepository.findById"]:::llamada
-  n8 --> n9
-  n10[("LEE profiles.patient_profiles")]:::efecto
-  n9 --> n10
-  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n9(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n8 -->|"no"| n10
+  n6 -->|"no"| n10
+  n11[("LEE profiles.person_account_links")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n11 -->|"no"| n13
-  n5 -->|"no"| n13
-  n14[("LEE profiles.person_account_links")]:::efecto
+  n12["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n12 --> n13
+  n14["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
   n13 --> n14
-  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n15{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n14 --> n15
-  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n15 --> n16
-  n17["Llama a ClinicalReadService.isAttending"]:::llamada
-  n16 --> n17
-  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n16(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PeriopDentalRepository.findByPatient"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE clinical.procedures")]:::efecto
   n17 --> n18
-  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n19["Llama a PeriopDentalRepository.countByPatient"]:::llamada
   n18 --> n19
-  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n20[("LEE clinical.procedures")]:::efecto
   n19 --> n20
-  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n21["Llama a PeriopDentalRepository.findSitesByProcedures"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.person_account_links")]:::efecto
+  n22[("LEE procedures_perioperative.procedure_body_sites")]:::efecto
   n21 --> n22
-  n23["Llama a PatientProfilesRepository.findById"]:::llamada
+  n23(("200 Responde con éxito")):::ok
   n22 --> n23
-  n24[("LEE profiles.patient_profiles")]:::efecto
-  n23 --> n24
-  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n24 --> n25
-  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a PeriopDentalRepository.findByPatient"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE clinical.procedures")]:::efecto
-  n27 --> n28
-  n29["Llama a PeriopDentalRepository.countByPatient"]:::llamada
-  n28 --> n29
-  n30[("LEE clinical.procedures")]:::efecto
-  n29 --> n30
-  n31["Llama a PeriopDentalRepository.findSitesByProcedures"]:::llamada
-  n30 --> n31
-  n32[("LEE procedures_perioperative.procedure_body_sites")]:::efecto
-  n31 --> n32
-  n33(("200 Responde con éxito")):::ok
-  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -717,61 +706,83 @@ flowchart TD
   n11 --> n12
   n13[("LEE profiles.health_practitioner_profiles")]:::efecto
   n12 --> n13
-  n14["Llama a ClinicalReadService.isAttending"]:::llamada
+  n14["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n13 --> n14
   n15["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n14 --> n15
   n16[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n15 --> n16
-  n17(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n17["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n16 --> n17
-  n9 -->|"no"| n17
-  n18["Transacción: transactional(…)"]:::transaccion
-  n19["Llama a PeriopDentalRepository.createProcedure"]:::llamada
+  n18[("LEE clinical.encounters")]:::efecto
+  n17 --> n18
+  n19["Llama a ClinicalScopeRepository.participates"]:::llamada
   n18 --> n19
-  n20[("CREA clinical.procedures")]:::efecto
+  n20[("LEE clinical.encounter_participants")]:::efecto
   n19 --> n20
-  n21["Llama a ReceivedServicesProjector.projectProcedure"]:::llamada
+  n21["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
   n20 --> n21
-  n22["Llama a ReceivedServicesRepository.findCaseByPrimaryProcedure"]:::llamada
+  n22[("LEE clinical.encounters")]:::efecto
   n21 --> n22
-  n23[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n23["Llama a ClinicalScopeRepository.participates"]:::llamada
   n22 --> n23
-  n24["Llama a ReceivedServicesRepository.upsert"]:::llamada
+  n24[("LEE clinical.encounter_participants")]:::efecto
   n23 --> n24
-  n25["Llama a ReceivedServicesRepository.findBySourceProcedure"]:::llamada
+  n25["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
   n24 --> n25
-  n26[("LEE clinical.received_services")]:::efecto
+  n26["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
   n25 --> n26
-  n27["Llama a ReceivedServicesRepository.findBySourceImmunization"]:::llamada
+  n27[("LEE authz.clinical_access_grants")]:::efecto
   n26 --> n27
-  n28[("LEE clinical.received_services")]:::efecto
+  n28(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
   n27 --> n28
-  n29["Llama a ReceivedServicesRepository.findByProcedureCase"]:::llamada
-  n28 --> n29
-  n30[("LEE clinical.received_services")]:::efecto
+  n9 -->|"no"| n28
+  n29["Transacción: transactional(…)"]:::transaccion
+  n30["Llama a PeriopDentalRepository.createProcedure"]:::llamada
   n29 --> n30
-  n31[("CREA clinical.received_services")]:::efecto
+  n31[("CREA clinical.procedures")]:::efecto
   n30 --> n31
-  n32{"dto.toothSiteConceptId !== undefined"}:::decision
+  n32["Llama a ReceivedServicesProjector.projectProcedure"]:::llamada
   n31 --> n32
-  n33["Llama a PeriopDentalRepository.createSite"]:::llamada
-  n32 -->|"sí"| n33
-  n34[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n33["Llama a ReceivedServicesRepository.findCaseByPrimaryProcedure"]:::llamada
+  n32 --> n33
+  n34[("LEE procedures_perioperative.procedure_cases")]:::efecto
   n33 --> n34
-  n35["Llama a AuditTrailService.record"]:::llamada
+  n35["Llama a ReceivedServicesRepository.upsert"]:::llamada
   n34 --> n35
-  n32 -->|"no"| n35
-  n36["Llama a AuditLogRepository.append"]:::llamada
+  n36["Llama a ReceivedServicesRepository.findBySourceProcedure"]:::llamada
   n35 --> n36
-  n37["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n37[("LEE clinical.received_services")]:::efecto
   n36 --> n37
-  n38[("LEE audit.audit_log")]:::efecto
+  n38["Llama a ReceivedServicesRepository.findBySourceImmunization"]:::llamada
   n37 --> n38
-  n39[("CREA audit.audit_log")]:::efecto
+  n39[("LEE clinical.received_services")]:::efecto
   n38 --> n39
-  n40(("201 Responde con éxito")):::ok
+  n40["Llama a ReceivedServicesRepository.findByProcedureCase"]:::llamada
   n39 --> n40
+  n41[("LEE clinical.received_services")]:::efecto
+  n40 --> n41
+  n42[("CREA clinical.received_services")]:::efecto
+  n41 --> n42
+  n43{"dto.toothSiteConceptId !== undefined"}:::decision
+  n42 --> n43
+  n44["Llama a PeriopDentalRepository.createSite"]:::llamada
+  n43 -->|"sí"| n44
+  n45[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n44 --> n45
+  n46["Llama a AuditTrailService.record"]:::llamada
+  n45 --> n46
+  n43 -->|"no"| n46
+  n47["Llama a AuditLogRepository.append"]:::llamada
+  n46 --> n47
+  n48["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n47 --> n48
+  n49[("LEE audit.audit_log")]:::efecto
+  n48 --> n49
+  n50[("CREA audit.audit_log")]:::efecto
+  n49 --> n50
+  n51(("201 Responde con éxito")):::ok
+  n50 --> n51
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1384,7 +1395,7 @@ Detalle completo del caso quirúrgico
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1410,127 +1421,102 @@ flowchart TD
   n10["Intenta"]:::intento
   n9 --> n10
   n7 -->|"no"| n10
-  n11["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
-  n10 --> n11
-  n12{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
-  n11 --> n12
-  n13["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n12 -->|"sí"| n13
-  n14{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n13 --> n14
-  n15(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n14 -->|"no"| n16
-  n12 -->|"no"| n16
-  n17[("LEE profiles.person_account_links")]:::efecto
+  n11{"error instanceof ForbiddenException"}:::decision
+  n10 -->|"si falla"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"no"| n13
+  n14["Llama a PeriopCasesRepository.findDiagnosesByCase"]:::llamada
+  n10 --> n14
+  n15[("LEE procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n14 --> n15
+  n16["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n15 --> n16
+  n17[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
   n16 --> n17
-  n18["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n18["Llama a PeriopCasesRepository.findMilestonesByCase"]:::llamada
   n17 --> n18
-  n19[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n19[("LEE procedures_perioperative.procedure_case_milestones")]:::efecto
   n18 --> n19
-  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n20["Llama a PeriopPreopRepository.findOrdersByCase"]:::llamada
   n19 --> n20
-  n21{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n21[("LEE procedures_perioperative.preoperative_orders")]:::efecto
   n20 --> n21
-  n22(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n21 -->|"sí"| n22
-  n23{"error instanceof ForbiddenException"}:::decision
-  n10 -->|"si falla"| n23
-  n24(["↩ (relanza el error capturado)"]):::error
-  n23 -->|"sí"| n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n23 -->|"no"| n25
-  n26["Llama a PeriopCasesRepository.findDiagnosesByCase"]:::llamada
-  n21 -->|"no"| n26
-  n27[("LEE procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n22["Llama a PeriopPreopRepository.findAssessmentByCase"]:::llamada
+  n21 --> n22
+  n23[("LEE procedures_perioperative.preoperative_assessments")]:::efecto
+  n22 --> n23
+  n24["Llama a PeriopPreopRepository.findAnesthesiaPlanByCase"]:::llamada
+  n23 --> n24
+  n25[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n24 --> n25
+  n26["Llama a PeriopIntraopRepository.findReportsByCase"]:::llamada
+  n25 --> n26
+  n27[("LEE procedures_perioperative.operative_reports")]:::efecto
   n26 --> n27
-  n28["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n28["Llama a PeriopIntraopRepository.findStepsByCase"]:::llamada
   n27 --> n28
-  n29[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n29[("LEE procedures_perioperative.operative_steps")]:::efecto
   n28 --> n29
-  n30["Llama a PeriopCasesRepository.findMilestonesByCase"]:::llamada
+  n30["Llama a PeriopIntraopRepository.findFindingsByCase"]:::llamada
   n29 --> n30
-  n31[("LEE procedures_perioperative.procedure_case_milestones")]:::efecto
+  n31[("LEE procedures_perioperative.operative_findings")]:::efecto
   n30 --> n31
-  n32["Llama a PeriopPreopRepository.findOrdersByCase"]:::llamada
+  n32["Llama a PeriopIntraopRepository.findImplantsByCase"]:::llamada
   n31 --> n32
-  n33[("LEE procedures_perioperative.preoperative_orders")]:::efecto
+  n33[("LEE procedures_perioperative.procedure_implants")]:::efecto
   n32 --> n33
-  n34["Llama a PeriopPreopRepository.findAssessmentByCase"]:::llamada
+  n34["Llama a PeriopIntraopRepository.findIdentifiersByImplants"]:::llamada
   n33 --> n34
-  n35[("LEE procedures_perioperative.preoperative_assessments")]:::efecto
+  n35[("LEE procedures_perioperative.implant_identifiers")]:::efecto
   n34 --> n35
-  n36["Llama a PeriopPreopRepository.findAnesthesiaPlanByCase"]:::llamada
+  n36["Llama a CaseOrViewBuilder.fields"]:::llamada
   n35 --> n36
-  n37[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n37[("LEE practice.care_spaces")]:::efecto
   n36 --> n37
-  n38["Llama a PeriopIntraopRepository.findReportsByCase"]:::llamada
+  n38["Llama a CaseOrViewBuilder.blockLabels"]:::llamada
   n37 --> n38
-  n39[("LEE procedures_perioperative.operative_reports")]:::efecto
+  n39[("LEE procedures_perioperative.operating_room_blocks · LEE practice.clinical_units · LEE terminology.catalog_co…")]:::efecto
   n38 --> n39
-  n40["Llama a PeriopIntraopRepository.findStepsByCase"]:::llamada
+  n40[("LEE terminology.catalog_concepts")]:::efecto
   n39 --> n40
-  n41[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n41["Llama a CaseOrViewBuilder.detail"]:::llamada
   n40 --> n41
-  n42["Llama a PeriopIntraopRepository.findFindingsByCase"]:::llamada
+  n42[("LEE procedures_perioperative.surgical_safety_checklists · LEE procedures_perioperative.operating_room_utiliza…")]:::efecto
   n41 --> n42
-  n43[("LEE procedures_perioperative.operative_findings")]:::efecto
+  n43{"!order && out && c.operatingRoomId"}:::decision
   n42 --> n43
-  n44["Llama a PeriopIntraopRepository.findImplantsByCase"]:::llamada
-  n43 --> n44
-  n45[("LEE procedures_perioperative.procedure_implants")]:::efecto
+  n44[("LEE practice.cleaning_orders")]:::efecto
+  n43 -->|"sí"| n44
+  n45{"order && status"}:::decision
   n44 --> n45
-  n46["Llama a PeriopIntraopRepository.findIdentifiersByImplants"]:::llamada
-  n45 --> n46
-  n47[("LEE procedures_perioperative.implant_identifiers")]:::efecto
+  n43 -->|"no"| n45
+  n46["Llama a InfrastructureAccessService.actionsOn"]:::llamada
+  n45 -->|"sí"| n46
+  n47["Llama a InfrastructureAccessService.resolve"]:::llamada
   n46 --> n47
-  n48["Llama a CaseOrViewBuilder.fields"]:::llamada
+  n48{"'careSpaceId' in target"}:::decision
   n47 --> n48
-  n49[("LEE practice.care_spaces")]:::efecto
-  n48 --> n49
-  n50["Llama a CaseOrViewBuilder.blockLabels"]:::llamada
-  n49 --> n50
-  n51[("LEE procedures_perioperative.operating_room_blocks · LEE practice.clinical_units · LEE terminology.catalog_co…")]:::efecto
-  n50 --> n51
-  n52[("LEE terminology.catalog_concepts")]:::efecto
-  n51 --> n52
-  n53["Llama a CaseOrViewBuilder.detail"]:::llamada
-  n52 --> n53
-  n54[("LEE procedures_perioperative.surgical_safety_checklists · LEE procedures_perioperative.operating_room_utiliza…")]:::efecto
-  n53 --> n54
-  n55{"!order && out && c.operatingRoomId"}:::decision
-  n54 --> n55
-  n56[("LEE practice.cleaning_orders")]:::efecto
-  n55 -->|"sí"| n56
-  n57{"order && status"}:::decision
-  n56 --> n57
-  n55 -->|"no"| n57
-  n58["Llama a InfrastructureAccessService.actionsOn"]:::llamada
-  n57 -->|"sí"| n58
-  n59["Llama a InfrastructureAccessService.resolve"]:::llamada
-  n58 --> n59
-  n60{"'careSpaceId' in target"}:::decision
-  n59 --> n60
-  n61{"!found || found.tenantId !== tenantId"}:::decision
-  n60 -->|"sí"| n61
-  n62(["404 NOT_FOUND Espacio no encontrado"]):::error
-  n61 -->|"sí"| n62
-  n63{"'unitId' in target"}:::decision
-  n60 -->|"no"| n63
-  n64{"!found || found.tenantId !== tenantId"}:::decision
-  n63 -->|"sí"| n64
-  n65(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
-  n64 -->|"sí"| n65
-  n66{"!site || site.tenantId !== tenantId"}:::decision
-  n61 -->|"no"| n66
-  n64 -->|"no"| n66
-  n63 -->|"no"| n66
-  n67(["404 NOT_FOUND Sitio no encontrado"]):::error
-  n66 -->|"sí"| n67
-  n68(("200 Responde con éxito")):::ok
-  n66 -->|"no"| n68
-  n57 -->|"no"| n68
+  n49{"!found || found.tenantId !== tenantId"}:::decision
+  n48 -->|"sí"| n49
+  n50(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n49 -->|"sí"| n50
+  n51{"'unitId' in target"}:::decision
+  n48 -->|"no"| n51
+  n52{"!found || found.tenantId !== tenantId"}:::decision
+  n51 -->|"sí"| n52
+  n53(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n52 -->|"sí"| n53
+  n54{"!site || site.tenantId !== tenantId"}:::decision
+  n49 -->|"no"| n54
+  n52 -->|"no"| n54
+  n51 -->|"no"| n54
+  n55(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n54 -->|"sí"| n55
+  n56(("200 Responde con éxito")):::ok
+  n54 -->|"no"| n56
+  n45 -->|"no"| n56
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1692,17 +1678,15 @@ flowchart TD
   n64 --> n65
   n66[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
   n65 --> n66
-  n67["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n67["Llama a PeriopEventPublisher.publishDomainEvent"]:::llamada
   n66 --> n67
   n63 -->|"no"| n67
-  n68["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n68>"Evento ~null"]:::evento
   n67 --> n68
-  n69["Transacción: startActiveSpan(…)"]:::transaccion
+  n69>"Evento periop.case.reacceptance_required"]:::evento
   n68 --> n69
-  n70["Intenta"]:::intento
+  n70(("200 Responde con éxito")):::ok
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
-  n70 -->|"si falla"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2069,66 +2053,56 @@ flowchart TD
   n14{"withoutCurrentCredential.length › 0"}:::decision
   n13 --> n14
   n11 -->|"al terminar"| n14
-  n15["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n15["Llama a PeriopEventPublisher.publishDomainEvent"]:::llamada
   n14 -->|"sí"| n15
-  n16["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n16["Llama a OutboxService.publishDomainEvent"]:::llamada
   n15 --> n16
-  n17["Transacción: startActiveSpan(…)"]:::transaccion
+  n17["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n16 --> n17
-  n18["Intenta"]:::intento
+  n18["Transacción: startActiveSpan(…)"]:::transaccion
   n17 --> n18
-  n19(["↩ (relanza el error capturado)"]):::error
-  n18 -->|"si falla"| n19
-  n20["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n18 --> n20
-  n21["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
-  n20 --> n21
-  n22[("LEE messaging.outbox_messages")]:::efecto
+  n19["Intenta"]:::intento
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"si falla"| n20
+  n21>"Evento ~null"]:::evento
+  n19 --> n21
+  n22>"Evento periop.case.confirmation_blocked"]:::evento
   n21 --> n22
-  n23["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n23["Llama a AuditTrailService.record"]:::llamada
   n22 --> n23
-  n24[("CREA messaging.domain_events")]:::efecto
+  n24["Llama a AuditLogRepository.append"]:::llamada
   n23 --> n24
-  n25["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n25["Llama a AuditLogRepository.findChainTip"]:::llamada
   n24 --> n25
-  n26[("CREA messaging.outbox_messages")]:::efecto
+  n26[("LEE audit.audit_log")]:::efecto
   n25 --> n26
-  n27>"Evento periop.case.confirmation_blocked"]:::evento
+  n27[("CREA audit.audit_log")]:::efecto
   n26 --> n27
-  n28["Llama a AuditTrailService.record"]:::llamada
+  n28{"statusConceptId === CONCEPTS.CASE_SCHEDULED"}:::decision
   n27 --> n28
-  n29["Llama a AuditLogRepository.append"]:::llamada
-  n28 --> n29
-  n30["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n14 -->|"no"| n28
+  n29["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n28 -->|"sí"| n29
+  n30[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
   n29 --> n30
-  n31[("LEE audit.audit_log")]:::efecto
+  n31["Llama a AuditTrailService.record"]:::llamada
   n30 --> n31
-  n32[("CREA audit.audit_log")]:::efecto
+  n28 -->|"no"| n31
+  n32["Llama a AuditLogRepository.append"]:::llamada
   n31 --> n32
-  n33{"statusConceptId === CONCEPTS.CASE_SCHEDULED"}:::decision
+  n33["Llama a AuditLogRepository.findChainTip"]:::llamada
   n32 --> n33
-  n14 -->|"no"| n33
-  n34["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
-  n33 -->|"sí"| n34
-  n35[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n34[("LEE audit.audit_log")]:::efecto
+  n33 --> n34
+  n35[("CREA audit.audit_log")]:::efecto
   n34 --> n35
-  n36["Llama a AuditTrailService.record"]:::llamada
+  n36{"result.blocked"}:::decision
   n35 --> n36
-  n33 -->|"no"| n36
-  n37["Llama a AuditLogRepository.append"]:::llamada
-  n36 --> n37
-  n38["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n37 --> n38
-  n39[("LEE audit.audit_log")]:::efecto
-  n38 --> n39
-  n40[("CREA audit.audit_log")]:::efecto
-  n39 --> n40
-  n41{"result.blocked"}:::decision
-  n40 --> n41
-  n42(["422 PRECONDITION_FAILED CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesio…"]):::error
-  n41 -->|"sí"| n42
-  n43(("200 Responde con éxito")):::ok
-  n41 -->|"no"| n43
+  n37(["422 PRECONDITION_FAILED CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesio…"]):::error
+  n36 -->|"sí"| n37
+  n38(("200 Responde con éxito")):::ok
+  n36 -->|"no"| n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2792,11 +2766,15 @@ flowchart TD
   n29 --> n30
   n31[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
   n30 --> n31
-  n32>"Evento periop.case.reacceptance_required"]:::evento
+  n32["Llama a PeriopEventPublisher.publishDomainEvent"]:::llamada
   n31 --> n32
   n28 -->|"no"| n32
-  n33(("201 Responde con éxito")):::ok
+  n33>"Evento ~null"]:::evento
   n32 --> n33
+  n34>"Evento periop.case.reacceptance_required"]:::evento
+  n33 --> n34
+  n35(("201 Responde con éxito")):::ok
+  n34 --> n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2816,7 +2794,7 @@ Indicar una orden preoperatoria para el caso
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: El diagnóstico indicado no existe o no es de esta persona; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2856,119 +2834,118 @@ flowchart TD
   n16 --> n17
   n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a ServiceRequestDetailService.prepare"]:::llamada
+  n19["Llama a ServiceRequestsService.assertReasonConditionBelongsToPatient"]:::llamada
   n17 -->|"no"| n19
-  n20{"enforce && study === null"}:::decision
+  n20[("LEE clinical.conditions")]:::efecto
   n19 --> n20
-  n21["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n20 -->|"sí"| n21
-  n22(["422 PRECONDITION_FAILED {message}"]):::error
-  n21 --> n22
-  n23{"enforce && study?.family"}:::decision
-  n20 -->|"no"| n23
-  n24{"declared !== undefined && declared !== study.family"}:::decision
-  n23 -->|"sí"| n24
+  n21{"!condition"}:::decision
+  n20 --> n21
+  n22(["422 PRECONDITION_FAILED El diagnóstico indicado no existe o no es de esta persona"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a ServiceRequestDetailService.prepare"]:::llamada
+  n21 -->|"no"| n23
+  n24{"enforce && study === null"}:::decision
+  n23 --> n24
   n25["Llama a ServiceRequestDetailService.fail"]:::llamada
   n24 -->|"sí"| n25
   n26(["422 PRECONDITION_FAILED {message}"]):::error
   n25 --> n26
-  n27{"input.specimenTypeConceptId !== undefined"}:::decision
+  n27{"enforce && study?.family"}:::decision
   n24 -->|"no"| n27
-  n23 -->|"no"| n27
-  n28{"!specimenAllowed && category !== 'LAB'"}:::decision
+  n28{"declared !== undefined && declared !== study.family"}:::decision
   n27 -->|"sí"| n28
   n29["Llama a ServiceRequestDetailService.fail"]:::llamada
   n28 -->|"sí"| n29
   n30(["422 PRECONDITION_FAILED {message}"]):::error
   n29 --> n30
-  n31["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n31{"input.specimenTypeConceptId !== undefined"}:::decision
   n28 -->|"no"| n31
-  n32[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
-  n31 --> n32
-  n33{"!(await this.catalog.isInValueSet( em, 'specimen-type', input.specimenTypeConceptId, ))"}:::decision
-  n32 --> n33
-  n34["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n33 -->|"sí"| n34
-  n35(["422 PRECONDITION_FAILED {message}"]):::error
-  n34 --> n35
-  n36{"components !== undefined || study?.componentsSelectable"}:::decision
-  n33 -->|"no"| n36
-  n27 -->|"no"| n36
-  n37{"!study?.componentsSelectable"}:::decision
-  n36 -->|"sí"| n37
-  n38{"components !== undefined && components.length › 0"}:::decision
+  n27 -->|"no"| n31
+  n32{"!specimenAllowed && category !== 'LAB'"}:::decision
+  n31 -->|"sí"| n32
+  n33["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n32 -->|"sí"| n33
+  n34(["422 PRECONDITION_FAILED {message}"]):::error
+  n33 --> n34
+  n35["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n32 -->|"no"| n35
+  n36[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
+  n35 --> n36
+  n37{"!(await this.catalog.isInValueSet( em, 'specimen-type', input.specimenTypeConceptId, ))"}:::decision
+  n36 --> n37
+  n38["Llama a ServiceRequestDetailService.fail"]:::llamada
   n37 -->|"sí"| n38
-  n39["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n38 -->|"sí"| n39
-  n40(["422 PRECONDITION_FAILED {message}"]):::error
-  n39 --> n40
-  n41{"components === undefined || components.length === 0"}:::decision
-  n37 -->|"no"| n41
-  n42["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n39(["422 PRECONDITION_FAILED {message}"]):::error
+  n38 --> n39
+  n40{"components !== undefined || study?.componentsSelectable"}:::decision
+  n37 -->|"no"| n40
+  n31 -->|"no"| n40
+  n41{"!study?.componentsSelectable"}:::decision
+  n40 -->|"sí"| n41
+  n42{"components !== undefined && components.length › 0"}:::decision
   n41 -->|"sí"| n42
-  n43(["422 PRECONDITION_FAILED {message}"]):::error
-  n42 --> n43
-  n44["Llama a TerminologyStudyCatalogAdapter.panelComponentIds"]:::llamada
-  n41 -->|"no"| n44
-  n45["Repite: ciclo for"]:::bucle
-  n44 --> n45
-  n46[("LEE terminology.concept_relationships")]:::efecto
-  n45 -->|"cada elemento"| n46
-  n47{"foreign.length › 0"}:::decision
+  n43["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n42 -->|"sí"| n43
+  n44(["422 PRECONDITION_FAILED {message}"]):::error
+  n43 --> n44
+  n45{"components === undefined || components.length === 0"}:::decision
+  n41 -->|"no"| n45
+  n46["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n45 -->|"sí"| n46
+  n47(["422 PRECONDITION_FAILED {message}"]):::error
   n46 --> n47
-  n45 -->|"al terminar"| n47
-  n48["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n47 -->|"sí"| n48
-  n49(["422 PRECONDITION_FAILED {message}"]):::error
+  n48["Llama a TerminologyStudyCatalogAdapter.panelComponentIds"]:::llamada
+  n45 -->|"no"| n48
+  n49["Repite: ciclo for"]:::bucle
   n48 --> n49
-  n50{"category !== 'IMAGING'"}:::decision
-  n38 -->|"no"| n50
-  n47 -->|"no"| n50
-  n36 -->|"no"| n50
-  n51{"hasImagingFields"}:::decision
-  n50 -->|"sí"| n51
+  n50[("LEE terminology.concept_relationships")]:::efecto
+  n49 -->|"cada elemento"| n50
+  n51{"foreign.length › 0"}:::decision
+  n50 --> n51
+  n49 -->|"al terminar"| n51
   n52["Llama a ServiceRequestDetailService.fail"]:::llamada
   n51 -->|"sí"| n52
   n53(["422 PRECONDITION_FAILED {message}"]):::error
   n52 --> n53
-  n54{"catalogImaging && modalityConceptId === undefined"}:::decision
+  n54{"category !== 'IMAGING'"}:::decision
+  n42 -->|"no"| n54
   n51 -->|"no"| n54
-  n50 -->|"no"| n54
-  n55["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n40 -->|"no"| n54
+  n55{"hasImagingFields(imaging)"}:::decision
   n54 -->|"sí"| n55
-  n56(["422 PRECONDITION_FAILED {message}"]):::error
-  n55 --> n56
-  n57{"modalityConceptId !== undefined"}:::decision
-  n54 -->|"no"| n57
-  n58["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
-  n57 -->|"sí"| n58
-  n59[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
-  n58 --> n59
-  n60{"!(await this.catalog.isInValueSet( em, 'service-request-imaging-modality', modalityConceptId, ))"}:::decision
+  n56["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n55 -->|"sí"| n56
+  n57(["422 PRECONDITION_FAILED {message}"]):::error
+  n56 --> n57
+  n58{"catalogImaging && modalityConceptId === undefined"}:::decision
+  n55 -->|"no"| n58
+  n54 -->|"no"| n58
+  n59["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n58 -->|"sí"| n59
+  n60(["422 PRECONDITION_FAILED {message}"]):::error
   n59 --> n60
-  n61["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n60 -->|"sí"| n61
-  n62(["422 PRECONDITION_FAILED {message}"]):::error
-  n61 --> n62
-  n63{"study?.modalityConceptId && study.modalityConceptId !== modalityConceptId"}:::decision
-  n60 -->|"no"| n63
-  n64["Llama a ServiceRequestDetailService.fail"]:::llamada
-  n63 -->|"sí"| n64
-  n65(["422 PRECONDITION_FAILED {message}"]):::error
-  n64 --> n65
-  n66{"bodySiteConceptId === undefined"}:::decision
-  n63 -->|"no"| n66
-  n57 -->|"no"| n66
-  n67{"catalogImaging"}:::decision
-  n66 -->|"sí"| n67
+  n61{"modalityConceptId !== undefined"}:::decision
+  n58 -->|"no"| n61
+  n62["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n61 -->|"sí"| n62
+  n63[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
+  n62 --> n63
+  n64{"!(await this.catalog.isInValueSet( em, 'service-request-imaging-modality', modalityConceptId, ))"}:::decision
+  n63 --> n64
+  n65["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n64 -->|"sí"| n65
+  n66(["422 PRECONDITION_FAILED {message}"]):::error
+  n65 --> n66
+  n67{"study?.modalityConceptId && study.modalityConceptId !== modalityConceptId"}:::decision
+  n64 -->|"no"| n67
   n68["Llama a ServiceRequestDetailService.fail"]:::llamada
   n67 -->|"sí"| n68
   n69(["422 PRECONDITION_FAILED {message}"]):::error
   n68 --> n69
-  n70{"bodySiteConceptId !== undefined && bodySite === null"}:::decision
+  n70{"bodySiteConceptId === undefined"}:::decision
   n67 -->|"no"| n70
-  n66 -->|"no"| n70
-  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
+  n61 -->|"no"| n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
   n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -3482,15 +3459,19 @@ flowchart TD
   n20 --> n21
   n22[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
   n21 --> n22
-  n23>"Evento periop.case.reacceptance_required"]:::evento
+  n23["Llama a PeriopEventPublisher.publishDomainEvent"]:::llamada
   n22 --> n23
   n19 -->|"no"| n23
-  n24["Llama a PeriopCasesRepository.createTeamMember"]:::llamada
+  n24>"Evento ~null"]:::evento
   n23 --> n24
-  n25[("CREA procedures_perioperative.procedure_case_team_members")]:::efecto
+  n25>"Evento periop.case.reacceptance_required"]:::evento
   n24 --> n25
-  n26(("201 Responde con éxito")):::ok
+  n26["Llama a PeriopCasesRepository.createTeamMember"]:::llamada
   n25 --> n26
+  n27[("CREA procedures_perioperative.procedure_case_team_members")]:::efecto
+  n26 --> n27
+  n28(("201 Responde con éxito")):::ok
+  n27 --> n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3595,44 +3576,34 @@ flowchart TD
   n9 -->|"no"| n11
   n12(["422 PRECONDITION_FAILED Sólo el propio integrante puede responder a su participación"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n13["Llama a PeriopEventPublisher.publishDomainEvent"]:::llamada
   n11 -->|"no"| n13
-  n14["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n14["Llama a OutboxService.publishDomainEvent"]:::llamada
   n13 --> n14
-  n15["Transacción: startActiveSpan(…)"]:::transaccion
+  n15["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n14 --> n15
-  n16["Intenta"]:::intento
+  n16["Transacción: startActiveSpan(…)"]:::transaccion
   n15 --> n16
-  n17(["↩ (relanza el error capturado)"]):::error
-  n16 -->|"si falla"| n17
-  n18["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n16 --> n18
-  n19["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
-  n18 --> n19
-  n20[("LEE messaging.outbox_messages")]:::efecto
+  n17["Intenta"]:::intento
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"si falla"| n18
+  n19>"Evento ~null"]:::evento
+  n17 --> n19
+  n20>"Evento periop.case.team_participation_declined"]:::evento
   n19 --> n20
-  n21["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n21["Llama a AuditTrailService.record"]:::llamada
   n20 --> n21
-  n22[("CREA messaging.domain_events")]:::efecto
+  n22["Llama a AuditLogRepository.append"]:::llamada
   n21 --> n22
-  n23["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n23["Llama a AuditLogRepository.findChainTip"]:::llamada
   n22 --> n23
-  n24[("CREA messaging.outbox_messages")]:::efecto
+  n24[("LEE audit.audit_log")]:::efecto
   n23 --> n24
-  n25>"Evento periop.case.team_participation_declined"]:::evento
+  n25[("CREA audit.audit_log")]:::efecto
   n24 --> n25
-  n26["Llama a AuditTrailService.record"]:::llamada
+  n26(("200 Responde con éxito")):::ok
   n25 --> n26
-  n27["Llama a AuditLogRepository.append"]:::llamada
-  n26 --> n27
-  n28["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n27 --> n28
-  n29[("LEE audit.audit_log")]:::efecto
-  n28 --> n29
-  n30[("CREA audit.audit_log")]:::efecto
-  n29 --> n30
-  n31(("200 Responde con éxito")):::ok
-  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

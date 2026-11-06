@@ -10,22 +10,22 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 229 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 280 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
-| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
-| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
-| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 38 | COINCIDE |
+| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 24 | COINCIDE |
+| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 21 | COINCIDE |
+| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 41 | COINCIDE |
 | [concept_maps](#concept_maps) | Mantiene correspondencias entre conceptos o sistemas de códigos para facilitar intercambio y normalización semántica. | 12 | 6 | 3 | COINCIDE |
-| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 41 | COINCIDE |
+| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 47 | COINCIDE |
 | [concept_relationship_evidence](#concept_relationship_evidence) | sin propósito | 23 | 10 | 1 | COINCIDE |
-| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 14 | 10 | 15 | COINCIDE |
+| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 14 | 10 | 23 | COINCIDE |
 | [tenant_catalog_policies](#tenant_catalog_policies) | Define políticas de catálogo por tenant para gobernar qué terminologías se habilitan en cada organización sanitaria. | 14 | 6 | 3 | COINCIDE |
 | [tenant_concept_config](#tenant_concept_config) | Guarda configuraciones de conceptos por tenant para permitir ajustes locales sin alterar el concepto canónico compartido. | 12 | 5 | 3 | COINCIDE |
-| [terminology_sources](#terminology_sources) | Identifica fuentes de terminología sanitaria para registrar procedencia y gobierno de los catálogos clínicos. | 14 | 7 | 4 | COINCIDE |
-| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 60 | COINCIDE |
+| [terminology_sources](#terminology_sources) | Identifica fuentes de terminología sanitaria para registrar procedencia y gobierno de los catálogos clínicos. | 14 | 7 | 7 | COINCIDE |
+| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 71 | COINCIDE |
 | [value_set_rules](#value_set_rules) | Describe reglas de inclusión o selección de miembros de conjuntos de valores usadas por catálogos clínicos. | 12 | 5 | 2 | COINCIDE |
-| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 52 | COINCIDE |
-| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 51 | COINCIDE |
+| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 63 | COINCIDE |
+| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 62 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -220,7 +220,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2745 entrantes · 229 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2745 entrantes · 280 operaciones
 
 #### Columnas
 
@@ -3030,9 +3030,13 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /privacy/dsar | LEE | POR_SQL |
 | GET /privacy/dsar/{id} | LEE | POR_SQL |
 | GET /admin/catalogs/services/scopes | LEE | DIRECTA |
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
 | POST /billing/service-catalog/import-procedures | LEE | POR_SQL |
 | GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | GET /billing/space-tariffs | LEE | POR_SQL |
 | POST /billing/space-tariffs | LEE | POR_SQL |
 | POST /billing/space-tariffs/{id}/close | LEE | POR_SQL |
@@ -3064,25 +3068,68 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /admin/governance/jobs | LEE | POR_SQL |
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | GET /approvals/pending | LEE | POR_SQL |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | GET /me/support-agenda | LEE | POR_SQL |
 | GET /diagnostic-equipment/{id} | LEE | POR_SQL |
+| DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
 | GET /diagnostic-units | LEE | DIRECTA |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
+| POST /diagnostic-units/{unitId}/equipment | LEE | POR_SQL |
+| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| GET /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
+| PUT /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
+| GET /diagnostic-units/{unitId}/study-availability | LEE | POR_SQL |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
+| GET /diagnostic-units/me/bookings | LEE | POR_SQL |
+| GET /diagnostic-units/me/schedule | LEE | POR_SQL |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | DIRECTA |
+| POST /diagnostics/lab/catalog/import | LEE | DIRECTA |
+| GET /diagnostics/lab/categories | LEE | DIRECTA |
+| POST /diagnostics/lab/categories | LEE | DIRECTA |
+| DELETE /diagnostics/lab/categories/{id} | LEE | DIRECTA |
+| PATCH /diagnostics/lab/categories/{id} | LEE | DIRECTA |
+| GET /diagnostics/lab/services | LEE | DIRECTA |
+| POST /diagnostics/lab/services | LEE | DIRECTA |
+| DELETE /diagnostics/lab/services/{id} | LEE | DIRECTA |
+| PATCH /diagnostics/lab/services/{id} | LEE | DIRECTA |
+| POST /diagnostics/lab/services/import | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
+| GET /public/diagnostic-reports/{versionId}/verify | LEE | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | GET /admin/governance/data-quality/rules | LEE | POR_SQL |
 | GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
@@ -3090,6 +3137,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
@@ -3152,6 +3200,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/availability/medications | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/ledger | LEE | POR_SQL |
+| GET /pharmacy/{pharmacyId}/inventory/lots | LEE | POR_SQL |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
@@ -3199,6 +3249,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | POR_SQL |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | POR_SQL |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
@@ -3346,7 +3397,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_system_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystemVersions` — `src/modules/terminology/entities/code_system_versions.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 3 entrantes · 19 operaciones
+- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 3 entrantes · 24 operaciones
 
 #### Columnas
 
@@ -3401,6 +3452,10 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /insurance-campaigns | LEE | POR_SQL |
@@ -3411,6 +3466,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
 | GET /pharmacy/catalog-products | LEE | POR_SQL |
+| GET /public/medications | LEE | POR_SQL |
 | GET /terminology/code-systems/{id}/versions | LEE | DIRECTA |
 | POST /terminology/code-systems/{id}/versions | CREA | DIRECTA |
 | POST /terminology/code-systems/{id}/versions | LEE | DIRECTA |
@@ -3444,7 +3500,7 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_systems`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystems` — `src/modules/terminology/entities/code_systems.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 16 operaciones
+- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -3504,6 +3560,10 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /insurance-campaigns | LEE | POR_SQL |
@@ -3514,6 +3574,7 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
 | GET /pharmacy/catalog-products | LEE | POR_SQL |
+| GET /public/medications | LEE | POR_SQL |
 | GET /terminology/code-systems | LEE | DIRECTA |
 | POST /terminology/code-systems | CREA | DIRECTA |
 | POST /terminology/code-systems | LEE | DIRECTA |
@@ -3544,7 +3605,7 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_designations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptDesignations` — `src/modules/terminology/entities/concept_designations.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 38 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 41 operaciones
 
 #### Columnas
 
@@ -3586,6 +3647,7 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | GET /clinical/service-requests/{id} | LEE | DIRECTA |
@@ -3594,6 +3656,8 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
@@ -3721,7 +3785,7 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_properties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptProperties` — `src/modules/terminology/entities/concept_properties.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 41 operaciones
+- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 47 operaciones
 
 #### Columnas
 
@@ -3762,16 +3826,22 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 | GET /billing/service-catalog/procedure-specialties | LEE | POR_SQL |
 | GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
+| POST /diagnostics/lab/orders | LEE | POR_SQL |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | POR_SQL |
 | GET /medical-centers/search | LEE | POR_SQL |
 | GET /medical-centers/search/for-my-orders | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
 | GET /pharmacy/catalog-products | LEE | DIRECTA |
+| GET /public/medications | LEE | POR_SQL |
 | GET /practices/{practiceId}/healthcare-services | LEE | POR_SQL |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | POR_SQL |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
@@ -3917,7 +3987,7 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_relationships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptRelationships` — `src/modules/terminology/entities/concept_relationships.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 1 entrantes · 15 operaciones
+- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 1 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -3976,11 +4046,19 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
+| POST /diagnostics/lab/orders | LEE | POR_SQL |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | POR_SQL |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 | GET /clinical/study-catalog | LEE | POR_SQL |
 | GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
@@ -4157,7 +4235,7 @@ Identifica fuentes de terminología sanitaria para registrar procedencia y gobie
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: terminology_sources`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `TerminologySources` — `src/modules/terminology/entities/terminology_sources.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 3 entrantes · 4 operaciones
+- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 3 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -4213,6 +4291,9 @@ Identifica fuentes de terminología sanitaria para registrar procedencia y gobie
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /terminology/code-systems | CREA | DIRECTA |
@@ -4241,7 +4322,7 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_members`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetMembers` — `src/modules/terminology/entities/value_set_members.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 60 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 71 operaciones
 
 #### Columnas
 
@@ -4287,6 +4368,10 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
@@ -4296,15 +4381,23 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | GET /public/search/organizations | LEE | DIRECTA |
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
+| POST /diagnostics/lab/orders | LEE | POR_SQL |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | POR_SQL |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -4312,13 +4405,12 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
-| GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
 | PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
@@ -4440,7 +4532,7 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetVersions` — `src/modules/terminology/entities/value_set_versions.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 52 operaciones
+- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -4493,6 +4585,10 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
@@ -4502,14 +4598,22 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | GET /public/search/organizations | LEE | DIRECTA |
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
+| POST /diagnostics/lab/orders | LEE | POR_SQL |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | POR_SQL |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -4517,12 +4621,11 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
-| GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
 | PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
@@ -4569,7 +4672,7 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_sets`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSets` — `src/modules/terminology/entities/value_sets.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 51 operaciones
+- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 62 operaciones
 
 #### Columnas
 
@@ -4645,6 +4748,10 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | POR_SQL |
+| POST /billing/service-catalog/import | LEE | POR_SQL |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
+| GET /billing/service-catalog/repository/facets | LEE | POR_SQL |
 | POST /clinical/requisitions | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
@@ -4654,14 +4761,22 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | GET /public/search/organizations | LEE | DIRECTA |
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| GET /diagnostics/lab/catalog | LEE | POR_SQL |
+| POST /diagnostics/lab/catalog/import | LEE | POR_SQL |
+| POST /diagnostics/lab/orders | LEE | POR_SQL |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | POR_SQL |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
@@ -4669,12 +4784,11 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
-| GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
 | PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |

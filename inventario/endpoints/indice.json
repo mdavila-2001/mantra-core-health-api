@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1942,
+    "total": 2033,
     "porOrigen": {
-      "CONTRATO": 1930,
-      "CONTRATO_AUSENTE": 12
+      "CONTRATO": 2022,
+      "CONTRATO_AUSENTE": 11
     },
     "porRiesgo": {
-      "BAJO": 734,
-      "MEDIO": 948,
-      "ALTO": 260
+      "BAJO": 777,
+      "MEDIO": 961,
+      "ALTO": 295
     },
-    "conTablas": 1850,
-    "sinTablasSinDeterminar": 22,
+    "conTablas": 1933,
+    "sinTablasSinDeterminar": 29,
     "sinExplicacionDeNegocio": 1,
-    "conPruebas": 1047,
-    "conRequerimientos": 1942
+    "conPruebas": 1105,
+    "conRequerimientos": 2033
   },
   "endpoints": [
     {
@@ -1708,12 +1708,12 @@
     },
     {
       "id": "AppController_metrics",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/metrics",
       "modulo": "app",
       "bloque": null,
-      "nombre": "Métricas de runtime y proceso en formato estándar Prometheus (OpenMetrics). Excluido de trazas OTLP para evitar polución de spans en muestreo.",
+      "nombre": "Métricas de runtime y proceso en formato Prometheus",
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
@@ -2539,7 +2539,7 @@
       ],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -2555,7 +2555,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 8,
+      "tablas": 11,
       "eventos": 1,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -2568,13 +2568,13 @@
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
       "nombre": "Revocar o expirar una relación asistencial",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "CLINICIAN",
         "SECURITY_ADMIN"
       ],
-      "tablas": 1,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -2593,7 +2593,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 17,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -2762,6 +2762,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuthzMeController_listAccessRequests",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/me/access-requests",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mis solicitudes de acceso, recibidas y enviadas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuthzMeController_revokeCareRelationship",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -2769,12 +2787,12 @@
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
       "nombre": "Revocar una de mis relaciones asistenciales",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "PATIENT"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -2793,6 +2811,24 @@
         "PATIENT"
       ],
       "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzMeController_requestPrimaryPractitioner",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/authz/me/primary-practitioner-requests",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Pedir a un profesional que sea mi médico de cabecera",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -2923,6 +2959,44 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzPractitionerRequestsController_listAccessRequests",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/practitioners/me/access-requests",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Solicitudes de acceso enviadas y recibidas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzPractitionerRequestsController_respond",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/authz/practitioners/me/care-relationships/{id}/respond",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aceptar o rechazar una solicitud de cabecera de un paciente",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 12,
+      "eventos": 1,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4117,7 +4191,7 @@
       "ruta": "/billing/service-catalog",
       "modulo": "billing",
       "bloque": "Financiero y ERP",
-      "nombre": "Dar de alta un servicio en el catálogo maestro",
+      "nombre": "Dar de alta en el catálogo un servicio del repositorio",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -4125,9 +4199,9 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 5,
+      "tablas": 12,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4164,6 +4238,26 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_importServices",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/service-catalog/import",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Importar servicios del repositorio a mi catálogo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4230,6 +4324,38 @@
       "publica": false,
       "roles": [],
       "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_searchRepository",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/repository",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Buscar en el repositorio de servicios (para importar)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_repositoryFacets",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/repository/facets",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Fuentes y especialidades del repositorio de servicios",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -4693,7 +4819,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -4731,7 +4857,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4750,7 +4876,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4871,7 +4997,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4890,7 +5016,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4909,7 +5035,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -4928,7 +5054,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -4947,7 +5073,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -4966,7 +5092,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4985,7 +5111,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5004,7 +5130,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 6,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -5151,7 +5277,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5170,7 +5296,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5259,7 +5385,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5278,7 +5404,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -5297,7 +5423,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 29,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5335,7 +5461,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 19,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -5371,7 +5497,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5390,7 +5516,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5441,7 +5567,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 42,
+      "tablas": 41,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -5473,7 +5599,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 30,
+      "tablas": 32,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -5508,9 +5634,9 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 31,
+      "tablas": 30,
       "eventos": 0,
-      "pruebas": 8,
+      "pruebas": 9,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5546,7 +5672,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 13,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5654,7 +5780,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5673,7 +5799,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5692,7 +5818,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5711,7 +5837,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5730,7 +5856,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 37,
+      "tablas": 38,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -5749,7 +5875,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5768,7 +5894,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5787,7 +5913,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -5825,7 +5951,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5841,7 +5967,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5861,7 +5987,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 6,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5881,7 +6007,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 9,
+      "tablas": 32,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -5974,7 +6100,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6012,7 +6138,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6052,7 +6178,7 @@
       ],
       "tablas": 36,
       "eventos": 2,
-      "pruebas": 6,
+      "pruebas": 8,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6069,7 +6195,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6088,7 +6214,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 28,
+      "tablas": 30,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6241,7 +6367,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 20,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6260,7 +6386,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6279,7 +6405,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 20,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6501,7 +6627,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6520,7 +6646,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6587,7 +6713,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6625,7 +6751,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6644,7 +6770,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6663,7 +6789,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6682,7 +6808,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6701,7 +6827,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6720,7 +6846,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -7036,7 +7162,7 @@
       "roles": [],
       "tablas": 6,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -7388,7 +7514,7 @@
       "roles": [],
       "tablas": 8,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -7418,9 +7544,9 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -7434,9 +7560,9 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 25,
+      "tablas": 24,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -7467,6 +7593,22 @@
       "publica": false,
       "roles": [],
       "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunityMessageReactionsController_react",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/community/conversations/{conversationId}/messages/{messageId}/reaction",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Reaccionar a un mensaje (una reacción por perfil)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -7738,7 +7880,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -7770,7 +7912,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -8182,7 +8324,7 @@
       "roles": [],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -8339,10 +8481,26 @@
       "modulo": "community",
       "bloque": "Marketing y Crecimiento",
       "nombre": "Temas de la comunidad",
-      "riesgo": "BAJO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 1,
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunityTopicsController_createTopic",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/community/topics",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Crear un tema propio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -8960,7 +9118,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -8979,7 +9137,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9179,7 +9337,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9197,7 +9355,25 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 25,
+      "tablas": 26,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerAccessRequestsController_revoke",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/consent/practitioner-access-requests/{id}/revoke",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Revocar un acceso granular que el paciente ya había aceptado",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9270,7 +9446,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9290,7 +9466,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9309,7 +9485,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9328,7 +9504,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 20,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9347,7 +9523,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9366,7 +9542,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10958,7 +11134,7 @@
       "roles": [
         "SYSTEM"
       ],
-      "tablas": 12,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10979,6 +11155,25 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_redeem",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/affiliation-invitations/redeem",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Canjear un código o QR de afiliación",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 39,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -11428,6 +11623,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AffiliationInvitationsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/affiliation-invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Listar los códigos de afiliación de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/affiliation-invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Crear un código o QR de afiliación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_revoke",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/affiliation-invitations/{id}/revoke",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Revocar un código o QR de afiliación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "SupportStaffController_orgCatalog",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -11766,6 +12009,60 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "OrderBookingController_cancel",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostic-results/me/orders/{orderId}/booking",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cancel the appointment of my order",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OrderBookingController_book",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostic-results/me/orders/{orderId}/booking",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Book my order at a center, confirmed",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 29,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OrderBookingController_bookingOptions",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-results/me/orders/{orderId}/booking-options",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Centers that perform the study of my order",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 25,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticPricingController_retireOffering",
       "origen": "CONTRATO",
       "metodo": "DELETE",
@@ -12050,6 +12347,118 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CenterScheduleController_addEquipment",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostic-units/{unitId}/equipment",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Register a device (a production line)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_removeEquipment",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Remove a device registered by mistake",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_setEquipmentStatus",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Mark a device operational or not",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 19,
+      "eventos": 2,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_editEquipment",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Edit a device: name, maker, serial, modality",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_schedule",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-units/{unitId}/schedule",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Schedule, studies and equipment of a center",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_saveSchedule",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostic-units/{unitId}/schedule",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Publish the whole schedule of a center",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 19,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "StudyAvailabilityController_studyAvailability",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-units/{unitId}/study-availability",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Free starts of a study in a center",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticUnitsController_listForAdministration",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -12068,6 +12477,38 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CenterScheduleController_myBookings",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-units/me/bookings",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Appointments booked at my center, by start",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CenterScheduleController_mySchedule",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-units/me/schedule",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Schedule, studies and equipment of my center",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticUnitsController_search",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -12079,6 +12520,182 @@
       "publica": false,
       "roles": [],
       "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_studyCatalogItems",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/catalog",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Catálogo de análisis (LOINC) con componentes y precio sugerido",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_importCatalog",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/catalog/import",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Sumar análisis del catálogo, con sus componentes y precio sugerido",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_listCategories",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/categories",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Categorías del laboratorio, con su conteo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_createCategory",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/categories",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_deleteCategory",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostics/lab/categories/{id}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Eliminar una categoría (409 mientras agrupe servicios no retirados)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_renameCategory",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/diagnostics/lab/categories/{id}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Renombrar una categoría (409 si el nombre ya existe)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_listServices",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/services",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Catálogo de servicios del laboratorio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_createService",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/services",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Dar de alta un servicio con su precio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_withdrawService",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostics/lab/services/{id}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Retirar un servicio (no se borra)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_updateService",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/diagnostics/lab/services/{id}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Editar un servicio (un precio nuevo es una versión nueva)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "LabPortalServicesController_importServices",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/services/import",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Carga masiva por código, fila por fila",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12134,7 +12751,7 @@
       ],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12170,7 +12787,7 @@
       ],
       "tablas": 9,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12242,7 +12859,7 @@
       ],
       "tablas": 29,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 7,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12358,7 +12975,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 4,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12440,6 +13057,246 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "DiagnosticsLabPortalController_listOrders",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/orders",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Órdenes derivadas al laboratorio, con su estado derivado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_createOrder",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/orders",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "El centro carga una orden que llega en papel o por mostrador",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 26,
+      "eventos": 1,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_updateOrder",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostics/lab/orders/{orderId}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Corregir una orden que cargó el centro, antes de recibirla",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 23,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_transition",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/orders/{orderId}/transitions",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 30,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_lookupPatient",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/patients/lookup",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Paciente por número de documento, para cargar su orden",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabResultsController_listResultFiles",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/result-files",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Resultados subidos por el laboratorio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabResultsController_getResultContent",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/result-files/{id}/content",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Descargar un resultado subido",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabResultsController_withdrawResult",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/result-files/{id}/withdrawal",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Retirar un resultado subido por error (queda en el historial)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 22,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabResultsController_searchResultFiles",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/result-files/search",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Buscar entre los resultados subidos (filtros en el cuerpo)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_listResultTargets",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/result-targets",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Órdenes procesadas a las que se puede adjuntar un resultado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabUploadsController_start",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/result-uploads",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Empezar la subida por partes de un resultado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabUploadsController_abort",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostics/lab/result-uploads/{uploadId}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cancelar una subida abierta",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabUploadsController_complete",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/lab/result-uploads/{uploadId}/complete",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cerrar la subida: guarda el archivo y lo publica en el informe",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 31,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabUploadsController_putPart",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostics/lab/result-uploads/{uploadId}/parts/{index}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Mandar una parte (bytes crudos)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsLabPortalController_getSummary",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/lab/summary",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Resumen del laboratorio del tenant activo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 20,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticsImagingController_listStudies",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -12472,9 +13329,242 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsOrdersController_getReleasedResult",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/patients/{patientProfileId}/reports/{reportId}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Resultado liberado de un informe del paciente",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsOrdersController_getReleasedResultFileContent",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Descargar un archivo del resultado liberado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_open",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/report-drafts",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Abrir (u obtener) el borrador del informe de una orden",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/report-drafts/{id}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Borrador del informe",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_update",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostics/report-drafts/{id}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Guardar el borrador (409 si cambió o ya se publicó)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_attachFile",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/report-drafts/{id}/files",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Adjuntar documento, audio o anexo al borrador",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_removeFile",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/diagnostics/report-drafts/{id}/files/{draftFileId}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Quitar un archivo del borrador",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportPublishController_preview",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/report-drafts/{id}/preview",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Vista previa en PDF con marca de agua «BORRADOR»",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportPublishController_publish",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/report-drafts/{id}/publish",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Publicar el informe: versión inmutable, PDF oficial y liberación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 43,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportPublishController_requestSignature",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/report-drafts/{id}/signature-request",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Pedir al firmante elegido que revise y publique con su firma",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportDraftsController_listSigners",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/report-drafts/signers",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Profesionales que pueden firmar informes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportReleaseController_getSettings",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/report-issuer-settings",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Firma, sello y responsable de los informes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportReleaseController_setSettings",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/diagnostics/report-issuer-settings",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cambiar firma, sello y responsable (OWNER/ADMIN)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReportReleaseController_releaseToPatient",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/reports/{reportId}/patient-release",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Liberar al paciente un resultado retenido",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12491,7 +13581,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -12510,7 +13600,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -12695,6 +13785,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "DiagnosticsReportVerifyPublicController_verify",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/public/diagnostic-reports/{versionId}/verify",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Verificar la autenticidad de un informe diagnóstico",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AdminTenantsController_searchTenants",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -12726,7 +13832,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12829,7 +13935,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -12883,6 +13989,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "BranchLocationController_preview",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/{tenantId}/branches/location-preview",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Coordenadas de un enlace de Google Maps u OpenStreetMap",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TenantsController_listChildTenants",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -12911,7 +14033,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13109,6 +14231,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TenantRepresentativesController_rename",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/tenants/{tenantId}/representatives/{role}/name",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Corregir el nombre del representante legal o de una gerencia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TenantsController_listMyTenants",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -13122,6 +14260,54 @@
       "tablas": 13,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MembershipInvitationsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/tenants/me/membership-invitations",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Pending organization invitations of the caller",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MembershipInvitationsController_accept",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/me/membership-invitations/{membershipId}/accept",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Accept an invitation: the membership turns active",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MembershipInvitationsController_decline",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/me/membership-invitations/{membershipId}/decline",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Decline an invitation: the membership ends",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -14133,7 +15319,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14171,7 +15357,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 25,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15525,6 +16711,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamIdentifierExistsController_check",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/auth/identifier-exists",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Whether a national id, email or organization name has an account",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamAuthController_login",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -15535,9 +16737,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 23,
+      "tablas": 26,
       "eventos": 0,
-      "pruebas": 67,
+      "pruebas": 72,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15583,9 +16785,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 40,
+      "tablas": 43,
       "eventos": 0,
-      "pruebas": 27,
+      "pruebas": 31,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15601,7 +16803,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 41,
+      "pruebas": 45,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15615,9 +16817,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 76,
+      "tablas": 73,
       "eventos": 0,
-      "pruebas": 38,
+      "pruebas": 41,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15764,6 +16966,54 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamMyDevicesController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/me/devices",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Listar los dispositivos donde inicié sesión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamMyDevicesController_confirm",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/devices/{id}/confirm",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Verificar un dispositivo con el código del correo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamMyDevicesController_requestCode",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/devices/{id}/confirm-code",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Enviar a mi correo el código para verificar un dispositivo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -16019,9 +17269,9 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -16125,7 +17375,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -16197,7 +17447,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 79,
+      "tablas": 70,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16216,7 +17466,7 @@
         "CLINICIAN",
         "SECURITY_ADMIN"
       ],
-      "tablas": 10,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16337,12 +17587,12 @@
       "modulo": "identity_assurance",
       "bloque": "Identidad y Seguridad",
       "nombre": "Resolver una revisión manual (decisión)",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 31,
+      "tablas": 52,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -16374,7 +17624,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 16,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16390,7 +17640,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 17,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -17210,7 +18460,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -17270,7 +18520,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 25,
+      "tablas": 24,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -19474,7 +20724,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 29,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19702,7 +20952,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -19798,6 +21048,25 @@
         "MESSAGING_ADMIN"
       ],
       "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MessagingInternalController_releaseDueInApp",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/notifications/in-app/release-due",
+      "modulo": "messaging",
+      "bloque": "Integraciones y Contratos",
+      "nombre": "Liberar los avisos in-app aplazados por el silencio nocturno",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM",
+        "MESSAGING_ADMIN"
+      ],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19913,7 +21182,45 @@
       ],
       "tablas": 1,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "NativePushController_unregister",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/notifications/native-push/token",
+      "modulo": "messaging",
+      "bloque": "Integraciones y Contratos",
+      "nombre": "Quita el token push (FCM) de esta instalación",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "USER",
+        "MESSAGING_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "NativePushController_register",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/notifications/native-push/token",
+      "modulo": "messaging",
+      "bloque": "Integraciones y Contratos",
+      "nombre": "Guarda el token push (FCM) de esta instalación",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "USER",
+        "MESSAGING_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -20005,7 +21312,7 @@
       ],
       "tablas": 0,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21813,7 +23120,7 @@
         "BUSINESS_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 22,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21875,7 +23182,7 @@
         "PHARMA_LAB_ADMIN",
         "BUSINESS_ADMIN"
       ],
-      "tablas": 10,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22164,7 +23471,7 @@
         "LEGAL_COUNSEL",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 5,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22284,7 +23591,7 @@
         "BUSINESS_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 11,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22484,7 +23791,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 15,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22522,7 +23829,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 9,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22599,7 +23906,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 23,
+      "tablas": 32,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22638,7 +23945,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 8,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22658,7 +23965,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 10,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22677,7 +23984,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 17,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22696,7 +24003,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 8,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22715,7 +24022,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 7,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22733,7 +24040,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 18,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23036,7 +24343,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23576,7 +24883,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 9,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23663,7 +24970,7 @@
         "SYSTEM",
         "SECURITY_ADMIN"
       ],
-      "tablas": 15,
+      "tablas": 23,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23943,6 +25250,82 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyInventoryManagementController_ledger",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacy/{pharmacyId}/inventory/ledger",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Libro de movimientos (kardex), por secuencia de registro, la más reciente primero",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyInventoryManagementController_locations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacy/{pharmacyId}/inventory/locations",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Ubicaciones activas de las sedes de la farmacia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyInventoryManagementController_lots",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacy/{pharmacyId}/inventory/lots",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Lotes con su vencimiento, estados y existencia por sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyInventoryManagementController_positions",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacy/{pharmacyId}/inventory/positions",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Existencias por sede, ubicación y lote, con su desglose",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyProcurementController_createPurchaseOrder",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -24118,7 +25501,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 34,
+      "tablas": 33,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -24152,7 +25535,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 49,
+      "tablas": 48,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -24207,7 +25590,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 40,
+      "tablas": 39,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24242,7 +25625,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 37,
+      "tablas": 36,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24279,7 +25662,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 29,
+      "tablas": 28,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24298,7 +25681,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 34,
+      "tablas": 33,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24317,7 +25700,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 29,
+      "tablas": 28,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24335,7 +25718,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 48,
+      "tablas": 47,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25613,7 +26996,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 10,
+      "pruebas": 11,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -26514,7 +27897,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 22,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -26533,7 +27916,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -26706,7 +28089,7 @@
         "SURGERY_SCHEDULER",
         "PERIOP_ADMIN"
       ],
-      "tablas": 44,
+      "tablas": 46,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -26726,8 +28109,8 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 16,
-      "eventos": 1,
+      "tablas": 26,
+      "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -26843,8 +28226,8 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 9,
-      "eventos": 1,
+      "tablas": 19,
+      "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -27019,8 +28402,8 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 11,
-      "eventos": 1,
+      "tablas": 21,
+      "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -27207,8 +28590,8 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 8,
-      "eventos": 1,
+      "tablas": 18,
+      "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -27251,8 +28634,8 @@
         "SURGERY_SCHEDULER",
         "PERIOP_ADMIN"
       ],
-      "tablas": 7,
-      "eventos": 1,
+      "tablas": 17,
+      "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -27390,7 +28773,7 @@
         "ADMISSIONS_REVIEWER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 40,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27409,7 +28792,7 @@
         "ADMISSIONS_APPROVER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 50,
+      "tablas": 49,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27506,7 +28889,7 @@
         "ADMISSIONS_APPROVER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 44,
+      "tablas": 43,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27545,7 +28928,7 @@
         "ADMISSIONS_REVIEWER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 40,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27564,7 +28947,7 @@
         "ADMISSIONS_APPROVER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 40,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27583,7 +28966,7 @@
         "SYSTEM",
         "SECURITY_ADMIN"
       ],
-      "tablas": 25,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27660,7 +29043,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 6,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -27894,7 +29277,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 16,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -27910,7 +29293,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -27926,7 +29309,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 14,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -28083,12 +29466,12 @@
       "modulo": "profiles",
       "bloque": "Núcleo y Terminología",
       "nombre": "Fusionar pacientes duplicados",
-      "riesgo": "MEDIO",
+      "riesgo": "BAJO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 8,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28145,7 +29528,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 6,
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28249,7 +29632,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 25,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28377,7 +29760,23 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 38,
+      "tablas": 37,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OwnAdmissionController_submit",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/profiles/practitioners/me/admission/submit",
+      "modulo": "profiles",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Enviarme a verificación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 37,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28393,7 +29792,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 32,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28425,7 +29824,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 25,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28729,7 +30128,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28745,7 +30144,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28761,7 +30160,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -29807,7 +31206,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -29826,7 +31225,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 26,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -29876,7 +31275,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -29892,7 +31291,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -30496,7 +31895,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 50,
+      "tablas": 49,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -30534,7 +31933,25 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 3,
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SchedulingAgendaController_listBookableResources",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/scheduling/bookable-resources",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30615,7 +32032,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 50,
+      "tablas": 54,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -30636,7 +32053,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 38,
+      "tablas": 37,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -30675,7 +32092,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30695,7 +32112,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 36,
+      "tablas": 35,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -30734,7 +32151,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 40,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30754,7 +32171,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 47,
+      "tablas": 46,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30795,7 +32212,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 37,
+      "tablas": 36,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30875,7 +32292,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 35,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -30935,7 +32352,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 44,
+      "tablas": 43,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -31143,7 +32560,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 38,
+      "tablas": 53,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -31162,7 +32579,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 35,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31181,7 +32598,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 8,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31200,7 +32617,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 33,
+      "tablas": 32,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31222,6 +32639,25 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SchedulingAgendaController_listMine",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/scheduling/my-resources",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Listar mis agendas y cómo reciben las solicitudes de consulta",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "SCHEDULING_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -31265,6 +32701,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "SchedulingAgendaController_updateResource",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/scheduling/resources/{id}",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Editar un recurso agendable",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SCHEDULING_ADMIN",
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "SchedulingController_closeSlots",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -31278,7 +32733,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 37,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31298,7 +32753,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 35,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -31337,7 +32792,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 37,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -31398,7 +32853,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 34,
+      "tablas": 33,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -31641,7 +33096,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 35,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -31869,7 +33324,7 @@
       "roles": [],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -32008,6 +33463,82 @@
       "publica": false,
       "roles": [],
       "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysServiceAssignmentsController_listServiceAssignments",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/surveys/service-assignments",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Ver la encuesta de cada uno de mis servicios",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysServiceAssignmentsController_removeServiceSurvey",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/surveys/service-assignments/{serviceId}",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Quitar la encuesta de un servicio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysServiceAssignmentsController_importServiceSurvey",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/surveys/service-assignments/{serviceId}",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Asociar a un servicio una encuesta del catálogo estándar",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysServiceAssignmentsController_getCatalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/surveys/standard-catalog",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Ver el catálogo estándar de encuestas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -32346,7 +33877,7 @@
       "roles": [],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {

@@ -54,14 +54,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.coverage → ObservabilityReadService.coverage → ObservabilityReadRepository.instances | `src/modules/observability/infrastructure/observability-read.repository.ts:179` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.coverage → ObservabilityReadService.coverage → ObservabilityReadRepository.instances | `src/modules/observability/infrastructure/observability-read.repository.ts:181` |
 
 ### Parámetros
 
@@ -125,16 +125,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadRepository.openGroupCounts | `src/modules/observability/infrastructure/observability-read.repository.ts:278` |
-| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadRepository.httpByEndpoint | `src/modules/observability/infrastructure/observability-read.repository.ts:235` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadRepository.openGroupCounts | `src/modules/observability/infrastructure/observability-read.repository.ts:280` |
+| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadRepository.httpByEndpoint | `src/modules/observability/infrastructure/observability-read.repository.ts:237` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.endpoints → ObservabilityReadService.endpoints → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
 
 ### Parámetros
 
@@ -202,15 +202,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorEvents → ObservabilityReadService.errorEvents → ObservabilityReadRepository.listEvents | `src/modules/observability/infrastructure/observability-read.repository.ts:521` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorEvents → ObservabilityReadService.errorEvents → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
+| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorEvents → ObservabilityReadService.errorEvents → ObservabilityReadRepository.listEvents | `src/modules/observability/infrastructure/observability-read.repository.ts:523` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorEvents → ObservabilityReadService.errorEvents → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
 
 ### Parámetros
 
@@ -278,16 +278,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadRepository.groupActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:399` |
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadRepository.listErrorGroups | `src/modules/observability/infrastructure/observability-read.repository.ts:363` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
+| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadRepository.groupActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:401` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadRepository.listErrorGroups | `src/modules/observability/infrastructure/observability-read.repository.ts:365` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorGroups → ObservabilityReadService.errorGroups → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
 
 ### Parámetros
 
@@ -358,17 +358,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/observability/presentation/controllers/observability.controller.ts:105` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadRepository.groupActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:399` |
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadRepository.getErrorGroup | `src/modules/observability/infrastructure/observability-read.repository.ts:376` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
+| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadRepository.groupActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:401` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadRepository.getErrorGroup | `src/modules/observability/infrastructure/observability-read.repository.ts:378` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.errorGroup → ObservabilityReadService.errorGroup → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
 
 ### Parámetros
 
@@ -435,18 +435,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE | `src/modules/observability/presentation/controllers/observability.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/observability/presentation/controllers/observability.controller.ts:140` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_groups` | ESCRIBE | ACTUALIZA | POR_SQL | ObservabilityController.changeErrorGroupState → ObservabilityReadService.changeGroupState → ObservabilityReadRepository.changeState | `src/modules/observability/infrastructure/observability-read.repository.ts:579` |
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.changeErrorGroupState → ObservabilityReadService.changeGroupState → ObservabilityReadRepository.getErrorGroup | `src/modules/observability/infrastructure/observability-read.repository.ts:376` |
+| `observability.error_groups` | ESCRIBE | ACTUALIZA | POR_SQL | ObservabilityController.changeErrorGroupState → ObservabilityReadService.changeGroupState → ObservabilityReadRepository.changeState | `src/modules/observability/infrastructure/observability-read.repository.ts:581` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.changeErrorGroupState → ObservabilityReadService.changeGroupState → ObservabilityReadRepository.getErrorGroup | `src/modules/observability/infrastructure/observability-read.repository.ts:378` |
 
 ### Parámetros
 
@@ -535,16 +535,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadRepository.openGroupCounts | `src/modules/observability/infrastructure/observability-read.repository.ts:278` |
-| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadRepository.httpByModule | `src/modules/observability/infrastructure/observability-read.repository.ts:261` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadRepository.openGroupCounts | `src/modules/observability/infrastructure/observability-read.repository.ts:280` |
+| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadRepository.httpByModule | `src/modules/observability/infrastructure/observability-read.repository.ts:263` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.modules → ObservabilityReadService.modules → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
 
 ### Parámetros
 
@@ -608,15 +608,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.request → ObservabilityReadService.request → ObservabilityReadRepository.byRequestId | `src/modules/observability/infrastructure/observability-read.repository.ts:537` |
-| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.request → ObservabilityReadService.request → ObservabilityReadRepository.byRequestId | `src/modules/observability/infrastructure/observability-read.repository.ts:549` |
+| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.request → ObservabilityReadService.request → ObservabilityReadRepository.byRequestId | `src/modules/observability/infrastructure/observability-read.repository.ts:539` |
+| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.request → ObservabilityReadService.request → ObservabilityReadRepository.byRequestId | `src/modules/observability/infrastructure/observability-read.repository.ts:551` |
 
 ### Parámetros
 
@@ -678,15 +678,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:181` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlSlow → ObservabilityReadService.sqlSlow → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
-| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.sqlSlow → ObservabilityReadService.sqlSlow → ObservabilityReadRepository.listSlowSamples | `src/modules/observability/infrastructure/observability-read.repository.ts:752` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlSlow → ObservabilityReadService.sqlSlow → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
+| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.sqlSlow → ObservabilityReadService.sqlSlow → ObservabilityReadRepository.listSlowSamples | `src/modules/observability/infrastructure/observability-read.repository.ts:754` |
 
 ### Parámetros
 
@@ -752,16 +752,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:160` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
-| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadRepository.sqlStatements | `src/modules/observability/infrastructure/observability-read.repository.ts:659` |
-| `observability.sql_statements` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadRepository.sqlStatements | `src/modules/observability/infrastructure/observability-read.repository.ts:659` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
+| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadRepository.sqlStatements | `src/modules/observability/infrastructure/observability-read.repository.ts:661` |
+| `observability.sql_statements` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatements → ObservabilityReadService.sqlStatements → ObservabilityReadRepository.sqlStatements | `src/modules/observability/infrastructure/observability-read.repository.ts:661` |
 
 ### Parámetros
 
@@ -829,17 +829,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
-| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.slowSamplesOfStatement | `src/modules/observability/infrastructure/observability-read.repository.ts:728` |
-| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.sqlStatementSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:694` |
-| `observability.sql_statements` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.sqlStatement | `src/modules/observability/infrastructure/observability-read.repository.ts:682` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
+| `observability.slow_request_samples` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.slowSamplesOfStatement | `src/modules/observability/infrastructure/observability-read.repository.ts:730` |
+| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.sqlStatementSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:696` |
+| `observability.sql_statements` | LEE | LEE | POR_SQL | ObservabilityController.sqlStatement → ObservabilityReadService.sqlStatement → ObservabilityReadRepository.sqlStatement | `src/modules/observability/infrastructure/observability-read.repository.ts:684` |
 
 ### Parámetros
 
@@ -906,17 +906,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.errorGroupSummary | `src/modules/observability/infrastructure/observability-read.repository.ts:299` |
-| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.httpTotals | `src/modules/observability/infrastructure/observability-read.repository.ts:195` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
-| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.sqlTotals | `src/modules/observability/infrastructure/observability-read.repository.ts:611` |
+| `observability.error_groups` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.errorGroupSummary | `src/modules/observability/infrastructure/observability-read.repository.ts:301` |
+| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.httpTotals | `src/modules/observability/infrastructure/observability-read.repository.ts:197` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
+| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.summary → ObservabilityReadService.summary → ObservabilityReadRepository.sqlTotals | `src/modules/observability/infrastructure/observability-read.repository.ts:613` |
 
 ### Parámetros
 
@@ -980,18 +980,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | metric (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.listEventBuckets | `src/modules/observability/infrastructure/observability-read.repository.ts:447` |
-| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.httpSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:216` |
-| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:155` |
-| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.sqlSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:625` |
+| `observability.error_events` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.listEventBuckets | `src/modules/observability/infrastructure/observability-read.repository.ts:449` |
+| `observability.http_request_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.httpSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:218` |
+| `observability.instances` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadService.envelope → ObservabilityReadRepository.instanceActivity | `src/modules/observability/infrastructure/observability-read.repository.ts:157` |
+| `observability.sql_statement_minute_series` | LEE | LEE | POR_SQL | ObservabilityController.timeseries → ObservabilityReadService.timeseries → ObservabilityReadRepository.sqlSeries | `src/modules/observability/infrastructure/observability-read.repository.ts:627` |
 
 ### Parámetros
 
@@ -1060,8 +1060,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/observability/presentation/controllers/observability-selftest.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

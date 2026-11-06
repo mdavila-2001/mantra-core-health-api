@@ -18,7 +18,7 @@
 | 4 | DELETE | `/pharmacies/{pharmacyId}/categories/{categoryId}` | Eliminar una categoría de la farmacia | ALTO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
 | 5 | PATCH | `/pharmacies/{pharmacyId}/categories/{categoryId}` | Renombrar una categoría de la farmacia | MEDIO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
 | 6 | POST | `/pharmacies/{pharmacyId}/categories/bulk` | Cargar categorías en lote, con vista previa | BAJO | 0 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 7 | POST | `/pharmacies/{pharmacyId}/integration-connections` | Establecer conexión de integración externa | MEDIO | 2 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 7 | POST | `/pharmacies/{pharmacyId}/integration-connections` | Establecer conexión de integración externa | MEDIO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
 | 8 | POST | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` | Mapear producto a código de proveedor externo | MEDIO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
 | 9 | DELETE | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}` | Deshacer un vínculo con un código de proveedor externo | ALTO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
 | 10 | PATCH | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}` | Corregir un vínculo con un código de proveedor externo | MEDIO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
@@ -48,7 +48,7 @@
 | 34 | GET | `/pharmacy/products` | Buscar productos publicados por texto, medicamento o farmacia | BAJO | 8 | sesión (sin roles) |
 | 35 | GET | `/pharmacy/sites` | Listar sedes publicadas, sueltas | BAJO | 7 | sesión (sin roles) |
 | 36 | GET | `/pharmacy/sites/{siteId}/prices` | Consultar los precios públicos vigentes de una sede | BAJO | 6 | sesión (sin roles) |
-| 37 | GET | `/public/medications` | Vitrina pública de medicamentos con disponibilidad por farmacia | BAJO | 9 | pública |
+| 37 | GET | `/public/medications` | Vitrina pública de medicamentos con disponibilidad por farmacia | BAJO | 12 | pública |
 | 38 | GET | `/public/medications/{conceptId}/availability` | Farmacias que publican un medicamento, con precio y distancia | BAJO | 9 | pública |
 | 39 | GET | `/public/pharmacies/open-now` | Farmacias abiertas ahora: 24 h o de turno vigente | BAJO | 6 | pública |
 
@@ -79,10 +79,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:285` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -207,9 +207,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:106` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -232,10 +232,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PharmacyCategoryItemDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:793` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:785` |
-| `items[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:786` |
-| `items[].productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:787` |
+| `items` | `array<PharmacyCategoryItemDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:790` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:782` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:783` |
+| `items[].productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:784` |
 
 ### Respuestas posibles
 
@@ -284,11 +284,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:117` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -331,9 +331,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:785` |
-| `name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:786` |
-| `productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:787` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:782` |
+| `name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:783` |
+| `productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:784` |
 
 ### Respuestas posibles
 
@@ -383,9 +383,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, categoryId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:163` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -462,11 +462,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, categoryId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:139` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -511,9 +511,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:785` |
-| `name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:786` |
-| `productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:787` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:782` |
+| `name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:783` |
+| `productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:784` |
 
 ### Respuestas posibles
 
@@ -564,11 +564,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:53` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -678,7 +678,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacies/{pharmacyId}/integration-connections` la atiende `PharmacyController.createConnection` (src/modules/pharmacy/controllers/pharmacy.controller.ts:466). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `CreateConnectionDto` (8 campos, 1 obligatorio). Delega en `PharmacyIntegrationService.createConnection`. Crea filas en pharmacy.pharmacy_integration_connections. Lee pharmacy.pharmacy_sites.
+`POST /pharmacies/{pharmacyId}/integration-connections` la atiende `PharmacyController.createConnection` (src/modules/pharmacy/controllers/pharmacy.controller.ts:466). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `CreateConnectionDto` (8 campos, 1 obligatorio). Delega en `PharmacyIntegrationService.createConnection`. Crea filas en pharmacy.pharmacy_integration_connections. Lee pharmacy.pharmacy_integration_connections, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
@@ -686,17 +686,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:466` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:466` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy.pharmacy_integration_connections` | ESCRIBE | CREA | DIRECTA | PharmacyController.createConnection → PharmacyIntegrationService.createConnection → PharmacyIntegrationConnectionsRepository.create | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:90` |
+| `pharmacy.pharmacy_integration_connections` | ESCRIBE | CREA | DIRECTA | PharmacyController.createConnection → PharmacyIntegrationService.createConnection → PharmacyIntegrationConnectionsRepository.create | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:108` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.createConnection → PharmacyIntegrationService.createConnection → PharmacyIntegrationConnectionsRepository.findActiveStockInScope | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:94` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyController.createConnection → PharmacyIntegrationService.createConnection → PharmacyReferencesRepository.findPharmacySiteInPharmacy | `src/modules/pharmacy/repositories/pharmacy-references.repository.ts:20` |
 
 ### Parámetros
@@ -761,6 +762,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La sucursal ya tiene una conexión de stock activa / La farmacia ya tiene una conexión general de stock activa |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -803,11 +805,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:483` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:483` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -815,7 +817,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|---|---|---|
 | `pharmacy.pharmacy_external_product_mappings` | ESCRIBE | CREA | DIRECTA | PharmacyController.mapProduct → PharmacyIntegrationService.mapProduct → PharmacyExternalProductMappingsRepository.create | `src/modules/pharmacy/repositories/pharmacy-external-product-mappings.repository.ts:87` |
 | `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyController.mapProduct → PharmacyIntegrationService.mapProduct → PharmacyIntegrationService.assertProductFree → PharmacyExternalProductMappingsRepository.findByConnectionAndProduct | `src/modules/pharmacy/repositories/pharmacy-external-product-mappings.repository.ts:47` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.mapProduct → PharmacyIntegrationService.mapProduct → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:69` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.mapProduct → PharmacyIntegrationService.mapProduct → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:70` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyController.mapProduct → PharmacyIntegrationService.mapProduct → PharmacyIntegrationService.requireMappableProduct → PharmacyProductsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-products.repository.ts:80` |
 
 ### Parámetros
@@ -920,9 +922,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:538` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId, mappingId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:538` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -930,7 +932,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy.pharmacy_external_product_mappings` | BORRA | BORRA | POR_TIPO | PharmacyController.unmapProduct → PharmacyIntegrationService.unmapProduct → PharmacyExternalProductMappingsRepository.remove | `src/modules/pharmacy/repositories/pharmacy-external-product-mappings.repository.ts:67` |
 | `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyController.unmapProduct → PharmacyIntegrationService.unmapProduct → PharmacyIntegrationService.requireMapping → PharmacyExternalProductMappingsRepository.findInConnection | `src/modules/pharmacy/repositories/pharmacy-external-product-mappings.repository.ts:59` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.unmapProduct → PharmacyIntegrationService.unmapProduct → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:69` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.unmapProduct → PharmacyIntegrationService.unmapProduct → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:70` |
 
 ### Parámetros
 
@@ -1006,19 +1008,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:506` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId, mappingId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:506` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy.pharmacy_external_product_mappings` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping | `src/modules/pharmacy/services/pharmacy-integration.service.ts:254` |
+| `pharmacy.pharmacy_external_product_mappings` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping | `src/modules/pharmacy/services/pharmacy-integration.service.ts:276` |
 | `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping → PharmacyIntegrationService.requireMapping → PharmacyExternalProductMappingsRepository.findInConnection | `src/modules/pharmacy/repositories/pharmacy-external-product-mappings.repository.ts:59` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:69` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping → PharmacyIntegrationService.requireConnection → PharmacyIntegrationConnectionsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-integration-connections.repository.ts:70` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyController.updateMapping → PharmacyIntegrationService.updateMapping → PharmacyIntegrationService.requireMappableProduct → PharmacyProductsRepository.findById | `src/modules/pharmacy/repositories/pharmacy-products.repository.ts:80` |
 
 ### Parámetros
@@ -1120,11 +1122,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:180` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1231,11 +1233,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:302` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, licenseId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:302` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1335,9 +1337,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:265` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, shiftId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:265` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1424,9 +1426,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:203` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:203` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1519,11 +1521,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:407` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:407` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1641,9 +1643,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:449` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, priceListId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:449` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1722,11 +1724,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:426` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, priceListId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:426` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1843,11 +1845,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:89` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1965,11 +1967,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:343` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:343` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1991,10 +1993,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 | `pharmacy.pharmacy_products` | ESCRIBE | CREA | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsRepository.create | `src/modules/pharmacy/repositories/pharmacy-products.repository.ts:121` |
 | `pharmacy.pharmacy_products` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.applyCatalogFields | `src/modules/pharmacy/services/pharmacy-products.service.ts:454` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsRepository.findByPharmacyAndCode | `src/modules/pharmacy/repositories/pharmacy-products.repository.ts:89` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:187` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:212` |
 | `terminology.code_system_versions` | LEE | LEE | POR_SQL | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:81` |
 | `terminology.code_systems` | LEE | LEE | POR_SQL | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:81` |
-| `terminology.concept_properties` | LEE | LEE | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:188` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | PharmacyController.publishProduct → PharmacyProductsService.publishProduct → PharmacyProductsService.deriveFromCatalog → MedicineCatalogRepository.findProductById → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:213` |
 
 ### Parámetros
 
@@ -2148,9 +2150,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:390` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, productId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:390` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2231,11 +2233,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:362` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, productId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:362` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2402,11 +2404,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:71` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2524,9 +2526,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:568` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:568` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2610,11 +2612,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/pharmac
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:326` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:326` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2733,11 +2735,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:242` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2848,11 +2850,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy.controller.ts:219` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId | `src/modules/pharmacy/controllers/pharmacy.controller.ts:219` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2964,11 +2966,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:109` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3086,17 +3088,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:196` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:187` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:212` |
 | `terminology.code_system_versions` | LEE | LEE | POR_SQL | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:114` |
 | `terminology.code_systems` | LEE | LEE | POR_SQL | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:114` |
-| `terminology.concept_properties` | LEE | LEE | DIRECTA | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:188` |
+| `terminology.concept_properties` | LEE | LEE | DIRECTA | PharmacyReadController.searchCatalogProducts → MedicineCatalogSearchService.search → MedicineCatalogRepository.search → MedicineCatalogRepository.hydrate | `src/modules/pharmacy/repositories/medicine-catalog.repository.ts:213` |
 
 ### Parámetros
 
@@ -3194,8 +3196,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3274,9 +3276,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:75` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3386,9 +3388,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:121` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3396,10 +3398,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.contact_points` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → ContactPointsRepository.findAllCurrentByOwners | `src/modules/common/repositories/contact-points.repository.ts:96` |
 | `common.identifiers` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → IdentifiersRepository.findByIds | `src/modules/common/repositories/identifiers.repository.ts:104` |
-| `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:84` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:86` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:361` |
-| `profiles.persons` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.findPersonsByIds | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:167` |
+| `profiles.persons` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.findPersonsByIds | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:170` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
@@ -3446,7 +3448,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/pharmacy/controllers/pharmacy-read.controller.spec.ts:235` |
+| CONTROLADOR | `src/modules/pharmacy/controllers/pharmacy-read.controller.spec.ts:245` |
 
 ### Flujos
 
@@ -3479,15 +3481,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:92` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:361` |
 | `pharmacy.pharmacy_licenses` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyReadRepository.findLicenses | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:420` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyReadRepository.findSitesByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:433` |
@@ -3543,7 +3545,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/pharmacy/controllers/pharmacy-read.controller.spec.ts:226` |
+| CONTROLADOR | `src/modules/pharmacy/controllers/pharmacy-read.controller.spec.ts:236` |
 
 ### Flujos
 
@@ -3576,16 +3578,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:105` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.audit_log` | LEE | LEE | POR_SQL | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.findRecentActivity | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:355` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:361` |
 | `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:300` |
 | `pharmacy.pharmacy_product_categories` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.listCategories | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:55` |
@@ -3607,20 +3609,20 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `published` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:770` |
-| `drafts` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:771` |
-| `withdrawn` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:772` |
-| `outOfStock` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:773` |
-| `lowStock` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:774` |
-| `inventoryValue` | `string` | Sí | — | — | Valor del inventario, decimal en texto | `src/modules/pharmacy/dto/read-responses.dto.ts:776` |
-| `byCategory` | `array<PharmacyCategoryCountDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:778` |
-| `byCategory[].category` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:758` |
-| `byCategory[].count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:759` |
-| `recentActivity` | `array<PharmacyRecentActivityDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:780` |
-| `recentActivity[].id` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:750` |
-| `recentActivity[].at` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:751` |
-| `recentActivity[].kind` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:752` |
-| `recentActivity[].text` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:753` |
+| `published` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:767` |
+| `drafts` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:768` |
+| `withdrawn` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:769` |
+| `outOfStock` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:770` |
+| `lowStock` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:771` |
+| `inventoryValue` | `string` | Sí | — | — | Valor del inventario, decimal en texto | `src/modules/pharmacy/dto/read-responses.dto.ts:773` |
+| `byCategory` | `array<PharmacyCategoryCountDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:775` |
+| `byCategory[].category` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:755` |
+| `byCategory[].count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:756` |
+| `recentActivity` | `array<PharmacyRecentActivityDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:777` |
+| `recentActivity[].id` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:747` |
+| `recentActivity[].at` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:748` |
+| `recentActivity[].kind` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:749` |
+| `recentActivity[].text` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:750` |
 
 ### Respuestas posibles
 
@@ -3651,7 +3653,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyReadController.searchProducts` — `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:208`
+- **Implementación:** `PharmacyReadController.searchProducts` — `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:207`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3661,22 +3663,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/products` la atiende `PharmacyReadController.searchProducts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:208). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listManagedProducts`, `PharmacyReadService.searchProducts`. Lee directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_images, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, terminology.catalog_concepts.
+`GET /pharmacy/products` la atiende `PharmacyReadController.searchProducts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:207). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listManagedProducts`, `PharmacyReadService.searchProducts`. Lee directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_images, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:207` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyReadService.searchProducts → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:48` |
 | `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyReadService.toCatalogDtos → PharmacyCatalogRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:300` |
 | `pharmacy.pharmacy_product_categories` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyReadService.toCatalogDtos → PharmacyCatalogRepository.findCategoriesByIds | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:68` |
@@ -3689,11 +3691,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `search` | query | No | `string` | Texto a buscar en marca, genérico o código de producto |
+| `search` | query | No | `string` | Marca, genérico, código o uso; `exact=true` no corrige |
 | `conceptId` | query | No | `string` | Medicamento del vademécum (medication_concept_id) |
 | `pharmacyId` | query | No | `string` | Sólo lo publicado por esta farmacia (carril A, H5) |
 | `managed` | query | No | `string` | P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404. |
-| `limit` | query | No | `number` | Tope del listado (por defecto 50) |
+| `limit` | query | No | `number` | Tope (def. 50) |
+| `exact` | query | No | `string` | true: literal |
 
 ### Cuerpo
 
@@ -3703,7 +3706,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PharmacyProductReadDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:484` |
+| `items` | `array<PharmacyProductReadDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:481` |
 | `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:357` |
 | `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:363` |
 | `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:369` |
@@ -3729,8 +3732,9 @@ La operación no recibe cuerpo.
 | `items[].minStock` | `number` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:464` |
 | `items[].outOfStockDeclared` | `boolean` | No | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:471` |
 | `items[].imageFileIds` | `array<string>` | No | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:475` |
-| `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/pharmacy/dto/read-responses.dto.ts:490` |
-| `truncated` | `boolean` | Sí | — | — | true si quedaron productos fuera del tope. Se declara, no se calla | `src/modules/pharmacy/dto/read-responses.dto.ts:499` |
+| `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/pharmacy/dto/read-responses.dto.ts:487` |
+| `truncated` | `boolean` | Sí | — | — | true si quedaron productos fuera del tope. Se declara, no se calla | `src/modules/pharmacy/dto/read-responses.dto.ts:493` |
+| `correctedQuery` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:496` |
 
 ### Respuestas posibles
 
@@ -3781,8 +3785,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3814,21 +3818,21 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PharmacySiteListItemDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:739` |
-| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:656` |
-| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:662` |
-| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:668` |
-| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:674` |
-| `items[].addressText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:680` |
-| `items[].latitude` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:686` |
-| `items[].longitude` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:692` |
-| `items[].distanceKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:699` |
-| `items[].homeDeliveryAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:705` |
-| `items[].pickupAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:711` |
-| `items[].productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:717` |
-| `items[].open24h` | `boolean` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:723` |
-| `items[].onCallUntil` | `string` | No | formato date-time; admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:730` |
-| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:745` |
+| `items` | `array<PharmacySiteListItemDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:736` |
+| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:653` |
+| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:659` |
+| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:665` |
+| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:671` |
+| `items[].addressText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:677` |
+| `items[].latitude` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:683` |
+| `items[].longitude` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:689` |
+| `items[].distanceKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:696` |
+| `items[].homeDeliveryAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:702` |
+| `items[].pickupAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:708` |
+| `items[].productCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:714` |
+| `items[].open24h` | `boolean` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:720` |
+| `items[].onCallUntil` | `string` | No | formato date-time; admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:727` |
+| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:742` |
 
 ### Respuestas posibles
 
@@ -3862,7 +3866,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy.md).
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyReadController.getSitePrices` — `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:275`
+- **Implementación:** `PharmacyReadController.getSitePrices` — `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:272`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3872,17 +3876,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/sites/{siteId}/prices` la atiende `PharmacyReadController.getSitePrices` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:275). Exige sesión; el controlador no declara roles. Delega en `PharmacyReadService.getSitePrices`. Lee pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts.
+`GET /pharmacy/sites/{siteId}/prices` la atiende `PharmacyReadController.getSitePrices` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:272). Exige sesión; el controlador no declara roles. Delega en `PharmacyReadService.getSitePrices`. Lee pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:275` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:275` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:272` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy/controllers/pharmacy-read.controller.ts:272` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3910,33 +3914,33 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:613` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:619` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:625` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:631` |
-| `items` | `array<PharmacySitePriceDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:637` |
-| `items[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:508` |
-| `items[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:514` |
-| `items[].brandName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:520` |
-| `items[].genericName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:526` |
-| `items[].strengthText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:532` |
-| `items[].packageSizeText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:538` |
-| `items[].medication` | `PharmacyConceptDto` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:544` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:610` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:616` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:622` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:628` |
+| `items` | `array<PharmacySitePriceDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:634` |
+| `items[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:505` |
+| `items[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:511` |
+| `items[].brandName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:517` |
+| `items[].genericName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:523` |
+| `items[].strengthText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:529` |
+| `items[].packageSizeText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:535` |
+| `items[].medication` | `PharmacyConceptDto` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:541` |
 | `items[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `items[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `items[].requiresPrescription` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:550` |
-| `items[].priceListId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:556` |
-| `items[].priceListCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:562` |
-| `items[].currency` | `PharmacyConceptDto` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:568` |
+| `items[].requiresPrescription` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:547` |
+| `items[].priceListId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:553` |
+| `items[].priceListCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:559` |
+| `items[].currency` | `PharmacyConceptDto` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:565` |
 | `items[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].unitAmount` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:574` |
-| `items[].taxAmount` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:580` |
-| `items[].patientAmount` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:586` |
-| `items[].minimumQuantity` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:592` |
-| `items[].effectiveFrom` | `string` | Sí | formato date-time | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:598` |
-| `items[].effectiveTo` | `string` | No | formato date-time; admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:604` |
-| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:643` |
+| `items[].unitAmount` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:571` |
+| `items[].taxAmount` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:577` |
+| `items[].patientAmount` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:583` |
+| `items[].minimumQuantity` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:589` |
+| `items[].effectiveFrom` | `string` | Sí | formato date-time | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:595` |
+| `items[].effectiveTo` | `string` | No | formato date-time; admite null | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:601` |
+| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/read-responses.dto.ts:640` |
 
 ### Respuestas posibles
 
@@ -3978,7 +3982,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /public/medications` la atiende `PharmacyPublicController.listMedications` (src/modules/pharmacy/controllers/pharmacy-public.controller.ts:149). Es una ruta pública: no exige token. Delega en `PharmacyMarketplaceService.listMedications`. Lee common.addresses, community.public_profiles, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts y 1 más.
+`GET /public/medications` la atiende `PharmacyPublicController.listMedications` (src/modules/pharmacy/controllers/pharmacy-public.controller.ts:149). Es una ruta pública: no exige token. Delega en `PharmacyMarketplaceService.listMedications`. Lee common.addresses, community.public_profiles, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts y 4 más.
 
 ### Requerimientos
 
@@ -3991,26 +3995,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `terminology.concept_designations` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
+| `common.addresses` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `terminology.code_system_versions` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findVademecum | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:255` |
+| `terminology.code_systems` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findVademecum | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:255` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | PharmacyPublicController.listMedications → PharmacyMarketplaceService.listMedications → PharmacyMarketplaceRepository.findVademecum | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:255` |
 
 ### Parámetros
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `q` | query | No | `string` | Texto a buscar en principio activo, marca o código ATC |
+| `q` | query | No | `string` | Texto a buscar en principio activo, marca, código ATC o para qué se usa («dolor abdominal»). Sin coincidencias, se corrige el tipeo y se informa en `correctedQuery` |
 | `group` | query | No | `string` | Grupo terapéutico ATC de primer nivel, tal como lo lista `groups` |
 | `lat` | query | No | `string` | Latitud WGS84 desde donde medir distancias (va con lng) |
 | `lng` | query | No | `string` | Longitud WGS84 desde donde medir distancias (va con lat) |
 | `radiusKm` | query | No | `string` | Radio en km; sólo se aplica si viajó el origen |
 | `limit` | query | No | `string` | Tope de tarjetas (máx. 60) |
+| `exact` | query | No | `string` | `true` busca el texto tal cual, sin corregir el tipeo |
 
 ### Cuerpo
 
@@ -4020,22 +4028,36 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PublicMedicationCardDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:105` |
-| `items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:29` |
-| `items[].atcCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:35` |
-| `items[].genericName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:41` |
-| `items[].therapeuticGroup` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:47` |
-| `items[].brands` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:53` |
-| `items[].presentations` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:59` |
-| `items[].requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:65` |
-| `items[].priceFrom` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:71` |
-| `items[].priceTo` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:77` |
-| `items[].currency` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:83` |
-| `items[].pharmacyCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:89` |
-| `items[].nearestKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:96` |
-| `total` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:111` |
-| `groups` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:117` |
-| `generatedAt` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:123` |
+| `items` | `array<PublicMedicationCardDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:132` |
+| `items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:30` |
+| `items[].atcCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:36` |
+| `items[].genericName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:42` |
+| `items[].therapeuticGroup` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:48` |
+| `items[].brands` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:54` |
+| `items[].presentations` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:60` |
+| `items[].requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:66` |
+| `items[].priceFrom` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:73` |
+| `items[].priceTo` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:79` |
+| `items[].currency` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:85` |
+| `items[].pharmacyCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:91` |
+| `items[].nearestKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:98` |
+| `items[].uses` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:105` |
+| `items[].matchedBy` | `string` | No | valores: name, brand, code, use; admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:115` |
+| `items[].matchedUse` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:123` |
+| `total` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:138` |
+| `groups` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:144` |
+| `correctedQuery` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:151` |
+| `officialProducts` | `array<PublicOfficialMedicineDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:158` |
+| `officialProducts[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:11` |
+| `officialProducts[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:15` |
+| `officialProducts[].holder` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:19` |
+| `officialProducts[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:22` |
+| `officialProducts[].dosageForm` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:25` |
+| `officialProducts[].sourceName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:29` |
+| `officialProducts[].atc` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:32` |
+| `officialProducts[].uses` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:36` |
+| `officialProducts[].requiresPrescription` | `boolean` | No | admite null | — | — | `src/modules/pharmacy/dto/public-official-medicine.dto.ts:39` |
+| `generatedAt` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:164` |
 
 ### Respuestas posibles
 
@@ -4064,7 +4086,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyPublicController.getAvailability` — `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:204`
+- **Implementación:** `PharmacyPublicController.getAvailability` — `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:213`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4074,29 +4096,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /public/medications/{conceptId}/availability` la atiende `PharmacyPublicController.getAvailability` (src/modules/pharmacy/controllers/pharmacy-public.controller.ts:204). Es una ruta pública: no exige token. Delega en `PharmacyMarketplaceService.getAvailability`. Lee common.addresses, community.public_profiles, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts y 1 más.
+`GET /public/medications/{conceptId}/availability` la atiende `PharmacyPublicController.getAvailability` (src/modules/pharmacy/controllers/pharmacy-public.controller.ts:213). Es una ruta pública: no exige token. Delega en `PharmacyMarketplaceService.getAvailability`. Lee common.addresses, community.public_profiles, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:204` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:204` |
-| RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:204` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:213` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conceptId | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:213` |
+| RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/pharmacy/controllers/pharmacy-public.controller.ts:213` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
-| `terminology.concept_designations` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:124` |
+| `common.addresses` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | PharmacyPublicController.getAvailability → PharmacyMarketplaceService.getAvailability → PharmacyMarketplaceRepository.findPublishedOffers | `src/modules/pharmacy/repositories/pharmacy-marketplace.repository.ts:132` |
 
 ### Parámetros
 
@@ -4115,36 +4137,39 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `medication` | `PublicMedicationCardDto` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:225` |
-| `medication.conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:29` |
-| `medication.atcCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:35` |
-| `medication.genericName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:41` |
-| `medication.therapeuticGroup` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:47` |
-| `medication.brands` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:53` |
-| `medication.presentations` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:59` |
-| `medication.requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:65` |
-| `medication.priceFrom` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:71` |
-| `medication.priceTo` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:77` |
-| `medication.currency` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:83` |
-| `medication.pharmacyCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:89` |
-| `medication.nearestKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:96` |
-| `offers` | `array<PublicMedicationOfferDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:231` |
-| `offers[].pharmacySlug` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:132` |
-| `offers[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:138` |
-| `offers[].addressText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:144` |
-| `offers[].city` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:150` |
-| `offers[].latitude` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:156` |
-| `offers[].longitude` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:162` |
-| `offers[].distanceKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:168` |
-| `offers[].brandName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:174` |
-| `offers[].presentation` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:180` |
-| `offers[].price` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:186` |
-| `offers[].currency` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:192` |
-| `offers[].inStock` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:198` |
-| `offers[].homeDelivery` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:204` |
-| `offers[].pickup` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:210` |
-| `offers[].requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:216` |
-| `generatedAt` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:237` |
+| `medication` | `PublicMedicationCardDto` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:266` |
+| `medication.conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:30` |
+| `medication.atcCode` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:36` |
+| `medication.genericName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:42` |
+| `medication.therapeuticGroup` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:48` |
+| `medication.brands` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:54` |
+| `medication.presentations` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:60` |
+| `medication.requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:66` |
+| `medication.priceFrom` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:73` |
+| `medication.priceTo` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:79` |
+| `medication.currency` | `string` | Sí | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:85` |
+| `medication.pharmacyCount` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:91` |
+| `medication.nearestKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:98` |
+| `medication.uses` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:105` |
+| `medication.matchedBy` | `string` | No | valores: name, brand, code, use; admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:115` |
+| `medication.matchedUse` | `string` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:123` |
+| `offers` | `array<PublicMedicationOfferDto>` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:272` |
+| `offers[].pharmacySlug` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:173` |
+| `offers[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:179` |
+| `offers[].addressText` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:185` |
+| `offers[].city` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:191` |
+| `offers[].latitude` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:197` |
+| `offers[].longitude` | `number` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:203` |
+| `offers[].distanceKm` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:209` |
+| `offers[].brandName` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:215` |
+| `offers[].presentation` | `object` | No | admite null | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:221` |
+| `offers[].price` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:227` |
+| `offers[].currency` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:233` |
+| `offers[].inStock` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:239` |
+| `offers[].homeDelivery` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:245` |
+| `offers[].pickup` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:251` |
+| `offers[].requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:257` |
+| `generatedAt` | `string` | Sí | — | — | — | `src/modules/pharmacy/dto/public-marketplace.dto.ts:278` |
 
 ### Respuestas posibles
 

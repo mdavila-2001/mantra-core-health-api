@@ -27,7 +27,7 @@
 | [grant_usage_stats](#grant_usage_stats) | Acumula por hora el uso de cada permiso de apoyo (permitidos, negados, desafíos, fuera de horario y pacientes distintos) para certificar con evidencia y detectar anomalías. | 13 | 4 | 0 | COINCIDE |
 | [handover_items](#handover_items) | Registra el traspaso del trabajo de quien se va o cambia de función: conversaciones, tareas, vínculos supervisados y citas pendientes, y a quién se reasignó cada uno. | 17 | 9 | 0 | COINCIDE |
 | [lifecycle_cases](#lifecycle_cases) | Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una persona de apoyo con su lista de pasos y su estado. | 18 | 9 | 0 | COINCIDE |
-| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 36 | 25 | 86 | COINCIDE |
+| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 36 | 25 | 88 | COINCIDE |
 | [patient_restriction_flags](#patient_restriction_flags) | Marca por organización a los pacientes VIP, confidenciales, familiares del personal o protegidos para limitar quién del equipo de apoyo puede verlos; es una marca de acceso, no un dato clínico. | 13 | 7 | 0 | COINCIDE |
 | [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 8 | COINCIDE |
 | [role_templates](#role_templates) | Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, recepción, central telefónica, etc.), de plataforma o propios de una organización, para conceder permisos sin repetirlos uno a uno. | 14 | 6 | 0 | COINCIDE |
@@ -1731,7 +1731,7 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: organization_user_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `OrganizationUserAssignments` — `src/modules/delegated_access/entities/organization_user_assignments.entity.ts`
-- **Resumen:** 36 columnas · 25 índices · 21 FK salientes · 8 entrantes · 86 operaciones
+- **Resumen:** 36 columnas · 25 índices · 21 FK salientes · 8 entrantes · 88 operaciones
 
 #### Columnas
 
@@ -1881,6 +1881,8 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 | POST /sites/{siteId}/census/{date}/close | LEE | POR_SQL |
 | GET /sites/{siteId}/inpatient-indicators | LEE | POR_SQL |
 | GET /sites/{siteId}/inpatients | LEE | POR_SQL |
+| POST /affiliation-invitations/redeem | CREA | POR_SQL |
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | GET /approvals/pending | LEE | POR_SQL |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | POST /delegated-access/expiry-sweep | ACTUALIZA | POR_TIPO |
