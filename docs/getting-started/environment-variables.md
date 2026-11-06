@@ -18,7 +18,7 @@
 | Variable | Almacén |
 |---|---|
 | `MONGODB_URI`, `MONGO_DB` | MongoDB (`document_store`) |
-| `REDIS_HOST`, `REDIS_PORT` | Redis (`redis_runtime`) |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` | Redis (`redis_runtime`); con `REDIS_PASSWORD` los compose levantan Redis con `requirepass` |
 | `OPENSEARCH_NODE` | OpenSearch (`search_platform`) |
 | `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | MinIO/S3 (`object_storage`) |
 
