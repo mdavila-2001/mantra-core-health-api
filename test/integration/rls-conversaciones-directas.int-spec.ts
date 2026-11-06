@@ -18,6 +18,10 @@ import pg from 'pg';
  *      practitioner the patient searched for) is readable but not writable,
  *      and a private one stays invisible. Without it, opening the chat answered
  *      412 «La persona no está disponible».
+ *   5. With `2026-11-06_conversaciones_directas_acotadas.sql`: a tenant-less
+ *      conversation cannot be deleted, a tenant's conversation cannot be moved
+ *      out of its tenant (it would become readable by everyone), and a
+ *      tenant-less row must be a direct one (no group).
  *
  * Opt-in (`RLS_TEST=1`), like `rls.int-spec.ts`. Needs the base model applied
  * (`database/SQL/apply_all.sql`). Inserts and deletes only its own rows.
@@ -44,8 +48,9 @@ const TENANT_A = '11111111-1111-4111-8111-1111111187a1';
 const TENANT_B = '22222222-2222-4222-8222-2222222287b2';
 const DIRECT = 'c0a20000-0000-4000-8000-000000004287';
 const OTHER_TENANT = 'c0a20000-0000-4000-8000-0000000042b2';
+const OWN_TENANT = 'c0a20000-0000-4000-8000-0000000042a3';
 const CONCEPT = 'c0a20000-0000-4000-8000-0000000042cc';
-const IDS = [DIRECT, OTHER_TENANT];
+const IDS = [DIRECT, OTHER_TENANT, OWN_TENANT];
 // Deterministic seed concepts (`deterministicId`) used by the v4.2.84 policy.
 const PROFILE_PUBLIC = '0006f171-fd25-503d-906e-b77423a5f1d0';
 const STATE_ACTIVE = '38a1d301-f40d-5b17-a695-5e6d605f8b19';
@@ -55,12 +60,16 @@ const PROFILES = [PROFILE_B_PUBLIC, PROFILE_B_PRIVATE];
 /** Whether this suite inserted `CONCEPT` (the seed may not have it). */
 let insertedConcept = false;
 
-const insertConversation = (id: string, tenantId: string | null) => ({
+const insertConversation = (
+  id: string,
+  tenantId: string | null,
+  groupId: string | null = null,
+) => ({
   text: `INSERT INTO community.conversations
-         (id, tenant_id, conversation_type_concept_id, message_count,
+         (id, tenant_id, conversation_type_concept_id, group_id, message_count,
           status_concept_id, created_at, updated_at)
-       VALUES ($1, $2, $3, 0, $3, now(), now())`,
-  values: [id, tenantId, CONCEPT],
+       VALUES ($1, $2, $3, $4, 0, $3, now(), now())`,
+  values: [id, tenantId, CONCEPT, groupId],
 });
 
 describeRls(
@@ -117,6 +126,7 @@ describeRls(
         '2026-08-05_tenant_rls.sql',
         '2026-11-02_v4284_rls_community_public_read.sql',
         '2026-11-04_v4287_conversaciones_directas_rls.sql',
+        '2026-11-06_conversaciones_directas_acotadas.sql',
       ]) {
         await admin.query(readFileSync(join(patches, patch), 'utf8'));
       }
@@ -141,6 +151,7 @@ describeRls(
         );
         insertedConcept = seeded.rowCount === 1;
         await admin.query(insertConversation(OTHER_TENANT, TENANT_B));
+        await admin.query(insertConversation(OWN_TENANT, TENANT_A));
         for (const [id, visibility] of [
           [PROFILE_B_PUBLIC, PROFILE_PUBLIC],
           [PROFILE_B_PRIVATE, CONCEPT],
@@ -220,11 +231,53 @@ describeRls(
       });
       await asTenantA(async () => {
         await app.query(insertConversation(DIRECT, null));
+        // Since 2026-11-06 the owner-is-fixed trigger stops it before RLS does.
         await expect(
           app.query(
             'UPDATE community.conversations SET tenant_id = $2 WHERE id = $1',
             [DIRECT, TENANT_B],
           ),
+        ).rejects.toThrow(/no se cambian/);
+      });
+    });
+
+    it('no deja borrar una conversación directa sin tenant', async () => {
+      await asTenantA(async () => {
+        await app.query(insertConversation(DIRECT, null));
+        const deleted = await app.query(
+          'DELETE FROM community.conversations WHERE id = $1',
+          [DIRECT],
+        );
+        expect(deleted.rowCount).toBe(0);
+        const still = await app.query(
+          'SELECT 1 FROM community.conversations WHERE id = $1',
+          [DIRECT],
+        );
+        expect(still.rowCount).toBe(1);
+      });
+    });
+
+    it('no deja sacar una conversación de su tenant para que la lean todos', async () => {
+      await asTenantA(async () => {
+        // Readable as tenant A: it is tenant A's own conversation.
+        const own = await app.query(
+          'SELECT 1 FROM community.conversations WHERE id = $1',
+          [OWN_TENANT],
+        );
+        expect(own.rowCount).toBe(1);
+        await expect(
+          app.query(
+            'UPDATE community.conversations SET tenant_id = NULL WHERE id = $1',
+            [OWN_TENANT],
+          ),
+        ).rejects.toThrow(/no se cambian/);
+      });
+    });
+
+    it('una conversación sin tenant tiene que ser directa: sin grupo', async () => {
+      await asTenantA(async () => {
+        await expect(
+          app.query(insertConversation(DIRECT, null, CONCEPT)),
         ).rejects.toThrow(/row-level security/);
       });
     });
