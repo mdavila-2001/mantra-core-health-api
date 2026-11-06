@@ -1136,7 +1136,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya hay una verificación en curso para este sujeto | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
@@ -1286,7 +1285,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Indique qué matrícula quiere verificar | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La matrícula pertenece a otro profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Adjunta el frente, el reverso y las tres capturas de prueba de vida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Una evidencia no existe, no pertenece a esta cuenta o no está protegida | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |
 | 422 | `PRECONDITION_FAILED` | Envía el archivo histórico o las cinco evidencias nuevas, no ambos | Excepción explícita en src/modules/identity_assurance/services/identity-self-service.service.ts |

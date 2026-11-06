@@ -23,8 +23,8 @@ _Fuente: `src/modules/quotations/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 24 |
-|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 26 |
+| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 26 |
+|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 28 |
 |  |  | GET /quotations/{id} | Cualquier sesión válida | BAJO | 4 |
 
 ### Diagrama — etapas `ctrl:QuotationsController`
@@ -43,8 +43,8 @@ flowchart LR
   t15[("billing.quotations")]:::tabla
   t16[("practice.practices")]:::tabla
   t17[("practice.practitioner_role_assignments")]:::tabla
-  t9[("+18 tablas más")]
-  t12[("+20 tablas más")]
+  t9[("+20 tablas más")]
+  t12[("+22 tablas más")]
   subgraph s0["ctrl:QuotationsController · Operaciones de QuotationsController que el README n…"]
     o1["GET /quotations"]:::op
     o10["POST /quotations"]:::op

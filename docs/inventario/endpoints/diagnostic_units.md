@@ -3,9 +3,9 @@
 # Endpoints del módulo `diagnostic_units`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 24 (24 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 14 · BAJO 8
-- **Tablas distintas que tocan:** 27
+- **Operaciones:** 47 (47 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 15 · MEDIO 16 · BAJO 16
+- **Tablas distintas que tocan:** 47
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/diagnostic-units.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -16,26 +16,49 @@
 | 2 | PATCH | `/diagnostic-equipment/{id}` | Actualizar estado/calibración de un equipo | ALTO | 14 | sesión (sin roles) |
 | 3 | GET | `/diagnostic-equipment/{id}/mwl-station` | Estación MWL del equipo (F5a) | BAJO | 11 | sesión (sin roles) |
 | 4 | POST | `/diagnostic-equipment/{id}/resource` | Crear el recurso agendable del equipo (F5a) | ALTO | 16 | sesión (sin roles) |
-| 5 | DELETE | `/diagnostic-study-offerings/{id}` | Retirar (soft-delete) una oferta de estudio | MEDIO | 3 | SECURITY_ADMIN |
-| 6 | POST | `/diagnostic-unit-accreditations/{id}/renew` | Renovar/registrar acreditación con evidencia | MEDIO | 4 | SECURITY_ADMIN |
-| 7 | PATCH | `/diagnostic-unit-sites/{siteId}` | Actualizar un sitio operativo de la unidad | MEDIO | 3 | SECURITY_ADMIN |
-| 8 | POST | `/diagnostic-unit-sites/{siteId}/equipment` | Registrar equipamiento y calibración del sitio | MEDIO | 5 | SECURITY_ADMIN |
-| 9 | GET | `/diagnostic-units` | Listar unidades diagnósticas publicadas | BAJO | 5 | sesión (sin roles) |
-| 10 | POST | `/diagnostic-units` | Alta de unidad diagnóstica con sitios y acreditaciones | MEDIO | 4 | SECURITY_ADMIN |
-| 11 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 10 | sesión (sin roles) |
-| 12 | POST | `/diagnostic-units/{id}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 3 | SECURITY_ADMIN |
-| 13 | GET | `/diagnostic-units/{id}/administration` | Consola de administración de una unidad diagnóstica | BAJO | 11 | SECURITY_ADMIN |
-| 14 | POST | `/diagnostic-units/{id}/practitioner-assignments` | Asignar un especialista a la unidad/sitio | MEDIO | 6 | SECURITY_ADMIN |
-| 15 | POST | `/diagnostic-units/{id}/price-schedules` | Crear un cronograma de precios | MEDIO | 4 | SECURITY_ADMIN |
-| 16 | POST | `/diagnostic-units/{id}/reproject` | Reconstruir la proyección del perfil público | BAJO | 1 | SECURITY_ADMIN |
-| 17 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
-| 18 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
-| 19 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 5 | SECURITY_ADMIN |
-| 20 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 9 | SECURITY_ADMIN |
-| 21 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
-| 22 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
-| 23 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 6 | SECURITY_ADMIN |
-| 24 | POST | `/study-prices/{priceId}/close` | Cerrar una versión de precio vigente | MEDIO | 4 | SECURITY_ADMIN |
+| 5 | DELETE | `/diagnostic-results/me/orders/{orderId}/booking` | Cancel the appointment of my order | MEDIO | 12 | PATIENT |
+| 6 | POST | `/diagnostic-results/me/orders/{orderId}/booking` | Book my order at a center, confirmed | MEDIO | 29 | PATIENT |
+| 7 | GET | `/diagnostic-results/me/orders/{orderId}/booking-options` | Centers that perform the study of my order | BAJO | 25 | PATIENT |
+| 8 | DELETE | `/diagnostic-study-offerings/{id}` | Retirar (soft-delete) una oferta de estudio | MEDIO | 3 | SECURITY_ADMIN |
+| 9 | POST | `/diagnostic-unit-accreditations/{id}/renew` | Renovar/registrar acreditación con evidencia | MEDIO | 4 | SECURITY_ADMIN |
+| 10 | PATCH | `/diagnostic-unit-sites/{siteId}` | Actualizar un sitio operativo de la unidad | MEDIO | 3 | SECURITY_ADMIN |
+| 11 | POST | `/diagnostic-unit-sites/{siteId}/equipment` | Registrar equipamiento y calibración del sitio | MEDIO | 5 | SECURITY_ADMIN |
+| 12 | GET | `/diagnostic-units` | Listar unidades diagnósticas publicadas | BAJO | 5 | sesión (sin roles) |
+| 13 | POST | `/diagnostic-units` | Alta de unidad diagnóstica con sitios y acreditaciones | MEDIO | 4 | SECURITY_ADMIN |
+| 14 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 10 | sesión (sin roles) |
+| 15 | POST | `/diagnostic-units/{id}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 3 | SECURITY_ADMIN |
+| 16 | GET | `/diagnostic-units/{id}/administration` | Consola de administración de una unidad diagnóstica | BAJO | 11 | SECURITY_ADMIN |
+| 17 | POST | `/diagnostic-units/{id}/practitioner-assignments` | Asignar un especialista a la unidad/sitio | MEDIO | 6 | SECURITY_ADMIN |
+| 18 | POST | `/diagnostic-units/{id}/price-schedules` | Crear un cronograma de precios | MEDIO | 4 | SECURITY_ADMIN |
+| 19 | POST | `/diagnostic-units/{id}/reproject` | Reconstruir la proyección del perfil público | BAJO | 1 | SECURITY_ADMIN |
+| 20 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
+| 21 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
+| 22 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 5 | SECURITY_ADMIN |
+| 23 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 9 | SECURITY_ADMIN |
+| 24 | POST | `/diagnostic-units/{unitId}/equipment` | Register a device (a production line) | ALTO | 17 | sesión (sin roles) |
+| 25 | DELETE | `/diagnostic-units/{unitId}/equipment/{equipmentId}` | Remove a device registered by mistake | ALTO | 16 | sesión (sin roles) |
+| 26 | PATCH | `/diagnostic-units/{unitId}/equipment/{equipmentId}` | Mark a device operational or not | ALTO | 19 | sesión (sin roles) |
+| 27 | PUT | `/diagnostic-units/{unitId}/equipment/{equipmentId}` | Edit a device: name, maker, serial, modality | ALTO | 16 | sesión (sin roles) |
+| 28 | GET | `/diagnostic-units/{unitId}/schedule` | Schedule, studies and equipment of a center | BAJO | 15 | sesión (sin roles) |
+| 29 | PUT | `/diagnostic-units/{unitId}/schedule` | Publish the whole schedule of a center | ALTO | 19 | sesión (sin roles) |
+| 30 | GET | `/diagnostic-units/{unitId}/study-availability` | Free starts of a study in a center | BAJO | 15 | sesión (sin roles) |
+| 31 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
+| 32 | GET | `/diagnostic-units/me/bookings` | Appointments booked at my center, by start | BAJO | 16 | sesión (sin roles) |
+| 33 | GET | `/diagnostic-units/me/schedule` | Schedule, studies and equipment of my center | BAJO | 15 | sesión (sin roles) |
+| 34 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
+| 35 | GET | `/diagnostics/lab/catalog` | Catálogo de análisis (LOINC) con componentes y precio sugerido | BAJO | 13 | sesión (sin roles) |
+| 36 | POST | `/diagnostics/lab/catalog/import` | Sumar análisis del catálogo, con sus componentes y precio sugerido | ALTO | 17 | sesión (sin roles) |
+| 37 | GET | `/diagnostics/lab/categories` | Categorías del laboratorio, con su conteo | BAJO | 7 | sesión (sin roles) |
+| 38 | POST | `/diagnostics/lab/categories` | Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas) | ALTO | 8 | sesión (sin roles) |
+| 39 | DELETE | `/diagnostics/lab/categories/{id}` | Eliminar una categoría (409 mientras agrupe servicios no retirados) | ALTO | 8 | sesión (sin roles) |
+| 40 | PATCH | `/diagnostics/lab/categories/{id}` | Renombrar una categoría (409 si el nombre ya existe) | ALTO | 8 | sesión (sin roles) |
+| 41 | GET | `/diagnostics/lab/services` | Catálogo de servicios del laboratorio | BAJO | 7 | sesión (sin roles) |
+| 42 | POST | `/diagnostics/lab/services` | Dar de alta un servicio con su precio | ALTO | 10 | sesión (sin roles) |
+| 43 | DELETE | `/diagnostics/lab/services/{id}` | Retirar un servicio (no se borra) | ALTO | 8 | sesión (sin roles) |
+| 44 | PATCH | `/diagnostics/lab/services/{id}` | Editar un servicio (un precio nuevo es una versión nueva) | ALTO | 10 | sesión (sin roles) |
+| 45 | POST | `/diagnostics/lab/services/import` | Carga masiva por código, fila por fila | ALTO | 11 | sesión (sin roles) |
+| 46 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 6 | SECURITY_ADMIN |
+| 47 | POST | `/study-prices/{priceId}/close` | Cerrar una versión de precio vigente | MEDIO | 4 | SECURITY_ADMIN |
 
 ---
 
@@ -64,9 +87,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -77,7 +100,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -149,11 +172,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -164,7 +187,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -286,9 +309,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -299,7 +322,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -370,9 +393,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -383,7 +406,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -441,7 +464,344 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 5. DELETE /diagnostic-study-offerings/{id}
+## 5. DELETE /diagnostic-results/me/orders/{orderId}/booking
+
+- **Origen:** CONTRATO
+- **Nombre:** Cancel the appointment of my order
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrderBookingController.cancel` — `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:87`
+
+### Qué es y para qué sirve (negocio)
+
+Cancel the appointment of my order. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /diagnostic-results/me/orders/{orderId}/booking` la atiende `OrderBookingController.cancel` (src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:87). Exige sesión con alguno de los roles PATIENT. Delega en `CancelOrderBookingUseCase.execute`. Actualiza scheduling.appointment_bookings, scheduling.bookable_slots. Lee clinical.diagnostic_reports, clinical.service_requests, diagnostics.diagnostic_release_events, diagnostics.diagnostic_report_versions, diagnostics.service_request_performer_events, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings y 2 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:87` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical.diagnostic_reports` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `clinical.service_requests` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderPatientRepository.lockOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:98` |
+| `diagnostics.diagnostic_release_events` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.diagnostic_report_versions` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.service_request_performer_events` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:48` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:43` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → CenterBookingsRepository.cancel | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:188` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → CenterBookingsRepository.findForOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:82` |
+| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → CenterBookingsRepository.cancel | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:195` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → CenterBookingsRepository.findForOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:82` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | OrderBookingController.cancel → CancelOrderBookingUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `orderId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>` · HTTP `HttpStatus.NO_CONTENT`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada; ResourceNotFoundException: La orden no tiene cita |
+| 409 | `CONFLICT` | ConflictException: Esta orden ya tiene su resultado: no hace falta reservar. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Ese turno ya pasó. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:OrderBookingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. POST /diagnostic-results/me/orders/{orderId}/booking
+
+- **Origen:** CONTRATO
+- **Nombre:** Book my order at a center, confirmed
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrderBookingController.book` — `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:66`
+
+### Qué es y para qué sirve (negocio)
+
+Book my order at a center, confirmed. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostic-results/me/orders/{orderId}/booking` la atiende `OrderBookingController.book` (src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:66). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `BookOrderDto` (2 campos, 2 obligatorios). Delega en `BookOrderUseCase.execute`. Crea filas en scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedulable_resources. Actualiza scheduling.bookable_slots. Lee clinical.diagnostic_reports, clinical.service_request_components, clinical.service_requests, common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings y 17 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:66` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:66` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical.diagnostic_reports` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `clinical.service_request_components` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderQuoteService.pricerFor → OrderPatientRepository.orderedComponents | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:109` |
+| `clinical.service_requests` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderPatientRepository.lockOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:98` |
+| `common.addresses` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderQuoteService.pricerFor → CenterStudiesRepository.findParts | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:95` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `diagnostics.diagnostic_release_events` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.diagnostic_report_versions` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.service_request_performer_events` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:48` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:43` |
+| `scheduling.appointment_bookings` | ESCRIBE | CREA | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.insertBooking | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:157` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.findForOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:82` |
+| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.takeSlot | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:112` |
+| `scheduling.bookable_slots` | ESCRIBE | CREA | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.takeSlot | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:134` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.findForOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:82` |
+| `scheduling.schedulable_resources` | ESCRIBE | CREA | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterScheduleRepository.createResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:139` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterBookingsRepository.lockResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:98` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+| `terminology.concept_relationships` | LEE | LEE | POR_SQL | OrderBookingController.book → BookOrderUseCase.execute → OrderQuoteService.pricerFor → CenterStudiesRepository.findParts | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:95` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `orderId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `BookOrderDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:8` |
+| `startAt` | `string` | Sí | — | `@IsISO8601()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:12` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-11-05T12:00:00.000Z"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-11-05T12:00:00.000Z"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OrderAppointmentDto>` · DTO `OrderAppointmentDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `bookingId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:17` |
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:18` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:19` |
+| `addressText` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:20` |
+| `startAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:21` |
+| `endAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:22` |
+| `studyName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:23` |
+| `price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:24` |
+| `currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:25` |
+| `preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/order-booking.dto.ts:26` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada; ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: El centro no hace ese estudio |
+| 409 | `CONFLICT` | ConflictException: Esta orden ya tiene su resultado: no hace falta reservar.; ConflictException: Esta orden ya tiene un turno. Cancélelo para elegir otro.; ConflictException: Ese horario se acaba de ocupar. Elija otro. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:OrderBookingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /diagnostic-results/me/orders/{orderId}/booking-options
+
+- **Origen:** CONTRATO
+- **Nombre:** Centers that perform the study of my order
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrderBookingController.bookingOptions` — `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:51`
+
+### Qué es y para qué sirve (negocio)
+
+Centers that perform the study of my order. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-results/me/orders/{orderId}/booking-options` la atiende `OrderBookingController.bookingOptions` (src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:51). Exige sesión con alguno de los roles PATIENT. Delega en `GetBookingOptionsUseCase.execute`. Lee clinical.diagnostic_reports, clinical.service_request_components, clinical.service_requests, common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings y 17 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:51` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts:51` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical.diagnostic_reports` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `clinical.service_request_components` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderQuoteService.pricerFor → OrderPatientRepository.orderedComponents | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:109` |
+| `clinical.service_requests` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+| `common.addresses` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderPatientRepository.homeOf | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:148` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterStudiesRepository.findPublishedByConcept | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:122` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderQuoteService.pricerFor → CenterStudiesRepository.findParts | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:95` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterStudiesRepository.findPublishedByConcept | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:122` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterStudiesRepository.findPublishedByConcept | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:122` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterStudiesRepository.findPublishedByConcept | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:122` |
+| `diagnostics.diagnostic_release_events` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.diagnostic_report_versions` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.hasReleasedResult | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:123` |
+| `diagnostics.service_request_performer_events` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.findDiagnosticOrder | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:70` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:48` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderBookingAccessService.ownOrder → OrderPatientRepository.ownPatientProfileId | `src/modules/diagnostic_units/center-schedule/infrastructure/order-patient.repository.ts:43` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterAvailabilityService.startsFor → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterAvailabilityService.startsFor → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → CenterStudiesRepository.findPublishedByConcept | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:122` |
+| `terminology.concept_relationships` | LEE | LEE | POR_SQL | OrderBookingController.bookingOptions → GetBookingOptionsUseCase.execute → GetBookingOptionsUseCase.options → OrderQuoteService.pricerFor → CenterStudiesRepository.findParts | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:95` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `orderId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OrderBookingOptionsDto>` · DTO `OrderBookingOptionsDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `orderId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:29` |
+| `studyCode` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:30` |
+| `studyName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:31` |
+| `modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:32` |
+| `modalityLabel` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:33` |
+| `options` | `array<OrderBookingOptionDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:35` |
+| `options[].unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:9` |
+| `options[].unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:10` |
+| `options[].addressText` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:11` |
+| `options[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:12` |
+| `options[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:13` |
+| `options[].distanceKm` | `number` | Sí | admite null | — | Straight line from the patient home; `null` if a location is missing. | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:20` |
+| `options[].nextStartAt` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:21` |
+| `options[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:22` |
+| `options[].operationalEquipment` | `number` | Sí | — | — | Patients per slot for the modality. | `src/modules/diagnostic_units/center-schedule/presentation/dto/booking-options.dto.ts:24` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada |
+| 409 | `CONFLICT` | ConflictException: Esta orden ya tiene su resultado: no hace falta reservar. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Esta orden no es de un estudio que se reserve en un centro. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:OrderBookingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. DELETE /diagnostic-study-offerings/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar (soft-delete) una oferta de estudio
@@ -466,16 +826,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticPricingController.retireOffering → DiagnosticStudiesService.retireOffering | `src/modules/diagnostic_units/services/diagnostic-studies.service.ts:165` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticPricingController.retireOffering → DiagnosticStudiesService.retireOffering → DiagnosticUnitScopeService.offering → DiagnosticStudyOfferingsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:93` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticPricingController.retireOffering → DiagnosticStudiesService.retireOffering → DiagnosticUnitScopeService.offering → DiagnosticStudyOfferingsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:99` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticPricingController.retireOffering → DiagnosticStudiesService.retireOffering → DiagnosticUnitScopeService.offering → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
 ### Parámetros
@@ -517,7 +877,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /diagnostic-unit-accreditations/{id}/renew
+## 9. POST /diagnostic-unit-accreditations/{id}/renew
 
 - **Origen:** CONTRATO
 - **Nombre:** Renovar/registrar acreditación con evidencia
@@ -542,11 +902,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:36` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -622,7 +982,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. PATCH /diagnostic-unit-sites/{siteId}
+## 10. PATCH /diagnostic-unit-sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Actualizar un sitio operativo de la unidad
@@ -647,11 +1007,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:49` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -728,7 +1088,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. POST /diagnostic-unit-sites/{siteId}/equipment
+## 11. POST /diagnostic-unit-sites/{siteId}/equipment
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar equipamiento y calibración del sitio
@@ -753,11 +1113,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:67` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -848,7 +1208,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. GET /diagnostic-units
+## 12. GET /diagnostic-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar unidades diagnósticas publicadas
@@ -873,18 +1233,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:95` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findVisibleByTenant | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:25` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:84` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:96` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:56` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findVisibleByTenant | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:26` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
 
 ### Cuerpo
 
@@ -932,7 +1292,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 10. POST /diagnostic-units
+## 13. POST /diagnostic-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de unidad diagnóstica con sitios y acreditaciones
@@ -957,10 +1317,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1077,7 +1437,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 11. GET /diagnostic-units/{id}
+## 14. GET /diagnostic-units/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil de una unidad diagnóstica
@@ -1102,24 +1462,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:153` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:75` |
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
-| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:110` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:95` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:130` |
-| `diagnostic_units.diagnostic_unit_accreditations` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentAccreditations | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:144` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findVisibleById | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:42` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:163` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
+| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:76` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:84` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:96` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_unit_accreditations` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentAccreditations | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:142` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:56` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findVisibleById | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:43` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:161` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
 
 ### Parámetros
 
@@ -1229,7 +1589,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 12. POST /diagnostic-units/{id}/accreditations
+## 15. POST /diagnostic-units/{id}/accreditations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una acreditación con evidencia
@@ -1254,11 +1614,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:311` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:311` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1345,7 +1705,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 13. GET /diagnostic-units/{id}/administration
+## 16. GET /diagnostic-units/{id}/administration
 
 - **Origen:** CONTRATO
 - **Nombre:** Consola de administración de una unidad diagnóstica
@@ -1370,9 +1730,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:170` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1552,7 +1912,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 14. POST /diagnostic-units/{id}/practitioner-assignments
+## 17. POST /diagnostic-units/{id}/practitioner-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar un especialista a la unidad/sitio
@@ -1577,11 +1937,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:293` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:293` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1672,7 +2032,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 15. POST /diagnostic-units/{id}/price-schedules
+## 18. POST /diagnostic-units/{id}/price-schedules
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un cronograma de precios
@@ -1697,11 +2057,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:275` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:275` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1793,7 +2153,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 16. POST /diagnostic-units/{id}/reproject
+## 19. POST /diagnostic-units/{id}/reproject
 
 - **Origen:** CONTRATO
 - **Nombre:** Reconstruir la proyección del perfil público
@@ -1818,9 +2178,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:329` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:329` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1869,7 +2229,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 17. POST /diagnostic-units/{id}/sites
+## 20. POST /diagnostic-units/{id}/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un sitio operativo de la unidad
@@ -1894,11 +2254,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:202` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1981,7 +2341,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 18. PUT /diagnostic-units/{id}/specialties
+## 21. PUT /diagnostic-units/{id}/specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar las especialidades de la unidad
@@ -2006,11 +2366,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:237` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2094,7 +2454,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 19. POST /diagnostic-units/{id}/study-offerings
+## 22. POST /diagnostic-units/{id}/study-offerings
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar oferta de estudio con componentes (panel)
@@ -2119,19 +2479,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:255` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:255` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_study_components` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticStudyComponentsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-components.repository.ts:52` |
-| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:119` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticStudyOfferingsRepository.findByStudyCode | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:102` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:125` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticStudyOfferingsRepository.findByStudyCode | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:108` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticUnitScopeService.siteOfUnit → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.createOffering → DiagnosticStudiesService.createOffering → DiagnosticUnitScopeService.unit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
@@ -2242,7 +2602,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 20. POST /diagnostic-units/{id}/verify-and-publish
+## 23. POST /diagnostic-units/{id}/verify-and-publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar la unidad y publicar su perfil público
@@ -2267,17 +2627,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitAccreditationsRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-accreditations.repository.ts:98` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSitesRepository.countActiveForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:58` |
 | `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-specialties.repository.ts:93` |
@@ -2325,7 +2685,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:459` |
+| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:540` |
 | CONTROLADOR | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.spec.ts:109` |
 
 ### Flujos
@@ -2334,7 +2694,1184 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 21. GET /diagnostic-units/administration
+## 24. POST /diagnostic-units/{unitId}/equipment
+
+- **Origen:** CONTRATO
+- **Nombre:** Register a device (a production line)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.addEquipment` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126`
+
+### Qué es y para qué sirve (negocio)
+
+Register a device (a production line). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostic-units/{unitId}/equipment` la atiende `CenterScheduleController.addEquipment` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CenterEquipmentInputDto` (4 campos, 1 obligatorio). Delega en `ManageCenterEquipmentUseCase.create`. Crea filas en diagnostic_units.diagnostic_equipment. Actualiza diagnostic_units.diagnostic_unit_sites. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | ESCRIBE | CREA | DIRECTA | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:75` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:90` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:65` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.addEquipment → ManageCenterEquipmentUseCase.create → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CenterEquipmentInputDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:20` |
+| `manufacturer` | `string` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:26` |
+| `serialNumber` | `string` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:32` |
+| `modalityCode` | `string` | No | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | `@IsOptional()` `@IsIn(MODALITY_CODES)` | `null`: an analyzer, which never limits appointments. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:41` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Ecógrafo sala 2"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Ecógrafo sala 2",
+  "manufacturer": "valor-ejemplo",
+  "serialNumber": "valor-ejemplo",
+  "modalityCode": "ECO"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El centro no tiene una sucursal activa donde registrar el equipo.; PreconditionFailedException: El catálogo todavía no tiene un tipo de equipo para esa modalidad. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Remove a device registered by mistake
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.removeEquipment` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159`
+
+### Qué es y para qué sirve (negocio)
+
+Remove a device registered by mistake. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}` la atiende `CenterScheduleController.removeEquipment` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159). Exige sesión; el controlador no declara roles. Delega en `ManageCenterEquipmentUseCase.remove`. Borra de diagnostic_units.diagnostic_equipment. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId, equipmentId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | BORRA | BORRA | POR_TIPO | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:126` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → ManageCenterEquipmentUseCase.ownDevice | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:170` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → ManageCenterEquipmentUseCase.ownDevice | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:174` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.removeEquipment → ManageCenterEquipmentUseCase.remove → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+| `equipmentId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El equipo ya tiene registros asociados: márquelo «Fuera de servicio» en lugar de quitarlo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 26. PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Mark a device operational or not
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.setEquipmentStatus` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109`
+
+### Qué es y para qué sirve (negocio)
+
+Mark a device operational or not. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}` la atiende `CenterScheduleController.setEquipmentStatus` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetEquipmentStatusDto` (1 campo, 1 obligatorio). Delega en `SetEquipmentStatusUseCase.execute`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza diagnostic_units.diagnostic_equipment. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, messaging.outbox_messages y 8 más. Publica diagnostic_units.equipment.located, diagnostic_units.equipment.status_changed.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId, equipmentId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | ESCRIBE | ACTUALIZA | POR_TIPO | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute | `src/modules/diagnostic_units/center-schedule/application/set-equipment-status.use-case.ts:62` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute | `src/modules/diagnostic_units/center-schedule/application/set-equipment-status.use-case.ts:43` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute | `src/modules/diagnostic_units/center-schedule/application/set-equipment-status.use-case.ts:47` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.setEquipmentStatus → SetEquipmentStatusUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `diagnostic_units.equipment.located` | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:229` |
+| Evento de dominio | `diagnostic_units.equipment.status_changed` | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:242` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+| `equipmentId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SetEquipmentStatusDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | `@IsIn(EQUIPMENT_STATUSES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/equipment-status.dto.ts:12` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "status": "OPERATIONAL"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "status": "OPERATIONAL"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. PUT /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Edit a device: name, maker, serial, modality
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.editEquipment` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142`
+
+### Qué es y para qué sirve (negocio)
+
+Edit a device: name, maker, serial, modality. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PUT /diagnostic-units/{unitId}/equipment/{equipmentId}` la atiende `CenterScheduleController.editEquipment` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CenterEquipmentInputDto` (4 campos, 1 obligatorio). Delega en `ManageCenterEquipmentUseCase.update`. Actualiza diagnostic_units.diagnostic_equipment. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId, equipmentId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | ESCRIBE | ACTUALIZA | POR_TIPO | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:107` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → ManageCenterEquipmentUseCase.ownDevice | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:170` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → ManageCenterEquipmentUseCase.ownDevice | `src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts:174` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.editEquipment → ManageCenterEquipmentUseCase.update → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+| `equipmentId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CenterEquipmentInputDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:20` |
+| `manufacturer` | `string` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:26` |
+| `serialNumber` | `string` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:32` |
+| `modalityCode` | `string` | No | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | `@IsOptional()` `@IsIn(MODALITY_CODES)` | `null`: an analyzer, which never limits appointments. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-equipment.dto.ts:41` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Ecógrafo sala 2"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Ecógrafo sala 2",
+  "manufacturer": "valor-ejemplo",
+  "serialNumber": "valor-ejemplo",
+  "modalityCode": "ECO"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo todavía no tiene un tipo de equipo para esa modalidad. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 28. GET /diagnostic-units/{unitId}/schedule
+
+- **Origen:** CONTRATO
+- **Nombre:** Schedule, studies and equipment of a center
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.schedule` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:80`
+
+### Qué es y para qué sirve (negocio)
+
+Schedule, studies and equipment of a center. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-units/{unitId}/schedule` la atiende `CenterScheduleController.schedule` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `GetCenterScheduleUseCase.forUnit`. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:80` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.schedule → GetCenterScheduleUseCase.forUnit → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 29. PUT /diagnostic-units/{unitId}/schedule
+
+- **Origen:** CONTRATO
+- **Nombre:** Publish the whole schedule of a center
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.saveSchedule` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89`
+
+### Qué es y para qué sirve (negocio)
+
+Publish the whole schedule of a center. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PUT /diagnostic-units/{unitId}/schedule` la atiende `CenterScheduleController.saveSchedule` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SaveCenterScheduleDto` (30 campos, 22 obligatorios). Delega en `SaveCenterScheduleUseCase.execute`. Crea filas en scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates. Actualiza scheduling.schedule_templates. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → GetCenterScheduleUseCase.staffUnit → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | ESCRIBE | CREA | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterScheduleRepository.createResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:139` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterBookingsRepository.lockResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:98` |
+| `scheduling.schedule_rules` | ESCRIBE | CREA | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterScheduleRepository.insertTemplate | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:233` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | ESCRIBE | ACTUALIZA | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterScheduleRepository.retireTemplates | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:186` |
+| `scheduling.schedule_templates` | ESCRIBE | CREA | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterScheduleRepository.insertTemplate | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:215` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.saveSchedule → SaveCenterScheduleUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SaveCenterScheduleDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "general": {
+    "windows": [
+      {
+        "dayOfWeek": 1,
+        "startTime": "08:00",
+        "endTime": "12:00"
+      }
+    ],
+    "slotMinutes": 30
+  },
+  "modalities": [
+    {
+      "modalityCode": "ECO",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "studies": [
+    {
+      "studyCode": "STUDY-ECO-OBSTETRICA",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "general": {
+    "windows": [
+      {
+        "dayOfWeek": 1,
+        "startTime": "08:00",
+        "endTime": "12:00"
+      }
+    ],
+    "slotMinutes": 30
+  },
+  "modalities": [
+    {
+      "modalityCode": "ECO",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "studies": [
+    {
+      "studyCode": "STUDY-ECO-OBSTETRICA",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "equipmentId": "00000000-0000-4000-8000-000000000001",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: Hay 1 turno reservado que quedaría fuera del horario nuevo. / Hay {affected} turnos reservados que quedarían fuera del horario nuevo. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El horario tiene datos incompletos. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 30. GET /diagnostic-units/{unitId}/study-availability
+
+- **Origen:** CONTRATO
+- **Nombre:** Free starts of a study in a center
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `StudyAvailabilityController.studyAvailability` — `src/modules/diagnostic_units/center-schedule/presentation/study-availability.controller.ts:24`
+
+### Qué es y para qué sirve (negocio)
+
+Free starts of a study in a center. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-units/{unitId}/study-availability` la atiende `StudyAvailabilityController.studyAvailability` (src/modules/diagnostic_units/center-schedule/presentation/study-availability.controller.ts:24). Exige sesión; el controlador no declara roles. Delega en `GetStudyAvailabilityUseCase.execute`. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/study-availability.controller.ts:24` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_QUERY | studyCode (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: unitId | `src/modules/diagnostic_units/center-schedule/presentation/study-availability.controller.ts:24` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterScheduleRepository.findUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:75` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterAvailabilityService.startsFor → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterAvailabilityService.startsFor → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | StudyAvailabilityController.studyAvailability → GetStudyAvailabilityUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `unitId` | path | Sí | `string` | — |
+| `studyCode` | query | Sí | `string` | — |
+| `from` | query | No | `string` | ISO instant; defaults to now. |
+| `to` | query | No | `string` | ISO instant; defaults to from + 14 days. |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<StudyAvailabilityDto>` · DTO `StudyAvailabilityDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:34` |
+| `studyCode` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:35` |
+| `origin` | `string` | Sí | valores: STUDY, MODALITY, GENERAL | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:37` |
+| `items` | `array<StudyStartDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:38` |
+| `items[].startAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:26` |
+| `items[].endAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:27` |
+| `items[].remaining` | `number` | Sí | — | — | Places left in this slot. | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:28` |
+| `items[].capacity` | `number` | Sí | — | — | Patients per slot. | `src/modules/diagnostic_units/center-schedule/presentation/dto/study-availability.dto.ts:29` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: El centro no hace ese estudio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Pida una ventana de hasta {MAX_WINDOW_DAYS} días, con «to» posterior a «from». |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:StudyAvailabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 31. GET /diagnostic-units/administration
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las unidades del tenant, publicadas o no
@@ -2359,8 +3896,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2425,7 +3962,239 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 22. GET /diagnostic-units/search
+## 32. GET /diagnostic-units/me/bookings
+
+- **Origen:** CONTRATO
+- **Nombre:** Appointments booked at my center, by start
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.myBookings` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:70`
+
+### Qué es y para qué sirve (negocio)
+
+Appointments booked at my center, by start. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-units/me/bookings` la atiende `CenterScheduleController.myBookings` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:70). Exige sesión; el controlador no declara roles. Delega en `ListCenterBookingsUseCase.execute`. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 8 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → GetCenterScheduleUseCase.myUnit → CenterScheduleRepository.findUnitOfTenant | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:87` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `profiles.persons` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterBookingsRepository.listForResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:211` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterBookingsRepository.listForResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:211` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterBookingsRepository.listForResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:211` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.myBookings → ListCenterBookingsUseCase.execute → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | Sí | `string` | — |
+| `to` | query | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<CenterBookingsDto>` · DTO `CenterBookingsDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<CenterBookingDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:51` |
+| `items[].bookingId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:16` |
+| `items[].orderId` | `string` | Sí | admite null | — | `null` for a booking made outside the order flow. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:22` |
+| `items[].patientName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:23` |
+| `items[].studyName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:24` |
+| `items[].startsAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:25` |
+| `items[].endsAt` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:26` |
+| `items[].siteName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:27` |
+| `items[].status` | `string` | Sí | valores: REQUESTED, PENDING_CONFIRMATION, CONFIRMED, CHECKED_IN, IN_PROGRESS, COMPLETED | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:38` |
+| `items[].equipmentId` | `string` | Sí | formato uuid; admite null | — | Device (production line) that attends it; `null` when no open line can. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:46` |
+| `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-bookings.dto.ts:52` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Pida una ventana de hasta 31 días, con «to» posterior a «from». |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 33. GET /diagnostic-units/me/schedule
+
+- **Origen:** CONTRATO
+- **Nombre:** Schedule, studies and equipment of my center
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CenterScheduleController.mySchedule` — `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:63`
+
+### Qué es y para qué sirve (negocio)
+
+Schedule, studies and equipment of my center. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-units/me/schedule` la atiende `CenterScheduleController.mySchedule` (src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:63). Exige sesión; el controlador no declara roles. Delega en `GetCenterScheduleUseCase.forMe`. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 7 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:63` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findEquipment | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:252` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `practice.practices` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findMainSites | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:102` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → GetCenterScheduleUseCase.view → CenterBookingsRepository.findOccupying | `src/modules/diagnostic_units/center-schedule/infrastructure/center-bookings.repository.ts:64` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findResource | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:122` |
+| `scheduling.schedule_rules` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `scheduling.schedule_templates` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterScheduleRepository.findTemplateRules | `src/modules/diagnostic_units/center-schedule/infrastructure/center-schedule.repository.ts:166` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CenterScheduleController.mySchedule → GetCenterScheduleUseCase.forMe → CenterContextService.load → CenterStudiesRepository.findForUnit | `src/modules/diagnostic_units/center-schedule/infrastructure/center-studies.repository.ts:82` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<CenterScheduleViewDto>` · DTO `CenterScheduleViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `unitId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:42` |
+| `unitName` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:43` |
+| `kind` | `string` | Sí | valores: LABORATORY, IMAGING | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:45` |
+| `schedule` | `SaveCenterScheduleDto` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:47` |
+| `schedule.general` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:61` |
+| `schedule.general.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.general.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.general.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.general.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.general.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.modalities` | `array<ModalityScheduleDto>` | Sí | máximo MODALITY_CODES.length elemento(s) | `@IsArray()` `@ArrayMaxSize(MODALITY_CODES.length)` `@ValidateNested({ each: true })` `@Type(() => ModalityScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:68` |
+| `schedule.modalities[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | `@IsIn(MODALITY_CODES)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:23` |
+| `schedule.modalities[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:28` |
+| `schedule.modalities[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.modalities[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.modalities[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.modalities[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.studies` | `array<StudyScheduleDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => StudyScheduleDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:75` |
+| `schedule.studies[].studyCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:36` |
+| `schedule.studies[].schedule` | `ScheduleBlockDto` | Sí | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:41` |
+| `schedule.studies[].schedule.windows` | `array<ScheduleWindowDto>` | Sí | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | `number` | Sí | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.studies[].schedule.windows[].startTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.studies[].schedule.windows[].endTime` | `string` | Sí | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.studies[].schedule.slotMinutes` | `number` | Sí | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `schedule.equipment` | `array<EquipmentScheduleDto>` | No | máximo 200 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => EquipmentScheduleDto)` | Devices with a shift of their own; the rest follow their study. Omitted = none. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:87` |
+| `schedule.equipment[].equipmentId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:48` |
+| `schedule.equipment[].schedule` | `ScheduleBlockDto` | No | — | `@ValidateNested()` `@Type(() => ScheduleBlockDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule.dto.ts:53` |
+| `schedule.equipment[].schedule.windows` | `array<ScheduleWindowDto>` | No | máximo 28 elemento(s) | `@IsArray()` `@ArrayMaxSize(28)` `@ValidateNested({ each: true })` `@Type(() => ScheduleWindowDto)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:39` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | `number` | No | mínimo 1; máximo 7 | `@IsInt()` `@Min(1)` `@Max(7)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:21` |
+| `schedule.equipment[].schedule.windows[].startTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:25` |
+| `schedule.equipment[].schedule.windows[].endTime` | `string` | No | patrón ^([01]\d\|2[0-3]):[0-5]\d$; patrón runtime HH_MM | `@Matches(HH_MM)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:29` |
+| `schedule.equipment[].schedule.slotMinutes` | `number` | No | mínimo 5; máximo 240 | `@IsInt()` `@Min(5)` `@Max(240)` | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/schedule-block.dto.ts:45` |
+| `studies` | `array<CenterStudyDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:48` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:11` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:12` |
+| `studies[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:13` |
+| `studies[].price` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:14` |
+| `studies[].currency` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:16` |
+| `studies[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:17` |
+| `equipment` | `array<CenterEquipmentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:49` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:21` |
+| `equipment[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:22` |
+| `equipment[].manufacturer` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:23` |
+| `equipment[].model` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:24` |
+| `equipment[].modalityCode` | `string` | Sí | valores: ECO, RX, RM, TC, MG, DXA, LAB; admite null | — | `null`: does not limit appointments (an analyzer). | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:30` |
+| `equipment[].status` | `string` | Sí | valores: OPERATIONAL, MAINTENANCE, OUT_OF_SERVICE | — | — | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:31` |
+| `equipment[].glossaryConceptId` | `string` | Sí | admite null | — | Always `null` for now. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:37` |
+| `updatedAt` | `string` | Sí | admite null | — | `null` while the center has never published a schedule. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:55` |
+| `bookingsWithoutEquipment` | `number` | No | — | — | Future bookings left without an operational device. | `src/modules/diagnostic_units/center-schedule/presentation/dto/center-schedule-view.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:CenterScheduleController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 34. GET /diagnostic-units/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar centros de diagnóstico, laboratorio e imagen
@@ -2451,22 +4220,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:129` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:75` |
+| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:76` |
 | `community.service_reviews` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → CommunityRatingsService.ratingsByProfiles → ReviewsRepository.averageByTargets | `src/modules/community/repositories/reviews.repository.ts:307` |
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
-| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.restrictions → DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:285` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsReadRepository.findOfferedConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:254` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findCurrentPricesForSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:336` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsReadRepository.countVisible | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:163` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:84` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.restrictions → DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:283` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsReadRepository.findOfferedConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:252` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findCurrentPricesForSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:334` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:56` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsReadRepository.countVisible | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:210` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:161` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.searchCoverage → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
 
 ### Parámetros
 
@@ -2548,7 +4317,1246 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 23. POST /price-schedules/{scheduleId}/study-prices
+## 35. GET /diagnostics/lab/catalog
+
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de análisis (LOINC) con componentes y precio sugerido
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.studyCatalogItems` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:77`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de análisis (LOINC) con componentes y precio sugerido. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostics/lab/catalog` la atiende `LabPortalServicesController.studyCatalogItems` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:77). Exige sesión; el controlador no declara roles. Delega en `LabPortalStudyCatalogService.catalog`. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts, terminology.concept_designations y 5 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:110` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.concept_relationships` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:110` |
+| `terminology.value_set_members` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.value_set_versions` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.value_sets` | LEE | LEE | POR_SQL | LabPortalServicesController.studyCatalogItems → LabPortalStudyCatalogService.catalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<LabCatalogDto>` · DTO `LabCatalogDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `sections` | `array<LabCatalogSectionDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:62` |
+| `sections[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:49` |
+| `sections[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:50` |
+| `sections[].items` | `array<LabCatalogItemDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:51` |
+| `sections[].items[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:25` |
+| `sections[].items[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:26` |
+| `sections[].items[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:27` |
+| `sections[].items[].loinc` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:28` |
+| `sections[].items[].specimen` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:29` |
+| `sections[].items[].sampleType` | `string` | Sí | valores: BLOOD, URINE, STOOL, FLUID, SWAB, OTHER | — | What is drawn from the patient, to browse by sample type | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:34` |
+| `sections[].items[].suggestedPrice` | `LabSuggestedPriceDto` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:36` |
+| `sections[].items[].suggestedPrice.source` | `string` | Sí | valores: INLASA, FONASA | — | — | sin fuente |
+| `sections[].items[].suggestedPrice.sourceCode` | `string` | Sí | — | — | — | sin fuente |
+| `sections[].items[].suggestedPrice.sourceName` | `string` | Sí | — | — | — | sin fuente |
+| `sections[].items[].suggestedPrice.priceBs` | `string` | Sí | — | — | — | sin fuente |
+| `sections[].items[].offeredServiceId` | `string` | Sí | formato uuid; admite null | — | The lab service already made from this item, if any | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:43` |
+| `sections[].items[].components` | `array<LabCatalogComponentDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:45` |
+| `sections[].items[].components[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:14` |
+| `sections[].items[].components[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:15` |
+| `sections[].items[].components[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:16` |
+| `sections[].items[].components[].loinc` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:17` |
+| `sections[].items[].components[].unit` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:18` |
+| `sections[].items[].components[].suggestedPrice` | `LabSuggestedPriceDto` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:20` |
+| `sections[].items[].components[].suggestedPrice.source` | `string` | Sí | valores: INLASA, FONASA | — | — | sin fuente |
+| `sections[].items[].components[].suggestedPrice.sourceCode` | `string` | Sí | — | — | — | sin fuente |
+| `sections[].items[].components[].suggestedPrice.sourceName` | `string` | Sí | — | — | — | sin fuente |
+| `sections[].items[].components[].suggestedPrice.priceBs` | `string` | Sí | — | — | — | sin fuente |
+| `sampleTypes` | `array<LabSampleTypeDto>` | Sí | — | — | Sample types in display order (blood first) | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:67` |
+| `sampleTypes[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:55` |
+| `sampleTypes[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:56` |
+| `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:68` |
+| `priceRule` | `string` | Sí | — | — | How suggested prices were chosen | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:70` |
+| `catalogVersion` | `string` | Sí | admite null | — | Version of the LOINC study catalog loaded in this database (laboratorio.json), or null when only the basic boot análisis are there: no sections, LOINC nor components until `yarn catalog:studies:load` runs | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:77` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:58` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 36. POST /diagnostics/lab/catalog/import
+
+- **Origen:** CONTRATO
+- **Nombre:** Sumar análisis del catálogo, con sus componentes y precio sugerido
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.importCatalog` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86`
+
+### Qué es y para qué sirve (negocio)
+
+Sumar análisis del catálogo, con sus componentes y precio sugerido. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostics/lab/catalog/import` la atiende `LabPortalServicesController.importCatalog` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabCatalogImportDto` (1 campo, 1 obligatorio). Delega en `LabPortalStudyCatalogService.importCatalog`. Crea filas en diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts, terminology.concept_designations y 5 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.importOne → LabPortalStudyCatalogService.add → LabPortalPricingService.setPrice → LabPortalPricingService.ensureSchedule → DiagnosticPriceSchedulesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:92` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.importOne → DiagnosticStudyComponentsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-components.repository.ts:52` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.importOne → LabPortalStudyCatalogService.add → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:125` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.importOne → LabPortalStudyCatalogService.add → LabPortalPricingService.setPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:132` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+| `terminology.concept_designations` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:110` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.concept_relationships` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:110` |
+| `terminology.value_set_members` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.value_set_versions` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+| `terminology.value_sets` | LEE | LEE | POR_SQL | LabPortalServicesController.importCatalog → LabPortalStudyCatalogService.importCatalog → LabPortalStudyCatalogService.read → StudyCatalogRepository.findPage | `src/modules/study_catalog/repositories/study-catalog.repository.ts:138` |
+
+### Cuerpo — DTO `LabCatalogImportDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conceptIds` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s); máximo 600 elemento(s) | `@IsArray()` `@ArrayMinSize(1, { message: 'Elija al menos un análisis.' })` `@ArrayMaxSize(600, { message: 'Hasta 600 análisis por vez.' })` `@IsUUID('all', { each: true })` | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:87` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "conceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "conceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabCatalogImportResultDto>` · DTO `LabCatalogImportResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `created` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:104` |
+| `republished` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:105` |
+| `linked` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:106` |
+| `skipped` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:107` |
+| `rejected` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:108` |
+| `rows` | `array<LabCatalogImportRowDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:110` |
+| `rows[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:91` |
+| `rows[].outcome` | `string` | Sí | valores: CREATED, LINKED, REPUBLISHED, SKIPPED, REJECTED | — | LINKED: a free-form service with the same code now points to the catalog item | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:97` |
+| `rows[].serviceId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:99` |
+| `rows[].reason` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-catalog.dto.ts:100` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:59` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 37. GET /diagnostics/lab/categories
+
+- **Origen:** CONTRATO
+- **Nombre:** Categorías del laboratorio, con su conteo
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.listCategories` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:176`
+
+### Qué es y para qué sirve (negocio)
+
+Categorías del laboratorio, con su conteo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostics/lab/categories` la atiende `LabPortalServicesController.listCategories` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:176). Exige sesión; el controlador no declara roles. Delega en `LabPortalCategoriesService.list`. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.listCategories → LabPortalCategoriesService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<LabCategoryPageDto>` · DTO `LabCategoryPageDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<LabCategoryDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:84` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:75` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:76` |
+| `items[].serviceCount` | `number` | Sí | — | — | Services of the category that are not withdrawn | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:80` |
+| `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:85` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:54` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 38. POST /diagnostics/lab/categories
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.createCategory` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:183`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostics/lab/categories` la atiende `LabPortalServicesController.createCategory` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:183). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabCategoryNameDto` (1 campo, 1 obligatorio). Delega en `LabPortalCategoriesService.create`. Crea filas en diagnostic_units.diagnostic_service_categories. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:183` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create | `src/modules/diagnostic_units/services/lab-portal-categories.service.ts:71` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.createCategory → LabPortalCategoriesService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Cuerpo — DTO `LabCategoryNameDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud máxima 60; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'Falta el nombre de la categoría.' })` `@MaxLength(60, { message: 'El nombre no puede pasar de 60 caracteres.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:77` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Hematología"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Hematología"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabCategoryDto>` · DTO `LabCategoryDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:75` |
+| `name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:76` |
+| `serviceCount` | `number` | Sí | — | — | Services of the category that are not withdrawn | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:80` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:55` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 39. DELETE /diagnostics/lab/categories/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Eliminar una categoría (409 mientras agrupe servicios no retirados)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.deleteCategory` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220`
+
+### Qué es y para qué sirve (negocio)
+
+Eliminar una categoría (409 mientras agrupe servicios no retirados). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /diagnostics/lab/categories/{id}` la atiende `LabPortalServicesController.deleteCategory` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220). Exige sesión; el controlador no declara roles. Delega en `LabPortalCategoriesService.remove`. Borra de diagnostic_units.diagnostic_service_categories. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | BORRA | BORRA | POR_TIPO | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove | `src/modules/diagnostic_units/services/lab-portal-categories.service.ts:130` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.deleteCategory → LabPortalCategoriesService.remove → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<{ ok: true }>` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado; ResourceNotFoundException: Categoría no encontrada |
+| 409 | `CONFLICT` | ConflictException: «{category.name}» tiene {live.length} servicios. Muévalos a otra categoría antes de borrarla. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:57` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 40. PATCH /diagnostics/lab/categories/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Renombrar una categoría (409 si el nombre ya existe)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.renameCategory` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:202`
+
+### Qué es y para qué sirve (negocio)
+
+Renombrar una categoría (409 si el nombre ya existe). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /diagnostics/lab/categories/{id}` la atiende `LabPortalServicesController.renameCategory` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:202). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabCategoryNameDto` (1 campo, 1 obligatorio). Delega en `LabPortalCategoriesService.rename`. Actualiza diagnostic_units.diagnostic_service_categories. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:202` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:202` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | ESCRIBE | ACTUALIZA | POR_TIPO | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename | `src/modules/diagnostic_units/services/lab-portal-categories.service.ts:105` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.renameCategory → LabPortalCategoriesService.rename → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `LabCategoryNameDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud máxima 60; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'Falta el nombre de la categoría.' })` `@MaxLength(60, { message: 'El nombre no puede pasar de 60 caracteres.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:77` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Hematología"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Hematología"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabCategoryDto>` · DTO `LabCategoryDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:75` |
+| `name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:76` |
+| `serviceCount` | `number` | Sí | — | — | Services of the category that are not withdrawn | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:80` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado; ResourceNotFoundException: Categoría no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:56` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 41. GET /diagnostics/lab/services
+
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de servicios del laboratorio
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.listServices` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:104`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de servicios del laboratorio. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostics/lab/services` la atiende `LabPortalServicesController.listServices` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:104). Exige sesión; el controlador no declara roles. Delega en `LabPortalCatalogService.list`. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.listServices → LabPortalCatalogService.list → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `q` | query | No | `string` | — |
+| `categoryId` | query | No | `string` | — |
+| `status` | query | No | `string` | — |
+| `available` | query | No | `boolean` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<LabServicePageDto>` · DTO `LabServicePageDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<LabServiceDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:70` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:5` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:6` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:7` |
+| `items[].kind` | `string` | Sí | valores: SERVICE, MODALITY | — | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:13` |
+| `items[].parentId` | `string` | Sí | formato uuid; admite null | — | Panel this service is a component of | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:20` |
+| `items[].catalogConceptId` | `string` | Sí | formato uuid; admite null | — | Study catalog concept; null for free-form services | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:27` |
+| `items[].hasPrice` | `boolean` | Sí | — | — | False until a price version exists | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:29` |
+| `items[].categoryId` | `string` | Sí | admite null | — | Category of the lab, or null when the service has none | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:35` |
+| `items[].categoryName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:36` |
+| `items[].sampleType` | `string` | Sí | admite null | — | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:43` |
+| `items[].preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:44` |
+| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:45` |
+| `items[].turnaroundHours` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:46` |
+| `items[].requiresMedicalOrder` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:48` |
+| `items[].homeCollection` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:49` |
+| `items[].price` | `string` | Sí | admite null | — | null when the service has no current price | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:56` |
+| `items[].alovidaDiscountPercent` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:58` |
+| `items[].alovidaPrice` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:60` |
+| `items[].currency` | `string` | Sí | valores: BOB | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:61` |
+| `items[].status` | `string` | Sí | valores: PUBLISHED, DRAFT, WITHDRAWN | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:63` |
+| `items[].available` | `boolean` | Sí | — | — | "Available today" switch of the service | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:65` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:66` |
+| `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:71` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/lab-portal-prices.int-spec.ts:123` |
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:46` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 42. POST /diagnostics/lab/services
+
+- **Origen:** CONTRATO
+- **Nombre:** Dar de alta un servicio con su precio
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.createService` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:111`
+
+### Qué es y para qué sirve (negocio)
+
+Dar de alta un servicio con su precio. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostics/lab/services` la atiende `LabPortalServicesController.createService` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:111). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabServiceDraftDto` (13 campos, 3 obligatorios). Delega en `LabPortalCatalogService.create`. Crea filas en diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:111` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalWriterService.create → LabPortalPricingService.setPrice → LabPortalPricingService.ensureSchedule → DiagnosticPriceSchedulesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:92` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalWriterService.create → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:125` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalWriterService.create → LabPortalPricingService.setPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:132` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.createService → LabPortalCatalogService.create → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Cuerpo — DTO `LabServiceDraftDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `categoryId` | `string` | No | formato uuid; admite null | `@IsOptional()` `@IsUUID('all', { message: 'La categoría no existe.' })` | A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as non-existent. | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:32` |
+| `sampleType` | `string` | No | longitud máxima 120; admite null | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Sample type as free text, stored in `specimen_description`; blank or null clears it | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:43` |
+| `preparation` | `string` | No | longitud máxima 2000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:49` |
+| `description` | `string` | No | longitud máxima 2000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:55` |
+| `turnaroundHours` | `number` | No | mínimo 0; máximo 8760; admite null | `@IsOptional()` `@IsInt({ message: 'El tiempo de entrega va en horas enteras.' })` `@Min(0, { message: 'El tiempo de entrega va en horas enteras.' })` `@Max(8760)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:62` |
+| `requiresMedicalOrder` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:67` |
+| `homeCollection` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:72` |
+| `alovidaDiscountPercent` | `number` | No | mínimo 0; máximo 100; admite null | `@IsOptional()` `@IsNumber( { maxDecimalPlaces: 2 }, { message: 'El descuento va de 0 a 100 %.' }, )` `@Min(0, { message: 'El descuento va de 0 a 100 %.' })` `@Max(100, { message: 'El descuento va de 0 a 100 %.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:82` |
+| `available` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | "Available today": false hides the service from the public directory, the coverage search and order booking; it keeps its status and price | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:90` |
+| `code` | `string` | Sí | longitud máxima 40; patrón runtime NOT_BLANK | `@IsString()` `@Matches(NOT_BLANK, { message: 'Falta el código del servicio.' })` `@MaxLength(40, { message: 'El código no puede pasar de 40 caracteres.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:99` |
+| `name` | `string` | Sí | longitud máxima 200; patrón runtime NOT_BLANK | `@IsString()` `@Matches(NOT_BLANK, { message: 'Falta el nombre del servicio.' })` `@MaxLength(200)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:105` |
+| `price` | `string` | Sí | patrón runtime PRICE | `@IsString({ message: PRICE_MESSAGE })` `@Matches(PRICE, { message: PRICE_MESSAGE })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:110` |
+| `status` | `string` | No | valores: PUBLISHED, DRAFT | `@IsOptional()` `@IsIn(['PUBLISHED', 'DRAFT'], { message: 'Estado desconocido.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:115` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "price": "45.00"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "alovidaDiscountPercent": 10,
+  "available": true,
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "price": "45.00",
+  "status": "PUBLISHED"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabServiceDto>` · DTO `LabServiceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:5` |
+| `code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:6` |
+| `name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:7` |
+| `kind` | `string` | Sí | valores: SERVICE, MODALITY | — | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:13` |
+| `parentId` | `string` | Sí | formato uuid; admite null | — | Panel this service is a component of | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:20` |
+| `catalogConceptId` | `string` | Sí | formato uuid; admite null | — | Study catalog concept; null for free-form services | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:27` |
+| `hasPrice` | `boolean` | Sí | — | — | False until a price version exists | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:29` |
+| `categoryId` | `string` | Sí | admite null | — | Category of the lab, or null when the service has none | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:35` |
+| `categoryName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:36` |
+| `sampleType` | `string` | Sí | admite null | — | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:43` |
+| `preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:44` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:45` |
+| `turnaroundHours` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:46` |
+| `requiresMedicalOrder` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:48` |
+| `homeCollection` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:49` |
+| `price` | `string` | Sí | admite null | — | null when the service has no current price | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:56` |
+| `alovidaDiscountPercent` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:58` |
+| `alovidaPrice` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:60` |
+| `currency` | `string` | Sí | valores: BOB | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:61` |
+| `status` | `string` | Sí | valores: PUBLISHED, DRAFT, WITHDRAWN | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:63` |
+| `available` | `boolean` | Sí | — | — | "Available today" switch of the service | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:65` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:66` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 409 | `CONFLICT` | ConflictException: {problem.message}; ConflictException: El tarifario público del laboratorio existe pero no está vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {problem.message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/lab-portal-prices.int-spec.ts:155` |
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:47` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 43. DELETE /diagnostics/lab/services/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Retirar un servicio (no se borra)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.withdrawService` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:160`
+
+### Qué es y para qué sirve (negocio)
+
+Retirar un servicio (no se borra). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /diagnostics/lab/services/{id}` la atiende `LabPortalServicesController.withdrawService` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:160). Exige sesión; el controlador no declara roles. Delega en `LabPortalCatalogService.withdraw`. Actualiza diagnostic_units.diagnostic_study_offerings. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:160` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:160` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | ACTUALIZA | POR_TIPO | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → DiagnosticStudiesService.retireOffering | `src/modules/diagnostic_units/services/diagnostic-studies.service.ts:165` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.withdrawService → LabPortalCatalogService.withdraw → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<LabServiceDto>` · DTO `LabServiceDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:5` |
+| `code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:6` |
+| `name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:7` |
+| `kind` | `string` | Sí | valores: SERVICE, MODALITY | — | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:13` |
+| `parentId` | `string` | Sí | formato uuid; admite null | — | Panel this service is a component of | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:20` |
+| `catalogConceptId` | `string` | Sí | formato uuid; admite null | — | Study catalog concept; null for free-form services | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:27` |
+| `hasPrice` | `boolean` | Sí | — | — | False until a price version exists | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:29` |
+| `categoryId` | `string` | Sí | admite null | — | Category of the lab, or null when the service has none | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:35` |
+| `categoryName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:36` |
+| `sampleType` | `string` | Sí | admite null | — | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:43` |
+| `preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:44` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:45` |
+| `turnaroundHours` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:46` |
+| `requiresMedicalOrder` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:48` |
+| `homeCollection` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:49` |
+| `price` | `string` | Sí | admite null | — | null when the service has no current price | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:56` |
+| `alovidaDiscountPercent` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:58` |
+| `alovidaPrice` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:60` |
+| `currency` | `string` | Sí | valores: BOB | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:61` |
+| `status` | `string` | Sí | valores: PUBLISHED, DRAFT, WITHDRAWN | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:63` |
+| `available` | `boolean` | Sí | — | — | "Available today" switch of the service | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:65` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:66` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado; ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 409 | `CONFLICT` | ConflictException: La oferta ya está retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:49` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 44. PATCH /diagnostics/lab/services/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar un servicio (un precio nuevo es una versión nueva)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.updateService` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:142`
+
+### Qué es y para qué sirve (negocio)
+
+Editar un servicio (un precio nuevo es una versión nueva). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /diagnostics/lab/services/{id}` la atiende `LabPortalServicesController.updateService` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:142). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabServiceChangesDto` (13 campos, 0 obligatorios). Delega en `LabPortalCatalogService.update`. Crea filas en diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_prices. Actualiza diagnostic_units.diagnostic_study_offerings. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalWriterService.update → LabPortalPricingService.setPrice → LabPortalPricingService.ensureSchedule → DiagnosticPriceSchedulesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:92` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | ACTUALIZA | POR_TIPO | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalWriterService.update | `src/modules/diagnostic_units/services/lab-portal-writer.service.ts:178` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalWriterService.update → LabPortalPricingService.setPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:132` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.updateService → LabPortalCatalogService.update → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `LabServiceChangesDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `categoryId` | `string` | No | formato uuid; admite null | `@IsOptional()` `@IsUUID('all', { message: 'La categoría no existe.' })` | A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as non-existent. | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:32` |
+| `sampleType` | `string` | No | longitud máxima 120; admite null | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Sample type as free text, stored in `specimen_description`; blank or null clears it | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:43` |
+| `preparation` | `string` | No | longitud máxima 2000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:49` |
+| `description` | `string` | No | longitud máxima 2000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:55` |
+| `turnaroundHours` | `number` | No | mínimo 0; máximo 8760; admite null | `@IsOptional()` `@IsInt({ message: 'El tiempo de entrega va en horas enteras.' })` `@Min(0, { message: 'El tiempo de entrega va en horas enteras.' })` `@Max(8760)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:62` |
+| `requiresMedicalOrder` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:67` |
+| `homeCollection` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:72` |
+| `alovidaDiscountPercent` | `number` | No | mínimo 0; máximo 100; admite null | `@IsOptional()` `@IsNumber( { maxDecimalPlaces: 2 }, { message: 'El descuento va de 0 a 100 %.' }, )` `@Min(0, { message: 'El descuento va de 0 a 100 %.' })` `@Max(100, { message: 'El descuento va de 0 a 100 %.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:82` |
+| `available` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | "Available today": false hides the service from the public directory, the coverage search and order booking; it keeps its status and price | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:90` |
+| `code` | `string` | No | longitud máxima 40; patrón runtime NOT_BLANK | `@IsOptional()` `@IsString()` `@Matches(NOT_BLANK, { message: 'Falta el código del servicio.' })` `@MaxLength(40, { message: 'El código no puede pasar de 40 caracteres.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:125` |
+| `name` | `string` | No | longitud máxima 200; patrón runtime NOT_BLANK | `@IsOptional()` `@IsString()` `@Matches(NOT_BLANK, { message: 'Falta el nombre del servicio.' })` `@MaxLength(200)` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:132` |
+| `price` | `string` | No | patrón runtime PRICE | `@IsOptional()` `@IsString({ message: PRICE_MESSAGE })` `@Matches(PRICE, { message: PRICE_MESSAGE })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:138` |
+| `status` | `string` | No | valores: PUBLISHED, DRAFT, WITHDRAWN | `@IsOptional()` `@IsIn(['PUBLISHED', 'DRAFT', 'WITHDRAWN'], { message: 'Estado desconocido.' })` | — | `src/modules/diagnostic_units/dto/lab-portal-service.dto.ts:143` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "alovidaDiscountPercent": 10,
+  "available": true,
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "price": "45.00",
+  "status": "PUBLISHED"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabServiceDto>` · DTO `LabServiceDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:5` |
+| `code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:6` |
+| `name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:7` |
+| `kind` | `string` | Sí | valores: SERVICE, MODALITY | — | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:13` |
+| `parentId` | `string` | Sí | formato uuid; admite null | — | Panel this service is a component of | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:20` |
+| `catalogConceptId` | `string` | Sí | formato uuid; admite null | — | Study catalog concept; null for free-form services | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:27` |
+| `hasPrice` | `boolean` | Sí | — | — | False until a price version exists | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:29` |
+| `categoryId` | `string` | Sí | admite null | — | Category of the lab, or null when the service has none | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:35` |
+| `categoryName` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:36` |
+| `sampleType` | `string` | Sí | admite null | — | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:43` |
+| `preparation` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:44` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:45` |
+| `turnaroundHours` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:46` |
+| `requiresMedicalOrder` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:48` |
+| `homeCollection` | `boolean` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:49` |
+| `price` | `string` | Sí | admite null | — | null when the service has no current price | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:56` |
+| `alovidaDiscountPercent` | `number` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:58` |
+| `alovidaPrice` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:60` |
+| `currency` | `string` | Sí | valores: BOB | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:61` |
+| `status` | `string` | Sí | valores: PUBLISHED, DRAFT, WITHDRAWN | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:63` |
+| `available` | `boolean` | Sí | — | — | "Available today" switch of the service | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:65` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:66` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado; ResourceNotFoundException: Servicio no encontrado |
+| 409 | `CONFLICT` | ConflictException: {problem.message}; ConflictException: El tarifario público del laboratorio existe pero no está vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {problem.message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/lab-portal-prices.int-spec.ts:146` |
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:48` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 45. POST /diagnostics/lab/services/import
+
+- **Origen:** CONTRATO
+- **Nombre:** Carga masiva por código, fila por fila
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LabPortalServicesController.importServices` — `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:127`
+
+### Qué es y para qué sirve (negocio)
+
+Carga masiva por código, fila por fila. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostics/lab/services/import` la atiende `LabPortalServicesController.importServices` (src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:127). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabImportDto` (4 campos, 4 obligatorios). Delega en `LabPortalImportService.import`. Crea filas en diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices. Actualiza diagnostic_units.diagnostic_study_offerings. Lee diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_service_categories, diagnostic_units.diagnostic_study_components, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `diagnostic_units.diagnostic_price_schedules` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalWriterService.create → LabPortalPricingService.setPrice → LabPortalPricingService.ensureSchedule → DiagnosticPriceSchedulesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:92` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:108` |
+| `diagnostic_units.diagnostic_service_categories` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:78` |
+| `diagnostic_units.diagnostic_study_components` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:104` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalWriterService.create → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:125` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | ACTUALIZA | POR_TIPO | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalWriterService.update | `src/modules/diagnostic_units/services/lab-portal-writer.service.ts:178` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:77` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalWriterService.create → LabPortalPricingService.setPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:132` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:128` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load → LabPortalContextService.unitOfTenant | `src/modules/diagnostic_units/services/lab-portal-context.service.ts:56` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | LabPortalServicesController.importServices → LabPortalImportService.import → LabPortalContextService.load → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:169` |
+
+### Cuerpo — DTO `LabImportDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `mode` | `string` | Sí | valores: CREATE_OR_UPDATE, UPDATE_ONLY | `@IsIn(['CREATE_OR_UPDATE', 'UPDATE_ONLY'])` | — | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:60` |
+| `rows` | `array<LabImportRowDto>` | Sí | mínimo 1 elemento(s); máximo 2000 elemento(s) | `@IsArray()` `@ArrayMinSize(1, { message: 'El archivo no trae filas.' })` `@ArrayMaxSize(2000, { message: 'Hasta 2000 filas por archivo.' })` `@ValidateNested({ each: true })` `@Type(() => LabImportRowDto)` | — | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:68` |
+| `rows[].line` | `number` | Sí | mínimo 0 | `@IsInt()` `@Min(0)` | — | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:49` |
+| `rows[].service` | `object` | Sí | — | `@IsObject()` | A LabServiceDraft | `src/modules/diagnostic_units/dto/lab-portal-requests.dto.ts:53` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "mode": "CREATE_OR_UPDATE",
+  "rows": [
+    {
+      "line": 1,
+      "service": {}
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "mode": "CREATE_OR_UPDATE",
+  "rows": [
+    {
+      "line": 1,
+      "service": {}
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<LabImportResultDto>` · DTO `LabImportResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `created` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:97` |
+| `updated` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:98` |
+| `unchanged` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:99` |
+| `rejected` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:100` |
+| `rows` | `array<LabImportRowResultDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:102` |
+| `rows[].line` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:89` |
+| `rows[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:90` |
+| `rows[].outcome` | `string` | Sí | valores: CREATED, UPDATED, UNCHANGED, REJECTED | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:92` |
+| `rows[].reason` | `string` | Sí | admite null | — | — | `src/modules/diagnostic_units/dto/lab-portal-responses.dto.ts:93` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La organización activa no tiene un laboratorio registrado |
+| 409 | `CONFLICT` | ConflictException: El tarifario público del laboratorio existe pero no está vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.spec.ts:50` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:LabPortalServicesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 46. POST /price-schedules/{scheduleId}/study-prices
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar/versionar el precio de un estudio (append-only)
@@ -2573,21 +5581,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: scheduleId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:50` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticUnitScopeService.schedule → DiagnosticPriceSchedulesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:69` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticUnitScopeService.offering → DiagnosticStudyOfferingsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:93` |
-| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice | `src/modules/diagnostic_units/services/diagnostic-pricing.service.ts:141` |
-| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:114` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticStudyPricesRepository.findActive | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:81` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticUnitScopeService.offering → DiagnosticStudyOfferingsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:99` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice | `src/modules/diagnostic_units/services/diagnostic-pricing.service.ts:144` |
+| `diagnostic_units.diagnostic_study_prices` | ESCRIBE | CREA | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticStudyPricesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:132` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticStudyPricesRepository.findActive | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:82` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticPricingController.addStudyPrice → DiagnosticPricingService.addStudyPrice → DiagnosticUnitScopeService.schedule → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
 ### Parámetros
@@ -2667,7 +5675,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /study-prices/{priceId}/close
+## 47. POST /study-prices/{priceId}/close
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar una versión de precio vigente
@@ -2692,9 +5700,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: priceId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:70` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2702,7 +5710,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticPricingController.closePrice → DiagnosticPricingService.closePrice → DiagnosticUnitScopeService.price → DiagnosticUnitScopeService.schedule → DiagnosticPriceSchedulesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-price-schedules.repository.ts:69` |
 | `diagnostic_units.diagnostic_study_prices` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticPricingController.closePrice → DiagnosticPricingService.closePrice | `src/modules/diagnostic_units/services/diagnostic-pricing.service.ts:200` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticPricingController.closePrice → DiagnosticPricingService.closePrice → DiagnosticUnitScopeService.price → DiagnosticStudyPricesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:72` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticPricingController.closePrice → DiagnosticPricingService.closePrice → DiagnosticUnitScopeService.price → DiagnosticStudyPricesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-study-prices.repository.ts:73` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticPricingController.closePrice → DiagnosticPricingService.closePrice → DiagnosticUnitScopeService.price → DiagnosticUnitScopeService.schedule → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
 ### Parámetros

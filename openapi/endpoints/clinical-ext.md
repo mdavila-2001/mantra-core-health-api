@@ -2837,6 +2837,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "rejectReason": "Texto descriptivo de ejemplo",
     "counterReferralText": "valor-ejemplo",
     "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "targetEncounterId": "00000000-0000-4000-8000-000000000001",
     "transfer": {
       "required": true,
       "transportMode": "AMBULANCE_BASIC",
@@ -3695,6 +3696,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `decision` | Sí | `string` | valores: `ACCEPT`, `REJECT` | Decisión del tenant destino | `ACCEPT` |
 | `rejectReason` | No | `string` | longitud máxima 4000 | Motivo del rechazo (obligatorio si REJECT) | `Texto descriptivo de ejemplo` |
+| `targetEncounterId` | No | `string` | formato `uuid` | Sólo con ACCEPT: atención (clinical.encounters) del tenant destino en la que se recibe al paciente. 422 REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED con REJECT; 422 REFERRAL_TARGET_ENCOUNTER_INVALID si no existe, es de otro paciente o de otro tenant | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3708,7 +3710,8 @@ Content-Type: application/json
 
 {
   "decision": "ACCEPT",
-  "rejectReason": "Texto descriptivo de ejemplo"
+  "rejectReason": "Texto descriptivo de ejemplo",
+  "targetEncounterId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3753,7 +3756,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La atención de llegada sólo se registra al aceptar la derivación | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | La referencia no está en estado solicitado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención indicada no existe o no es de esta persona en esta organización | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4046,6 +4051,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "rejectReason": "Texto descriptivo de ejemplo",
     "counterReferralText": "valor-ejemplo",
     "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "targetEncounterId": "00000000-0000-4000-8000-000000000001",
     "transfer": {
       "required": true,
       "transportMode": "AMBULANCE_BASIC",

@@ -5,7 +5,7 @@
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 78 (78 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 29 · MEDIO 24 · BAJO 25
-- **Tablas distintas que tocan:** 94
+- **Tablas distintas que tocan:** 93
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/insurance.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -39,10 +39,10 @@
 | 25 | GET | `/insurance-claims` | Listar las solicitudes de seguro presentadas (cursor) | BAJO | 11 | BILLING_OPERATOR, SECURITY_ADMIN |
 | 26 | POST | `/insurance-claims` | Enviar reclamo con líneas (837) | MEDIO | 22 | BILLING, FINANCE |
 | 27 | GET | `/insurance-claims/{id}` | Consultar una solicitud de seguro con sus ítems y su dictamen | BAJO | 20 | BILLING_OPERATOR, SECURITY_ADMIN |
-| 28 | POST | `/insurance-claims/{id}/adjudications` | Adjudicar reclamo por línea (835) | MEDIO | 18 | BILLING, FINANCE |
+| 28 | POST | `/insurance-claims/{id}/adjudications` | Adjudicar reclamo por línea (835) | MEDIO | 19 | BILLING, FINANCE |
 | 29 | POST | `/insurance-claims/{id}/disputes` | Abrir disputa sobre adjudicación | MEDIO | 10 | BILLING, FINANCE, BILLING_OPERATOR, SECURITY_ADMIN, PATIENT |
 | 30 | POST | `/insurance-claims/{id}/eob` | Publicar Explicación de Beneficios (EOB) | MEDIO | 21 | BILLING, FINANCE |
-| 31 | POST | `/insurance-claims/{id}/patient-invoice` | Facturar al paciente su parte de un servicio reclamado | MEDIO | 25 | BILLING, FINANCE |
+| 31 | POST | `/insurance-claims/{id}/patient-invoice` | Facturar al paciente su parte de un servicio reclamado | MEDIO | 24 | BILLING, FINANCE |
 | 32 | POST | `/insurance-claims/{id}/reversals` | Registrar reversión de reclamo | MEDIO | 15 | BILLING, FINANCE |
 | 33 | POST | `/insurance-claims/quote` | Cotizar un cobro a la aseguradora (sin guardar) | BAJO | 10 | BILLING, FINANCE |
 | 34 | POST | `/insurance-plans/{planId}/benefits` | Crear una cobertura de un plan administrable | ALTO | 5 | sesión (sin roles) |
@@ -118,10 +118,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -225,11 +225,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -329,10 +329,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -431,10 +431,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -531,10 +531,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:354` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -625,8 +625,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -709,10 +709,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:306` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -805,9 +805,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:99` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -913,11 +913,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:330` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:330` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1018,9 +1018,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:118` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1107,17 +1107,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -1212,19 +1212,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createCampaign | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:131` |
@@ -1380,18 +1380,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.assertNotCrossTenant → InsuranceCampaignsRepository.findAnyById | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:123` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -1482,20 +1482,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | BORRA | BORRA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.deletePartners | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:143` |
 | `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
@@ -1639,20 +1639,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus | `src/modules/insurance/application/services/insurance-campaigns.service.ts:325` |
 | `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.requireOwnedEntity → InsuranceCampaignsRepository.findEntityForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:111` |
@@ -1764,7 +1764,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1851,23 +1851,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 
@@ -1942,24 +1942,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 
@@ -2118,14 +2118,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceReadController.listCarriers → InsuranceReadService.listCarriers → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceReadController.listCarriers → InsuranceReadService.listCarriers → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceReadController.listCarriers → InsuranceReadService.listCarriers → InsuranceReadRepository.findCarriersByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:34` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | InsuranceReadController.listCarriers → InsuranceReadService.listCarriers → InsuranceReadRepository.findActivePlans | `src/modules/insurance/infrastructure/repositories/read.repository.ts:78` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | InsuranceReadController.listCarriers → InsuranceReadService.listCarriers → InsuranceReadRepository.findActiveProducts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:62` |
@@ -2212,10 +2212,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2310,15 +2310,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:67` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceReadController.getCarrier → InsuranceReadService.getCarrier → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceReadController.getCarrier → InsuranceReadService.getCarrier → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceReadController.getCarrier → InsuranceReadService.getCarrier → InsuranceReadRepository.findCarrierByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:53` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | InsuranceReadController.getCarrier → InsuranceReadService.getCarrier → InsuranceReadRepository.findActiveBenefits | `src/modules/insurance/infrastructure/repositories/read.repository.ts:94` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | InsuranceReadController.getCarrier → InsuranceReadService.getCarrier → InsuranceReadRepository.findActivePlans | `src/modules/insurance/infrastructure/repositories/read.repository.ts:78` |
@@ -2474,17 +2474,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:102` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateContactChannels → InsuranceBackboneService.updateContactChannels → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateContactChannels → InsuranceBackboneService.updateContactChannels → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceBackboneController.updateContactChannels → InsuranceBackboneService.updateContactChannels | `src/modules/insurance/application/services/insurance-backbone.service.ts:129` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateContactChannels → InsuranceBackboneService.updateContactChannels → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 
@@ -2581,11 +2581,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:130` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2684,8 +2684,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING_OPERATOR, SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2800,20 +2800,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:138` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:139` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_claim_lines` | ESCRIBE | CREA | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimRepository.createLine | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:110` |
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimsService.replayLinkedClaim | `src/modules/insurance/application/services/claims.service.ts:277` |
 | `insurance.insurance_claims` | ESCRIBE | CREA | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimRepository.createClaim | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:82` |
@@ -2963,9 +2963,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING_OPERATOR, SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3205,7 +3205,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /insurance-claims/{id}/adjudications` la atiende `ClaimsController.adjudicate` (src/modules/insurance/presentation/controllers/claims.controller.ts:150). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAdjudicationDto` (14 campos, 4 obligatorios). Delega en `ClaimsService.adjudicate`. Crea filas en insurance.claim_adjudication_versions, insurance.claim_line_adjudications. Lee clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, insurance.claim_adjudication_versions, insurance.insurance_carriers, insurance.insurance_claim_lines, insurance.insurance_claims, insurance.insurance_plans y 8 más.
+`POST /insurance-claims/{id}/adjudications` la atiende `ClaimsController.adjudicate` (src/modules/insurance/presentation/controllers/claims.controller.ts:150). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAdjudicationDto` (14 campos, 4 obligatorios). Delega en `ClaimsService.adjudicate`. Crea filas en insurance.claim_adjudication_versions, insurance.claim_line_adjudications. Lee clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, directory.tenant_memberships, insurance.claim_adjudication_versions, insurance.insurance_carriers, insurance.insurance_claim_lines, insurance.insurance_claims y 9 más.
 
 ### Requerimientos
 
@@ -3213,11 +3213,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:150` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:150` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3226,6 +3226,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | ESCRIBE | CREA | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.createVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:152` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.latestVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:135` |
 | `insurance.claim_line_adjudications` | ESCRIBE | CREA | DIRECTA | ClaimsController.adjudicate → ClaimsService.adjudicate → ClaimRepository.createLineAdjudication | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:173` |
@@ -3362,11 +3363,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE, BILLING_OPERATOR, SECURITY_ADMIN, PATIENT | `src/modules/insurance/presentation/controllers/claims.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:220` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3380,7 +3381,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → ClaimDecisionPublisherAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → ClaimDecisionPublisherAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `practice.practices` | LEE | LEE | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → PracticeTenantLookupAdapter.findTenantOfPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClaimsController.openDispute → PatientChargeObjectionService.object → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Eventos y trabajos
@@ -3483,11 +3484,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:168` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3496,7 +3497,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob → ClaimRepository.latestVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:135` |
 | `insurance.claim_line_adjudications` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob | `src/modules/insurance/application/services/claims.service.ts:610` |
 | `insurance.claim_reversals` | LEE | LEE | DIRECTA | ClaimsController.publishEob → ClaimsService.publishEob | `src/modules/insurance/application/services/claims.service.ts:608` |
@@ -3590,7 +3591,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /insurance-claims/{id}/patient-invoice` la atiende `ClaimsController.issuePatientInvoice` (src/modules/insurance/presentation/controllers/claims.controller.ts:125). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `IssuePatientInvoiceDto` (3 campos, 1 obligatorio). Delega en `ClaimPatientInvoiceService.issue`. Crea filas en billing.invoice_lines, billing.invoices, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza iam.devices. Lee billing.invoice_lines, iam.devices, insurance.insurance_claim_lines, insurance.insurance_claims, insurance.insurance_plan_benefits, insurance.patient_coverages, insurance.prior_authorization_determinations, insurance.prior_authorization_items y 9 más. Publica un evento calculado (null).
+`POST /insurance-claims/{id}/patient-invoice` la atiende `ClaimsController.issuePatientInvoice` (src/modules/insurance/presentation/controllers/claims.controller.ts:125). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `IssuePatientInvoiceDto` (3 campos, 1 obligatorio). Delega en `ClaimPatientInvoiceService.issue`. Crea filas en billing.invoice_lines, billing.invoices, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza messaging.in_app_notifications. Lee billing.invoice_lines, insurance.insurance_claim_lines, insurance.insurance_claims, insurance.insurance_plan_benefits, insurance.patient_coverages, insurance.prior_authorization_determinations, insurance.prior_authorization_items, insurance.prior_authorization_requests y 8 más. Publica un evento calculado (null).
 
 ### Requerimientos
 
@@ -3598,11 +3599,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:125` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3611,8 +3612,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.invoice_lines` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → BillingPatientInvoiceAdapter.issuePatientInvoice → InvoicesRepository.createLine | `src/modules/billing/repositories/invoices.repository.ts:318` |
 | `billing.invoice_lines` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → BillingPatientInvoiceAdapter.findInvoiceLineByClaimLine | `src/modules/insurance/infrastructure/adapters/billing-patient-invoice.adapter.ts:32` |
 | `billing.invoices` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → BillingPatientInvoiceAdapter.issuePatientInvoice → InvoicesRepository.create | `src/modules/billing/repositories/invoices.repository.ts:287` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimRepository.findLine | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:97` |
 | `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimRepository.findClaimForUpdate | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:51` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
@@ -3621,6 +3620,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:411` |
 | `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:393` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimDecisionPublisherAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -3740,11 +3740,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:186` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3753,7 +3753,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimRepository.findVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:128` |
 | `insurance.claim_reversals` | ESCRIBE | CREA | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimRepository.createReversal | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:231` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | ClaimsController.reverse → ClaimsService.reverse → ClaimsService.claimForMutation → ClaimsService.assertLegacyClaimParty → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -3855,16 +3855,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:138` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:139` |
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:500` |
 | `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:495` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
@@ -4003,17 +4003,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:180` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.createBenefit → InsuranceBackboneService.createBenefit → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.createBenefit → InsuranceBackboneService.createBenefit → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createBenefit → InsuranceBackboneService.createBenefit → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plan_benefits` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createBenefit → InsuranceBackboneService.createBenefit → CatalogRepository.createBenefit | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:179` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | InsuranceBackboneController.createBenefit → InsuranceBackboneService.createBenefit → CatalogRepository.findPlanForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:129` |
@@ -4121,17 +4121,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:198` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, benefitId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:198` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefit → InsuranceBackboneService.updateBenefit → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefit → InsuranceBackboneService.updateBenefit → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefit → InsuranceBackboneService.updateBenefit → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plan_benefits` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceBackboneController.updateBenefit → InsuranceBackboneService.updateBenefit | `src/modules/insurance/application/services/insurance-backbone.service.ts:327` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefit → InsuranceBackboneService.updateBenefit → CatalogRepository.findBenefitForPlanAndCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:148` |
@@ -4234,17 +4234,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:216` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, benefitId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:216` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefitRules → InsuranceBackboneService.updateBenefitRules → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefitRules → InsuranceBackboneService.updateBenefitRules → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefitRules → InsuranceBackboneService.updateBenefitRules → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plan_benefits` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceBackboneController.updateBenefitRules → InsuranceBackboneService.updateBenefitRules | `src/modules/insurance/application/services/insurance-backbone.service.ts:369` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | InsuranceBackboneController.updateBenefitRules → InsuranceBackboneService.updateBenefitRules → CatalogRepository.findBenefitForPlanAndCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:148` |
@@ -4348,17 +4348,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:239` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:239` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updatePlanPremium → InsuranceBackboneService.updatePlanPremium → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.updatePlanPremium → InsuranceBackboneService.updatePlanPremium → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.updatePlanPremium → InsuranceBackboneService.updatePlanPremium → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plans` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceBackboneController.updatePlanPremium → InsuranceBackboneService.updatePlanPremium | `src/modules/insurance/application/services/insurance-backbone.service.ts:287` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | InsuranceBackboneController.updatePlanPremium → InsuranceBackboneService.updatePlanPremium → CatalogRepository.findPlanForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:129` |
@@ -4449,17 +4449,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: productId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:155` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.createPlan → InsuranceBackboneService.createPlan → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceBackboneController.createPlan → InsuranceBackboneService.createPlan → InsuranceBackboneService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createPlan → InsuranceBackboneService.createPlan → InsuranceBackboneService.administrableCarrier → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plans` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createPlan → InsuranceBackboneService.createPlan → CatalogRepository.createPlan | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:161` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | InsuranceBackboneController.createPlan → InsuranceBackboneService.createPlan → CatalogRepository.findProductForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:89` |
@@ -4562,8 +4562,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-analytics.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4573,7 +4573,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.conditions` | LEE | LEE | POR_SQL | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → InsuranceAnalyticsRepository.prevalentPathologies | `src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts:555` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → InsuranceAnalyticsRepository.specialties | `src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts:474` |
 | `clinical.immunizations` | LEE | LEE | POR_SQL | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → InsuranceAnalyticsRepository.immunization | `src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts:634` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | POR_SQL | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → InsuranceAnalyticsRepository.kpis | `src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts:166` |
 | `insurance.coverage_dependents` | LEE | LEE | POR_SQL | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → InsuranceAnalyticsRepository.kpis | `src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts:166` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceAnalyticsController.getLossRatioAnalytics → InsuranceAnalyticsService.getLossRatioAnalytics → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -4703,17 +4703,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -4810,19 +4810,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createCampaign | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:131` |
@@ -4980,18 +4980,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.assertNotCrossTenant → InsuranceCampaignsRepository.findAnyById | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:123` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -5084,20 +5084,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | BORRA | BORRA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.deletePartners | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:143` |
 | `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
@@ -5243,20 +5243,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
 | `insurance.insurance_campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus | `src/modules/insurance/application/services/insurance-campaigns.service.ts:325` |
 | `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.requireOwnedEntity → InsuranceCampaignsRepository.findEntityForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:111` |
@@ -5370,7 +5370,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5459,23 +5459,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 
@@ -5550,24 +5550,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
 
@@ -5651,7 +5651,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/my-claims.controller.ts:35` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/insurance/presentation/controllers/my-claims.controller.ts:35` |
 | CABECERA | x-tenant-id (obligatoria) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5664,10 +5664,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.claim_disputes` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read | `src/modules/insurance/application/services/patient-charge-breakdown.service.ts:84` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → InsurerReceivedClaimsService.buildMyItems → ClaimReadRepository.findCarriersByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:347` |
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read | `src/modules/insurance/application/services/patient-charge-breakdown.service.ts:79` |
-| `insurance.insurance_claims` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims | `src/modules/insurance/application/services/my-claims.service.ts:140` |
+| `insurance.insurance_claims` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims | `src/modules/insurance/application/services/my-claims.service.ts:141` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read → PatientChargeBreakdownService.breakdownOf → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → InsurerReceivedClaimsService.buildMyItems → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findPlansByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:487` |
-| `insurance.patient_coverages` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list | `src/modules/insurance/application/services/my-claims.service.ts:76` |
+| `insurance.patient_coverages` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list | `src/modules/insurance/application/services/my-claims.service.ts:77` |
 | `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read → PatientChargeBreakdownService.breakdownOf → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:516` |
 | `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read → PatientChargeBreakdownService.breakdownOf → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:411` |
 | `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | MyClaimsController.listMyClaims → MyClaimsService.list → MyClaimsService.readClaims → PatientChargeBreakdownService.read → PatientChargeBreakdownService.breakdownOf → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:393` |
@@ -5795,31 +5795,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.recordAccess → PatientDirectoryAdapter.record → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
-| `common.contact_points` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
+| `common.contact_points` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
 | `community.conversation_participants` | ESCRIBE | CREA | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createParticipant | `src/modules/community/repositories/conversations.repository.ts:161` |
 | `community.conversation_participants` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:284` |
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
-| `iam.users` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation | `src/modules/insurance/application/services/insurer-patients.service.ts:428` |
+| `iam.users` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation | `src/modules/insurance/application/services/insurer-patients.service.ts:422` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.resolveScope → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `profiles.persons` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `profiles.persons` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
 
 ### Cuerpo — DTO `InsurerPatientConversationDto` · `application/json`
 
@@ -5905,14 +5905,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.options → InsurerPatientsService.options → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.options → InsurerPatientsService.options → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPatientsController.options → InsurerPatientsService.options → InsurerPatientsService.resolveScope → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 
 ### Cuerpo
@@ -5975,28 +5975,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.recordAccess → PatientDirectoryAdapter.record → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
-| `common.contact_points` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.users` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
+| `common.contact_points` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.users` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.resolveScope → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
-| `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:278` |
-| `insurance.insurance_products` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:278` |
-| `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:278` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `profiles.persons` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
+| `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:273` |
+| `insurance.insurance_products` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:273` |
+| `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readCoverages | `src/modules/insurance/application/services/insurer-patients.service.ts:273` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `profiles.persons` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsurerPatientsController.listPatients → InsurerPatientsService.list → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:215` |
 
 ### Cuerpo — DTO `InsurerPatientSearchQueryDto` · `application/json`
 
@@ -6112,22 +6112,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: certificateId | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:122` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `common.file_versions` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilitySupportAdapter.downloadFile → FileUploadService.downloadForAuthorizedContext → FileUploadService.serveCurrentVersion → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilitySupportAdapter.downloadFile → FileUploadService.downloadForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `health_data.health_export_jobs` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilitySupportAdapter.findExportJobById → DataReleaseRepository.findExportJobById | `src/modules/health_data/repositories/data-release.repository.ts:401` |
 | `health_data.health_export_manifests` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilitySupportAdapter.findManifest → DataReleaseRepository.findManifest | `src/modules/health_data/repositories/data-release.repository.ts:371` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadJson → InsurancePortabilityService.downloadJson → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -6194,22 +6194,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: certificateId | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `common.file_versions` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilitySupportAdapter.downloadFile → FileUploadService.downloadForAuthorizedContext → FileUploadService.serveCurrentVersion → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilitySupportAdapter.downloadFile → FileUploadService.downloadForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `health_data.health_export_jobs` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilitySupportAdapter.findExportJobById → DataReleaseRepository.findExportJobById | `src/modules/health_data/repositories/data-release.repository.ts:401` |
 | `health_data.health_export_manifests` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilitySupportAdapter.findManifest → DataReleaseRepository.findManifest | `src/modules/health_data/repositories/data-release.repository.ts:371` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.recordAudit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsurancePortabilityController.downloadPdf → InsurancePortabilityService.renderPdf → InsurancePortabilityService.loadCertificate → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -6274,7 +6274,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle(EXPORT_RATE_LIMIT) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
@@ -6283,8 +6283,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
 | `audit.dsar_requests` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → DsarRequestsRepository.create | `src/modules/audit/repositories/dsar-requests.repository.ts:44` |
 | `clinical.conditions` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.conditionsOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:241` |
@@ -6299,7 +6299,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `health_data.health_export_manifests` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → DataReleaseRepository.createExportManifest | `src/modules/health_data/repositories/data-release.repository.ts:340` |
 | `health_data.health_provenance_records` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → HealthProvenanceRepository.createProvenanceRecord | `src/modules/health_data/repositories/health-provenance.repository.ts:122` |
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
-| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.persistExport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.claimsOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:164` |
 | `insurance.claim_line_adjudications` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.claimsOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:164` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -6310,11 +6310,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.policiesOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:123` |
 | `messaging.message_queues` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.storeGeneratedFile → FileUploadService.storeGenerated → FileUploadService.persistBytes → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
 | `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.storeGeneratedFile → FileUploadService.storeGenerated → FileUploadService.persistBytes → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
-| `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.storeGeneratedFile → FileUploadService.storeGenerated → FileUploadService.persistBytes → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.reuse → StorageLifecycleCoordinator.change | `src/common/storage/storage-lifecycle-coordinator.service.ts:651` |
+| `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.storeGeneratedFile → FileUploadService.storeGenerated → FileUploadService.persistBytes → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.reuse → StorageLifecycleCoordinator.change | `src/common/storage/storage-lifecycle-coordinator.service.ts:656` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilitySupportAdapter.storeGeneratedFile → FileUploadService.storeGenerated → FileUploadService.persistBytes → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.findJobByDedupeKey | `src/modules/messaging/repositories/queues.repository.ts:132` |
 | `pharmacy.pharmacies` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.claimsOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:164` |
 | `practice.practices` | LEE | LEE | POR_SQL | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityRepository.claimsOfPatient | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:164` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityService.resolvePatientParts → InsurancePortabilitySupportAdapter.resolvePatientParts → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityService.resolvePatientParts → InsurancePortabilitySupportAdapter.resolvePatientParts → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityService.assertOwnership → InsurancePortabilitySupportAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityService.resolvePatientParts → InsurancePortabilitySupportAdapter.resolvePatientParts → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsurancePortabilityController.export → InsurancePortabilityService.export → InsurancePortabilityService.conceptMap → InsurancePortabilityRepository.findConceptsByIds | `src/modules/insurance/infrastructure/repositories/insurance-portability.repository.ts:114` |
@@ -6448,14 +6448,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.listReceived → PractitionerInsurerRequestsService.listReceived → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.listReceived → PractitionerInsurerRequestsService.listReceived → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.listReceived → PractitionerInsurerRequestsService.listReceived → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.listReceived → PractitionerInsurerRequestsService.listReceived → PractitionerInsurerRequestsRepository.listByCarrier | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:71` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.listReceived → PractitionerInsurerRequestsService.listReceived → PractitionerInsurerRequestsRepository.findPractitionerCards | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:130` |
@@ -6526,15 +6526,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:152` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.approve → PractitionerInsurerRequestsService.approve → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.approve → PractitionerInsurerRequestsService.approve → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.approve → PractitionerInsurerRequestsService.approve → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | InsurerPractitionerRequestsController.approve → PractitionerInsurerRequestsService.approve → PractitionerInsurerRequestsService.decide | `src/modules/insurance/application/services/practitioner-insurer-requests.service.ts:367` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.approve → PractitionerInsurerRequestsService.approve → PractitionerInsurerRequestsService.decide → PractitionerInsurerRequestsRepository.findForCarrier | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:84` |
@@ -6613,17 +6613,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:174` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:174` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.reject → PractitionerInsurerRequestsService.reject → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.reject → PractitionerInsurerRequestsService.reject → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.reject → PractitionerInsurerRequestsService.reject → PractitionerInsurerRequestsService.decide → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | InsurerPractitionerRequestsController.reject → PractitionerInsurerRequestsService.reject → PractitionerInsurerRequestsService.decide | `src/modules/insurance/application/services/practitioner-insurer-requests.service.ts:367` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | InsurerPractitionerRequestsController.reject → PractitionerInsurerRequestsService.reject → PractitionerInsurerRequestsService.decide → PractitionerInsurerRequestsRepository.findForCarrier | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:84` |
@@ -6720,8 +6720,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6729,7 +6729,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.encounters` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findEncountersByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:441` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findDiagnosticUnitsByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:478` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.resolveCarrier → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.resolveCarrier → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `iam.users` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findUsersByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:493` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findAdjudicationsByClaimIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:385` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.listReceivedClaims → InsurerReceivedClaimsService.list → InsurerReceivedClaimsService.resolveCarrier → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
@@ -6856,11 +6856,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:96` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6870,7 +6870,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findDiagnosticUnitsByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:478` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → InsurerReceivedClaimsService.resolveCarrier → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → InsurerReceivedClaimsService.resolveCarrier → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `iam.users` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → InsurerReceivedClaimsService.buildItems → InsurerReceivedClaimsService.loadContext → ClaimReadRepository.findUsersByIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:493` |
 | `insurance.claim_adjudication_versions` | ESCRIBE | CREA | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → InsurerReceivedClaimsService.writeDecision → ClaimRepository.createVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:152` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | InsurerReceivedClaimsController.decideReceivedClaim → InsurerReceivedClaimsService.decide → ClaimRepository.latestVersion | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:135` |
@@ -7047,10 +7047,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7165,15 +7165,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/insurance/presentation/controllers/coverage.controller.ts:70` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.care_relationships` | LEE | LEE | DIRECTA | CoverageController.listForPatient → CoverageService.listForPatient → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:138` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | CoverageController.listForPatient → CoverageService.listForPatient → ClaimCareRelationshipGate.assertCareRelationship → PatientCareRelationshipAdapter.hasCareRelationshipForPayment → CareRelationshipsRepository.hasActiveInTenantAt | `src/modules/authz/repositories/care-relationships.repository.ts:139` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | CoverageController.listForPatient → CoverageService.listForPatient → CoverageRepository.findOptionsByPatient | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:138` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | CoverageController.listForPatient → CoverageService.listForPatient → CoverageRepository.findOptionsByPatient | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:138` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | CoverageController.listForPatient → CoverageService.listForPatient → CoverageRepository.findOptionsByPatient | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:138` |
@@ -7249,8 +7249,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE, PATIENT | `src/modules/insurance/presentation/controllers/coverage.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7327,8 +7327,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7446,16 +7446,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.generate → PractitionerSettlementBatchesService.generate → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.generate → PractitionerSettlementBatchesService.generate → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.generate → PractitionerSettlementBatchesService.generate | `src/modules/insurance/application/services/practitioner-settlement-batches.service.ts:132` |
 | `insurance.claim_line_adjudications` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.generate → PractitionerSettlementBatchesService.generate | `src/modules/insurance/application/services/practitioner-settlement-batches.service.ts:165` |
 | `insurance.claim_reversals` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.generate → PractitionerSettlementBatchesService.generate | `src/modules/insurance/application/services/practitioner-settlement-batches.service.ts:135` |
@@ -7591,16 +7591,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:69` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.assertBatchAccess → PractitionerSettlementBatchesService.providerEntityIdsForTenant → SettlementRepository.findActiveDiagnosticUnitIds | `src/modules/insurance/infrastructure/repositories/settlement.repository.ts:26` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.assertBatchAccess → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.assertBatchAccess → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.toDto | `src/modules/insurance/application/services/practitioner-settlement-batches.service.ts:494` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.toDto → CatalogRepository.findCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:36` |
 | `insurance.insurance_claims` | LEE | LEE | DIRECTA | PractitionerSettlementBatchesController.getById → PractitionerSettlementBatchesService.getById → PractitionerSettlementBatchesService.toDto | `src/modules/insurance/application/services/practitioner-settlement-batches.service.ts:497` |
@@ -7710,18 +7710,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT | `src/modules/insurance/presentation/controllers/practitioner-insurance-networks.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/insurance/presentation/controllers/practitioner-insurance-networks.controller.ts:25` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `insurance.insurance_carriers` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:48` |
-| `insurance.network_provider_memberships` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:48` |
-| `insurance.provider_networks` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:48` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:48` |
+| `insurance.insurance_carriers` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:45` |
+| `insurance.network_provider_memberships` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:45` |
+| `insurance.provider_networks` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:45` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerInsuranceNetworksController.list → PractitionerInsuranceNetworksService.listForPractitioner | `src/modules/insurance/application/services/practitioner-insurance-networks.service.ts:45` |
 
 ### Parámetros
 
@@ -7793,8 +7793,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7868,10 +7868,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7972,9 +7972,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/practitioner-insurer-requests.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8055,10 +8055,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8067,7 +8067,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimAccessService.coverageForOrder → CatalogRepository.findPlan | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:120` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → LinkedClaimAccessService.coverageForOrder → CatalogRepository.findProduct | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:80` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | PriorAuthController.submit → PriorAuthService.submitRequest → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:58` |
@@ -8191,16 +8191,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → PriorAuthReadService.hydrate → PriorAuthRepository.findDiagnosticOfferings | `src/modules/insurance/infrastructure/repositories/prior-auth.repository.ts:93` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → PriorAuthReadService.insurerCarrierId → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → PriorAuthReadService.insurerCarrierId → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → PriorAuthReadService.insurerCarrierId → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → CatalogRepository.findPlan | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:120` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | PriorAuthController.getById → PriorAuthReadService.getForInsurer → CatalogRepository.findProduct | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:80` |
@@ -8303,11 +8303,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:116` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8316,7 +8316,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.service_requests` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockServiceRequest | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:73` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findOfferings | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:132` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimAccessService.assertInsurer → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → LinkedClaimAccessService.assertInsurer → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → CatalogRepository.findPlan | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:120` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | PriorAuthController.determine → PriorAuthService.issueDetermination → CatalogRepository.findProduct | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:80` |
@@ -8441,15 +8441,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthReadService.hydrate → PriorAuthRepository.findDiagnosticOfferings | `src/modules/insurance/infrastructure/repositories/prior-auth.repository.ts:93` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthReadService.insurerCarrierId → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthReadService.insurerCarrierId → LinkedClaimAccessService.assertAdministrator → DirectoryTenantAdministrationAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthReadService.insurerCarrierId → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthReadService.hydrate | `src/modules/insurance/application/services/prior-auth-read.service.ts:155` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | PriorAuthController.inbox → PriorAuthReadService.listInbox → PriorAuthRepository.findIdsForCarrier | `src/modules/insurance/infrastructure/repositories/prior-auth.repository.ts:172` |
@@ -8538,10 +8538,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:265` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8638,11 +8638,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:282` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:282` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8821,10 +8821,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8922,11 +8922,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:58` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

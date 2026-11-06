@@ -10,17 +10,17 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [accession_specimens](#accession_specimens) | Asocia muestras a accesiones para registrar qué material biológico integra cada ingreso de laboratorio. | 6 | 4 | 2 | COINCIDE |
+| [accession_specimens](#accession_specimens) | Asocia muestras a accesiones para registrar qué material biológico integra cada ingreso de laboratorio. | 6 | 4 | 16 | COINCIDE |
 | [analyzer_result_messages](#analyzer_result_messages) | Recibe mensajes de resultados emitidos por analizadores para conservar la integración entre equipos y sistemas de laboratorio. | 12 | 9 | 2 | COINCIDE |
 | [analyzer_runs](#analyzer_runs) | Registra ejecuciones de analizadores clínicos para asociar mediciones automatizadas con el equipo y proceso que las produjo. | 13 | 8 | 2 | COINCIDE |
 | [clinical_media](#clinical_media) | Cataloga medios clínicos asociados al proceso diagnóstico sin convertir la metadata en un repositorio binario independiente. | 19 | 15 | 2 | COINCIDE |
 | [critical_result_notifications](#critical_result_notifications) | Traza notificaciones de resultados críticos para documentar la comunicación de hallazgos que requieren atención prioritaria. | 21 | 14 | 4 | COINCIDE |
 | [diagnostic_data_quality_events](#diagnostic_data_quality_events) | Registra incidencias de calidad de datos diagnósticos para rastrear problemas de integridad o consistencia durante su manejo. | 13 | 8 | 1 | COINCIDE |
 | [diagnostic_provenance_links](#diagnostic_provenance_links) | Vincula recursos diagnósticos con su procedencia para explicar de qué fuentes y procesos se originó la información. | 12 | 11 | 1 | COINCIDE |
-| [diagnostic_release_events](#diagnostic_release_events) | Mantiene evidencia de los eventos que liberan resultados diagnósticos para consulta dentro del flujo asistencial. | 9 | 7 | 6 | COINCIDE |
-| [diagnostic_report_files](#diagnostic_report_files) | Vincula archivos complementarios con informes diagnósticos manteniendo separada la metadata del contenido binario. | 8 | 5 | 6 | COINCIDE |
-| [diagnostic_report_results](#diagnostic_report_results) | Asocia resultados estructurados a informes diagnósticos para que un informe pueda contener varias observaciones. | 6 | 3 | 6 | COINCIDE |
-| [diagnostic_report_versions](#diagnostic_report_versions) | Preserva versiones inmutables de informes diagnósticos para conservar conclusiones y estados clínicos emitidos a lo largo del tiempo. | 18 | 12 | 14 | COINCIDE |
+| [diagnostic_release_events](#diagnostic_release_events) | Mantiene evidencia de los eventos que liberan resultados diagnósticos para consulta dentro del flujo asistencial. | 9 | 7 | 17 | COINCIDE |
+| [diagnostic_report_files](#diagnostic_report_files) | Vincula archivos complementarios con informes diagnósticos manteniendo separada la metadata del contenido binario. | 8 | 5 | 29 | COINCIDE |
+| [diagnostic_report_results](#diagnostic_report_results) | Asocia resultados estructurados a informes diagnósticos para que un informe pueda contener varias observaciones. | 6 | 3 | 7 | COINCIDE |
+| [diagnostic_report_versions](#diagnostic_report_versions) | Preserva versiones inmutables de informes diagnósticos para conservar conclusiones y estados clínicos emitidos a lo largo del tiempo. | 18 | 12 | 38 | COINCIDE |
 | [dicom_object_locations](#dicom_object_locations) | Resuelve las ubicaciones de objetos DICOM en repositorios o sistemas externos sin almacenar necesariamente el objeto pesado en la base relacional. | 18 | 10 | 1 | COINCIDE |
 | [dicom_structured_reports](#dicom_structured_reports) | Cataloga informes estructurados DICOM para conservar referencias y metadata de resultados de imagenología interoperables. | 16 | 10 | 0 | COINCIDE |
 | [imaging_endpoints](#imaging_endpoints) | Registra puntos de conexión con sistemas de imagenología para intercambiar estudios con PACS, VNA u otros servicios autorizados. | 13 | 8 | 2 | COINCIDE |
@@ -30,22 +30,22 @@
 | [imaging_selections](#imaging_selections) | Define selecciones o conjuntos de imágenes organizados para revisión diagnóstica o tareas clínicas específicas. | 13 | 7 | 0 | COINCIDE |
 | [imaging_series](#imaging_series) | Agrupa series de imágenes pertenecientes a un estudio para organizar sus instancias diagnósticas. | 11 | 5 | 2 | COINCIDE |
 | [imaging_studies](#imaging_studies) | Representa estudios de imágenes de un paciente y mantiene su asociación clínica y su contexto de adquisición. | 22 | 15 | 6 | COINCIDE |
-| [laboratory_accessions](#laboratory_accessions) | Representa accesiones de laboratorio que agrupan y asignan identidad operativa a muestras y solicitudes recibidas. | 17 | 13 | 6 | COINCIDE |
-| [laboratory_work_order_tests](#laboratory_work_order_tests) | Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trabajo diagnóstico requerido. | 17 | 12 | 5 | COINCIDE |
-| [laboratory_work_orders](#laboratory_work_orders) | Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamiento diagnóstico. | 16 | 9 | 3 | COINCIDE |
+| [laboratory_accessions](#laboratory_accessions) | Representa accesiones de laboratorio que agrupan y asignan identidad operativa a muestras y solicitudes recibidas. | 17 | 13 | 20 | COINCIDE |
+| [laboratory_work_order_tests](#laboratory_work_order_tests) | Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trabajo diagnóstico requerido. | 17 | 12 | 9 | COINCIDE |
+| [laboratory_work_orders](#laboratory_work_orders) | Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamiento diagnóstico. | 16 | 9 | 18 | COINCIDE |
 | [media_annotations](#media_annotations) | Guarda anotaciones vinculadas a medios clínicos para conservar marcas o descripciones interpretativas asociadas al contenido. | 16 | 8 | 1 | COINCIDE |
 | [observation_specimens](#observation_specimens) | Vincula observaciones clínicas o de laboratorio con las muestras que les dieron origen. | 5 | 3 | 0 | COINCIDE |
 | [radiation_dose_events](#radiation_dose_events) | Registra eventos y datos de dosis de radiación asociados a estudios para dar seguimiento a la exposición durante imagenología. | 14 | 8 | 1 | COINCIDE |
 | [result_verifications](#result_verifications) | Registra verificaciones de resultados diagnósticos para documentar su revisión antes de liberar o utilizar resultados. | 12 | 10 | 1 | COINCIDE |
-| [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 7 | COINCIDE |
+| [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 8 | COINCIDE |
 | [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 13 | 9 | 2 | COINCIDE |
 | [specimen_container_events](#specimen_container_events) | Traza cambios y eventos relacionados con recipientes de muestras durante su preparación, traslado o recepción. | 11 | 6 | 1 | COINCIDE |
 | [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 9 | COINCIDE |
 | [specimen_identifiers](#specimen_identifiers) | Conserva identificadores alternativos de muestras para reconciliar etiquetas internas y referencias de laboratorio externo. | 14 | 6 | 0 | COINCIDE |
 | [specimen_parent_links](#specimen_parent_links) | Expresa relaciones entre muestras derivadas y muestras de origen para mantener trazabilidad de la cadena de procesamiento. | 7 | 6 | 0 | COINCIDE |
 | [specimen_processing_steps](#specimen_processing_steps) | Traza los pasos de procesamiento aplicados a cada muestra para conservar cómo se preparó antes de producir resultados. | 9 | 5 | 0 | COINCIDE |
-| [specimen_rejection_events](#specimen_rejection_events) | Documenta rechazos de muestras y sus motivos para explicar por qué un análisis no pudo continuar o requirió nueva toma. | 9 | 5 | 1 | COINCIDE |
-| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 15 | COINCIDE |
+| [specimen_rejection_events](#specimen_rejection_events) | Documenta rechazos de muestras y sus motivos para explicar por qué un análisis no pudo continuar o requirió nueva toma. | 9 | 5 | 14 | COINCIDE |
+| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 18 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -387,7 +387,7 @@ Asocia muestras a accesiones para registrar qué material biológico integra cad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: accession_specimens`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `AccessionSpecimens` — `src/modules/diagnostics/entities/accession_specimens.entity.ts`
-- **Resumen:** 6 columnas · 4 índices · 3 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 6 columnas · 4 índices · 3 FK salientes · 0 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -412,10 +412,10 @@ Asocia muestras a accesiones para registrar qué material biológico integra cad
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_accession_specimens_laboratory_accession_id` | no | laboratory_accession_id | Soporta la clave foránea fk_accession_specimens_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «laboratory_accession_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_accession_specimens_specimen_id` | no | specimen_id | Soporta la clave foránea fk_accession_specimens_specimen_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_accession_specimens_laboratory_accession_id` | no | laboratory_accession_id | Soporta la clave foránea fk_accession_specimens_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «laboratory_accession_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_accession_specimens_specimen_id` | no | specimen_id | Soporta la clave foránea fk_accession_specimens_specimen_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «specimen_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_accession_specimens_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_accession_specimens_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_accession_specimens_accession_specimen` | sí | laboratory_accession_id, specimen_id | Garantiza que no se repita la combinación (laboratory_accession_id, specimen_id) _(DOCUMENTO)_; Soporta la clave foránea fk_accession_specimens_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «laboratory_accession_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_accession_specimens_accession_specimen` | sí | laboratory_accession_id, specimen_id | Garantiza que no se repita la combinación (laboratory_accession_id, specimen_id) _(DOCUMENTO)_; Soporta la clave foránea fk_accession_specimens_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «laboratory_accession_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -429,6 +429,20 @@ Asocia muestras a accesiones para registrar qué material biológico integra cad
 |---|---|---|
 | POST /diagnostics/accessions | CREA | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | ACTUALIZA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -955,7 +969,7 @@ Mantiene evidencia de los eventos que liberan resultados diagnósticos para cons
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: diagnostic_release_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReleaseEvents` — `src/modules/diagnostics/entities/diagnostic_release_events.entity.ts`
-- **Resumen:** 9 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 9 columnas · 7 índices · 6 FK salientes · 0 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -998,11 +1012,22 @@ Mantiene evidencia de los eventos que liberan resultados diagnósticos para cons
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
 | GET /diagnostic-results/me | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | CREA | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | CREA | DIRECTA |
 
 #### Gobierno
@@ -1028,7 +1053,7 @@ Vincula archivos complementarios con informes diagnósticos manteniendo separada
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: diagnostic_report_files`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReportFiles` — `src/modules/diagnostics/entities/diagnostic_report_files.entity.ts`
-- **Resumen:** 8 columnas · 5 índices · 5 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 8 columnas · 5 índices · 5 FK salientes · 0 entrantes · 29 operaciones
 
 #### Columnas
 
@@ -1057,9 +1082,9 @@ Vincula archivos complementarios con informes diagnósticos manteniendo separada
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_diagnostic_report_files_diagnostic_report_version_id` | no | diagnostic_report_version_id | Soporta la clave foránea fk_diagnostic_report_files_diagnostic_report_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «diagnostic_report_version_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_diagnostic_report_files_file_id` | no | file_id | Soporta la clave foránea fk_diagnostic_report_files_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_report_files_content_role_concept_id` | no | content_role_concept_id | Soporta la clave foránea fk_diagnostic_report_files_content_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_diagnostic_report_files_diagnostic_report_version_id` | no | diagnostic_report_version_id | Soporta la clave foránea fk_diagnostic_report_files_diagnostic_report_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «diagnostic_report_version_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_report_files_file_id` | no | file_id | Soporta la clave foránea fk_diagnostic_report_files_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «file_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_report_files_content_role_concept_id` | no | content_role_concept_id | Soporta la clave foránea fk_diagnostic_report_files_content_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «content_role_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_report_files_presentation_format_concept_id` | no | presentation_format_concept_id | Soporta la clave foránea fk_diagnostic_report_files_presentation_format_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_report_files_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_diagnostic_report_files_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1072,6 +1097,29 @@ Vincula archivos complementarios con informes diagnósticos manteniendo separada
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | CREA | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /diagnostics/report-drafts | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/files | LEE | DIRECTA |
+| DELETE /diagnostics/report-drafts/{id}/files/{draftFileId} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | CREA | DIRECTA |
 
 #### Gobierno
@@ -1097,7 +1145,7 @@ Asocia resultados estructurados a informes diagnósticos para que un informe pue
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: diagnostic_report_results`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReportResults` — `src/modules/diagnostics/entities/diagnostic_report_results.entity.ts`
-- **Resumen:** 6 columnas · 3 índices · 3 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 6 columnas · 3 índices · 3 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -1135,6 +1183,7 @@ Asocia resultados estructurados a informes diagnósticos para que un informe pue
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | CREA | DIRECTA |
 
 #### Gobierno
@@ -1160,7 +1209,7 @@ Preserva versiones inmutables de informes diagnósticos para conservar conclusio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: diagnostic_report_versions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReportVersions` — `src/modules/diagnostics/entities/diagnostic_report_versions.entity.ts`
-- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 6 entrantes · 14 operaciones
+- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 6 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -1237,15 +1286,39 @@ Preserva versiones inmutables de informes diagnósticos para conservar conclusio
 | POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
 | GET /diagnostic-results/me | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | CREA | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | CREA | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | LEE | DIRECTA |
+| GET /public/diagnostic-reports/{versionId}/verify | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 
@@ -2012,7 +2085,7 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: laboratory_accessions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `LaboratoryAccessions` — `src/modules/diagnostics/entities/laboratory_accessions.entity.ts`
-- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 2 entrantes · 6 operaciones
+- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 2 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -2058,10 +2131,10 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_laboratory_accessions_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_laboratory_accessions_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_laboratory_accessions_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_laboratory_accessions_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_accessions_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_laboratory_accessions_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_accessions_encounter_id` | no | encounter_id | Soporta la clave foránea fk_laboratory_accessions_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_laboratory_accessions_service_request_id` | no | service_request_id | Soporta la clave foránea fk_laboratory_accessions_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «service_request_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_laboratory_accessions_service_request_id` | no | service_request_id | Soporta la clave foránea fk_laboratory_accessions_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «service_request_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_accessions_receiving_site_id` | no | receiving_site_id | Soporta la clave foránea fk_laboratory_accessions_receiving_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_accessions_laboratory_unit_id` | no | laboratory_unit_id | Soporta la clave foránea fk_laboratory_accessions_laboratory_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_accessions_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_laboratory_accessions_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2069,7 +2142,7 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 | `ix_laboratory_accessions_source_system_id` | no | source_system_id | Soporta la clave foránea fk_laboratory_accessions_source_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_accessions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_laboratory_accessions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_accessions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_laboratory_accessions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_laboratory_accessions_tenant_number` | sí | custodian_tenant_id, accession_number | Garantiza que no se repita la combinación (custodian_tenant_id, accession_number) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_accessions_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_laboratory_accessions_tenant_number` | sí | custodian_tenant_id, accession_number | Garantiza que no se repita la combinación (custodian_tenant_id, accession_number) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_accessions_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_accessions_patient_received` | no | custodian_tenant_id, patient_profile_id, ("received_at" DESC) | _sin uso detectado estáticamente_ |
 
 #### Restricciones
@@ -2084,6 +2157,20 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 |---|---|---|
 | POST /diagnostics/accessions | CREA | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | GET /diagnostics/work-orders | LEE | POR_SQL |
 | POST /diagnostics/work-orders | ACTUALIZA | POR_TIPO |
@@ -2112,7 +2199,7 @@ Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trab
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: laboratory_work_order_tests`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `LaboratoryWorkOrderTests` — `src/modules/diagnostics/entities/laboratory_work_order_tests.entity.ts`
-- **Resumen:** 17 columnas · 12 índices · 11 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 17 columnas · 12 índices · 11 FK salientes · 1 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -2157,18 +2244,18 @@ Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trab
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_laboratory_work_order_tests_laboratory_work_order_id` | no | laboratory_work_order_id | Soporta la clave foránea fk_laboratory_work_order_tests_laboratory_work_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_laboratory_work_order_tests_service_request_id` | no | service_request_id | Soporta la clave foránea fk_laboratory_work_order_tests_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_laboratory_work_order_tests_laboratory_work_order_id` | no | laboratory_work_order_id | Soporta la clave foránea fk_laboratory_work_order_tests_laboratory_work_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «laboratory_work_order_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_laboratory_work_order_tests_service_request_id` | no | service_request_id | Soporta la clave foránea fk_laboratory_work_order_tests_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «service_request_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_work_order_tests_test_code_concept_id` | no | test_code_concept_id | Soporta la clave foránea fk_laboratory_work_order_tests_test_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_order_tests_specimen_id` | no | specimen_id | Soporta la clave foránea fk_laboratory_work_order_tests_specimen_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «specimen_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_work_order_tests_method_concept_id` | no | method_concept_id | Soporta la clave foránea fk_laboratory_work_order_tests_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_order_tests_analyzer_device_id` | no | analyzer_device_id | Soporta la clave foránea fk_laboratory_work_order_tests_analyzer_device_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_order_tests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_laboratory_work_order_tests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_order_tests_observation_id` | no | observation_id | Soporta la clave foránea fk_laboratory_work_order_tests_observation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «observation_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_laboratory_work_order_tests_diagnostic_report_id` | no | diagnostic_report_id | Soporta la clave foránea fk_laboratory_work_order_tests_diagnostic_report_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_laboratory_work_order_tests_diagnostic_report_id` | no | diagnostic_report_id | Soporta la clave foránea fk_laboratory_work_order_tests_diagnostic_report_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «diagnostic_report_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_work_order_tests_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_laboratory_work_order_tests_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_order_tests_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_laboratory_work_order_tests_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_lab_work_order_tests_order_request_code` | sí | laboratory_work_order_id, service_request_id, test_code_concept_id | Garantiza que no se repita la combinación (laboratory_work_order_id, service_request_id, test_code_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_work_order_tests_laboratory_work_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uk_lab_work_order_tests_order_request_code` | sí | laboratory_work_order_id, service_request_id, test_code_concept_id | Garantiza que no se repita la combinación (laboratory_work_order_id, service_request_id, test_code_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_work_order_tests_laboratory_work_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «laboratory_work_order_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -2182,6 +2269,10 @@ Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trab
 |---|---|---|
 | POST /diagnostics/analyzer-runs/{id}/messages | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/analyzer-runs/{id}/messages | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | ACTUALIZA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | ACTUALIZA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | ACTUALIZA | DIRECTA |
 | POST /diagnostics/results/{observationId}/verifications | ACTUALIZA | DIRECTA |
 | POST /diagnostics/specimens/{id}/rejection | ACTUALIZA | DIRECTA |
 | POST /diagnostics/work-orders | CREA | DIRECTA |
@@ -2209,7 +2300,7 @@ Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamient
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: laboratory_work_orders`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `LaboratoryWorkOrders` — `src/modules/diagnostics/entities/laboratory_work_orders.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -2250,15 +2341,15 @@ Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamient
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_laboratory_work_orders_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_laboratory_work_orders_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_laboratory_work_orders_laboratory_accession_id` | no | laboratory_accession_id | Soporta la clave foránea fk_laboratory_work_orders_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_laboratory_work_orders_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_laboratory_work_orders_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_laboratory_work_orders_laboratory_accession_id` | no | laboratory_accession_id | Soporta la clave foránea fk_laboratory_work_orders_laboratory_accession_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «laboratory_accession_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_laboratory_work_orders_assigned_laboratory_unit_id` | no | assigned_laboratory_unit_id | Soporta la clave foránea fk_laboratory_work_orders_assigned_laboratory_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_orders_assigned_profile_id` | no | assigned_profile_id | Soporta la clave foránea fk_laboratory_work_orders_assigned_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_orders_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_laboratory_work_orders_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_orders_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_laboratory_work_orders_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_orders_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_laboratory_work_orders_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_laboratory_work_orders_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_laboratory_work_orders_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_lab_work_orders_tenant_number` | sí | custodian_tenant_id, work_order_number | Garantiza que no se repita la combinación (custodian_tenant_id, work_order_number) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_work_orders_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uk_lab_work_orders_tenant_number` | sí | custodian_tenant_id, work_order_number | Garantiza que no se repita la combinación (custodian_tenant_id, work_order_number) _(DOCUMENTO)_; Soporta la clave foránea fk_laboratory_work_orders_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -2271,6 +2362,21 @@ Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamient
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /diagnostics/analyzer-runs/{id}/messages | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | GET /diagnostics/work-orders | LEE | DIRECTA |
 | POST /diagnostics/work-orders | CREA | DIRECTA |
 
@@ -2580,7 +2686,7 @@ Preserva los traspasos y controles de custodia de muestras para reconstruir su r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_chain_of_custody_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenChainOfCustodyEvents` — `src/modules/diagnostics/entities/specimen_chain_of_custody_events.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -2635,6 +2741,7 @@ Preserva los traspasos y controles de custodia de muestras para reconstruir su r
 | POST /diagnostics/accessions | CREA | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/containers/{id}/custody-events | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
@@ -3110,7 +3217,7 @@ Documenta rechazos de muestras y sus motivos para explicar por qué un análisis
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_rejection_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenRejectionEvents` — `src/modules/diagnostics/entities/specimen_rejection_events.entity.ts`
-- **Resumen:** 9 columnas · 5 índices · 4 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 9 columnas · 5 índices · 4 FK salientes · 0 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -3139,7 +3246,7 @@ Documenta rechazos de muestras y sus motivos para explicar por qué un análisis
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_specimen_rejection_events_specimen_id` | no | specimen_id | Soporta la clave foránea fk_specimen_rejection_events_specimen_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_specimen_rejection_events_specimen_id` | no | specimen_id | Soporta la clave foránea fk_specimen_rejection_events_specimen_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «specimen_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_specimen_rejection_events_rejection_reason_concept_id` | no | rejection_reason_concept_id | Soporta la clave foránea fk_specimen_rejection_events_rejection_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_specimen_rejection_events_rejected_by_profile_id` | no | rejected_by_profile_id | Soporta la clave foránea fk_specimen_rejection_events_rejected_by_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_specimen_rejection_events_recollection_service_request_id` | no | recollection_service_request_id | Soporta la clave foránea fk_specimen_rejection_events_recollection_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3149,6 +3256,19 @@ Documenta rechazos de muestras y sus motivos para explicar por qué un análisis
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/rejection | CREA | DIRECTA |
 
 #### Gobierno
@@ -3174,7 +3294,7 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimens`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `Specimens` — `src/modules/diagnostics/entities/specimens.entity.ts`
-- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 15 operaciones
+- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -3261,6 +3381,9 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/containers/{id}/custody-events | LEE | DIRECTA |
 | POST /diagnostics/data-quality-events | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/orders/{orderId}/transitions | CREA | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |

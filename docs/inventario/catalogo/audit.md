@@ -20,9 +20,9 @@
 | [agents_history](#agents_history) | Preserva versiones o estados históricos de agents para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [allergy_intolerances_history](#allergy_intolerances_history) | Preserva versiones o estados históricos de allergy intolerances para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [analytics_governance_log](#analytics_governance_log) | Registra cambios de gobierno analítico para conservar trazabilidad de decisiones que afectan el uso secundario de datos de salud. | 9 | 5 | 4 | COINCIDE |
-| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 50 | COINCIDE |
+| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 53 | COINCIDE |
 | [assets_history](#assets_history) | Preserva versiones o estados históricos de assets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 17 | 10 | 216 | COINCIDE |
+| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 17 | 10 | 222 | COINCIDE |
 | [automated_rules_history](#automated_rules_history) | Preserva versiones o estados históricos de automated rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [bills_history](#bills_history) | Preserva versiones o estados históricos de bills para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -802,7 +802,7 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: appointment_bookings_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AppointmentBookingsHistory` — `src/modules/audit/entities/appointment_bookings_history.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 50 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 53 operaciones
 
 #### Columnas
 
@@ -881,6 +881,9 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 | POST /scheduling/bookings/{id}/start | ACTUALIZA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/start | CREA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/start | LEE | POR_REGISTRO |
+| POST /scheduling/holds/{holdToken}/request | ACTUALIZA | POR_REGISTRO |
+| POST /scheduling/holds/{holdToken}/request | CREA | POR_REGISTRO |
+| POST /scheduling/holds/{holdToken}/request | LEE | POR_REGISTRO |
 | POST /scheduling/resources/{id}/close-slots | ACTUALIZA | POR_REGISTRO |
 | POST /scheduling/resources/{id}/close-slots | CREA | POR_REGISTRO |
 | POST /scheduling/resources/{id}/close-slots | LEE | POR_REGISTRO |
@@ -980,7 +983,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: audit_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AuditLog` — `src/modules/audit/entities/audit_log.entity.ts`
-- **Resumen:** 17 columnas · 10 índices · 7 FK salientes · 0 entrantes · 216 operaciones
+- **Resumen:** 17 columnas · 10 índices · 7 FK salientes · 0 entrantes · 222 operaciones
 
 #### Columnas
 
@@ -1080,10 +1083,14 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | DELETE /authz/clinical-access-grants/{grantId} | LEE | DIRECTA |
 | POST /authz/me/clinical-access-grants/{grantId}/revoke | CREA | DIRECTA |
 | POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | CREA | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | CREA | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | LEE | DIRECTA |
 | GET /authz/users/{userId}/access-map | LEE | POR_SQL |
 | POST /authz/users/{userId}/access-reviews | CREA | DIRECTA |
 | POST /authz/users/{userId}/access-reviews | LEE | DIRECTA |
@@ -1119,6 +1126,8 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/revoke | CREA | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/revoke | LEE | DIRECTA |
 | GET /admin/governance/jobs | LEE | POR_SQL |
 | GET /insurance-campaigns | CREA | DIRECTA |
 | GET /insurance-campaigns | LEE | DIRECTA |

@@ -10,13 +10,13 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 102 | COINCIDE |
-| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 50 | COINCIDE |
+| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 114 | COINCIDE |
+| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 52 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
-| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 91 | COINCIDE |
-| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 101 | COINCIDE |
-| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 11 | 64 | COINCIDE |
+| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 111 | COINCIDE |
+| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 123 | COINCIDE |
+| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 11 | 69 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -84,7 +84,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: addresses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Addresses` — `src/modules/common/entities/addresses.entity.ts`
-- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 102 operaciones
+- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 114 operaciones
 
 #### Columnas
 
@@ -179,7 +179,18 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | GET /public/search/pharmacies | LEE | POR_SQL |
 | GET /public/search/practitioners | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
+| POST /diagnostic-units/{unitId}/equipment | LEE | POR_SQL |
+| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
+| GET /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
+| PUT /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
+| GET /diagnostic-units/{unitId}/study-availability | LEE | POR_SQL |
+| GET /diagnostic-units/me/bookings | LEE | POR_SQL |
+| GET /diagnostic-units/me/schedule | LEE | POR_SQL |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
@@ -259,6 +270,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
 | POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
@@ -288,7 +300,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: contact_points`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `ContactPoints` — `src/modules/common/entities/contact_points.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 50 operaciones
+- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 52 operaciones
 
 #### Columnas
 
@@ -350,6 +362,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /insurance/patients/conversation | LEE | POR_SQL |
 | POST /insurance/patients/search | LEE | POR_SQL |
@@ -382,6 +395,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 | PATCH /profiles/practitioners/me | CREA | DIRECTA |
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
 
@@ -553,7 +567,7 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: file_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `FileVersions` — `src/modules/common/entities/file_versions.entity.ts`
-- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 91 operaciones
+- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 111 operaciones
 
 #### Columnas
 
@@ -658,6 +672,23 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | PUT /community/profiles/me | LEE | DIRECTA |
 | GET /public/media/{id} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
@@ -670,6 +701,7 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/license-verification | LEE | DIRECTA |
@@ -705,8 +737,10 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | PUT /profiles/practitioners/me/signature-assets | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | GET /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
@@ -738,7 +772,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: files`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Files` — `src/modules/common/entities/files.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 90 entrantes · 101 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 90 entrantes · 123 operaciones
 
 #### Columnas
 
@@ -867,13 +901,13 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_files_tenant_id` | no | tenant_id | Soporta la clave foránea fk_files_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_files_tenant_id` | no | tenant_id | Soporta la clave foránea fk_files_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_files_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_files_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_files_sensitivity_concept_id` | no | sensitivity_concept_id | Soporta la clave foránea fk_files_sensitivity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_files_lifecycle_status_concept_id` | no | lifecycle_status_concept_id | Soporta la clave foránea fk_files_lifecycle_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_files_current_version_id` | no | current_version_id | Soporta la clave foránea fk_files_current_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_files_retention_class_concept_id` | no | retention_class_concept_id | Soporta la clave foránea fk_files_retention_class_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_files_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_files_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_files_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_files_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «created_by_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_files_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_files_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_files_tenant_id_lifecycle_status_concept_id` | no | tenant_id, lifecycle_status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
 
@@ -917,25 +951,45 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /diagnostics/analyzer-runs/{id}/messages | LEE | DIRECTA |
 | POST /diagnostics/clinical-media | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | LEE | DIRECTA |
-| POST /tenants/{tenantId}/affiliation-documents | ACTUALIZA | POR_TIPO |
+| POST /tenants/{tenantId}/affiliation-documents | ACTUALIZA | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
 | POST /fhir/r5/$export | LEE | DIRECTA |
 | POST /health-data/deidentification-runs | LEE | DIRECTA |
-| POST /iam/auth/register-organization | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/register-organization | ACTUALIZA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
-| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/register-practitioner | ACTUALIZA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-logo | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/license-verification | LEE | DIRECTA |
@@ -972,8 +1026,10 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | PUT /profiles/practitioners/me/signature-assets | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | GET /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
@@ -1006,7 +1062,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: identifiers`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Identifiers` — `src/modules/common/entities/identifiers.entity.ts`
-- **Resumen:** 19 columnas · 11 índices · 9 FK salientes · 2 entrantes · 64 operaciones
+- **Resumen:** 19 columnas · 11 índices · 9 FK salientes · 2 entrantes · 69 operaciones
 
 #### Columnas
 
@@ -1087,7 +1143,12 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /common/identifiers | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | CREA | DIRECTA |
 | POST /org/support-staff | CREA | DIRECTA |
+| POST /diagnostics/lab/patients/lookup | LEE | POR_SQL |
+| POST /tenants/{tenantId}/affiliation-documents | CREA | DIRECTA |
+| POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
+| POST /iam/auth/register-organization | CREA | DIRECTA |
+| POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
@@ -1095,6 +1156,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
@@ -1114,7 +1176,6 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /admissions/{id}/suspend | LEE | DIRECTA |
 | POST /admissions/search | LEE | DIRECTA |
 | POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
-| GET /profiles/patients | LEE | POR_SQL |
 | GET /profiles/patients/me | LEE | DIRECTA |
 | PATCH /profiles/patients/me | CREA | DIRECTA |
 | PATCH /profiles/patients/me | LEE | DIRECTA |
@@ -1125,7 +1186,6 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
 | DELETE /profiles/patients/me/photo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | POR_SQL |
 | POST /profiles/practitioners | LEE | DIRECTA |
 | PATCH /profiles/practitioners/{profileId} | CREA | DIRECTA |
 | PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
@@ -1136,6 +1196,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
 

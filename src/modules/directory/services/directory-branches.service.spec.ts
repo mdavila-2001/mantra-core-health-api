@@ -24,7 +24,8 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const branchesRepo = {
     findByTenantAndCode: mockFn(),
     create: mockFn(),
@@ -38,6 +39,7 @@ function build() {
     assertCanAdminister: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const mapLinks = { resolve: mockFn().mockResolvedValue(undefined) };
 
   const service = new DirectoryBranchesService(
     em as any,
@@ -45,8 +47,9 @@ function build() {
     tenantsRepo as any,
     tenantAdmin as never,
     logger as any,
+    mapLinks as never,
   );
-  return { service, tx, branchesRepo, tenantsRepo };
+  return { service, tx, branchesRepo, tenantsRepo, tenantAdmin, mapLinks };
 }
 
 describe('DirectoryBranchesService', () => {
@@ -112,6 +115,107 @@ describe('DirectoryBranchesService', () => {
         }),
       );
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('enlace de ubicación', () => {
+    const link = 'https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7';
+    const active = { statusConceptId: CONCEPTS.TENANT_ACTIVE };
+    const created = {
+      id: 'b1',
+      tenantId: 't1',
+      code: 'B',
+      name: 'Main',
+      statusConceptId: DIR.BRANCH_ACTIVE,
+      createdAt: new Date(),
+    };
+
+    it('toma las coordenadas del enlace cuando no vienen en el pedido', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue(active);
+      d.branchesRepo.findByTenantAndCode.mockResolvedValue(null);
+      d.branchesRepo.create.mockReturnValue(created);
+      d.mapLinks.resolve.mockResolvedValue({
+        latitude: -16.5,
+        longitude: -68.1,
+      });
+
+      await d.service.create(
+        't1',
+        { code: 'B', name: 'Main', locationUrl: link },
+        actor,
+      );
+
+      expect(d.mapLinks.resolve).toHaveBeenCalledWith(link);
+      expect(d.branchesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ latitude: '-16.5', longitude: '-68.1' }),
+      );
+    });
+
+    it('no consulta el enlace si el pedido ya trae coordenadas', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue(active);
+      d.branchesRepo.findByTenantAndCode.mockResolvedValue(null);
+      d.branchesRepo.create.mockReturnValue(created);
+
+      await d.service.create(
+        't1',
+        { code: 'B', name: 'M', locationUrl: link, latitude: 1, longitude: 2 },
+        actor,
+      );
+
+      expect(d.mapLinks.resolve).not.toHaveBeenCalled();
+      expect(d.branchesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ latitude: '1', longitude: '2' }),
+      );
+    });
+
+    it('guarda la sede sin coordenadas si el enlace no las trae', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue(active);
+      d.branchesRepo.findByTenantAndCode.mockResolvedValue(null);
+      d.branchesRepo.create.mockReturnValue(created);
+
+      await d.service.create(
+        't1',
+        { code: 'B', name: 'Main', locationUrl: link },
+        actor,
+      );
+
+      expect(d.branchesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ latitude: undefined, longitude: undefined }),
+      );
+    });
+
+    it('al editar, el enlace nuevo reemplaza el pin anterior', async () => {
+      const d = build();
+      const branch = { ...created, latitude: '1', longitude: '2' };
+      d.branchesRepo.findById.mockResolvedValue(branch);
+      d.mapLinks.resolve.mockResolvedValue({
+        latitude: -16.5,
+        longitude: -68.1,
+      });
+
+      await d.service.update('t1', 'b1', { locationUrl: link }, actor);
+
+      expect(branch).toMatchObject({ latitude: '-16.5', longitude: '-68.1' });
+    });
+
+    it('no consulta el enlace de quien no administra la organización', async () => {
+      const d = build();
+      d.tenantAdmin.assertCanAdminister.mockRejectedValue(new Error('403'));
+
+      await expect(
+        d.service.create(
+          't1',
+          { code: 'B', name: 'M', locationUrl: link },
+          actor,
+        ),
+      ).rejects.toThrow('403');
+      expect(d.mapLinks.resolve).not.toHaveBeenCalled();
     });
   });
 

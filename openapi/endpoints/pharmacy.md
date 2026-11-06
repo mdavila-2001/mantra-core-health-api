@@ -1006,6 +1006,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | dto.pharmacySiteId               ? 'La sucursal ya tiene una conexión de stock activa'               : 'La farmacia ya tiene una conexión general de stock activa' | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4986,7 +4987,6 @@ Ejemplo de error normalizado:
 
 Buscar productos publicados por texto, medicamento o farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: E2: búsqueda de productos por texto, por medicamento o por farmacia.
 
 ### Descripción del sistema
 
@@ -4996,11 +4996,12 @@ NestJS resuelve `GET /pharmacy/products` en `PharmacyReadController_searchProduc
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
-| `search` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en marca, genérico o código de producto | `valor-ejemplo` |
+| `search` | query | No | `string` | Sin restricción adicional declarada | Marca, genérico, código o uso; `exact=true` no corrige | `valor-ejemplo` |
 | `conceptId` | query | No | `string` | formato `uuid` | Medicamento del vademécum (medication_concept_id) | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyId` | query | No | `string` | formato `uuid` | Sólo lo publicado por esta farmacia (carril A, H5) | `00000000-0000-4000-8000-000000000001` |
 | `managed` | query | No | `string` | valores: `true`, `false` | P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404. | `true` |
-| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope del listado (por defecto 50) | `1` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope (def. 50) | `1` |
+| `exact` | query | No | `string` | Sin restricción adicional declarada | true: literal | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -5025,7 +5026,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /pharmacy/products?search=valor-ejemplo&conceptId=00000000-0000-4000-8000-000000000001&pharmacyId=00000000-0000-4000-8000-000000000001&managed=true&limit=1 HTTP/1.1
+GET /pharmacy/products?search=valor-ejemplo&conceptId=00000000-0000-4000-8000-000000000001&pharmacyId=00000000-0000-4000-8000-000000000001&managed=true&limit=1&exact=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -5080,7 +5081,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     }
   ],
   "limit": 1,
-  "truncated": true
+  "truncated": true,
+  "correctedQuery": "ibuprofeno"
 }
 ```
 
@@ -5116,6 +5118,7 @@ Campos de la respuesta:
 | `items[].imageFileIds` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado al listado | `1` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | true si quedaron productos fuera del tope. Se declara, no se calla | `true` |
+| `correctedQuery` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `ibuprofeno` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5473,12 +5476,13 @@ NestJS resuelve `GET /public/medications` en `PharmacyPublicController_listMedic
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
-| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en principio activo, marca o código ATC | `valor-ejemplo` |
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en principio activo, marca, código ATC o para qué se usa («dolor abdominal»). Sin coincidencias, se corrige el tipeo y se informa en `correctedQuery` | `valor-ejemplo` |
 | `group` | query | No | `string` | Sin restricción adicional declarada | Grupo terapéutico ATC de primer nivel, tal como lo lista `groups` | `valor-ejemplo` |
 | `lat` | query | No | `string` | Sin restricción adicional declarada | Latitud WGS84 desde donde medir distancias (va con lng) | `valor-ejemplo` |
 | `lng` | query | No | `string` | Sin restricción adicional declarada | Longitud WGS84 desde donde medir distancias (va con lat) | `valor-ejemplo` |
 | `radiusKm` | query | No | `string` | Sin restricción adicional declarada | Radio en km; sólo se aplica si viajó el origen | `valor-ejemplo` |
 | `limit` | query | No | `string` | Sin restricción adicional declarada | Tope de tarjetas (máx. 60) | `valor-ejemplo` |
+| `exact` | query | No | `string` | Sin restricción adicional declarada | `true` busca el texto tal cual, sin corregir el tipeo | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -5502,7 +5506,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/medications?q=valor-ejemplo&group=valor-ejemplo&lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/medications?q=valor-ejemplo&group=valor-ejemplo&lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo&exact=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -5537,12 +5541,35 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "priceTo": "valor-ejemplo",
       "currency": "BOB",
       "pharmacyCount": 1,
-      "nearestKm": {}
+      "nearestKm": {},
+      "uses": [
+        "Dolor abdominal y cólicos"
+      ],
+      "matchedBy": "name",
+      "matchedUse": "Dolor abdominal y cólicos"
     }
   ],
   "total": 1,
   "groups": [
     "valor-ejemplo"
+  ],
+  "correctedQuery": "ibuprofeno",
+  "officialProducts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "holder": "valor-ejemplo",
+      "strengthText": "valor-ejemplo",
+      "dosageForm": "valor-ejemplo",
+      "sourceName": "Nombre de ejemplo",
+      "atc": [
+        "valor-ejemplo"
+      ],
+      "uses": [
+        "valor-ejemplo"
+      ],
+      "requiresPrescription": true
+    }
   ],
   "generatedAt": "valor-ejemplo"
 }
@@ -5552,7 +5579,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PublicMedicationCardDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","atcCode":"CODIGO_EJEMPLO","genericName":"Nombre de ejemplo","therapeuticGroup":"valor-ejemplo","brands":["valor-ejemplo"],"presentations":["valor-ejemplo"],"requiresPrescription":true,"priceFrom":"valor-ejemplo","priceTo":"valor-ejemplo","currency":"BOB","pharmacyCount":1,"nearestKm":{}}]` |
+| `items` | Sí | `array<PublicMedicationCardDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","atcCode":"CODIGO_EJEMPLO","genericName":"Nombre de ejemplo","therapeuticGroup":"valor-ejemplo","brands":["valor-ejemplo"],"presentations":["valor-ejemplo"],"requiresPrescription":true,"priceFrom":"valor-ejemplo","priceTo":"valor-ejemplo","currency":"BOB","pharmacyCount":1,"nearestKm":{},"uses":["Dolor abdominal y cólicos"],"matchedBy":"name","matchedUse":"Dolor abdominal y cólicos"}]` |
 | `items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].atcCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].genericName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -5560,13 +5587,27 @@ Campos de la respuesta:
 | `items[].brands` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `items[].presentations` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `items[].requiresPrescription` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `items[].priceFrom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `items[].priceTo` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `items[].currency` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].priceFrom` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].priceTo` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `items[].pharmacyCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `items[].nearestKm` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].uses` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["Dolor abdominal y cólicos"]` |
+| `items[].matchedBy` | No | `string` | valores: `name`, `brand`, `code`, `use`; admite null | Sin descripción específica en el contrato OpenAPI. | `name` |
+| `items[].matchedUse` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Dolor abdominal y cólicos` |
 | `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `groups` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `correctedQuery` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `ibuprofeno` |
+| `officialProducts` | Sí | `array<PublicOfficialMedicineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","holder":"valor-ejemplo","strengthText":"valor-ejemplo","dosageForm":"valor-ejemplo","sourceName":"Nombre de ejemplo","atc":["valor-ejemplo"],"uses":["valor-ejemplo"],"requiresPrescription":true}]` |
+| `officialProducts[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialProducts[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `officialProducts[].holder` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `officialProducts[].strengthText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `officialProducts[].dosageForm` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `officialProducts[].sourceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `officialProducts[].atc` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `officialProducts[].uses` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `officialProducts[].requiresPrescription` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `generatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -5679,7 +5720,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "priceTo": "valor-ejemplo",
     "currency": "BOB",
     "pharmacyCount": 1,
-    "nearestKm": {}
+    "nearestKm": {},
+    "uses": [
+      "Dolor abdominal y cólicos"
+    ],
+    "matchedBy": "name",
+    "matchedUse": "Dolor abdominal y cólicos"
   },
   "offers": [
     {
@@ -5708,7 +5754,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `medication` | Sí | `PublicMedicationCardDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"conceptId":"00000000-0000-4000-8000-000000000001","atcCode":"CODIGO_EJEMPLO","genericName":"Nombre de ejemplo","therapeuticGroup":"valor-ejemplo","brands":["valor-ejemplo"],"presentations":["valor-ejemplo"],"requiresPrescription":true,"priceFrom":"valor-ejemplo","priceTo":"valor-ejemplo","currency":"BOB","pharmacyCount":1,"nearestKm":{}}` |
+| `medication` | Sí | `PublicMedicationCardDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"conceptId":"00000000-0000-4000-8000-000000000001","atcCode":"CODIGO_EJEMPLO","genericName":"Nombre de ejemplo","therapeuticGroup":"valor-ejemplo","brands":["valor-ejemplo"],"presentations":["valor-ejemplo"],"requiresPrescription":true,"priceFrom":"valor-ejemplo","priceTo":"valor-ejemplo","currency":"BOB","pharmacyCount":1,"nearestKm":{},"uses":["Dolor abdominal y cólicos"],"matchedBy":"name","matchedUse":"Dolor abdominal y cólicos"}` |
 | `medication.conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `medication.atcCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `medication.genericName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -5716,11 +5762,14 @@ Campos de la respuesta:
 | `medication.brands` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `medication.presentations` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `medication.requiresPrescription` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `medication.priceFrom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `medication.priceTo` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `medication.currency` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `medication.priceFrom` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `medication.priceTo` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `medication.currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `medication.pharmacyCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `medication.nearestKm` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `medication.uses` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["Dolor abdominal y cólicos"]` |
+| `medication.matchedBy` | No | `string` | valores: `name`, `brand`, `code`, `use`; admite null | Sin descripción específica en el contrato OpenAPI. | `name` |
+| `medication.matchedUse` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Dolor abdominal y cólicos` |
 | `offers` | Sí | `array<PublicMedicationOfferDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"pharmacySlug":"valor-ejemplo","pharmacyName":"Nombre de ejemplo","addressText":{},"city":{},"latitude":1,"longitude":1,"distanceKm":{},"brandName":{},"presentation":{},"price":"valor-ejemplo","currency":"BOB","inStock":true,"homeDelivery":true,"pickup":true,"requiresPrescription":true}]` |
 | `offers[].pharmacySlug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `offers[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |

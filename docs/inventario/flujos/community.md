@@ -3,12 +3,12 @@
 # Flujos del módulo `community`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 104 (91 con decisiones propias, 13 sin ellas)
+- **Operaciones:** 106 (94 con decisiones propias, 12 sin ellas)
 - Inventario de endpoints del módulo: [community](../endpoints/community.md)
 
 ## Proceso: Módulo Community (19)
 
-- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 104
+- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 106
 - **Actores:** Cualquier sesión válida · PATIENT · Público (sin sesión) · SEARCH_ADMIN · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/community/README.md`
@@ -28,7 +28,7 @@ _Fuente: `src/modules/community/README.md:3`_
 | `UC-19-03` | Reacciona (upsert una reacción por actor/objeto) | PUT /community/reactions | Cualquier sesión válida | ALTO | 6 |
 | `UC-19-04` | Guarda bookmark en colección | POST /community/bookmarks | Cualquier sesión válida | ALTO | 5 |
 | `UC-19-05` | Sigue objeto social (perfil/tópico/hashtag/grupo) | POST /community/follows | Cualquier sesión válida | ALTO | 6 |
-| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 25 |
+| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 24 |
 | `UC-19-07` | Marca mensajes como leídos (recibos) | POST /community/conversations/{conversationId}/read | Cualquier sesión válida | ALTO | 8 |
 | `UC-19-08` | Reporta contenido y encola moderación | POST /community/reports | Cualquier sesión válida | ALTO | 3 |
 | `UC-19-09` | Resuelve moderación (decisión + strike) | POST /community/moderation/queue/{queueId}/decision | SECURITY_ADMIN | MEDIO | 6 |
@@ -46,13 +46,14 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | GET /community/groups/{groupId} | Cualquier sesión válida | BAJO | 7 |
 |  |  | GET /community/groups/{groupId}/members | Cualquier sesión válida | BAJO | 7 |
 |  |  | DELETE /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 9 |
-|  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 13 |
+|  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 20 |
 |  |  | GET /community/groups/{groupId}/posts | Cualquier sesión válida | BAJO | 8 |
-|  |  | POST /community/groups/{groupId}/posts | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /community/groups/{groupId}/posts | Cualquier sesión válida | ALTO | 22 |
+| `ctrl:CommunityMessageReactionsController` | Operaciones de CommunityMessageReactionsController que el README no asigna a un caso de uso | PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | Cualquier sesión válida | ALTO | 9 |
 | `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 7 |
 |  |  | POST /community/conversations | Cualquier sesión válida | ALTO | 8 |
 |  |  | GET /community/conversations/{conversationId}/attachments/{fileId}/content | Cualquier sesión válida | BAJO | 8 |
-|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 9 |
 |  |  | DELETE /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 8 |
 |  |  | PATCH /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 6 |
 |  |  | PATCH /community/conversations/{conversationId}/participant | Cualquier sesión válida | BAJO | 4 |
@@ -117,7 +118,8 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | POST /community/public-profiles | SECURITY_ADMIN | MEDIO | 1 |
 | `ctrl:CommunityTimelineController` | Operaciones de CommunityTimelineController que el README no asigna a un caso de uso | GET /community/feed | Cualquier sesión válida | BAJO | 9 |
 |  |  | GET /community/notifications | Cualquier sesión válida | BAJO | 4 |
-| `ctrl:CommunityTopicsController` | Operaciones de CommunityTopicsController que el README no asigna a un caso de uso | GET /community/topics | Cualquier sesión válida | BAJO | 1 |
+| `ctrl:CommunityTopicsController` | Operaciones de CommunityTopicsController que el README no asigna a un caso de uso | GET /community/topics | Cualquier sesión válida | ALTO | 2 |
+|  |  | POST /community/topics | Cualquier sesión válida | ALTO | 2 |
 | `ctrl:CommunityVerificationController` | Operaciones de CommunityVerificationController que el README no asigna a un caso de uso | POST /internal/community/verification/badges | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | POST /internal/community/verification/badges/{targetId}/revoke | SECURITY_ADMIN | MEDIO | 5 |
 |  |  | POST /internal/community/verification/badges/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 5 |
@@ -186,7 +188,7 @@ flowchart LR
   subgraph s4["UC-19-05 · Sigue objeto social (perfil/tópico/hashtag/grupo)"]
     o19["POST /community/follows"]:::op
   end
-  t25[("+19 tablas más")]
+  t25[("+18 tablas más")]
   subgraph s5["UC-19-06 · Envía mensaje directo"]
     o21["POST /community/conversations/{conversationId}/messages"]:::op
   end
@@ -349,12 +351,12 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 5 — etapas `ctrl:CommunityGroupsController`, `ctrl:CommunityMessagingController`, `ctrl:CommunityModerationController`…
+### Diagrama 2 de 5 — etapas `ctrl:CommunityGroupsController`, `ctrl:CommunityMessageReactionsController`, `ctrl:CommunityMessagingController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a50(["SECURITY_ADMIN"]):::actor
+  a53(["SECURITY_ADMIN"]):::actor
   t3[("clinical.encounters")]:::tabla
   t4[("community.groups")]:::tabla
   t5[("community.public_profiles")]:::tabla
@@ -364,29 +366,25 @@ flowchart LR
   t10[("community.topics")]:::tabla
   t21[("community.comments")]:::tabla
   t26[("community.conversation_participants")]:::tabla
-  t27[("community.conversations")]:::tabla
-  t28[("community.direct_messages")]:::tabla
-  t29[("directory.tenants")]:::tabla
-  t32[("community.user_blocks")]:::tabla
-  t35[("common.file_versions")]:::tabla
-  t36[("common.files")]:::tabla
-  t51[("community.moderation_appeals")]:::tabla
-  t52[("community.moderation_decisions")]:::tabla
-  t54[("community.moderation_queue")]:::tabla
-  t57[("community.moderation_strikes")]:::tabla
-  t59[("community.content_reports")]:::tabla
-  t61[("community.poll_options")]:::tabla
-  t62[("community.poll_votes")]:::tabla
-  t63[("community.polls")]:::tabla
-  t64[("community.social_follows")]:::tabla
-  t65[("community.social_posts")]:::tabla
+  t27[("community.direct_messages")]:::tabla
+  t28[("community.message_reactions")]:::tabla
+  t31[("community.conversations")]:::tabla
+  t32[("directory.tenants")]:::tabla
+  t35[("community.user_blocks")]:::tabla
+  t38[("common.file_versions")]:::tabla
+  t39[("common.files")]:::tabla
+  t54[("community.moderation_appeals")]:::tabla
+  t55[("community.moderation_decisions")]:::tabla
+  t57[("community.moderation_queue")]:::tabla
+  t60[("community.moderation_strikes")]:::tabla
+  t62[("community.content_reports")]:::tabla
   t11[("+3 tablas más")]
   t13[("+1 tablas más")]
   t15[("+1 tablas más")]
   t17[("+3 tablas más")]
-  t19[("+7 tablas más")]
+  t19[("+14 tablas más")]
   t22[("+2 tablas más")]
-  t24[("+9 tablas más")]
+  t24[("+16 tablas más")]
   subgraph s0["ctrl:CommunityGroupsController · Operaciones de CommunityGroupsController que e…"]
     o1["GET /community/groups"]:::op
     o8["POST /community/groups"]:::op
@@ -397,36 +395,35 @@ flowchart LR
     o20["GET /community/groups/{groupId}/posts"]:::op
     o23["POST /community/groups/{groupId}/posts"]:::op
   end
-  t30[("+1 tablas más")]
-  t33[("+2 tablas más")]
-  t37[("+2 tablas más")]
-  t39[("+2 tablas más")]
-  t41[("+2 tablas más")]
-  t46[("+1 tablas más")]
-  subgraph s1["ctrl:CommunityMessagingController · Operaciones de CommunityMessagingController…"]
-    o25["GET /community/conversations"]:::op
-    o31["POST /community/conversations"]:::op
-    o34["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
-    o38["GET /community/conversations/{conversationId}/messages"]:::op
-    o40["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o42["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o43["PATCH /community/conversations/{conversationId}/participant"]:::op
-    o44["DELETE /community/conversations/{conversationId}/pin"]:::op
-    o45["POST /community/conversations/{conversationId}/pin"]:::op
-    o47["GET /community/conversations/{conversationId}/presence"]:::op
-    o48["POST /community/conversations/contacts/search"]:::op
+  t29[("+3 tablas más")]
+  subgraph s1["ctrl:CommunityMessageReactionsController · Operaciones de CommunityMessageReact…"]
+    o25["PUT /community/conversations/{conversationId}/messages/{messageId}/re…"]:::op
   end
-  subgraph s2["ctrl:CommunityModerationController · Operaciones de CommunityModerationControll…"]
-    o49["GET /community/moderation/appeals"]:::op
-    o53["POST /community/moderation/appeals/{appealId}/resolve"]:::op
-    o55["GET /community/moderation/decisions"]:::op
-    o56["GET /community/moderation/decisions/mine"]:::op
-    o58["GET /community/moderation/queue"]:::op
+  t33[("+1 tablas más")]
+  t36[("+2 tablas más")]
+  t40[("+2 tablas más")]
+  t42[("+3 tablas más")]
+  t44[("+2 tablas más")]
+  t49[("+1 tablas más")]
+  subgraph s2["ctrl:CommunityMessagingController · Operaciones de CommunityMessagingController…"]
+    o30["GET /community/conversations"]:::op
+    o34["POST /community/conversations"]:::op
+    o37["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
+    o41["GET /community/conversations/{conversationId}/messages"]:::op
+    o43["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o45["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o46["PATCH /community/conversations/{conversationId}/participant"]:::op
+    o47["DELETE /community/conversations/{conversationId}/pin"]:::op
+    o48["POST /community/conversations/{conversationId}/pin"]:::op
+    o50["GET /community/conversations/{conversationId}/presence"]:::op
+    o51["POST /community/conversations/contacts/search"]:::op
   end
-  t66[("+3 tablas más")]
-  subgraph s3["ctrl:CommunityPollsController · Operaciones de CommunityPollsController que el…"]
-    o60["GET /community/polls/{pollId}"]:::op
-    o67["POST /community/posts/{postId}/polls"]:::op
+  subgraph s3["ctrl:CommunityModerationController · Operaciones de CommunityModerationControll…"]
+    o52["GET /community/moderation/appeals"]:::op
+    o56["POST /community/moderation/appeals/{appealId}/resolve"]:::op
+    o58["GET /community/moderation/decisions"]:::op
+    o59["GET /community/moderation/decisions/mine"]:::op
+    o61["GET /community/moderation/queue"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -493,652 +490,680 @@ flowchart LR
   a2 --> o25
   o25 -->|"LEE"| t26
   o25 -->|"LEE"| t27
+  o25 -->|"BORRA"| t28
+  o25 -->|"CREA"| t28
   o25 -->|"LEE"| t28
   o25 -->|"LEE"| t5
-  o25 -->|"LEE"| t7
-  o25 -->|"LEE"| t29
-  o25 -.-> t30
-  a2 --> o31
-  o31 -->|"CREA"| t26
-  o31 -->|"LEE"| t26
-  o31 -->|"CREA"| t27
-  o31 -->|"LEE"| t27
-  o31 -->|"LEE"| t5
-  o31 -->|"LEE"| t32
-  o31 -.-> t33
+  o25 -.-> t29
+  a2 --> o30
+  o30 -->|"LEE"| t26
+  o30 -->|"LEE"| t31
+  o30 -->|"LEE"| t27
+  o30 -->|"LEE"| t5
+  o30 -->|"LEE"| t7
+  o30 -->|"LEE"| t32
+  o30 -.-> t33
   a2 --> o34
-  o34 -->|"LEE"| t35
-  o34 -->|"LEE"| t36
+  o34 -->|"CREA"| t26
   o34 -->|"LEE"| t26
-  o34 -->|"LEE"| t28
+  o34 -->|"CREA"| t31
+  o34 -->|"LEE"| t31
   o34 -->|"LEE"| t5
-  o34 -->|"LEE"| t32
-  o34 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t26
-  o38 -->|"LEE"| t27
-  o38 -->|"LEE"| t28
-  o38 -->|"LEE"| t5
-  o38 -->|"LEE"| t32
-  o38 -->|"LEE"| t7
-  o38 -.-> t39
-  a2 --> o40
-  o40 -->|"LEE"| t26
-  o40 -->|"ACTUALIZA"| t27
-  o40 -->|"LEE"| t27
-  o40 -->|"ACTUALIZA"| t28
-  o40 -->|"LEE"| t28
-  o40 -->|"LEE"| t5
-  o40 -.-> t41
-  a2 --> o42
-  o42 -->|"LEE"| t26
-  o42 -->|"ACTUALIZA"| t28
-  o42 -->|"LEE"| t28
-  o42 -->|"LEE"| t5
-  o42 -->|"LEE"| t7
-  o42 -->|"LEE"| t29
+  o34 -->|"LEE"| t35
+  o34 -.-> t36
+  a2 --> o37
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t26
+  o37 -->|"LEE"| t27
+  o37 -->|"LEE"| t5
+  o37 -->|"LEE"| t35
+  o37 -.-> t40
+  a2 --> o41
+  o41 -->|"LEE"| t26
+  o41 -->|"LEE"| t31
+  o41 -->|"LEE"| t27
+  o41 -->|"LEE"| t28
+  o41 -->|"LEE"| t5
+  o41 -->|"LEE"| t35
+  o41 -.-> t42
   a2 --> o43
   o43 -->|"LEE"| t26
+  o43 -->|"ACTUALIZA"| t31
+  o43 -->|"LEE"| t31
+  o43 -->|"ACTUALIZA"| t27
+  o43 -->|"LEE"| t27
   o43 -->|"LEE"| t5
-  o43 -->|"LEE"| t7
-  o43 -->|"LEE"| t29
-  a2 --> o44
-  o44 -->|"LEE"| t26
-  o44 -->|"ACTUALIZA"| t27
-  o44 -->|"LEE"| t27
-  o44 -->|"LEE"| t5
-  o44 -->|"LEE"| t7
-  o44 -->|"LEE"| t29
+  o43 -.-> t44
   a2 --> o45
   o45 -->|"LEE"| t26
   o45 -->|"ACTUALIZA"| t27
   o45 -->|"LEE"| t27
-  o45 -->|"LEE"| t28
   o45 -->|"LEE"| t5
   o45 -->|"LEE"| t7
-  o45 -.-> t46
+  o45 -->|"LEE"| t32
+  a2 --> o46
+  o46 -->|"LEE"| t26
+  o46 -->|"LEE"| t5
+  o46 -->|"LEE"| t7
+  o46 -->|"LEE"| t32
   a2 --> o47
   o47 -->|"LEE"| t26
+  o47 -->|"ACTUALIZA"| t31
+  o47 -->|"LEE"| t31
   o47 -->|"LEE"| t5
   o47 -->|"LEE"| t7
-  o47 -->|"LEE"| t29
+  o47 -->|"LEE"| t32
   a2 --> o48
+  o48 -->|"LEE"| t26
+  o48 -->|"ACTUALIZA"| t31
+  o48 -->|"LEE"| t31
+  o48 -->|"LEE"| t27
   o48 -->|"LEE"| t5
-  o48 -->|"LEE"| t32
   o48 -->|"LEE"| t7
-  o48 -->|"LEE"| t29
-  a50 --> o49
-  o49 -->|"LEE"| t51
-  o49 -->|"LEE"| t52
-  a50 --> o53
-  o53 -->|"ACTUALIZA"| t51
-  o53 -->|"LEE"| t51
-  o53 -->|"LEE"| t52
-  o53 -->|"ACTUALIZA"| t54
-  o53 -->|"LEE"| t54
-  a50 --> o55
-  o55 -->|"LEE"| t52
-  a2 --> o56
-  o56 -->|"LEE"| t51
-  o56 -->|"LEE"| t52
+  o48 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t26
+  o50 -->|"LEE"| t5
+  o50 -->|"LEE"| t7
+  o50 -->|"LEE"| t32
+  a2 --> o51
+  o51 -->|"LEE"| t5
+  o51 -->|"LEE"| t35
+  o51 -->|"LEE"| t7
+  o51 -->|"LEE"| t32
+  a53 --> o52
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t55
+  a53 --> o56
+  o56 -->|"ACTUALIZA"| t54
+  o56 -->|"LEE"| t54
+  o56 -->|"LEE"| t55
+  o56 -->|"ACTUALIZA"| t57
   o56 -->|"LEE"| t57
-  o56 -->|"LEE"| t5
-  o56 -->|"LEE"| t7
-  o56 -->|"LEE"| t29
-  a50 --> o58
-  o58 -->|"LEE"| t59
-  o58 -->|"LEE"| t54
-  a2 --> o60
-  o60 -->|"LEE"| t61
-  o60 -->|"LEE"| t62
-  o60 -->|"LEE"| t63
-  o60 -->|"LEE"| t5
-  o60 -->|"LEE"| t64
-  o60 -->|"LEE"| t65
-  o60 -.-> t66
-  a2 --> o67
-  o67 -->|"CREA"| t61
-  o67 -->|"CREA"| t63
-  o67 -->|"LEE"| t5
-  o67 -->|"LEE"| t65
-  o67 -->|"LEE"| t7
-  o67 -->|"LEE"| t29
-  classDef op fill:#fff,stroke:#446
-  classDef actor fill:#eef,stroke:#66a
-  classDef tabla fill:#ffd,stroke:#aa3
-  classDef evento fill:#efe,stroke:#3a3
-```
-
-### Diagrama 3 de 5 — etapas `ctrl:CommunityPublicController`, `ctrl:CommunityReviewsController`, `ctrl:CommunitySearchIndexController`
-
-```mermaid
-flowchart LR
-  a2(["Cualquier sesión válida"]):::actor
-  a7(["Público (sin sesión)"]):::actor
-  a64(["SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN"]):::actor
-  t8[("common.addresses")]:::tabla
-  t9[("community.comments")]:::tabla
-  t10[("community.post_media")]:::tabla
-  t11[("community.public_profiles")]:::tabla
-  t12[("community.reactions")]:::tabla
-  t13[("community.service_reviews")]:::tabla
-  t22[("community.comment_media")]:::tabla
-  t23[("community.social_posts")]:::tabla
-  t25[("common.file_versions")]:::tabla
-  t26[("common.files")]:::tabla
-  t29[("community.verified_badges")]:::tabla
-  t30[("profiles.practitioner_admissions")]:::tabla
-  t31[("scheduling.bookable_slots")]:::tabla
-  t39[("community.review_dimension_scores")]:::tabla
-  t40[("community.review_responses")]:::tabla
-  t41[("profiles.persons")]:::tabla
-  t43[("profiles.practitioner_specialties")]:::tabla
-  t61[("directory.tenant_memberships")]:::tabla
-  t62[("directory.tenants")]:::tabla
-  t14[("+13 tablas más")]
-  t16[("+13 tablas más")]
-  t18[("+13 tablas más")]
-  t20[("+13 tablas más")]
-  t27[("+1 tablas más")]
-  t32[("+2 tablas más")]
-  t37[("+13 tablas más")]
-  t44[("+7 tablas más")]
-  t46[("+7 tablas más")]
-  t48[("+7 tablas más")]
-  t50[("+7 tablas más")]
-  t52[("+7 tablas más")]
-  t54[("+7 tablas más")]
-  t56[("+7 tablas más")]
-  t58[("+13 tablas más")]
-  subgraph s0["ctrl:CommunityPublicController · Operaciones de CommunityPublicController que e…"]
-    o1["DESCONOCIDO /"]:::op
-    o3["DESCONOCIDO /"]:::op
-    o4["DESCONOCIDO /"]:::op
-    o5["DESCONOCIDO /"]:::op
-    o6["GET /f/{slug}"]:::op
-    o15["GET /l/{slug}"]:::op
-    o17["GET /o/{slug}"]:::op
-    o19["GET /p/{slug}"]:::op
-    o21["GET /public/comments/{commentId}/replies"]:::op
-    o24["GET /public/media/{id}"]:::op
-    o28["GET /public/nearby"]:::op
-    o33["GET /public/posts"]:::op
-    o34["GET /public/posts/{postId}/comments"]:::op
-    o35["GET /public/posts/{postId}/reactions"]:::op
-    o36["GET /public/profiles/{prefijo}/{slug}"]:::op
-    o38["GET /public/profiles/{prefijo}/{slug}/reviews"]:::op
-    o42["GET /public/search"]:::op
-    o45["GET /public/search/diagnostic-units"]:::op
-    o47["GET /public/search/insurers"]:::op
-    o49["GET /public/search/medications"]:::op
-    o51["GET /public/search/organizations"]:::op
-    o53["GET /public/search/pharmacies"]:::op
-    o55["GET /public/search/practitioners"]:::op
-    o57["GET /s/{slug}"]:::op
-  end
-  subgraph s1["ctrl:CommunityReviewsController · Operaciones de CommunityReviewsController que…"]
-    o59["GET /community/profiles/{profileId}/reviews"]:::op
-    o60["POST /community/profiles/{profileId}/reviews/{reviewId}/responses"]:::op
-  end
-  t66[("+4 tablas más")]
-  subgraph s2["ctrl:CommunitySearchIndexController · Operaciones de CommunitySearchIndexContro…"]
-    o63["GET /internal/community/search/health"]:::op
-    o65["POST /internal/community/search/reindex"]:::op
-  end
-  a2 --> o1
-  a2 --> o3
-  a2 --> o4
-  a2 --> o5
-  a7 --> o6
-  o6 -->|"LEE"| t8
-  o6 -->|"LEE"| t9
-  o6 -->|"LEE"| t10
-  o6 -->|"LEE"| t11
-  o6 -->|"LEE"| t12
-  o6 -->|"LEE"| t13
-  o6 -.-> t14
-  a7 --> o15
-  o15 -->|"LEE"| t8
-  o15 -->|"LEE"| t9
-  o15 -->|"LEE"| t10
-  o15 -->|"LEE"| t11
-  o15 -->|"LEE"| t12
-  o15 -->|"LEE"| t13
-  o15 -.-> t16
-  a7 --> o17
-  o17 -->|"LEE"| t8
-  o17 -->|"LEE"| t9
-  o17 -->|"LEE"| t10
-  o17 -->|"LEE"| t11
-  o17 -->|"LEE"| t12
-  o17 -->|"LEE"| t13
-  o17 -.-> t18
-  a7 --> o19
-  o19 -->|"LEE"| t8
-  o19 -->|"LEE"| t9
-  o19 -->|"LEE"| t10
-  o19 -->|"LEE"| t11
-  o19 -->|"LEE"| t12
-  o19 -->|"LEE"| t13
-  o19 -.-> t20
-  a7 --> o21
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t9
-  o21 -->|"LEE"| t11
-  o21 -->|"LEE"| t23
-  a7 --> o24
-  o24 -->|"LEE"| t25
-  o24 -->|"LEE"| t26
-  o24 -->|"LEE"| t22
-  o24 -->|"LEE"| t9
-  o24 -->|"LEE"| t10
-  o24 -->|"LEE"| t11
-  o24 -.-> t27
-  a7 --> o28
-  o28 -->|"LEE"| t8
-  o28 -->|"LEE"| t11
-  o28 -->|"LEE"| t13
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t31
-  o28 -.-> t32
-  a7 --> o33
-  o33 -->|"LEE"| t9
-  o33 -->|"LEE"| t10
-  o33 -->|"LEE"| t11
-  o33 -->|"LEE"| t12
-  o33 -->|"LEE"| t23
-  a7 --> o34
-  o34 -->|"LEE"| t22
-  o34 -->|"LEE"| t9
-  o34 -->|"LEE"| t11
-  o34 -->|"LEE"| t23
-  a7 --> o35
-  o35 -->|"LEE"| t11
-  o35 -->|"LEE"| t12
-  o35 -->|"LEE"| t23
-  a7 --> o36
-  o36 -->|"LEE"| t8
-  o36 -->|"LEE"| t9
-  o36 -->|"LEE"| t10
-  o36 -->|"LEE"| t11
-  o36 -->|"LEE"| t12
-  o36 -->|"LEE"| t13
-  o36 -.-> t37
-  a7 --> o38
-  o38 -->|"LEE"| t11
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t40
-  o38 -->|"LEE"| t13
-  o38 -->|"LEE"| t41
-  a7 --> o42
-  o42 -->|"LEE"| t8
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t13
-  o42 -->|"LEE"| t29
-  o42 -->|"LEE"| t30
-  o42 -->|"LEE"| t43
-  o42 -.-> t44
-  a7 --> o45
-  o45 -->|"LEE"| t8
-  o45 -->|"LEE"| t11
-  o45 -->|"LEE"| t13
-  o45 -->|"LEE"| t29
-  o45 -->|"LEE"| t30
-  o45 -->|"LEE"| t43
-  o45 -.-> t46
-  a7 --> o47
-  o47 -->|"LEE"| t8
-  o47 -->|"LEE"| t11
-  o47 -->|"LEE"| t13
-  o47 -->|"LEE"| t29
-  o47 -->|"LEE"| t30
-  o47 -->|"LEE"| t43
-  o47 -.-> t48
-  a7 --> o49
-  o49 -->|"LEE"| t8
-  o49 -->|"LEE"| t11
-  o49 -->|"LEE"| t13
-  o49 -->|"LEE"| t29
-  o49 -->|"LEE"| t30
-  o49 -->|"LEE"| t43
-  o49 -.-> t50
-  a7 --> o51
-  o51 -->|"LEE"| t8
-  o51 -->|"LEE"| t11
-  o51 -->|"LEE"| t13
-  o51 -->|"LEE"| t29
-  o51 -->|"LEE"| t30
-  o51 -->|"LEE"| t43
-  o51 -.-> t52
-  a7 --> o53
-  o53 -->|"LEE"| t8
-  o53 -->|"LEE"| t11
-  o53 -->|"LEE"| t13
-  o53 -->|"LEE"| t29
-  o53 -->|"LEE"| t30
-  o53 -->|"LEE"| t43
-  o53 -.-> t54
-  a7 --> o55
-  o55 -->|"LEE"| t8
-  o55 -->|"LEE"| t11
-  o55 -->|"LEE"| t13
-  o55 -->|"LEE"| t29
-  o55 -->|"LEE"| t30
-  o55 -->|"LEE"| t43
-  o55 -.-> t56
-  a7 --> o57
-  o57 -->|"LEE"| t8
-  o57 -->|"LEE"| t9
-  o57 -->|"LEE"| t10
-  o57 -->|"LEE"| t11
-  o57 -->|"LEE"| t12
-  o57 -->|"LEE"| t13
-  o57 -.-> t58
+  a53 --> o58
+  o58 -->|"LEE"| t55
   a2 --> o59
-  o59 -->|"LEE"| t11
-  o59 -->|"LEE"| t39
-  o59 -->|"LEE"| t40
-  o59 -->|"LEE"| t13
-  o59 -->|"LEE"| t41
-  a2 --> o60
-  o60 -->|"LEE"| t11
-  o60 -->|"CREA"| t40
-  o60 -->|"LEE"| t40
-  o60 -->|"LEE"| t13
-  o60 -->|"LEE"| t61
-  o60 -->|"LEE"| t62
-  a64 --> o63
-  o63 -->|"LEE"| t11
-  a64 --> o65
-  o65 -->|"LEE"| t8
-  o65 -->|"LEE"| t11
-  o65 -->|"LEE"| t13
-  o65 -->|"LEE"| t29
-  o65 -->|"LEE"| t30
-  o65 -->|"LEE"| t43
-  o65 -.-> t66
+  o59 -->|"LEE"| t54
+  o59 -->|"LEE"| t55
+  o59 -->|"LEE"| t60
+  o59 -->|"LEE"| t5
+  o59 -->|"LEE"| t7
+  o59 -->|"LEE"| t32
+  a53 --> o61
+  o61 -->|"LEE"| t62
+  o61 -->|"LEE"| t57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 4 de 5 — etapas `ctrl:CommunitySocialController`, `ctrl:CommunityTimelineController`, `ctrl:CommunityTopicsController`…
+### Diagrama 3 de 5 — etapas `ctrl:CommunityPollsController`, `ctrl:CommunityPublicController`, `ctrl:CommunityReviewsController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a46(["SECURITY_ADMIN"]):::actor
-  a58(["SYSTEM · SECURITY_ADMIN"]):::actor
-  t3[("community.public_profiles")]:::tabla
-  t4[("community.user_blocks")]:::tabla
-  t5[("directory.tenant_memberships")]:::tabla
-  t6[("directory.tenants")]:::tabla
-  t9[("community.bookmarks")]:::tabla
-  t12[("common.file_versions")]:::tabla
-  t13[("common.files")]:::tabla
-  t14[("community.comment_media")]:::tabla
-  t15[("community.comments")]:::tabla
-  t16[("community.social_follows")]:::tabla
-  t21[("community.content_hashtags")]:::tabla
-  t22[("community.hashtags")]:::tabla
-  t23[("community.mentions")]:::tabla
-  t24[("community.post_media")]:::tabla
-  t27[("community.social_posts")]:::tabla
-  t30[("community.reactions")]:::tabla
-  t33[("community.prestige_scores")]:::tabla
-  t34[("community.verified_badges")]:::tabla
-  t36[("community.chat_auto_replies")]:::tabla
-  t48[("community.feed_items")]:::tabla
-  t51[("community.social_notifications")]:::tabla
-  t53[("community.topics")]:::tabla
-  t55[("audit.verified_badges_history")]:::tabla
-  t17[("+4 tablas más")]
-  t25[("+6 tablas más")]
-  t28[("+2 tablas más")]
-  t31[("+1 tablas más")]
-  t39[("+2 tablas más")]
-  subgraph s0["ctrl:CommunitySocialController · Operaciones de CommunitySocialController que e…"]
-    o1["DELETE /community/blocks"]:::op
-    o7["GET /community/blocks"]:::op
-    o8["DELETE /community/bookmarks"]:::op
-    o10["GET /community/bookmarks"]:::op
-    o11["GET /community/comments/media/{fileId}/content"]:::op
-    o18["DELETE /community/follows"]:::op
-    o19["GET /community/follows"]:::op
-    o20["GET /community/posts/{postId}"]:::op
-    o26["GET /community/posts/{postId}/comments"]:::op
-    o29["GET /community/posts/{postId}/reactions"]:::op
-    o32["GET /community/profiles/{profileId}"]:::op
-    o35["GET /community/profiles/{profileId}/auto-reply"]:::op
-    o37["PUT /community/profiles/{profileId}/auto-reply"]:::op
-    o38["GET /community/profiles/{profileId}/posts"]:::op
-    o40["GET /community/profiles/by-slug/{slug}"]:::op
-    o41["GET /community/profiles/me"]:::op
-    o42["PUT /community/profiles/me"]:::op
-    o43["GET /community/profiles/me/stats"]:::op
-    o44["GET /community/profiles/organization-showcases/me"]:::op
-    o45["POST /community/public-profiles"]:::op
+  a18(["Público (sin sesión)"]):::actor
+  t3[("community.poll_options")]:::tabla
+  t4[("community.poll_votes")]:::tabla
+  t5[("community.polls")]:::tabla
+  t6[("community.public_profiles")]:::tabla
+  t7[("community.social_follows")]:::tabla
+  t8[("community.social_posts")]:::tabla
+  t11[("directory.tenant_memberships")]:::tabla
+  t12[("directory.tenants")]:::tabla
+  t19[("common.addresses")]:::tabla
+  t20[("community.comments")]:::tabla
+  t21[("community.post_media")]:::tabla
+  t22[("community.reactions")]:::tabla
+  t23[("community.service_reviews")]:::tabla
+  t32[("community.comment_media")]:::tabla
+  t34[("common.file_versions")]:::tabla
+  t35[("common.files")]:::tabla
+  t38[("community.verified_badges")]:::tabla
+  t39[("profiles.practitioner_admissions")]:::tabla
+  t40[("scheduling.bookable_slots")]:::tabla
+  t48[("community.review_dimension_scores")]:::tabla
+  t49[("community.review_responses")]:::tabla
+  t50[("profiles.persons")]:::tabla
+  t52[("profiles.practitioner_specialties")]:::tabla
+  t9[("+3 tablas más")]
+  subgraph s0["ctrl:CommunityPollsController · Operaciones de CommunityPollsController que el…"]
+    o1["GET /community/polls/{pollId}"]:::op
+    o10["POST /community/posts/{postId}/polls"]:::op
   end
-  t49[("+3 tablas más")]
-  subgraph s1["ctrl:CommunityTimelineController · Operaciones de CommunityTimelineController q…"]
-    o47["GET /community/feed"]:::op
-    o50["GET /community/notifications"]:::op
+  t24[("+13 tablas más")]
+  t26[("+13 tablas más")]
+  t28[("+13 tablas más")]
+  t30[("+13 tablas más")]
+  t36[("+1 tablas más")]
+  t41[("+2 tablas más")]
+  t46[("+13 tablas más")]
+  t53[("+7 tablas más")]
+  t55[("+7 tablas más")]
+  t57[("+7 tablas más")]
+  t59[("+7 tablas más")]
+  t61[("+7 tablas más")]
+  t63[("+7 tablas más")]
+  t65[("+7 tablas más")]
+  t67[("+13 tablas más")]
+  subgraph s1["ctrl:CommunityPublicController · Operaciones de CommunityPublicController que e…"]
+    o13["DESCONOCIDO /"]:::op
+    o14["DESCONOCIDO /"]:::op
+    o15["DESCONOCIDO /"]:::op
+    o16["DESCONOCIDO /"]:::op
+    o17["GET /f/{slug}"]:::op
+    o25["GET /l/{slug}"]:::op
+    o27["GET /o/{slug}"]:::op
+    o29["GET /p/{slug}"]:::op
+    o31["GET /public/comments/{commentId}/replies"]:::op
+    o33["GET /public/media/{id}"]:::op
+    o37["GET /public/nearby"]:::op
+    o42["GET /public/posts"]:::op
+    o43["GET /public/posts/{postId}/comments"]:::op
+    o44["GET /public/posts/{postId}/reactions"]:::op
+    o45["GET /public/profiles/{prefijo}/{slug}"]:::op
+    o47["GET /public/profiles/{prefijo}/{slug}/reviews"]:::op
+    o51["GET /public/search"]:::op
+    o54["GET /public/search/diagnostic-units"]:::op
+    o56["GET /public/search/insurers"]:::op
+    o58["GET /public/search/medications"]:::op
+    o60["GET /public/search/organizations"]:::op
+    o62["GET /public/search/pharmacies"]:::op
+    o64["GET /public/search/practitioners"]:::op
+    o66["GET /s/{slug}"]:::op
   end
-  subgraph s2["ctrl:CommunityTopicsController · Operaciones de CommunityTopicsController que e…"]
-    o52["GET /community/topics"]:::op
-  end
-  subgraph s3["ctrl:CommunityVerificationController · Operaciones de CommunityVerificationCont…"]
-    o54["POST /internal/community/verification/badges"]:::op
-    o56["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
-    o57["POST /internal/community/verification/badges/expire-sweep"]:::op
+  subgraph s2["ctrl:CommunityReviewsController · Operaciones de CommunityReviewsController que…"]
+    o68["GET /community/profiles/{profileId}/reviews"]:::op
+    o69["POST /community/profiles/{profileId}/reviews/{reviewId}/responses"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
-  o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
   o1 -->|"LEE"| t5
   o1 -->|"LEE"| t6
-  a2 --> o7
-  o7 -->|"LEE"| t3
-  o7 -->|"LEE"| t4
-  o7 -->|"LEE"| t5
-  o7 -->|"LEE"| t6
-  a2 --> o8
-  o8 -->|"BORRA"| t9
-  o8 -->|"LEE"| t9
-  o8 -->|"LEE"| t3
-  o8 -->|"LEE"| t5
-  o8 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  o1 -->|"LEE"| t8
+  o1 -.-> t9
   a2 --> o10
-  o10 -->|"LEE"| t9
-  o10 -->|"LEE"| t3
-  o10 -->|"LEE"| t5
+  o10 -->|"CREA"| t3
+  o10 -->|"CREA"| t5
   o10 -->|"LEE"| t6
-  a2 --> o11
-  o11 -->|"LEE"| t12
+  o10 -->|"LEE"| t8
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t12
+  a2 --> o13
+  a2 --> o14
+  a2 --> o15
+  a2 --> o16
+  a18 --> o17
+  o17 -->|"LEE"| t19
+  o17 -->|"LEE"| t20
+  o17 -->|"LEE"| t21
+  o17 -->|"LEE"| t6
+  o17 -->|"LEE"| t22
+  o17 -->|"LEE"| t23
+  o17 -.-> t24
+  a18 --> o25
+  o25 -->|"LEE"| t19
+  o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t21
+  o25 -->|"LEE"| t6
+  o25 -->|"LEE"| t22
+  o25 -->|"LEE"| t23
+  o25 -.-> t26
+  a18 --> o27
+  o27 -->|"LEE"| t19
+  o27 -->|"LEE"| t20
+  o27 -->|"LEE"| t21
+  o27 -->|"LEE"| t6
+  o27 -->|"LEE"| t22
+  o27 -->|"LEE"| t23
+  o27 -.-> t28
+  a18 --> o29
+  o29 -->|"LEE"| t19
+  o29 -->|"LEE"| t20
+  o29 -->|"LEE"| t21
+  o29 -->|"LEE"| t6
+  o29 -->|"LEE"| t22
+  o29 -->|"LEE"| t23
+  o29 -.-> t30
+  a18 --> o31
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t20
+  o31 -->|"LEE"| t6
+  o31 -->|"LEE"| t8
+  a18 --> o33
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t32
+  o33 -->|"LEE"| t20
+  o33 -->|"LEE"| t21
+  o33 -->|"LEE"| t6
+  o33 -.-> t36
+  a18 --> o37
+  o37 -->|"LEE"| t19
+  o37 -->|"LEE"| t6
+  o37 -->|"LEE"| t23
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t40
+  o37 -.-> t41
+  a18 --> o42
+  o42 -->|"LEE"| t20
+  o42 -->|"LEE"| t21
+  o42 -->|"LEE"| t6
+  o42 -->|"LEE"| t22
+  o42 -->|"LEE"| t8
+  a18 --> o43
+  o43 -->|"LEE"| t32
+  o43 -->|"LEE"| t20
+  o43 -->|"LEE"| t6
+  o43 -->|"LEE"| t8
+  a18 --> o44
+  o44 -->|"LEE"| t6
+  o44 -->|"LEE"| t22
+  o44 -->|"LEE"| t8
+  a18 --> o45
+  o45 -->|"LEE"| t19
+  o45 -->|"LEE"| t20
+  o45 -->|"LEE"| t21
+  o45 -->|"LEE"| t6
+  o45 -->|"LEE"| t22
+  o45 -->|"LEE"| t23
+  o45 -.-> t46
+  a18 --> o47
+  o47 -->|"LEE"| t6
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t49
+  o47 -->|"LEE"| t23
+  o47 -->|"LEE"| t50
+  a18 --> o51
+  o51 -->|"LEE"| t19
+  o51 -->|"LEE"| t6
+  o51 -->|"LEE"| t23
+  o51 -->|"LEE"| t38
+  o51 -->|"LEE"| t39
+  o51 -->|"LEE"| t52
+  o51 -.-> t53
+  a18 --> o54
+  o54 -->|"LEE"| t19
+  o54 -->|"LEE"| t6
+  o54 -->|"LEE"| t23
+  o54 -->|"LEE"| t38
+  o54 -->|"LEE"| t39
+  o54 -->|"LEE"| t52
+  o54 -.-> t55
+  a18 --> o56
+  o56 -->|"LEE"| t19
+  o56 -->|"LEE"| t6
+  o56 -->|"LEE"| t23
+  o56 -->|"LEE"| t38
+  o56 -->|"LEE"| t39
+  o56 -->|"LEE"| t52
+  o56 -.-> t57
+  a18 --> o58
+  o58 -->|"LEE"| t19
+  o58 -->|"LEE"| t6
+  o58 -->|"LEE"| t23
+  o58 -->|"LEE"| t38
+  o58 -->|"LEE"| t39
+  o58 -->|"LEE"| t52
+  o58 -.-> t59
+  a18 --> o60
+  o60 -->|"LEE"| t19
+  o60 -->|"LEE"| t6
+  o60 -->|"LEE"| t23
+  o60 -->|"LEE"| t38
+  o60 -->|"LEE"| t39
+  o60 -->|"LEE"| t52
+  o60 -.-> t61
+  a18 --> o62
+  o62 -->|"LEE"| t19
+  o62 -->|"LEE"| t6
+  o62 -->|"LEE"| t23
+  o62 -->|"LEE"| t38
+  o62 -->|"LEE"| t39
+  o62 -->|"LEE"| t52
+  o62 -.-> t63
+  a18 --> o64
+  o64 -->|"LEE"| t19
+  o64 -->|"LEE"| t6
+  o64 -->|"LEE"| t23
+  o64 -->|"LEE"| t38
+  o64 -->|"LEE"| t39
+  o64 -->|"LEE"| t52
+  o64 -.-> t65
+  a18 --> o66
+  o66 -->|"LEE"| t19
+  o66 -->|"LEE"| t20
+  o66 -->|"LEE"| t21
+  o66 -->|"LEE"| t6
+  o66 -->|"LEE"| t22
+  o66 -->|"LEE"| t23
+  o66 -.-> t67
+  a2 --> o68
+  o68 -->|"LEE"| t6
+  o68 -->|"LEE"| t48
+  o68 -->|"LEE"| t49
+  o68 -->|"LEE"| t23
+  o68 -->|"LEE"| t50
+  a2 --> o69
+  o69 -->|"LEE"| t6
+  o69 -->|"CREA"| t49
+  o69 -->|"LEE"| t49
+  o69 -->|"LEE"| t23
+  o69 -->|"LEE"| t11
+  o69 -->|"LEE"| t12
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 4 de 5 — etapas `ctrl:CommunitySearchIndexController`, `ctrl:CommunitySocialController`, `ctrl:CommunityTimelineController`…
+
+```mermaid
+flowchart LR
+  a2(["SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN"]):::actor
+  a12(["Cualquier sesión válida"]):::actor
+  a54(["SECURITY_ADMIN"]):::actor
+  t3[("community.public_profiles")]:::tabla
+  t5[("common.addresses")]:::tabla
+  t6[("community.service_reviews")]:::tabla
+  t7[("community.verified_badges")]:::tabla
+  t8[("profiles.practitioner_admissions")]:::tabla
+  t9[("profiles.practitioner_specialties")]:::tabla
+  t13[("community.user_blocks")]:::tabla
+  t14[("directory.tenant_memberships")]:::tabla
+  t15[("directory.tenants")]:::tabla
+  t18[("community.bookmarks")]:::tabla
+  t21[("common.file_versions")]:::tabla
+  t22[("common.files")]:::tabla
+  t23[("community.comment_media")]:::tabla
+  t24[("community.comments")]:::tabla
+  t25[("community.social_follows")]:::tabla
+  t30[("community.content_hashtags")]:::tabla
+  t31[("community.hashtags")]:::tabla
+  t32[("community.mentions")]:::tabla
+  t33[("community.post_media")]:::tabla
+  t36[("community.social_posts")]:::tabla
+  t39[("community.reactions")]:::tabla
+  t42[("community.prestige_scores")]:::tabla
+  t44[("community.chat_auto_replies")]:::tabla
+  t56[("community.feed_items")]:::tabla
+  t59[("community.social_notifications")]:::tabla
+  t61[("community.topics")]:::tabla
+  t10[("+4 tablas más")]
+  subgraph s0["ctrl:CommunitySearchIndexController · Operaciones de CommunitySearchIndexContro…"]
+    o1["GET /internal/community/search/health"]:::op
+    o4["POST /internal/community/search/reindex"]:::op
+  end
+  t26[("+4 tablas más")]
+  t34[("+6 tablas más")]
+  t37[("+2 tablas más")]
+  t40[("+1 tablas más")]
+  t47[("+2 tablas más")]
+  subgraph s1["ctrl:CommunitySocialController · Operaciones de CommunitySocialController que e…"]
+    o11["DELETE /community/blocks"]:::op
+    o16["GET /community/blocks"]:::op
+    o17["DELETE /community/bookmarks"]:::op
+    o19["GET /community/bookmarks"]:::op
+    o20["GET /community/comments/media/{fileId}/content"]:::op
+    o27["DELETE /community/follows"]:::op
+    o28["GET /community/follows"]:::op
+    o29["GET /community/posts/{postId}"]:::op
+    o35["GET /community/posts/{postId}/comments"]:::op
+    o38["GET /community/posts/{postId}/reactions"]:::op
+    o41["GET /community/profiles/{profileId}"]:::op
+    o43["GET /community/profiles/{profileId}/auto-reply"]:::op
+    o45["PUT /community/profiles/{profileId}/auto-reply"]:::op
+    o46["GET /community/profiles/{profileId}/posts"]:::op
+    o48["GET /community/profiles/by-slug/{slug}"]:::op
+    o49["GET /community/profiles/me"]:::op
+    o50["PUT /community/profiles/me"]:::op
+    o51["GET /community/profiles/me/stats"]:::op
+    o52["GET /community/profiles/organization-showcases/me"]:::op
+    o53["POST /community/public-profiles"]:::op
+  end
+  t57[("+3 tablas más")]
+  subgraph s2["ctrl:CommunityTimelineController · Operaciones de CommunityTimelineController q…"]
+    o55["GET /community/feed"]:::op
+    o58["GET /community/notifications"]:::op
+  end
+  subgraph s3["ctrl:CommunityTopicsController · Operaciones de CommunityTopicsController que e…"]
+    o60["GET /community/topics"]:::op
+    o62["POST /community/topics"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  a2 --> o4
+  o4 -->|"LEE"| t5
+  o4 -->|"LEE"| t3
+  o4 -->|"LEE"| t6
+  o4 -->|"LEE"| t7
+  o4 -->|"LEE"| t8
+  o4 -->|"LEE"| t9
+  o4 -.-> t10
+  a12 --> o11
+  o11 -->|"LEE"| t3
+  o11 -->|"ACTUALIZA"| t13
   o11 -->|"LEE"| t13
   o11 -->|"LEE"| t14
   o11 -->|"LEE"| t15
-  o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t16
-  o11 -.-> t17
-  a2 --> o18
-  o18 -->|"LEE"| t3
-  o18 -->|"ACTUALIZA"| t16
-  o18 -->|"LEE"| t16
-  o18 -->|"LEE"| t5
-  o18 -->|"LEE"| t6
-  a2 --> o19
+  a12 --> o16
+  o16 -->|"LEE"| t3
+  o16 -->|"LEE"| t13
+  o16 -->|"LEE"| t14
+  o16 -->|"LEE"| t15
+  a12 --> o17
+  o17 -->|"BORRA"| t18
+  o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t3
+  o17 -->|"LEE"| t14
+  o17 -->|"LEE"| t15
+  a12 --> o19
+  o19 -->|"LEE"| t18
   o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t16
-  o19 -->|"LEE"| t5
-  o19 -->|"LEE"| t6
-  a2 --> o20
-  o20 -->|"LEE"| t15
+  o19 -->|"LEE"| t14
+  o19 -->|"LEE"| t15
+  a12 --> o20
   o20 -->|"LEE"| t21
   o20 -->|"LEE"| t22
   o20 -->|"LEE"| t23
   o20 -->|"LEE"| t24
   o20 -->|"LEE"| t3
-  o20 -.-> t25
-  a2 --> o26
-  o26 -->|"LEE"| t14
-  o26 -->|"LEE"| t15
-  o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t16
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t4
-  o26 -.-> t28
-  a2 --> o29
-  o29 -->|"LEE"| t3
+  o20 -->|"LEE"| t25
+  o20 -.-> t26
+  a12 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"ACTUALIZA"| t25
+  o27 -->|"LEE"| t25
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t15
+  a12 --> o28
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t25
+  o28 -->|"LEE"| t14
+  o28 -->|"LEE"| t15
+  a12 --> o29
+  o29 -->|"LEE"| t24
   o29 -->|"LEE"| t30
-  o29 -->|"LEE"| t16
-  o29 -->|"LEE"| t27
-  o29 -->|"LEE"| t4
-  o29 -->|"LEE"| t5
-  o29 -.-> t31
-  a2 --> o32
-  o32 -->|"LEE"| t33
-  o32 -->|"LEE"| t3
-  o32 -->|"LEE"| t4
-  o32 -->|"LEE"| t34
-  o32 -->|"LEE"| t5
-  o32 -->|"LEE"| t6
-  a2 --> o35
-  o35 -->|"LEE"| t36
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t32
+  o29 -->|"LEE"| t33
+  o29 -->|"LEE"| t3
+  o29 -.-> t34
+  a12 --> o35
+  o35 -->|"LEE"| t23
+  o35 -->|"LEE"| t24
   o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t5
-  o35 -->|"LEE"| t6
-  a2 --> o37
-  o37 -->|"LEE"| t36
-  o37 -->|"LEE"| t3
-  o37 -->|"LEE"| t5
-  o37 -->|"LEE"| t6
-  a2 --> o38
-  o38 -->|"LEE"| t15
+  o35 -->|"LEE"| t25
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t13
+  o35 -.-> t37
+  a12 --> o38
   o38 -->|"LEE"| t3
-  o38 -->|"LEE"| t30
-  o38 -->|"LEE"| t16
-  o38 -->|"LEE"| t27
-  o38 -->|"LEE"| t4
-  o38 -.-> t39
-  a2 --> o40
-  o40 -->|"LEE"| t33
-  o40 -->|"LEE"| t3
-  o40 -->|"LEE"| t4
-  o40 -->|"LEE"| t34
-  o40 -->|"LEE"| t5
-  o40 -->|"LEE"| t6
-  a2 --> o41
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t25
+  o38 -->|"LEE"| t36
+  o38 -->|"LEE"| t13
+  o38 -->|"LEE"| t14
+  o38 -.-> t40
+  a12 --> o41
+  o41 -->|"LEE"| t42
   o41 -->|"LEE"| t3
-  a2 --> o42
-  o42 -->|"LEE"| t12
-  o42 -->|"LEE"| t13
-  o42 -->|"CREA"| t3
-  o42 -->|"LEE"| t3
-  a2 --> o43
+  o41 -->|"LEE"| t13
+  o41 -->|"LEE"| t7
+  o41 -->|"LEE"| t14
+  o41 -->|"LEE"| t15
+  a12 --> o43
+  o43 -->|"LEE"| t44
   o43 -->|"LEE"| t3
-  a2 --> o44
-  o44 -->|"LEE"| t3
-  o44 -->|"LEE"| t5
-  a46 --> o45
-  o45 -->|"CREA"| t3
-  a2 --> o47
-  o47 -->|"LEE"| t15
-  o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t3
-  o47 -->|"LEE"| t30
-  o47 -->|"LEE"| t16
-  o47 -->|"LEE"| t27
-  o47 -.-> t49
-  a2 --> o50
+  o43 -->|"LEE"| t14
+  o43 -->|"LEE"| t15
+  a12 --> o45
+  o45 -->|"LEE"| t44
+  o45 -->|"LEE"| t3
+  o45 -->|"LEE"| t14
+  o45 -->|"LEE"| t15
+  a12 --> o46
+  o46 -->|"LEE"| t24
+  o46 -->|"LEE"| t3
+  o46 -->|"LEE"| t39
+  o46 -->|"LEE"| t25
+  o46 -->|"LEE"| t36
+  o46 -->|"LEE"| t13
+  o46 -.-> t47
+  a12 --> o48
+  o48 -->|"LEE"| t42
+  o48 -->|"LEE"| t3
+  o48 -->|"LEE"| t13
+  o48 -->|"LEE"| t7
+  o48 -->|"LEE"| t14
+  o48 -->|"LEE"| t15
+  a12 --> o49
+  o49 -->|"LEE"| t3
+  a12 --> o50
+  o50 -->|"LEE"| t21
+  o50 -->|"LEE"| t22
+  o50 -->|"CREA"| t3
   o50 -->|"LEE"| t3
-  o50 -->|"LEE"| t51
-  o50 -->|"LEE"| t5
-  o50 -->|"LEE"| t6
-  a2 --> o52
-  o52 -->|"LEE"| t53
-  a46 --> o54
-  o54 -->|"CREA"| t55
-  o54 -->|"ACTUALIZA"| t3
-  o54 -->|"LEE"| t3
-  o54 -->|"ACTUALIZA"| t34
-  o54 -->|"CREA"| t34
-  o54 -->|"LEE"| t34
-  a46 --> o56
-  o56 -->|"CREA"| t55
-  o56 -->|"ACTUALIZA"| t3
-  o56 -->|"LEE"| t3
-  o56 -->|"ACTUALIZA"| t34
-  o56 -->|"LEE"| t34
-  a58 --> o57
-  o57 -->|"CREA"| t55
-  o57 -->|"ACTUALIZA"| t3
-  o57 -->|"LEE"| t3
-  o57 -->|"ACTUALIZA"| t34
-  o57 -->|"LEE"| t34
+  a12 --> o51
+  o51 -->|"LEE"| t3
+  a12 --> o52
+  o52 -->|"LEE"| t3
+  o52 -->|"LEE"| t14
+  a54 --> o53
+  o53 -->|"CREA"| t3
+  a12 --> o55
+  o55 -->|"LEE"| t24
+  o55 -->|"LEE"| t56
+  o55 -->|"LEE"| t3
+  o55 -->|"LEE"| t39
+  o55 -->|"LEE"| t25
+  o55 -->|"LEE"| t36
+  o55 -.-> t57
+  a12 --> o58
+  o58 -->|"LEE"| t3
+  o58 -->|"LEE"| t59
+  o58 -->|"LEE"| t14
+  o58 -->|"LEE"| t15
+  a12 --> o60
+  o60 -->|"CREA"| t61
+  o60 -->|"LEE"| t61
+  a12 --> o62
+  o62 -->|"CREA"| t61
+  o62 -->|"LEE"| t61
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 5 de 5 — etapas `ctrl:PartyRatingsController`, `ctrl:PatientReviewsController`
+### Diagrama 5 de 5 — etapas `ctrl:CommunityVerificationController`, `ctrl:PartyRatingsController`, `ctrl:PatientReviewsController`
 
 ```mermaid
 flowchart LR
-  a2(["Cualquier sesión válida"]):::actor
-  a12(["PATIENT"]):::actor
-  t3[("community.party_ratings")]:::tabla
-  t4[("practice.practices")]:::tabla
-  t6[("clinical.encounter_participants")]:::tabla
-  t7[("clinical.encounters")]:::tabla
-  t13[("community.public_profiles")]:::tabla
-  t14[("community.service_reviews")]:::tabla
-  t15[("scheduling.appointment_bookings")]:::tabla
-  t17[("community.review_dimension_scores")]:::tabla
-  t8[("+3 tablas más")]
-  subgraph s0["ctrl:PartyRatingsController · Operaciones de PartyRatingsController que el READ…"]
-    o1["GET /community/ratings"]:::op
-    o5["PUT /community/ratings"]:::op
-    o9["GET /community/ratings/mine"]:::op
-    o10["GET /community/ratings/summary"]:::op
+  a2(["SECURITY_ADMIN"]):::actor
+  a8(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a10(["Cualquier sesión válida"]):::actor
+  a20(["PATIENT"]):::actor
+  t3[("audit.verified_badges_history")]:::tabla
+  t4[("community.public_profiles")]:::tabla
+  t5[("community.verified_badges")]:::tabla
+  t11[("community.party_ratings")]:::tabla
+  t12[("practice.practices")]:::tabla
+  t14[("clinical.encounter_participants")]:::tabla
+  t15[("clinical.encounters")]:::tabla
+  t21[("community.service_reviews")]:::tabla
+  t22[("scheduling.appointment_bookings")]:::tabla
+  t24[("community.review_dimension_scores")]:::tabla
+  subgraph s0["ctrl:CommunityVerificationController · Operaciones de CommunityVerificationCont…"]
+    o1["POST /internal/community/verification/badges"]:::op
+    o6["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
+    o7["POST /internal/community/verification/badges/expire-sweep"]:::op
   end
-  subgraph s1["ctrl:PatientReviewsController · Operaciones de PatientReviewsController que el…"]
-    o11["GET /patients/me/reviewable-care"]:::op
-    o16["POST /patients/me/reviews"]:::op
+  t16[("+3 tablas más")]
+  subgraph s1["ctrl:PartyRatingsController · Operaciones de PartyRatingsController que el READ…"]
+    o9["GET /community/ratings"]:::op
+    o13["PUT /community/ratings"]:::op
+    o17["GET /community/ratings/mine"]:::op
+    o18["GET /community/ratings/summary"]:::op
+  end
+  subgraph s2["ctrl:PatientReviewsController · Operaciones de PatientReviewsController que el…"]
+    o19["GET /patients/me/reviewable-care"]:::op
+    o23["POST /patients/me/reviews"]:::op
   end
   a2 --> o1
-  o1 -->|"LEE"| t3
+  o1 -->|"CREA"| t3
+  o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t6
-  o5 -->|"LEE"| t7
-  o5 -->|"ACTUALIZA"| t3
-  o5 -->|"CREA"| t3
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  o5 -.-> t8
-  a2 --> o9
-  o9 -->|"LEE"| t3
-  o9 -->|"LEE"| t4
-  a2 --> o10
-  o10 -->|"LEE"| t3
-  o10 -->|"LEE"| t4
-  a12 --> o11
-  o11 -->|"LEE"| t7
-  o11 -->|"LEE"| t13
-  o11 -->|"LEE"| t14
-  o11 -->|"LEE"| t15
-  a12 --> o16
-  o16 -->|"LEE"| t6
-  o16 -->|"LEE"| t7
-  o16 -->|"LEE"| t13
-  o16 -->|"CREA"| t17
-  o16 -->|"CREA"| t14
-  o16 -->|"LEE"| t14
+  o1 -->|"ACTUALIZA"| t5
+  o1 -->|"CREA"| t5
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"CREA"| t3
+  o6 -->|"ACTUALIZA"| t4
+  o6 -->|"LEE"| t4
+  o6 -->|"ACTUALIZA"| t5
+  o6 -->|"LEE"| t5
+  a8 --> o7
+  o7 -->|"CREA"| t3
+  o7 -->|"ACTUALIZA"| t4
+  o7 -->|"LEE"| t4
+  o7 -->|"ACTUALIZA"| t5
+  o7 -->|"LEE"| t5
+  a10 --> o9
+  o9 -->|"LEE"| t11
+  o9 -->|"LEE"| t12
+  a10 --> o13
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t15
+  o13 -->|"ACTUALIZA"| t11
+  o13 -->|"CREA"| t11
+  o13 -->|"LEE"| t11
+  o13 -->|"LEE"| t12
+  o13 -.-> t16
+  a10 --> o17
+  o17 -->|"LEE"| t11
+  o17 -->|"LEE"| t12
+  a10 --> o18
+  o18 -->|"LEE"| t11
+  o18 -->|"LEE"| t12
+  a20 --> o19
+  o19 -->|"LEE"| t15
+  o19 -->|"LEE"| t4
+  o19 -->|"LEE"| t21
+  o19 -->|"LEE"| t22
+  a20 --> o23
+  o23 -->|"LEE"| t14
+  o23 -->|"LEE"| t15
+  o23 -->|"LEE"| t4
+  o23 -->|"CREA"| t24
+  o23 -->|"CREA"| t21
+  o23 -->|"LEE"| t21
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2280,8 +2305,12 @@ flowchart TD
   n37 --> n38
   n39[("LEE community.public_profiles")]:::efecto
   n38 --> n39
-  n40(("200 Responde con éxito")):::ok
+  n40["Llama a CommunityMessageReactionsService.attach"]:::llamada
   n39 --> n40
+  n41[("LEE community.message_reactions")]:::efecto
+  n40 --> n41
+  n42(("200 Responde con éxito")):::ok
+  n41 --> n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2436,21 +2465,21 @@ flowchart TD
   n59 -->|"al terminar"| n62
   n63["Intenta"]:::intento
   n62 --> n63
-  n64["Llama a PublicProfilesRepository.findById"]:::llamada
+  n64["Transacción: transactional(…)"]:::transaccion
   n63 --> n64
-  n65[("LEE community.public_profiles")]:::efecto
+  n65["Llama a PublicProfilesRepository.findById"]:::llamada
   n64 --> n65
-  n66{"evaluateAutomaticResponse"}:::decision
+  n66[("LEE community.public_profiles")]:::efecto
   n65 --> n66
-  n67["Llama a CommunityMessagingService.responderOnly"]:::llamada
-  n66 -->|"sí"| n67
-  n68["Repite: por cada const recipient de recipients"]:::bucle
-  n67 --> n68
-  n69["Intenta"]:::intento
-  n68 -->|"cada elemento"| n69
-  n70["Llama a CommunityChatAutoReplyService.textForResponder"]:::llamada
-  n69 --> n70
-  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n67{"evaluateAutomaticResponse"}:::decision
+  n66 --> n67
+  n68["Llama a CommunityMessagingService.responderOnly"]:::llamada
+  n67 -->|"sí"| n68
+  n69["Repite: por cada const recipient de recipients"]:::bucle
+  n68 --> n69
+  n70["Intenta"]:::intento
+  n69 -->|"cada elemento"| n70
+  n71["… el resto del árbol (4 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -2571,7 +2600,7 @@ Editar el texto de un mensaje propio
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: Mensaje no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo el autor puede editar o eliminar su mensaje; PreconditionFailedException: El mensaje ya fue eliminado; PreconditionFailedException: El mensaje no tiene marca de envío: no se puede editar; PreconditionFailedException: Pasaron más de 5 minutos: el mensaje ya no se puede editar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo el autor puede editar o eliminar su mensaje; PreconditionFailedException: El mensaje ya fue eliminado; PreconditionFailedException: El mensaje no tiene marca de envío: no se puede editar; PreconditionFailedException: Pasaron más de 15 minutos: el mensaje ya no se puede editar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2641,7 +2670,7 @@ flowchart TD
   n31 -->|"sí"| n32
   n33{"elapsed › EDIT_WINDOW_MS"}:::decision
   n31 -->|"no"| n33
-  n34(["422 PRECONDITION_FAILED Pasaron más de 5 minutos: el mensaje ya no se puede editar"]):::error
+  n34(["422 PRECONDITION_FAILED Pasaron más de 15 minutos: el mensaje ya no se puede editar"]):::error
   n33 -->|"sí"| n34
   n35[("ACTUALIZA community.direct_messages · ACTUALIZA community.direct_messages")]:::efecto
   n33 -->|"no"| n35
@@ -2661,7 +2690,102 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. PATCH /community/conversations/{conversationId}/participant
+#### 16. PUT /community/conversations/{conversationId}/messages/{messageId}/reaction
+
+Reaccionar a un mensaje (una reacción por perfil)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: Mensaje no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Existe un bloqueo entre los participantes |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunityMessageReactionsService.react"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
+  n4 --> n5
+  n6["Llama a PublicProfilesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE community.public_profiles")]:::efecto
+  n6 --> n7
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n7 --> n8
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
+  n9 --> n10
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
+  n10 --> n11
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n17[("LEE community.conversation_participants")]:::efecto
+  n16 --> n17
+  n18{"!participant"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE community.direct_messages")]:::efecto
+  n20 --> n21
+  n22{"!message || message.deletedAt"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND Mensaje no encontrado"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE community.conversation_participants")]:::efecto
+  n24 --> n25
+  n26["Repite: por cada const other de others"]:::bucle
+  n25 --> n26
+  n27["Llama a BlocksRepository.existsBetween"]:::llamada
+  n26 -->|"cada elemento"| n27
+  n28[("LEE community.user_blocks")]:::efecto
+  n27 --> n28
+  n29{"await this.blocksRepo.existsBetween( tx, dto.profileId, other, CONCEPTS.STATE_ACTIVE, )"}:::decision
+  n28 --> n29
+  n30(["422 PRECONDITION_FAILED Existe un bloqueo entre los participantes"]):::error
+  n29 -->|"sí"| n30
+  n31{"dto.emoji === null"}:::decision
+  n29 -->|"no"| n31
+  n26 -->|"al terminar"| n31
+  n32[("BORRA community.message_reactions")]:::efecto
+  n31 -->|"sí"| n32
+  n33[("CREA community.message_reactions")]:::efecto
+  n31 -->|"no"| n33
+  n34[("LEE community.message_reactions")]:::efecto
+  n32 --> n34
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. PATCH /community/conversations/{conversationId}/participant
 
 Marcar la conversación como favorita, fijada o archivada
 
@@ -2725,7 +2849,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. DELETE /community/conversations/{conversationId}/pin
+#### 18. DELETE /community/conversations/{conversationId}/pin
 
 Soltar el mensaje fijado de la conversación
 
@@ -2805,7 +2929,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /community/conversations/{conversationId}/pin
+#### 19. POST /community/conversations/{conversationId}/pin
 
 Fijar un mensaje de la conversación
 
@@ -2893,7 +3017,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /community/conversations/{conversationId}/presence
+#### 20. GET /community/conversations/{conversationId}/presence
 
 Presencia de los demás participantes
 
@@ -2948,7 +3072,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /community/conversations/{conversationId}/read
+#### 21. POST /community/conversations/{conversationId}/read
 
 Marcar mensajes como leídos (recibos)
 
@@ -3032,7 +3156,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /community/conversations/contacts/search
+#### 22. POST /community/conversations/contacts/search
 
 Buscar personas para iniciar una conversación
 
@@ -3089,7 +3213,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /community/feed
+#### 23. GET /community/feed
 
 Timeline de un perfil
 
@@ -3172,7 +3296,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. DELETE /community/follows
+#### 24. DELETE /community/follows
 
 Dejar de seguir un objeto social
 
@@ -3231,7 +3355,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /community/follows
+#### 25. GET /community/follows
 
 Seguimientos activos de un perfil
 
@@ -3286,7 +3410,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /community/follows
+#### 26. POST /community/follows
 
 Seguir un objeto social
 
@@ -3362,7 +3486,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /community/groups
+#### 27. GET /community/groups
 
 Grupos de una organización
 
@@ -3414,7 +3538,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /community/groups
+#### 28. POST /community/groups
 
 Crear un grupo/comunidad
 
@@ -3539,7 +3663,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /community/groups/{groupId}
+#### 29. GET /community/groups/{groupId}
 
 Ficha de un grupo
 
@@ -3613,7 +3737,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /community/groups/{groupId}/members
+#### 30. GET /community/groups/{groupId}/members
 
 Integrantes de un grupo
 
@@ -3702,7 +3826,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /community/groups/{groupId}/members
+#### 31. POST /community/groups/{groupId}/members
 
 Unirse a un grupo / comunidad
 
@@ -3808,7 +3932,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. DELETE /community/groups/{groupId}/members/{member}
+#### 32. DELETE /community/groups/{groupId}/members/{member}
 
 Salir del grupo o dar de baja a un integrante
 
@@ -3937,7 +4061,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. PATCH /community/groups/{groupId}/members/{member}
+#### 33. PATCH /community/groups/{groupId}/members/{member}
 
 Aprobar/rechazar un alta o cambiar el rol
 
@@ -3947,8 +4071,8 @@ Aprobar/rechazar un alta o cambiar el rol
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Sólo quien administra el grupo puede resolver sus membresías |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Membresía no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que indicar una decisión o un rol; PreconditionFailedException: La solicitud de ingreso ya estaba resuelta; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Membresía no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que indicar una decisión o un rol; PreconditionFailedException: La solicitud de ingreso ya estaba resuelta; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4040,46 +4164,63 @@ flowchart TD
   n41 -->|"sí"| n42
   n43["Transacción: safely(…)"]:::transaccion
   n42 --> n43
-  n44["Llama a PublicProfilesRepository.listByIds"]:::llamada
+  n44["Llama a CommunityGroupNotificationsService.recipientsOf"]:::llamada
   n43 --> n44
-  n45[("LEE community.public_profiles")]:::efecto
+  n45["Llama a PublicProfilesRepository.listByIds"]:::llamada
   n44 --> n45
-  n46["Llama a CommunityGroupNotificationsService.emit"]:::llamada
+  n46[("LEE community.public_profiles")]:::efecto
   n45 --> n46
-  n47["Llama a NotificationsService.createRequest"]:::llamada
+  n47["Llama a CommunityGroupNotificationsService.emit"]:::llamada
   n46 --> n47
-  n48{"!recipientUserId"}:::decision
+  n48["Llama a NotificationsService.createRequest"]:::llamada
   n47 --> n48
-  n49(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n48 -->|"sí"| n49
-  n50["Transacción: transactional(…)"]:::transaccion
-  n48 -->|"no"| n50
-  n51{"!channel"}:::decision
-  n50 --> n51
-  n52(["404 NOT_FOUND Canal no encontrado"]):::error
-  n51 -->|"sí"| n52
-  n53{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n51 -->|"no"| n53
-  n54(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n53 -->|"sí"| n54
-  n55{"dto.templateId"}:::decision
-  n53 -->|"no"| n55
-  n56{"!template"}:::decision
-  n55 -->|"sí"| n56
-  n57(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n49{"!recipientUserId"}:::decision
+  n48 --> n49
+  n50(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n49 -->|"sí"| n50
+  n51["Transacción: transactional(…)"]:::transaccion
+  n49 -->|"no"| n51
+  n52{"!channel"}:::decision
+  n51 --> n52
+  n53(["404 NOT_FOUND Canal no encontrado"]):::error
+  n52 -->|"sí"| n53
+  n54{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n52 -->|"no"| n54
+  n55(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n54 -->|"sí"| n55
+  n56{"dto.templateId"}:::decision
+  n54 -->|"no"| n56
+  n57{"!template"}:::decision
   n56 -->|"sí"| n57
-  n58{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n56 -->|"no"| n58
-  n59(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n58 -->|"sí"| n59
-  n60{"template.channelId !== dto.channelId"}:::decision
-  n58 -->|"no"| n60
-  n61(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n60 -->|"sí"| n61
-  n62(("200 Responde con éxito")):::ok
-  n60 -->|"no"| n62
-  n55 -->|"no"| n62
-  n41 -->|"no"| n62
+  n58(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n57 -->|"sí"| n58
+  n59{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n57 -->|"no"| n59
+  n60(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n59 -->|"sí"| n60
+  n61{"template.channelId !== dto.channelId"}:::decision
+  n59 -->|"no"| n61
+  n62(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n61 -->|"sí"| n62
+  n63["Llama a NotificationsService.deliverNotification"]:::llamada
+  n61 -->|"no"| n63
+  n56 -->|"no"| n63
+  n64["Transacción: transactional(…)"]:::transaccion
+  n63 --> n64
+  n65{"!request"}:::decision
+  n64 --> n65
+  n66(["404 NOT_FOUND Solicitud de notificación no encontrada"]):::error
+  n65 -->|"sí"| n66
+  n67{"request.statusConceptId === CONCEPTS.NOTIF_SUPPRESSED"}:::decision
+  n65 -->|"no"| n67
+  n68(["422 PRECONDITION_FAILED La notificación está suprimida"]):::error
+  n67 -->|"sí"| n68
+  n69{"request.statusConceptId !== CONCEPTS.NOTIF_PENDING && request.statusConceptId !== CONCEPTS.NOTIF_SENDING"}:::decision
+  n67 -->|"no"| n69
+  n70(["422 PRECONDITION_FAILED La notificación ya no admite intentos"]):::error
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (10 nodos) está en el JSON del inventario"]:::corte
+  n69 -->|"no"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4088,7 +4229,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /community/groups/{groupId}/posts
+#### 34. GET /community/groups/{groupId}/posts
 
 Muro de un grupo
 
@@ -4169,7 +4310,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /community/groups/{groupId}/posts
+#### 35. POST /community/groups/{groupId}/posts
 
 Publicar en el muro del grupo
 
@@ -4179,8 +4320,8 @@ Publicar en el muro del grupo
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Hay que ser integrante del grupo para publicar en su muro |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Perfil autor no encontrado; ResourceNotFoundException: La publicación a la que responde no es de este grupo; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Perfil autor no encontrado; ResourceNotFoundException: La publicación a la que responde no es de este grupo; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4280,49 +4421,53 @@ flowchart TD
   n46 --> n47
   n48[("LEE community.group_members")]:::efecto
   n47 --> n48
-  n49["Llama a PublicProfilesRepository.listByIds"]:::llamada
+  n49["Llama a CommunityGroupNotificationsService.recipientsOf"]:::llamada
   n48 --> n49
-  n50[("LEE community.public_profiles")]:::efecto
+  n50["Llama a PublicProfilesRepository.listByIds"]:::llamada
   n49 --> n50
-  n51["Repite: por cada const recipientUserId de new Set(recipients)"]:::bucle
+  n51[("LEE community.public_profiles")]:::efecto
   n50 --> n51
-  n52["Llama a CommunityGroupNotificationsService.emit"]:::llamada
-  n51 -->|"cada elemento"| n52
-  n53["Llama a NotificationsService.createRequest"]:::llamada
-  n52 --> n53
-  n54{"!recipientUserId"}:::decision
+  n52["Repite: por cada const recipientUserId de recipients"]:::bucle
+  n51 --> n52
+  n53["Llama a CommunityGroupNotificationsService.emit"]:::llamada
+  n52 -->|"cada elemento"| n53
+  n54["Llama a NotificationsService.createRequest"]:::llamada
   n53 --> n54
-  n55(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n54 -->|"sí"| n55
-  n56["Transacción: transactional(…)"]:::transaccion
-  n54 -->|"no"| n56
-  n57{"!channel"}:::decision
-  n56 --> n57
-  n58(["404 NOT_FOUND Canal no encontrado"]):::error
-  n57 -->|"sí"| n58
-  n59{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n57 -->|"no"| n59
-  n60(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n59 -->|"sí"| n60
-  n61{"dto.templateId"}:::decision
-  n59 -->|"no"| n61
-  n62{"!template"}:::decision
-  n61 -->|"sí"| n62
-  n63(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n55{"!recipientUserId"}:::decision
+  n54 --> n55
+  n56(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n55 -->|"sí"| n56
+  n57["Transacción: transactional(…)"]:::transaccion
+  n55 -->|"no"| n57
+  n58{"!channel"}:::decision
+  n57 --> n58
+  n59(["404 NOT_FOUND Canal no encontrado"]):::error
+  n58 -->|"sí"| n59
+  n60{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n58 -->|"no"| n60
+  n61(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n60 -->|"sí"| n61
+  n62{"dto.templateId"}:::decision
+  n60 -->|"no"| n62
+  n63{"!template"}:::decision
   n62 -->|"sí"| n63
-  n64{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n62 -->|"no"| n64
-  n65(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n64 -->|"sí"| n65
-  n66{"template.channelId !== dto.channelId"}:::decision
-  n64 -->|"no"| n66
-  n67(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n66 -->|"sí"| n67
-  n68(("201 Responde con éxito")):::ok
-  n66 -->|"no"| n68
-  n61 -->|"no"| n68
-  n51 -->|"al terminar"| n68
-  n44 -->|"no"| n68
+  n64(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n63 -->|"sí"| n64
+  n65{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n63 -->|"no"| n65
+  n66(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n65 -->|"sí"| n66
+  n67{"template.channelId !== dto.channelId"}:::decision
+  n65 -->|"no"| n67
+  n68(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n67 -->|"sí"| n68
+  n69["Llama a NotificationsService.deliverNotification"]:::llamada
+  n67 -->|"no"| n69
+  n62 -->|"no"| n69
+  n70["Transacción: transactional(…)"]:::transaccion
+  n69 --> n70
+  n71["… el resto del árbol (16 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4331,7 +4476,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /community/moderation/appeals/{appealId}/resolve
+#### 36. POST /community/moderation/appeals/{appealId}/resolve
 
 Resolver una apelación de moderación
 
@@ -4398,7 +4543,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /community/moderation/decisions/{decisionId}/appeal
+#### 37. POST /community/moderation/decisions/{decisionId}/appeal
 
 Apelar una decisión de moderación
 
@@ -4492,7 +4637,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /community/moderation/decisions/mine
+#### 38. GET /community/moderation/decisions/mine
 
 Mis propias decisiones de moderación
 
@@ -4555,7 +4700,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /community/moderation/queue/{queueId}/decision
+#### 39. POST /community/moderation/queue/{queueId}/decision
 
 Resolver moderación (decisión + strike)
 
@@ -4622,7 +4767,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /community/notifications
+#### 40. GET /community/notifications
 
 Notificaciones sociales de un perfil
 
@@ -4681,7 +4826,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. GET /community/polls/{pollId}
+#### 41. GET /community/polls/{pollId}
 
 Encuesta con opciones, recuentos y voto propio
 
@@ -4775,7 +4920,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /community/polls/{pollId}/votes
+#### 42. POST /community/polls/{pollId}/votes
 
 Votar en una encuesta
 
@@ -4901,7 +5046,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. GET /community/posts/{postId}
+#### 43. GET /community/posts/{postId}
 
 Publicación con media, hashtags y menciones
 
@@ -5005,7 +5150,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. GET /community/posts/{postId}/comments
+#### 44. GET /community/posts/{postId}/comments
 
 Comentarios de una publicación (hilo anidado)
 
@@ -5078,7 +5223,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /community/posts/{postId}/polls
+#### 45. POST /community/posts/{postId}/polls
 
 Crear una encuesta con opciones sobre un post
 
@@ -5151,7 +5296,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /community/posts/{postId}/reactions
+#### 46. GET /community/posts/{postId}/reactions
 
 Reacciones de una publicación, agrupadas por tipo
 
@@ -5218,7 +5363,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. GET /community/profiles/{profileId}
+#### 47. GET /community/profiles/{profileId}
 
 Ficha de un perfil público
 
@@ -5293,7 +5438,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. GET /community/profiles/{profileId}/auto-reply
+#### 48. GET /community/profiles/{profileId}/auto-reply
 
 Respuesta automática por inactividad del perfil
 
@@ -5346,7 +5491,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. PUT /community/profiles/{profileId}/auto-reply
+#### 49. PUT /community/profiles/{profileId}/auto-reply
 
 Configurar la respuesta automática del perfil
 
@@ -5401,7 +5546,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. GET /community/profiles/{profileId}/posts
+#### 50. GET /community/profiles/{profileId}/posts
 
 Publicaciones de un perfil
 
@@ -5477,7 +5622,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. POST /community/profiles/{profileId}/posts
+#### 51. POST /community/profiles/{profileId}/posts
 
 Publicar un post con hashtags, media y menciones
 
@@ -5622,7 +5767,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. GET /community/profiles/{profileId}/reviews
+#### 52. GET /community/profiles/{profileId}/reviews
 
 Reviews publicadas de un perfil
 
@@ -5688,7 +5833,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /community/profiles/{profileId}/reviews
+#### 53. POST /community/profiles/{profileId}/reviews
 
 Publicar una review verificada de servicio
 
@@ -5781,7 +5926,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+#### 54. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 Responder una reseña de la propia vitrina
 
@@ -5864,7 +6009,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. GET /community/profiles/by-slug/{slug}
+#### 55. GET /community/profiles/by-slug/{slug}
 
 Ficha de un perfil público por su slug
 
@@ -5944,7 +6089,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. GET /community/profiles/me
+#### 56. GET /community/profiles/me
 
 Consultar la vitrina pública propia
 
@@ -5981,7 +6126,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. PUT /community/profiles/me
+#### 57. PUT /community/profiles/me
 
 Crear o actualizar la vitrina pública propia
 
@@ -6152,7 +6297,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. GET /community/profiles/me/stats
+#### 58. GET /community/profiles/me/stats
 
 Estadísticas de la vitrina pública propia
 
@@ -6206,7 +6351,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. GET /community/ratings
+#### 59. GET /community/ratings
 
 Calificaciones de un médico, paciente u organización
 
@@ -6250,7 +6395,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. PUT /community/ratings
+#### 60. PUT /community/ratings
 
 Calificar con estrellas a un médico, paciente u organización
 
@@ -6395,7 +6540,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. GET /community/ratings/mine
+#### 61. GET /community/ratings/mine
 
 Mis calificaciones
 
@@ -6458,7 +6603,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. GET /community/ratings/summary
+#### 62. GET /community/ratings/summary
 
 Nota media de un médico, paciente u organización
 
@@ -6498,7 +6643,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. PUT /community/reactions
+#### 63. PUT /community/reactions
 
 Reaccionar a contenido (upsert una reacción por actor/objeto)
 
@@ -6564,7 +6709,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 63. POST /community/reports
+#### 64. POST /community/reports
 
 Reportar contenido y encolar moderación
 
@@ -6610,7 +6755,82 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 64. GET /f/{slug}
+#### 65. GET /community/topics
+
+Temas de la comunidad
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunityTopicsService.listTopics"]:::llamada
+  n2 --> n3
+  n4["Llama a CommunityTopicsService.ensureCatalog"]:::llamada
+  n3 --> n4
+  n5["Transacción: catch(…)"]:::transaccion
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 --> n6
+  n7[("LEE community.topics")]:::efecto
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 66. POST /community/topics
+
+Crear un tema propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El nombre del tema necesita al menos tres letras o números |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunityTopicsService.createTopic"]:::llamada
+  n2 --> n3
+  n4["Llama a CommunityTopicsService.ensureCatalog"]:::llamada
+  n3 --> n4
+  n5["Transacción: catch(…)"]:::transaccion
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 --> n6
+  n7{"base.length ‹ 3"}:::decision
+  n8(["400 VALIDATION_FAILED El nombre del tema necesita al menos tres letras o números"]):::error
+  n7 -->|"sí"| n8
+  n9[("LEE community.topics · CREA community.topics")]:::efecto
+  n7 -->|"no"| n9
+  n10(("201 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 67. GET /f/{slug}
 
 Ficha pública de una farmacia
 
@@ -6692,7 +6912,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 65. POST /internal/community/feed/ranking/apply
+#### 68. POST /internal/community/feed/ranking/apply
 
 Aplicar rank_score recalculado
 
@@ -6728,7 +6948,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 66. POST /internal/community/feed/rebuild
+#### 69. POST /internal/community/feed/rebuild
 
 Generar feed (fan-out y ranking)
 
@@ -6770,7 +6990,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 67. GET /internal/community/search/health
+#### 70. GET /internal/community/search/health
 
 Estado del índice del directorio público
 
@@ -6827,7 +7047,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. POST /internal/community/search/reindex
+#### 71. POST /internal/community/search/reindex
 
 Reindexar el directorio público
 
@@ -6967,7 +7187,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. POST /internal/community/verification/badges
+#### 72. POST /internal/community/verification/badges
 
 Emitir un sello a mano (auditado)
 
@@ -7019,7 +7239,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 70. POST /internal/community/verification/badges/{targetId}/revoke
+#### 73. POST /internal/community/verification/badges/{targetId}/revoke
 
 Bajar los sellos de un sujeto (auditado)
 
@@ -7079,7 +7299,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 71. POST /internal/community/verification/badges/expire-sweep
+#### 74. POST /internal/community/verification/badges/expire-sweep
 
 Bajar los sellos cuya vigencia ya venció
 
@@ -7143,7 +7363,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 72. GET /l/{slug}
+#### 75. GET /l/{slug}
 
 Ficha pública de un laboratorio
 
@@ -7225,7 +7445,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 73. GET /o/{slug}
+#### 76. GET /o/{slug}
 
 Ficha pública de una organización
 
@@ -7307,7 +7527,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 74. GET /p/{slug}
+#### 77. GET /p/{slug}
 
 Ficha pública de un profesional
 
@@ -7389,7 +7609,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 75. GET /patients/me/reviewable-care
+#### 78. GET /patients/me/reviewable-care
 
 Consultar si una atención recibida se puede calificar
 
@@ -7445,7 +7665,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 76. POST /patients/me/reviews
+#### 79. POST /patients/me/reviews
 
 Calificar una atención recibida
 
@@ -7554,7 +7774,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 77. GET /public/comments/{commentId}/replies
+#### 80. GET /public/comments/{commentId}/replies
 
 Respuestas de un comentario público
 
@@ -7611,7 +7831,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 78. GET /public/media/{id}
+#### 81. GET /public/media/{id}
 
 Servir una imagen pública (avatar, portada o post)
 
@@ -7740,7 +7960,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 79. GET /public/nearby
+#### 82. GET /public/nearby
 
 Prestadores cercanos, en línea recta
 
@@ -7857,7 +8077,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 80. GET /public/posts/{postId}/comments
+#### 83. GET /public/posts/{postId}/comments
 
 Comentarios raíz de una publicación pública
 
@@ -7906,7 +8126,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 81. GET /public/posts/{postId}/reactions
+#### 84. GET /public/posts/{postId}/reactions
 
 Quiénes reaccionaron a una publicación pública
 
@@ -7949,7 +8169,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 82. GET /public/profiles/{prefijo}/{slug}
+#### 85. GET /public/profiles/{prefijo}/{slug}
 
 Ficha pública por prefijo de vertical
 
@@ -8035,7 +8255,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 83. GET /public/profiles/{prefijo}/{slug}/reviews
+#### 86. GET /public/profiles/{prefijo}/{slug}/reviews
 
 Opiniones publicadas de una ficha pública
 
@@ -8108,7 +8328,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 84. GET /public/search
+#### 87. GET /public/search
 
 Buscador público unificado
 
@@ -8280,7 +8500,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 85. GET /public/search/diagnostic-units
+#### 88. GET /public/search/diagnostic-units
 
 Laboratorios y centros de diagnóstico
 
@@ -8452,7 +8672,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 86. GET /public/search/insurers
+#### 89. GET /public/search/insurers
 
 Aseguradoras en el directorio público
 
@@ -8624,7 +8844,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 87. GET /public/search/medications
+#### 90. GET /public/search/medications
 
 Medicamentos ofertados públicamente
 
@@ -8796,7 +9016,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 88. GET /public/search/organizations
+#### 91. GET /public/search/organizations
 
 Organizaciones en el directorio público
 
@@ -8968,7 +9188,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 89. GET /public/search/pharmacies
+#### 92. GET /public/search/pharmacies
 
 Farmacias en el directorio público
 
@@ -9140,7 +9360,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 90. GET /public/search/practitioners
+#### 93. GET /public/search/practitioners
 
 Profesionales en el directorio público
 
@@ -9312,7 +9532,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 91. GET /s/{slug}
+#### 94. GET /s/{slug}
 
 Ficha pública de una aseguradora
 
@@ -9409,7 +9629,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /community/moderation/queue | 200, 401, 403, 429 | 2 |
 | GET /community/profiles/organization-showcases/me | 200, 401, 403, 429 | 2 |
 | POST /community/public-profiles | 201, 400, 401, 403, 429 | 1 |
-| GET /community/topics | 200, 401, 403, 429 | 1 |
 | GET /internal/community/feed/pending | 200, 400, 401, 403, 429 | 3 |
 | GET /internal/community/feed/ranking/pending | 200, 400, 401, 403, 429 | 4 |
 | GET /public/posts | 200, 400, 401, 429 | 5 |

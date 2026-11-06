@@ -44,8 +44,8 @@ _Fuente: `src/modules/forms/README.md:3`_
 | `ctrl:FormsDefinitionSetsController` | Operaciones de FormsDefinitionSetsController que el README no asigna a un caso de uso | GET /forms/definition-sets | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 |  |  | GET /forms/definition-sets/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 8 |
 | `ctrl:FormsFieldsController` | Operaciones de FormsFieldsController que el README no asigna a un caso de uso | PATCH /forms/field-definitions/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 25 |
+| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 27 |
 | `ctrl:FormsMeController` | Operaciones de FormsMeController que el README no asigna a un caso de uso | GET /forms/me/instances | Cualquier sesión válida | BAJO | 2 |
 |  |  | GET /forms/me/instances/{id} | Cualquier sesión válida | BAJO | 5 |
 
@@ -239,8 +239,8 @@ flowchart LR
   subgraph s0["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
     o1["PATCH /forms/field-definitions/{id}"]:::op
   end
-  t14[("+16 tablas más")]
-  t16[("+19 tablas más")]
+  t14[("+18 tablas más")]
+  t16[("+21 tablas más")]
   subgraph s1["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
     o6["GET /forms/instances"]:::op
     o15["GET /forms/instances/{id}"]:::op
@@ -1214,7 +1214,7 @@ Listar las instancias de formulario de un encuentro
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1231,43 +1231,18 @@ flowchart TD
   n4 --> n5
   n6["Intenta"]:::intento
   n5 --> n6
-  n7["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
-  n6 --> n7
-  n8{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
-  n7 --> n8
-  n9["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n8 -->|"sí"| n9
-  n10{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n9 --> n10
-  n11(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n10 -->|"no"| n12
-  n8 -->|"no"| n12
-  n13[("LEE profiles.person_account_links")]:::efecto
-  n12 --> n13
-  n14["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n13 --> n14
-  n15[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n14 --> n15
-  n16["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n15 --> n16
-  n17{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n16 --> n17
-  n18(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n17 -->|"sí"| n18
-  n19{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
-  n6 -->|"si falla"| n19
-  n20(["404 NOT_FOUND {failure.message}"]):::error
-  n19 -->|"sí"| n20
-  n21(["↩ (relanza el error capturado)"]):::error
-  n19 -->|"no"| n21
-  n22["Llama a FormInstancesRepository.findByResourceId"]:::llamada
-  n17 -->|"no"| n22
-  n23[("LEE forms.form_instances")]:::efecto
-  n22 --> n23
-  n24(("200 Responde con éxito")):::ok
-  n23 --> n24
+  n7{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
+  n6 -->|"si falla"| n7
+  n8(["404 NOT_FOUND {failure.message}"]):::error
+  n7 -->|"sí"| n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"no"| n9
+  n10["Llama a FormInstancesRepository.findByResourceId"]:::llamada
+  n6 --> n10
+  n11[("LEE forms.form_instances")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1333,7 +1308,7 @@ Leer una instancia con sus valores vigentes, por tipo resuelto
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: {INSTANCE_NOT_FOUND.message}; ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1358,53 +1333,28 @@ flowchart TD
   n8 --> n9
   n10["Intenta"]:::intento
   n9 --> n10
-  n11["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
-  n10 --> n11
-  n12{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
-  n11 --> n12
-  n13["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n12 -->|"sí"| n13
-  n14{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n13 --> n14
-  n15(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n14 -->|"no"| n16
-  n12 -->|"no"| n16
-  n17[("LEE profiles.person_account_links")]:::efecto
+  n11{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
+  n10 -->|"si falla"| n11
+  n12(["404 NOT_FOUND {failure.message}"]):::error
+  n11 -->|"sí"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"no"| n13
+  n14["Llama a FormsReadService.composeInstanceDetail"]:::llamada
+  n10 --> n14
+  n15["Llama a FieldValuesRepository.findCurrentByInstance"]:::llamada
+  n14 --> n15
+  n16[("LEE forms.field_values")]:::efecto
+  n15 --> n16
+  n17["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
   n16 --> n17
-  n18["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n18[("LEE forms.dynamic_field_definitions")]:::efecto
   n17 --> n18
-  n19[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n19["Llama a FieldDefinitionsRepository.findActiveAccessRulesByFieldIds"]:::llamada
   n18 --> n19
-  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n20[("LEE forms.field_value_access_rules")]:::efecto
   n19 --> n20
-  n21{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n21(("200 Responde con éxito")):::ok
   n20 --> n21
-  n22(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n21 -->|"sí"| n22
-  n23{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
-  n10 -->|"si falla"| n23
-  n24(["404 NOT_FOUND {failure.message}"]):::error
-  n23 -->|"sí"| n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n23 -->|"no"| n25
-  n26["Llama a FormsReadService.composeInstanceDetail"]:::llamada
-  n21 -->|"no"| n26
-  n27["Llama a FieldValuesRepository.findCurrentByInstance"]:::llamada
-  n26 --> n27
-  n28[("LEE forms.field_values")]:::efecto
-  n27 --> n28
-  n29["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
-  n28 --> n29
-  n30[("LEE forms.dynamic_field_definitions")]:::efecto
-  n29 --> n30
-  n31["Llama a FieldDefinitionsRepository.findActiveAccessRulesByFieldIds"]:::llamada
-  n30 --> n31
-  n32[("LEE forms.field_value_access_rules")]:::efecto
-  n31 --> n32
-  n33(("200 Responde con éxito")):::ok
-  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

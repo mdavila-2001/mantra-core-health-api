@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 33 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 63 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens`
-- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReceptionController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
+- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-lab-portal`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-public`, `diagnostics-reception`, `diagnostics-report-drafts`, `diagnostics-reports`, `diagnostics-specimens`
+- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsLabPortalController`, `DiagnosticsLabResultsController`, `DiagnosticsLabUploadsController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReceptionController`, `DiagnosticsReportDraftsController`, `DiagnosticsReportPublishController`, `DiagnosticsReportReleaseController`, `DiagnosticsReportVerifyPublicController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,21 +29,51 @@ Referencia exhaustiva de 33 operación(es) del módulo `diagnostics`, derivada d
 16. [POST /diagnostics/data-quality-events](#16-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
 17. [POST /diagnostics/imaging-endpoints](#17-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
 18. [POST /diagnostics/imaging-studies/{id}/dose-events](#18-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
-19. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#19-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
-20. [GET /diagnostics/patients/{patientProfileId}/orders](#20-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
-21. [POST /diagnostics/reports/{reportId}/versions](#21-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
-22. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#22-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
-23. [POST /diagnostics/results/{observationId}/verifications](#23-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-24. [GET /diagnostics/service-requests/{id}](#24-get-diagnostics-service-requests-id) — Detalle de una orden dirigida al tenant activo
-25. [POST /diagnostics/service-requests/inbox](#25-post-diagnostics-service-requests-inbox) — Bandeja de órdenes de laboratorio por recibir
-26. [POST /diagnostics/service-requests/worklist](#26-post-diagnostics-service-requests-worklist) — Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado
-27. [POST /diagnostics/specimens](#27-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-28. [GET /diagnostics/specimens/{id}](#28-get-diagnostics-specimens-id) — Detalle de un espécimen (con su cadena de custodia)
-29. [POST /diagnostics/specimens/{id}/containers](#29-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-30. [POST /diagnostics/specimens/{id}/rejection](#30-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-31. [GET /diagnostics/work-orders](#31-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
-32. [POST /diagnostics/work-orders](#32-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-33. [POST /dicomweb/studies](#33-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+19. [GET /diagnostics/lab/orders](#19-get-diagnostics-lab-orders) — Órdenes derivadas al laboratorio, con su estado derivado
+20. [POST /diagnostics/lab/orders](#20-post-diagnostics-lab-orders) — El centro carga una orden que llega en papel o por mostrador
+21. [PUT /diagnostics/lab/orders/{orderId}](#21-put-diagnostics-lab-orders-orderid) — Corregir una orden que cargó el centro, antes de recibirla
+22. [POST /diagnostics/lab/orders/{orderId}/transitions](#22-post-diagnostics-lab-orders-orderid-transitions) — Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)
+23. [POST /diagnostics/lab/patients/lookup](#23-post-diagnostics-lab-patients-lookup) — Paciente por número de documento, para cargar su orden
+24. [GET /diagnostics/lab/result-files](#24-get-diagnostics-lab-result-files) — Resultados subidos por el laboratorio
+25. [GET /diagnostics/lab/result-files/{id}/content](#25-get-diagnostics-lab-result-files-id-content) — Descargar un resultado subido
+26. [POST /diagnostics/lab/result-files/{id}/withdrawal](#26-post-diagnostics-lab-result-files-id-withdrawal) — Retirar un resultado subido por error (queda en el historial)
+27. [POST /diagnostics/lab/result-files/search](#27-post-diagnostics-lab-result-files-search) — Buscar entre los resultados subidos (filtros en el cuerpo)
+28. [GET /diagnostics/lab/result-targets](#28-get-diagnostics-lab-result-targets) — Órdenes procesadas a las que se puede adjuntar un resultado
+29. [POST /diagnostics/lab/result-uploads](#29-post-diagnostics-lab-result-uploads) — Empezar la subida por partes de un resultado
+30. [DELETE /diagnostics/lab/result-uploads/{uploadId}](#30-delete-diagnostics-lab-result-uploads-uploadid) — Cancelar una subida abierta
+31. [POST /diagnostics/lab/result-uploads/{uploadId}/complete](#31-post-diagnostics-lab-result-uploads-uploadid-complete) — Cerrar la subida: guarda el archivo y lo publica en el informe
+32. [PUT /diagnostics/lab/result-uploads/{uploadId}/parts/{index}](#32-put-diagnostics-lab-result-uploads-uploadid-parts-index) — Mandar una parte (bytes crudos)
+33. [GET /diagnostics/lab/summary](#33-get-diagnostics-lab-summary) — Resumen del laboratorio del tenant activo
+34. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#34-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
+35. [GET /diagnostics/patients/{patientProfileId}/orders](#35-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
+36. [GET /diagnostics/patients/{patientProfileId}/reports/{reportId}](#36-get-diagnostics-patients-patientprofileid-reports-reportid) — Resultado liberado de un informe del paciente
+37. [GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content](#37-get-diagnostics-patients-patientprofileid-reports-reportid-files-fileid-content) — Descargar un archivo del resultado liberado
+38. [POST /diagnostics/report-drafts](#38-post-diagnostics-report-drafts) — Abrir (u obtener) el borrador del informe de una orden
+39. [GET /diagnostics/report-drafts/{id}](#39-get-diagnostics-report-drafts-id) — Borrador del informe
+40. [PUT /diagnostics/report-drafts/{id}](#40-put-diagnostics-report-drafts-id) — Guardar el borrador (409 si cambió o ya se publicó)
+41. [POST /diagnostics/report-drafts/{id}/files](#41-post-diagnostics-report-drafts-id-files) — Adjuntar documento, audio o anexo al borrador
+42. [DELETE /diagnostics/report-drafts/{id}/files/{draftFileId}](#42-delete-diagnostics-report-drafts-id-files-draftfileid) — Quitar un archivo del borrador
+43. [POST /diagnostics/report-drafts/{id}/preview](#43-post-diagnostics-report-drafts-id-preview) — Vista previa en PDF con marca de agua «BORRADOR»
+44. [POST /diagnostics/report-drafts/{id}/publish](#44-post-diagnostics-report-drafts-id-publish) — Publicar el informe: versión inmutable, PDF oficial y liberación
+45. [POST /diagnostics/report-drafts/{id}/signature-request](#45-post-diagnostics-report-drafts-id-signature-request) — Pedir al firmante elegido que revise y publique con su firma
+46. [GET /diagnostics/report-drafts/signers](#46-get-diagnostics-report-drafts-signers) — Profesionales que pueden firmar informes
+47. [GET /diagnostics/report-issuer-settings](#47-get-diagnostics-report-issuer-settings) — Firma, sello y responsable de los informes
+48. [PUT /diagnostics/report-issuer-settings](#48-put-diagnostics-report-issuer-settings) — Cambiar firma, sello y responsable (OWNER/ADMIN)
+49. [POST /diagnostics/reports/{reportId}/patient-release](#49-post-diagnostics-reports-reportid-patient-release) — Liberar al paciente un resultado retenido
+50. [POST /diagnostics/reports/{reportId}/versions](#50-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
+51. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#51-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
+52. [POST /diagnostics/results/{observationId}/verifications](#52-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
+53. [GET /diagnostics/service-requests/{id}](#53-get-diagnostics-service-requests-id) — Detalle de una orden dirigida al tenant activo
+54. [POST /diagnostics/service-requests/inbox](#54-post-diagnostics-service-requests-inbox) — Bandeja de órdenes de laboratorio por recibir
+55. [POST /diagnostics/service-requests/worklist](#55-post-diagnostics-service-requests-worklist) — Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado
+56. [POST /diagnostics/specimens](#56-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+57. [GET /diagnostics/specimens/{id}](#57-get-diagnostics-specimens-id) — Detalle de un espécimen (con su cadena de custodia)
+58. [POST /diagnostics/specimens/{id}/containers](#58-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+59. [POST /diagnostics/specimens/{id}/rejection](#59-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+60. [GET /diagnostics/work-orders](#60-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+61. [POST /diagnostics/work-orders](#61-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+62. [POST /dicomweb/studies](#62-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+63. [GET /public/diagnostic-reports/{versionId}/verify](#63-get-public-diagnostic-reports-versionid-verify) — Verificar la autenticidad de un informe diagnóstico
 
 ---
 
@@ -139,6 +169,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "id": "00000000-0000-4000-8000-000000000001",
           "fileId": "00000000-0000-4000-8000-000000000001",
           "contentRoleConceptId": "00000000-0000-4000-8000-000000000001",
+          "role": "OFFICIAL",
           "presentationFormatConceptId": "00000000-0000-4000-8000-000000000001",
           "ordinal": 1
         }
@@ -155,7 +186,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<PatientDiagnosticResultDto>` | Sin restricción adicional declarada | Resultados liberados, del más nuevo al más viejo. | `[{"reportId":"00000000-0000-4000-8000-000000000001","versionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"serviceRequestId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","custodianTenantId":"00000000-0000-4000-8000-000000000001","conclusionText":"valor-ejemplo","issuedAt":"2026-07-31T12:00:00.000Z","releasedAt":"2026-07-31T12:00:00.000Z","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","observationIds":["valor-ejemplo"],"files":[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]}]` |
+| `items` | Sí | `array<PatientDiagnosticResultDto>` | Sin restricción adicional declarada | Resultados liberados, del más nuevo al más viejo. | `[{"reportId":"00000000-0000-4000-8000-000000000001","versionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"serviceRequestId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","custodianTenantId":"00000000-0000-4000-8000-000000000001","conclusionText":"valor-ejemplo","issuedAt":"2026-07-31T12:00:00.000Z","releasedAt":"2026-07-31T12:00:00.000Z","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","observationIds":["valor-ejemplo"],"files":[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","role":"OFFICIAL","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]}]` |
 | `items[].reportId` | Sí | `string` | formato `uuid` | Informe (`clinical.diagnostic_reports`). | `00000000-0000-4000-8000-000000000001` |
 | `items[].versionId` | Sí | `string` | formato `uuid` | Versión liberada que se está mostrando. | `00000000-0000-4000-8000-000000000001` |
 | `items[].versionNumber` | Sí | `number` | Sin restricción adicional declarada | Número de esa versión; una enmienda posterior tiene un número mayor. | `1` |
@@ -168,10 +199,11 @@ Campos de la respuesta:
 | `items[].releasedAt` | Sí | `string` | formato `date-time` | Cuándo se liberó al paciente. | `2026-07-31T12:00:00.000Z` |
 | `items[].clinicalStatusConceptId` | Sí | `string` | formato `uuid` | Estado clínico de la versión (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `items[].observationIds` | Sí | `array<string>` | formato `uuid` | Observaciones enlazadas a la versión. | `["valor-ejemplo"]` |
-| `items[].files` | Sí | `array<DiagnosticResultFileDto>` | Sin restricción adicional declarada | Archivos descargables de la versión. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
+| `items[].files` | Sí | `array<DiagnosticResultFileDto>` | Sin restricción adicional declarada | Archivos descargables de la versión. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","role":"OFFICIAL","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
 | `items[].files[].id` | Sí | `string` | formato `uuid` | Identificador del enlace informe↔archivo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].files[].fileId` | Sí | `string` | formato `uuid` | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `00000000-0000-4000-8000-000000000001` |
 | `items[].files[].contentRoleConceptId` | Sí | `string` | formato `uuid` | Qué es el archivo dentro del informe (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].files[].role` | Sí | `string` | valores: `OFFICIAL`, `ANNEX` | The same content role without UUIDs: `OFFICIAL` is the signed PDF of a published report, `ANNEX` one of its annexes, `null` any other file. | `OFFICIAL` |
 | `items[].files[].presentationFormatConceptId` | No | `string` | formato `uuid` | Formato de presentación (concept id), si se declaró. | `00000000-0000-4000-8000-000000000001` |
 | `items[].files[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición dentro del informe. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
@@ -296,6 +328,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "contentRoleConceptId": "00000000-0000-4000-8000-000000000001",
+      "role": "OFFICIAL",
       "presentationFormatConceptId": "00000000-0000-4000-8000-000000000001",
       "ordinal": 1
     }
@@ -319,10 +352,11 @@ Campos de la respuesta:
 | `releasedAt` | Sí | `string` | formato `date-time` | Cuándo se liberó al paciente. | `2026-07-31T12:00:00.000Z` |
 | `clinicalStatusConceptId` | Sí | `string` | formato `uuid` | Estado clínico de la versión (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `observationIds` | Sí | `array<string>` | formato `uuid` | Observaciones enlazadas a la versión. | `["valor-ejemplo"]` |
-| `files` | Sí | `array<DiagnosticResultFileDto>` | Sin restricción adicional declarada | Archivos descargables de la versión. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
+| `files` | Sí | `array<DiagnosticResultFileDto>` | Sin restricción adicional declarada | Archivos descargables de la versión. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","role":"OFFICIAL","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
 | `files[].id` | Sí | `string` | formato `uuid` | Identificador del enlace informe↔archivo. | `00000000-0000-4000-8000-000000000001` |
 | `files[].fileId` | Sí | `string` | formato `uuid` | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `00000000-0000-4000-8000-000000000001` |
 | `files[].contentRoleConceptId` | Sí | `string` | formato `uuid` | Qué es el archivo dentro del informe (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `string` | valores: `OFFICIAL`, `ANNEX` | The same content role without UUIDs: `OFFICIAL` is the signed PDF of a published report, `ANNEX` one of its annexes, `null` any other file. | `OFFICIAL` |
 | `files[].presentationFormatConceptId` | No | `string` | formato `uuid` | Formato de presentación (concept id), si se declaró. | `00000000-0000-4000-8000-000000000001` |
 | `files[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición dentro del informe. | `1` |
 
@@ -945,6 +979,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "items": [
     {
+      "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "modalityDisplay": "valor-ejemplo",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "bodySiteDisplay": "valor-ejemplo",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityDisplay": "valor-ejemplo",
+      "bodyStructureUberon": "valor-ejemplo",
+      "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+      "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "boneTypeDisplay": "valor-ejemplo",
       "insuranceSettlement": {
         "claimId": "00000000-0000-4000-8000-000000000001",
         "claimIdentifier": "valor-ejemplo",
@@ -992,10 +1036,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
         "lateralityDisplay": "valor-ejemplo",
         "contrastConceptId": "00000000-0000-4000-8000-000000000001",
-        "contrastDisplay": "valor-ejemplo"
+        "contrastDisplay": "valor-ejemplo",
+        "bodyStructureUberon": "valor-ejemplo",
+        "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeDisplay": "valor-ejemplo"
       },
       "summary": "valor-ejemplo",
       "encounterId": "00000000-0000-4000-8000-000000000001",
+      "reasonConditionId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
       "category": "LAB",
@@ -1021,7 +1070,17 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","requisitionId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo","insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","requisitionId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","encounterId":"00000000-0000-4000-8000-000000000001","reasonConditionId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bodySiteDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].lateralityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].insuranceSettlement` | Sí | `PatientInsuranceSettlementDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]}` |
 | `items[].insuranceSettlement.claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].insuranceSettlement.claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1054,7 +1113,7 @@ Campos de la respuesta:
 | `items[].components[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
 | `items[].components[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
 | `items[].componentsSpecified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `items[].imaging` | Sí | `ServiceRequestImagingDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging` | Sí | `ServiceRequestImagingDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"}` |
 | `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1063,8 +1122,13 @@ Campos de la respuesta:
 | `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].summary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonConditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].category` | No | `string` | valores: `LAB`, `IMAGING`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
@@ -2017,7 +2081,7 @@ Detectar y notificar un resultado crítico. Requiere JWT y los roles o alcances 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /diagnostics/critical-results` en `DiagnosticsReportsController_detectCritical`. El controlador delega en `DiagnosticsReportsService.detectCritical`. Valida el body como `DetectCriticalResultDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+NestJS resuelve `POST /diagnostics/critical-results` en `DiagnosticsReportsController_detectCritical`. El controlador delega en `CriticalResultDetectionService.detect`. Valida el body como `DetectCriticalResultDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
 
 ### Parámetros
 
@@ -2118,9 +2182,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | Ya existe una notificación crítica para la observación | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2674,7 +2741,2145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /diagnostics/patients/{patientProfileId}/imaging-studies
+## 19. GET /diagnostics/lab/orders
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Órdenes derivadas al laboratorio, con su estado derivado
+- **Operation ID:** `DiagnosticsLabPortalController_listOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.listOrders](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Órdenes con `performer_tenant_id` = tenant activo (laboratorio, anatomía patológica e imagen), de la más nueva a la más vieja, por páginas (`limit` 100 por defecto, hasta 500). `count` es el total del laboratorio; si quedan órdenes más viejas viene `nextCursor`.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/orders` en `DiagnosticsLabPortalController_listOrders`. El controlador delega en `LabPortalOrdersService.list`. No recibe body. El tipo de retorno estático es `Promise<LabOrderPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 500 | Sin descripción específica en OpenAPI. | `100` |
+| `cursor` | query | No | `string` | longitud máxima 200 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/orders?limit=100&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabOrderPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabOrderPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "orderId": "00000000-0000-4000-8000-000000000001",
+      "studyName": "Nombre de ejemplo",
+      "patientName": "Nombre de ejemplo",
+      "requesterName": "Nombre de ejemplo",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "status": "DRAFT",
+      "reason": "Texto descriptivo de ejemplo",
+      "canReject": true,
+      "registeredByPerformer": true,
+      "canEdit": true,
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "externalRequesterName": "Nombre de ejemplo",
+      "externalRequesterLicense": "valor-ejemplo",
+      "files": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "fileName": "Nombre de ejemplo",
+          "sizeBytes": 1
+        }
+      ],
+      "report": {
+        "draftStatus": "DRAFT",
+        "publishedVersionId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabOrderDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"orderId":"00000000-0000-4000-8000-000000000001","studyName":"Nombre de ejemplo","patientName":"Nombre de ejemplo","requesterName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","status":"DRAFT","reason":"Texto descriptivo de ejemplo","canReject":true,"registeredByPerformer":true,"canEdit":true,"codeConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","externalRequesterName":"Nombre de ejemplo","externalRequesterLicense":"valor-ejemplo","files":[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","sizeBytes":1}],"report":{"draftStatus":"DRAFT","publishedVersionId":"00000000-0000-4000-8000-000000000001"}}]` |
+| `items[].orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].patientName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].requesterName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].status` | Sí | `string` | valores: `DRAFT`, `RECEIVED`, `PROCESSED`, `UPLOADED`, `CANCELLED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `items[].reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].canReject` | Sí | `boolean` | Sin restricción adicional declarada | Whether REJECT applies now: a received order with an open specimen. | `true` |
+| `items[].registeredByPerformer` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].canEdit` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].priorityConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].externalRequesterName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].externalRequesterLicense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].files` | Sí | `array<LabOrderFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","sizeBytes":1}]` |
+| `items[].files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].files[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].files[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].report` | Sí | `LabOrderReportStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"draftStatus":"DRAFT","publishedVersionId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].report.draftStatus` | Sí | `string` | valores: `DRAFT`, `PUBLISHED`; admite null | Null when the tenant never opened a written report. | `DRAFT` |
+| `items[].report.publishedVersionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Orders of the laboratory in total, not just the ones in this page. | `1` |
+| `nextCursor` | No | `string` | Sin restricción adicional declarada | Present when older orders remain: send it back as `cursor`. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/orders"
+}
+```
+
+---
+
+## 20. POST /diagnostics/lab/orders
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** El centro carga una orden que llega en papel o por mostrador
+- **Operation ID:** `DiagnosticsLabPortalController_createOrder`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.createOrder](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Queda con el centro como custodio y ejecutor, sin encuentro ni médico de la plataforma; quien firmó el papel va en `externalRequesterName`. El estudio se valida contra el mismo catálogo que la orden del médico (422 con `reason`).
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/orders` en `DiagnosticsLabPortalController_createOrder`. El controlador delega en `LabPortalOrderIntakeService.create`. Valida el body como `CreateLabOrderDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabOrderDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateLabOrderDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "category": "LAB",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `category` | Sí | `string` | valores: `LAB`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
+| `priorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001","bodyStructureUberon":"UBERON:0000955","bodyMeshId":"BP44","boneTypeConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodyStructureUberon` | No | `string` | longitud máxima 64 | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `UBERON:0000955` |
+| `imaging.bodyMeshId` | No | `string` | longitud máxima 64 | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `BP44` |
+| `imaging.boneTypeConceptId` | No | `string` | formato `uuid` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `00000000-0000-4000-8000-000000000001` |
+| `externalRequesterName` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `externalRequesterLicense` | No | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "category": "LAB",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "imaging": {
+    "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+    "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodyStructureUberon": "UBERON:0000955",
+    "bodyMeshId": "BP44",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
+  },
+  "externalRequesterName": "Nombre de ejemplo",
+  "externalRequesterLicense": "valor-ejemplo",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<LabOrderDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "studyName": "Nombre de ejemplo",
+  "patientName": "Nombre de ejemplo",
+  "requesterName": "Nombre de ejemplo",
+  "requestedAt": "2026-07-31T12:00:00.000Z",
+  "status": "DRAFT",
+  "reason": "Texto descriptivo de ejemplo",
+  "canReject": true,
+  "registeredByPerformer": true,
+  "canEdit": true,
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "externalRequesterName": "Nombre de ejemplo",
+  "externalRequesterLicense": "valor-ejemplo",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileName": "Nombre de ejemplo",
+      "sizeBytes": 1
+    }
+  ],
+  "report": {
+    "draftStatus": "DRAFT",
+    "publishedVersionId": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `patientName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requesterName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `status` | Sí | `string` | valores: `DRAFT`, `RECEIVED`, `PROCESSED`, `UPLOADED`, `CANCELLED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `canReject` | Sí | `boolean` | Sin restricción adicional declarada | Whether REJECT applies now: a received order with an open specimen. | `true` |
+| `registeredByPerformer` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `canEdit` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `priorityConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalRequesterName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `externalRequesterLicense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `files` | Sí | `array<LabOrderFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","sizeBytes":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `files[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `report` | Sí | `LabOrderReportStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"draftStatus":"DRAFT","publishedVersionId":"00000000-0000-4000-8000-000000000001"}` |
+| `report.draftStatus` | Sí | `string` | valores: `DRAFT`, `PUBLISHED`; admite null | Null when the tenant never opened a written report. | `DRAFT` |
+| `report.publishedVersionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | NO_PATIENT | Excepción explícita en src/modules/diagnostics/services/lab-portal-order-intake.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/clinical/services/service-request-detail.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/orders"
+}
+```
+
+---
+
+## 21. PUT /diagnostics/lab/orders/{orderId}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Corregir una orden que cargó el centro, antes de recibirla
+- **Operation ID:** `DiagnosticsLabPortalController_updateOrder`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.updateOrder](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Reemplaza el estudio, su detalle, la prioridad y el solicitante externo. Sólo órdenes con `canEdit`: las de un médico o las ya recibidas responden 409.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostics/lab/orders/{orderId}` en `DiagnosticsLabPortalController_updateOrder`. El controlador delega en `LabPortalOrderIntakeService.update`. Valida el body como `UpdateLabOrderDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabOrderDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `orderId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateLabOrderDto`; los campos opcionales se omiten.
+
+```http
+PUT /diagnostics/lab/orders/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "category": "LAB"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `orderId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `category` | Sí | `string` | valores: `LAB`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
+| `priorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `imaging` | No | `ImagingDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","contrastConceptId":"00000000-0000-4000-8000-000000000001","bodyStructureUberon":"UBERON:0000955","bodyMeshId":"BP44","boneTypeConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `imaging.modalityConceptId` | No | `string` | formato `uuid` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodySiteConceptId` | No | `string` | formato `uuid` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.contrastConceptId` | No | `string` | formato `uuid` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `00000000-0000-4000-8000-000000000001` |
+| `imaging.bodyStructureUberon` | No | `string` | longitud máxima 64 | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `UBERON:0000955` |
+| `imaging.bodyMeshId` | No | `string` | longitud máxima 64 | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `BP44` |
+| `imaging.boneTypeConceptId` | No | `string` | formato `uuid` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `00000000-0000-4000-8000-000000000001` |
+| `externalRequesterName` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `externalRequesterLicense` | No | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /diagnostics/lab/orders/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "category": "LAB",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "imaging": {
+    "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+    "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodyStructureUberon": "UBERON:0000955",
+    "bodyMeshId": "BP44",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
+  },
+  "externalRequesterName": "Nombre de ejemplo",
+  "externalRequesterLicense": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabOrderDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 409 | La orden no es editable | `Promise<LabOrderDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "studyName": "Nombre de ejemplo",
+  "patientName": "Nombre de ejemplo",
+  "requesterName": "Nombre de ejemplo",
+  "requestedAt": "2026-07-31T12:00:00.000Z",
+  "status": "DRAFT",
+  "reason": "Texto descriptivo de ejemplo",
+  "canReject": true,
+  "registeredByPerformer": true,
+  "canEdit": true,
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "externalRequesterName": "Nombre de ejemplo",
+  "externalRequesterLicense": "valor-ejemplo",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileName": "Nombre de ejemplo",
+      "sizeBytes": 1
+    }
+  ],
+  "report": {
+    "draftStatus": "DRAFT",
+    "publishedVersionId": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `patientName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requesterName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `status` | Sí | `string` | valores: `DRAFT`, `RECEIVED`, `PROCESSED`, `UPLOADED`, `CANCELLED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `canReject` | Sí | `boolean` | Sin restricción adicional declarada | Whether REJECT applies now: a received order with an open specimen. | `true` |
+| `registeredByPerformer` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `canEdit` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `priorityConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalRequesterName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `externalRequesterLicense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `files` | Sí | `array<LabOrderFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","sizeBytes":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `files[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `report` | Sí | `LabOrderReportStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"draftStatus":"DRAFT","publishedVersionId":"00000000-0000-4000-8000-000000000001"}` |
+| `report.draftStatus` | Sí | `string` | valores: `DRAFT`, `PUBLISHED`; admite null | Null when the tenant never opened a written report. | `DRAFT` |
+| `report.publishedVersionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Sólo se editan las órdenes que cargó el centro y que todavía no se recibieron. | Excepción explícita en src/modules/diagnostics/services/lab-portal-order-intake.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/clinical/services/service-request-detail.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/orders/{orderId}"
+}
+```
+
+---
+
+## 22. POST /diagnostics/lab/orders/{orderId}/transitions
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)
+- **Operation ID:** `DiagnosticsLabPortalController_transition`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.transition](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+CANCEL (desde DRAFT o RECEIVED) y REJECT (desde RECEIVED) valen para toda orden, imagenología incluida, y exigen `reason`: el ejecutor agrega un evento propio (`service_request_performer_events`) sin tocar la orden del solicitante. Una orden cancelada o rechazada deja de poder reservarse. Un paso que el estado no admite responde 409.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/orders/{orderId}/transitions` en `DiagnosticsLabPortalController_transition`. El controlador delega en `LabPortalOrdersService.transition`. Valida el body como `LabOrderTransitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabOrderDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `orderId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabOrderTransitionDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/orders/00000000-0000-4000-8000-000000000001/transitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "RECEIVE"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `orderId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `action` | Sí | `string` | valores: `RECEIVE`, `PROCESS`, `CANCEL`, `REJECT` | Sin descripción específica en el contrato OpenAPI. | `RECEIVE` |
+| `reason` | No | `string` | longitud máxima 1000; patrón runtime `/\S/` | Required (non-blank) when action is CANCEL or REJECT; ignored by RECEIVE and PROCESS | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/orders/00000000-0000-4000-8000-000000000001/transitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "RECEIVE",
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 400 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 409 | El estado actual no admite ese paso | `Promise<LabOrderDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "studyName": "Nombre de ejemplo",
+  "patientName": "Nombre de ejemplo",
+  "requesterName": "Nombre de ejemplo",
+  "requestedAt": "2026-07-31T12:00:00.000Z",
+  "status": "DRAFT",
+  "reason": "Texto descriptivo de ejemplo",
+  "canReject": true,
+  "registeredByPerformer": true,
+  "canEdit": true,
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "externalRequesterName": "Nombre de ejemplo",
+  "externalRequesterLicense": "valor-ejemplo",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileName": "Nombre de ejemplo",
+      "sizeBytes": 1
+    }
+  ],
+  "report": {
+    "draftStatus": "DRAFT",
+    "publishedVersionId": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `patientName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requesterName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `status` | Sí | `string` | valores: `DRAFT`, `RECEIVED`, `PROCESSED`, `UPLOADED`, `CANCELLED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `canReject` | Sí | `boolean` | Sin restricción adicional declarada | Whether REJECT applies now: a received order with an open specimen. | `true` |
+| `registeredByPerformer` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `canEdit` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `priorityConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `externalRequesterName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `externalRequesterLicense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `files` | Sí | `array<LabOrderFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","sizeBytes":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `files[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `report` | Sí | `LabOrderReportStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"draftStatus":"DRAFT","publishedVersionId":"00000000-0000-4000-8000-000000000001"}` |
+| `report.draftStatus` | Sí | `string` | valores: `DRAFT`, `PUBLISHED`; admite null | Null when the tenant never opened a written report. | `DRAFT` |
+| `report.publishedVersionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La orden no está en un estado que admita ese paso. | Excepción explícita en src/modules/diagnostics/services/lab-portal-orders.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/orders/{orderId}/transitions"
+}
+```
+
+---
+
+## 23. POST /diagnostics/lab/patients/lookup
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Paciente por número de documento, para cargar su orden
+- **Operation ID:** `DiagnosticsLabPortalController_lookupPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.lookupPatient](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Coincidencia exacta con el documento de identidad vigente. `POST` porque el documento es PHI y no viaja en la URL. 404 si nadie lo tiene.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/patients/lookup` en `DiagnosticsLabPortalController_lookupPatient`. El controlador delega en `LabPortalOrderIntakeService.lookupPatient`. Valida el body como `LabPatientLookupDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabPatientMatchDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabPatientLookupDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/patients/lookup HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `nationalId` | Sí | `string` | longitud máxima 40; patrón runtime `NOT_BLANK` | Exact national id number | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/patients/lookup HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabPatientMatchDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabPatientMatchDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "displayName": "Nombre de ejemplo",
+  "patientCode": "CODIGO_EJEMPLO"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `patientCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | NO_PATIENT | Excepción explícita en src/modules/diagnostics/services/lab-portal-order-intake.service.ts |
+| 409 | `CONFLICT` | Ese documento figura en más de un paciente. Pida a soporte que lo revise. | Excepción explícita en src/modules/diagnostics/services/lab-portal-order-intake.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/patients/lookup"
+}
+```
+
+---
+
+## 24. GET /diagnostics/lab/result-files
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Resultados subidos por el laboratorio
+- **Operation ID:** `DiagnosticsLabResultsController_listResultFiles`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabResultsController.listResultFiles](../../src/modules/diagnostics/controllers/diagnostics-lab-results.controller.ts)
+
+### Descripción de negocio
+
+Sin búsqueda por texto: puede ser un nombre de paciente y no viaja en la URL. Para buscar, `POST /diagnostics/lab/result-files/search`.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/result-files` en `DiagnosticsLabResultsController_listResultFiles`. El controlador delega en `LabPortalResultsService.list`. No recibe body. El tipo de retorno estático es `Promise<LabResultFilePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `kind` | query | No | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en OpenAPI. | `PDF` |
+| `orderId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `includeWithdrawn` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/result-files HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/result-files?kind=PDF&orderId=00000000-0000-4000-8000-000000000001&includeWithdrawn=true HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultFilePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileName": "Nombre de ejemplo",
+      "contentType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "kind": "PDF",
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "uploadedBy": "valor-ejemplo",
+      "orderId": "00000000-0000-4000-8000-000000000001",
+      "orderLabel": "valor-ejemplo",
+      "patientName": "Nombre de ejemplo",
+      "note": "valor-ejemplo",
+      "notified": true,
+      "status": "AVAILABLE",
+      "withdrawnReason": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "count": 1,
+  "totalBytes": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabResultFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","contentType":"valor-ejemplo","sizeBytes":1,"kind":"PDF","uploadedAt":"2026-07-31T12:00:00.000Z","uploadedBy":"valor-ejemplo","orderId":"00000000-0000-4000-8000-000000000001","orderLabel":"valor-ejemplo","patientName":"Nombre de ejemplo","note":"valor-ejemplo","notified":true,"status":"AVAILABLE","withdrawnReason":"Texto descriptivo de ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].contentType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].kind` | Sí | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `items[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].uploadedBy` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].orderId` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].orderLabel` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].notified` | Sí | `boolean` | Sin restricción adicional declarada | The API does not send notifications from this portal: always `false`. | `true` |
+| `items[].status` | Sí | `string` | valores: `AVAILABLE`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `items[].withdrawnReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `totalBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-files"
+}
+```
+
+---
+
+## 25. GET /diagnostics/lab/result-files/{id}/content
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Descargar un resultado subido
+- **Operation ID:** `DiagnosticsLabResultsController_getResultContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabResultsController.getResultContent](../../src/modules/diagnostics/controllers/diagnostics-lab-results.controller.ts)
+
+### Descripción de negocio
+
+Descargar un resultado subido. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/result-files/{id}/content` en `DiagnosticsLabResultsController_getResultContent`. El controlador delega en `LabPortalResultsService.content`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/result-files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/result-files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Bytes del archivo | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | La descarga de archivos no está disponible | Excepción explícita en src/modules/diagnostics/services/lab-portal-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-files/{id}/content"
+}
+```
+
+---
+
+## 26. POST /diagnostics/lab/result-files/{id}/withdrawal
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Retirar un resultado subido por error (queda en el historial)
+- **Operation ID:** `DiagnosticsLabResultsController_withdrawResult`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabResultsController.withdrawResult](../../src/modules/diagnostics/controllers/diagnostics-lab-results.controller.ts)
+
+### Descripción de negocio
+
+Retirar un resultado subido por error (queda en el historial). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/result-files/{id}/withdrawal` en `DiagnosticsLabResultsController_withdrawResult`. El controlador delega en `LabPortalResultWritesService.withdraw`. Valida el body como `LabResultWithdrawalDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabResultFileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabResultWithdrawalDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/result-files/00000000-0000-4000-8000-000000000001/withdrawal HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/result-files/00000000-0000-4000-8000-000000000001/withdrawal HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultFileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "fileName": "Nombre de ejemplo",
+  "contentType": "valor-ejemplo",
+  "sizeBytes": 1,
+  "kind": "PDF",
+  "uploadedAt": "2026-07-31T12:00:00.000Z",
+  "uploadedBy": "valor-ejemplo",
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "orderLabel": "valor-ejemplo",
+  "patientName": "Nombre de ejemplo",
+  "note": "valor-ejemplo",
+  "notified": true,
+  "status": "AVAILABLE",
+  "withdrawnReason": "Texto descriptivo de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `contentType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `kind` | Sí | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `uploadedBy` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `orderId` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `orderLabel` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notified` | Sí | `boolean` | Sin restricción adicional declarada | The API does not send notifications from this portal: always `false`. | `true` |
+| `status` | Sí | `string` | valores: `AVAILABLE`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `withdrawnReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | El archivo ya estaba retirado. | Excepción explícita en src/modules/diagnostics/services/lab-portal-result-writes.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-files/{id}/withdrawal"
+}
+```
+
+---
+
+## 27. POST /diagnostics/lab/result-files/search
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Buscar entre los resultados subidos (filtros en el cuerpo)
+- **Operation ID:** `DiagnosticsLabResultsController_searchResultFiles`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabResultsController.searchResultFiles](../../src/modules/diagnostics/controllers/diagnostics-lab-results.controller.ts)
+
+### Descripción de negocio
+
+Buscar entre los resultados subidos (filtros en el cuerpo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/result-files/search` en `DiagnosticsLabResultsController_searchResultFiles`. El controlador delega en `LabPortalResultsService.list`. Valida el body como `LabResultFileSearchDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabResultFilePageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabResultFileSearchDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/result-files/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | No | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `orderId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `includeWithdrawn` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `q` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/result-files/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "PDF",
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "includeWithdrawn": true,
+  "q": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabResultFilePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultFilePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileName": "Nombre de ejemplo",
+      "contentType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "kind": "PDF",
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "uploadedBy": "valor-ejemplo",
+      "orderId": "00000000-0000-4000-8000-000000000001",
+      "orderLabel": "valor-ejemplo",
+      "patientName": "Nombre de ejemplo",
+      "note": "valor-ejemplo",
+      "notified": true,
+      "status": "AVAILABLE",
+      "withdrawnReason": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "count": 1,
+  "totalBytes": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabResultFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileName":"Nombre de ejemplo","contentType":"valor-ejemplo","sizeBytes":1,"kind":"PDF","uploadedAt":"2026-07-31T12:00:00.000Z","uploadedBy":"valor-ejemplo","orderId":"00000000-0000-4000-8000-000000000001","orderLabel":"valor-ejemplo","patientName":"Nombre de ejemplo","note":"valor-ejemplo","notified":true,"status":"AVAILABLE","withdrawnReason":"Texto descriptivo de ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].contentType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].kind` | Sí | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `items[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].uploadedBy` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].orderId` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].orderLabel` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].notified` | Sí | `boolean` | Sin restricción adicional declarada | The API does not send notifications from this portal: always `false`. | `true` |
+| `items[].status` | Sí | `string` | valores: `AVAILABLE`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `items[].withdrawnReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `totalBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-files/search"
+}
+```
+
+---
+
+## 28. GET /diagnostics/lab/result-targets
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Órdenes procesadas a las que se puede adjuntar un resultado
+- **Operation ID:** `DiagnosticsLabPortalController_listResultTargets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.listResultTargets](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Órdenes procesadas a las que se puede adjuntar un resultado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/result-targets` en `DiagnosticsLabPortalController_listResultTargets`. El controlador delega en `LabPortalResultsService.targets`. No recibe body. El tipo de retorno estático es `Promise<LabResultTargetPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/result-targets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/result-targets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabResultTargetPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultTargetPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "orderId": "00000000-0000-4000-8000-000000000001",
+      "studyName": "Nombre de ejemplo",
+      "patientName": "Nombre de ejemplo",
+      "requesterName": "Nombre de ejemplo",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "fileCount": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabResultTargetDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"orderId":"00000000-0000-4000-8000-000000000001","studyName":"Nombre de ejemplo","patientName":"Nombre de ejemplo","requesterName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","fileCount":1}]` |
+| `items[].orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].patientName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].requesterName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].fileCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-targets"
+}
+```
+
+---
+
+## 29. POST /diagnostics/lab/result-uploads
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Empezar la subida por partes de un resultado
+- **Operation ID:** `DiagnosticsLabUploadsController_start`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabUploadsController.start](../../src/modules/diagnostics/controllers/diagnostics-lab-uploads.controller.ts)
+
+### Descripción de negocio
+
+Exige una orden procesada del tenant activo (409 si no lo está). El tamaño total no puede superar `FILE_STORAGE_MAX_SIZE_BYTES` (422).
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/result-uploads` en `DiagnosticsLabUploadsController_start`. El controlador delega en `LabPortalUploadsService.start`. Valida el body como `LabResultUploadStartDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabResultUploadSessionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabResultUploadStartDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/result-uploads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileName": "Nombre de ejemplo",
+  "contentType": "valor-ejemplo",
+  "sizeBytes": 1,
+  "orderId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileName` | Sí | `string` | longitud mínima 1; longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `contentType` | Sí | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sizeBytes` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `note` | No | `string` | longitud máxima 1000; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notify` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/result-uploads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileName": "Nombre de ejemplo",
+  "contentType": "valor-ejemplo",
+  "sizeBytes": 1,
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "note": "valor-ejemplo",
+  "notify": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabResultUploadSessionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultUploadSessionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "uploadId": "00000000-0000-4000-8000-000000000001",
+  "chunkSizeBytes": 1,
+  "totalParts": 1,
+  "receivedParts": [
+    1
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `uploadId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `chunkSizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `totalParts` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `receivedParts` | Sí | `array<number>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Hay demasiadas subidas abiertas; termine o cancele alguna. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 409 | `CONFLICT` | Marque la orden como procesada antes de subir sus resultados. | Excepción explícita en src/modules/diagnostics/services/lab-portal-results.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-uploads"
+}
+```
+
+---
+
+## 30. DELETE /diagnostics/lab/result-uploads/{uploadId}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Cancelar una subida abierta
+- **Operation ID:** `DiagnosticsLabUploadsController_abort`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabUploadsController.abort](../../src/modules/diagnostics/controllers/diagnostics-lab-uploads.controller.ts)
+
+### Descripción de negocio
+
+Cancelar una subida abierta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostics/lab/result-uploads/{uploadId}` en `DiagnosticsLabUploadsController_abort`. El controlador delega en `LabPortalUploadsService.abort`. No recibe body. El tipo de retorno estático es `void`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `uploadId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `uploadId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `void` | No |
+| 400 | Operación completada correctamente. | `void` | No |
+| 401 | Operación completada correctamente. | `void` | No |
+| 403 | Operación completada correctamente. | `void` | No |
+| 404 | Operación completada correctamente. | `void` | No |
+| 409 | Operación completada correctamente. | `void` | No |
+| 422 | Operación completada correctamente. | `void` | No |
+| 429 | Operación completada correctamente. | `void` | No |
+| 500 | Operación completada correctamente. | `void` | No |
+| 504 | Operación completada correctamente. | `void` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La subida se está cerrando. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-uploads/{uploadId}"
+}
+```
+
+---
+
+## 31. POST /diagnostics/lab/result-uploads/{uploadId}/complete
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Cerrar la subida: guarda el archivo y lo publica en el informe
+- **Operation ID:** `DiagnosticsLabUploadsController_complete`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabUploadsController.complete](../../src/modules/diagnostics/controllers/diagnostics-lab-uploads.controller.ts)
+
+### Descripción de negocio
+
+Cerrar la subida: guarda el archivo y lo publica en el informe. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/result-uploads/{uploadId}/complete` en `DiagnosticsLabUploadsController_complete`. El controlador delega en `LabPortalUploadsService.complete`. No recibe body. El tipo de retorno estático es `Promise<LabResultFileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `uploadId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001/complete HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `uploadId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001/complete HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<LabResultFileDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabResultFileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabResultFileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "fileName": "Nombre de ejemplo",
+  "contentType": "valor-ejemplo",
+  "sizeBytes": 1,
+  "kind": "PDF",
+  "uploadedAt": "2026-07-31T12:00:00.000Z",
+  "uploadedBy": "valor-ejemplo",
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "orderLabel": "valor-ejemplo",
+  "patientName": "Nombre de ejemplo",
+  "note": "valor-ejemplo",
+  "notified": true,
+  "status": "AVAILABLE",
+  "withdrawnReason": "Texto descriptivo de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `contentType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `kind` | Sí | `string` | valores: `PDF`, `IMAGE`, `VIDEO`, `AUDIO`, `TEXT`, `DICOM`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `uploadedBy` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `orderId` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `orderLabel` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `notified` | Sí | `boolean` | Sin restricción adicional declarada | The API does not send notifications from this portal: always `false`. | `true` |
+| `status` | Sí | `string` | valores: `AVAILABLE`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `withdrawnReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La subida no existe o ya se cerró. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/files.service.ts |
+| 409 | `CONFLICT` | Faltan ${missing.length} partes del archivo. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 409 | `CONFLICT` | La subida ya se está cerrando. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 409 | `CONFLICT` | Marque la orden como procesada antes de subir sus resultados. | Excepción explícita en src/modules/diagnostics/services/lab-portal-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo está bajo retención legal y no puede borrarse | Excepción explícita en src/modules/common/services/files.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El contenido no corresponde a ningún formato de archivo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El formato del archivo no está permitido para esta categoría | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-uploads/{uploadId}/complete"
+}
+```
+
+---
+
+## 32. PUT /diagnostics/lab/result-uploads/{uploadId}/parts/{index}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Mandar una parte (bytes crudos)
+- **Operation ID:** `DiagnosticsLabUploadsController_putPart`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabUploadsController.putPart](../../src/modules/diagnostics/controllers/diagnostics-lab-uploads.controller.ts)
+
+### Descripción de negocio
+
+Otro Content-Type distinto de octet-stream es 415.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostics/lab/result-uploads/{uploadId}/parts/{index}` en `DiagnosticsLabUploadsController_putPart`. El controlador delega en `LabPortalUploadsService.expectedPartSize`, `LabPortalUploadsService.putPart`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `uploadId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `index` | path | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PUT /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001/parts/1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `uploadId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PUT /diagnostics/lab/result-uploads/00000000-0000-4000-8000-000000000001/parts/1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | La parte ${index} está fuera de rango. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 400 | `VALIDATION_FAILED` | La parte ${index} trae ${part.byteLength} bytes y se esperaban ${expected}. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La subida no existe o ya se cerró. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 409 | `CONFLICT` | La subida se está cerrando. | Excepción explícita en src/modules/diagnostics/services/lab-portal-uploads.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/result-uploads/{uploadId}/parts/{index}"
+}
+```
+
+---
+
+## 33. GET /diagnostics/lab/summary
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Resumen del laboratorio del tenant activo
+- **Operation ID:** `DiagnosticsLabPortalController_getSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabPortalController.getSummary](../../src/modules/diagnostics/controllers/diagnostics-lab-portal.controller.ts)
+
+### Descripción de negocio
+
+Resumen del laboratorio del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/summary` en `DiagnosticsLabPortalController_getSummary`. El controlador delega en `LabPortalSummaryService.summary`. No recibe body. El tipo de retorno estático es `Promise<LabSummaryDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "labName": "Nombre de ejemplo",
+  "published": 1,
+  "drafts": 1,
+  "withdrawn": 1,
+  "unavailable": 1,
+  "ordersWithoutResults": 1,
+  "resultFiles": 1,
+  "resultBytes": 1,
+  "byCategory": [
+    {
+      "categoryId": "00000000-0000-4000-8000-000000000001",
+      "category": "valor-ejemplo",
+      "count": 1
+    }
+  ],
+  "recentActivity": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "at": "2026-07-31T12:00:00.000Z",
+      "kind": {},
+      "text": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `labName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `published` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `drafts` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withdrawn` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `unavailable` | Sí | `number` | Sin restricción adicional declarada | Services (not withdrawn) switched off with "available today" = false | `1` |
+| `ordersWithoutResults` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `resultFiles` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `resultBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byCategory` | Sí | `array<LabCategoryCountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"categoryId":"00000000-0000-4000-8000-000000000001","category":"valor-ejemplo","count":1}]` |
+| `byCategory[].categoryId` | Sí | `string` | formato `uuid`; admite null | Null for the «Sin categoría» bucket | `00000000-0000-4000-8000-000000000001` |
+| `byCategory[].category` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `byCategory[].count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `recentActivity` | Sí | `array<LabActivityEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","at":"2026-07-31T12:00:00.000Z","kind":{},"text":"valor-ejemplo"}]` |
+| `recentActivity[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `recentActivity[].at` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `recentActivity[].kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof LAB_ACTIVITY_KINDS)[number] | `{}` |
+| `recentActivity[].text` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/summary"
+}
+```
+
+---
+
+## 34. GET /diagnostics/patients/{patientProfileId}/imaging-studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2789,7 +4994,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /diagnostics/patients/{patientProfileId}/orders
+## 35. GET /diagnostics/patients/{patientProfileId}/orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-orders`
@@ -2869,6 +5074,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "patientProfileId": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "formInstanceId": "00000000-0000-4000-8000-000000000001",
+      "reasonConditionId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
       "category": {},
@@ -2904,6 +5110,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "currentVersionId": "00000000-0000-4000-8000-000000000001",
       "currentReleasedVersionId": "00000000-0000-4000-8000-000000000001",
       "resultReleaseStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "releasedVersionId": "00000000-0000-4000-8000-000000000001",
+      "patientVisibility": {},
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
@@ -2919,11 +5127,12 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","reasonConditionId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","suggestedCareSpace":{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"},"createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
 | `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].formInstanceId` | No | `string` | formato `uuid` | P43: instancia del formulario médico de la que salió la orden, si salió de uno. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].reasonConditionId` | No | `string` | formato `uuid` | v4295: diagnóstico que el estudio se pidió para confirmar, descartar o seguir; ausente si no lo declara. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].category` | No | `object` | Sin restricción adicional declarada | P40: categoría de análisis derivada del concepto; ausente = sin clasificar. | `{}` |
@@ -2942,7 +5151,7 @@ Campos de la respuesta:
 | `orders[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
 | `orders[].previousDiagnosticReportId` | No | `string` | formato `uuid` | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].duplicateOverrideReason` | No | `string` | Sin restricción adicional declarada | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `Texto descriptivo de ejemplo` |
-| `reports` | Sí | `array<DiagnosticReportSummaryDto>` | Sin restricción adicional declarada | Informes diagnósticos, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","currentReleasedVersionId":"00000000-0000-4000-8000-000000000001","resultReleaseStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `reports` | Sí | `array<DiagnosticReportSummaryDto>` | Sin restricción adicional declarada | Informes diagnósticos, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","currentReleasedVersionId":"00000000-0000-4000-8000-000000000001","resultReleaseStatusConceptId":"00000000-0000-4000-8000-000000000001","releasedVersionId":"00000000-0000-4000-8000-000000000001","patientVisibility":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `reports[].id` | Sí | `string` | formato `uuid` | Identificador del informe. | `00000000-0000-4000-8000-000000000001` |
 | `reports[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `reports[].serviceRequestId` | No | `string` | formato `uuid` | Orden que lo originó, si cuelga de una. | `00000000-0000-4000-8000-000000000001` |
@@ -2953,6 +5162,8 @@ Campos de la respuesta:
 | `reports[].currentVersionId` | No | `string` | formato `uuid` | Versión vigente, esté liberada o no. | `00000000-0000-4000-8000-000000000001` |
 | `reports[].currentReleasedVersionId` | No | `string` | formato `uuid` | Versión liberada al paciente, si alguna lo está. | `00000000-0000-4000-8000-000000000001` |
 | `reports[].resultReleaseStatusConceptId` | No | `string` | formato `uuid` | Estado de liberación de resultados (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `reports[].releasedVersionId` | Sí | `string` | formato `uuid`; admite null | Released version whose patient visibility `patientVisibility` reports. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Latest release event of that version: `HELD` means the requester still has to release it (`POST /diagnostics/reports/:id/patient-release`). | `{}` |
 | `reports[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se emitió. | `2026-07-31T12:00:00.000Z` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque. | `1` |
 | `truncated` | Sí | `array<string>` | Sin restricción adicional declarada | Bloques que quedaron recortados por el tope. | `["valor-ejemplo"]` |
@@ -2983,7 +5194,1936 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /diagnostics/reports/{reportId}/versions
+## 36. GET /diagnostics/patients/{patientProfileId}/reports/{reportId}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-orders`
+- **Nombre:** Resultado liberado de un informe del paciente
+- **Operation ID:** `DiagnosticsOrdersController_getReleasedResult`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsOrdersController.getReleasedResult](../../src/modules/diagnostics/controllers/diagnostics-orders.controller.ts)
+
+### Descripción de negocio
+
+Valores con unidad, rango de referencia e interpretación, conclusión, fecha de liberación y archivos de la versión liberada vigente. Un informe sin liberar responde 404.
+
+Contexto declarado en el controlador: El resultado liberado de un informe del paciente: valores, conclusión y archivos. Misma puerta que la lista de órdenes (`ClinicalRecordAccessGuard`, 403 sin acceso a la historia) y mismo alcance de lectura: pasada la puerta, lo que la lista no mostraría (inexistente, de otro paciente u organización, fuera del alcance) o sin versión liberada responde el mismo 404.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/patients/{patientProfileId}/reports/{reportId}` en `DiagnosticsOrdersController_getReleasedResult`. El controlador delega en `DiagnosticsPractitionerResultsService.getReleasedResult`. No recibe body. El tipo de retorno estático es `Promise<PractitionerDiagnosticResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reportId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/reports/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`, `reportId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/reports/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 403 | Sin acceso a la historia | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 404 | No existe, no es de ese paciente u organización, o no está liberado | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerDiagnosticResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerDiagnosticResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "reportId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "codeDisplay": "CODIGO_EJEMPLO",
+  "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "versionNumber": 1,
+  "clinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "issuedAt": "2026-07-31T12:00:00.000Z",
+  "releasedAt": "2026-07-31T12:00:00.000Z",
+  "patientVisible": true,
+  "conclusionText": "valor-ejemplo",
+  "values": [
+    {
+      "observationId": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "value": "valor-ejemplo",
+      "valueKind": "QUANTITY",
+      "valueConceptId": "00000000-0000-4000-8000-000000000001",
+      "unitConceptId": "00000000-0000-4000-8000-000000000001",
+      "unit": "valor-ejemplo",
+      "referenceRange": {
+        "low": "valor-ejemplo",
+        "high": "valor-ejemplo",
+        "text": "valor-ejemplo",
+        "unitConceptId": "00000000-0000-4000-8000-000000000001",
+        "unit": "valor-ejemplo"
+      },
+      "interpretationConceptId": "00000000-0000-4000-8000-000000000001",
+      "interpretationCode": "CODIGO_EJEMPLO",
+      "interpretation": "valor-ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "effectiveAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "contentRoleConceptId": "00000000-0000-4000-8000-000000000001",
+      "presentationFormatConceptId": "00000000-0000-4000-8000-000000000001",
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `codeDisplay` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `categoryConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `versionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `versionNumber` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `clinicalStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `issuedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `releasedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `patientVisible` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values` | Sí | `array<DiagnosticResultValueDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"observationId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","value":"valor-ejemplo","valueKind":"QUANTITY","valueConceptId":"00000000-0000-4000-8000-000000000001","unitConceptId":"00000000-0000-4000-8000-000000000001","unit":"valor-ejemplo","referenceRange":{"low":"valor-ejemplo","high":"valor-ejemplo","text":"valor-ejemplo","unitConceptId":"00000000-0000-4000-8000-000000000001","unit":"valor-ejemplo"},"interpretationConceptId":"00000000-0000-4000-8000-000000000001","interpretationCode":"CODIGO_EJEMPLO","interpretation":"valor-ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","effectiveAt":"2026-07-31T12:00:00.000Z"}]` |
+| `values[].observationId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].name` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `values[].value` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].valueKind` | Sí | `string` | valores: `QUANTITY`, `DECIMAL`, `INTEGER`, `TEXT`, `BOOLEAN`, `CONCEPT`, `DATETIME`, `DATE`; admite null | Sin descripción específica en el contrato OpenAPI. | `QUANTITY` |
+| `values[].valueConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].unitConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].unit` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].referenceRange` | Sí | `DiagnosticResultReferenceRangeDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"low":"valor-ejemplo","high":"valor-ejemplo","text":"valor-ejemplo","unitConceptId":"00000000-0000-4000-8000-000000000001","unit":"valor-ejemplo"}` |
+| `values[].referenceRange.low` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].referenceRange.high` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].referenceRange.text` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].referenceRange.unitConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].referenceRange.unit` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].interpretationConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].interpretationCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `values[].interpretation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `values[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `values[].effectiveAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<DiagnosticResultFileSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","contentRoleConceptId":"00000000-0000-4000-8000-000000000001","presentationFormatConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].name` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `files[].contentRoleConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].presentationFormatConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].ordinal` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/patients/{patientProfileId}/reports/{reportId}"
+}
+```
+
+---
+
+## 37. GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-orders`
+- **Nombre:** Descargar un archivo del resultado liberado
+- **Operation ID:** `DiagnosticsOrdersController_getReleasedResultFileContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsOrdersController.getReleasedResultFileContent](../../src/modules/diagnostics/controllers/diagnostics-orders.controller.ts)
+
+### Descripción de negocio
+
+Autoriza por acceso a la historia, alcance de lectura, informe liberado del paciente y archivo de esa versión. Todo lo demás responde 404.
+
+Contexto declarado en el controlador: Los bytes de un archivo del resultado liberado.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content` en `DiagnosticsOrdersController_getReleasedResultFileContent`. El controlador delega en `DiagnosticsPractitionerResultsService.getReleasedResultFileContent`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reportId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/reports/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`, `reportId`, `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/reports/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Bytes del archivo | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Sin acceso a la historia | `Promise<void>` | No |
+| 404 | El informe no está disponible o el archivo no cuelga de su versión liberada | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | La descarga de archivos no está disponible | Excepción explícita en src/modules/diagnostics/services/diagnostics-practitioner-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content"
+}
+```
+
+---
+
+## 38. POST /diagnostics/report-drafts
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Abrir (u obtener) el borrador del informe de una orden
+- **Operation ID:** `DiagnosticsReportDraftsController_open`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.open](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Abrir (u obtener) el borrador del informe de una orden. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/report-drafts` en `DiagnosticsReportDraftsController_open`. El controlador delega en `ReportDraftsService.open`. Valida el body como `CreateReportDraftDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReportDraftDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateReportDraftDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/report-drafts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/report-drafts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDraftDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "body": {
+    "clave": "valor"
+  },
+  "conclusionText": "valor-ejemplo",
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": {},
+  "rowVersion": 1,
+  "diagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "publishedVersionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "publishedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "role": {},
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` with heading, paragraph and list blocks. | `{"clave":"valor"}` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `diagnosticReportId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `publishedVersionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid`; admite null | File id of the official PDF; null until published. | `00000000-0000-4000-8000-000000000001` |
+| `publishedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<ReportDraftFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","role":{},"ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_DRAFT_FILE_ROLES)[number] | `{}` |
+| `files[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts"
+}
+```
+
+---
+
+## 39. GET /diagnostics/report-drafts/{id}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Borrador del informe
+- **Operation ID:** `DiagnosticsReportDraftsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.get](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Borrador del informe. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/report-drafts/{id}` en `DiagnosticsReportDraftsController_get`. El controlador delega en `ReportDraftsService.get`. No recibe body. El tipo de retorno estático es `Promise<ReportDraftDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReportDraftDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDraftDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "body": {
+    "clave": "valor"
+  },
+  "conclusionText": "valor-ejemplo",
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": {},
+  "rowVersion": 1,
+  "diagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "publishedVersionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "publishedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "role": {},
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` with heading, paragraph and list blocks. | `{"clave":"valor"}` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `diagnosticReportId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `publishedVersionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid`; admite null | File id of the official PDF; null until published. | `00000000-0000-4000-8000-000000000001` |
+| `publishedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<ReportDraftFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","role":{},"ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_DRAFT_FILE_ROLES)[number] | `{}` |
+| `files[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}"
+}
+```
+
+---
+
+## 40. PUT /diagnostics/report-drafts/{id}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Guardar el borrador (409 si cambió o ya se publicó)
+- **Operation ID:** `DiagnosticsReportDraftsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.update](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Guardar el borrador (409 si cambió o ya se publicó). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostics/report-drafts/{id}` en `DiagnosticsReportDraftsController_update`. El controlador delega en `ReportDraftsService.update`. Valida el body como `UpdateReportDraftDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReportDraftDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateReportDraftDto`; los campos opcionales se omiten.
+
+```http
+PUT /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rowVersion": 1,
+  "body": {
+    "clave": "valor"
+  },
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": "VISIBLE"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `rowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` | `{"clave":"valor"}` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `string` | valores: `VISIBLE`, `HELD` | Sin descripción específica en el contrato OpenAPI. | `VISIBLE` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rowVersion": 1,
+  "body": {
+    "clave": "valor"
+  },
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": "VISIBLE"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDraftDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "body": {
+    "clave": "valor"
+  },
+  "conclusionText": "valor-ejemplo",
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": {},
+  "rowVersion": 1,
+  "diagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "publishedVersionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "publishedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "role": {},
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` with heading, paragraph and list blocks. | `{"clave":"valor"}` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `diagnosticReportId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `publishedVersionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid`; admite null | File id of the official PDF; null until published. | `00000000-0000-4000-8000-000000000001` |
+| `publishedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<ReportDraftFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","role":{},"ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_DRAFT_FILE_ROLES)[number] | `{}` |
+| `files[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El firmante elegido no está entre los profesionales de la organización | Excepción explícita en src/modules/diagnostics/services/report-signers.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}"
+}
+```
+
+---
+
+## 41. POST /diagnostics/report-drafts/{id}/files
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Adjuntar documento, audio o anexo al borrador
+- **Operation ID:** `DiagnosticsReportDraftsController_attachFile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.attachFile](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Adjuntar documento, audio o anexo al borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/report-drafts/{id}/files` en `DiagnosticsReportDraftsController_attachFile`. El controlador delega en `ReportDraftsService.attachFile`. Valida el body como `AttachReportDraftFileDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReportDraftDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AttachReportDraftFileDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/files HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "role": "DOCUMENT"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `role` | Sí | `string` | valores: `DOCUMENT`, `AUDIO`, `ANNEX` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/files HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "role": "DOCUMENT"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ReportDraftDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDraftDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "body": {
+    "clave": "valor"
+  },
+  "conclusionText": "valor-ejemplo",
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": {},
+  "rowVersion": 1,
+  "diagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "publishedVersionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "publishedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "role": {},
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` with heading, paragraph and list blocks. | `{"clave":"valor"}` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `diagnosticReportId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `publishedVersionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid`; admite null | File id of the official PDF; null until published. | `00000000-0000-4000-8000-000000000001` |
+| `publishedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<ReportDraftFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","role":{},"ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_DRAFT_FILE_ROLES)[number] | `{}` |
+| `files[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | El archivo ya está en el borrador | Excepción explícita en src/modules/diagnostics/services/report-drafts.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}/files"
+}
+```
+
+---
+
+## 42. DELETE /diagnostics/report-drafts/{id}/files/{draftFileId}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Quitar un archivo del borrador
+- **Operation ID:** `DiagnosticsReportDraftsController_removeFile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.removeFile](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Quitar un archivo del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostics/report-drafts/{id}/files/{draftFileId}` en `DiagnosticsReportDraftsController_removeFile`. El controlador delega en `ReportDraftsService.removeFile`. No recibe body. El tipo de retorno estático es `Promise<ReportDraftDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draftFileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`, `draftFileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportDraftDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDraftDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "body": {
+    "clave": "valor"
+  },
+  "conclusionText": "valor-ejemplo",
+  "signerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": {},
+  "rowVersion": 1,
+  "diagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "publishedVersionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "publishedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "files": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "role": {},
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `body` | Sí | `object` | Sin restricción adicional declarada | `{ version: 1, blocks: Block[] }` with heading, paragraph and list blocks. | `{"clave":"valor"}` |
+| `conclusionText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `signerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `diagnosticReportId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `publishedVersionId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid`; admite null | File id of the official PDF; null until published. | `00000000-0000-4000-8000-000000000001` |
+| `publishedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `files` | Sí | `array<ReportDraftFileDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","role":{},"ordinal":1}]` |
+| `files[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `files[].role` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_DRAFT_FILE_ROLES)[number] | `{}` |
+| `files[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}/files/{draftFileId}"
+}
+```
+
+---
+
+## 43. POST /diagnostics/report-drafts/{id}/preview
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Vista previa en PDF con marca de agua «BORRADOR»
+- **Operation ID:** `DiagnosticsReportPublishController_preview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportPublishController.preview](../../src/modules/diagnostics/controllers/diagnostics-report-publish.controller.ts)
+
+### Descripción de negocio
+
+Vista previa en PDF con marca de agua «BORRADOR». Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/report-drafts/{id}/preview` en `DiagnosticsReportPublishController_preview`. El controlador delega en `ReportPublishService.preview`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | application/pdf | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}/preview"
+}
+```
+
+---
+
+## 44. POST /diagnostics/report-drafts/{id}/publish
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Publicar el informe: versión inmutable, PDF oficial y liberación
+- **Operation ID:** `DiagnosticsReportPublishController_publish`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportPublishController.publish](../../src/modules/diagnostics/controllers/diagnostics-report-publish.controller.ts)
+
+### Descripción de negocio
+
+Publicar el informe: versión inmutable, PDF oficial y liberación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/report-drafts/{id}/publish` en `DiagnosticsReportPublishController_publish`. El controlador delega en `ReportPublishService.publish`. Valida el body como `PublishReportDraftDto` y consume `application/json`. El tipo de retorno estático es `Promise<PublishedReportDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PublishReportDraftDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/publish HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rowVersion": 1,
+  "confirmIrreversible": true
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `rowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `confirmIrreversible` | Sí | `boolean` | valores: `true` | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/publish HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rowVersion": 1,
+  "confirmIrreversible": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishedReportDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishedReportDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "reportId": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "officialFileId": "00000000-0000-4000-8000-000000000001",
+  "status": "PUBLISHED",
+  "patientVisibility": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `versionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `officialFileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `patientVisibility` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof REPORT_PATIENT_VISIBILITIES)[number] | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para publicar hacen falta un firmante y el texto del informe | Excepción explícita en src/modules/diagnostics/services/report-publish.service.ts |
+| 422 | `PRECONDITION_FAILED` | El firmante elegido no está entre los profesionales de la organización | Excepción explícita en src/modules/diagnostics/services/report-signers.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | El artefacto generado no tiene contenido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El artefacto generado excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}/publish"
+}
+```
+
+---
+
+## 45. POST /diagnostics/report-drafts/{id}/signature-request
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Pedir al firmante elegido que revise y publique con su firma
+- **Operation ID:** `DiagnosticsReportPublishController_requestSignature`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportPublishController.requestSignature](../../src/modules/diagnostics/controllers/diagnostics-report-publish.controller.ts)
+
+### Descripción de negocio
+
+Solo el firmante publica con su propia firma (403 REPORT_SIGNER_MUST_PUBLISH para cualquier otro); quien prepara el borrador le avisa con esta ruta.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/report-drafts/{id}/signature-request` en `DiagnosticsReportPublishController_requestSignature`. El controlador delega en `ReportPublishService.requestSignature`. No recibe body. El tipo de retorno estático es `Promise<{ readonly requested: true }>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/signature-request HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /diagnostics/report-drafts/00000000-0000-4000-8000-000000000001/signature-request HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 400 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 401 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 403 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 404 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 409 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 422 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 429 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 500 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ readonly requested: true }>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ readonly requested: true }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "requested": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `requested` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: true | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para pedir la firma hacen falta un firmante y el texto del informe | Excepción explícita en src/modules/diagnostics/services/report-publish.service.ts |
+| 422 | `PRECONDITION_FAILED` | El firmante elegido no está entre los profesionales de la organización | Excepción explícita en src/modules/diagnostics/services/report-signers.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/{id}/signature-request"
+}
+```
+
+---
+
+## 46. GET /diagnostics/report-drafts/signers
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Profesionales que pueden firmar informes
+- **Operation ID:** `DiagnosticsReportDraftsController_listSigners`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportDraftsController.listSigners](../../src/modules/diagnostics/controllers/diagnostics-report-drafts.controller.ts)
+
+### Descripción de negocio
+
+Profesionales que pueden firmar informes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Declared before `:id`, so `signers` is never parsed as an id.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/report-drafts/signers` en `DiagnosticsReportDraftsController_listSigners`. El controlador delega en `ReportSignersService.list`, `EntityManager.fork`. No recibe body. El tipo de retorno estático es `Promise<ReportSignerListDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/report-drafts/signers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/report-drafts/signers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReportSignerListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportSignerListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "registration": "valor-ejemplo",
+      "hasSignature": true,
+      "hasSeal": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReportSignerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","registration":"valor-ejemplo","hasSignature":true,"hasSeal":true}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].registration` | Sí | `string` | admite null | National registration (matrícula), if declared. | `valor-ejemplo` |
+| `items[].hasSignature` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].hasSeal` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-drafts/signers"
+}
+```
+
+---
+
+## 47. GET /diagnostics/report-issuer-settings
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Firma, sello y responsable de los informes
+- **Operation ID:** `DiagnosticsReportReleaseController_getSettings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportReleaseController.getSettings](../../src/modules/diagnostics/controllers/diagnostics-report-release.controller.ts)
+
+### Descripción de negocio
+
+Firma, sello y responsable de los informes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/report-issuer-settings` en `DiagnosticsReportReleaseController_getSettings`. El controlador delega en `ReportIssuerSettingsService.get`. No recibe body. El tipo de retorno estático es `Promise<ReportIssuerSettingsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/report-issuer-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/report-issuer-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportIssuerSettingsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "responsibleName": "Nombre de ejemplo",
+  "responsibleTitle": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sealFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `responsibleName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `responsibleTitle` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-issuer-settings"
+}
+```
+
+---
+
+## 48. PUT /diagnostics/report-issuer-settings
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Cambiar firma, sello y responsable (OWNER/ADMIN)
+- **Operation ID:** `DiagnosticsReportReleaseController_setSettings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportReleaseController.setSettings](../../src/modules/diagnostics/controllers/diagnostics-report-release.controller.ts)
+
+### Descripción de negocio
+
+Cambiar firma, sello y responsable (OWNER/ADMIN). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostics/report-issuer-settings` en `DiagnosticsReportReleaseController_setSettings`. El controlador delega en `ReportIssuerSettingsService.set`. Valida el body como `UpdateReportIssuerSettingsDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReportIssuerSettingsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateReportIssuerSettingsDto`; los campos opcionales se omiten.
+
+```http
+PUT /diagnostics/report-issuer-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "responsibleName": "Nombre de ejemplo",
+  "responsibleTitle": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sealFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `responsibleName` | Sí | `string` | longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `responsibleTitle` | Sí | `string` | longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /diagnostics/report-issuer-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "responsibleName": "Nombre de ejemplo",
+  "responsibleTitle": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportIssuerSettingsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportIssuerSettingsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "responsibleName": "Nombre de ejemplo",
+  "responsibleTitle": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sealFileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `responsibleName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `responsibleTitle` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/report-issuer-settings"
+}
+```
+
+---
+
+## 49. POST /diagnostics/reports/{reportId}/patient-release
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-report-drafts`
+- **Nombre:** Liberar al paciente un resultado retenido
+- **Operation ID:** `DiagnosticsReportReleaseController_releaseToPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReportReleaseController.releaseToPatient](../../src/modules/diagnostics/controllers/diagnostics-report-release.controller.ts)
+
+### Descripción de negocio
+
+Liberar al paciente un resultado retenido. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/reports/{reportId}/patient-release` en `DiagnosticsReportReleaseController_releaseToPatient`. El controlador delega en `ReportReleaseService.releaseToPatient`. No recibe body. El tipo de retorno estático es `Promise<PatientReleaseResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `reportId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /diagnostics/reports/00000000-0000-4000-8000-000000000001/patient-release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `reportId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /diagnostics/reports/00000000-0000-4000-8000-000000000001/patient-release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientReleaseResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientReleaseResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "reportId": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "patientVisibility": "VISIBLE"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `versionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientVisibility` | Sí | `string` | valores: `VISIBLE` | Sin descripción específica en el contrato OpenAPI. | `VISIBLE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | El resultado ya está visible para el paciente | Excepción explícita en src/modules/diagnostics/services/report-release.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/reports/{reportId}/patient-release"
+}
+```
+
+---
+
+## 50. POST /diagnostics/reports/{reportId}/versions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -2999,7 +7139,7 @@ Crear/enmendar versión de informe diagnóstico. Requiere JWT y los roles o alca
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /diagnostics/reports/{reportId}/versions` en `DiagnosticsReportsController_createVersion`. El controlador delega en `DiagnosticsReportsService.createReportVersion`. Valida el body como `CreateReportVersionDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+NestJS resuelve `POST /diagnostics/reports/{reportId}/versions` en `DiagnosticsReportsController_createVersion`. El controlador delega en `ReportImmutabilityService.assertWritable`, `DiagnosticsReportsService.createReportVersion`. Valida el body como `CreateReportVersionDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
 
 ### Parámetros
 
@@ -3141,7 +7281,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+## 51. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -3157,7 +7297,7 @@ Validar y liberar una versión del informe. Requiere JWT y los roles o alcances 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` en `DiagnosticsReportsController_releaseVersion`. El controlador delega en `DiagnosticsReportsService.releaseVersion`. Valida el body como `ReleaseReportVersionDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+NestJS resuelve `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` en `DiagnosticsReportsController_releaseVersion`. El controlador delega en `ReportImmutabilityService.assertWritable`, `DiagnosticsReportsService.releaseVersion`. Valida el body como `ReleaseReportVersionDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
 
 ### Parámetros
 
@@ -3274,7 +7414,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /diagnostics/results/{observationId}/verifications
+## 52. POST /diagnostics/results/{observationId}/verifications
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -3411,7 +7551,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /diagnostics/service-requests/{id}
+## 53. GET /diagnostics/service-requests/{id}
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reception`
@@ -3521,7 +7661,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /diagnostics/service-requests/inbox
+## 54. POST /diagnostics/service-requests/inbox
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reception`
@@ -3640,7 +7780,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
         "lateralityDisplay": "valor-ejemplo",
         "contrastConceptId": "00000000-0000-4000-8000-000000000001",
-        "contrastDisplay": "valor-ejemplo"
+        "contrastDisplay": "valor-ejemplo",
+        "bodyStructureUberon": "valor-ejemplo",
+        "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "boneTypeDisplay": "valor-ejemplo"
       },
       "summary": "valor-ejemplo",
       "specimens": [
@@ -3685,7 +7829,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<LabInboxItemDto>` | Sin restricción adicional declarada | Las órdenes de la página, de la más vieja a la más nueva. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","patientDisplayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","categoryConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","requestingTenantId":"00000000-0000-4000-8000-000000000001","requestingTenantName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","requisitionId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","specimens":[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]}]` |
+| `items` | Sí | `array<LabInboxItemDto>` | Sin restricción adicional declarada | Las órdenes de la página, de la más vieja a la más nueva. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","patientDisplayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","categoryConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","requestingTenantId":"00000000-0000-4000-8000-000000000001","requestingTenantName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","requisitionId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","specimenTypeDisplay":"valor-ejemplo","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","display":"valor-ejemplo","ordinal":1}],"componentsSpecified":true,"imaging":{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"},"summary":"valor-ejemplo","specimens":[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]}]` |
 | `items[].serviceRequestId` | Sí | `string` | formato `uuid` | La orden de servicio (`clinical.service_requests`). | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientDisplayName` | Sí | `string` | admite null | Nombre pintable del paciente, si se conoce. | `Nombre de ejemplo` |
@@ -3707,7 +7851,7 @@ Campos de la respuesta:
 | `items[].components[].display` | No | `string` | Sin restricción adicional declarada | Nombre legible (castellano si existe) | `valor-ejemplo` |
 | `items[].components[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición, desde 1, en el orden en que se marcó | `1` |
 | `items[].componentsSpecified` | No | `boolean` | Sin restricción adicional declarada | v4.2.82: `false` = orden sin detalle de componentes («estudio completo»). | `true` |
-| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: modalidad, región, lateralidad y contraste; `null` si no es imagen o no los trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo"}` |
+| `items[].imaging` | No | `ServiceRequestImagingDto` | Sin restricción adicional declarada | v4.2.82: modalidad, región, lateralidad y contraste; `null` si no es imagen o no los trae. | `{"modalityConceptId":"00000000-0000-4000-8000-000000000001","modalityDisplay":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","bodySiteDisplay":"valor-ejemplo","lateralityConceptId":"00000000-0000-4000-8000-000000000001","lateralityDisplay":"valor-ejemplo","contrastConceptId":"00000000-0000-4000-8000-000000000001","contrastDisplay":"valor-ejemplo","bodyStructureUberon":"valor-ejemplo","bodyMeshId":"00000000-0000-4000-8000-000000000001","boneTypeConceptId":"00000000-0000-4000-8000-000000000001","boneTypeDisplay":"valor-ejemplo"}` |
 | `items[].imaging.modalityConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.modalityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.bodySiteConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3716,6 +7860,10 @@ Campos de la respuesta:
 | `items[].imaging.lateralityDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].imaging.contrastConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].imaging.contrastDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyStructureUberon` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].imaging.bodyMeshId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].imaging.boneTypeDisplay` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].summary` | No | `string` | Sin restricción adicional declarada | v4.2.82: resumen legible armado por el servidor, p. ej. «Hemograma · 3 componentes» o «Radiografía de mano · Mano · Izquierda · sin contraste». | `valor-ejemplo` |
 | `items[].specimens` | Sí | `array<SpecimenDetailDto>` | Sin restricción adicional declarada | Muestras que este laboratorio ya recibió para la orden y todavía no acesionó, con sus contenedores y su cadena de custodia. Vacío mientras nadie recibió nada; un espécimen rechazado sigue acá con su estado, para que se vea por qué hace falta otra muestra. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]` |
 | `items[].specimens[].id` | Sí | `string` | formato `uuid` | Identificador del espécimen. | `00000000-0000-4000-8000-000000000001` |
@@ -3769,7 +7917,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /diagnostics/service-requests/worklist
+## 55. POST /diagnostics/service-requests/worklist
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reception`
@@ -3912,7 +8060,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /diagnostics/specimens
+## 56. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -4054,7 +8202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /diagnostics/specimens/{id}
+## 57. GET /diagnostics/specimens/{id}
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -4206,7 +8354,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /diagnostics/specimens/{id}/containers
+## 58. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -4340,7 +8488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /diagnostics/specimens/{id}/rejection
+## 59. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -4475,7 +8623,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /diagnostics/work-orders
+## 60. GET /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -4597,7 +8745,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /diagnostics/work-orders
+## 61. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -4752,7 +8900,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /dicomweb/studies
+## 62. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -4926,6 +9074,115 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/dicomweb/studies"
+}
+```
+
+---
+
+## 63. GET /public/diagnostic-reports/{versionId}/verify
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-public`
+- **Nombre:** Verificar la autenticidad de un informe diagnóstico
+- **Operation ID:** `DiagnosticsReportVerifyPublicController_verify`
+- **Autenticación:** Pública
+- **Implementación:** [DiagnosticsReportVerifyPublicController.verify](../../src/modules/diagnostics/controllers/diagnostics-report-verify-public.controller.ts)
+
+### Descripción de negocio
+
+Sin autenticación y sin PHI: estado, fecha de emisión, emisor, estudio y SHA-256.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/diagnostic-reports/{versionId}/verify` en `DiagnosticsReportVerifyPublicController_verify`. El controlador delega en `ReportReleaseService.verify`. No recibe body. El tipo de retorno estático es `Promise<ReportVerificationDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `versionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/diagnostic-reports/00000000-0000-4000-8000-000000000001/verify HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `versionId`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/diagnostic-reports/00000000-0000-4000-8000-000000000001/verify HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportVerificationDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportVerificationDto>` | No |
+| 404 | El informe no existe o no es oficial | `Promise<ReportVerificationDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportVerificationDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportVerificationDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReportVerificationDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportVerificationDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "status": "PUBLISHED",
+  "issuedAt": "2026-07-31T12:00:00.000Z",
+  "issuerName": "Nombre de ejemplo",
+  "studyName": "Nombre de ejemplo",
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `PUBLISHED` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `issuedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `issuerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `contentHash` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Informe no encontrado | Excepción explícita en src/modules/diagnostics/services/report-release.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/diagnostic-reports/{versionId}/verify"
 }
 ```
 
