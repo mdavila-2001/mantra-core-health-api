@@ -1,4 +1,4 @@
--- SALUD v4.2.87 · schema directory · constraints de integridad (módulo 33)
+-- SALUD v4.2.91 · schema directory · constraints de integridad (módulo 33)
 -- Aplicar DESPUÉS de 04_indexes.sql y de SQL/_integrity/00_integrity_functions.sql.
 -- Reglas del módulo 33. Las UK/CHECK/EXCLUDE en prosa quedan como comentario:
 -- el modelo no declara su expresión SQL y no se inventa (temperatura-0).
@@ -43,3 +43,21 @@ ALTER TABLE "directory"."tenant_medical_facility_sites" ADD CONSTRAINT "ck_tenan
 -- CHECK concreto declarado por el modelo (CHECK_SQL).
 ALTER TABLE "directory"."branches" DROP CONSTRAINT IF EXISTS "ck_branches_branch_category";
 ALTER TABLE "directory"."branches" ADD CONSTRAINT "ck_branches_branch_category" CHECK ("branch_category" IN ('default', 'head_office', 'branch'));
+
+
+-- ═══ tenant_opening_hours ═══
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "directory"."tenant_opening_hours" DROP CONSTRAINT IF EXISTS "ck_tenant_opening_hours_day_of_week";
+ALTER TABLE "directory"."tenant_opening_hours" ADD CONSTRAINT "ck_tenant_opening_hours_day_of_week" CHECK ("day_of_week" BETWEEN 1 AND 7);
+
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "directory"."tenant_opening_hours" DROP CONSTRAINT IF EXISTS "ck_tenant_opening_hours_shift_ordinal";
+ALTER TABLE "directory"."tenant_opening_hours" ADD CONSTRAINT "ck_tenant_opening_hours_shift_ordinal" CHECK ("shift_ordinal" BETWEEN 1 AND 2);
+
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "directory"."tenant_opening_hours" DROP CONSTRAINT IF EXISTS "ck_tenant_opening_hours_closes_after_opens";
+ALTER TABLE "directory"."tenant_opening_hours" ADD CONSTRAINT "ck_tenant_opening_hours_closes_after_opens" CHECK ("closes_at" > "opens_at");
+
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "directory"."tenant_opening_hours" DROP CONSTRAINT IF EXISTS "ck_tenant_opening_hours_one_site";
+ALTER TABLE "directory"."tenant_opening_hours" ADD CONSTRAINT "ck_tenant_opening_hours_one_site" CHECK (("branch_id" IS NULL OR "medical_facility_site_id" IS NULL));

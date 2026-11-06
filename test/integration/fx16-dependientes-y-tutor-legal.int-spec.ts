@@ -186,6 +186,7 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
         relationshipDisplay: 'Hijo/a',
         isLegalGuardian: true,
         birthDate: '2018-03-14',
+        sexAtBirth: 'MALE',
       });
       expect(res.body.patientProfileId).toBeDefined();
       expect(res.body.id).toBeDefined();
@@ -251,6 +252,8 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
         patientProfileId: perfilHijo,
         fullName: 'Mateo Quispe',
         relationshipCode: 'CHILD',
+        // Read back from the database: the booking body map draws him as a boy.
+        sexAtBirth: 'MALE',
       });
       expect(typeof res.body[0].ageYears).toBe('number');
       expect(res.body[0].ageYears).toBeGreaterThan(0);

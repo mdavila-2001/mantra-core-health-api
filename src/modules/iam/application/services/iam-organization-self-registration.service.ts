@@ -15,15 +15,10 @@ import {
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
-  BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
   MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../../directory/directory.concepts';
-import {
-  branchCodeFromName,
-  type BranchCategory,
-} from '../../../directory/branch-categories';
 import {
   countryConceptForLegalEntityType,
   resolveLegalEntityType,
@@ -361,6 +356,13 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // Horario de atención de la casa central: el tenant ya está volcado.
+      this.directory.recordOpeningHours(
+        tx,
+        { tenantId: tenant.id, actorUserId: user.id },
+        dto.organization.openingHours,
+      );
+
       // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
       // registro sanitario, el director y las sedes declaradas. La respuesta lo
       // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
@@ -376,7 +378,7 @@ export class IamOrganizationSelfRegistrationService {
       // `directory.branches`). One transaction: no pharmacy without sites.
       let pharmacyId: string | undefined;
       if (dto.organization.tenantType === 'PHARMACY') {
-        this.createPharmacyBranches(tx, tenant.id, dto, user.id);
+        await this.registerPharmacyBranches(tx, tenant.id, dto, user.id);
         const block = dto.organization.pharmacy;
         const provisioned = await this.pharmacies.provision(
           tx,
@@ -572,55 +574,41 @@ export class IamOrganizationSelfRegistrationService {
   }
 
   /**
-   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada.
-   * El código sale del nombre, en mayúsculas y sin repetirse dentro del alta.
+   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada,
+   * con el horario de atención de cada sucursal.
    */
-  private createPharmacyBranches(
+  private registerPharmacyBranches(
     tx: EntityManager,
     tenantId: string,
     dto: RegisterOrganizationDto,
     actorUserId: string,
-  ): void {
+  ): Promise<void> {
     const block = dto.organization.pharmacy;
-    if (!block) return;
-    const used = new Set<string>();
-    const codeOf = (name: string): string => branchCodeFromName(name, used);
-    const add = (item: {
-      name: string;
-      latitude?: number;
-      longitude?: number;
-      description?: string;
-      locationUrl?: string;
-      category: BranchCategory;
-    }): void => {
-      this.directory.createBranch(tx, {
-        tenantId,
-        code: codeOf(item.name),
-        name: item.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
-        statusConceptId: DIR.BRANCH_ACTIVE,
-        timeZone: dto.organization.timeZone,
-        latitude:
-          item.latitude !== undefined ? String(item.latitude) : undefined,
-        longitude:
-          item.longitude !== undefined ? String(item.longitude) : undefined,
-        description: item.description,
-        locationUrl: item.locationUrl,
-        branchCategory: item.category,
-        actorUserId,
-      });
-    };
-    // La casa central es la casa matriz; cada sucursal declarada, una sucursal (v4.2.91).
-    if (block.latitude !== undefined && block.longitude !== undefined) {
-      add({
-        name: 'Casa central',
-        latitude: block.latitude,
-        longitude: block.longitude,
-        category: 'head_office',
-      });
-    }
-    for (const branch of block.branches ?? [])
-      add({ ...branch, category: 'branch' });
+    if (!block) return Promise.resolve();
+    const headquarters =
+      block.latitude !== undefined && block.longitude !== undefined
+        ? [
+            {
+              name: 'Casa central',
+              latitude: block.latitude,
+              longitude: block.longitude,
+              category: 'head_office' as const,
+            },
+          ]
+        : [];
+    // v4.2.91: the central site is the head office; each declared one, a branch.
+    return this.directory.registerDeclaredBranches(tx, {
+      tenantId,
+      timeZone: dto.organization.timeZone,
+      actorUserId,
+      branches: [
+        ...headquarters,
+        ...(block.branches ?? []).map((branch) => ({
+          ...branch,
+          category: 'branch' as const,
+        })),
+      ],
+    });
   }
 
   /**

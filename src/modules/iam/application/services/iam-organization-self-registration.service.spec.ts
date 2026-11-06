@@ -96,6 +96,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       provision: fn().mockResolvedValue({ pharmacyId: 'pharmacy-1' }),
     };
     const branches = { create: fn(() => undefined) };
+    const openingHours = { createShifts: fn(() => []) };
     const taxIdentifiers = { register: fn(async () => 'identifier-tax-1') };
 
     const service = new IamOrganizationSelfRegistrationService(
@@ -110,6 +111,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
         tenants: tenantsRepo,
         memberships: membershipsRepo,
         branches,
+        openingHours,
         typeProfile,
         affiliationDocuments,
         taxIdentifiers,
@@ -136,9 +138,61 @@ describe('IamOrganizationSelfRegistrationService', () => {
       representatives,
       pharmacies,
       branches,
+      openingHours,
       taxIdentifiers,
     };
   }
+
+  describe('horario de atención', () => {
+    const hours = [
+      { dayOfWeek: 1, opensAt: '08:00', closesAt: '12:00' },
+      { dayOfWeek: 1, opensAt: '14:30', closesAt: '19:00' },
+    ];
+
+    it('guarda el horario de la casa central con el tenant recién creado', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, openingHours: hours },
+      });
+
+      expect(d.openingHours.createShifts).toHaveBeenCalledWith(
+        d.tx,
+        { tenantId: 'tenant-1', actorUserId: 'user-1' },
+        hours,
+      );
+    });
+
+    it('guarda el horario de cada sucursal de farmacia con el id de su fila', async () => {
+      const d = build();
+      d.branches.create.mockImplementation(
+        (_tx: unknown, data: { code: string }) => ({ id: `id-${data.code}` }),
+      );
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          code: 'FARM-1',
+          tenantType: 'PHARMACY',
+          pharmacy: {
+            branches: [{ name: 'Sucursal Sur', openingHours: hours }],
+          },
+        },
+      });
+
+      expect(d.openingHours.createShifts).toHaveBeenCalledWith(
+        d.tx,
+        {
+          tenantId: 'tenant-1',
+          branchId: 'id-SUCURSAL-SUR',
+          actorUserId: 'user-1',
+        },
+        hours,
+      );
+    });
+  });
 
   describe('PHARMACY (P50)', () => {
     const pharmacyDto: RegisterOrganizationDto = {

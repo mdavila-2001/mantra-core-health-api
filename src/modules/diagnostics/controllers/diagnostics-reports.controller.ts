@@ -15,6 +15,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { DiagnosticsReportsService } from '../services';
+import { ReportImmutabilityService } from '../services/report-immutability.service';
 import {
   CreateReportVersionDto,
   ReleaseReportVersionDto,
@@ -38,7 +39,10 @@ export class DiagnosticsReportsController {
    *
    * @param service - Valor de service requerido por la operación.
    */
-  constructor(private readonly service: DiagnosticsReportsService) {}
+  constructor(
+    private readonly service: DiagnosticsReportsService,
+    private readonly immutability: ReportImmutabilityService,
+  ) {}
 
   /** UC-20-07. */
   @Audited({
@@ -49,11 +53,13 @@ export class DiagnosticsReportsController {
   @Post('reports/:reportId/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear/enmendar versión de informe diagnóstico' })
-  createVersion(
+  async createVersion(
     @Param('reportId', ParseUUIDPipe) reportId: string,
     @Body() dto: CreateReportVersionDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
+    // D16: a report published through the draft flow takes no new version (409).
+    await this.immutability.assertWritable(reportId);
     return this.service.createReportVersion(reportId, dto, actor);
   }
 
@@ -66,12 +72,14 @@ export class DiagnosticsReportsController {
   @Post('reports/:reportId/versions/:versionId/release')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Validar y liberar una versión del informe' })
-  releaseVersion(
+  async releaseVersion(
     @Param('reportId', ParseUUIDPipe) reportId: string,
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @Body() dto: ReleaseReportVersionDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
+    // A published report changes visibility only through `patient-release`.
+    await this.immutability.assertWritable(reportId);
     return this.service.releaseVersion(reportId, versionId, dto, actor);
   }
 

@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
+import { DeclaredBranchesService } from './declared-branches.service';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/domain/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
@@ -47,12 +48,16 @@ describe('TenantTypeProfileService', () => {
       create: fn(() => ({ id: 'facility-1' })),
       createSite: fn(() => ({ id: 'site-1' })),
     };
+    const openingHoursRepo = { createShifts: fn(() => []) };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
       diagnosticUnitProvisioning as never,
       addressesRepo as never,
-      branchesRepo as never,
+      new DeclaredBranchesService(
+        branchesRepo as never,
+        openingHoursRepo as never,
+      ),
       medicalFacilitiesRepo as never,
     );
     return {
@@ -63,6 +68,7 @@ describe('TenantTypeProfileService', () => {
       addressesRepo,
       branchesRepo,
       medicalFacilitiesRepo,
+      openingHoursRepo,
       tx: { flush: fn().mockResolvedValue(undefined) } as never,
     };
   }
@@ -1256,6 +1262,111 @@ describe('TenantTypeProfileService', () => {
       expect(id).toBeUndefined();
       expect(medicalFacilitiesRepo.create).not.toHaveBeenCalled();
       expect(medicalFacilitiesRepo.createSite).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('materializeProfile · horario de atención de las sucursales', () => {
+    const hours = [
+      { dayOfWeek: 1, opensAt: '08:00', closesAt: '12:00' },
+      { dayOfWeek: 1, opensAt: '14:30', closesAt: '19:00' },
+    ];
+
+    it('el laboratorio guarda el horario de cada sucursal con su branchId', async () => {
+      const { service, branchesRepo, openingHoursRepo, tx } = build();
+      branchesRepo.create.mockImplementation(
+        (_tx: unknown, data: { code: string }) => ({ id: `id-${data.code}` }),
+      );
+
+      await service.materializeProfile(
+        tx,
+        'tenant-7',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_LABORATORY],
+            branches: [{ name: 'Sucursal Norte', openingHours: hours }],
+          },
+        },
+        'actor-1',
+      );
+
+      expect(openingHoursRepo.createShifts).toHaveBeenCalledWith(
+        tx,
+        {
+          tenantId: 'tenant-7',
+          branchId: 'id-SUCURSAL-NORTE',
+          actorUserId: 'actor-1',
+        },
+        hours,
+      );
+    });
+
+    it('el establecimiento médico vuelca sus sedes y después guarda el horario de cada sucursal', async () => {
+      const { service, medicalFacilitiesRepo, openingHoursRepo, tx } = build();
+      const order: string[] = [];
+      (
+        tx as unknown as { flush: ReturnType<typeof fn> }
+      ).flush.mockImplementation(async () => {
+        order.push('flush');
+      });
+      let next = 0;
+      medicalFacilitiesRepo.createSite.mockImplementation(() => {
+        next += 1;
+        order.push(`site-${next}`);
+        return { id: `site-${next}` };
+      });
+      openingHoursRepo.createShifts.mockImplementation(
+        (_tx: unknown, site: { medicalFacilitySiteId: string }) => {
+          order.push(`hours:${site.medicalFacilitySiteId}`);
+          return [];
+        },
+      );
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        {
+          tenantType: 'CLINIC',
+          legalName: 'Clínica Z S.R.L.',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          medicalFacility: {
+            taxIdentifierNumber: '1023456789',
+            healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+            medicalDirector: {
+              name: 'Ana',
+              lastName: 'Rojas',
+              professionalLicenseNumber: 'MAT-12345',
+              email: 'dir@clinica.bo',
+            },
+            headquarters: { addressLines: ['Av. San Martín 123'] },
+            branches: [
+              { name: 'Norte', addressLines: ['Calle 1'], openingHours: hours },
+            ],
+          },
+        },
+        'owner-1',
+      );
+
+      expect(order).toEqual([
+        'flush',
+        'site-1',
+        'site-2',
+        'flush',
+        'hours:site-2',
+      ]);
+      expect(openingHoursRepo.createShifts).toHaveBeenCalledWith(
+        tx,
+        {
+          tenantId: 'tenant-1',
+          medicalFacilitySiteId: 'site-2',
+          actorUserId: 'owner-1',
+        },
+        hours,
+      );
     });
   });
 });

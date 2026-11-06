@@ -80,6 +80,23 @@ describe('F09 · el comprobador de deriva encuentra la deriva (integración)', (
     );
   });
 
+  // The tables of v4.2.89 (written report) and v4.2.90 (opening hours) reach a
+  // live base through their patches; the versioned DDL (`yarn db:vendor`) must
+  // declare them too, or a base rebuilt from `database/SQL` diverges from the
+  // one in production.
+  it('el DDL versionado declara las tablas de los parches v4.2.89 y v4.2.90', async () => {
+    const informe = await comprobar();
+    for (const tabla of [
+      'diagnostics.report_drafts',
+      'diagnostics.report_draft_files',
+      'diagnostics.report_issuer_settings',
+      'directory.tenant_opening_hours',
+    ]) {
+      expect(informe.tablasNoDeclaradas).not.toContain(tabla);
+      expect(informe.tablasFaltantes).not.toContain(tabla);
+    }
+  }, 180_000);
+
   it('detecta una tabla que está en la base y el DDL no declara', async () => {
     const antes = await comprobar();
     expect(antes.tablasNoDeclaradas).not.toContain(tablaSonda);
