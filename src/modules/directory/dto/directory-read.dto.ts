@@ -276,7 +276,7 @@ export class BranchListItemDto {
   longitude?: number;
 
   /**
-   * Categoría de la sede (v4.2.91): `default`, `head_office` (casa matriz) o `branch`.
+   * Categoría de la sede (v4.2.92): `default`, `head_office` (casa matriz) o `branch`.
    */
   @ApiProperty({ enum: BRANCH_CATEGORIES })
   category!: BranchCategory;
