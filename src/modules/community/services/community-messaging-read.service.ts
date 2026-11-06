@@ -36,6 +36,7 @@ import type {
   DirectMessages,
   PublicProfiles,
 } from '../entities';
+import { CommunityMessageReactionsService } from './community-message-reactions.service';
 
 /**
  * Tope de conversaciones que se resuelven de una vez para armar la bandeja.
@@ -80,6 +81,7 @@ export class CommunityMessagingReadService {
     private readonly files: FileUploadService,
     private readonly verifications: PractitionerVerificationReader,
     private readonly logger: PinoLogger,
+    private readonly reactions: CommunityMessageReactionsService,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
   }
@@ -496,7 +498,10 @@ export class CommunityMessagingReadService {
       : await this.threadPeers(em, conversationId, profileId);
 
     return {
-      items: page.map((message) => toDirectMessageDto(message)),
+      items: await this.reactions.attach(
+        em,
+        page.map((message) => toDirectMessageDto(message)),
+      ),
       count: page.length,
       limit: options.limit,
       nextCursor:

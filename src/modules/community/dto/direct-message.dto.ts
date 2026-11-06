@@ -3,6 +3,7 @@ import {
   MESSAGE_CONTENT_TYPES,
   type MessageContentType,
 } from '../message-content-type';
+import { MessageReactionDto } from './message-reaction.dto';
 
 /** Un mensaje directo. */
 export class DirectMessageDto {
@@ -56,4 +57,8 @@ export class DirectMessageDto {
   /** Cuándo se envió. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   sentAt?: Date | null;
+
+  /** Reacciones con emoji, agrupadas por emoji (v4.2.91). */
+  @ApiPropertyOptional({ type: () => MessageReactionDto, isArray: true })
+  reactions?: MessageReactionDto[];
 }

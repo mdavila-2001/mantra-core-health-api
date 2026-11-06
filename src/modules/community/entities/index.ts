@@ -18,6 +18,7 @@ export * from './groups.entity';
 export * from './hashtags.entity';
 export * from './mentions.entity';
 export * from './message_receipts.entity';
+export * from './message_reactions.entity';
 export * from './moderation_appeals.entity';
 export * from './moderation_decisions.entity';
 export * from './moderation_queue.entity';
