@@ -24,7 +24,8 @@ otro extractor) cuyo centro cae en la misma celda. La tabla queda marcada si un
 glifo o una palabra de su área no cae en ninguna celda (`unassigned`), si está
 dentro de otra tabla (`nested`) o si una celda tiene un trazo que no es borde
 (`graphic`). Una línea dentro de una grilla que pdfplumber no reconoce como
-tabla sigue marcada `table`, sin celdas, y su sección no se publica.
+tabla, o fuera de la grilla pero a la altura de una tabla, sigue marcada
+`table`, sin celdas, y su sección no se publica.
 Cada fila lleva también `alt`: las palabras de `pdftotext -bbox` cuyo centro cae
 en la fila (fuera de las tablas); la página lleva `altUnassigned` con las
 palabras que no caen en ninguna fila ni celda.
@@ -401,6 +402,10 @@ def page_rows(page, tables=(), words=()):
             if ov / h >= 0.5 and ov / h > best_ov:
                 best, best_ov = r, ov / h
         in_table = any(b[0] - 1 <= cx <= b[2] + 1 and b[1] - 1 <= cy <= b[3] + 1 for b in boxes)
+        # Una línea fuera de la grilla pero a su altura (un rótulo al costado, una cifra de una figura) no es texto corrido:
+        # se marca como tabla, igual que cuando compartía fila con las líneas de la tabla.
+        h = (ln.y1 - ln.y0) or 1.0
+        in_table = in_table or any((min(ln.y1, t['bbox'][3]) - max(ln.y0, t['bbox'][1])) / h >= 0.5 for t in tables)
         text, html = line_markup(ln)
         part = (ln.x0, text.rstrip(), in_table, html.rstrip() if html else None)
         if best is None:
