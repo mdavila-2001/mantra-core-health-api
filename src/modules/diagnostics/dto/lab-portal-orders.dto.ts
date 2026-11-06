@@ -87,6 +87,17 @@ export class LabOrderDto {
       'Whether REJECT applies now: a received order with an open specimen.',
   })
   canReject!: boolean;
+  /** v4.2.96: the center entered it (paper or walk-in), not a practitioner. */
+  @ApiProperty() registeredByPerformer!: boolean;
+  /** Whether `PUT` applies now: registered by the center and not received yet. */
+  @ApiProperty() canEdit!: boolean;
+  @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  priorityConceptId!: string | null;
+  @ApiProperty({ type: String, nullable: true })
+  externalRequesterName!: string | null;
+  @ApiProperty({ type: String, nullable: true })
+  externalRequesterLicense!: string | null;
   @ApiProperty({ type: [LabOrderFileDto] }) files!: LabOrderFileDto[];
   @ApiProperty({ type: LabOrderReportStateDto })
   report!: LabOrderReportStateDto;

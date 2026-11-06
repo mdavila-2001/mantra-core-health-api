@@ -253,4 +253,24 @@ export class ServiceRequests {
    */
   @Property({ fieldName: 'bone_type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   boneTypeConceptId?: string;
+
+  /** v4.2.96: entered by the performing center itself (paper or walk-in order). */
+  @Property({ fieldName: 'registered_by_performer', type: 'boolean' })
+  registeredByPerformer: boolean = false;
+
+  /** v4.2.96: who signed the paper order; only on center-registered orders. */
+  @Property({
+    fieldName: 'external_requester_name',
+    columnType: 'varchar(200)',
+    nullable: true,
+  })
+  externalRequesterName?: string;
+
+  /** v4.2.96: license number of the paper order's signer, when present. */
+  @Property({
+    fieldName: 'external_requester_license',
+    columnType: 'varchar(64)',
+    nullable: true,
+  })
+  externalRequesterLicense?: string;
 }

@@ -38,10 +38,16 @@ describe('laboratory portal controllers', () => {
     const results = { targets: mockFn(), list: mockFn() };
     const writes = { withdraw: mockFn() };
     const uploads = { start: mockFn(), complete: mockFn(), abort: mockFn() };
+    const intake = {
+      lookupPatient: mockFn(),
+      create: mockFn(),
+      update: mockFn(),
+    };
     const portal = new DiagnosticsLabPortalController(
       summary as any,
       orders as any,
       results as any,
+      intake as any,
     );
     const files = new DiagnosticsLabResultsController(
       results as any,
@@ -52,6 +58,20 @@ describe('laboratory portal controllers', () => {
       await portal.getSummary();
       await portal.listOrders({ limit: 50, cursor: 'c' });
       await portal.transition('sr-1', { action: 'RECEIVE' }, actor);
+      await portal.lookupPatient({ nationalId: '1234567' });
+      await portal.createOrder(
+        {
+          patientProfileId: 'p-1',
+          codeConceptId: 'c-1',
+          category: 'LAB' as const,
+        },
+        actor,
+      );
+      await portal.updateOrder(
+        'sr-2',
+        { codeConceptId: 'c-2', category: 'LAB' as const },
+        actor,
+      );
       await portal.listResultTargets();
       await files.listResultFiles({ kind: 'PDF' });
       await files.searchResultFiles({ q: 'ana' });
@@ -71,6 +91,22 @@ describe('laboratory portal controllers', () => {
       { action: 'RECEIVE' },
       actor,
     );
+    expect(intake.lookupPatient).toHaveBeenCalledWith('1234567');
+    expect(intake.create).toHaveBeenCalledWith(
+      'lab-1',
+      {
+        patientProfileId: 'p-1',
+        codeConceptId: 'c-1',
+        category: 'LAB' as const,
+      },
+      actor,
+    );
+    expect(intake.update).toHaveBeenCalledWith(
+      'lab-1',
+      'sr-2',
+      { codeConceptId: 'c-2', category: 'LAB' as const },
+      actor,
+    );
     expect(results.targets).toHaveBeenCalledWith('lab-1');
     expect(results.list).toHaveBeenCalledWith('lab-1', { kind: 'PDF' });
     expect(results.list).toHaveBeenCalledWith('lab-1', { q: 'ana' });
@@ -87,13 +123,30 @@ describe('laboratory portal controllers', () => {
 
   it('without a tenant in the context nothing reaches the services', async () => {
     const orders = { list: mockFn(), transition: mockFn() };
+    const intake = { create: mockFn(), update: mockFn() };
     const portal = new DiagnosticsLabPortalController(
       { summary: mockFn() } as any,
       orders as any,
       { targets: mockFn() } as any,
+      intake as any,
     );
     await expect(async () => portal.listOrders({})).rejects.toThrow(/tenant/i);
+    await expect(async () =>
+      portal.createOrder(
+        { patientProfileId: 'p', codeConceptId: 'c', category: 'LAB' as const },
+        actor,
+      ),
+    ).rejects.toThrow(/tenant/i);
+    await expect(async () =>
+      portal.updateOrder(
+        'sr',
+        { codeConceptId: 'c', category: 'LAB' as const },
+        actor,
+      ),
+    ).rejects.toThrow(/tenant/i);
     expect(orders.list).not.toHaveBeenCalled();
+    expect(intake.create).not.toHaveBeenCalled();
+    expect(intake.update).not.toHaveBeenCalled();
   });
 
   it('readRawBody joins the stream and refuses more than the limit', async () => {
