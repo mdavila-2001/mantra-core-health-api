@@ -6,6 +6,7 @@ import {
   DomainException,
   ErrorCode,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -197,7 +198,12 @@ export class SupportStaffProvisioningService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (PLATFORM_ADMIN_ROLES.some((r) => actor.roles.includes(r))) return;
+    // El rol se contrasta con la organización del contexto: un SECURITY_ADMIN o
+    // SUPERADMIN acotado a otra organización (`scopedRoles`) no administra esta.
+    const platform = PLATFORM_ADMIN_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (platform) return;
     const isAdmin = await this.supportLinksRepo.isOrganizationAdmin(
       em,
       tenantId,

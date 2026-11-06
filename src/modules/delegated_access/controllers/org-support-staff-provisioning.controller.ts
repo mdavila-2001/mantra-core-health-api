@@ -11,6 +11,7 @@ import { Throttle } from '@nestjs/throttler';
 import {
   Audited,
   CurrentUser,
+  Roles,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
@@ -33,11 +34,17 @@ export class OrgSupportStaffProvisioningController {
     entityId: 'result.linkId',
   })
   @Post('org/support-staff')
+  @Roles()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary:
       'Crear cuenta de secretaria y vincularla a la organización de inmediato',
+    description:
+      '`@Roles()` vacío: sin rol global. Lo decide el servicio, que exige ser ' +
+      'OWNER/ADMIN activo de la organización del contexto o tener ' +
+      'SECURITY_ADMIN/SUPERADMIN válido en ella (un rol acotado a otra ' +
+      'organización no sirve).',
   })
   create(
     @Body() dto: CreateOrgSupportStaffDto,
