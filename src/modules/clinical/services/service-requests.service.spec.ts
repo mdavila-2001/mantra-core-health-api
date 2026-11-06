@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ServiceRequestsService } from './service-requests.service';
+import { mergeImagingInput } from '../service-request-imaging';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -72,15 +73,24 @@ function build() {
   };
   // v4.2.82: el detalle (V1–V9) tiene su propia spec; acá devuelve lo que recibe.
   const detail = {
-    prepare: mockFn(async (_tx: any, input: any) => ({
-      categoryConceptId: input.categoryConceptId,
-      specimenTypeConceptId: input.specimenTypeConceptId,
-      modalityConceptId: input.imaging?.modalityConceptId,
-      bodySiteConceptId: input.imaging?.bodySiteConceptId,
-      lateralityConceptId: input.imaging?.lateralityConceptId,
-      contrastConceptId: input.imaging?.contrastConceptId,
-      componentConceptIds: input.componentConceptIds ?? [],
-    })),
+    prepare: mockFn(async (_tx: any, input: any) => {
+      const imaging = mergeImagingInput({
+        ...input.flat,
+        imaging: input.imaging,
+      });
+      return {
+        categoryConceptId: input.categoryConceptId,
+        specimenTypeConceptId: input.specimenTypeConceptId,
+        modalityConceptId: imaging?.modalityConceptId,
+        bodySiteConceptId: imaging?.bodySiteConceptId,
+        lateralityConceptId: imaging?.lateralityConceptId,
+        contrastConceptId: imaging?.contrastConceptId,
+        bodyStructureUberon: imaging?.bodyStructureUberon,
+        bodyMeshId: imaging?.bodyMeshId,
+        boneTypeConceptId: imaging?.boneTypeConceptId,
+        componentConceptIds: input.componentConceptIds ?? [],
+      };
+    }),
     writeComponents: mockFn(),
     describe: mockFn().mockResolvedValue(new Map()),
   };
@@ -376,6 +386,86 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
       expect(d.basedOnNotes.link).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('región marcada en el modelo 3D (campos planos y tipo de hueso)', () => {
+    const registration = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'code1',
+      encounterId: 'enc-1',
+    };
+    const flat = {
+      bodySiteConceptId: 'site-1',
+      lateralityConceptId: 'lat-1',
+      modalityConceptId: 'mod-1',
+      bodyStructureUberon: 'UBERON:0002398',
+      bodyMeshId: 'BP44',
+      boneTypeConceptId: 'bone-1',
+    };
+
+    function echo(d: ReturnType<typeof build>) {
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: unknown, data: any) => ({
+          id: 'sr1',
+          ...data,
+          createdAt: new Date(),
+        }),
+      );
+    }
+
+    it('los campos planos llegan al detalle como imaging y a las columnas de la orden', async () => {
+      const d = build();
+      echo(d);
+      await d.service.create({ ...registration, ...flat }, actor);
+      // El alta pasa el cuerpo tal cual: unir lo plano con `imaging` es del detalle (V5–V9).
+      expect(d.detail.prepare.mock.calls[0][1].flat).toMatchObject(flat);
+      expect(d.serviceRequestsRepo.create.mock.calls[0][1]).toMatchObject(flat);
+    });
+
+    it('los campos dentro de imaging dan lo mismo que los planos', async () => {
+      const d = build();
+      echo(d);
+      await d.service.create({ ...registration, imaging: flat }, actor);
+      expect(d.serviceRequestsRepo.create.mock.calls[0][1]).toMatchObject(flat);
+    });
+
+    it('la respuesta repite la región en el nivel superior y dentro de imaging', async () => {
+      const d = build();
+      echo(d);
+      const imaging = {
+        modalityConceptId: 'mod-1',
+        modalityDisplay: 'Rayos X',
+        bodySiteConceptId: 'site-1',
+        bodySiteDisplay: 'Mano',
+        lateralityConceptId: 'lat-1',
+        lateralityDisplay: 'Izquierda',
+        contrastConceptId: null,
+        contrastDisplay: null,
+        bodyStructureUberon: 'UBERON:0002398',
+        bodyMeshId: 'BP44',
+        boneTypeConceptId: 'bone-1',
+        boneTypeDisplay: 'Hueso largo',
+      };
+      d.detail.describe.mockResolvedValue(new Map([['sr1', { imaging }]]));
+      const res = await d.service.create({ ...registration, ...flat }, actor);
+      expect(res.imaging).toEqual(imaging);
+      expect(res).toMatchObject({
+        bodyStructureUberon: 'UBERON:0002398',
+        bodyMeshId: 'BP44',
+        boneTypeConceptId: 'bone-1',
+        boneTypeDisplay: 'Hueso largo',
+        bodySiteDisplay: 'Mano',
+      });
+    });
+
+    it('sin campos de imagen la respuesta no gana ninguna clave plana (compatibilidad)', async () => {
+      const d = build();
+      echo(d);
+      const res = await d.service.create(registration, actor);
+      expect(res.imaging).toBeNull();
+      for (const key of Object.keys(flat)) expect(res).not.toHaveProperty(key);
     });
   });
 

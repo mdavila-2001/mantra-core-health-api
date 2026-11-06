@@ -10,6 +10,7 @@ import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
 import { CLINICAL_CONCEPT_SEEDS } from '../../modules/clinical/clinical.concepts';
+import { BONE_TYPE_CONCEPT_SEEDS } from '../../modules/clinical/clinical.bone-type.concepts';
 import { AUDIT_CONCEPT_SEEDS } from '../../modules/audit/audit.concepts';
 import { SYSTEM_OPS_CONCEPT_SEEDS } from '../../modules/system_ops/system_ops.concepts';
 import { GEO_CONCEPT_SEEDS } from '../../modules/geo/geo.concepts';
@@ -63,6 +64,7 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...CONSENT_CONCEPT_SEEDS,
   ...FORMS_CONCEPT_SEEDS,
   ...CLINICAL_CONCEPT_SEEDS,
+  ...BONE_TYPE_CONCEPT_SEEDS,
   ...AUDIT_CONCEPT_SEEDS,
   ...SYSTEM_OPS_CONCEPT_SEEDS,
   ...GEO_CONCEPT_SEEDS,

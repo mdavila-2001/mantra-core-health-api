@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical/README.md)
-· 11 controllers · 21 services · 18 repositories · 25 entidades · 18 DTO
+· 12 controllers · 30 services · 20 repositories · 31 entidades · 22 DTO
 
 ---
 
@@ -105,6 +105,37 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 > con el router (Express 5 / path-to-regexp v8, donde `:` es sintaxis de
 > parámetro). El método HTTP y la intención se preservan.
 
+## Detalle de la orden de estudio: muestra, región 3D y tipo de hueso
+
+`POST /clinical/service-requests` (y cada renglón de `POST /clinical/requisitions`) lleva el detalle
+que pide el cliente: **laboratorio = qué muestra; imagenología = qué parte del cuerpo**. Un 422 trae
+siempre `details.reason` y `details.field`; un uuid mal formado o un texto de más de 64 caracteres es 400.
+
+| Campo (camelCase) | Columna de `clinical.service_requests` | Regla |
+|---|---|---|
+| `specimenTypeConceptId` | `specimen_type_concept_id` | Value set `specimen-type`; sólo laboratorio o patología |
+| `modalityConceptId` | `modality_concept_id` | `service-request-imaging-modality`; si el estudio fija una, debe coincidir |
+| `bodySiteConceptId` | `body_site_concept_id` | `imaging-body-structure`; obligatoria en estudios de imagen del catálogo |
+| `lateralityConceptId` | `laterality_concept_id` | `condition-laterality`; exige región y que la región admita lateralidad |
+| `bodyStructureUberon` | `body_structure_uberon` | Forma `UBERON:<n>` (hasta 12 dígitos). Sólo se valida la forma, no contra el atlas |
+| `bodyMeshId` | `body_mesh_id` | Alfanumérico (`A-Z a-z 0-9 _ -`), hasta 64 caracteres |
+| `boneTypeConceptId` | `bone_type_concept_id` | Value set `bone-type` (largo, corto, plano, irregular, sesamoideo); exige región o `bodyStructureUberon`; lo elige el médico, no se deriva |
+| `imaging.contrastConceptId` | `contrast_concept_id` | `imaging-contrast`; exige modalidad (sólo dentro de `imaging`) |
+
+Los seis primeros, salvo la muestra, viajan **en el nivel superior del cuerpo o dentro de `imaging`**
+(equivalentes; el mismo dato con valores distintos en los dos lugares es 422 `IMAGING_FIELD_CONFLICT`).
+La respuesta de la orden, `GET /clinical/service-requests/:id` y los listados de órdenes del paciente
+repiten la región en el nivel superior (con su nombre en castellano: `bodySiteDisplay`,
+`lateralityDisplay`, `boneTypeDisplay`, …) y dentro de `imaging`. Una orden sin detalle de imagen
+responde exactamente igual que antes.
+
+Motivos 422 nuevos: `SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE` (laboratorio con muestra y datos de
+imagen a la vez), `IMAGING_FIELD_CONFLICT`, `BODY_STRUCTURE_FORMAT_INVALID`, `BODY_MESH_ID_FORMAT_INVALID`,
+`BONE_TYPE_REQUIRES_BODY_STRUCTURE` y `BONE_TYPE_NOT_IN_CATALOG`. La API los responde antes de que la
+base lance `check_violation` de `ck_service_requests_specimen_xor_imaging` y
+`ck_service_requests_bone_type_requires_location`. La autorización no cambia: roles `CLINICIAN` /
+`PRACTITIONER` y `ClinicalRecordAccessGuard` sobre el paciente del cuerpo.
+
 ## Aviso de receta por vencer (PAC-REC-002)
 
 `POST /clinical/internal/prescription-expiry-notices` lo dispara el job `prescription-expiry-notice`
@@ -139,7 +170,7 @@ acepta `SYSTEM`/`SYSTEM_WORKER`.
 `prescription_signature_policies` y `appointments` (solo referenciada por el
 check-in).
 
-## Reglas de negocio
+## Business rules
 
 - **Servicios recibidos** (`received_services`): una fila por servicio que el paciente
   recibió. Hoy son dos tipos, ambos conceptos del value set `vs_received_service_type`:
@@ -185,27 +216,19 @@ check-in).
   registrar procedimiento con orden la marca `completed`; administrar la dosis
   final marca la prescripción `completed`; cerrar encuentro cierra participantes y
   ubicaciones activos.
+- **Cierre del encuentro → turno de agenda.** `POST /clinical/encounters/:id/close`
+  pasa por `EncounterCloseService`: cierra con `EncountersService.close` y avisa por
+  `ENCOUNTER_CLOSED_PORT` (`ports/encounter-closed.port.ts`) con la cita clínica del
+  encuentro; `SchedulingEncounterClosedAdapter` pide a `scheduling` completar la
+  reserva atada a esa cita (`CompleteLinkedBookingUseCase`, resuelto con `ModuleRef`
+  porque `scheduling` ya llega a este módulo por `community`), lo que emite la encuesta
+  de satisfacción. Corre en un savepoint de la transacción en curso (la de la petición
+  con `RLS_ENFORCE=true`): un fallo se descarta, queda en el log (`warn` si es
+  esperable, `error` si no) y el cierre sigue en pie. `clinical_ext` usa el mismo
+  puerto al terminar la teleconsulta, pero sólo si el encuentro ya está cerrado: con
+  el encuentro abierto, cortar la videollamada no completa el turno.
 - **VALUE CONTRACT**: la observación (y cada componente) lleva un único tipo de
   valor; el `value_type_concept_id` se infiere del campo presente si no se indica.
-- **Alcance de lectura de la historia**: `ClinicalReadService.resolveReadScope` devuelve
-  `FULL` o `SPECIALTIES`.
-  - **FULL**: lo da el titular, su representante, la cabecera (`CARE_REL_PRIMARY` activa),
-    una atención en curso (turno de hoy, consulta o relación de atención) o un grant sin
-    consent.
-  - **SPECIALTIES**: lo da solo el acceso por especialidad, un grant ligado a un consent
-    `ACTIVE` de acceso profesional.
-  - **Qué filtra**: con `SPECIALTIES`, `summary`, `chart`, `received-services` y
-    `diagnostics/.../orders` devuelven siempre las tres secciones obligatorias del IPS
-    (problemas activos, alergias y medicación activa). Del resto, solo traen los registros
-    cuyo responsable tiene una especialidad autorizada; si nada aporta especialidad, el
-    registro se oculta.
-  - **`hiddenByScope`**: la respuesta suma `hiddenByScope` con la cantidad oculta por
-    bloque. No viene cuando la lectura es completa.
-  - **Escritura**: una atención escribe solo dentro de un encuentro propio abierto, y un
-    grant de solo lectura no escribe.
-  - **Registros de otro profesional**: no se modifican. Las notas, recetas y órdenes exigen
-    ser el autor, el prescriptor o el solicitante. Cambiar el estado de una condición
-    ajena exige `FULL`.
 
 ## Permisos y auth
 

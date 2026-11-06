@@ -7,6 +7,7 @@ import { Type } from 'class-transformer';
 import {
   ServiceRequestComponentDto,
   ServiceRequestImagingDto,
+  ServiceRequestImagingFlatDto,
 } from '../../clinical/dto/service-request-detail.dto';
 import { IsDate, IsUUID } from 'class-validator';
 import {
@@ -110,7 +111,10 @@ export class PatientDiagnosticResultsResponseDto {
  * reimplementarse en la pantalla sin arriesgar mostrar un borrador como
  * resultado.
  */
-export class PatientOrderSummaryDto implements PatientSettlementProjection {
+export class PatientOrderSummaryDto
+  extends ServiceRequestImagingFlatDto
+  implements PatientSettlementProjection
+{
   @ApiProperty({ nullable: true, type: PatientInsuranceSettlementDto })
   insuranceSettlement!: PatientSettlementProjection['insuranceSettlement'];
 
