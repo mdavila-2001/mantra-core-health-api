@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { DependentRelationshipCode } from '../../domain/dependent-relationship';
+import { BIRTH_SEX_CODES, type BirthSexCode } from '../../profiles.concepts';
 
 /**
  * Un dependiente, tal como lo ve quien lo representa.
@@ -64,6 +65,13 @@ export class DependentSummaryDto {
   /** Documento de identidad del dependiente, si lo tiene. */
   @ApiPropertyOptional()
   nationalId?: string;
+
+  /** Sex at birth as a readable code; absent when not declared. */
+  @ApiPropertyOptional({
+    description: 'Sexo asignado al nacer',
+    enum: BIRTH_SEX_CODES,
+  })
+  sexAtBirth?: BirthSexCode;
 
   /**
    * Qué es el dependiente para quien lo representa, ya dado vuelta.
