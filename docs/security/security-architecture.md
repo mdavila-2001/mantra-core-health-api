@@ -21,6 +21,14 @@ flowchart TB
 Ver [ciclo de vida de una request](../architecture/request-lifecycle.md) para el detalle de cada
 capa con evidencia de código.
 
+**Caché del navegador.** `NoStoreHeadersModule` (`src/common/http/no-store-headers.module.ts`) fija
+`Cache-Control: no-store` y `Pragma: no-cache` como valor por omisión en toda respuesta, incluidos
+los 401/403 de un guard y los 404, para que una respuesta con datos de personas no quede en la caché
+de disco de un equipo compartido. Lo que escribe después gana: las rutas `@Public()` cacheables
+conservan `public, max-age` + `ETag` (`PublicCacheInterceptor`, que fija `Cache-Control` antes que el
+`ETag` para no cruzarse con `stripEtagOnNoStore`) y las descargas con su propio `@Header` conservan
+su directiva. `Pragma` se retira si la directiva final ya no es `no-store`.
+
 ## Autenticación — controles verificados
 
 | Control | Entidad/mecanismo real | Evidencia |
