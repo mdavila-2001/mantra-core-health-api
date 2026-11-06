@@ -22,6 +22,7 @@ export * from './read-social.dto';
 export * from './read-timeline.dto';
 export * from './read-messaging.dto';
 export * from './message-reaction.dto';
+export * from './direct-message.dto';
 export * from './read-groups.dto';
 export * from './read-polls.dto';
 export * from './read-reviews.dto';

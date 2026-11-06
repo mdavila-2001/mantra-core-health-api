@@ -452,17 +452,15 @@ export class TenantTypeProfileService {
         input.diagnosticUnit,
         actorUserId,
       );
-      if (
-        resolveDiagnosticUnitType(input.diagnosticUnit) ===
-        DUNIT.UNIT_TYPE_LABORATORY
-      ) {
-        await this.registerLaboratoryBranches(
-          tx,
-          tenantId,
-          input.diagnosticUnit,
-          actorUserId,
-        );
-      }
+      // Laboratory and imaging (v4.2.91: imaging too, so its Branches screen
+      // starts with the head office on the map). An imaging unit declares no
+      // branches (`assertProfileMatchesType`): for it only the central site.
+      await this.registerDiagnosticCenterBranches(
+        tx,
+        tenantId,
+        input.diagnosticUnit,
+        actorUserId,
+      );
       return provisioned.unitId;
     }
 
@@ -549,11 +547,68 @@ export class TenantTypeProfileService {
         { tenantId, medicalFacilitySiteId: site.id, actorUserId },
         hours,
       );
+    await this.registerMedicalFacilityBranches(
+      tx,
+      tenantId,
+      facility,
+      actorUserId,
+    );
     return created.id;
   }
 
   /**
-   * Las sucursales del laboratorio en `directory.branches` (P51, D-4).
+   * The medical facility's sites in `directory.branches` (v4.2.91).
+   *
+   * What was declared stays in `tenant_medical_facility_sites` (it feeds the
+   * verification and is not edited); this adds the same sites to the
+   * organization's branch registry —the one the Branches screen lists, labels,
+   * maps and edits— like the pharmacy and laboratory sign-ups do. The central
+   * site is the head office and each declared one a branch; the declared
+   * address goes to the description. Opening hours stay on the declared sites.
+   * The v4.2.91 patch does the same for medical organizations created before.
+   */
+  private registerMedicalFacilityBranches(
+    tx: EntityManager,
+    tenantId: string,
+    facility: MedicalFacilityDto,
+    actorUserId: string,
+  ): Promise<void> {
+    const toBranch = (
+      site: {
+        name?: string;
+        addressLines: string[];
+        latitude?: number;
+        longitude?: number;
+      },
+      category: 'head_office' | 'branch',
+    ) => {
+      const address = site.addressLines.join(', ').trim();
+      return {
+        name: site.name ?? MEDICAL_FACILITY_HEADQUARTERS_DEFAULT_NAME,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        description: address === '' ? undefined : address.slice(0, 1000),
+        branchType: 'CLINIC' as const,
+        category,
+      };
+    };
+    return this.declaredBranches.register(tx, {
+      tenantId,
+      actorUserId,
+      branches: [
+        ...(facility.headquarters
+          ? [toBranch(facility.headquarters, 'head_office')]
+          : []),
+        ...(facility.branches ?? []).map((branch) =>
+          toBranch(branch, 'branch'),
+        ),
+      ],
+    });
+  }
+
+  /**
+   * Las sucursales del laboratorio y la sede central de imagenología en
+   * `directory.branches` (P51, D-4; imagenología desde v4.2.91).
    *
    * La provisión de la unidad ya las creó como sedes de práctica y de unidad
    * (toma de muestras); esto las suma al registro de sucursales de la
@@ -568,7 +623,7 @@ export class TenantTypeProfileService {
    * @param unit - Bloque `diagnosticUnit` declarado.
    * @param actorUserId - Autor de las filas.
    */
-  private async registerLaboratoryBranches(
+  private async registerDiagnosticCenterBranches(
     tx: EntityManager,
     tenantId: string,
     unit: DiagnosticUnitProfileDto,
@@ -582,6 +637,7 @@ export class TenantTypeProfileService {
               name: unit.primarySite?.name ?? 'Sede central',
               latitude: central.latitude,
               longitude: central.longitude,
+              category: 'head_office' as const,
             },
           ]
         : [];
@@ -598,6 +654,7 @@ export class TenantTypeProfileService {
           description: branch.description,
           locationUrl: branch.locationUrl,
           openingHours: branch.openingHours,
+          category: 'branch' as const,
         })),
       ],
     });

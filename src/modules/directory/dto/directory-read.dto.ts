@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BRANCH_CATEGORIES, type BranchCategory } from '../branch-categories';
 
 /**
  * Contratos de lectura de `directory`.
@@ -273,6 +274,12 @@ export class BranchListItemDto {
 
   @ApiPropertyOptional()
   longitude?: number;
+
+  /**
+   * Categoría de la sede (v4.2.91): `default`, `head_office` (casa matriz) o `branch`.
+   */
+  @ApiProperty({ enum: BRANCH_CATEGORIES })
+  category!: BranchCategory;
 
   @ApiProperty()
   createdAt!: Date;

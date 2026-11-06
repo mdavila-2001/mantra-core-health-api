@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
-import { MessageReactionDto } from './message-reaction.dto';
 import { PractitionerVerificationDto } from '../../profiles/presentation/dto/practitioner-verification.dto';
+import { DirectMessageDto } from './direct-message.dto';
 import {
   IsInt,
   IsOptional,
@@ -278,52 +278,6 @@ export class ConversationPageDto {
    */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
-}
-
-/** Un mensaje directo. */
-export class DirectMessageDto {
-  /** Identificador del mensaje. */
-  @ApiProperty({ format: 'uuid' })
-  id!: string;
-
-  /** Conversación a la que pertenece. */
-  @ApiProperty({ format: 'uuid' })
-  conversationId!: string;
-
-  /** Perfil que lo envió. */
-  @ApiProperty({ format: 'uuid' })
-  senderProfileId!: string;
-
-  /** Mensaje al que responde, si responde a alguno. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  replyToMessageId?: string | null;
-
-  /** Concept id del tipo de contenido. */
-  @ApiProperty({ format: 'uuid' })
-  contentTypeConceptId!: string;
-
-  /** Cuerpo del mensaje. */
-  @ApiPropertyOptional()
-  bodyText?: string | null;
-
-  /** Adjunto en `common.files`. */
-  @ApiPropertyOptional({ format: 'uuid' })
-  attachmentFileId?: string | null;
-
-  /** Si fue editado (F4.5). */
-  @ApiPropertyOptional()
-  isEdited?: boolean | null;
-
-  /** When it was deleted (F4.5); still travels, with body and attachment in `null`. */
-  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
-  deletedAt?: Date | null;
-
-  /** Cuándo se envió. */
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  sentAt?: Date | null;
-
-  @ApiPropertyOptional({ type: () => MessageReactionDto, isArray: true }) // v4.2.91
-  reactions?: MessageReactionDto[];
 }
 
 /** Página de mensajes de una conversación. */

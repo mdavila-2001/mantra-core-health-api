@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -13,6 +16,18 @@ import { BRANCH_TYPE_CONCEPT_BY_CODE, DIR } from '../directory.concepts';
 import { BranchesRepository, TenantsRepository } from '../repositories';
 import { BranchResponseDto, CreateBranchDto, UpdateBranchDto } from '../dto';
 import type { Branches } from '../entities';
+import {
+  DEFAULT_BRANCH_CATEGORY,
+  ONE_HEAD_OFFICE_INDEX,
+  type BranchCategory,
+} from '../branch-categories';
+
+/** Lo que se le dice a quien intenta una segunda casa matriz. */
+const SECOND_HEAD_OFFICE =
+  'La organización ya tiene una casa matriz. Cambie primero la categoría de la actual.';
+
+/** Motivo legible por máquina del 409 de la casa matriz repetida. */
+export const HEAD_OFFICE_TAKEN = 'HEAD_OFFICE_TAKEN';
 import { TenantAdministrationService } from './tenant-administration.service';
 
 /** Caso de uso UC-04-04: crear una branch / sede física con geolocalización. */
@@ -82,6 +97,9 @@ export class DirectoryBranchesService {
         );
       }
 
+      const category = dto.category ?? DEFAULT_BRANCH_CATEGORY;
+      await this.assertHeadOfficeFree(tx, tenantId, category, null);
+
       const branch = this.branchesRepo.create(tx, {
         tenantId,
         code: dto.code,
@@ -95,9 +113,10 @@ export class DirectoryBranchesService {
           dto.longitude !== undefined ? String(dto.longitude) : undefined,
         description: dto.description,
         locationUrl: dto.locationUrl,
+        branchCategory: category,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushGuardingHeadOffice(tx, tenantId);
 
       this.logger.info(
         { operation: 'directory.branch.create', branchId: branch.id },
@@ -134,10 +153,65 @@ export class DirectoryBranchesService {
       if (dto.longitude !== undefined)
         branch.longitude =
           dto.longitude === null ? undefined : String(dto.longitude);
+      if (
+        dto.category !== undefined &&
+        dto.category !== branch.branchCategory
+      ) {
+        await this.assertHeadOfficeFree(tx, tenantId, dto.category, branch.id);
+        branch.branchCategory = dto.category;
+      }
       touch(branch, actor.id);
-      await tx.flush();
+      await flushGuardingHeadOffice(tx, tenantId);
       return toBranchResponse(branch);
     });
+  }
+
+  /**
+   * 409 si la sede quiere ser casa matriz y la organización ya tiene otra.
+   * Adelanta el índice único `ux_branches_one_head_office` con un mensaje que
+   * dice qué hacer; la carrera entre dos pedidos la cierra el índice.
+   */
+  private async assertHeadOfficeFree(
+    tx: EntityManager,
+    tenantId: string,
+    category: BranchCategory,
+    ownId: string | null,
+  ): Promise<void> {
+    if (category !== 'head_office') return;
+    const current = await this.branchesRepo.findHeadOffice(tx, tenantId);
+    if (current && current.id !== ownId) {
+      throw new ConflictException(
+        SECOND_HEAD_OFFICE,
+        {
+          tenantId,
+          headOfficeBranchId: current.id,
+          headOfficeName: current.name,
+        },
+        HEAD_OFFICE_TAKEN,
+      );
+    }
+  }
+}
+
+/** `flush` que traduce la violación del índice de casa matriz única a un 409. */
+async function flushGuardingHeadOffice(
+  tx: EntityManager,
+  tenantId: string,
+): Promise<void> {
+  try {
+    await tx.flush();
+  } catch (error) {
+    if (
+      error instanceof UniqueConstraintViolationException &&
+      String(error.message).includes(ONE_HEAD_OFFICE_INDEX)
+    ) {
+      throw new ConflictException(
+        SECOND_HEAD_OFFICE,
+        { tenantId },
+        HEAD_OFFICE_TAKEN,
+      );
+    }
+    throw error;
   }
 }
 
@@ -156,6 +230,7 @@ export function toBranchResponse(branch: Branches): BranchResponseDto {
     locationUrl: branch.locationUrl ?? undefined,
     latitude: branch.latitude == null ? undefined : Number(branch.latitude),
     longitude: branch.longitude == null ? undefined : Number(branch.longitude),
+    category: branch.branchCategory,
     createdAt: branch.createdAt,
   };
 }

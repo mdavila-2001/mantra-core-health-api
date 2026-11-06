@@ -87449,28 +87449,6 @@ components:
       required:
         - value
       additionalProperties: false
-    OpeningHoursShiftDto:
-      type: object
-      properties:
-        dayOfWeek:
-          type: number
-          minimum: 1
-          maximum: 7
-          example: 1
-          description: 'Día ISO-8601: 1 = lunes … 7 = domingo'
-        opensAt:
-          type: string
-          example: '08:00'
-          description: Apertura, HH:MM (00:00–23:59)
-        closesAt:
-          type: string
-          example: '12:30'
-          description: Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura
-      required:
-        - dayOfWeek
-        - opensAt
-        - closesAt
-      additionalProperties: false
     TerminologyCreateRelationshipDto:
       type: object
       properties:
@@ -88954,6 +88932,28 @@ components:
         address:
           $ref: '#/components/schemas/OwnSiteAddressDto'
       additionalProperties: false
+    OpeningHoursShiftDto:
+      type: object
+      properties:
+        dayOfWeek:
+          type: number
+          minimum: 1
+          maximum: 7
+          example: 1
+          description: 'Día ISO-8601: 1 = lunes … 7 = domingo'
+        opensAt:
+          type: string
+          example: '08:00'
+          description: Apertura, HH:MM (00:00–23:59)
+        closesAt:
+          type: string
+          example: '12:30'
+          description: Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura
+      required:
+        - dayOfWeek
+        - opensAt
+        - closesAt
+      additionalProperties: false
     DiagnosticUnitBranchDto:
       type: object
       properties:
@@ -89316,16 +89316,16 @@ components:
           description: Zona horaria IANA
           maxLength: 100
           example: America/La_Paz
-        pharmacy:
-          description: 'Sólo para PHARMACY: dirección y punto de la casa central y sucursales'
-          allOf:
-            - $ref: '#/components/schemas/RegisterPharmacyBlockDto'
         openingHours:
           maxItems: 14
           description: 'Horario de atención semanal: hasta dos turnos por día, sin superponerse'
           type: array
           items:
             $ref: '#/components/schemas/OpeningHoursShiftDto'
+        pharmacy:
+          description: 'Sólo para PHARMACY: dirección y punto de la casa central y sucursales'
+          allOf:
+            - $ref: '#/components/schemas/RegisterPharmacyBlockDto'
       required:
         - code
         - legalName
@@ -96517,6 +96517,15 @@ components:
           type: string
           description: Enlace de ubicación (http/https)
           maxLength: 2000
+        category:
+          type: string
+          description: >-
+            Categoría de la sede: default (sin clasificar), head_office (casa matriz, una por organización) o branch
+            (sucursal). Por omisión, default.
+          enum:
+            - default
+            - head_office
+            - branch
       required:
         - code
         - name
@@ -96545,6 +96554,13 @@ components:
           minimum: -180
           maximum: 180
           nullable: true
+        category:
+          type: string
+          description: 'Categoría de la sede: default, head_office (casa matriz, una por organización) o branch.'
+          enum:
+            - default
+            - head_office
+            - branch
       additionalProperties: false
     DirectoryCreateMembershipDto:
       type: object
@@ -97039,14 +97055,15 @@ components:
           format: uuid
         bodyText:
           type: string
-          description: Texto del mensaje
+          description: Texto del mensaje. Vacío o en blanco equivale a no mandarlo; obligatorio si no hay adjunto
           maxLength: 4000
         contentType:
           type: string
-          description: Tipo de contenido
+          description: 'Tipo de contenido. STICKER: un sticker propio (imagen), exige adjunto'
           enum:
             - TEXT
             - MEDIA
+            - STICKER
         replyToMessageId:
           type: string
           description: Mensaje al que responde

@@ -1,11 +1,11 @@
 import type { DirectMessageDto, MessageReactionDto } from '../dto';
 import type { DirectMessages, MessageReactions } from '../entities';
+import { messageContentTypeOf } from '../message-content-type';
 
 /**
- * Maps a stored direct message to its response DTO.
- *
- * A deleted message still travels, with body and attachment in `null`, so the
- * thread shows «Se eliminó este mensaje» instead of a gap.
+ * A direct message as it travels to the client. A deleted one keeps its place
+ * but loses body and attachment: the thread draws «Se eliminó este mensaje»
+ * and quotes that pointed to it still know what they pointed to.
  */
 export function toDirectMessageDto(
   message: DirectMessages,
@@ -18,6 +18,7 @@ export function toDirectMessageDto(
     senderProfileId: message.senderProfileId,
     replyToMessageId: message.replyToMessageId ?? null,
     contentTypeConceptId: message.contentTypeConceptId,
+    contentType: messageContentTypeOf(message.contentTypeConceptId),
     bodyText: deleted ? null : (message.bodyText ?? null),
     attachmentFileId: deleted ? null : (message.attachmentFileId ?? null),
     isEdited: message.isEdited ?? null,

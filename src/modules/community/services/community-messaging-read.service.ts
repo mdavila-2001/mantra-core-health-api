@@ -17,6 +17,7 @@ import { FileUploadService } from '../../common/services';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
+import { toDirectMessageDto } from './direct-message.mapper';
 import type { FileContentDto } from '../../common/dto';
 import { CommunityErrorReason } from '../community.error-reasons';
 import { PractitionerVerificationReader } from '../../profiles/application/services/practitioner-verification-reader.service';
@@ -27,7 +28,6 @@ import type {
   ConversationPeerDto,
   ConversationPageDto,
   ConversationPresenceDto,
-  DirectMessageDto,
   DirectMessagePageDto,
 } from '../dto';
 import type {
@@ -37,7 +37,6 @@ import type {
   PublicProfiles,
 } from '../entities';
 import { CommunityMessageReactionsService } from './community-message-reactions.service';
-import { toDirectMessageDto } from './direct-message.mapper';
 
 /**
  * Tope de conversaciones que se resuelven de una vez para armar la bandeja.
@@ -501,7 +500,7 @@ export class CommunityMessagingReadService {
     return {
       items: await this.reactions.attach(
         em,
-        page.map((m) => this.toDto(m)),
+        page.map((message) => toDirectMessageDto(message)),
       ),
       count: page.length,
       limit: options.limit,
@@ -519,7 +518,7 @@ export class CommunityMessagingReadService {
         : {
             pinnedMessage:
               pinnedMessage && !pinnedMessage.deletedAt
-                ? this.toDto(pinnedMessage)
+                ? toDirectMessageDto(pinnedMessage)
                 : null,
           }),
     };
@@ -645,15 +644,6 @@ export class CommunityMessagingReadService {
         verification: null,
       }
     );
-  }
-
-  /**
-   * Un mensaje como viaja al cliente. Uno eliminado va **sin** cuerpo ni
-   * adjunto pero con su lugar: el hilo pinta «Se eliminó este mensaje» y las
-   * citas que apuntaban a él siguen sabiendo a qué apuntaban.
-   */
-  private toDto(message: DirectMessages): DirectMessageDto {
-    return toDirectMessageDto(message);
   }
 
   /**

@@ -592,14 +592,22 @@ export class IamOrganizationSelfRegistrationService {
               name: 'Casa central',
               latitude: block.latitude,
               longitude: block.longitude,
+              category: 'head_office' as const,
             },
           ]
         : [];
+    // v4.2.91: the central site is the head office; each declared one, a branch.
     return this.directory.registerDeclaredBranches(tx, {
       tenantId,
       timeZone: dto.organization.timeZone,
       actorUserId,
-      branches: [...headquarters, ...(block.branches ?? [])],
+      branches: [
+        ...headquarters,
+        ...(block.branches ?? []).map((branch) => ({
+          ...branch,
+          category: 'branch' as const,
+        })),
+      ],
     });
   }
 

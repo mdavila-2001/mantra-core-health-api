@@ -7,6 +7,7 @@ import {
   ResourceNotFoundException,
   roleAuthorizesInTenant,
   STICKER_PACK_FILE_IDS,
+  UPLOAD_MIME_ALLOWLIST,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -26,6 +27,12 @@ import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityChatAutoReplyService } from './community-chat-auto-reply.service';
 import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 import { COMM } from '../community.concepts';
+import { toDirectMessageDto } from './direct-message.mapper';
+import {
+  messageContentConceptId,
+  messageContentTypeOf,
+  type MessageContentType,
+} from '../message-content-type';
 import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreateConversationDto,
@@ -424,6 +431,7 @@ export class CommunityMessagingService {
           dto.senderProfileId,
           dto.attachmentFileId,
           authorizingActor,
+          dto.contentType,
         );
       }
 
@@ -432,10 +440,7 @@ export class CommunityMessagingService {
         conversationId,
         senderProfileId: dto.senderProfileId,
         replyToMessageId: dto.replyToMessageId,
-        contentTypeConceptId:
-          dto.contentType === 'MEDIA'
-            ? COMM.MESSAGE_CONTENT_MEDIA
-            : COMM.MESSAGE_CONTENT_TEXT,
+        contentTypeConceptId: messageContentConceptId(dto.contentType),
         bodyText: dto.bodyText,
         attachmentFileId: dto.attachmentFileId,
         statusConceptId: COMM.MESSAGE_SENT,
@@ -465,6 +470,7 @@ export class CommunityMessagingService {
         senderProfileId: message.senderProfileId,
         replyToMessageId: message.replyToMessageId ?? null,
         contentTypeConceptId: message.contentTypeConceptId,
+        contentType: messageContentTypeOf(message.contentTypeConceptId),
         bodyText: message.bodyText ?? null,
         attachmentFileId: message.attachmentFileId ?? null,
         isEdited: false,
@@ -500,6 +506,7 @@ export class CommunityMessagingService {
         senderProfileId: sent.senderProfileId,
         replyToMessageId: sent.replyToMessageId,
         contentTypeConceptId: sent.contentTypeConceptId,
+        contentType: sent.contentType,
         bodyText: sent.bodyText,
         attachmentFileId: sent.attachmentFileId,
         isEdited: sent.isEdited,
@@ -535,9 +542,13 @@ export class CommunityMessagingService {
     senderProfileId: string,
     fileId: string,
     actor: AuthenticatedUser,
+    contentType?: MessageContentType,
   ): Promise<void> {
     const options = {
       operation: 'community.message.attachment.associate',
+      // An own sticker is drawn as an image on the other side: only images.
+      allowedMimeTypes:
+        contentType === 'STICKER' ? UPLOAD_MIME_ALLOWLIST.IMAGE : undefined,
       // AG-17: el pack de stickers del producto no es de ningún remitente —es
       // del sistema— así que cualquier participante puede adjuntarlo. Un
       // fileId ajeno a este catálogo cerrado sigue exigiendo dueño, igual que
@@ -826,7 +837,7 @@ export class CommunityMessagingService {
       await tx.flush();
 
       return {
-        dto: this.toDto(message),
+        dto: toDirectMessageDto(message),
         destinatarios: await this.otherParticipants(
           tx,
           conversationId,
@@ -1092,20 +1103,5 @@ export class CommunityMessagingService {
     return participants
       .map((p) => p.participantProfileId)
       .filter((other) => other !== profileId);
-  }
-
-  private toDto(message: DirectMessages): DirectMessageDto {
-    return {
-      id: message.id,
-      conversationId: message.conversationId,
-      senderProfileId: message.senderProfileId,
-      replyToMessageId: message.replyToMessageId ?? null,
-      contentTypeConceptId: message.contentTypeConceptId,
-      bodyText: message.bodyText ?? null,
-      attachmentFileId: message.attachmentFileId ?? null,
-      isEdited: message.isEdited ?? null,
-      deletedAt: message.deletedAt ?? null,
-      sentAt: message.sentAt ?? null,
-    };
   }
 }

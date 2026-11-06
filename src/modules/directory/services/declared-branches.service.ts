@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import type { OpeningHoursShiftDto } from '../../../common/dto/opening-hours.dto';
 import { BRANCH_TYPE_CONCEPT_BY_CODE, DIR } from '../directory.concepts';
 import { BranchesRepository } from '../repositories/branches.repository';
+import { branchCodeFromName, type BranchCategory } from '../branch-categories';
 import {
   TenantOpeningHoursRepository,
   type OpeningHoursSite,
@@ -18,6 +19,10 @@ export interface DeclaredBranch {
   readonly description?: string;
   readonly locationUrl?: string;
   readonly openingHours?: readonly OpeningHoursShiftDto[];
+  /** v4.2.91: head office, branch or (unsaid) default. */
+  readonly category?: BranchCategory;
+  /** `OFFICE` unless said; the medical organization's sites are `CLINIC`. */
+  readonly branchType?: 'CLINIC' | 'OFFICE';
 }
 
 /** One sign-up's branches: same tenant, time zone and author. */
@@ -50,27 +55,15 @@ export class DeclaredBranchesService {
     input: DeclaredBranchesInput,
   ): Promise<void> {
     const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[̀-ͯ]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
+    const codeOf = (name: string): string => branchCodeFromName(name, used);
     const created = input.branches.map((item) => ({
       hours: item.openingHours ?? [],
       row: this.branchesRepo.create(tx, {
         tenantId: input.tenantId,
         code: codeOf(item.name),
         name: item.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
+        branchTypeConceptId:
+          BRANCH_TYPE_CONCEPT_BY_CODE[item.branchType ?? 'OFFICE'],
         statusConceptId: DIR.BRANCH_ACTIVE,
         timeZone: input.timeZone,
         latitude:
@@ -79,6 +72,7 @@ export class DeclaredBranchesService {
           item.longitude !== undefined ? String(item.longitude) : undefined,
         description: item.description,
         locationUrl: item.locationUrl,
+        branchCategory: item.category,
         actorUserId: input.actorUserId,
       }),
     }));
