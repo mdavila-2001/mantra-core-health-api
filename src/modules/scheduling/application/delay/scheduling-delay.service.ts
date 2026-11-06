@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../../common';
 import { SchedulingCatalogRepository } from '../../infrastructure/repositories';
@@ -27,7 +28,7 @@ import {
   type DelayResourceDto,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import { operatesAnyAgenda } from '../../domain/booking/agenda-actors';
 import {
   BOOKING_HISTORY_PORT,
   type BookingHistoryPort,
@@ -268,8 +269,9 @@ export class SchedulingDelayService {
     resourceId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    // El oficio de agenda se lee en la organización activa: un rol de mostrador
+    // de OTRA organización no autoriza a avisar demoras en esta.
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
 
     const resource =
       resourceId === undefined

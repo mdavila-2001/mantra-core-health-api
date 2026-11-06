@@ -87,11 +87,8 @@ export class RescheduleBookingUseCase {
 
       // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelAndNotify` —
       // reprogramar no comprobaba que el actor fuera el paciente titular.
-      await this.access.assertMayActForPatient(
-        booking.patientProfileId,
-        actor,
-        tx,
-      );
+      // SEG V-1: quien atiende sólo reprograma lo de su propia agenda.
+      await this.access.assertMayChangeBooking(tx, booking, actor);
 
       if (!ACTIVE_BOOKING_STATES.includes(booking.statusConceptId)) {
         throw new PreconditionFailedException(

@@ -5055,8 +5055,8 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
     it('a quien atiende no lo alcanza: su agenda lista por paciente', async () => {
       // `agenda.ts` y el formulario de cotización listan las citas de sus
       // pacientes por `patientProfileId`. Exigirles apoderamiento rompería las
-      // dos pantallas. Que un profesional pueda listar las de cualquiera es un
-      // hueco anterior, declarado como seguimiento.
+      // dos pantallas. En cambio se le acota a su agenda: sólo recibe las citas
+      // del paciente que son de SU recurso (ver «actor por organización»).
       const d = build();
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [],
@@ -5431,6 +5431,358 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
         d.service.getBookingById('booking-ajena', desk),
       ).resolves.toMatchObject({ id: 'booking-ajena' });
       expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+  });
+});
+
+/**
+ * SEG V-1 / S1-A4 · quién actúa sobre una cita se decide en la organización de
+ * la cita, no con los roles ni el perfil profesional globales del token.
+ *
+ * Antes: cualquier profesional cancelaba, reprogramaba y listaba por paciente las
+ * citas de un colega (`isPatientActor` lo daba por no-paciente por traer
+ * `practitionerProfileId`, y cancelar no cargaba la cita para operarla), y un
+ * rol de mostrador de OTRA organización operaba cualquier cita de esta.
+ */
+describe('SchedulingBookingsService · actor por organización (SEG V-1 / S1-A4)', () => {
+  const TENANT_A = '77777777-7777-7777-7777-777777777777';
+  const TENANT_B = '88888888-8888-8888-8888-888888888888';
+  /** Con holgura sobre la ventana de cancelación del paciente (24 h). */
+  const IN_THREE_DAYS = () => new Date(Date.now() + 3 * 86_400_000);
+
+  /** Una cita confirmada de la organización A, de un paciente ajeno, en la agenda de `hp-colega`. */
+  function bookingOfColleague(over: Record<string, unknown> = {}) {
+    return {
+      id: 'booking-ajena',
+      tenantId: TENANT_A,
+      patientProfileId: 'pat-ajeno',
+      bookableSlotId: SLOT_ID,
+      resourceId: 'res-1',
+      statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      ...over,
+    };
+  }
+
+  /** Quien atiende en A con perfil `hp-1`; su agenda NO es `res-1`. */
+  const doctor = {
+    id: 'user-medico',
+    roles: ['PRACTITIONER'],
+    scopedRoles: { [TENANT_A]: ['PRACTITIONER'] },
+    practitionerProfileId: 'hp-1',
+    patientProfileId: 'pat-medico',
+  } as any;
+
+  /** Mostrador de B con cuenta de paciente, actuando en A. */
+  const deskOfB = {
+    id: 'user-mostrador-b',
+    roles: ['PATIENT', 'SCHEDULING_AGENT'],
+    scopedRoles: { [TENANT_B]: ['SCHEDULING_AGENT'] },
+    patientProfileId: 'pat-mostrador',
+  } as any;
+
+  const deskOfA = {
+    id: 'user-mostrador-a',
+    roles: ['SCHEDULING_AGENT'],
+    scopedRoles: { [TENANT_A]: ['SCHEDULING_AGENT'] },
+  } as any;
+
+  /** La agenda `res-1` de A, cuyo dueño es `hp-colega`. */
+  function colleagueAgenda(d: ReturnType<typeof build>, owner = 'hp-colega') {
+    d.catalogRepo.findResourceById.mockResolvedValue({
+      id: 'res-1',
+      tenantId: TENANT_A,
+      resourceRefId: owner,
+      resourceRefType: 'practitioner_profiles',
+    });
+    d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+      openSlot({ startAt: IN_THREE_DAYS() }),
+    );
+  }
+
+  const cancelDto = { cancelledBy: 'PROVIDER', reasonText: REASON } as any;
+  const rescheduleDto = {
+    toSlotId: '44444444-4444-4444-4444-444444444444',
+    reasonText: REASON,
+  } as any;
+  const notRepresented = () =>
+    new ForbiddenException('No cuenta con autorización de tutoría');
+
+  describe('cancelar y reprogramar', () => {
+    it('un profesional no cancela la cita de un paciente que no es suyo ni de su agenda', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+
+      await expect(
+        d.service.cancel('booking-ajena', cancelDto, doctor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+
+    it('un profesional no reprograma la cita de un paciente que no es suyo ni de su agenda', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+
+      await expect(
+        d.service.reschedule('booking-ajena', rescheduleDto, doctor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+    });
+
+    it('un profesional sí cancela la cita de SU agenda', async () => {
+      const d = build();
+      colleagueAgenda(d, 'hp-1');
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+
+      await d.service.cancel('booking-ajena', cancelDto, doctor);
+
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+    });
+
+    it('un profesional sí cancela la cita donde él es el paciente, aunque sea en otra agenda', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague({ patientProfileId: 'pat-medico' }),
+      );
+
+      await d.service.cancel('booking-ajena', cancelDto, doctor);
+
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+    });
+
+    it('un profesional sí cancela la cita de quien representa', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague({ patientProfileId: 'pat-hijo' }),
+      );
+      d.representation.representsPatient.mockResolvedValue(true);
+
+      await d.service.cancel('booking-ajena', cancelDto, doctor);
+
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+    });
+
+    it('el médico de A que es paciente en B cancela en B como paciente: titular o apoderado', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague({ tenantId: TENANT_B }),
+      );
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        notRepresented(),
+      );
+
+      await expect(
+        d.service.cancel('booking-ajena', cancelDto, doctor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalled();
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de OTRA organización no cancela la cita de esta: debe ser titular o apoderado', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        notRepresented(),
+      );
+
+      await expect(
+        d.service.cancel('booking-ajena', cancelDto, deskOfB),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de OTRA organización no reprograma la cita de esta', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        notRepresented(),
+      );
+
+      await expect(
+        d.service.reschedule('booking-ajena', rescheduleDto, deskOfB),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de ESTA organización cancela cualquier cita suya sin preguntar por el paciente', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+
+      await d.service.cancel('booking-ajena', cancelDto, deskOfA);
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+    });
+  });
+
+  describe('operar y leer una cita', () => {
+    it('el mostrador de OTRA organización no inicia la cita de esta (loadForOperation)', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingOfColleague(),
+      );
+
+      await expect(
+        d.service.start('booking-ajena', deskOfB),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('el mostrador de OTRA organización no lee el detalle de la cita de esta', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingById.mockResolvedValue(bookingOfColleague());
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        notRepresented(),
+      );
+
+      await expect(
+        d.service.getBookingById('booking-ajena', deskOfB),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('el mostrador de ESTA organización lee el detalle', async () => {
+      const d = build();
+      colleagueAgenda(d);
+      d.bookingsRepo.findBookingById.mockResolvedValue(bookingOfColleague());
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await expect(
+        d.service.getBookingById('booking-ajena', deskOfA),
+      ).resolves.toMatchObject({ id: 'booking-ajena' });
+    });
+  });
+
+  describe('listar por paciente', () => {
+    /** Dos citas del paciente: una en la agenda de `hp-1` (el médico) y otra en la de un colega. */
+    function twoBookings(d: ReturnType<typeof build>) {
+      d.catalogRepo.findResourceById.mockImplementation(
+        async (_em: unknown, id: string) => ({
+          id,
+          tenantId: TENANT_A,
+          resourceRefId: id === 'res-propia' ? 'hp-1' : 'hp-colega',
+          resourceRefType: 'practitioner_profiles',
+        }),
+      );
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: bookingOfColleague({
+              id: 'b-propia',
+              resourceId: 'res-propia',
+            }),
+            slot: null,
+          },
+          {
+            booking: bookingOfColleague({
+              id: 'b-colega',
+              resourceId: 'res-colega',
+            }),
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+    }
+
+    it('un profesional que lista por un paciente ajeno solo recibe las citas de su agenda', async () => {
+      const d = build();
+      twoBookings(d);
+
+      const res = await d.searchIn(
+        TENANT_A,
+        { patientProfileId: 'pat-ajeno', includeCancelled: false },
+        50,
+        doctor,
+      );
+
+      expect(res.items.map((item) => item.id)).toEqual(['b-propia']);
+    });
+
+    it('un profesional que lista por sí mismo como paciente recibe todas las suyas', async () => {
+      const d = build();
+      twoBookings(d);
+
+      const res = await d.searchIn(
+        TENANT_A,
+        { patientProfileId: 'pat-medico', includeCancelled: false },
+        50,
+        doctor,
+      );
+
+      expect(res.items.map((item) => item.id)).toEqual([
+        'b-propia',
+        'b-colega',
+      ]);
+    });
+
+    it('un profesional que lista por quien representa recibe todas', async () => {
+      const d = build();
+      twoBookings(d);
+      d.representation.representsPatient.mockResolvedValue(true);
+
+      const res = await d.searchIn(
+        TENANT_A,
+        { patientProfileId: 'pat-hijo', includeCancelled: false },
+        50,
+        doctor,
+      );
+
+      expect(res.items.map((item) => item.id)).toEqual([
+        'b-propia',
+        'b-colega',
+      ]);
+    });
+
+    it('el mostrador de OTRA organización que lista por un paciente ajeno debe ser su titular o apoderado', async () => {
+      const d = build();
+      twoBookings(d);
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        notRepresented(),
+      );
+
+      await expect(
+        d.searchIn(
+          TENANT_A,
+          { patientProfileId: 'pat-ajeno', includeCancelled: false },
+          50,
+          deskOfB,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de ESTA organización lista por cualquier paciente', async () => {
+      const d = build();
+      twoBookings(d);
+
+      const res = await d.searchIn(
+        TENANT_A,
+        { patientProfileId: 'pat-ajeno', includeCancelled: false },
+        50,
+        deskOfA,
+      );
+
+      expect(res.items).toHaveLength(2);
     });
   });
 });

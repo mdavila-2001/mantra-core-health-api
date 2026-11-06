@@ -97,19 +97,36 @@ export class GetBookingUseCase {
     // su representante, quien opera cualquier agenda (`SCHEDULING_ADMIN`,
     // `SCHEDULING_AGENT`, `SUPERADMIN`), o quien atiende exactamente en ese
     // recurso. Reusa el `recurso` de arriba: no agrega una consulta nueva.
-    if (isPatientActor(actor)) {
+    //
+    // SEG V-1/S1-A4: el oficio (mostrador, profesional) se lee en la
+    // organización de la cita, no con los roles globales del token. Quien
+    // atiende lee, además de su agenda, las citas donde él (o quien representa)
+    // es el paciente.
+    if (isPatientActor(actor, booking.tenantId)) {
       await this.access.assertMayActForPatient(
         booking.patientProfileId,
         actor!,
         em,
+        booking.tenantId,
       );
-    } else if (actor && !operatesAnyAgenda(actor)) {
+    } else if (actor && !operatesAnyAgenda(actor, booking.tenantId)) {
       const isOwnAgenda =
         actor.practitionerProfileId !== undefined &&
         resource !== null &&
         resource.resourceRefId === actor.practitionerProfileId &&
         PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
-      if (!isOwnAgenda) {
+      const isOwnPatient =
+        actor.patientProfileId !== undefined &&
+        actor.patientProfileId === booking.patientProfileId;
+      if (
+        !isOwnAgenda &&
+        !isOwnPatient &&
+        !(await this.representation.representsPatient(
+          booking.patientProfileId,
+          actor,
+          em,
+        ))
+      ) {
         throw new ForbiddenException(
           'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
         );
@@ -134,7 +151,7 @@ export class GetBookingUseCase {
 
     // El detalle dice lo mismo que el listado también en esto: quien representa
     // al paciente ve el motivo que él mismo escribió al pedir el turno.
-    const representedPatients = isPatientActor(actor)
+    const representedPatients = isPatientActor(actor, booking.tenantId)
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 
