@@ -118,6 +118,11 @@ export class DiagnosticsOrdersService {
         suggestedPracticeSiteName: row.suggestedPracticeSiteId
           ? (suggestedSiteNames.get(row.suggestedPracticeSiteId) ?? null)
           : null,
+        specimenTypeConceptId: row.specimenTypeConceptId ?? null,
+        modalityConceptId: row.modalityConceptId ?? null,
+        bodySiteConceptId: row.bodySiteConceptId ?? null,
+        lateralityConceptId: row.lateralityConceptId ?? null,
+        contrastConceptId: row.contrastConceptId ?? null,
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,

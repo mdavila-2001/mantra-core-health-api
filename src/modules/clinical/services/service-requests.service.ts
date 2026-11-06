@@ -19,6 +19,7 @@ import {
   ServiceRequestResponseDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { assertServiceRequestDetail } from '../service-request-detail';
 import { ClinicalReadService } from './clinical-read.service';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { OutboxService } from '../../messaging/services';
@@ -264,6 +265,9 @@ export class ServiceRequestsService {
       'Placing service request',
     );
     const categoryConceptId = this.resolveCategoryConceptId(dto);
+    // El detalle (muestra, modalidad, región…) se valida antes de abrir la
+    // transacción: un 422 no escribe nada.
+    assertServiceRequestDetail(analysisCategoryOf(categoryConceptId), dto);
     const basedOnNoteIds = dto.basedOnNoteIds ?? [];
     return this.em.transactional(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
@@ -308,6 +312,11 @@ export class ServiceRequestsService {
         categoryConceptId,
         intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
         priorityConceptId: dto.priorityConceptId,
+        specimenTypeConceptId: dto.specimenTypeConceptId,
+        modalityConceptId: dto.modalityConceptId,
+        bodySiteConceptId: dto.bodySiteConceptId,
+        lateralityConceptId: dto.lateralityConceptId,
+        contrastConceptId: dto.contrastConceptId,
         statusConceptId: decision.statusConceptId,
         requesterProfileId: dto.requesterProfileId,
         // Tal como llegó: la sugerencia de una sede NO le da a su organización
@@ -384,6 +393,11 @@ export class ServiceRequestsService {
         formInstanceId: sr.formInstanceId ?? null,
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: [...basedOnNoteIds],
+        specimenTypeConceptId: sr.specimenTypeConceptId ?? null,
+        modalityConceptId: sr.modalityConceptId ?? null,
+        bodySiteConceptId: sr.bodySiteConceptId ?? null,
+        lateralityConceptId: sr.lateralityConceptId ?? null,
+        contrastConceptId: sr.contrastConceptId ?? null,
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
         performerSelectionConceptId: performer.performerSelectionConceptId,

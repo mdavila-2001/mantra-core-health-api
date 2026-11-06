@@ -3021,6 +3021,79 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_CONTRAST_NONE,
+    {
+      display: 'Sin contraste',
+      definition: 'El estudio de imagen se hace sin medio de contraste.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CONTRAST_WITH,
+    {
+      display: 'Con contraste',
+      definition: 'El estudio de imagen se hace con medio de contraste.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CONTRAST_BOTH,
+    {
+      display: 'Sin y con contraste',
+      definition:
+        'El estudio de imagen se hace primero sin contraste y después con contraste.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_HEAD_NECK,
+    {
+      display: 'Cabeza y cuello',
+      definition: 'Región del cuerpo: cráneo, cara y cuello.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_BACK_SPINE,
+    {
+      display: 'Dorso y médula espinal',
+      definition: 'Región del cuerpo: columna, espalda y médula espinal.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_THORAX,
+    {
+      display: 'Tórax',
+      definition: 'Región del cuerpo: caja torácica, pulmones y corazón.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_ABDOMEN,
+    {
+      display: 'Abdomen',
+      definition: 'Región del cuerpo: cavidad abdominal y sus órganos.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_PELVIS,
+    {
+      display: 'Pelvis y periné',
+      definition: 'Región del cuerpo: pelvis, órganos pélvicos y periné.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_UPPER_LIMB,
+    {
+      display: 'Miembro superior',
+      definition:
+        'Región del cuerpo: hombro, brazo, codo, antebrazo, muñeca y mano.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REGION_LOWER_LIMB,
+    {
+      display: 'Miembro inferior',
+      definition:
+        'Región del cuerpo: cadera, muslo, rodilla, pierna, tobillo y pie.',
+    },
+  ],
+  [
     CLIN.STUDY_HEMOGRAMA,
     {
       display: 'Hemograma completo',

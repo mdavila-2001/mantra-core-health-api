@@ -76807,6 +76807,36 @@ components:
           items:
             type: string
             format: uuid
+        specimenTypeConceptId:
+          type: string
+          description: >-
+            Tipo de muestra (laboratorio). Concepto de `specimen-type`; sólo con categoría LAB. Un cruce incoherente
+            responde 422 (`SERVICE_REQUEST_DETAIL_*`)
+          format: uuid
+        modalityConceptId:
+          type: string
+          description: >-
+            Modalidad del estudio de imagen. Concepto de `diagnostic-modality` (rayos X, ecografía…); sólo con categoría
+            IMAGING. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)
+          format: uuid
+        bodySiteConceptId:
+          type: string
+          description: >-
+            Región del cuerpo del estudio de imagen. Concepto de `service-request-body-region`; sólo con categoría
+            IMAGING. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)
+          format: uuid
+        lateralityConceptId:
+          type: string
+          description: >-
+            Lateralidad (izquierda, derecha, bilateral). Concepto de `condition-laterality`; exige `bodySiteConceptId`.
+            Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)
+          format: uuid
+        contrastConceptId:
+          type: string
+          description: >-
+            Contraste del estudio de imagen. Concepto de `service-request-contrast`; exige `modalityConceptId`. Un cruce
+            incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)
+          format: uuid
         priorityConceptId:
           type: string
           description: Prioridad (concept id)

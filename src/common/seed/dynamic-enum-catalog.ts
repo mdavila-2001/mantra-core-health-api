@@ -1321,7 +1321,10 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.CONDITION_LATERALITY_RIGHT,
       CLIN.CONDITION_LATERALITY_BILATERAL,
     ],
-    targets: ['clinical.conditions.laterality_concept_id'],
+    targets: [
+      'clinical.conditions.laterality_concept_id',
+      'clinical.service_requests.laterality_concept_id',
+    ],
   },
   /* Patch v4.0.8 — estado clínico y cronicidad. `condition-clinical-status`
      gobierna la transición que ofrece `POST /clinical/conditions/:id/change-status`
@@ -1494,6 +1497,34 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     targets: ['clinical.service_requests.category_concept_id'],
   },
   {
+    code: 'service-request-contrast',
+    name: 'Contraste del estudio de imagen',
+    description:
+      'Si el estudio de imagen se pide sin contraste, con contraste, o sin y con contraste.',
+    concepts: [
+      CLIN.SERVICE_REQUEST_CONTRAST_NONE,
+      CLIN.SERVICE_REQUEST_CONTRAST_WITH,
+      CLIN.SERVICE_REQUEST_CONTRAST_BOTH,
+    ],
+    targets: ['clinical.service_requests.contrast_concept_id'],
+  },
+  {
+    code: 'service-request-body-region',
+    name: 'Región del cuerpo del estudio de imagen',
+    description:
+      'Las siete regiones del atlas anatómico 3D: cabeza y cuello, dorso, tórax, abdomen, pelvis, miembro superior e inferior.',
+    concepts: [
+      CLIN.SERVICE_REQUEST_REGION_HEAD_NECK,
+      CLIN.SERVICE_REQUEST_REGION_BACK_SPINE,
+      CLIN.SERVICE_REQUEST_REGION_THORAX,
+      CLIN.SERVICE_REQUEST_REGION_ABDOMEN,
+      CLIN.SERVICE_REQUEST_REGION_PELVIS,
+      CLIN.SERVICE_REQUEST_REGION_UPPER_LIMB,
+      CLIN.SERVICE_REQUEST_REGION_LOWER_LIMB,
+    ],
+    targets: ['clinical.service_requests.body_site_concept_id'],
+  },
+  {
     code: 'service-request-performer-selection',
     name: 'Quién ejecuta la orden',
     description:
@@ -1625,6 +1656,9 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     targets: [
       'diagnostic_units.diagnostic_study_offerings.modality_concept_id',
+      // La orden de imagen declara su modalidad del mismo conjunto (las de
+      // imagen; la de laboratorio la rechaza el servicio de la orden).
+      'clinical.service_requests.modality_concept_id',
     ],
   },
   {
@@ -1668,7 +1702,10 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     description:
       'Qué muestra se tomó al paciente: sangre, suero, orina, heces, líquido cefalorraquídeo, etc.',
     concepts: SPECIMEN_TYPE_CONCEPTS,
-    targets: ['diagnostics.specimens.specimen_type_concept_id'],
+    targets: [
+      'diagnostics.specimens.specimen_type_concept_id',
+      'clinical.service_requests.specimen_type_concept_id',
+    ],
   },
   {
     code: 'specimen-container-type',

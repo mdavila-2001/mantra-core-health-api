@@ -15,6 +15,7 @@ import {
 } from '../../../common';
 import { CLIN } from '../clinical.concepts';
 import { DIAG } from '../../diagnostics/diagnostics.concepts';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
 import { PerformerSelectionValidator } from './performer-selection.validator';
@@ -310,6 +311,85 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       expect(err).toBeInstanceOf(PreconditionFailedException);
       expect((err as any).getResponse().reason).toBe(
         'SERVICE_REQUEST_CATEGORY_MISMATCH',
+      );
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('guarda el detalle de una imagen y lo devuelve en la respuesta', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: unknown, data: any) => ({
+          id: 'sr1',
+          patientProfileId: 'p1',
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          createdAt: new Date(),
+          ...data,
+        }),
+      );
+      const detalle = {
+        modalityConceptId: DUNIT.MODALITY_XRAY,
+        bodySiteConceptId: CLIN.SERVICE_REQUEST_REGION_UPPER_LIMB,
+        lateralityConceptId: CLIN.CONDITION_LATERALITY_LEFT,
+        contrastConceptId: CLIN.SERVICE_REQUEST_CONTRAST_NONE,
+      };
+      const res = await d.service.create(
+        { ...registration, category: 'IMAGING', ...detalle },
+        actor,
+      );
+      expect(d.serviceRequestsRepo.create.mock.calls[0][1]).toMatchObject(
+        detalle,
+      );
+      expect(res).toMatchObject({ ...detalle, specimenTypeConceptId: null });
+    });
+
+    it('guarda la muestra de un laboratorio; sin detalle todo vuelve null', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: unknown, data: any) => ({
+          id: 'sr1',
+          patientProfileId: 'p1',
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          createdAt: new Date(),
+          ...data,
+        }),
+      );
+      const con = await d.service.create(
+        {
+          ...registration,
+          category: 'LAB',
+          specimenTypeConceptId: DIAG.SPECIMEN_TYPE_URINE,
+        },
+        actor,
+      );
+      expect(con.specimenTypeConceptId).toBe(DIAG.SPECIMEN_TYPE_URINE);
+      const sin = await d.service.create(
+        { ...registration, category: 'LAB' },
+        actor,
+      );
+      expect(sin).toMatchObject({
+        specimenTypeConceptId: null,
+        modalityConceptId: null,
+        bodySiteConceptId: null,
+        lateralityConceptId: null,
+        contrastConceptId: null,
+      });
+    });
+
+    it('un detalle que no cuadra con la categoría da 422 y no escribe nada', async () => {
+      const d = build();
+      const err = await d.service
+        .create(
+          {
+            ...registration,
+            category: 'LAB',
+            modalityConceptId: DUNIT.MODALITY_XRAY,
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as any).getResponse().reason).toBe(
+        'SERVICE_REQUEST_DETAIL_NOT_FOR_CATEGORY',
       );
       expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
     });

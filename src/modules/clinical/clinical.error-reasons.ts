@@ -90,4 +90,10 @@ export enum ClinicalErrorReason {
   BASED_ON_NOTE_ENCOUNTER_MISMATCH = 'BASED_ON_NOTE_ENCOUNTER_MISMATCH',
   /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
   SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
+  /** Detalle de la orden: un dato de laboratorio en una orden de imagen, o al revés, o sin categoría. */
+  SERVICE_REQUEST_DETAIL_NOT_FOR_CATEGORY = 'SERVICE_REQUEST_DETAIL_NOT_FOR_CATEGORY',
+  /** Detalle de la orden: el concepto no pertenece al catálogo de ese campo. */
+  SERVICE_REQUEST_DETAIL_NOT_IN_CATALOG = 'SERVICE_REQUEST_DETAIL_NOT_IN_CATALOG',
+  /** Detalle de la orden: lateralidad sin región, o contraste sin modalidad. */
+  SERVICE_REQUEST_DETAIL_DEPENDENCY = 'SERVICE_REQUEST_DETAIL_DEPENDENCY',
 }

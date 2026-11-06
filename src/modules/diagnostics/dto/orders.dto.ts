@@ -65,6 +65,18 @@ export class DiagnosticOrderSummaryDto {
   @ApiProperty({ nullable: true, type: String })
   suggestedPracticeSiteName!: string | null;
 
+  /** Detalle de la orden (v4.2.82); `null` en una orden anterior o «estudio completo». */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  specimenTypeConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  modalityConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  bodySiteConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  lateralityConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  contrastConceptId!: string | null;
+
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 

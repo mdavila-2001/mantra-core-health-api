@@ -124,6 +124,66 @@ export class CreateServiceRequestDto {
   basedOnNoteIds?: string[];
 
   /**
+   * Detalle de la orden (v4.2.82): specimenTypeConceptId.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tipo de muestra (laboratorio). Concepto de `specimen-type`; sólo con categoría LAB. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  specimenTypeConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): modalityConceptId.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Modalidad del estudio de imagen. Concepto de `diagnostic-modality` (rayos X, ecografía…); sólo con categoría IMAGING. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  modalityConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): bodySiteConceptId.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Región del cuerpo del estudio de imagen. Concepto de `service-request-body-region`; sólo con categoría IMAGING. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  bodySiteConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): lateralityConceptId.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Lateralidad (izquierda, derecha, bilateral). Concepto de `condition-laterality`; exige `bodySiteConceptId`. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  lateralityConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): contrastConceptId.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Contraste del estudio de imagen. Concepto de `service-request-contrast`; exige `modalityConceptId`. Un cruce incoherente responde 422 (`SERVICE_REQUEST_DETAIL_*`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  contrastConceptId?: string;
+
+  /**
    * Identificador asociado a priority concept.
    */
   @ApiPropertyOptional({
@@ -285,6 +345,20 @@ export class ServiceRequestResponseDto {
     format: 'uuid',
   })
   basedOnNoteIds!: string[];
+
+  /**
+   * Detalle de la orden que quedó guardado; `null` = sin detalle.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  specimenTypeConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  modalityConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  bodySiteConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  lateralityConceptId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  contrastConceptId!: string | null;
 
   /**
    * Valor de status mantenido por la instancia.

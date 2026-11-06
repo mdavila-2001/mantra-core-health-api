@@ -176,6 +176,54 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Other analysis category',
     },
 
+    /* --- detalle de la orden de imagen ------------------------------------------
+       Contraste (`contrast_concept_id`, v4.2.82): sin, con, o sin y con. Y la
+       región del cuerpo (`body_site_concept_id`): las siete en que el atlas 3D
+       del frontend clasifica cada estructura (R01–R07), una por concepto. La
+       estructura exacta que el médico toca en el modelo no se guarda: lo que el
+       centro de imagen necesita para agendar es la región. Conjuntos internos,
+       sin fuente externa: son la definición que pidió el cliente (06/11/2026). */
+    SERVICE_REQUEST_CONTRAST_NONE: {
+      code: 'SR_CONTRAST_NONE',
+      display: 'Without contrast',
+    },
+    SERVICE_REQUEST_CONTRAST_WITH: {
+      code: 'SR_CONTRAST_WITH',
+      display: 'With contrast',
+    },
+    SERVICE_REQUEST_CONTRAST_BOTH: {
+      code: 'SR_CONTRAST_BOTH',
+      display: 'Without and with contrast',
+    },
+    SERVICE_REQUEST_REGION_HEAD_NECK: {
+      code: 'SR_REGION_HEAD_NECK',
+      display: 'Head and neck',
+    },
+    SERVICE_REQUEST_REGION_BACK_SPINE: {
+      code: 'SR_REGION_BACK_SPINE',
+      display: 'Back and spinal cord',
+    },
+    SERVICE_REQUEST_REGION_THORAX: {
+      code: 'SR_REGION_THORAX',
+      display: 'Thorax',
+    },
+    SERVICE_REQUEST_REGION_ABDOMEN: {
+      code: 'SR_REGION_ABDOMEN',
+      display: 'Abdomen',
+    },
+    SERVICE_REQUEST_REGION_PELVIS: {
+      code: 'SR_REGION_PELVIS',
+      display: 'Pelvis and perineum',
+    },
+    SERVICE_REQUEST_REGION_UPPER_LIMB: {
+      code: 'SR_REGION_UPPER_LIMB',
+      display: 'Upper limb',
+    },
+    SERVICE_REQUEST_REGION_LOWER_LIMB: {
+      code: 'SR_REGION_LOWER_LIMB',
+      display: 'Lower limb',
+    },
+
     /* --- quién ejecuta la orden -------------------------------------------------
        El médico recomienda, no impone: el paciente siempre puede elegir otro
        centro. `SR_PERF_PATIENT_CHOICE` es el valor de toda orden que no declara

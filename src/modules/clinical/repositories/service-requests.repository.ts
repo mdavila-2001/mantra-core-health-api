@@ -35,6 +35,16 @@ export interface CreateServiceRequestData {
    * Identificador asociado a intent concept.
    */
   intentConceptId?: string;
+  /** Detalle de la orden (v4.2.82). */
+  specimenTypeConceptId?: string;
+  /** Detalle de la orden (v4.2.82). */
+  modalityConceptId?: string;
+  /** Detalle de la orden (v4.2.82). */
+  bodySiteConceptId?: string;
+  /** Detalle de la orden (v4.2.82). */
+  lateralityConceptId?: string;
+  /** Detalle de la orden (v4.2.82). */
+  contrastConceptId?: string;
   /**
    * Identificador asociado a priority concept.
    */
@@ -111,6 +121,11 @@ export class ServiceRequestsRepository {
         codeConceptId: data.codeConceptId,
         categoryConceptId: data.categoryConceptId,
         intentConceptId: data.intentConceptId,
+        specimenTypeConceptId: data.specimenTypeConceptId,
+        modalityConceptId: data.modalityConceptId,
+        bodySiteConceptId: data.bodySiteConceptId,
+        lateralityConceptId: data.lateralityConceptId,
+        contrastConceptId: data.contrastConceptId,
         priorityConceptId: data.priorityConceptId,
         statusConceptId: data.statusConceptId,
         requesterProfileId: data.requesterProfileId,

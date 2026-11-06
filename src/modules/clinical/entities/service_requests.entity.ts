@@ -128,6 +128,44 @@ export class ServiceRequests {
   formInstanceId?: string;
 
   /**
+   * Detalle de la orden (v4.2.82): specimenTypeConceptId.
+   */
+  @Property({
+    fieldName: 'specimen_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  specimenTypeConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): modalityConceptId.
+   */
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  modalityConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): bodySiteConceptId.
+   */
+  @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  bodySiteConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): lateralityConceptId.
+   */
+  @Property({
+    fieldName: 'laterality_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  lateralityConceptId?: string;
+
+  /**
+   * Detalle de la orden (v4.2.82): contrastConceptId.
+   */
+  @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  contrastConceptId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
