@@ -8,11 +8,9 @@ import {
 } from '../../../../observability';
 import * as argon2 from 'argon2';
 import { SessionValidator } from '../../../../common/auth/session-validator';
-import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
   TokenService,
-  decryptSecret,
   loadAuthEnv,
   touch,
   type AuthEnv,
@@ -41,6 +39,7 @@ import {
   IamLoginDevicesService,
   type LoginClient,
 } from './iam-login-devices.service';
+import { IamTotpService } from './iam-totp.service';
 import {
   ACCOUNT_PROFILE_IDS_PORT,
   type AccountProfileIdsPort,
@@ -110,6 +109,8 @@ export class IamAuthService {
    * @param patientProfilesRepo - Perfil de paciente del titular.
    * @param logger - Valor de logger requerido por la operación.
    * @param mfaRepo - Factores MFA, para el desafío de `AUTH_MFA_CHALLENGE_ENABLED`.
+   * @param loginDevices - Reconocimiento de dispositivos del login.
+   * @param totp - Códigos TOTP de un solo uso, para el desafío MFA.
    */
   constructor(
     private readonly em: EntityManager,
@@ -132,6 +133,7 @@ export class IamAuthService {
     private readonly sessionValidator: SessionValidator,
     private readonly mfaRepo?: MfaFactorsRepository,
     private readonly loginDevices?: IamLoginDevicesService,
+    private readonly totp?: IamTotpService,
   ) {
     this.logger.setContext(IamAuthService.name);
   }
@@ -479,7 +481,7 @@ export class IamAuthService {
    *
    * Sólo aplica a cuentas con un factor VERIFICADO. Sin `mfaCode` responde 401 con
    * `details.reason = MFA_REQUIRED` para que el cliente pida el código; con un
-   * código que no valida, 401 `MFA_INVALID` y cuenta como intento fallido. Se
+   * código que no valida o que ya se usó, 401 `MFA_INVALID` y cuenta como intento fallido. Se
    * corre DESPUÉS de comprobar la contraseña: sin ella no se revela si la cuenta
    * tiene MFA.
    *
@@ -512,13 +514,12 @@ export class IamAuthService {
         details: { reason: 'MFA_REQUIRED' },
       });
     }
-    for (const factor of factors) {
-      const secret = decryptSecret(factor.secretEncrypted as string);
-      const result = await verifyTotp({ token: mfaCode, secret }).catch(() => ({
-        valid: false,
-      }));
-      if (result.valid) return;
-    }
+    // Un código TOTP es de UN SOLO USO: `consume` rechaza el que ya se presentó
+    // dentro de su ventana (replay con la contraseña ya conocida). Sin el
+    // servicio inyectado no hay forma de gastar el código y el desafío falla
+    // cerrado en lugar de aceptar un código reutilizable.
+    const outcome = await this.totp?.consume(userId, factors, mfaCode);
+    if (outcome?.valid) return;
     span.addEvent('auth.rejected', { reason: 'bad-mfa' });
     await this.recordLoginFailure(userId, ip, 'bad-mfa');
     throw new UnauthorizedException({

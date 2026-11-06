@@ -9,9 +9,15 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  AccessLogged,
   Audited,
   CurrentUser,
   Roles,
@@ -176,13 +182,23 @@ export class SupportStaffController {
     return this.support.leaveMine(id, actor);
   }
 
-  /** Agenda de un doctor al que asiste (sólo con vínculo activo con él). */
+  /**
+   * Agenda de un doctor al que asiste (sólo con vínculo activo con él).
+   *
+   * Devuelve el nombre de los pacientes: es una lectura de PHI y deja su asiento
+   * en `audit.data_access_log` (`@AccessLogged`, sin identificadores de paciente
+   * en el asiento). Lleva un tope de turnos y avisa con `truncated`.
+   */
   @Get('me/support-agenda')
   @TenantAgnostic()
   @Roles('SUPPORT_STAFF')
+  @AccessLogged({ resourceType: 'SUPPORT_AGENDA' })
   @ApiOperation({
     summary: 'Agenda de un doctor asignado (403 si no hay vínculo activo)',
+    description:
+      'Devuelve como mucho `limit` turnos (500) por hora; con `truncated: true` el rango tenía más: acote `from`/`to` y vuelva a pedir. La lectura queda en la bitácora de acceso a datos.',
   })
+  @ApiOkResponse({ type: SupportAgendaResponseDto })
   agenda(
     @Query() query: SupportAgendaQueryDto,
     @CurrentUser() actor: AuthenticatedUser,

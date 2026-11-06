@@ -139,6 +139,38 @@ export class SecurityEventsRepository {
       em.getTransactionContext(),
     );
   }
+
+  /**
+   * Último paso de tiempo TOTP aceptado para un factor, o `undefined`. Solo se
+   * miran los últimos minutos: un código vale por su paso de 30 segundos, así
+   * que un uso más viejo no puede repetirse.
+   *
+   * @param em - Contexto de persistencia (la transacción que sostiene el cerrojo).
+   * @param userId - Titular del factor.
+   * @param factorId - Factor consultado.
+   * @returns El mayor `timeStep` registrado como `code-used`, si lo hay.
+   */
+  async lastMfaTimeStep(
+    em: EntityManager,
+    userId: string,
+    factorId: string,
+  ): Promise<number | undefined> {
+    const rows = await em
+      .getConnection()
+      .execute<{ step: string | number | null }[]>(
+        `select max((detail_json ->> 'timeStep')::bigint) as step
+           from iam.security_events
+          where user_id = ? and event_type_concept_id = ?
+            and detail_json ->> 'action' = 'code-used'
+            and detail_json ->> 'factorId' = ?
+            and recorded_at > now() - interval '10 minutes'`,
+        [userId, CONCEPTS.SEC_MFA_ENROLL, factorId],
+        'all',
+        em.getTransactionContext(),
+      );
+    const step = rows[0]?.step;
+    return step === null || step === undefined ? undefined : Number(step);
+  }
 }
 
 /** Fila de la historia de ciclo de vida, tal como sale de `iam.security_events`. */

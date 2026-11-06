@@ -79,6 +79,7 @@ function build() {
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
     latestLifecycleAction: mockFn(),
     lifecycleHistory: mockFn(),
+    lastMfaTimeStep: mockFn(),
   };
   // Por defecto, una cuenta sin persona vinculada: los claims `pid` y `hpid` se
   // omiten y el token queda igual que antes de que existieran. Los casos que los
