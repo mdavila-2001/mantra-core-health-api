@@ -201,6 +201,7 @@ describe('CommunityGroupWallService (P7)', () => {
         { id: 'g1', name: undefined, tenantId: 't1' },
         'p1',
         actor,
+        comment().id,
       );
     });
 

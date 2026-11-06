@@ -16,6 +16,7 @@ import {
 } from '../../../common';
 import { DiagnosticsReportsService } from '../services';
 import { ReportImmutabilityService } from '../services/report-immutability.service';
+import { CriticalResultDetectionService } from '../services/critical-result-detection.service';
 import {
   CreateReportVersionDto,
   ReleaseReportVersionDto,
@@ -38,10 +39,12 @@ export class DiagnosticsReportsController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param service - Valor de service requerido por la operación.
+   * @param criticalDetection - UC-20-09 with the notice to the responsible.
    */
   constructor(
     private readonly service: DiagnosticsReportsService,
     private readonly immutability: ReportImmutabilityService,
+    private readonly criticalDetection: CriticalResultDetectionService,
   ) {}
 
   /** UC-20-07. */
@@ -96,7 +99,7 @@ export class DiagnosticsReportsController {
     @Body() dto: DetectCriticalResultDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    return this.service.detectCritical(dto, actor);
+    return this.criticalDetection.detect(dto, actor);
   }
 
   /** UC-20-10. */

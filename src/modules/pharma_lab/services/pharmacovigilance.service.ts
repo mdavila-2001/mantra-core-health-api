@@ -153,7 +153,7 @@ export class PharmacovigilanceService {
         tx,
         pharmaLabId,
       );
-      this.notifications.notifyAll(
+      await this.notifications.notifyAll(
         tx,
         staffUserIds,
         {

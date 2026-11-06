@@ -59,7 +59,11 @@ function build(devices: any[] = []) {
               ? d.userId === where.userId
               : d.userId !== where.userId.$ne)) &&
           (where.deviceFingerprint === undefined ||
-            d.deviceFingerprint === where.deviceFingerprint),
+            (typeof where.deviceFingerprint === 'string'
+              ? d.deviceFingerprint === where.deviceFingerprint
+              : String(d.deviceFingerprint).startsWith(
+                  where.deviceFingerprint.$like.replace('%', ''),
+                ))),
       ),
     ),
   };
@@ -70,7 +74,13 @@ function build(devices: any[] = []) {
     fork: () => forked,
   };
   const logger: any = { setContext: jest.fn(), warn: jest.fn() };
-  return { service: new WebPushService(em, logger), devices, created, logger };
+  return {
+    service: new WebPushService(em, logger),
+    devices,
+    created,
+    logger,
+    tx,
+  };
 }
 
 describe('isAllowedPushEndpoint', () => {
@@ -158,6 +168,54 @@ describe('WebPushService', () => {
     expect(body.body).toBe('Tiene un aviso nuevo en AloVida');
     expect(JSON.stringify(body)).not.toContain('cancelada');
     expect(body.route).toBe('/appointments');
+  });
+
+  it('without a safe route it opens the notification center and carries the contract ids', async () => {
+    vapidOn();
+    const d = build();
+    const { service } = d;
+    await service.subscribe('u1', { endpoint: ENDPOINT, keys: KEYS });
+    sendNotification.mockResolvedValue({});
+
+    await service.pushToUser({
+      recipientUserId: 'u1',
+      route: 'https://evil.example/x',
+      notificationId: 'n-1',
+      destinationType: 'CONVERSATION',
+      destinationId: 'c-1',
+      category: 'MESSAGES',
+    });
+
+    const body = JSON.parse(sendNotification.mock.calls[0][1] as string);
+    // `/notifications` is the API prefix, never an app screen.
+    expect(body.route).toBe('/notification-center');
+    // Only browser rows: native app installs share push_token_encrypted.
+    const [, where] = d.tx.find.mock.calls.at(-1) as any[];
+    expect(where.deviceFingerprint).toEqual({ $like: 'webpush:%' });
+    expect(body).toMatchObject({
+      notificationId: 'n-1',
+      destinationType: 'CONVERSATION',
+      destinationId: 'c-1',
+      category: 'MESSAGES',
+    });
+  });
+
+  it('skips native app rows that share the push token column', async () => {
+    vapidOn();
+    const d = build([
+      {
+        id: 'native-1',
+        userId: 'u1',
+        deviceFingerprint: 'app-install-1',
+        pushTokenEncrypted: 'sealed-fcm-token',
+      },
+    ]);
+    sendNotification.mockResolvedValue({});
+
+    await d.service.pushToUser({ recipientUserId: 'u1' });
+
+    expect(sendNotification).not.toHaveBeenCalled();
+    expect(d.logger.warn).not.toHaveBeenCalled();
   });
 
   it('borra la suscripción cuando el navegador ya no existe (410)', async () => {

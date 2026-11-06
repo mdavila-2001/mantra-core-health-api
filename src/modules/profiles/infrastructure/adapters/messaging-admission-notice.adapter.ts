@@ -121,7 +121,7 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
           kind: `ADMISSION_${notice.kind}`,
           subject: SUBJECT[notice.kind],
           bodyText,
-          route: '/account/my-profile',
+          route: '/account/profile',
           admissionId: notice.admissionId,
         },
         debounceKey,

@@ -193,7 +193,7 @@ export class VisitRecordsService {
         createdByUserId: actor.id,
       });
 
-      this.notifications.notify(
+      await this.notifications.notify(
         tx,
         {
           recipientUserId: request.doctorUserId,
@@ -335,7 +335,7 @@ export class VisitRecordsService {
         record.medicalVisitorId,
       );
       if (visitor && dto.kindConceptId === PHL.RATING_INTERNAL) {
-        this.notifications.notify(
+        await this.notifications.notify(
           tx,
           {
             recipientUserId: visitor.userId,
@@ -503,7 +503,7 @@ export class VisitRecordsService {
       ),
       actorUserId: actor.id,
     });
-    this.notifications.notify(
+    await this.notifications.notify(
       tx,
       {
         recipientUserId: record.doctorUserId,
