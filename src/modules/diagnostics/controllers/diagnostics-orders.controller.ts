@@ -1,13 +1,19 @@
 import {
   Controller,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -18,9 +24,13 @@ import {
   requireTenantId,
   AccessLogged,
 } from '../../../common';
-import { DiagnosticsOrdersService } from '../services';
+import {
+  DiagnosticsOrdersService,
+  DiagnosticsPractitionerResultsService,
+} from '../services';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
+import { PractitionerDiagnosticResultDto } from '../dto';
 
 /**
  * Lectura del circuito diagnóstico por paciente. Capa fina: valida parámetros y
@@ -37,8 +47,12 @@ export class DiagnosticsOrdersController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param readService - Servicio de lectura del circuito diagnóstico.
+   * @param results - Resultado liberado de un informe, para quien atiende.
    */
-  constructor(private readonly readService: DiagnosticsOrdersService) {}
+  constructor(
+    private readonly readService: DiagnosticsOrdersService,
+    private readonly results: DiagnosticsPractitionerResultsService,
+  ) {}
 
   /**
    * Órdenes de laboratorio e imagenología del paciente, con sus informes.
@@ -77,5 +91,98 @@ export class DiagnosticsOrdersController {
       patientProfileId,
       limit ?? 50,
     );
+  }
+
+  /**
+   * El resultado liberado de un informe del paciente: valores, conclusión y
+   * archivos.
+   *
+   * Misma puerta que la lista de órdenes (`ClinicalRecordAccessGuard`, 403 sin
+   * acceso a la historia). Pasada la puerta, inexistente, de otro paciente, de
+   * otra organización o sin versión liberada responden el mismo 404.
+   *
+   * @param patientProfileId - Paciente cuya historia se lee.
+   * @param reportId - Informe pedido.
+   * @returns La versión liberada con sus valores y archivos.
+   */
+  @Get(':patientProfileId/reports/:reportId')
+  @UseGuards(ClinicalRecordAccessGuard)
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_REPORT',
+    patient: 'param:patientProfileId',
+    resourceId: 'param:reportId',
+  })
+  @ApiOperation({
+    summary: 'Resultado liberado de un informe del paciente',
+    description:
+      'Valores con unidad, rango de referencia e interpretación, conclusión, ' +
+      'fecha de liberación y archivos de la versión liberada vigente. Un ' +
+      'informe sin liberar responde 404.',
+  })
+  @ApiOkResponse({ type: PractitionerDiagnosticResultDto })
+  @ApiForbiddenResponse({ description: 'Sin acceso a la historia' })
+  @ApiNotFoundResponse({
+    description:
+      'No existe, no es de ese paciente u organización, o no está liberado',
+  })
+  getReleasedResult(
+    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+  ): Promise<PractitionerDiagnosticResultDto> {
+    return this.results.getReleasedResult(
+      requireTenantId(),
+      patientProfileId,
+      reportId,
+    );
+  }
+
+  /**
+   * Los bytes de un archivo del resultado liberado.
+   *
+   * @param patientProfileId - Paciente cuya historia se lee.
+   * @param reportId - Informe.
+   * @param fileId - Archivo del informe.
+   * @param res - Respuesta cruda: se envían bytes, no JSON.
+   */
+  @Get(':patientProfileId/reports/:reportId/files/:fileId/content')
+  @UseGuards(ClinicalRecordAccessGuard)
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_REPORT_FILE',
+    patient: 'param:patientProfileId',
+    resourceId: 'param:fileId',
+  })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar un archivo del resultado liberado',
+    description:
+      'Autoriza por acceso a la historia, informe liberado del paciente y ' +
+      'archivo de esa versión. Todo lo demás responde 404.',
+  })
+  @ApiOkResponse({ description: 'Bytes del archivo' })
+  @ApiForbiddenResponse({ description: 'Sin acceso a la historia' })
+  @ApiNotFoundResponse({
+    description:
+      'El informe no está disponible o el archivo no cuelga de su versión liberada',
+  })
+  async getReleasedResultFileContent(
+    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.results.getReleasedResultFileContent(
+      requireTenantId(),
+      patientProfileId,
+      reportId,
+      fileId,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
+      );
+    }
+    res.send(content.buffer);
   }
 }

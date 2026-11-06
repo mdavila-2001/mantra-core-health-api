@@ -155,3 +155,186 @@ export class PatientDiagnosticOrdersResponseDto {
   /** Bloques que quedaron recortados por el tope. */
   @ApiProperty({ type: [String] }) truncated!: string[];
 }
+
+/** Tipos de valor que puede traer una observación del informe. */
+export const RESULT_VALUE_KINDS = [
+  'QUANTITY',
+  'DECIMAL',
+  'INTEGER',
+  'TEXT',
+  'BOOLEAN',
+  'CONCEPT',
+  'DATETIME',
+  'DATE',
+] as const;
+/** Tipo de valor de una observación del informe. */
+export type ResultValueKind = (typeof RESULT_VALUE_KINDS)[number];
+
+/** Rango de referencia de un valor, tal como lo registró el laboratorio. */
+export class DiagnosticResultReferenceRangeDto {
+  /** Límite inferior, como texto decimal exacto (columna `numeric`). */
+  @ApiProperty({ type: String, nullable: true }) low!: string | null;
+
+  /** Límite superior, como texto decimal exacto. */
+  @ApiProperty({ type: String, nullable: true }) high!: string | null;
+
+  /** Texto libre del rango («< 200», «negativo»…). */
+  @ApiProperty({ type: String, nullable: true }) text!: string | null;
+
+  /** Unidad del rango (concept id). */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  unitConceptId!: string | null;
+
+  /** Rótulo de esa unidad en el catálogo. */
+  @ApiProperty({ type: String, nullable: true }) unit!: string | null;
+}
+
+/**
+ * Un valor del informe: una observación enlazada a la versión liberada.
+ *
+ * Lleva el concepto **y** su rótulo: el id es el contrato estable y el rótulo
+ * es lo que el panel pinta sin una consulta por fila al catálogo.
+ */
+export class DiagnosticResultValueDto {
+  /** Observación (`clinical.observations`). */
+  @ApiProperty({ format: 'uuid' }) observationId!: string;
+
+  /** Qué se midió (concept id). */
+  @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
+
+  /** Rótulo de lo medido; `null` si el concepto no está en el catálogo. */
+  @ApiProperty({ type: String, nullable: true }) name!: string | null;
+
+  /**
+   * El valor como texto: los numéricos llegan como texto decimal exacto, el
+   * booleano como `true`/`false`, el concepto como su rótulo y las fechas en
+   * ISO 8601. `null` si la observación no trae valor (ver `valueKind`).
+   */
+  @ApiProperty({ type: String, nullable: true }) value!: string | null;
+
+  /** De qué columna salió `value`; `null` si no hay valor. */
+  @ApiProperty({ enum: RESULT_VALUE_KINDS, nullable: true })
+  valueKind!: ResultValueKind | null;
+
+  /** Valor codificado (concept id), cuando `valueKind` es `CONCEPT`. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  valueConceptId!: string | null;
+
+  /** Unidad de la cantidad (concept id). */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  unitConceptId!: string | null;
+
+  /** Rótulo de la unidad. */
+  @ApiProperty({ type: String, nullable: true }) unit!: string | null;
+
+  /**
+   * Primer rango de referencia registrado para la observación (no los de sus
+   * componentes); `null` si no tiene.
+   */
+  @ApiProperty({ type: DiagnosticResultReferenceRangeDto, nullable: true })
+  referenceRange!: DiagnosticResultReferenceRangeDto | null;
+
+  /** Interpretación (concept id): alto, bajo, crítico… */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  interpretationConceptId!: string | null;
+
+  /** Código de la interpretación en su sistema de códigos. */
+  @ApiProperty({ type: String, nullable: true })
+  interpretationCode!: string | null;
+
+  /** Rótulo de la interpretación. */
+  @ApiProperty({ type: String, nullable: true })
+  interpretation!: string | null;
+
+  /** Estado de la observación (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+
+  /** Momento clínico del valor (inicio de la ventana efectiva). */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  effectiveAt!: Date | null;
+}
+
+/** Un archivo de la versión liberada (el PDF del informe, una imagen…). */
+export class DiagnosticResultFileSummaryDto {
+  /** Identificador del enlace informe↔archivo. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /**
+   * Archivo en `common.files`. Se descarga por
+   * `GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content`.
+   */
+  @ApiProperty({ format: 'uuid' }) fileId!: string;
+
+  /** Nombre original del archivo, si se conoce. */
+  @ApiProperty({ type: String, nullable: true }) name!: string | null;
+
+  /** Qué es el archivo dentro del informe (concept id). */
+  @ApiProperty({ format: 'uuid' }) contentRoleConceptId!: string;
+
+  /** Formato de presentación (concept id), si se declaró. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  presentationFormatConceptId!: string | null;
+
+  /** Posición dentro del informe. */
+  @ApiProperty({ type: Number, nullable: true }) ordinal!: number | null;
+}
+
+/**
+ * El resultado liberado de un informe, visto por quien atiende al paciente.
+ *
+ * Es la versión liberada de número más alto del informe, con sus valores y
+ * sus archivos. A diferencia del portal del paciente, una liberación marcada
+ * como oculta para el paciente **sí** se muestra: el profesional es quien la
+ * tiene que leer; `patientVisible` dice cuál de los dos casos es.
+ */
+export class PractitionerDiagnosticResultDto {
+  /** Informe (`clinical.diagnostic_reports`). */
+  @ApiProperty({ format: 'uuid' }) reportId!: string;
+
+  /** Paciente del informe. */
+  @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
+
+  /** Orden que lo originó, si cuelga de una. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  serviceRequestId!: string | null;
+
+  /** Qué informa (concept id). */
+  @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
+
+  /** Rótulo de lo que informa. */
+  @ApiProperty({ type: String, nullable: true }) codeDisplay!: string | null;
+
+  /** Laboratorio o imagenología (concept id). */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  categoryConceptId!: string | null;
+
+  /** Versión liberada que se muestra. */
+  @ApiProperty({ format: 'uuid' }) versionId!: string;
+
+  /** Número de esa versión; una enmienda posterior tiene un número mayor. */
+  @ApiProperty() versionNumber!: number;
+
+  /** Estado clínico de la versión (concept id). */
+  @ApiProperty({ format: 'uuid' }) clinicalStatusConceptId!: string;
+
+  /** Cuándo se emitió la versión. */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  issuedAt!: Date | null;
+
+  /** Cuándo se liberó (último evento de liberación de la versión). */
+  @ApiProperty({ type: String, format: 'date-time' }) releasedAt!: Date;
+
+  /** Si la liberación lo dejó visible para el paciente. */
+  @ApiProperty() patientVisible!: boolean;
+
+  /** Conclusión firmada, si la versión la trae. */
+  @ApiProperty({ type: String, nullable: true }) conclusionText!: string | null;
+
+  /** Valores, en el orden declarado por el informe. */
+  @ApiProperty({ type: [DiagnosticResultValueDto] })
+  values!: DiagnosticResultValueDto[];
+
+  /** Archivos de la versión, en el orden declarado por el informe. */
+  @ApiProperty({ type: [DiagnosticResultFileSummaryDto] })
+  files!: DiagnosticResultFileSummaryDto[];
+}
