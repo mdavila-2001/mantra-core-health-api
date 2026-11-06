@@ -5,6 +5,7 @@ import {
   DomainException,
   ErrorCode,
   PreconditionFailedException,
+  ResourceNotFoundException,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
@@ -45,7 +46,24 @@ export function invitationStatus(
   return 'ACTIVE';
 }
 
-/** The organization issues and lists affiliation codes (QR) for practitioners and support staff. */
+/** The listing shape of a code: never carries the plain code. */
+function toView(row: AffiliationInvitationRow): AffiliationInvitationViewDto {
+  return {
+    id: row.id,
+    kind:
+      row.kind_concept_id === AFF_INV.KIND_PRACTITIONER
+        ? 'PRACTITIONER'
+        : 'SUPPORT_STAFF',
+    ...(row.target_person_id ? { targetPersonId: row.target_person_id } : {}),
+    maxUses: row.max_uses,
+    usesCount: row.uses_count,
+    expiresAt: row.expires_at,
+    status: invitationStatus(row),
+    createdAt: row.created_at,
+  };
+}
+
+/** The organization issues, lists and revokes affiliation codes (QR) for practitioners and support staff. */
 @Injectable()
 export class AffiliationInvitationsService {
   constructor(
@@ -108,23 +126,30 @@ export class AffiliationInvitationsService {
     const em = this.em.fork();
     await this.assertOrganizationAdmin(em, tenantId, actor);
     const rows = await this.invitations.listByTenant(em, tenantId);
-    return {
-      items: rows.map((row) => ({
-        id: row.id,
-        kind:
-          row.kind_concept_id === AFF_INV.KIND_PRACTITIONER
-            ? 'PRACTITIONER'
-            : 'SUPPORT_STAFF',
-        ...(row.target_person_id
-          ? { targetPersonId: row.target_person_id }
-          : {}),
-        maxUses: row.max_uses,
-        usesCount: row.uses_count,
-        expiresAt: row.expires_at,
-        status: invitationStatus(row),
-        createdAt: row.created_at,
-      })),
-    };
+    return { items: rows.map((row) => toView(row)) };
+  }
+
+  /**
+   * An organization admin turns a code off (leaked or no longer needed). An id that
+   * does not exist and an id of another organization answer the same 404.
+   */
+  async revoke(
+    tenantId: string,
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationInvitationViewDto> {
+    return this.em.transactional(async (tx) => {
+      await this.assertOrganizationAdmin(tx, tenantId, actor);
+      const row = await this.invitations.revoke(tx, tenantId, id, actor.id);
+      if (!row) {
+        throw new ResourceNotFoundException(
+          'Código de afiliación no encontrado',
+          undefined,
+          Reason.SUPPORT_INVITATION_INVALID,
+        );
+      }
+      return toView(row);
+    });
   }
 
   private async assertOrganizationAdmin(

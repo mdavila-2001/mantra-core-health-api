@@ -86,6 +86,12 @@ miraba `/auth`, no quedó medido del lado del usuario.
 Vuelta atrás: `sudo alovida-data-switchover test rollback`. Con el cambio hecho,
 el reconciliador para cualquier base de Coolify de esa API que vuelva a arrancar.
 
+**Contraseña de Redis.** El Redis de este stack arranca con `requirepass` si
+`REDIS_PASSWORD` está en el env-file del entorno (`/etc/alovida-resilience/data-<entorno>.env`),
+y su healthcheck se autentica con ella. La API y los workers deben recibir el mismo valor
+en sus variables de aplicación; cambiarla pide reiniciar Redis y la API juntos. Vacía, Redis
+queda sin autenticación y solo lo protege la red `alovida`.
+
 ## Rol definitivo de la base (`mantra_app` + RLS): BLOQUEADO
 
 Probado el 25/10/2026 con una copia aislada de la API de test: 11 de 12 rutas

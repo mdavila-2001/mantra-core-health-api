@@ -13,8 +13,8 @@ registre igual se guardan, así que llegan avisos en cuanto se configura.
 
 | Plataforma | Identificador | Dónde está |
 |---|---|---|
-| Android | `com.mantracore.alovida` | `android/app/build.gradle.kts` (`applicationId`) |
-| iOS | `com.mantracore.alovida` | `ios/Runner.xcodeproj` (`PRODUCT_BUNDLE_IDENTIFIER`) |
+| Android | `com.alovida.alovida` | `android/app/build.gradle.kts` (`applicationId`) |
+| iOS | `com.alovida.alovida` | `ios/Runner.xcodeproj` (`PRODUCT_BUNDLE_IDENTIFIER`) |
 
 ## Pasos
 
@@ -28,7 +28,7 @@ registre igual se guardan, así que llegan avisos en cuanto se configura.
    Profiles → Keys*, se crea una clave con *Apple Push Notifications service
    (APNs)* y se descarga el `.p8`. En Firebase, en *Configuración del proyecto →
    Cloud Messaging → Configuración de apps de Apple*, se sube el `.p8` con su
-   *Key ID* y el *Team ID*. El App ID de `com.mantracore.alovida` debe tener
+   *Key ID* y el *Team ID*. El App ID de `com.alovida.alovida` debe tener
    activada la capacidad *Push Notifications*.
 4. **Cuenta de servicio.** En *Configuración del proyecto → Cuentas de servicio*
    se pulsa *Generar nueva clave privada* y se descarga un JSON. Ese JSON es un
