@@ -22,6 +22,7 @@ import {
   QueuesService,
   NotificationsService,
 } from '../services';
+import { InAppReleaseService } from '../services/in-app-release.service';
 import {
   RunOutboxRelayDto,
   OutboxRelayResponseDto,
@@ -38,6 +39,7 @@ import {
   DeliverNotificationDto,
   DeliverNotificationResponseDto,
   PendingNotificationsResponseDto,
+  ReleaseDueInAppResponseDto,
 } from '../dto';
 
 /**
@@ -72,6 +74,7 @@ export class MessagingInternalController {
     private readonly outboxService: OutboxService,
     private readonly queuesService: QueuesService,
     private readonly notificationsService: NotificationsService,
+    private readonly inAppRelease: InAppReleaseService,
   ) {}
 
   /** UC-35-02. */
@@ -203,5 +206,19 @@ export class MessagingInternalController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DeliverNotificationResponseDto> {
     return this.notificationsService.deliverNotification(requestId, dto, actor);
+  }
+
+  /** Announces (socket + push) inbox rows whose quiet-hours deferral ended. */
+  @Post('notifications/in-app/release-due')
+  @NotAudited(QUEUE_PLUMBING)
+  @Roles('SYSTEM', 'MESSAGING_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Liberar los avisos in-app aplazados por el silencio nocturno',
+  })
+  releaseDueInApp(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ReleaseDueInAppResponseDto> {
+    return this.inAppRelease.releaseDue(limit);
   }
 }

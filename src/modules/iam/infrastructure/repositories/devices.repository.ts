@@ -66,4 +66,13 @@ export class DevicesRepository {
   ): Promise<Devices | null> {
     return em.findOne(Devices, { deviceFingerprint });
   }
+
+  /** The account's own device with this stored fingerprint, or `null`. */
+  findOwnByFingerprint(
+    em: EntityManager,
+    userId: string,
+    deviceFingerprint: string,
+  ): Promise<Devices | null> {
+    return em.findOne(Devices, { userId, deviceFingerprint });
+  }
 }

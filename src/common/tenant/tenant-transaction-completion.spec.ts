@@ -1,11 +1,36 @@
 ﻿import { describe, expect, it, jest } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import {
+  deferAfterTenantCommit,
   deferAfterTenantTransaction,
   withTenantTransactionCompletion,
 } from './tenant-transaction-completion';
 
 describe('tenant transaction completion', () => {
+  it.each(['commit', 'rollback'] as const)(
+    'runs commit-only work after the boundary, and only on commit (%s)',
+    async (outcome) => {
+      const events: string[] = [];
+      const operation = withTenantTransactionCompletion(async () => {
+        expect(
+          deferAfterTenantCommit(async () => {
+            events.push('announced');
+          }),
+        ).toBe(true);
+        events.push('handler');
+        if (outcome === 'rollback') throw new Error('rolled back');
+        return 'ok';
+      });
+      if (outcome === 'rollback') await expect(operation).rejects.toThrow();
+      else await expect(operation).resolves.toBe('ok');
+      expect(events).toEqual(
+        outcome === 'commit' ? ['handler', 'announced'] : ['handler'],
+      );
+    },
+  );
+  it('commit-only work outside any boundary is left to the caller', () => {
+    expect(deferAfterTenantCommit(async () => undefined)).toBe(false);
+  });
   it.each(['commit', 'rollback'] as const)(
     'drains independent work only after %s releases the outer lease',
     async (outcome) => {

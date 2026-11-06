@@ -1,3 +1,4 @@
+import { PUSH_TOOLS } from './push-tools.catalog';
 /**
  * Catálogo INTERNO de herramientas de la plataforma (no es un catálogo oficial
  * ni dato aportado por personas: ver regla 97.4.5).
@@ -190,18 +191,8 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     source:
       'docker-compose.coolify.yml:818-822; .env.example:535-538; src/worker/google-email-client.service.ts:52',
   },
-  {
-    code: 'web-push',
-    name: 'Web Push (VAPID)',
-    kind: 'MESSAGING',
-    status: 'ACTIVE',
-    isCritical: false,
-    purpose: 'Notificaciones push del navegador.',
-    requiredEnvVars: ['VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT'],
-    check: 'CONFIGURATION',
-    source:
-      '.env.example:643-645; src/modules/messaging/services/web-push.service.ts:248',
-  },
+  // Web push + native push (FCM): see push-tools.catalog.ts.
+  ...PUSH_TOOLS,
   {
     code: 'mock-provider-server',
     name: 'Emulador de proveedores (mock-provider-server)',

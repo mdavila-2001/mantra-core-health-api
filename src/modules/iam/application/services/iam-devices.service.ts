@@ -4,8 +4,11 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ResourceNotFoundException,
+  touch,
   type AuthenticatedUser,
 } from '../../../../common';
+import { appDeviceFingerprint } from '../../domain';
+import { Devices } from '../../entities';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
   UsersRepository,
@@ -97,16 +100,36 @@ export class IamDevicesService {
         );
 
       const trusted = dto.trust === true;
-      const device = this.devicesRepo.create(tx, {
+      const platformConceptId = dto.platform
+        ? PLATFORM_CONCEPT[dto.platform]
+        : undefined;
+      // The stored fingerprint is derived per account from the client key, so
+      // this lookup can only ever return a row of `userId`: a second account
+      // on a shared phone gets its own row, and no client value reaches
+      // another account's row (nor a login or browser push row).
+      const deviceFingerprint = appDeviceFingerprint(
         userId,
-        deviceFingerprint: dto.deviceFingerprint,
-        platformConceptId: dto.platform
-          ? PLATFORM_CONCEPT[dto.platform]
-          : undefined,
-        name: dto.name,
-        trusted,
-        actorUserId: actor.id,
-      });
+        dto.deviceFingerprint,
+      );
+      const known = await this.devicesRepo.findOwnByFingerprint(
+        tx,
+        userId,
+        deviceFingerprint,
+      );
+      const device = known
+        ? refresh(known, actor.id, {
+            platformConceptId,
+            name: dto.name,
+            trusted,
+          })
+        : this.devicesRepo.create(tx, {
+            userId,
+            deviceFingerprint,
+            platformConceptId,
+            name: dto.name,
+            trusted,
+            actorUserId: actor.id,
+          });
 
       if (trusted) {
         this.eventsRepo.record(tx, {
@@ -118,7 +141,25 @@ export class IamDevicesService {
         });
       }
 
-      return { id: device.id, userId, trusted };
+      return {
+        id: device.id,
+        userId,
+        trusted: known ? known.trusted === true : trusted,
+      };
     });
   }
+}
+
+/** Refreshes the caller's own device row; trust is only ever added here. */
+function refresh(
+  device: Devices,
+  actorId: string,
+  data: { platformConceptId?: string; name?: string; trusted: boolean },
+): Devices {
+  if (data.platformConceptId) device.platformConceptId = data.platformConceptId;
+  if (data.name) device.name = data.name;
+  device.trusted = data.trusted || device.trusted === true;
+  device.lastSeenAt = new Date();
+  touch(device, actorId);
+  return device;
 }

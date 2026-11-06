@@ -9,6 +9,9 @@ import {
 } from '../../../common/crypto/secret-cipher';
 import { Devices } from '../../iam/entities';
 import { PreconditionFailedException } from '../../../common';
+import { DEFAULT_PUSH_ROUTE, safeRoute } from './push-route';
+
+export { safeRoute } from './push-route';
 
 /** Suscripción que entrega el navegador (`PushSubscription.toJSON()`). */
 export interface WebPushSubscriptionInput {
@@ -19,30 +22,27 @@ export interface WebPushSubscriptionInput {
 /** Lo mínimo que viaja en el push: el detalle se lee dentro de la aplicación. */
 export interface WebPushMessage {
   readonly recipientUserId: string;
-  /** Título corto del aviso, el mismo de la campana. */
-  readonly subject: string;
+  /** Bell subject. Never sent: the visible push text stays generic (PHI). */
+  readonly subject?: string;
   /** Ruta de la aplicación a la que lleva el toque. */
   readonly route?: string;
   readonly notificationId?: string;
+  /** Shared push contract fields (see PUSH_CONTRACT): identifiers only. */
+  readonly destinationType?: string;
+  readonly destinationId?: string;
+  readonly category?: string;
 }
 
 /** Nombre con que se guarda el dispositivo web en `iam.devices`. */
 const WEB_DEVICE_NAME = 'Navegador web';
+/** Fingerprint prefix of browser rows in `iam.devices`. */
+const WEB_FINGERPRINT_PREFIX = 'webpush:';
 /** Cuánto vive un push sin entregar: pasada la hora, ya no sirve. */
 const PUSH_TTL_SECONDS = 60 * 60;
 const GONE_STATUS_CODES: readonly number[] = [404, 410];
 /** Título fijo: la pantalla bloqueada no debe mostrar datos de la persona. */
 const PUSH_TITLE = 'AloVida';
 const PUSH_BODY = 'Tiene un aviso nuevo en AloVida';
-const DEFAULT_ROUTE = '/notifications';
-/** Ruta interna de la aplicación: segmentos simples, sin esquema ni `//`. */
-const INTERNAL_ROUTE =
-  /^\/(?:[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*)?(?:\?[A-Za-z0-9_=&%.-]*)?$/;
-
-/** `route` si es una ruta interna segura, o `undefined`. */
-export function safeRoute(route: string | undefined): string | undefined {
-  return route !== undefined && INTERNAL_ROUTE.test(route) ? route : undefined;
-}
 
 /**
  * Servicios de push que emiten los navegadores. El servidor hace un POST a la
@@ -73,7 +73,7 @@ export function isAllowedPushEndpoint(endpoint: string): boolean {
 
 /** Huella estable del endpoint: identifica el dispositivo sin guardarlo dos veces. */
 function fingerprintOf(endpoint: string): string {
-  return `webpush:${createHash('sha256').update(endpoint).digest('hex')}`;
+  return `${WEB_FINGERPRINT_PREFIX}${createHash('sha256').update(endpoint).digest('hex')}`;
 }
 
 /**
@@ -176,14 +176,19 @@ export class WebPushService {
         .find(Devices, {
           userId: message.recipientUserId,
           pushTokenEncrypted: { $ne: null },
+          // Native app rows share the column ({"fcm": token}); browsers only.
+          deviceFingerprint: { $like: `${WEB_FINGERPRINT_PREFIX}%` },
         });
       const body = JSON.stringify({
         title: PUSH_TITLE,
         // Genérico a propósito: el push viaja por el servicio del navegador y
         // se ve en la pantalla bloqueada. El detalle se lee ya autenticado.
         body: PUSH_BODY,
-        route: safeRoute(message.route) ?? DEFAULT_ROUTE,
+        route: safeRoute(message.route) ?? DEFAULT_PUSH_ROUTE,
         notificationId: message.notificationId,
+        destinationType: message.destinationType ?? '',
+        destinationId: message.destinationId ?? '',
+        category: message.category ?? '',
       });
       for (const device of devices) {
         await this.sendTo(device, body);

@@ -28,13 +28,16 @@ function build(published = false) {
       if (published) throw reportAlreadyPublished();
     }),
   };
+  const criticalDetection = { detect: mockFn() };
   return {
     controller: new DiagnosticsReportsController(
       service as any,
       immutability as any,
+      criticalDetection as any,
     ),
     service,
     immutability,
+    criticalDetection,
   };
 }
 
@@ -64,7 +67,8 @@ describe('DiagnosticsReportsController', () => {
     const d = build();
     const dto = { observationId: 'o1', patientProfileId: 'p1' };
     await d.controller.detectCritical(dto, actor);
-    expect(d.service.detectCritical).toHaveBeenCalledWith(dto, actor);
+    // Detection plus the notice to the responsible practitioner.
+    expect(d.criticalDetection.detect).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates acknowledge (UC-20-10)', async () => {

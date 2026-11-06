@@ -294,6 +294,33 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       expect(row.availableAt.getUTCMinutes()).toBe(59);
     });
 
+    it('a deferred in-app row is left unannounced (sent_at empty) and not pushed yet', async () => {
+      const d = build();
+      const inApp: any = { id: 'in-app-1', sentAt: new Date() };
+      d.notificationsRepo.createInAppNotification.mockReturnValue(inApp);
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        preference({ quietHoursJson: { start: '00:00', end: '23:59' } }),
+      ]);
+      const webPush: any = { pushToUser: mockFn(() => Promise.resolve()) };
+      const service = new NotificationsService(
+        { transactional: (cb: any) => cb(d.tx) } as any,
+        d.notificationsRepo,
+        d.logger as any,
+        undefined,
+        webPush,
+      );
+
+      await service.emitInApp({
+        recipientUserId: 'user-2',
+        category: 'MESSAGES',
+        subject: 'Mensaje nuevo',
+      });
+
+      // InAppReleaseService announces it when the window ends.
+      expect(inApp.sentAt).toBeUndefined();
+      expect(webPush.pushToUser).not.toHaveBeenCalled();
+    });
+
     it('fuera de la ventana la deja disponible en el acto', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([

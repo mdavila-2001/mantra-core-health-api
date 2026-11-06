@@ -5,6 +5,7 @@ import {
   type ToolCatalogItem,
   type ToolCode,
 } from '../domain/tool-catalog';
+import { PUSH_RESOLVERS } from './push-tool-resolvers';
 
 /** Versión del contrato: cambiar un campo o una regla de cálculo la cambia. */
 export const OPS_TOOLS_MODEL_VERSION = 'ops-tools/v1';
@@ -188,20 +189,7 @@ const CONFIGURATION_RESOLVERS: Record<
     };
   },
 
-  web_push: (env, tool) => {
-    const missing = missingOf(env, tool.requiredEnvVars);
-    return missing.length === 0
-      ? {
-          binding: 'real',
-          missingEnvVars: [],
-          message: 'Claves VAPID presentes; sin sonda en vivo.',
-        }
-      : {
-          binding: 'none',
-          missingEnvVars: missing,
-          message: 'Faltan claves VAPID: el servicio de push queda inactivo.',
-        };
-  },
+  ...PUSH_RESOLVERS,
 
   mock_provider_server: (env) => {
     if (env.NODE_ENV === 'production') {

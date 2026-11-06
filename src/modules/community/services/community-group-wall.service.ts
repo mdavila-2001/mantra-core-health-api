@@ -180,9 +180,12 @@ export class CommunityGroupWallService {
         announce: parentCommentId
           ? undefined
           : {
-              id: access.group.id,
-              name: access.group.name,
-              tenantId: access.group.tenantId,
+              group: {
+                id: access.group.id,
+                name: access.group.name,
+                tenantId: access.group.tenantId,
+              },
+              postId: post.id,
             },
       };
     });
@@ -191,9 +194,10 @@ export class CommunityGroupWallService {
     // canal de notificación falle no puede borrarla.
     if (announce)
       await this.notifications.notifyNewPost(
-        announce,
+        announce.group,
         dto.authorProfileId,
         actor,
+        announce.postId,
       );
 
     return item;
