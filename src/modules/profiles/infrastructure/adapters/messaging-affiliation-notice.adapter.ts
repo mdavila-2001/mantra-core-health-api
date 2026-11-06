@@ -110,7 +110,7 @@ export class MessagingAffiliationNoticeAdapter implements AffiliationNoticePort 
           bodyText: notice.bodyText,
           // El destino navegable: la pantalla del historial laboral, que es
           // donde el vínculo se ve y donde el motivo se lee.
-          route: '/account/my-profile',
+          route: '/account/profile',
           affiliationId: notice.affiliationId,
         },
         // Una decisión ocurre una vez; el rebote evita que un reintento del

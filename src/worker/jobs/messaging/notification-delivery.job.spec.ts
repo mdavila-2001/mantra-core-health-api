@@ -1,5 +1,7 @@
+import { jest } from '@jest/globals';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import {
+  NotificationDeliveryJob,
   defaultProviderAdapter,
   type PendingNotificationRequest,
 } from './notification-delivery.job';
@@ -44,5 +46,29 @@ describe('defaultProviderAdapter (Carril 18)', () => {
     const result = await defaultProviderAdapter(baseRequest);
     expect(result.outcome).toBe('FAILED');
     expect(result.errorCode).toBe('PROVIDER_NOT_CONFIGURED');
+  });
+});
+
+describe('NotificationDeliveryJob.releaseDeferred (quiet hours)', () => {
+  it('asks the API to release deferred in-app rows, declared idempotent', async () => {
+    const api = {
+      post: (jest.fn as any)().mockResolvedValue({ released: 0, announced: 0 }),
+    };
+    const logger: any = {
+      setContext: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    };
+    const job = new NotificationDeliveryJob(api as any, logger, {} as any);
+
+    await job.releaseDeferred();
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/internal/notifications/in-app/release-due',
+      {},
+      { idempotent: true },
+    );
   });
 });

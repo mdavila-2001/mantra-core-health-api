@@ -204,7 +204,7 @@ export class VisitRequestsService {
         actorUserId: actor.id,
         createdByUserId: actor.id,
       });
-      this.notifications.notify(
+      await this.notifications.notify(
         tx,
         {
           recipientUserId: dto.doctorUserId,
@@ -462,7 +462,7 @@ export class VisitRequestsService {
         actorUserId: actor.id,
         createdByUserId: actor.id,
       });
-      this.notifications.notify(
+      await this.notifications.notify(
         tx,
         {
           recipientUserId: request.doctorUserId,
@@ -551,7 +551,7 @@ export class VisitRequestsService {
         createdByUserId: actor.id,
       });
       if (isVisitor) {
-        this.notifications.notify(
+        await this.notifications.notify(
           tx,
           {
             recipientUserId: request.doctorUserId,
@@ -831,7 +831,7 @@ export class VisitRequestsService {
       request.medicalVisitorId,
     );
     if (!visitor) return;
-    this.notifications.notify(
+    await this.notifications.notify(
       tx,
       {
         recipientUserId: visitor.userId,

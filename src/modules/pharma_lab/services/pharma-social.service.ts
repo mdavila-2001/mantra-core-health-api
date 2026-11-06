@@ -202,7 +202,7 @@ export class PharmaSocialService {
         submission.socialPostId = post.id;
       }
 
-      this.notifications.notify(
+      await this.notifications.notify(
         tx,
         {
           recipientUserId: visitor.userId,

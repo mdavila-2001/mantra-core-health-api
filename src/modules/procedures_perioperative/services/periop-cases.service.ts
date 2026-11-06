@@ -21,7 +21,7 @@ import {
 } from '../repositories';
 import { ProfessionalCredentialsRepository } from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
-import { OutboxService } from '../../messaging/services';
+import { PeriopEventPublisher } from './periop-event-publisher';
 import {
   PeriopReacceptanceService,
   type RelevantChange,
@@ -216,7 +216,7 @@ export class PeriopCasesService {
     private readonly intraopRepo: PeriopIntraopRepository,
     private readonly credentialsRepo: ProfessionalCredentialsRepository,
     private readonly auditTrail: AuditTrailService,
-    private readonly outbox: OutboxService,
+    private readonly outbox: PeriopEventPublisher,
     private readonly conditions: ConditionsService,
     // Política de acceso al paciente: ver `assertCanReadCaseDetail`.
     private readonly clinicalRead: ClinicalReadService,

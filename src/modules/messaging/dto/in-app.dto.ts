@@ -237,3 +237,14 @@ export class MyPreferencesDto {
   @ApiPropertyOptional({ type: QuietHoursDto, nullable: true })
   quietHours!: QuietHoursDto | null;
 }
+
+/** Result of `POST /internal/notifications/in-app/release-due` (worker). */
+export class ReleaseDueInAppResponseDto {
+  /** Deferred rows whose quiet-hours window ended and were claimed now. */
+  @ApiProperty()
+  released!: number;
+
+  /** Of those, how many were announced (socket + push); stale ones are not. */
+  @ApiProperty()
+  announced!: number;
+}

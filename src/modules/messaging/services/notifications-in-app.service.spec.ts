@@ -74,13 +74,25 @@ function build() {
     error: mockFn(),
   };
   const gateway: any = { notifyUser: mockFn() };
+  const webPush: any = { pushToUser: mockFn(() => Promise.resolve()) };
+  const nativePush: any = { pushToUser: mockFn(() => Promise.resolve()) };
   const service = new NotificationsService(
     em,
     notificationsRepo,
     logger as any,
     gateway,
+    webPush,
+    nativePush,
   );
-  return { service, tx, notificationsRepo, logger, gateway };
+  return {
+    service,
+    tx,
+    notificationsRepo,
+    logger,
+    gateway,
+    webPush,
+    nativePush,
+  };
 }
 
 /**
@@ -204,6 +216,127 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(
         d.notificationsRepo.createNotificationRequest,
       ).not.toHaveBeenCalled();
+    });
+
+    it('collapsed into an unread notice: no new bell row or socket, but the phone still buzzes', async () => {
+      const d = build();
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue({
+        id: 'in-app-previa',
+        notificationRequestId: 'request-previa',
+        availableAt: new Date(Date.now() - 60_000),
+      });
+
+      const res = await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'MESSAGES',
+        subject: 'Mensaje nuevo',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
+      });
+
+      expect(res).not.toHaveProperty('renotify');
+      expect(d.gateway.notifyUser).not.toHaveBeenCalled();
+      for (const sender of [d.webPush, d.nativePush]) {
+        expect(sender.pushToUser).toHaveBeenCalledWith(
+          expect.objectContaining({
+            notificationId: 'in-app-previa',
+            route: '/messaging/c-1?responder=1',
+            category: 'MESSAGES',
+          }),
+        );
+      }
+    });
+
+    it('collapsed into a notice still deferred by quiet hours: no push now', async () => {
+      const d = build();
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue({
+        id: 'in-app-previa',
+        notificationRequestId: 'request-previa',
+        availableAt: new Date(Date.now() + 60 * 60_000),
+      });
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'MESSAGES',
+        subject: 'Mensaje nuevo',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
+      });
+
+      expect(d.webPush.pushToUser).not.toHaveBeenCalled();
+    });
+
+    it('collapsed while the recipient is in quiet hours: no push now', async () => {
+      const d = build();
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue({
+        id: 'in-app-previa',
+        notificationRequestId: 'request-previa',
+        availableAt: new Date(Date.now() - 60_000),
+      });
+      const now = new Date();
+      const hour = (h: number) =>
+        `${String((now.getUTCHours() + h + 24) % 24).padStart(2, '0')}:00`;
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        { optedIn: true, quietHoursJson: { start: hour(-1), end: hour(2) } },
+      ]);
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'MESSAGES',
+        subject: 'Mensaje nuevo',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
+      });
+
+      expect(d.webPush.pushToUser).not.toHaveBeenCalled();
+      expect(d.nativePush.pushToUser).not.toHaveBeenCalled();
+    });
+
+    it('collapsed into a category the recipient opted out of: no push, row untouched', async () => {
+      const d = build();
+      const row = {
+        id: 'in-app-previa',
+        notificationRequestId: 'request-previa',
+        subject: 'Ana le escribió',
+        availableAt: new Date(Date.now() - 60_000),
+      };
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue(row);
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.MESSAGES,
+          optedIn: false,
+          quietHoursJson: null,
+        },
+      ]);
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'MESSAGES',
+        subject: 'Luis le escribió',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
+      });
+
+      expect(d.webPush.pushToUser).not.toHaveBeenCalled();
+      expect(row.subject).toBe('Ana le escribió');
+    });
+
+    it('a fresh notice pushes with a route (web + native), not only the socket', async () => {
+      const d = build();
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Su receta está lista',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+
+      for (const sender of [d.webPush, d.nativePush]) {
+        expect(sender.pushToUser).toHaveBeenCalledWith({
+          recipientUserId: RECIPIENT,
+          notificationId: 'in-app-1',
+          route: '/my-account/medical-record',
+          destinationType: 'PRESCRIPTION',
+          destinationId: 'rx-1',
+          category: 'CLINICAL',
+        });
+      }
     });
 
     it('pero si el anterior YA se leyó, el siguiente vuelve a avisar', async () => {

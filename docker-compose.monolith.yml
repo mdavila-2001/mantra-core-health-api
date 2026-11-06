@@ -44,6 +44,12 @@ x-app-env: &app-env
   RATE_LIMIT_MAX_REQUESTS: "300"
   SIAT_MODE: simulated
   SIAT_BASE_URL: ${SIAT_BASE_URL:-https://pilotosiat.impuestos.gob.bo}
+  # Push (web VAPID + native FCM). Empty = disabled, the bell keeps working.
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+  FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+  FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
 
 services:
   postgres:

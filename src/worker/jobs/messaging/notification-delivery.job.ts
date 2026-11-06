@@ -11,6 +11,12 @@ import {
 import { CONCEPTS } from '../../../common';
 
 const DELIVERY_INTERVAL_MS = 5_000;
+/**
+ * Releasing in-app rows deferred by quiet hours scans the inbox table, so it
+ * runs once a minute instead of every delivery tick: a morning notice a few
+ * seconds late is fine, a 5-second table scan is not.
+ */
+const RELEASE_INTERVAL_MS = 60_000;
 
 /**
  * `channel_type_concept_id` del canal in-app (`CHANNEL_TYPE_IN_APP` en
@@ -126,6 +132,21 @@ export class NotificationDeliveryJob {
         }
       },
     );
+  }
+
+  /**
+   * Announces (socket + push) inbox rows whose quiet-hours window ended. The
+   * API claims them with `SKIP LOCKED`, so an overlapping tick cannot double-push.
+   */
+  @Interval(RELEASE_INTERVAL_MS)
+  async releaseDeferred(): Promise<void> {
+    await runTick(this.logger, 'worker.messaging.in-app-release', async () => {
+      await this.api.post(
+        '/internal/notifications/in-app/release-due',
+        {},
+        { idempotent: true },
+      );
+    });
   }
 
   private async deliverOne(request: PendingNotificationRequest): Promise<void> {

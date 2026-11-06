@@ -11658,6 +11658,42 @@ paths:
       summary: Registrar el intento de entrega ante el proveedor
       tags:
         - messaging-internal
+  /internal/notifications/in-app/release-due:
+    post:
+      operationId: MessagingInternalController_releaseDueInApp
+      parameters:
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Liberar los avisos in-app aplazados por el silencio nocturno
+      tags:
+        - messaging-internal
+      description: >-
+        Liberar los avisos in-app aplazados por el silencio nocturno. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /webhooks/providers/{providerCode}/receipts:
     post:
       description: 'Idempotente por entrega y tipo de acuse: los proveedores reentregan.'
@@ -11801,6 +11837,83 @@ paths:
       description: >-
         Quita la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /notifications/native-push/token:
+    put:
+      operationId: NativePushController_register
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NativePushTokenDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Guarda el token push (FCM) de esta instalación
+      tags:
+        - messaging
+      description: >-
+        Guarda el token push (FCM) de esta instalación. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: NativePushController_unregister
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NativePushTokenDeleteDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Quita el token push (FCM) de esta instalación
+      tags:
+        - messaging
+      description: >-
+        Quita el token push (FCM) de esta instalación. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /internal/storage-lifecycle/audio/{assetId}/begin:
     post:
       operationId: InternalStorageLifecycleController_begin
@@ -95818,6 +95931,34 @@ components:
           type: string
       required:
         - endpoint
+      additionalProperties: false
+    NativePushTokenDto:
+      type: object
+      properties:
+        token:
+          type: string
+          description: FCM registration token of this app install
+        platform:
+          type: string
+          enum:
+            - IOS
+            - ANDROID
+        deviceFingerprint:
+          type: string
+          description: Stable install fingerprint, the same one sent to POST /iam/users/:id/devices
+      required:
+        - token
+        - platform
+        - deviceFingerprint
+      additionalProperties: false
+    NativePushTokenDeleteDto:
+      type: object
+      properties:
+        token:
+          type: string
+          description: FCM registration token to forget
+      required:
+        - token
       additionalProperties: false
     BeginStoragePublicationDto:
       type: object

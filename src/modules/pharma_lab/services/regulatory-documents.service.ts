@@ -383,7 +383,7 @@ export class RegulatoryDocumentsService {
             document.statusConceptId = PHL.DOC_EXPIRED;
             touch(document, actor.id);
             expired += 1;
-            this.notifications.notifyAll(
+            await this.notifications.notifyAll(
               tx,
               staffUserIds,
               {
@@ -404,7 +404,7 @@ export class RegulatoryDocumentsService {
           document.statusConceptId = PHL.DOC_EXPIRING;
           touch(document, actor.id);
           expiring += 1;
-          this.notifications.notifyAll(
+          await this.notifications.notifyAll(
             tx,
             staffUserIds,
             {

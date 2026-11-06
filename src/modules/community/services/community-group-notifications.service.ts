@@ -6,7 +6,7 @@ import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { NotificationsService } from '../../messaging/services';
 import { GroupsRepository, PublicProfilesRepository } from '../repositories';
 import { COMM } from '../community.concepts';
-import type { Groups, PublicProfiles } from '../entities';
+import type { GroupMembers, Groups, PublicProfiles } from '../entities';
 
 /**
  * Tipo de recurso del enlace profundo de comunidad.
@@ -44,8 +44,11 @@ const MAX_POST_RECIPIENTS = 200;
  * puede deshacer ninguna de las dos. Todo fallo se registra y se traga, igual
  * que en el carril clínico.
  *
- * El `debounceKey` es determinista por recurso, destinatario y categoría, así
- * que reintentar la acción no produce un segundo aviso del mismo hecho.
+ * The `debounceKey` identifies the fact (the approval, or the post) per
+ * recipient, so retrying the action never produces a second notice, while a
+ * second post in the same group is a new notice. The request is delivered
+ * right away with its subject and body (same as the agenda notices): left to
+ * the worker it reached the bell with an empty subject and never pushed.
  */
 @Injectable()
 export class CommunityGroupNotificationsService {
@@ -72,35 +75,30 @@ export class CommunityGroupNotificationsService {
    * Avisa a quien acaba de ser aceptado en un grupo.
    *
    * @param group - Grupo al que entró.
-   * @param memberProfileId - Perfil aceptado.
+   * @param member - The approved membership; its id and `joinedAt` key the
+   *   fact, so a later re-join (same row, new `joinedAt`) notifies again.
    * @param actor - Quien aprobó el alta.
    */
   async notifyJoinApproved(
     group: Pick<Groups, 'id' | 'name' | 'tenantId'>,
-    memberProfileId: string,
+    member: Pick<GroupMembers, 'id' | 'memberProfileId' | 'joinedAt'>,
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.safely('community.group.join.notify', group.id, async () => {
-      // Savepoint: a swallowed failure must not abort the request transaction.
-      await this.em
-        .fork({ keepTransactionContext: true })
-        .transactional(async (em) => {
-          const [profile] = await this.profilesRepo.listByIds(em, [
-            memberProfileId,
-          ]);
-          const recipientUserId = this.resolveRecipientUserId(profile);
-          if (!recipientUserId) return;
-
-          await this.emit({
-            group,
-            recipientUserId,
-            actor,
-            categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_JOIN_APPROVED,
-            subject: `Ya es parte de ${group.name}`,
-            bodyText:
-              'Aceptaron su solicitud de ingreso. Entre para ver lo que se está publicando.',
-          });
-        });
+      const [recipientUserId] = await this.recipientsOf([
+        member.memberProfileId,
+      ]);
+      if (!recipientUserId) return;
+      await this.emit({
+        group,
+        recipientUserId,
+        actor,
+        categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_JOIN_APPROVED,
+        factKey: `join:${member.id}:${member.joinedAt?.getTime() ?? 0}`,
+        subject: `Ya es parte de ${group.name}`,
+        bodyText:
+          'Aceptaron su solicitud de ingreso. Entre para ver lo que se está publicando.',
+      });
     });
   }
 
@@ -113,48 +111,45 @@ export class CommunityGroupNotificationsService {
    * @param group - Grupo donde se publicó.
    * @param authorProfileId - Perfil que publicó.
    * @param actor - Quien publicó.
+   * @param postId - The new post, which keys the notice.
    */
   async notifyNewPost(
     group: Pick<Groups, 'id' | 'name' | 'tenantId'>,
     authorProfileId: string,
     actor: AuthenticatedUser,
+    postId: string,
   ): Promise<void> {
     await this.safely('community.group.post.notify', group.id, async () => {
-      // Savepoint: a swallowed failure must not abort the request transaction.
-      await this.em
-        .fork({ keepTransactionContext: true })
-        .transactional(async (em) => {
-          const memberProfileIds =
-            await this.groupsRepo.listActiveMemberProfileIds(
-              em,
-              group.id,
-              COMM.GROUP_JOIN_ACTIVE,
-              MAX_POST_RECIPIENTS,
-            );
-          const targets = memberProfileIds.filter(
-            (id) => id !== authorProfileId,
-          );
-          if (targets.length === 0) return;
-
-          const profiles = await this.profilesRepo.listByIds(em, targets);
-          const recipients = profiles
-            .map((profile) => this.resolveRecipientUserId(profile))
-            .filter((userId): userId is string => !!userId);
-
-          for (const recipientUserId of new Set(recipients)) {
-            await this.emit({
-              group,
-              recipientUserId,
-              actor,
-              categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_NEW_POST,
-              subject: `Hay algo nuevo en ${group.name}`,
-              // El cuerpo de la publicación no viaja en el asunto: una bandeja se
-              // mira en pantallas que pueden estar a la vista de cualquiera, y en
-              // un grupo de apoyo el título ya diría demasiado.
-              bodyText: 'Se publicó algo nuevo en el grupo. Entre para leerlo.',
-            });
-          }
-        });
+      const memberProfileIds = await this.readInSavepoint((em) =>
+        this.groupsRepo.listActiveMemberProfileIds(
+          em,
+          group.id,
+          COMM.GROUP_JOIN_ACTIVE,
+          MAX_POST_RECIPIENTS,
+        ),
+      );
+      const recipients = await this.recipientsOf(
+        memberProfileIds.filter((id) => id !== authorProfileId),
+      );
+      // One write (its own savepoint inside messaging) per recipient, outside
+      // any shared transaction: one failing recipient never drops the rest,
+      // and each announcement waits only for its own commit.
+      for (const recipientUserId of recipients) {
+        await this.safely('community.group.post.notify', group.id, () =>
+          this.emit({
+            group,
+            recipientUserId,
+            actor,
+            categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_NEW_POST,
+            factKey: `post:${postId}`,
+            subject: `Hay algo nuevo en ${group.name}`,
+            // El cuerpo de la publicación no viaja en el asunto: una bandeja se
+            // mira en pantallas que pueden estar a la vista de cualquiera, y en
+            // un grupo de apoyo el título ya diría demasiado.
+            bodyText: 'Se publicó algo nuevo en el grupo. Entre para leerlo.',
+          }),
+        );
+      }
     });
   }
 
@@ -175,6 +170,25 @@ export class CommunityGroupNotificationsService {
    * resuelve a nadie, y entonces no hay aviso: es preferible que no llegue a
    * mandárselo a quien lo dio de alta.
    */
+  /** Distinct accounts behind these public profiles (read in a savepoint). */
+  private async recipientsOf(profileIds: readonly string[]): Promise<string[]> {
+    if (profileIds.length === 0) return [];
+    const profiles = await this.readInSavepoint((em) =>
+      this.profilesRepo.listByIds(em, [...profileIds]),
+    );
+    const userIds = profiles
+      .map((profile) => this.resolveRecipientUserId(profile))
+      .filter((userId): userId is string => !!userId);
+    return [...new Set(userIds)];
+  }
+
+  /** Savepoint: a swallowed failed read must not abort the request transaction. */
+  private readInSavepoint<T>(
+    read: (em: EntityManager) => Promise<T>,
+  ): Promise<T> {
+    return this.em.fork({ keepTransactionContext: true }).transactional(read);
+  }
+
   private resolveRecipientUserId(
     profile: PublicProfiles | undefined,
   ): string | undefined {
@@ -184,30 +198,46 @@ export class CommunityGroupNotificationsService {
     return profile.createdByUserId;
   }
 
-  /** Crea la solicitud in-app contra el canal de P1. */
+  /** Creates the in-app request and delivers it with its text. */
   private async emit(input: {
     group: Pick<Groups, 'id' | 'name' | 'tenantId'>;
     recipientUserId: string;
     actor: AuthenticatedUser;
     categoryConceptId: string;
+    factKey: string;
     subject: string;
     bodyText: string;
   }): Promise<void> {
-    await this.notifications.createRequest(
+    const resource = COMMUNITY_NOTIFICATION_RESOURCES.group;
+    const request = await this.notifications.createRequest(
       {
         channelId: MESSAGING_SEED.inAppChannelId,
         tenantId: input.group.tenantId,
         recipientUserId: input.recipientUserId,
         categoryConceptId: input.categoryConceptId,
-        relatedResourceType: COMMUNITY_NOTIFICATION_RESOURCES.group,
+        relatedResourceType: resource,
         relatedResourceId: input.group.id,
-        debounceKey: `${COMMUNITY_NOTIFICATION_RESOURCES.group}:${input.group.id}:${input.recipientUserId}:${input.categoryConceptId}`,
+        debounceKey: `${resource}:${input.group.id}:${input.factKey}:${input.recipientUserId}`,
         payloadJson: {
           subject: input.subject,
           bodyText: input.bodyText,
-          resourceType: COMMUNITY_NOTIFICATION_RESOURCES.group,
+          resourceType: resource,
           resourceId: input.group.id,
+          // Where the push opens (`routeFromPayload` in messaging).
+          route: `/groups/${input.group.id}`,
         },
+      },
+      input.actor,
+    );
+    // Suppressed by preference, or the same fact already has a live request.
+    if (request.suppressed || request.debounced) return;
+    await this.notifications.deliverNotification(
+      request.id,
+      {
+        outcome: 'SENT',
+        providerChannelConfigId: MESSAGING_SEED.inAppChannelConfigId,
+        subject: input.subject,
+        bodyText: input.bodyText,
       },
       input.actor,
     );

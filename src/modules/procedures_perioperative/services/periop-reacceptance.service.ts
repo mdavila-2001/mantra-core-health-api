@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, touch, type AuthenticatedUser } from '../../../common';
-import { OutboxService } from '../../messaging/services';
+import { PeriopEventPublisher } from './periop-event-publisher';
 import type { ProcedureCases } from '../entities';
 import { PeriopCasesRepository } from '../repositories';
 
@@ -65,11 +65,11 @@ export class PeriopReacceptanceService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param casesRepo - Equipo e historia de estados del caso.
-   * @param outbox - Aviso transaccional al equipo.
+   * @param outbox - Outbox event plus the in-app notice to the team.
    */
   constructor(
     private readonly casesRepo: PeriopCasesRepository,
-    private readonly outbox: OutboxService,
+    private readonly outbox: PeriopEventPublisher,
   ) {}
 
   /**

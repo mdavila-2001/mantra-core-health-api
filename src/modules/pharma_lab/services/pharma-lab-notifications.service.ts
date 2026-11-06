@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { createdBy, touch, type AuthenticatedUser } from '../../../common';
+import { NotificationsService } from '../../messaging/services';
 import { PharmaLabNotices } from '../entities';
+import { pharmaLabInAppNotice } from './pharma-lab-in-app-notice';
 
 /** Aviso que un caso de uso del carril quiere entregar dentro del producto. */
 export interface PharmaLabNotice {
@@ -33,6 +35,13 @@ export interface PharmaLabNotice {
  * solicitud y una entrega de mensajería no nulas, y fabricarlas desde un caso de
  * uso de dominio sería inventar filas. Los canales externos —correo, WhatsApp,
  * SMS, push— siguen siendo de `messaging`; este servicio no los duplica.
+ *
+ * The same notice is also emitted through `NotificationsService.emitInApp`,
+ * which builds the request/delivery chain itself, so the bell and push reach
+ * the recipient. It runs inside the use-case transaction (a nested savepoint):
+ * the in-app row commits only if the fact commits, and `emitInApp` never
+ * throws, so a bell failure cannot undo the fact. Push and socket fire when
+ * the savepoint closes, slightly before the outer commit.
  */
 @Injectable()
 export class PharmaLabNotificationsService {
@@ -40,8 +49,12 @@ export class PharmaLabNotificationsService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia, para las lecturas del buzón.
+   * @param inApp - Messaging in-app emitter (bell + push).
    */
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly inApp: NotificationsService,
+  ) {}
 
   /**
    * Deja un aviso en el buzón de la persona destinataria.
@@ -50,12 +63,12 @@ export class PharmaLabNotificationsService {
    * @param notice - Contenido del aviso.
    * @param actorUserId - Quien originó el hecho notificado.
    */
-  notify(
+  async notify(
     tx: EntityManager,
     notice: PharmaLabNotice,
     actorUserId?: string,
-  ): void {
-    tx.create(
+  ): Promise<void> {
+    const row = tx.create(
       PharmaLabNotices,
       {
         recipientUserId: notice.recipientUserId,
@@ -70,6 +83,11 @@ export class PharmaLabNotificationsService {
       },
       { partial: true },
     );
+    // Flush first so the nested in-app savepoint starts from a clean unit of work.
+    await tx.flush();
+    await this.inApp.emitInApp(
+      pharmaLabInAppNotice(notice, row.id, actorUserId),
+    );
   }
 
   /**
@@ -80,14 +98,14 @@ export class PharmaLabNotificationsService {
    * @param notice - Contenido del aviso, sin destinatario.
    * @param actorUserId - Quien originó el hecho notificado.
    */
-  notifyAll(
+  async notifyAll(
     tx: EntityManager,
     recipientUserIds: readonly string[],
     notice: Omit<PharmaLabNotice, 'recipientUserId'>,
     actorUserId?: string,
-  ): void {
+  ): Promise<void> {
     for (const recipientUserId of new Set(recipientUserIds)) {
-      this.notify(tx, { ...notice, recipientUserId }, actorUserId);
+      await this.notify(tx, { ...notice, recipientUserId }, actorUserId);
     }
   }
 

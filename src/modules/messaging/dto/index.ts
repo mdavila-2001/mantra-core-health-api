@@ -49,5 +49,6 @@ export {
   CategoryPreferenceDto,
   UpdateMyPreferencesDto,
   MyPreferencesDto,
+  ReleaseDueInAppResponseDto,
 } from './in-app.dto';
 export * from './web-push.dto';

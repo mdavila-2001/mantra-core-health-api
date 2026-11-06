@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { AuditModule } from '../audit/audit.module';
 import { AuthzModule } from '../authz/authz.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import { PharmaLabScopeGuard } from './guards';
 import {
   MedicalVisitorsController,
@@ -66,6 +67,8 @@ import {
     // AG-31: asignar/revocar MEDICAL_VISITOR al vincular/desvincular, en la
     // misma transacción (ver `MedicalVisitorsService`).
     AuthzModule,
+    // Bell + push copy of every pharma_lab notice (`emitInApp`).
+    MessagingModule,
   ],
   controllers: [
     PharmaLabsController,
