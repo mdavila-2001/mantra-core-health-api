@@ -164,7 +164,9 @@
         "src/modules/directory/services/directory-branches.service.ts",
         "src/modules/directory/services/directory-memberships.service.ts",
         "src/modules/directory/services/directory-read.service.ts#forkForReadableTenant",
-        "src/modules/directory/services/organization-logo.service.ts"
+        "src/modules/directory/services/organization-logo.service.ts",
+        "src/modules/directory/services/tenant-representative-name.service.ts",
+        "src/modules/directory/application/use-cases/resolve-map-link.use-case.ts"
       ],
       "routes": [
         "GET /tenants/:tenantId",
@@ -178,7 +180,9 @@
         "PATCH /tenants/:tenantId",
         "PATCH /tenants/:tenantId/branches/:branchId",
         "PATCH /tenants/:tenantId/memberships/:membershipId/role",
+        "PATCH /tenants/:tenantId/representatives/:role/name",
         "POST /tenants/:tenantId/branches",
+        "POST /tenants/:tenantId/branches/location-preview",
         "POST /tenants/:tenantId/memberships",
         "POST /tenants/:tenantId/memberships/:membershipId/branch-assignments",
         "POST /tenants/:tenantId/memberships/:membershipId/offboard",

@@ -3,12 +3,12 @@
 # Flujos del módulo `delegated_access`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 41 (36 con decisiones propias, 5 sin ellas)
+- **Operaciones:** 45 (40 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [delegated_access](../endpoints/delegated_access.md)
 
 ## Proceso: Módulo 29 — Delegated Access and Scoped Infrastructure Users
 
-- **Código:** `delegated_access` · **Agrupación:** MIXTO · **Operaciones:** 41
+- **Código:** `delegated_access` · **Agrupación:** MIXTO · **Operaciones:** 45
 - **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · Público (sin sesión) · SECURITY_ADMIN · SUPPORT_STAFF · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/delegated_access/README.md`
@@ -34,6 +34,10 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 | `UC-29-08` | Expirar delegaciones y grants vencidos | POST /delegated-access/expiry-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
 | `UC-29-09` | Evaluar actor efectivo por propósito (step-up) | POST /authz/effective-actor/evaluate | SECURITY_ADMIN | MEDIO | 7 |
 | `UC-29-10` | Reasignar supervisor / suspender (cascada) | PATCH /org/user-assignments/{id} | SECURITY_ADMIN | MEDIO | 7 |
+| `ctrl:AffiliationInvitationsController` | Operaciones de AffiliationInvitationsController que el README no asigna a un caso de uso | POST /affiliation-invitations/redeem | PRACTITIONER · SUPPORT_STAFF | MEDIO | 39 |
+|  |  | GET /org/affiliation-invitations | Cualquier sesión válida | BAJO | 2 |
+|  |  | POST /org/affiliation-invitations | Cualquier sesión válida | ALTO | 4 |
+|  |  | POST /org/affiliation-invitations/{id}/revoke | Cualquier sesión válida | ALTO | 2 |
 | `ctrl:DelegatedPermissionSetsController` | Operaciones de DelegatedPermissionSetsController que el README no asigna a un caso de uso | GET /delegated-permission-sets | SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:OrgSupportStaffProvisioningController` | Operaciones de OrgSupportStaffProvisioningController que el README no asigna a un caso de uso | POST /org/support-staff | Cualquier sesión válida | ALTO | 26 |
 | `ctrl:PractitionerGovernanceController` | Operaciones de PractitionerGovernanceController que el README no asigna a un caso de uso | GET /approvals/pending | PRACTITIONER · CLINICIAN | BAJO | 14 |
@@ -71,8 +75,9 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a23(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a34(["Cualquier sesión válida"]):::actor
-  a39(["PRACTITIONER · CLINICIAN"]):::actor
+  a33(["PRACTITIONER · SUPPORT_STAFF"]):::actor
+  a38(["Cualquier sesión válida"]):::actor
+  a48(["PRACTITIONER · CLINICIAN"]):::actor
   t3[("delegated_access.organization_user_assignments")]:::tabla
   t4[("directory.tenant_memberships")]:::tabla
   t6[("delegated_access.delegated_permission_set_items")]:::tabla
@@ -87,14 +92,17 @@ flowchart LR
   t28[("messaging.domain_events")]:::tabla
   t29[("messaging.outbox_messages")]:::tabla
   e31>"delegated_access.assignment.scope_changed"]:::evento
-  t35[("common.contact_points")]:::tabla
-  t36[("common.identifiers")]:::tabla
-  t40[("delegated_access.four_eyes_requests")]:::tabla
-  t41[("directory.tenants")]:::tabla
-  t42[("iam.users")]:::tabla
-  t43[("practice.care_spaces")]:::tabla
-  t46[("delegated_access.access_anomalies")]:::tabla
-  t47[("delegated_access.access_review_items")]:::tabla
+  t34[("directory.affiliation_invitation_uses")]:::tabla
+  t35[("directory.affiliation_invitations")]:::tabla
+  t40[("practice.practice_sites")]:::tabla
+  t44[("common.contact_points")]:::tabla
+  t45[("common.identifiers")]:::tabla
+  t49[("delegated_access.four_eyes_requests")]:::tabla
+  t50[("directory.tenants")]:::tabla
+  t51[("iam.users")]:::tabla
+  t52[("practice.care_spaces")]:::tabla
+  t55[("delegated_access.access_anomalies")]:::tabla
+  t56[("delegated_access.access_review_items")]:::tabla
   subgraph s0["UC-29-01 · Asignar usuario de organización (scoped, vigente)"]
     o1["POST /org/{tenantMembershipId}/user-assignments"]:::op
   end
@@ -130,18 +138,25 @@ flowchart LR
   subgraph s9["UC-29-10 · Reasignar supervisor / suspender (cascada)"]
     o27["PATCH /org/user-assignments/{id}"]:::op
   end
-  subgraph s10["ctrl:DelegatedPermissionSetsController · Operaciones de DelegatedPermissionSets…"]
-    o32["GET /delegated-permission-sets"]:::op
+  t36[("+33 tablas más")]
+  subgraph s10["ctrl:AffiliationInvitationsController · Operaciones de AffiliationInvitationsCo…"]
+    o32["POST /affiliation-invitations/redeem"]:::op
+    o37["GET /org/affiliation-invitations"]:::op
+    o39["POST /org/affiliation-invitations"]:::op
+    o41["POST /org/affiliation-invitations/{id}/revoke"]:::op
   end
-  t37[("+20 tablas más")]
-  subgraph s11["ctrl:OrgSupportStaffProvisioningController · Operaciones de OrgSupportStaffProv…"]
-    o33["POST /org/support-staff"]:::op
+  subgraph s11["ctrl:DelegatedPermissionSetsController · Operaciones de DelegatedPermissionSets…"]
+    o42["GET /delegated-permission-sets"]:::op
   end
-  t44[("+8 tablas más")]
-  t48[("+9 tablas más")]
-  subgraph s12["ctrl:PractitionerGovernanceController · Operaciones de PractitionerGovernanceCo…"]
-    o38["GET /approvals/pending"]:::op
-    o45["GET /me/practitioner/governance-panel"]:::op
+  t46[("+20 tablas más")]
+  subgraph s12["ctrl:OrgSupportStaffProvisioningController · Operaciones de OrgSupportStaffProv…"]
+    o43["POST /org/support-staff"]:::op
+  end
+  t53[("+8 tablas más")]
+  t57[("+9 tablas más")]
+  subgraph s13["ctrl:PractitionerGovernanceController · Operaciones de PractitionerGovernanceCo…"]
+    o47["GET /approvals/pending"]:::op
+    o54["GET /me/practitioner/governance-panel"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -212,32 +227,51 @@ flowchart LR
   o27 -->|"CREA"| t29
   o27 -.-> t30
   o27 -->|"evento"| e31
-  a2 --> o32
-  o32 -->|"LEE"| t7
-  a34 --> o33
-  o33 -->|"CREA"| t35
-  o33 -->|"CREA"| t36
-  o33 -->|"CREA"| t3
-  o33 -->|"CREA"| t4
-  o33 -->|"ACTUALIZA"| t4
-  o33 -->|"LEE"| t4
-  o33 -.-> t37
-  a39 --> o38
-  o38 -->|"LEE"| t40
-  o38 -->|"LEE"| t3
-  o38 -->|"LEE"| t4
-  o38 -->|"LEE"| t41
-  o38 -->|"LEE"| t42
-  o38 -->|"LEE"| t43
-  o38 -.-> t44
-  a39 --> o45
-  o45 -->|"LEE"| t46
-  o45 -->|"LEE"| t47
-  o45 -->|"LEE"| t3
-  o45 -->|"LEE"| t4
-  o45 -->|"LEE"| t41
-  o45 -->|"LEE"| t42
-  o45 -.-> t48
+  a33 --> o32
+  o32 -->|"CREA"| t3
+  o32 -->|"LEE"| t3
+  o32 -->|"CREA"| t34
+  o32 -->|"ACTUALIZA"| t35
+  o32 -->|"LEE"| t35
+  o32 -->|"CREA"| t4
+  o32 -.-> t36
+  a38 --> o37
+  o37 -->|"LEE"| t35
+  o37 -->|"LEE"| t4
+  a38 --> o39
+  o39 -->|"CREA"| t35
+  o39 -->|"LEE"| t4
+  o39 -->|"LEE"| t40
+  o39 -->|"LEE"| t12
+  a38 --> o41
+  o41 -->|"ACTUALIZA"| t35
+  o41 -->|"LEE"| t4
+  a2 --> o42
+  o42 -->|"LEE"| t7
+  a38 --> o43
+  o43 -->|"CREA"| t44
+  o43 -->|"CREA"| t45
+  o43 -->|"CREA"| t3
+  o43 -->|"CREA"| t4
+  o43 -->|"ACTUALIZA"| t4
+  o43 -->|"LEE"| t4
+  o43 -.-> t46
+  a48 --> o47
+  o47 -->|"LEE"| t49
+  o47 -->|"LEE"| t3
+  o47 -->|"LEE"| t4
+  o47 -->|"LEE"| t50
+  o47 -->|"LEE"| t51
+  o47 -->|"LEE"| t52
+  o47 -.-> t53
+  a48 --> o54
+  o54 -->|"LEE"| t55
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t3
+  o54 -->|"LEE"| t4
+  o54 -->|"LEE"| t50
+  o54 -->|"LEE"| t51
+  o54 -.-> t57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -576,7 +610,175 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /approvals/pending
+#### 2. POST /affiliation-invitations/redeem
+
+Canjear un código o QR de afiliación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada; ResourceNotFoundException: Profesional no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya hay un vínculo vivo con ese mismo objetivo; ConflictException: Ese vínculo ya está en el historial laboral; ConflictException: Ese vínculo con el establecimiento ya está en el historial laboral; ConflictException: Ya pidió vincularse a esa sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El fin del vínculo no puede ser anterior a su inicio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a RedeemAffiliationInvitationService.redeem"]:::llamada
+  n2 --> n3
+  n4["Llama a RedeemAffiliationInvitationService.claim"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a AffiliationInvitationsRepository.findByTokenHash"]:::llamada
+  n5 --> n6
+  n7[("LEE directory.affiliation_invitations")]:::efecto
+  n6 --> n7
+  n8["Llama a AffiliationInvitationsRepository.findPersonOfUser"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.person_account_links · LEE profiles.health_practitioner_profiles")]:::efecto
+  n8 --> n9
+  n10{"invitationStatus(invitation) !== 'ACTIVE' || wrongPerson"}:::decision
+  n9 --> n10
+  n11["Llama a AffiliationInvitationsRepository.recordUse"]:::llamada
+  n10 -->|"sí"| n11
+  n12[("CREA directory.affiliation_invitation_uses")]:::efecto
+  n11 --> n12
+  n13{"invitation.kind_concept_id === AFF_INV.KIND_PRACTITIONER"}:::decision
+  n12 --> n13
+  n10 -->|"no"| n13
+  n14["Llama a AffiliationInvitationsRepository.findFirstActiveSite"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("LEE practice.practice_sites · LEE practice.practices")]:::efecto
+  n14 --> n15
+  n16["Llama a AffiliationInvitationsRepository.claimUse"]:::llamada
+  n15 --> n16
+  n13 -->|"no"| n16
+  n17[("ACTUALIZA directory.affiliation_invitations")]:::efecto
+  n16 --> n17
+  n18{"!(await this.invitations.claimUse(tx, invitation.id))"}:::decision
+  n17 --> n18
+  n19["Llama a AffiliationInvitationsRepository.recordUse"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("CREA directory.affiliation_invitation_uses")]:::efecto
+  n19 --> n20
+  n21["Llama a AffiliationInvitationsRepository.recordUse"]:::llamada
+  n20 --> n21
+  n18 -->|"no"| n21
+  n22[("CREA directory.affiliation_invitation_uses")]:::efecto
+  n21 --> n22
+  n23["Llama a SupportLinksRepository.findOrganizationName"]:::llamada
+  n22 --> n23
+  n24[("LEE directory.tenants")]:::efecto
+  n23 --> n24
+  n25{"outcome === Reason.SUPPORT_PRACTITIONER_PROFILE_REQUIRED"}:::decision
+  n24 --> n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27{"outcome === Reason.SUPPORT_AFFILIATION_PRACTICE_MISSING"}:::decision
+  n25 -->|"no"| n27
+  n28(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"sí"| n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"no"| n29
+  n30["Intenta"]:::intento
+  n31["Llama a RedeemAffiliationInvitationService.affiliate"]:::llamada
+  n30 --> n31
+  n32{"invitation.kind_concept_id !== AFF_INV.KIND_PRACTITIONER"}:::decision
+  n31 --> n32
+  n33["Llama a SupportStaffService.request"]:::llamada
+  n32 -->|"sí"| n33
+  n34["Transacción: transactional(…)"]:::transaccion
+  n33 --> n34
+  n35["Llama a SupportStaffService.requireSecretaryPerson"]:::llamada
+  n34 --> n35
+  n36{"!personId"}:::decision
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a SupportStaffService.createLinks"]:::llamada
+  n36 -->|"no"| n38
+  n39{"organizationName === undefined"}:::decision
+  n38 --> n39
+  n40(["404 NOT_FOUND Organización no encontrada"]):::error
+  n39 -->|"sí"| n40
+  n41["Repite: por cada const target de resolved"]:::bucle
+  n39 -->|"no"| n41
+  n42{"seen.has(key)"}:::decision
+  n41 -->|"cada elemento"| n42
+  n43(["409 CONFLICT Ya hay un vínculo vivo con ese mismo objetivo"]):::error
+  n42 -->|"sí"| n43
+  n44["Intenta"]:::intento
+  n42 -->|"no"| n44
+  n41 -->|"al terminar"| n44
+  n32 -->|"no"| n44
+  n45["Llama a ProfilesPractitionersService.addOwnAffiliation"]:::llamada
+  n44 --> n45
+  n46["Llama a ProfilesPractitionersService.addAffiliation"]:::llamada
+  n45 --> n46
+  n47{"endDate && endDate ‹ startDate"}:::decision
+  n46 --> n47
+  n48(["422 PRECONDITION_FAILED El fin del vínculo no puede ser anterior a su inicio"]):::error
+  n47 -->|"sí"| n48
+  n49["Transacción: transactional(…)"]:::transaccion
+  n47 -->|"no"| n49
+  n50{"explicitProfile !== null"}:::decision
+  n49 --> n50
+  n51{"!exists"}:::decision
+  n50 -->|"sí"| n51
+  n52(["404 NOT_FOUND Profesional no encontrado"]):::error
+  n51 -->|"sí"| n52
+  n53{"duplicate"}:::decision
+  n51 -->|"no"| n53
+  n50 -->|"no"| n53
+  n54(["409 CONFLICT Ese vínculo ya está en el historial laboral"]):::error
+  n53 -->|"sí"| n54
+  n55{"dto.healthFacilityConceptId !== undefined"}:::decision
+  n53 -->|"no"| n55
+  n56{"sameFacility"}:::decision
+  n55 -->|"sí"| n56
+  n57(["409 CONFLICT Ese vínculo con el establecimiento ya está en el historial laboral"]):::error
+  n56 -->|"sí"| n57
+  n58{"dto.practiceSiteId"}:::decision
+  n56 -->|"no"| n58
+  n55 -->|"no"| n58
+  n59{"alreadyRequested"}:::decision
+  n58 -->|"sí"| n59
+  n60(["409 CONFLICT Ya pidió vincularse a esa sede"]):::error
+  n59 -->|"sí"| n60
+  n61(["↩ (relanza el error capturado)"]):::error
+  n44 -->|"si falla"| n61
+  n62{"!created"}:::decision
+  n59 -->|"no"| n62
+  n58 -->|"no"| n62
+  n63["Llama a AffiliationInvitationsRepository.releaseUse"]:::llamada
+  n62 -->|"sí"| n63
+  n64[("ACTUALIZA directory.affiliation_invitations")]:::efecto
+  n63 --> n64
+  n65["Llama a AffiliationInvitationsRepository.releaseUse"]:::llamada
+  n30 -->|"si falla"| n65
+  n66[("ACTUALIZA directory.affiliation_invitations")]:::efecto
+  n65 --> n66
+  n67(["↩ (relanza el error capturado)"]):::error
+  n66 --> n67
+  n68(("200 Responde con éxito")):::ok
+  n64 --> n68
+  n62 -->|"no"| n68
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /approvals/pending
 
 Aprobaciones que espera mi decisión
 
@@ -594,25 +796,27 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerGovernanceService.pendingApprovals"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerGovernanceService.teamOf"]:::llamada
+  n4["Transacción: readWithSystemRls(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SupportLinksRepository.findLinks"]:::llamada
+  n5["Llama a PractitionerGovernanceService.teamOf"]:::llamada
   n4 --> n5
-  n6[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
+  n6["Llama a SupportLinksRepository.findLinks"]:::llamada
   n5 --> n6
-  n7["Repite: por cada const userId de new Set(mine.map((r) =› r.supportUserId))"]:::bucle
+  n7[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
   n6 --> n7
-  n8["Llama a SupportLinksRepository.findLinks"]:::llamada
-  n7 -->|"cada elemento"| n8
-  n9[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
-  n8 --> n9
-  n10["Llama a PractitionerGovernanceRepository.findPendingForDoctor"]:::llamada
+  n8["Repite: por cada const userId de new Set(mine.map((r) =› r.supportUserId))"]:::bucle
+  n7 --> n8
+  n9["Llama a SupportLinksRepository.findLinks"]:::llamada
+  n8 -->|"cada elemento"| n9
+  n10[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
   n9 --> n10
-  n7 -->|"al terminar"| n10
-  n11[("LEE delegated_access.four_eyes_requests · LEE terminology.catalog_concepts")]:::efecto
+  n11["Llama a PractitionerGovernanceRepository.findPendingForDoctor"]:::llamada
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
+  n8 -->|"al terminar"| n11
+  n12[("LEE delegated_access.four_eyes_requests · LEE terminology.catalog_concepts")]:::efecto
   n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -621,7 +825,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /authz/effective-actor/evaluate
+#### 4. POST /authz/effective-actor/evaluate
 
 Evaluar actor efectivo por propósito (step-up)
 
@@ -726,7 +930,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /clinical/prescription-shares
+#### 5. GET /clinical/prescription-shares
 
 Enlaces de receta de un paciente
 
@@ -772,7 +976,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /clinical/prescription-shares
+#### 6. POST /clinical/prescription-shares
 
 Compartir una receta con un enlace
 
@@ -842,7 +1046,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /clinical/prescription-shares/{shareId}/revoke
+#### 7. POST /clinical/prescription-shares/{shareId}/revoke
 
 Revocar un enlace de receta
 
@@ -883,7 +1087,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /clinical/prescription-shares/by-token/{token}
+#### 8. GET /clinical/prescription-shares/by-token/{token}
 
 Saber si un enlace es de la sesión
 
@@ -921,7 +1125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /delegated-access/expiry-sweep
+#### 9. POST /delegated-access/expiry-sweep
 
 Expirar delegaciones y grants vencidos (barrido)
 
@@ -986,7 +1190,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /delegated-permission-sets
+#### 10. POST /delegated-permission-sets
 
 Publicar set de permisos delegados (scoped)
 
@@ -1044,7 +1248,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /delegated-permission-sets/{id}/versions
+#### 11. POST /delegated-permission-sets/{id}/versions
 
 Versionar set de permisos delegados
 
@@ -1101,7 +1305,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /me/practitioner/governance-panel
+#### 12. GET /me/practitioner/governance-panel
 
 Panel «Para su atención» del doctor
 
@@ -1119,29 +1323,31 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerGovernanceService.panel"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerGovernanceService.teamOf"]:::llamada
+  n4["Transacción: readWithSystemRls(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SupportLinksRepository.findLinks"]:::llamada
+  n5["Llama a PractitionerGovernanceService.teamOf"]:::llamada
   n4 --> n5
-  n6[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
+  n6["Llama a SupportLinksRepository.findLinks"]:::llamada
   n5 --> n6
-  n7["Repite: por cada const userId de new Set(mine.map((r) =› r.supportUserId))"]:::bucle
+  n7[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
   n6 --> n7
-  n8["Llama a SupportLinksRepository.findLinks"]:::llamada
-  n7 -->|"cada elemento"| n8
-  n9[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
-  n8 --> n9
-  n10["Llama a PractitionerGovernanceRepository.countPendingReviews"]:::llamada
+  n8["Repite: por cada const userId de new Set(mine.map((r) =› r.supportUserId))"]:::bucle
+  n7 --> n8
+  n9["Llama a SupportLinksRepository.findLinks"]:::llamada
+  n8 -->|"cada elemento"| n9
+  n10[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
   n9 --> n10
-  n7 -->|"al terminar"| n10
-  n11[("LEE delegated_access.access_review_items")]:::efecto
+  n11["Llama a PractitionerGovernanceRepository.countPendingReviews"]:::llamada
   n10 --> n11
-  n12["Llama a PractitionerGovernanceRepository.findOpenAnomalies"]:::llamada
+  n8 -->|"al terminar"| n11
+  n12[("LEE delegated_access.access_review_items")]:::efecto
   n11 --> n12
-  n13[("LEE delegated_access.access_anomalies · LEE terminology.catalog_concepts")]:::efecto
+  n13["Llama a PractitionerGovernanceRepository.findOpenAnomalies"]:::llamada
   n12 --> n13
-  n14(("200 Responde con éxito")):::ok
+  n14[("LEE delegated_access.access_anomalies · LEE terminology.catalog_concepts")]:::efecto
   n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1150,7 +1356,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /me/practitioner/support-invitations
+#### 13. POST /me/practitioner/support-invitations
 
 Invitar a una secretaria a asistirme
 
@@ -1276,7 +1482,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /me/practitioner/support-staff
+#### 14. POST /me/practitioner/support-staff
 
 Crear cuenta de secretaria y vincularla de inmediato
 
@@ -1304,7 +1510,7 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Llama a SupportStaffProvisioningRepository.findActiveRoleAssignmentOfPractitioner"]:::llamada
   n4 -->|"no"| n6
-  n7[("LEE practice.practitioner_role_assignments · LEE practice.practices · LEE directory.tenants · LEE profiles.pe…")]:::efecto
+  n7[("LEE practice.practitioner_role_assignments · LEE practice.practices · LEE directory.tenants")]:::efecto
   n6 --> n7
   n8{"!role"}:::decision
   n7 --> n8
@@ -1401,7 +1607,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /me/practitioner/support-team/{id}/end
+#### 15. POST /me/practitioner/support-team/{id}/end
 
 Terminar el vínculo con una secretaria
 
@@ -1470,7 +1676,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /me/support-agenda
+#### 16. GET /me/support-agenda
 
 Agenda de un doctor asignado (403 si no hay vínculo activo)
 
@@ -1504,20 +1710,22 @@ flowchart TD
   n8 --> n9
   n10(["↩ (relanza el error capturado)"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a SupportLinksRepository.findActiveRoleAssignmentInTenant"]:::llamada
+  n11["Transacción: withTenantRls(…)"]:::transaccion
   n9 -->|"no"| n11
-  n12[("LEE practice.practitioner_role_assignments · LEE practice.practices")]:::efecto
+  n12["Llama a SupportLinksRepository.findActiveRoleAssignmentInTenant"]:::llamada
   n11 --> n12
-  n13{"!role"}:::decision
+  n13[("LEE practice.practitioner_role_assignments · LEE practice.practices")]:::efecto
   n12 --> n13
-  n14(["↩ (relanza el error capturado)"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a SupportLinksRepository.findPractitionerAgenda"]:::llamada
-  n13 -->|"no"| n15
-  n16[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources ·…")]:::efecto
-  n15 --> n16
-  n17(("200 Responde con éxito")):::ok
+  n14{"!role"}:::decision
+  n13 --> n14
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a SupportLinksRepository.findPractitionerAgenda"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources ·…")]:::efecto
   n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1526,7 +1734,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /me/support-catalog
+#### 17. GET /me/support-catalog
 
 Sedes, servicios, pisos y doctores de un hospital para pedir
 
@@ -1580,7 +1788,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /me/support-engagements/{id}/confirm
+#### 18. POST /me/support-engagements/{id}/confirm
 
 Aceptar una invitación de apoyo
 
@@ -1670,7 +1878,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /me/support-engagements/{id}/decline
+#### 19. POST /me/support-engagements/{id}/decline
 
 Rechazar una invitación de apoyo
 
@@ -1760,7 +1968,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /me/support-engagements/{id}/leave
+#### 20. POST /me/support-engagements/{id}/leave
 
 Dejar un vínculo o retirar mi pedido
 
@@ -1829,7 +2037,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /org/{tenantMembershipId}/user-assignments
+#### 21. POST /org/{tenantMembershipId}/user-assignments
 
 Asignar usuario de organización con alcance y vigencia
 
@@ -1886,7 +2094,147 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /org/support-catalog
+#### 22. GET /org/affiliation-invitations
+
+Listar los códigos de afiliación de la organización
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AffiliationInvitationsService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a AffiliationInvitationsService.assertOrganizationAdmin"]:::llamada
+  n3 --> n4
+  n5["Llama a SupportLinksRepository.isOrganizationAdmin"]:::llamada
+  n4 --> n5
+  n6[("LEE directory.tenant_memberships")]:::efecto
+  n5 --> n6
+  n7(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n6 --> n7
+  n8["Llama a AffiliationInvitationsRepository.listByTenant"]:::llamada
+  n9[("LEE directory.affiliation_invitations")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. POST /org/affiliation-invitations
+
+Crear un código o QR de afiliación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización necesita una sede activa para recibir solicitudes de médicos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AffiliationInvitationsService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AffiliationInvitationsService.assertOrganizationAdmin"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportLinksRepository.isOrganizationAdmin"]:::llamada
+  n5 --> n6
+  n7[("LEE directory.tenant_memberships")]:::efecto
+  n6 --> n7
+  n8(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n7 --> n8
+  n9["Llama a AffiliationInvitationsRepository.findFirstActiveSite"]:::llamada
+  n10[("LEE practice.practice_sites · LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"dto.kind === 'PRACTITIONER' && !(await this.invitations.findFirstActiveSite(tx, tenantId))"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED La organización necesita una sede activa para recibir solicitudes de médicos"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a AffiliationInvitationsRepository.insert"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA directory.affiliation_invitations")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 24. POST /org/affiliation-invitations/{id}/revoke
+
+Revocar un código o QR de afiliación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Código de afiliación no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AffiliationInvitationsService.revoke"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AffiliationInvitationsService.assertOrganizationAdmin"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportLinksRepository.isOrganizationAdmin"]:::llamada
+  n5 --> n6
+  n7[("LEE directory.tenant_memberships")]:::efecto
+  n6 --> n7
+  n8(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n7 --> n8
+  n9["Llama a AffiliationInvitationsRepository.revoke"]:::llamada
+  n10[("ACTUALIZA directory.affiliation_invitations")]:::efecto
+  n9 --> n10
+  n11{"!row"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Código de afiliación no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13(("200 Responde con éxito")):::ok
+  n11 -->|"no"| n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 25. GET /org/support-catalog
 
 Sedes, servicios, pisos y doctores para invitar
 
@@ -1943,7 +2291,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /org/support-engagement-requests
+#### 26. GET /org/support-engagement-requests
 
 Solicitudes e invitaciones de apoyo del hospital
 
@@ -1989,7 +2337,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /org/support-engagement-requests/{id}/decision
+#### 27. POST /org/support-engagement-requests/{id}/decision
 
 Aceptar o rechazar una solicitud de apoyo
 
@@ -2095,7 +2443,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /org/support-engagements
+#### 28. GET /org/support-engagements
 
 Personal de apoyo del hospital
 
@@ -2141,7 +2489,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /org/support-engagements/{id}/end
+#### 29. POST /org/support-engagements/{id}/end
 
 Terminar un vínculo de apoyo
 
@@ -2186,7 +2534,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /org/support-staff
+#### 30. POST /org/support-staff
 
 Crear cuenta de secretaria y vincularla a la organización de inmediato
 
@@ -2300,7 +2648,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /org/team/invitations
+#### 31. POST /org/team/invitations
 
 Invitar a una secretaria a lugares o doctores
 
@@ -2432,7 +2780,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. PATCH /org/user-assignments/{id}
+#### 32. PATCH /org/user-assignments/{id}
 
 Reasignar supervisor / suspender asignación de organización
 
@@ -2540,7 +2888,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /practitioner-delegates
+#### 33. POST /practitioner-delegates
 
 Crear asignación de delegado de practitioner
 
@@ -2619,7 +2967,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /practitioner-delegates/{id}/accept
+#### 34. POST /practitioner-delegates/{id}/accept
 
 Aceptar a una secretaria
 
@@ -2709,7 +3057,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /practitioner-delegates/{id}/access-requests
+#### 35. POST /practitioner-delegates/{id}/access-requests
 
 Solicitar acceso delegado (aprobación previa)
 
@@ -2771,7 +3119,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /practitioner-delegates/{id}/grants
+#### 36. POST /practitioner-delegates/{id}/grants
 
 Otorgar grant delegado por-propósito y temporal
 
@@ -2860,7 +3208,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /practitioner-delegates/{id}/reject
+#### 37. POST /practitioner-delegates/{id}/reject
 
 Rechazar a una secretaria
 
@@ -2950,7 +3298,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /practitioner-delegates/{id}/revoke
+#### 38. POST /practitioner-delegates/{id}/revoke
 
 Revocar delegación de forma inmediata (cascada authz)
 
@@ -3014,7 +3362,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /public/prescription-shares/{token}
+#### 39. GET /public/prescription-shares/{token}
 
 Comprobar un enlace de receta compartida
 
@@ -3101,7 +3449,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /support-engagement-requests
+#### 40. POST /support-engagement-requests
 
 Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor)
 

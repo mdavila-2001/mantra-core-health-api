@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 45 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 49 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
-- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
+- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamIdentifierExistsController`, `IamMyDevicesController`, `IamOnboardingDraftsController`, `IamUsersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,48 +14,52 @@ Referencia exhaustiva de 45 operación(es) del módulo `iam`, derivada del contr
 1. [POST /iam/auth/activate](#1-post-iam-auth-activate) — Activar la cuenta con el token de un solo uso y fijar la contraseña
 2. [POST /iam/auth/change-password](#2-post-iam-auth-change-password) — Cambiar la contraseña de la propia cuenta
 3. [POST /iam/auth/forgot-password](#3-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
-4. [POST /iam/auth/login](#4-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
-5. [POST /iam/auth/logout](#5-post-iam-auth-logout) — Cerrar la sesión actual del usuario
-6. [POST /iam/auth/logout-all](#6-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
-7. [POST /iam/auth/register-organization](#7-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
-8. [POST /iam/auth/register-patient](#8-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
-9. [POST /iam/auth/register-practitioner](#9-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
-10. [POST /iam/auth/register-support-staff](#10-post-iam-auth-register-support-staff) — Registrarse como secretaria (personal de apoyo hospitalario)
-11. [POST /iam/auth/resend-verification](#11-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
-12. [POST /iam/auth/reset-password](#12-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
-13. [POST /iam/auth/sessions/purge](#13-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
-14. [POST /iam/auth/token/refresh](#14-post-iam-auth-token-refresh) — Rotar el refresh token
-15. [POST /iam/auth/upload-registration-document](#15-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
-16. [POST /iam/auth/upload-registration-logo](#16-post-iam-auth-upload-registration-logo) — Pre-cargar el logo del consultorio propio para el registro
-17. [POST /iam/auth/upload-registration-signature-image](#17-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
-18. [POST /iam/auth/verify-email](#18-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-19. [GET /iam/me/sessions](#19-get-iam-me-sessions) — Listar mis sesiones abiertas
-20. [POST /iam/me/sessions/{id}/revoke](#20-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
-21. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#21-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
-22. [GET /iam/onboarding-drafts/{formType}/{draftId}](#22-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
-23. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#23-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-24. [GET /iam/users](#24-get-iam-users) — Listado paginado de usuarios (obsoleto)
-25. [POST /iam/users](#25-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-26. [GET /iam/users/{id}](#26-get-iam-users-id) — Ficha de un usuario
-27. [POST /iam/users/{id}/anonymize](#27-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-28. [GET /iam/users/{id}/credentials](#28-get-iam-users-id-credentials) — Credenciales del usuario
-29. [POST /iam/users/{id}/credentials/{cid}/revoke](#29-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-30. [POST /iam/users/{id}/credentials/federated](#30-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-31. [POST /iam/users/{id}/deactivate](#31-post-iam-users-id-deactivate) — Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
-32. [GET /iam/users/{id}/devices](#32-get-iam-users-id-devices) — Dispositivos del usuario
-33. [POST /iam/users/{id}/devices](#33-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-34. [GET /iam/users/{id}/global-roles](#34-get-iam-users-id-global-roles) — Roles globales del usuario
-35. [POST /iam/users/{id}/global-roles](#35-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-36. [GET /iam/users/{id}/lifecycle](#36-get-iam-users-id-lifecycle) — Estado de ciclo de vida de la cuenta y su historia, paginada
-37. [POST /iam/users/{id}/lock](#37-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-38. [GET /iam/users/{id}/mfa-factors](#38-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-39. [POST /iam/users/{id}/mfa-factors](#39-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-40. [POST /iam/users/{id}/reactivate](#40-post-iam-users-id-reactivate) — Reactivar una cuenta suspendida con motivo (idempotente)
-41. [GET /iam/users/{id}/sessions](#41-get-iam-users-id-sessions) — Sesiones del usuario
-42. [POST /iam/users/{id}/suspend](#42-post-iam-users-id-suspend) — Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
-43. [POST /iam/users/assisted-practitioner-registration](#43-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-44. [POST /iam/users/assisted-registration](#44-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
-45. [POST /iam/users/search](#45-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
+4. [GET /iam/auth/identifier-exists](#4-get-iam-auth-identifier-exists) — Whether a national id, email or organization name has an account
+5. [POST /iam/auth/login](#5-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
+6. [POST /iam/auth/logout](#6-post-iam-auth-logout) — Cerrar la sesión actual del usuario
+7. [POST /iam/auth/logout-all](#7-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
+8. [POST /iam/auth/register-organization](#8-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
+9. [POST /iam/auth/register-patient](#9-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
+10. [POST /iam/auth/register-practitioner](#10-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
+11. [POST /iam/auth/register-support-staff](#11-post-iam-auth-register-support-staff) — Registrarse como secretaria (personal de apoyo hospitalario)
+12. [POST /iam/auth/resend-verification](#12-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
+13. [POST /iam/auth/reset-password](#13-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
+14. [POST /iam/auth/sessions/purge](#14-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
+15. [POST /iam/auth/token/refresh](#15-post-iam-auth-token-refresh) — Rotar el refresh token
+16. [POST /iam/auth/upload-registration-document](#16-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
+17. [POST /iam/auth/upload-registration-logo](#17-post-iam-auth-upload-registration-logo) — Pre-cargar el logo del consultorio propio para el registro
+18. [POST /iam/auth/upload-registration-signature-image](#18-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
+19. [POST /iam/auth/verify-email](#19-post-iam-auth-verify-email) — Verificar el correo con el token recibido
+20. [GET /iam/me/devices](#20-get-iam-me-devices) — Listar los dispositivos donde inicié sesión
+21. [POST /iam/me/devices/{id}/confirm](#21-post-iam-me-devices-id-confirm) — Verificar un dispositivo con el código del correo
+22. [POST /iam/me/devices/{id}/confirm-code](#22-post-iam-me-devices-id-confirm-code) — Enviar a mi correo el código para verificar un dispositivo
+23. [GET /iam/me/sessions](#23-get-iam-me-sessions) — Listar mis sesiones abiertas
+24. [POST /iam/me/sessions/{id}/revoke](#24-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+25. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#25-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+26. [GET /iam/onboarding-drafts/{formType}/{draftId}](#26-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
+27. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#27-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
+28. [GET /iam/users](#28-get-iam-users) — Listado paginado de usuarios (obsoleto)
+29. [POST /iam/users](#29-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+30. [GET /iam/users/{id}](#30-get-iam-users-id) — Ficha de un usuario
+31. [POST /iam/users/{id}/anonymize](#31-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+32. [GET /iam/users/{id}/credentials](#32-get-iam-users-id-credentials) — Credenciales del usuario
+33. [POST /iam/users/{id}/credentials/{cid}/revoke](#33-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+34. [POST /iam/users/{id}/credentials/federated](#34-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+35. [POST /iam/users/{id}/deactivate](#35-post-iam-users-id-deactivate) — Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
+36. [GET /iam/users/{id}/devices](#36-get-iam-users-id-devices) — Dispositivos del usuario
+37. [POST /iam/users/{id}/devices](#37-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+38. [GET /iam/users/{id}/global-roles](#38-get-iam-users-id-global-roles) — Roles globales del usuario
+39. [POST /iam/users/{id}/global-roles](#39-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+40. [GET /iam/users/{id}/lifecycle](#40-get-iam-users-id-lifecycle) — Estado de ciclo de vida de la cuenta y su historia, paginada
+41. [POST /iam/users/{id}/lock](#41-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+42. [GET /iam/users/{id}/mfa-factors](#42-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+43. [POST /iam/users/{id}/mfa-factors](#43-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+44. [POST /iam/users/{id}/reactivate](#44-post-iam-users-id-reactivate) — Reactivar una cuenta suspendida con motivo (idempotente)
+45. [GET /iam/users/{id}/sessions](#45-get-iam-users-id-sessions) — Sesiones del usuario
+46. [POST /iam/users/{id}/suspend](#46-post-iam-users-id-suspend) — Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
+47. [POST /iam/users/assisted-practitioner-registration](#47-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+48. [POST /iam/users/assisted-registration](#48-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+49. [POST /iam/users/search](#49-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
 
 ---
 
@@ -423,7 +427,108 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /iam/auth/login
+## 4. GET /iam/auth/identifier-exists
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Whether a national id, email or organization name has an account
+- **Operation ID:** `IamIdentifierExistsController_check`
+- **Autenticación:** Pública
+- **Implementación:** [IamIdentifierExistsController.check](../../src/modules/iam/presentation/controllers/iam-identifier-exists.controller.ts)
+
+### Descripción de negocio
+
+Whether a national id, email or organization name has an account. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/auth/identifier-exists` en `IamIdentifierExistsController_check`. El controlador delega en `IdentifierExistsUseCase.execute`. No recibe body. El tipo de retorno estático es `Promise<IdentifierExistsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `kind` | query | Sí | `string` | valores: `ORG_NAME` | Sin descripción específica en OpenAPI. | `ORG_NAME` |
+| `value` | query | Sí | `string` | longitud máxima 320 | Organization name to check | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/auth/identifier-exists?kind=ORG_NAME&value=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/auth/identifier-exists?kind=ORG_NAME&value=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IdentifierExistsResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<IdentifierExistsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdentifierExistsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "exists": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `exists` | Sí | `boolean` | Sin restricción adicional declarada | Whether an account already uses it | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/identifier-exists"
+}
+```
+
+---
+
+## 5. POST /iam/auth/login
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -549,7 +654,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /iam/auth/logout
+## 6. POST /iam/auth/logout
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -653,7 +758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /iam/auth/logout-all
+## 7. POST /iam/auth/logout-all
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -756,7 +861,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /iam/auth/register-organization
+## 8. POST /iam/auth/register-organization
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -810,7 +915,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]},"medicalFacility":{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]},"medicalFacility":{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18,"openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}],"pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
@@ -899,7 +1004,7 @@ Content-Type: application/json
 | `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]}` |
+| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]}` |
 | `organization.diagnosticUnit.code` | No | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Sin descripción específica en el contrato OpenAPI. | `CENTRO_IMAGEN_CENTRAL` |
 | `organization.diagnosticUnit.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico por Imágenes` |
 | `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -917,7 +1022,7 @@ Content-Type: application/json
 | `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.primarySite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.primarySite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]` |
+| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]` |
 | `organization.diagnosticUnit.branches[].name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
 | `organization.diagnosticUnit.branches[].address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `organization.diagnosticUnit.branches[].address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
@@ -929,7 +1034,11 @@ Content-Type: application/json
 | `organization.diagnosticUnit.branches[].address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.branches[].description` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Frente al mercado` |
 | `organization.diagnosticUnit.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Sin descripción específica en el contrato OpenAPI. | `https://maps.google.com/?q=-17.78,-63.18` |
-| `organization.medicalFacility` | No | `MedicalFacilityDto` | Sin restricción adicional declarada | Sólo para HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER: NIT, registro sanitario, director médico, casa central y sucursales | `{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]}` |
+| `organization.diagnosticUnit.branches[].openingHours` | No | `array<OpeningHoursShiftDto>` | máximo 14 elemento(s) | Horario de atención semanal: hasta dos turnos por día, sin superponerse | `[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]` |
+| `organization.diagnosticUnit.branches[].openingHours[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Día ISO-8601: 1 = lunes … 7 = domingo | `1` |
+| `organization.diagnosticUnit.branches[].openingHours[].opensAt` | No | `string` | patrón runtime `OPENS_AT` | Apertura, HH:MM (00:00–23:59) | `08:00` |
+| `organization.diagnosticUnit.branches[].openingHours[].closesAt` | No | `string` | patrón runtime `CLOSES_AT` | Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura | `12:30` |
+| `organization.medicalFacility` | No | `MedicalFacilityDto` | Sin restricción adicional declarada | Sólo para HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER: NIT, registro sanitario, director médico, casa central y sucursales | `{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18,"openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]}` |
 | `organization.medicalFacility.taxIdentifierNumber` | No | `string` | patrón `^[0-9][0-9-]{3,19}$` | NIT del establecimiento (número, sin el certificado) | `1023456789` |
 | `organization.medicalFacility.healthFacilityRegistrationNumber` | No | `string` | longitud mínima 3; longitud máxima 50; patrón `^[A-Za-z0-9./-]+$` | Número de registro del establecimiento ante la autoridad sanitaria (SEDES en Bolivia) | `SEDES-SC-2020-0412` |
 | `organization.medicalFacility.medicalDirector` | No | `MedicalDirectorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"}` |
@@ -945,24 +1054,36 @@ Content-Type: application/json
 | `organization.medicalFacility.headquarters.addressLines` | No | `array<string>` | longitud mínima 1; longitud máxima 500; mínimo 1 elemento(s); máximo 10 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["Av. San Martín 123"]` |
 | `organization.medicalFacility.headquarters.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `-17.78` |
 | `organization.medicalFacility.headquarters.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `-63.18` |
-| `organization.medicalFacility.branches` | No | `array<MedicalFacilitySiteDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]` |
+| `organization.medicalFacility.branches` | No | `array<MedicalFacilitySiteDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18,"openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]` |
 | `organization.medicalFacility.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
 | `organization.medicalFacility.branches[].addressLines` | No | `array<string>` | longitud mínima 1; longitud máxima 500; mínimo 1 elemento(s); máximo 10 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["Av. San Martín 123"]` |
 | `organization.medicalFacility.branches[].latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `-17.78` |
 | `organization.medicalFacility.branches[].longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `-63.18` |
+| `organization.medicalFacility.branches[].openingHours` | No | `array<OpeningHoursShiftDto>` | máximo 14 elemento(s) | Horario de atención semanal: hasta dos turnos por día, sin superponerse | `[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]` |
+| `organization.medicalFacility.branches[].openingHours[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Día ISO-8601: 1 = lunes … 7 = domingo | `1` |
+| `organization.medicalFacility.branches[].openingHours[].opensAt` | No | `string` | patrón runtime `OPENS_AT` | Apertura, HH:MM (00:00–23:59) | `08:00` |
+| `organization.medicalFacility.branches[].openingHours[].closesAt` | No | `string` | patrón runtime `CLOSES_AT` | Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura | `12:30` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
-| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sólo para PHARMACY: dirección y punto de la casa central y sucursales | `{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
+| `organization.openingHours` | No | `array<OpeningHoursShiftDto>` | máximo 14 elemento(s) | Horario de atención semanal: hasta dos turnos por día, sin superponerse | `[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]` |
+| `organization.openingHours[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Día ISO-8601: 1 = lunes … 7 = domingo | `1` |
+| `organization.openingHours[].opensAt` | No | `string` | patrón runtime `OPENS_AT` | Apertura, HH:MM (00:00–23:59) | `08:00` |
+| `organization.openingHours[].closesAt` | No | `string` | patrón runtime `CLOSES_AT` | Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura | `12:30` |
+| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sólo para PHARMACY: dirección y punto de la casa central y sucursales | `{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]}` |
 | `organization.pharmacy.address` | No | `string` | longitud máxima 500 | Dirección escrita de la casa central (dirección legal) | `Av. Cristo Redentor 1234, Santa Cruz de la Sierra` |
 | `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central; va junto con longitude o no va | `1` |
 | `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central; va junto con latitude o no va | `1` |
-| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
+| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","openingHours":[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]}]` |
 | `organization.pharmacy.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 300 | Nombre de la sucursal | `Nombre de ejemplo` |
 | `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud; va junto con longitude o no va | `-17.769` |
 | `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud; va junto con latitude o no va | `-63.196` |
 | `organization.pharmacy.branches[].description` | No | `string` | longitud máxima 1000 | Descripción | `Texto descriptivo de ejemplo` |
 | `organization.pharmacy.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
+| `organization.pharmacy.branches[].openingHours` | No | `array<OpeningHoursShiftDto>` | máximo 14 elemento(s) | Horario de atención semanal: hasta dos turnos por día, sin superponerse | `[{"dayOfWeek":1,"opensAt":"08:00","closesAt":"12:30"}]` |
+| `organization.pharmacy.branches[].openingHours[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Día ISO-8601: 1 = lunes … 7 = domingo | `1` |
+| `organization.pharmacy.branches[].openingHours[].opensAt` | No | `string` | patrón runtime `OPENS_AT` | Apertura, HH:MM (00:00–23:59) | `08:00` |
+| `organization.pharmacy.branches[].openingHours[].closesAt` | No | `string` | patrón runtime `CLOSES_AT` | Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura | `12:30` |
 | `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
 | `owner.email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo con el que el owner iniciará sesión | `usuario@example.com` |
 | `owner.password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
@@ -1127,7 +1248,14 @@ Content-Type: application/json
             "longitude": 1
           },
           "description": "Frente al mercado",
-          "locationUrl": "https://maps.google.com/?q=-17.78,-63.18"
+          "locationUrl": "https://maps.google.com/?q=-17.78,-63.18",
+          "openingHours": [
+            {
+              "dayOfWeek": 1,
+              "opensAt": "08:00",
+              "closesAt": "12:30"
+            }
+          ]
         }
       ]
     },
@@ -1158,13 +1286,27 @@ Content-Type: application/json
             "Av. San Martín 123"
           ],
           "latitude": -17.78,
-          "longitude": -63.18
+          "longitude": -63.18,
+          "openingHours": [
+            {
+              "dayOfWeek": 1,
+              "opensAt": "08:00",
+              "closesAt": "12:30"
+            }
+          ]
         }
       ]
     },
     "countryConceptId": "00000000-0000-4000-8000-000000000001",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
     "timeZone": "America/La_Paz",
+    "openingHours": [
+      {
+        "dayOfWeek": 1,
+        "opensAt": "08:00",
+        "closesAt": "12:30"
+      }
+    ],
     "pharmacy": {
       "address": "Av. Cristo Redentor 1234, Santa Cruz de la Sierra",
       "latitude": 1,
@@ -1175,7 +1317,14 @@ Content-Type: application/json
           "latitude": -17.769,
           "longitude": -63.196,
           "description": "Texto descriptivo de ejemplo",
-          "locationUrl": "valor-ejemplo"
+          "locationUrl": "valor-ejemplo",
+          "openingHours": [
+            {
+              "dayOfWeek": 1,
+              "opensAt": "08:00",
+              "closesAt": "12:30"
+            }
+          ]
         }
       ]
     }
@@ -1267,7 +1416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /iam/auth/register-patient
+## 9. POST /iam/auth/register-patient
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1484,7 +1633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /iam/auth/register-practitioner
+## 10. POST /iam/auth/register-practitioner
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1821,7 +1970,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /iam/auth/register-support-staff
+## 11. POST /iam/auth/register-support-staff
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1973,7 +2122,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /iam/auth/resend-verification
+## 12. POST /iam/auth/resend-verification
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2087,7 +2236,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /iam/auth/reset-password
+## 13. POST /iam/auth/reset-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2209,7 +2358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /iam/auth/sessions/purge
+## 14. POST /iam/auth/sessions/purge
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2315,7 +2464,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /iam/auth/token/refresh
+## 15. POST /iam/auth/token/refresh
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2434,7 +2583,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /iam/auth/upload-registration-document
+## 16. POST /iam/auth/upload-registration-document
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2554,7 +2703,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /iam/auth/upload-registration-logo
+## 17. POST /iam/auth/upload-registration-logo
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2675,7 +2824,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /iam/auth/upload-registration-signature-image
+## 18. POST /iam/auth/upload-registration-signature-image
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2796,7 +2945,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /iam/auth/verify-email
+## 19. POST /iam/auth/verify-email
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2914,7 +3063,353 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /iam/me/sessions
+## 20. GET /iam/me/devices
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Listar los dispositivos donde inicié sesión
+- **Operation ID:** `IamMyDevicesController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamMyDevicesController.list](../../src/modules/iam/presentation/controllers/iam-my-devices.controller.ts)
+
+### Descripción de negocio
+
+Listar los dispositivos donde inicié sesión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/devices` en `IamMyDevicesController_list`. El controlador delega en `IamMyDevicesService.list`. No recibe body. El tipo de retorno estático es `Promise<MyDeviceDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/devices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/devices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyDeviceDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyDeviceDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo",
+    "platform": "WEB",
+    "trusted": true,
+    "current": true,
+    "activeSessions": 1,
+    "lastSeenAt": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices"
+}
+```
+
+---
+
+## 21. POST /iam/me/devices/{id}/confirm
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Verificar un dispositivo con el código del correo
+- **Operation ID:** `IamMyDevicesController_confirm`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamMyDevicesController.confirm](../../src/modules/iam/presentation/controllers/iam-my-devices.controller.ts)
+
+### Descripción de negocio
+
+Verificar un dispositivo con el código del correo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/devices/{id}/confirm` en `IamMyDevicesController_confirm`. El controlador delega en `IamMyDevicesService.confirm`. Valida el body como `ConfirmDeviceDto` y consume `application/json`. El tipo de retorno estático es `Promise<DeviceConfirmedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ConfirmDeviceDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | No | `string` | longitud mínima 8; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeviceConfirmedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeviceConfirmedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "confirmed": true,
+  "deviceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `confirmed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `deviceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Dispositivo no encontrado | Excepción explícita en src/modules/iam/application/services/iam-my-devices.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para verificar este dispositivo hace falta el código enviado a su correo | Excepción explícita en src/modules/iam/application/services/iam-my-devices.service.ts |
+| 422 | `PRECONDITION_FAILED` | El código no es válido o ya se usó | Excepción explícita en src/modules/iam/application/services/iam-my-devices.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices/{id}/confirm"
+}
+```
+
+---
+
+## 22. POST /iam/me/devices/{id}/confirm-code
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Enviar a mi correo el código para verificar un dispositivo
+- **Operation ID:** `IamMyDevicesController_requestCode`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamMyDevicesController.requestCode](../../src/modules/iam/presentation/controllers/iam-my-devices.controller.ts)
+
+### Descripción de negocio
+
+Enviar a mi correo el código para verificar un dispositivo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/devices/{id}/confirm-code` en `IamMyDevicesController_requestCode`. El controlador delega en `IamMyDevicesService.requestCode`. No recibe body. El tipo de retorno estático es `Promise<DeviceCodeRequestedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm-code HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 3, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm-code HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeviceCodeRequestedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeviceCodeRequestedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "sent": true,
+  "sentTo": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `sent` | Sí | `boolean` | Sin restricción adicional declarada | `false` si ya era de confianza | `true` |
+| `sentTo` | No | `string` | Sin restricción adicional declarada | Dirección enmascarada: j***@correo.com | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Dispositivo no encontrado | Excepción explícita en src/modules/iam/application/services/iam-my-devices.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un correo verificado al que enviar el código | Excepción explícita en src/modules/iam/application/services/iam-my-devices.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 3, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices/{id}/confirm-code"
+}
+```
+
+---
+
+## 23. GET /iam/me/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -3020,7 +3515,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /iam/me/sessions/{id}/revoke
+## 24. POST /iam/me/sessions/{id}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -3130,7 +3625,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+## 25. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3234,7 +3729,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /iam/onboarding-drafts/{formType}/{draftId}
+## 26. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3324,7 +3819,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PUT /iam/onboarding-drafts/{formType}/{draftId}
+## 27. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3416,7 +3911,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /iam/users
+## 28. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3550,7 +4045,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /iam/users
+## 29. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3689,7 +4184,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /iam/users/{id}
+## 30. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3816,7 +4311,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /iam/users/{id}/anonymize
+## 31. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3926,7 +4421,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /iam/users/{id}/credentials
+## 32. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4056,7 +4551,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/{id}/credentials/{cid}/revoke
+## 33. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4167,7 +4662,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /iam/users/{id}/credentials/federated
+## 34. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4302,7 +4797,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /iam/users/{id}/deactivate
+## 35. POST /iam/users/{id}/deactivate
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4440,7 +4935,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /iam/users/{id}/devices
+## 36. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4566,7 +5061,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /iam/users/{id}/devices
+## 37. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4701,7 +5196,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /iam/users/{id}/global-roles
+## 38. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4823,7 +5318,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /iam/users/{id}/global-roles
+## 39. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4953,7 +5448,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /iam/users/{id}/lifecycle
+## 40. GET /iam/users/{id}/lifecycle
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5086,7 +5581,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /iam/users/{id}/lock
+## 41. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5209,7 +5704,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /iam/users/{id}/mfa-factors
+## 42. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5333,7 +5828,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /iam/users/{id}/mfa-factors
+## 43. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5385,6 +5880,8 @@ Content-Type: application/json
 | `verify` | No | `boolean` | Sin restricción adicional declarada | Si es true, verifica el factor indicado | `true` |
 | `factorId` | No | `string` | formato `uuid` | Factor a verificar | `00000000-0000-4000-8000-000000000001` |
 | `code` | No | `string` | longitud mínima 6; longitud máxima 8 | Código TOTP de la app autenticadora. Obligatorio cuando verify=true. | `123456` |
+| `currentPassword` | No | `string` | longitud máxima 200 | Contraseña actual (o `mfaCode`): obligatoria para dar de alta un factor propio | `ClaveSegura2026!` |
+| `mfaCode` | No | `string` | longitud mínima 6; longitud máxima 8 | Código de un factor ya verificado (o `currentPassword`): reautentica el alta de un factor propio | `123456` |
 
 ### Payload completo de ejemplo
 
@@ -5401,7 +5898,9 @@ Content-Type: application/json
   "label": "valor-ejemplo",
   "verify": true,
   "factorId": "00000000-0000-4000-8000-000000000001",
-  "code": "123456"
+  "code": "123456",
+  "currentPassword": "ClaveSegura2026!",
+  "mfaCode": "123456"
 }
 ```
 
@@ -5463,6 +5962,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña o el código no coinciden | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5480,7 +5981,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /iam/users/{id}/reactivate
+## 44. POST /iam/users/{id}/reactivate
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5617,7 +6118,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /iam/users/{id}/sessions
+## 45. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5743,7 +6244,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /iam/users/{id}/suspend
+## 46. POST /iam/users/{id}/suspend
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5881,7 +6382,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /iam/users/assisted-practitioner-registration
+## 47. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6202,7 +6703,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /iam/users/assisted-registration
+## 48. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6258,6 +6759,7 @@ Content-Type: application/json
 | `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Identificador verificado (email) que actúa como identidad de login | `usuario@example.com` |
 | `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo del registro asistido (queda en la trazabilidad C-18) | `Texto descriptivo de ejemplo` |
+| `allowHomonym` | No | `boolean` | Sin restricción adicional declarada | Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT) | `true` |
 | `timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA del paciente | `America/La_Paz` |
 | `legalRepresentationId` | No | `string` | formato `uuid` | Id de la representación legal formal (authz.patient_legal_representations) | `00000000-0000-4000-8000-000000000001` |
 | `legalRepresentativeUserId` | No | `string` | formato `uuid` | Id del usuario representante legal (dato mínimo si no hay representación formal) | `00000000-0000-4000-8000-000000000001` |
@@ -6280,6 +6782,7 @@ Content-Type: application/json
   "displayName": "Nombre de ejemplo",
   "email": "usuario@example.com",
   "reason": "Texto descriptivo de ejemplo",
+  "allowHomonym": true,
   "timeZone": "America/La_Paz",
   "legalRepresentationId": "00000000-0000-4000-8000-000000000001",
   "legalRepresentativeUserId": "00000000-0000-4000-8000-000000000001"
@@ -6330,7 +6833,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado | Excepción explícita en src/modules/iam/application/services/iam-assisted-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6349,7 +6851,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /iam/users/search
+## 49. POST /iam/users/search
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

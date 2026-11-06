@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `messaging`
 
-Referencia exhaustiva de 20 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `messaging`, `messaging-internal`, `messaging-webhooks`
-- **Controladores:** `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`, `WebPushController`
+- **Controladores:** `MessagingController`, `MessagingInternalController`, `NativePushController`, `ProviderWebhooksController`, `WebPushController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -16,21 +16,24 @@ Referencia exhaustiva de 20 operación(es) del módulo `messaging`, derivada del
 3. [POST /internal/jobs/{id}/complete](#3-post-internal-jobs-id-complete) — Cerrar el trabajo con éxito
 4. [POST /internal/jobs/{id}/fail](#4-post-internal-jobs-id-fail) — Registrar el fallo del trabajo
 5. [POST /internal/notifications/{requestId}/deliver](#5-post-internal-notifications-requestid-deliver) — Registrar el intento de entrega ante el proveedor
-6. [GET /internal/notifications/pending](#6-get-internal-notifications-pending) — Listar solicitudes de notificación listas para entregar
-7. [POST /internal/outbox/relay/run](#7-post-internal-outbox-relay-run) — Reclamar y publicar un lote del outbox
-8. [POST /internal/queues/{code}/claim](#8-post-internal-queues-code-claim) — Reclamar un lote de trabajos de la cola
-9. [POST /notifications/in-app/{id}/read](#9-post-notifications-in-app-id-read) — Marcar una notificación in-app como leída
-10. [POST /notifications/in-app/read-all](#10-post-notifications-in-app-read-all) — Marcar toda mi bandeja como leída
-11. [GET /notifications/me](#11-get-notifications-me) — Mis notificaciones in-app
-12. [GET /notifications/preferences/me](#12-get-notifications-preferences-me) — Mis preferencias de notificación in-app
-13. [PUT /notifications/preferences/me](#13-put-notifications-preferences-me) — Guardar mis preferencias de notificación in-app
-14. [POST /notifications/requests](#14-post-notifications-requests) — Crear una solicitud de notificación
-15. [GET /notifications/web-push/config](#15-get-notifications-web-push-config) — Clave pública VAPID, o enabled=false si no hay push
-16. [DELETE /notifications/web-push/subscription](#16-delete-notifications-web-push-subscription) — Quita la suscripción push de este navegador
-17. [PUT /notifications/web-push/subscription](#17-put-notifications-web-push-subscription) — Guarda la suscripción push de este navegador
-18. [POST /queues/{code}/jobs](#18-post-queues-code-jobs) — Encolar un trabajo
-19. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#19-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
-20. [POST /webhooks/providers/{providerCode}/receipts](#20-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
+6. [POST /internal/notifications/in-app/release-due](#6-post-internal-notifications-in-app-release-due) — Liberar los avisos in-app aplazados por el silencio nocturno
+7. [GET /internal/notifications/pending](#7-get-internal-notifications-pending) — Listar solicitudes de notificación listas para entregar
+8. [POST /internal/outbox/relay/run](#8-post-internal-outbox-relay-run) — Reclamar y publicar un lote del outbox
+9. [POST /internal/queues/{code}/claim](#9-post-internal-queues-code-claim) — Reclamar un lote de trabajos de la cola
+10. [POST /notifications/in-app/{id}/read](#10-post-notifications-in-app-id-read) — Marcar una notificación in-app como leída
+11. [POST /notifications/in-app/read-all](#11-post-notifications-in-app-read-all) — Marcar toda mi bandeja como leída
+12. [GET /notifications/me](#12-get-notifications-me) — Mis notificaciones in-app
+13. [DELETE /notifications/native-push/token](#13-delete-notifications-native-push-token) — Quita el token push (FCM) de esta instalación
+14. [PUT /notifications/native-push/token](#14-put-notifications-native-push-token) — Guarda el token push (FCM) de esta instalación
+15. [GET /notifications/preferences/me](#15-get-notifications-preferences-me) — Mis preferencias de notificación in-app
+16. [PUT /notifications/preferences/me](#16-put-notifications-preferences-me) — Guardar mis preferencias de notificación in-app
+17. [POST /notifications/requests](#17-post-notifications-requests) — Crear una solicitud de notificación
+18. [GET /notifications/web-push/config](#18-get-notifications-web-push-config) — Clave pública VAPID, o enabled=false si no hay push
+19. [DELETE /notifications/web-push/subscription](#19-delete-notifications-web-push-subscription) — Quita la suscripción push de este navegador
+20. [PUT /notifications/web-push/subscription](#20-put-notifications-web-push-subscription) — Guarda la suscripción push de este navegador
+21. [POST /queues/{code}/jobs](#21-post-queues-code-jobs) — Encolar un trabajo
+22. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#22-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
+23. [POST /webhooks/providers/{providerCode}/receipts](#23-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
 
 ---
 
@@ -739,7 +742,117 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /internal/notifications/pending
+## 6. POST /internal/notifications/in-app/release-due
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging-internal`
+- **Nombre:** Liberar los avisos in-app aplazados por el silencio nocturno
+- **Operation ID:** `MessagingInternalController_releaseDueInApp`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingInternalController.releaseDueInApp](../../src/modules/messaging/controllers/messaging-internal.controller.ts)
+
+### Descripción de negocio
+
+Liberar los avisos in-app aplazados por el silencio nocturno. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Announces (socket + push) inbox rows whose quiet-hours deferral ended.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/notifications/in-app/release-due` en `MessagingInternalController_releaseDueInApp`. El controlador delega en `InAppReleaseService.releaseDue`. No recibe body. El tipo de retorno estático es `Promise<ReleaseDueInAppResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/notifications/in-app/release-due?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/notifications/in-app/release-due?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseDueInAppResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseDueInAppResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "released": 1,
+  "announced": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `released` | Sí | `number` | Sin restricción adicional declarada | Deferred rows whose quiet-hours window ended and were claimed now. | `1` |
+| `announced` | Sí | `number` | Sin restricción adicional declarada | Of those, how many were announced (socket + push); stale ones are not. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/notifications/in-app/release-due"
+}
+```
+
+---
+
+## 7. GET /internal/notifications/pending
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-internal`
@@ -864,7 +977,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /internal/outbox/relay/run
+## 8. POST /internal/outbox/relay/run
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-internal`
@@ -1007,7 +1120,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /internal/queues/{code}/claim
+## 9. POST /internal/queues/{code}/claim
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-internal`
@@ -1154,7 +1267,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /notifications/in-app/{id}/read
+## 10. POST /notifications/in-app/{id}/read
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1271,7 +1384,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /notifications/in-app/read-all
+## 11. POST /notifications/in-app/read-all
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1378,7 +1491,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /notifications/me
+## 12. GET /notifications/me
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1522,7 +1635,229 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /notifications/preferences/me
+## 13. DELETE /notifications/native-push/token
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Quita el token push (FCM) de esta instalación
+- **Operation ID:** `NativePushController_unregister`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [NativePushController.unregister](../../src/modules/messaging/controllers/native-push.controller.ts)
+
+### Descripción de negocio
+
+Quita el token push (FCM) de esta instalación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /notifications/native-push/token` en `NativePushController_unregister`. El controlador delega en `NativePushService.unregisterToken`. Valida el body como `NativePushTokenDeleteDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `NativePushTokenDeleteDto`; los campos opcionales se omiten.
+
+```http
+DELETE /notifications/native-push/token HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `token` | Sí | `string` | longitud mínima 1; longitud máxima 4096 | FCM registration token to forget | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+DELETE /notifications/native-push/token HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/native-push/token"
+}
+```
+
+---
+
+## 14. PUT /notifications/native-push/token
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Guarda el token push (FCM) de esta instalación
+- **Operation ID:** `NativePushController_register`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [NativePushController.register](../../src/modules/messaging/controllers/native-push.controller.ts)
+
+### Descripción de negocio
+
+Guarda el token push (FCM) de esta instalación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /notifications/native-push/token` en `NativePushController_register`. El controlador delega en `NativePushService.registerToken`. Valida el body como `NativePushTokenDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `NativePushTokenDto`; los campos opcionales se omiten.
+
+```http
+PUT /notifications/native-push/token HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo",
+  "platform": "IOS",
+  "deviceFingerprint": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `token` | Sí | `string` | longitud mínima 1; longitud máxima 4096 | FCM registration token of this app install | `valor-ejemplo` |
+| `platform` | Sí | `string` | valores: `IOS`, `ANDROID` | Sin descripción específica en el contrato OpenAPI. | `IOS` |
+| `deviceFingerprint` | Sí | `string` | longitud mínima 1; longitud máxima 512 | Stable install fingerprint, the same one sent to POST /iam/users/:id/devices | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /notifications/native-push/token HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo",
+  "platform": "IOS",
+  "deviceFingerprint": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/native-push/token"
+}
+```
+
+---
+
+## 15. GET /notifications/preferences/me
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1640,7 +1975,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PUT /notifications/preferences/me
+## 16. PUT /notifications/preferences/me
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1788,7 +2123,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /notifications/requests
+## 17. POST /notifications/requests
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1948,7 +2283,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /notifications/web-push/config
+## 18. GET /notifications/web-push/config
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2052,7 +2387,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. DELETE /notifications/web-push/subscription
+## 19. DELETE /notifications/web-push/subscription
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2160,7 +2495,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PUT /notifications/web-push/subscription
+## 20. PUT /notifications/web-push/subscription
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2280,7 +2615,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /queues/{code}/jobs
+## 21. POST /queues/{code}/jobs
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2424,7 +2759,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /queues/dead-letter/{deadLetterJobId}/redrive
+## 22. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2560,7 +2895,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /webhooks/providers/{providerCode}/receipts
+## 23. POST /webhooks/providers/{providerCode}/receipts
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-webhooks`

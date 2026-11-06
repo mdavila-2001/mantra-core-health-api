@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 53 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 56 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `admin-catalogs-services`, `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`, `billing-space-charges`, `patient-spending`
 - **Controladores:** `AdminServiceCatalogController`, `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`, `BillingSpaceChargesController`, `PatientSpendingController`
@@ -39,31 +39,34 @@ Referencia exhaustiva de 53 operación(es) del módulo `billing`, derivada del c
 26. [POST /billing/reconciliation:clear](#26-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
 27. [POST /billing/reimbursements:link](#27-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
 28. [GET /billing/service-catalog](#28-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
-29. [POST /billing/service-catalog](#29-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
+29. [POST /billing/service-catalog](#29-post-billing-service-catalog) — Dar de alta en el catálogo un servicio del repositorio
 30. [PATCH /billing/service-catalog/{id}](#30-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
 31. [GET /billing/service-catalog/{id}/image](#31-get-billing-service-catalog-id-image) — Descargar la imagen de un servicio que el actor puede ver
-32. [POST /billing/service-catalog/import-procedures](#32-post-billing-service-catalog-import-procedures) — Importar en lote procedimientos del arancel al catálogo
-33. [GET /billing/service-catalog/procedure-specialties](#33-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
-34. [GET /billing/service-catalog/procedure-specialties/mine](#34-get-billing-service-catalog-procedure-specialties-mine) — Listar las especialidades del arancel que corresponden al médico
-35. [GET /billing/service-catalog/procedures](#35-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
-36. [GET /billing/simulated/catalogs](#36-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
-37. [GET /billing/simulated/charges](#37-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
-38. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#38-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
-39. [POST /billing/simulated/charges/{chargeId}/invoices](#39-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
-40. [POST /billing/simulated/charges/{chargeId}/payment](#40-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
-41. [GET /billing/simulated/invoices/{invoiceId}](#41-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
-42. [POST /billing/simulated/invoices/{invoiceId}/annulment](#42-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
-43. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#43-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
-44. [POST /billing/simulated/invoices/{invoiceId}/email](#44-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
-45. [GET /billing/simulated/my-invoices](#45-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
-46. [GET /billing/simulated/my-invoices/{invoiceId}](#46-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
-47. [GET /billing/simulated/outbox](#47-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
-48. [GET /billing/simulated/status](#48-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
-49. [GET /billing/space-tariffs](#49-get-billing-space-tariffs) — Tarifas de espacios
-50. [POST /billing/space-tariffs](#50-post-billing-space-tariffs) — Crear una tarifa de espacio
-51. [POST /billing/space-tariffs/{id}/close](#51-post-billing-space-tariffs-id-close) — Cerrar la vigencia de una tarifa
-52. [POST /internal/billing/bed-day-charges/run](#52-post-internal-billing-bed-day-charges-run) — Devengar día-cama y quirófano (worker)
-53. [GET /patient-spending/me](#53-get-patient-spending-me) — Mis gastos de salud
+32. [POST /billing/service-catalog/import](#32-post-billing-service-catalog-import) — Importar servicios del repositorio a mi catálogo
+33. [POST /billing/service-catalog/import-procedures](#33-post-billing-service-catalog-import-procedures) — Importar en lote procedimientos del arancel al catálogo
+34. [GET /billing/service-catalog/procedure-specialties](#34-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
+35. [GET /billing/service-catalog/procedure-specialties/mine](#35-get-billing-service-catalog-procedure-specialties-mine) — Listar las especialidades del arancel que corresponden al médico
+36. [GET /billing/service-catalog/procedures](#36-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+37. [GET /billing/service-catalog/repository](#37-get-billing-service-catalog-repository) — Buscar en el repositorio de servicios (para importar)
+38. [GET /billing/service-catalog/repository/facets](#38-get-billing-service-catalog-repository-facets) — Fuentes y especialidades del repositorio de servicios
+39. [GET /billing/simulated/catalogs](#39-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
+40. [GET /billing/simulated/charges](#40-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
+41. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#41-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+42. [POST /billing/simulated/charges/{chargeId}/invoices](#42-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
+43. [POST /billing/simulated/charges/{chargeId}/payment](#43-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
+44. [GET /billing/simulated/invoices/{invoiceId}](#44-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
+45. [POST /billing/simulated/invoices/{invoiceId}/annulment](#45-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
+46. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#46-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
+47. [POST /billing/simulated/invoices/{invoiceId}/email](#47-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
+48. [GET /billing/simulated/my-invoices](#48-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
+49. [GET /billing/simulated/my-invoices/{invoiceId}](#49-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
+50. [GET /billing/simulated/outbox](#50-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
+51. [GET /billing/simulated/status](#51-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
+52. [GET /billing/space-tariffs](#52-get-billing-space-tariffs) — Tarifas de espacios
+53. [POST /billing/space-tariffs](#53-post-billing-space-tariffs) — Crear una tarifa de espacio
+54. [POST /billing/space-tariffs/{id}/close](#54-post-billing-space-tariffs-id-close) — Cerrar la vigencia de una tarifa
+55. [POST /internal/billing/bed-day-charges/run](#55-post-internal-billing-bed-day-charges-run) — Devengar día-cama y quirófano (worker)
+56. [GET /patient-spending/me](#56-get-patient-spending-me) — Mis gastos de salud
 
 ---
 
@@ -4129,14 +4132,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
-- **Nombre:** Dar de alta un servicio en el catálogo maestro
+- **Nombre:** Dar de alta en el catálogo un servicio del repositorio
 - **Operation ID:** `BillingServiceCatalogController_create`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [BillingServiceCatalogController.create](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
 
 ### Descripción de negocio
 
-La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.
+Exige serviceConceptId de un servicio del repositorio: no hay alta de texto libre. Código y nombre salen del repositorio. La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.
 
 Contexto declarado en el controlador: Crea un servicio nuevo en el catálogo maestro.
 
@@ -4160,8 +4163,7 @@ Content-Type: application/json
 
 {
   "practiceId": "00000000-0000-4000-8000-000000000001",
-  "code": "CODIGO_EJEMPLO",
-  "name": "Nombre de ejemplo",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
   "defaultPrice": "100.00"
 }
 ```
@@ -4177,11 +4179,11 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `practiceId` | Sí | `string` | formato `uuid` | Práctica (practice.practices) | `00000000-0000-4000-8000-000000000001` |
-| `code` | Sí | `string` | longitud máxima 120 | Código interno del servicio | `CODIGO_EJEMPLO` |
-| `name` | Sí | `string` | longitud máxima 200 | Nombre del servicio | `Nombre de ejemplo` |
+| `code` | No | `string` | longitud máxima 120 | Obsoleto e ignorado: el código lo pone el repositorio | `CODIGO_EJEMPLO` |
+| `name` | No | `string` | longitud máxima 200 | Obsoleto e ignorado: el nombre lo pone el repositorio | `Nombre de ejemplo` |
 | `descriptionText` | No | `string` | longitud máxima 2000 | Descripción larga del servicio, para la tarjeta | `Texto descriptivo de ejemplo` |
 | `imageFileId` | No | `string` | formato `uuid` | Imagen del servicio (`common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `serviceConceptId` | No | `string` | formato `uuid` | Concepto de clasificación del servicio | `00000000-0000-4000-8000-000000000001` |
+| `serviceConceptId` | Sí | `string` | formato `uuid` | Concepto del repositorio de servicios (obligatorio). Buscarlo en GET /billing/service-catalog/repository | `00000000-0000-4000-8000-000000000001` |
 | `defaultPrice` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Precio de referencia; cada doctor puede cotizar otro precio | `100.00` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Moneda (concepto) | `00000000-0000-4000-8000-000000000001` |
 | `taxCodeId` | No | `string` | formato `uuid` | Código de impuesto (billing.tax_codes) | `00000000-0000-4000-8000-000000000001` |
@@ -4281,12 +4283,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 404 | `NOT_FOUND` | Imagen no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 409 | `CONFLICT` | Ya existe un servicio con ese código en el catálogo | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 409 | `CONFLICT` | Ese servicio ya está en el catálogo | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El servicio se elige del repositorio: indicá serviceConceptId | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese servicio no es del repositorio | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4564,7 +4568,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /billing/service-catalog/import-procedures
+## 32. POST /billing/service-catalog/import
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Importar servicios del repositorio a mi catálogo
+- **Operation ID:** `BillingServiceCatalogController_importServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.importServices](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Importar servicios del repositorio a mi catálogo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Importa servicios del repositorio al catálogo de una práctica. Mismos roles y alcance que el alta. Idempotente por concepto.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/service-catalog/import` en `BillingServiceCatalogController_importServices`. El controlador delega en `BillingServiceCatalogService.importServices`. Valida el body como `ImportServicesDto` y consume `application/json`. El tipo de retorno estático es `Promise<ImportServicesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ImportServicesDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/service-catalog/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "defaultPrice": "250.00"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<ImportServiceItemDto>` | mínimo 1 elemento(s); máximo SERVICE_IMPORT_MAX_ITEMS elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","defaultPrice":"250.00","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].defaultPrice` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `250.00` |
+| `items[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/service-catalog/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "defaultPrice": "250.00",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImportServicesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportServicesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "outcome": "CREATED",
+      "serviceCatalogId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ImportServiceResultDto>` | Sin restricción adicional declarada | Un resultado por servicio pedido, en el mismo orden. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","outcome":"CREATED","serviceCatalogId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].conceptId` | Sí | `string` | formato `uuid` | Concepto pedido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].outcome` | Sí | `string` | valores: `CREATED`, `ALREADY_IMPORTED` | `CREATED` si nació ahora; `ALREADY_IMPORTED` si la práctica ya lo tenía. | `CREATED` |
+| `items[].serviceCatalogId` | Sí | `string` | formato `uuid` | Servicio del catálogo de la práctica. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Hay servicios que no son del repositorio | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/import"
+}
+```
+
+---
+
+## 33. POST /billing/service-catalog/import-procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -4701,7 +4854,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /billing/service-catalog/procedure-specialties
+## 34. GET /billing/service-catalog/procedure-specialties
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -4810,7 +4963,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /billing/service-catalog/procedure-specialties/mine
+## 35. GET /billing/service-catalog/procedure-specialties/mine
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -4919,7 +5072,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /billing/service-catalog/procedures
+## 36. GET /billing/service-catalog/procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -5048,7 +5201,282 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /billing/simulated/catalogs
+## 37. GET /billing/service-catalog/repository
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Buscar en el repositorio de servicios (para importar)
+- **Operation ID:** `BillingServiceCatalogController_searchRepository`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.searchRepository](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Buscar en el repositorio de servicios (para importar). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Busca en el repositorio de servicios importables (todas las fuentes). Sin `@Roles`, como el nomenclador: es referencia pública y la necesita cualquiera que arme su catálogo. Lo que exige permiso es importar.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/service-catalog/repository` en `BillingServiceCatalogController_searchRepository`. El controlador delega en `ServiceRepositoryService.search`. No recibe body. El tipo de retorno estático es `Promise<ServiceRepositorySearchResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar | `valor-ejemplo` |
+| `specialtyConceptId` | query | No | `string` | Sin restricción adicional declarada | Especialidad (uuid del concepto) | `00000000-0000-4000-8000-000000000001` |
+| `codeSystem` | query | No | `string` | Sin restricción adicional declarada | Fuente: código del sistema de códigos | `CODIGO_EJEMPLO` |
+| `practiceId` | query | No | `string` | Sin restricción adicional declarada | Práctica, para marcar lo ya importado | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/service-catalog/repository HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/service-catalog/repository?q=valor-ejemplo&specialtyConceptId=00000000-0000-4000-8000-000000000001&codeSystem=CODIGO_EJEMPLO&practiceId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceRepositorySearchResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceRepositorySearchResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo",
+      "source": {
+        "codeSystem": "cups",
+        "name": "CUPS — Clasificación Única de Procedimientos en Salud",
+        "publisher": "valor-ejemplo"
+      },
+      "specialties": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "code": "CARDIOLOGIA",
+          "display": "Cardiología"
+        }
+      ],
+      "referencePrice": "valor-ejemplo",
+      "priceUnit": "valor-ejemplo",
+      "importedServiceCatalogId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ServiceRepositoryItemDto>` | Sin restricción adicional declarada | Servicios de esta página, los más parecidos a la búsqueda primero. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","source":{"codeSystem":"cups","name":"CUPS — Clasificación Única de Procedimientos en Salud","publisher":"valor-ejemplo"},"specialties":[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CARDIOLOGIA","display":"Cardiología"}],"referencePrice":"valor-ejemplo","priceUnit":"valor-ejemplo","importedServiceCatalogId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].conceptId` | Sí | `string` | formato `uuid` | Concepto del servicio: es lo que se manda al importar. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código en su fuente. | `CODIGO_EJEMPLO` |
+| `items[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre en castellano, tal cual lo publica la fuente. | `valor-ejemplo` |
+| `items[].source` | Sí | `ServiceRepositorySourceDto` | Sin restricción adicional declarada | Fuente del servicio. | `{"codeSystem":"cups","name":"CUPS — Clasificación Única de Procedimientos en Salud","publisher":"valor-ejemplo"}` |
+| `items[].source.codeSystem` | Sí | `string` | Sin restricción adicional declarada | Código del sistema de códigos (`cups`, `fonasa-mle-2026`, …). | `cups` |
+| `items[].source.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del sistema de códigos. | `CUPS — Clasificación Única de Procedimientos en Salud` |
+| `items[].source.publisher` | No | `string` | admite null | Organismo o fuente que lo publica, cuando está registrado. | `valor-ejemplo` |
+| `items[].specialties` | Sí | `array<ServiceRepositorySpecialtyDto>` | Sin restricción adicional declarada | Especialidades que lo atienden (puede estar vacía: no toda fuente lo dice). | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CARDIOLOGIA","display":"Cardiología"}]` |
+| `items[].specialties[].conceptId` | Sí | `string` | formato `uuid` | Concepto de la especialidad (`VS_MEDICAL_SPECIALTY`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specialties[].code` | Sí | `string` | Sin restricción adicional declarada | Código del modelo, p. ej. `CARDIOLOGIA`. | `CARDIOLOGIA` |
+| `items[].specialties[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Cardiología` |
+| `items[].referencePrice` | No | `string` | admite null | Precio de referencia de la fuente, si publica uno. No es un precio del profesional. | `valor-ejemplo` |
+| `items[].priceUnit` | No | `string` | admite null | Unidad del precio de referencia (`UMA`, `CLP`…), sin convertir. | `valor-ejemplo` |
+| `items[].importedServiceCatalogId` | No | `string` | formato `uuid`; admite null | Si se pidió con `practiceId`: el servicio del catálogo de esa práctica que ya lo importó. `null` = todavía no está en su catálogo. | `00000000-0000-4000-8000-000000000001` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de la página siguiente, o `null`. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/repository"
+}
+```
+
+---
+
+## 38. GET /billing/service-catalog/repository/facets
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Fuentes y especialidades del repositorio de servicios
+- **Operation ID:** `BillingServiceCatalogController_repositoryFacets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.repositoryFacets](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Fuentes y especialidades del repositorio de servicios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Fuentes y especialidades del repositorio con su recuento, para los filtros.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/service-catalog/repository/facets` en `BillingServiceCatalogController_repositoryFacets`. El controlador delega en `ServiceRepositoryService.facets`. No recibe body. El tipo de retorno estático es `Promise<ServiceRepositoryFacetsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/service-catalog/repository/facets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/service-catalog/repository/facets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceRepositoryFacetsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceRepositoryFacetsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "total": 1,
+  "sources": [
+    {
+      "key": "valor-ejemplo",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo",
+      "count": 1
+    }
+  ],
+  "specialties": [
+    {
+      "key": "valor-ejemplo",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo",
+      "count": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `total` | Sí | `number` | Sin restricción adicional declarada | Total de servicios importables. | `1` |
+| `sources` | Sí | `array<ServiceRepositoryFacetDto>` | Sin restricción adicional declarada | Fuentes, con su recuento. | `[{"key":"valor-ejemplo","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","count":1}]` |
+| `sources[].key` | Sí | `string` | Sin restricción adicional declarada | Identificador del filtro: código del sistema, o id del concepto de la especialidad. | `valor-ejemplo` |
+| `sources[].code` | Sí | `string` | Sin restricción adicional declarada | Código legible (`CARDIOLOGIA`, `cups`). | `CODIGO_EJEMPLO` |
+| `sources[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `valor-ejemplo` |
+| `sources[].count` | Sí | `number` | Sin restricción adicional declarada | Servicios del repositorio con ese valor. | `1` |
+| `specialties` | Sí | `array<ServiceRepositoryFacetDto>` | Sin restricción adicional declarada | Especialidades, con su recuento. | `[{"key":"valor-ejemplo","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","count":1}]` |
+| `specialties[].key` | Sí | `string` | Sin restricción adicional declarada | Identificador del filtro: código del sistema, o id del concepto de la especialidad. | `valor-ejemplo` |
+| `specialties[].code` | Sí | `string` | Sin restricción adicional declarada | Código legible (`CARDIOLOGIA`, `cups`). | `CODIGO_EJEMPLO` |
+| `specialties[].display` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `valor-ejemplo` |
+| `specialties[].count` | Sí | `number` | Sin restricción adicional declarada | Servicios del repositorio con ese valor. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/repository/facets"
+}
+```
+
+---
+
+## 39. GET /billing/simulated/catalogs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5138,7 +5566,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /billing/simulated/charges
+## 40. GET /billing/simulated/charges
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5232,7 +5660,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 41. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5349,7 +5777,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /billing/simulated/charges/{chargeId}/invoices
+## 42. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5485,7 +5913,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /billing/simulated/charges/{chargeId}/payment
+## 43. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5613,7 +6041,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /billing/simulated/invoices/{invoiceId}
+## 44. GET /billing/simulated/invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5709,7 +6137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 45. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5822,7 +6250,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 46. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -5920,7 +6348,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /billing/simulated/invoices/{invoiceId}/email
+## 47. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -6033,7 +6461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /billing/simulated/my-invoices
+## 48. GET /billing/simulated/my-invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -6123,7 +6551,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /billing/simulated/my-invoices/{invoiceId}
+## 49. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -6217,7 +6645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /billing/simulated/outbox
+## 50. GET /billing/simulated/outbox
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -6309,7 +6737,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /billing/simulated/status
+## 51. GET /billing/simulated/status
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -6400,7 +6828,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. GET /billing/space-tariffs
+## 52. GET /billing/space-tariffs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-space-charges`
@@ -6494,7 +6922,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. POST /billing/space-tariffs
+## 53. POST /billing/space-tariffs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-space-charges`
@@ -6632,7 +7060,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /billing/space-tariffs/{id}/close
+## 54. POST /billing/space-tariffs/{id}/close
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-space-charges`
@@ -6747,7 +7175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. POST /internal/billing/bed-day-charges/run
+## 55. POST /internal/billing/bed-day-charges/run
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-space-charges`
@@ -6858,7 +7286,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /patient-spending/me
+## 56. GET /patient-spending/me
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `patient-spending`

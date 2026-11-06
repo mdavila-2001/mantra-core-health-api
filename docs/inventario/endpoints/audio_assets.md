@@ -50,15 +50,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsController.contentById → AudioContentService.get → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:198` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsController.contentById → AudioContentService.get → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:196` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsController.contentById → AudioContentService.get → AudioAssetsRepository.findAssetById | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:58` |
 
 ### Parámetros
@@ -124,19 +124,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:198` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:196` |
 | `audio_assets.audio_assets` | ESCRIBE | CREA | POR_SQL | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.createPendingOrGet | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:84` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.findAssetByKey | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:55` |
-| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:205` |
+| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:203` |
 | `audio_assets.audio_templates` | LEE | LEE | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → AudioAssetsRepository.findTemplate | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:44` |
 | `messaging.message_queues` | LEE | LEE | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioJobQueueAdapter.enqueue → QueuesService.enqueueJob → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
 | `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | AudioAssetsController.resolve → AudioAssetsFacade.resolve → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioJobQueueAdapter.enqueue → QueuesService.enqueueJob → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
@@ -233,9 +233,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -243,8 +243,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioMaintenanceRepository.deprecate | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:33` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioAssetsRepository.findAssetById | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:58` |
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.deprecate → AudioMaintenanceService.deprecate → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
 
 ### Parámetros
 
@@ -309,18 +309,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:108` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.generated → AudioGenerationUseCase.generated → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.generated → AudioGenerationUseCase.generated → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.generated → AudioGenerationUseCase.generated → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.generated → AudioGenerationUseCase.generated → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
 
 ### Parámetros
 
@@ -418,20 +418,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:123` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | DIRECTA | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.markFailed | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:257` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | DIRECTA | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.markFailed | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:255` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.findAssetById | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:58` |
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.failed → AudioGenerationUseCase.failed → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
 
 ### Parámetros
 
@@ -522,19 +522,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:97` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.markFallbackOnly | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:273` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.markFallbackOnly | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:271` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.findAssetById | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:58` |
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
-| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:205` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
+| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsInternalController.prepare → AudioGenerationUseCase.prepare → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:203` |
 
 ### Parámetros
 
@@ -601,19 +601,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioMaintenanceRepository.clearStorageReference | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:55` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioMaintenanceRepository.clearStorageReference | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:51` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioMaintenanceRepository.listGarbageCandidates | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:26` |
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.garbageCollect → AudioMaintenanceService.garbageCollect → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
 
 ### Cuerpo — DTO `AudioMaintenanceDto` · `application/json`
 
@@ -692,19 +692,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:198` |
+| `audio_assets.audio_assets` | ESCRIBE | ACTUALIZA | POR_SQL | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.touchUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:196` |
 | `audio_assets.audio_assets` | ESCRIBE | CREA | POR_SQL | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.createPendingOrGet | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:84` |
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioAssetsRepository.findAssetByKey | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:55` |
-| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:205` |
+| `audio_assets.audio_generation_usage` | LEE | LEE | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioBudgetPolicy.canGenerate → AudioAssetsRepository.estimatedUsage | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:203` |
 | `audio_assets.audio_templates` | LEE | LEE | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → AudioAssetsRepository.findTemplate | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:44` |
 | `messaging.message_queues` | LEE | LEE | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioJobQueueAdapter.enqueue → QueuesService.enqueueJob → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
 | `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.pregenerateAssets → PregenerateAudioAssetsUseCase.execute → ResolveAudioAssetUseCase.execute → ResolveAudioAssetUseCase.resolveRendered → AudioJobQueueAdapter.enqueue → QueuesService.enqueueJob → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
@@ -795,14 +795,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audio_assets.audio_assets` | LEE | LEE | POR_SQL | AudioAssetsInternalController.status → AudioMaintenanceService.status → AudioMaintenanceRepository.statusCounts | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:64` |
+| `audio_assets.audio_assets` | LEE | LEE | POR_SQL | AudioAssetsInternalController.status → AudioMaintenanceService.status → AudioMaintenanceRepository.statusCounts | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:60` |
 
 ### Cuerpo
 
@@ -860,18 +860,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audio_assets.audio_assets` | LEE | LEE | DIRECTA | AudioAssetsInternalController.verify → AudioMaintenanceService.verify → AudioMaintenanceRepository.listReady | `src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts:9` |
-| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.verify → AudioMaintenanceService.verify → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:289` |
-| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.verify → AudioMaintenanceService.verify → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:303` |
+| `audio_assets.audio_generation_events` | ESCRIBE | CREA | DIRECTA | AudioAssetsInternalController.verify → AudioMaintenanceService.verify → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:287` |
+| `audio_assets.audio_generation_events` | ESCRIBE | GUARDA | POR_TIPO | AudioAssetsInternalController.verify → AudioMaintenanceService.verify → AudioAssetsRepository.appendEvent | `src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:301` |
 
 ### Cuerpo — DTO `AudioMaintenanceDto` · `application/json`
 

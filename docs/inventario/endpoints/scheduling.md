@@ -3,8 +3,8 @@
 # Endpoints del módulo `scheduling`
 
 - **Bloque:** Práctica y Agenda (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
-- **Operaciones:** 67 (67 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 3 · MEDIO 41 · BAJO 23
+- **Operaciones:** 70 (70 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 3 · MEDIO 42 · BAJO 25
 - **Tablas distintas que tocan:** 70
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/scheduling.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -13,72 +13,75 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/scheduling/activity-types` | Listar las tipologías de actividad de la agenda | BAJO | 0 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 2 | POST | `/scheduling/appointments/direct` | Asignar una cita puntual a un paciente (nace confirmada) | MEDIO | 50 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 2 | POST | `/scheduling/appointments/direct` | Asignar una cita puntual a un paciente (nace confirmada) | MEDIO | 49 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
 | 3 | POST | `/scheduling/appointments/walk-in` | Turno de mostrador atómico (walk-in) | MEDIO | 27 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 4 | GET | `/scheduling/bookable-organizations` | Listar las organizaciones con cupos abiertos para pedir cita | BAJO | 3 | PATIENT |
-| 5 | POST | `/scheduling/booking-policies` | Definir una política de reserva | MEDIO | 2 | SCHEDULING_ADMIN, PRACTITIONER |
-| 6 | GET | `/scheduling/bookings` | UC-41-15: lista citas por paciente, recurso y/o ventana | BAJO | 20 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 7 | GET | `/scheduling/bookings/{id}` | UC-41-15: consulta una cita | BAJO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 8 | POST | `/scheduling/bookings/{id}/accept` | Aceptar la solicitud de cita | MEDIO | 50 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 9 | POST | `/scheduling/bookings/{id}/cancel` | Cancelar la cita y liberar el cupo | MEDIO | 38 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 10 | POST | `/scheduling/bookings/{id}/check-in` | Registrar la llegada del paciente | MEDIO | 5 | SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 11 | POST | `/scheduling/bookings/{id}/complete` | Completar la atención | MEDIO | 24 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 12 | POST | `/scheduling/bookings/{id}/delay` | Informar una demora sobre una cita | MEDIO | 36 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 13 | GET | `/scheduling/bookings/{id}/payment-receipts` | Listar los comprobantes de pago de una cita | BAJO | 9 | PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 14 | POST | `/scheduling/bookings/{id}/payment-receipts` | Subir el comprobante de pago de una cita | MEDIO | 40 | PATIENT |
-| 15 | POST | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` | Confirmar un comprobante de pago | MEDIO | 47 | PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 16 | GET | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/content` | Descargar el archivo de un comprobante de pago | BAJO | 8 | PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 17 | POST | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` | Rechazar un comprobante de pago | MEDIO | 37 | PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 18 | GET | `/scheduling/bookings/{id}/payment-state` | Leer el estado de pago de una cita | BAJO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 19 | PUT | `/scheduling/bookings/{id}/payment-state` | Marcar el estado de pago de una cita | MEDIO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 20 | POST | `/scheduling/bookings/{id}/propose-schedule` | Proponer otro horario para la solicitud | MEDIO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 21 | POST | `/scheduling/bookings/{id}/reject` | Rechazar la solicitud de cita | MEDIO | 35 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 22 | POST | `/scheduling/bookings/{id}/reminders` | Programar recordatorios para la cita | MEDIO | 3 | SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 23 | POST | `/scheduling/bookings/{id}/request-info` | Pedir documentación u orden médica antes de aceptar | MEDIO | 6 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 24 | POST | `/scheduling/bookings/{id}/reschedule` | Reprogramar la cita a otro slot | MEDIO | 44 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 25 | POST | `/scheduling/bookings/{id}/start` | Iniciar la atención | MEDIO | 8 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 26 | GET | `/scheduling/confirmation-rules` | Listar las reglas de un tenant | BAJO | 1 | SCHEDULING_ADMIN |
-| 27 | POST | `/scheduling/confirmation-rules` | Crear una regla de confirmación | MEDIO | 1 | SCHEDULING_ADMIN |
-| 28 | POST | `/scheduling/confirmation-rules/{id}/activate` | Reactivar una regla desactivada | MEDIO | 2 | SCHEDULING_ADMIN |
-| 29 | POST | `/scheduling/confirmation-rules/{id}/deactivate` | Desactivar una regla (sin borrado duro) | MEDIO | 2 | SCHEDULING_ADMIN |
-| 30 | POST | `/scheduling/confirmation-rules/evaluate` | Evaluar una solicitud de reserva contra las reglas vigentes | BAJO | 1 | SCHEDULING_ADMIN |
-| 31 | GET | `/scheduling/exception-types` | Listar los motivos de bloqueo de agenda | BAJO | 0 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 32 | DELETE | `/scheduling/exceptions/{id}` | Eliminar una excepción de disponibilidad | ALTO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
-| 33 | PATCH | `/scheduling/exceptions/{id}` | Editar una excepción de disponibilidad | MEDIO | 5 | SCHEDULING_ADMIN, PRACTITIONER |
-| 34 | POST | `/scheduling/holds/{holdToken}/confirm` | Confirmar la cita a partir de la reserva temporal | MEDIO | 21 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| 35 | POST | `/scheduling/holds/{holdToken}/request` | Solicitar la cita a partir de la reserva temporal | MEDIO | 38 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| 36 | POST | `/scheduling/internal/dispatch-reminders` | Despachar los recordatorios cuya hora ya llegó | MEDIO | 35 | SYSTEM, SYSTEM_WORKER |
-| 37 | POST | `/scheduling/internal/expire-holds` | Liberar las reservas temporales vencidas | MEDIO | 8 | SYSTEM, SYSTEM_WORKER |
-| 38 | POST | `/scheduling/internal/promote-waitlist/{slotId}` | Promover candidatos de la lista de espera a un slot con cupo | MEDIO | 33 | SYSTEM, SYSTEM_WORKER |
-| 39 | GET | `/scheduling/internal/waitlist-candidates` | Listar slots con cupo libre y candidatos activos en espera | BAJO | 2 | SYSTEM, SYSTEM_WORKER |
-| 40 | GET | `/scheduling/resources` | Listar los recursos agendables de un tenant | BAJO | 6 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 41 | POST | `/scheduling/resources` | Dar de alta un recurso agendable | MEDIO | 9 | SCHEDULING_ADMIN, PRACTITIONER |
-| 42 | POST | `/scheduling/resources/{id}/close-slots` | Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos | MEDIO | 37 | SCHEDULING_ADMIN, PRACTITIONER |
-| 43 | POST | `/scheduling/resources/{id}/delay` | Informar una demora que alcanza a toda la agenda del recurso | MEDIO | 35 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 44 | GET | `/scheduling/resources/{id}/exceptions` | Listar las excepciones de disponibilidad de un recurso | BAJO | 3 | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
-| 45 | POST | `/scheduling/resources/{id}/exceptions` | Registrar una excepción de disponibilidad | MEDIO | 37 | SCHEDULING_ADMIN, PRACTITIONER |
-| 46 | GET | `/scheduling/resources/{id}/flexible-availability` | Horas que se pueden pedir en un horario flexible | BAJO | 9 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 47 | POST | `/scheduling/resources/{id}/flexible-holds` | Retener una hora de un horario flexible | MEDIO | 17 | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 48 | POST | `/scheduling/resources/{id}/shift-slots` | Correr los cupos de una agenda N minutos | MEDIO | 34 | SCHEDULING_ADMIN, PRACTITIONER |
-| 49 | GET | `/scheduling/resources/{id}/slots` | UC-41-14: agenda publicada del recurso en una ventana | BAJO | 2 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 50 | GET | `/scheduling/resources/{id}/templates` | Listar las plantillas de agenda de un recurso | BAJO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
-| 51 | POST | `/scheduling/resources/{id}/templates` | Publicar una plantilla de agenda con sus franjas | MEDIO | 5 | SCHEDULING_ADMIN, PRACTITIONER |
-| 52 | GET | `/scheduling/resources/{resourceId}/waitlist` | Listar quiénes esperan turno en una agenda | BAJO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| 53 | GET | `/scheduling/service-availability` | Horarios donde cabe un servicio | BAJO | 10 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 54 | GET | `/scheduling/service-offerings` | Los servicios que ofrece un profesional | BAJO | 2 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 55 | POST | `/scheduling/service-offerings` | Declarar cómo ofrezco un servicio | MEDIO | 4 | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
-| 56 | PATCH | `/scheduling/service-offerings/{id}` | Editar o apagar la oferta de un servicio | MEDIO | 3 | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
-| 57 | POST | `/scheduling/service-offerings/{id}/holds` | Retener el turno de un servicio | MEDIO | 19 | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| 58 | GET | `/scheduling/slots` | Consultar los cupos de una ventana | BAJO | 3 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 59 | POST | `/scheduling/slots/{id}/holds` | Reservar temporalmente un cupo del slot | MEDIO | 9 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| 60 | DELETE | `/scheduling/templates/{id}` | Retirar una plantilla de agenda y soltar sus cupos libres | ALTO | 35 | SCHEDULING_ADMIN, PRACTITIONER |
-| 61 | PATCH | `/scheduling/templates/{id}` | Editar una plantilla de agenda ya publicada | ALTO | 6 | SCHEDULING_ADMIN, PRACTITIONER |
-| 62 | POST | `/scheduling/templates/{id}/generate-slots` | Materializar los slots de la plantilla en una ventana | MEDIO | 7 | SCHEDULING_ADMIN, PRACTITIONER |
-| 63 | GET | `/scheduling/templates/{id}/live-bookings` | Listar las citas vivas de una plantilla antes de retirarla | BAJO | 6 | SCHEDULING_ADMIN, PRACTITIONER |
-| 64 | POST | `/scheduling/templates/{id}/reactivate` | Reactivar un horario retirado | MEDIO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
-| 65 | GET | `/scheduling/waitlist` | Listar las entradas de lista de espera de un paciente | BAJO | 7 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| 66 | POST | `/scheduling/waitlist` | Inscribir a un paciente en la lista de espera | MEDIO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| 67 | GET | `/tenants/{tenantId}/agenda` | La agenda de la organización | BAJO | 5 | sesión (sin roles) |
+| 4 | GET | `/scheduling/bookable-organizations` | Listar las organizaciones con cupos abiertos para pedir cita | BAJO | 0 | PATIENT |
+| 5 | GET | `/scheduling/bookable-resources` | Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones | BAJO | 0 | PATIENT |
+| 6 | POST | `/scheduling/booking-policies` | Definir una política de reserva | MEDIO | 2 | SCHEDULING_ADMIN, PRACTITIONER |
+| 7 | GET | `/scheduling/bookings` | UC-41-15: lista citas por paciente, recurso y/o ventana | BAJO | 20 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 8 | GET | `/scheduling/bookings/{id}` | UC-41-15: consulta una cita | BAJO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 9 | POST | `/scheduling/bookings/{id}/accept` | Aceptar la solicitud de cita | MEDIO | 54 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 10 | POST | `/scheduling/bookings/{id}/cancel` | Cancelar la cita y liberar el cupo | MEDIO | 37 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 11 | POST | `/scheduling/bookings/{id}/check-in` | Registrar la llegada del paciente | MEDIO | 5 | SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 12 | POST | `/scheduling/bookings/{id}/complete` | Completar la atención | MEDIO | 20 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 13 | POST | `/scheduling/bookings/{id}/delay` | Informar una demora sobre una cita | MEDIO | 35 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 14 | GET | `/scheduling/bookings/{id}/payment-receipts` | Listar los comprobantes de pago de una cita | BAJO | 9 | PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 15 | POST | `/scheduling/bookings/{id}/payment-receipts` | Subir el comprobante de pago de una cita | MEDIO | 39 | PATIENT |
+| 16 | POST | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` | Confirmar un comprobante de pago | MEDIO | 46 | PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 17 | GET | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/content` | Descargar el archivo de un comprobante de pago | BAJO | 8 | PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 18 | POST | `/scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` | Rechazar un comprobante de pago | MEDIO | 36 | PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 19 | GET | `/scheduling/bookings/{id}/payment-state` | Leer el estado de pago de una cita | BAJO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 20 | PUT | `/scheduling/bookings/{id}/payment-state` | Marcar el estado de pago de una cita | MEDIO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 21 | POST | `/scheduling/bookings/{id}/propose-schedule` | Proponer otro horario para la solicitud | MEDIO | 11 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 22 | POST | `/scheduling/bookings/{id}/reject` | Rechazar la solicitud de cita | MEDIO | 34 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 23 | POST | `/scheduling/bookings/{id}/reminders` | Programar recordatorios para la cita | MEDIO | 3 | SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 24 | POST | `/scheduling/bookings/{id}/request-info` | Pedir documentación u orden médica antes de aceptar | MEDIO | 6 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 25 | POST | `/scheduling/bookings/{id}/reschedule` | Reprogramar la cita a otro slot | MEDIO | 43 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 26 | POST | `/scheduling/bookings/{id}/start` | Iniciar la atención | MEDIO | 8 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 27 | GET | `/scheduling/confirmation-rules` | Listar las reglas de un tenant | BAJO | 1 | SCHEDULING_ADMIN |
+| 28 | POST | `/scheduling/confirmation-rules` | Crear una regla de confirmación | MEDIO | 1 | SCHEDULING_ADMIN |
+| 29 | POST | `/scheduling/confirmation-rules/{id}/activate` | Reactivar una regla desactivada | MEDIO | 2 | SCHEDULING_ADMIN |
+| 30 | POST | `/scheduling/confirmation-rules/{id}/deactivate` | Desactivar una regla (sin borrado duro) | MEDIO | 2 | SCHEDULING_ADMIN |
+| 31 | POST | `/scheduling/confirmation-rules/evaluate` | Evaluar una solicitud de reserva contra las reglas vigentes | BAJO | 1 | SCHEDULING_ADMIN |
+| 32 | GET | `/scheduling/exception-types` | Listar los motivos de bloqueo de agenda | BAJO | 0 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 33 | DELETE | `/scheduling/exceptions/{id}` | Eliminar una excepción de disponibilidad | ALTO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
+| 34 | PATCH | `/scheduling/exceptions/{id}` | Editar una excepción de disponibilidad | MEDIO | 5 | SCHEDULING_ADMIN, PRACTITIONER |
+| 35 | POST | `/scheduling/holds/{holdToken}/confirm` | Confirmar la cita a partir de la reserva temporal | MEDIO | 21 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| 36 | POST | `/scheduling/holds/{holdToken}/request` | Solicitar la cita a partir de la reserva temporal | MEDIO | 53 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| 37 | POST | `/scheduling/internal/dispatch-reminders` | Despachar los recordatorios cuya hora ya llegó | MEDIO | 34 | SYSTEM, SYSTEM_WORKER |
+| 38 | POST | `/scheduling/internal/expire-holds` | Liberar las reservas temporales vencidas | MEDIO | 10 | SYSTEM, SYSTEM_WORKER |
+| 39 | POST | `/scheduling/internal/promote-waitlist/{slotId}` | Promover candidatos de la lista de espera a un slot con cupo | MEDIO | 32 | SYSTEM, SYSTEM_WORKER |
+| 40 | GET | `/scheduling/internal/waitlist-candidates` | Listar slots con cupo libre y candidatos activos en espera | BAJO | 2 | SYSTEM, SYSTEM_WORKER |
+| 41 | GET | `/scheduling/my-resources` | Listar mis agendas y cómo reciben las solicitudes de consulta | BAJO | 1 | PRACTITIONER, SCHEDULING_ADMIN |
+| 42 | GET | `/scheduling/resources` | Listar los recursos agendables de un tenant | BAJO | 6 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 43 | POST | `/scheduling/resources` | Dar de alta un recurso agendable | MEDIO | 9 | SCHEDULING_ADMIN, PRACTITIONER |
+| 44 | PATCH | `/scheduling/resources/{id}` | Editar un recurso agendable | MEDIO | 2 | SCHEDULING_ADMIN, PRACTITIONER |
+| 45 | POST | `/scheduling/resources/{id}/close-slots` | Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos | MEDIO | 31 | SCHEDULING_ADMIN, PRACTITIONER |
+| 46 | POST | `/scheduling/resources/{id}/delay` | Informar una demora que alcanza a toda la agenda del recurso | MEDIO | 34 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 47 | GET | `/scheduling/resources/{id}/exceptions` | Listar las excepciones de disponibilidad de un recurso | BAJO | 3 | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
+| 48 | POST | `/scheduling/resources/{id}/exceptions` | Registrar una excepción de disponibilidad | MEDIO | 31 | SCHEDULING_ADMIN, PRACTITIONER |
+| 49 | GET | `/scheduling/resources/{id}/flexible-availability` | Horas que se pueden pedir en un horario flexible | BAJO | 9 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 50 | POST | `/scheduling/resources/{id}/flexible-holds` | Retener una hora de un horario flexible | MEDIO | 17 | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 51 | POST | `/scheduling/resources/{id}/shift-slots` | Correr los cupos de una agenda N minutos | MEDIO | 33 | SCHEDULING_ADMIN, PRACTITIONER |
+| 52 | GET | `/scheduling/resources/{id}/slots` | UC-41-14: agenda publicada del recurso en una ventana | BAJO | 2 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 53 | GET | `/scheduling/resources/{id}/templates` | Listar las plantillas de agenda de un recurso | BAJO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
+| 54 | POST | `/scheduling/resources/{id}/templates` | Publicar una plantilla de agenda con sus franjas | MEDIO | 5 | SCHEDULING_ADMIN, PRACTITIONER |
+| 55 | GET | `/scheduling/resources/{resourceId}/waitlist` | Listar quiénes esperan turno en una agenda | BAJO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| 56 | GET | `/scheduling/service-availability` | Horarios donde cabe un servicio | BAJO | 10 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 57 | GET | `/scheduling/service-offerings` | Los servicios que ofrece un profesional | BAJO | 2 | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 58 | POST | `/scheduling/service-offerings` | Declarar cómo ofrezco un servicio | MEDIO | 4 | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
+| 59 | PATCH | `/scheduling/service-offerings/{id}` | Editar o apagar la oferta de un servicio | MEDIO | 3 | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
+| 60 | POST | `/scheduling/service-offerings/{id}/holds` | Retener el turno de un servicio | MEDIO | 19 | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| 61 | GET | `/scheduling/slots` | Consultar los cupos de una ventana | BAJO | 3 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 62 | POST | `/scheduling/slots/{id}/holds` | Reservar temporalmente un cupo del slot | MEDIO | 9 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| 63 | DELETE | `/scheduling/templates/{id}` | Retirar una plantilla de agenda y soltar sus cupos libres | ALTO | 34 | SCHEDULING_ADMIN, PRACTITIONER |
+| 64 | PATCH | `/scheduling/templates/{id}` | Editar una plantilla de agenda ya publicada | ALTO | 6 | SCHEDULING_ADMIN, PRACTITIONER |
+| 65 | POST | `/scheduling/templates/{id}/generate-slots` | Materializar los slots de la plantilla en una ventana | MEDIO | 7 | SCHEDULING_ADMIN, PRACTITIONER |
+| 66 | GET | `/scheduling/templates/{id}/live-bookings` | Listar las citas vivas de una plantilla antes de retirarla | BAJO | 6 | SCHEDULING_ADMIN, PRACTITIONER |
+| 67 | POST | `/scheduling/templates/{id}/reactivate` | Reactivar un horario retirado | MEDIO | 3 | SCHEDULING_ADMIN, PRACTITIONER |
+| 68 | GET | `/scheduling/waitlist` | Listar las entradas de lista de espera de un paciente | BAJO | 7 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| 69 | POST | `/scheduling/waitlist` | Inscribir a un paciente en la lista de espera | MEDIO | 4 | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| 70 | GET | `/tenants/{tenantId}/agenda` | La agenda de la organización | BAJO | 5 | sesión (sin roles) |
 
 ---
 
@@ -107,8 +110,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:514` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -168,7 +171,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/appointments/direct` la atiende `SchedulingController.createDirectAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:639). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `CreateDirectAppointmentDto` (10 campos, 4 obligatorios). Delega en `SchedulingBookingsService.createDirectAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests y 3 más. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.encounters, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 26 más.
+`POST /scheduling/appointments/direct` la atiende `SchedulingController.createDirectAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:639). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `CreateDirectAppointmentDto` (10 campos, 4 obligatorios). Delega en `SchedulingBookingsService.createDirectAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests y 3 más. Actualiza audit.appointment_bookings_history, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.encounters, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 25 más.
 
 ### Requerimientos
 
@@ -176,10 +179,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:639` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -195,17 +198,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → CreateDirectAppointmentUseCase.validateFollowUp → FormsOriginAdapter.assertUsableOrigin → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -213,22 +215,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.findOfPractitioner | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:31` |
 | `scheduling.appointment_bookings` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:293` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:168` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction | `src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts:278` |
 | `scheduling.bookable_slots` | ESCRIBE | CREA | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingCatalogRepository.createSlot | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:806` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.createDirectAppointment → SchedulingBookingsService.createDirectAppointment → CreateDirectAppointmentUseCase.execute → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:739` |
@@ -346,10 +348,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:673` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -368,14 +370,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
 | `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.findOfPractitioner | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:31` |
 | `scheduling.appointment_bookings` | ESCRIBE | CREA | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:293` |
 | `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.startInTransaction → StartAppointmentUseCase.executeInTransaction | `src/modules/scheduling/application/bookings/use-cases/start-appointment.use-case.ts:93` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → CreateDirectAppointmentUseCase.validateFollowUp → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction | `src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts:278` |
 | `scheduling.bookable_slots` | ESCRIBE | CREA | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingCatalogRepository.createSlot | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:806` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.createWalkInAppointment → SchedulingWalkInService.createWalkInAppointment → SchedulingBookingsService.createDirectAppointmentInTransaction → CreateDirectAppointmentUseCase.executeInTransaction → SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:739` |
@@ -504,9 +506,9 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Origen:** CONTRATO
 - **Nombre:** Listar las organizaciones con cupos abiertos para pedir cita
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingAgendaController.listBookableOrganizations` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:37`
+- **Implementación:** `SchedulingAgendaController.listBookableOrganizations` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -516,24 +518,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookable-organizations` la atiende `SchedulingAgendaController.listBookableOrganizations` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:37). Exige sesión con alguno de los roles PATIENT. Delega en `SchedulingAgendaService.listBookableOrganizations`. Lee directory.tenants, scheduling.bookable_slots, scheduling.schedulable_resources.
+`GET /scheduling/bookable-organizations` la atiende `SchedulingAgendaController.listBookableOrganizations` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:104). Exige sesión con alguno de los roles PATIENT. Delega en `SchedulingAgendaService.listBookableOrganizations`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `directory.tenants` | LEE | LEE | POR_SQL | SchedulingAgendaController.listBookableOrganizations → SchedulingAgendaService.listBookableOrganizations | `src/modules/scheduling/application/agenda/scheduling-agenda.service.ts:108` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SchedulingAgendaController.listBookableOrganizations → SchedulingAgendaService.listBookableOrganizations | `src/modules/scheduling/application/agenda/scheduling-agenda.service.ts:108` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SchedulingAgendaController.listBookableOrganizations → SchedulingAgendaService.listBookableOrganizations | `src/modules/scheduling/application/agenda/scheduling-agenda.service.ts:108` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Cuerpo
 
@@ -571,7 +569,87 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /scheduling/booking-policies
+## 5. GET /scheduling/bookable-resources
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SchedulingAgendaController.listBookableResources` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:119`
+
+### Qué es y para qué sirve (negocio)
+
+Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`GET /scheduling/bookable-resources` la atiende `SchedulingAgendaController.listBookableResources` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:119). Exige sesión con alguno de los roles PATIENT. Delega en `SchedulingAgendaService.listBookableResources`. No se determinaron tablas para esta operación.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:119` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `resourceType` | query | No | `string` | — |
+| `q` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+| `offset` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<BookableResourcesResponseDto>` · DTO `BookableResourcesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<BookableResourceDto>` | Sí | — | — | This page, by name. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:38` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | The organization: the `X-Tenant-Id` its agenda is read with. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:11` |
+| `items[].organizationName` | `string` | Sí | — | — | Trade name, or legal name; the platform's own tenant reads «AloVida». | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:15` |
+| `items[].resourceId` | `string` | Sí | formato uuid | — | One of the person's resources in that organization. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:19` |
+| `items[].resourceRefType` | `string` | Sí | — | — | Table the resource points to, e.g. `health_practitioner_profiles`. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:23` |
+| `items[].resourceRefId` | `string` | Sí | formato uuid | — | The person (or room) behind the resource. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:27` |
+| `items[].name` | `string` | Sí | — | — | The person's display name, or the resource name when there is none. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:31` |
+| `count` | `number` | Sí | — | — | Entries in this page. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:42` |
+| `total` | `number` | Sí | — | — | Entries matching the query across all pages. | `src/modules/scheduling/presentation/dto/bookable-resources.dto.ts:46` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 41 — Scheduling (agenda) — etapa `ctrl:SchedulingAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. POST /scheduling/booking-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de reserva
@@ -596,10 +674,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:192` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -685,7 +763,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 6. GET /scheduling/bookings
+## 7. GET /scheduling/bookings
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-41-15: lista citas por paciente, recurso y/o ventana
@@ -710,8 +788,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -727,14 +805,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → InsuranceReadAdapter.findActiveCarriersByPatients → CoverageRepository.findActiveCarriersByPatients | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:213` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → InsuranceReadAdapter.findActiveCarriersByPatients → CoverageRepository.findActiveCarriersByPatients | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:201` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → ClinicalAppointmentsAdapter.findCareSpaces → AppointmentsRepository.findCareSpaces | `src/modules/clinical/repositories/appointments.repository.ts:116` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → ProfilesPatientRepresentationAdapter.findActiveProxiedPatientIds → PatientRepresentationService.findActiveProxiedPatientIds → PatientPortalProxiesRepository.findActiveByProxyUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:204` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → ProfilesPatientRepresentationAdapter.findActiveProxiedPatientIds → PatientRepresentationService.findActiveProxiedPatientIds → PatientPortalProxiesRepository.findActiveByProxyUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:107` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.findBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:598` |
 | `scheduling.appointment_payment_states` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.findPaymentStatesForBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:442` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.findBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:608` |
-| `scheduling.booking_reschedules` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.latestRescheduleOrigins | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1182` |
+| `scheduling.booking_reschedules` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingBookingsRepository.latestRescheduleOrigins | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1181` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | SchedulingBookingsController.searchBookings → SchedulingBookingsService.searchBookings → SearchBookingsUseCase.execute → BookingItemAssembler.insuranceClaimsByAppointment → InsuranceReadAdapter.findClaimSummariesByEncounterIds → ClaimReadRepository.findSummariesByEncounterIds | `src/modules/insurance/infrastructure/repositories/claim-read.repository.ts:535` |
 
@@ -842,7 +920,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:270` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:130` |
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:367` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:370` |
 | INTEGRACION | `test/integration/lab-booking-relevamiento.int-spec.ts:162` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:226` |
 
@@ -852,7 +930,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 7. GET /scheduling/bookings/{id}
+## 8. GET /scheduling/bookings/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-41-15: consulta una cita
@@ -877,9 +955,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:144` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -889,12 +967,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.appointments` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ClinicalAppointmentsAdapter.findTypesByIds → AppointmentsRepository.findTypesByIds | `src/modules/clinical/repositories/appointments.repository.ts:162` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ClinicalAppointmentsAdapter.findLatestEncounterIds → EncountersRepository.findLatestIdsByAppointmentIds | `src/modules/clinical/repositories/encounters.repository.ts:317` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ClinicalAppointmentsAdapter.findCareSpaces → AppointmentsRepository.findCareSpaces | `src/modules/clinical/repositories/appointments.repository.ts:116` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ProfilesPatientRepresentationAdapter.findActiveProxiedPatientIds → PatientRepresentationService.findActiveProxiedPatientIds → PatientPortalProxiesRepository.findActiveByProxyUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:204` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → SchedulingBookingsRepository.findBookingById | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:515` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → SchedulingBookingsRepository.findSlotById | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:227` |
-| `scheduling.booking_reschedules` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → SchedulingBookingsRepository.latestRescheduleOrigins | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1182` |
+| `scheduling.booking_reschedules` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → SchedulingBookingsRepository.latestRescheduleOrigins | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1181` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.getBooking → SchedulingBookingsService.getBookingById → GetBookingUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
@@ -992,7 +1070,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:142` |
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:358` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:361` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:371` |
 | INTEGRACION | `test/integration/infrastructure-f5d.int-spec.ts:207` |
 | INTEGRACION | `test/integration/tj2-reglas-cita.int-spec.ts:201` |
@@ -1003,7 +1081,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 8. POST /scheduling/bookings/{id}/accept
+## 9. POST /scheduling/bookings/{id}/accept
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar la solicitud de cita
@@ -1020,7 +1098,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/accept` la atiende `SchedulingBookingsController.accept` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:161). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `AcceptBookingDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.accept`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_reminders y 1 más. Actualiza audit.appointment_bookings_history, clinical.appointments, community.conversations, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 25 más.
+`POST /scheduling/bookings/{id}/accept` la atiende `SchedulingBookingsController.accept` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:161). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `AcceptBookingDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.accept`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.direct_messages, community.message_receipts, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries y 3 más. Actualiza audit.appointment_bookings_history, clinical.appointments, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.appointments, common.file_versions, common.files, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles y 27 más.
 
 ### Requerimientos
 
@@ -1028,11 +1106,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:161` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1043,51 +1121,55 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `clinical.appointments` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → ClinicalAppointmentSync.syncClinicalAppointment → ClinicalAppointmentsAdapter.updateStatus | `src/modules/scheduling/infrastructure/adapters/clinical-appointments.adapter.ts:39` |
 | `clinical.appointments` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → ClinicalAppointmentSync.syncClinicalAppointment → ClinicalAppointmentsAdapter.updateStatus → AppointmentsRepository.findById | `src/modules/clinical/repositories/appointments.repository.ts:138` |
+| `common.file_versions` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
+| `common.files` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `community.conversation_participants` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createParticipant | `src/modules/community/repositories/conversations.repository.ts:161` |
 | `community.conversation_participants` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:284` |
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
-| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send | `src/modules/community/services/community-messaging.service.ts:446` |
+| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send | `src/modules/community/services/community-messaging.service.ts:451` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
+| `community.direct_messages` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createMessage | `src/modules/community/repositories/conversations.repository.ts:466` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → ConversationsRepository.findLiveMessagesByAttachmentFileId | `src/modules/community/repositories/conversations.repository.ts:229` |
+| `community.message_receipts` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createReceipt | `src/modules/community/repositories/conversations.repository.ts:565` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyAcceptedInChat → CommunityBookingChatAdapter.announceAcceptance → CommunityBookingChatService.enviarConfirmacion → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
 | `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingAccess.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.findOfPractitioner | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:31` |
 | `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/accept-booking.use-case.ts:95` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending | `src/modules/scheduling/application/bookings/support/displaced-requests-canceller.ts:109` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingBookingsRepository.findSlotById | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:227` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
-| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_rules` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → ServiceSlotLifecycle.isOneOffOnDemand → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findRulesByTemplates | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:477` |
 | `scheduling.schedule_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → ServiceSlotLifecycle.isOneOffOnDemand → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findTemplateById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:438` |
-| `scheduling.slot_holds` | LEE | LEE | POR_SQL | SchedulingBookingsController.accept → SchedulingBookingsService.accept → BookingStateTransitionHandler.accept → AcceptBookingUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 
 ### Parámetros
 
@@ -1136,7 +1218,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación, así que todavía no puede comprometer citas suyas. / Su vínculo con esta organización ya…; PreconditionFailedException: Transición de estado de cita no permitida; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug… |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1158,7 +1240,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 9. POST /scheduling/bookings/{id}/cancel
+## 10. POST /scheduling/bookings/{id}/cancel
 
 - **Origen:** CONTRATO
 - **Nombre:** Cancelar la cita y liberar el cupo
@@ -1175,7 +1257,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/cancel` la atiende `SchedulingBookingsController.cancel` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:513). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `CancelBookingDto` (3 campos, 2 obligatorios). Delega en `SchedulingBookingsService.cancel`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 19 más.
+`POST /scheduling/bookings/{id}/cancel` la atiende `SchedulingBookingsController.cancel` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:513). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `CancelBookingDto` (3 campos, 2 obligatorios). Delega en `SchedulingBookingsService.cancel`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests y 18 más.
 
 ### Requerimientos
 
@@ -1183,11 +1265,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:513` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:513` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1197,9 +1279,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -1207,22 +1288,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:286` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:283` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
-| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:298` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
+| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:295` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.cancel → SchedulingBookingsService.cancel → BookingStateTransitionHandler.cancel → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
@@ -1308,7 +1389,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 10. POST /scheduling/bookings/{id}/check-in
+## 11. POST /scheduling/bookings/{id}/check-in
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar la llegada del paciente
@@ -1333,9 +1414,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:536` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:536` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1391,7 +1472,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 11. POST /scheduling/bookings/{id}/complete
+## 12. POST /scheduling/bookings/{id}/complete
 
 - **Origen:** CONTRATO
 - **Nombre:** Completar la atención
@@ -1408,7 +1489,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/complete` la atiende `SchedulingBookingsController.complete` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:470). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.complete`. Crea filas en audit.appointment_bookings_history, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_templates, surveys.survey_versions. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_templates y 6 más.
+`POST /scheduling/bookings/{id}/complete` la atiende `SchedulingBookingsController.complete` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:470). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.complete`. Crea filas en audit.appointment_bookings_history, surveys.survey_invitations. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_templates, surveys.survey_versions. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_templates y 4 más.
 
 ### Requerimientos
 
@@ -1416,9 +1497,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:470` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:470` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1431,22 +1512,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.appointments` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ClinicalAppointmentSync.syncClinicalAppointment → ClinicalAppointmentsAdapter.updateStatus → AppointmentsRepository.findById | `src/modules/clinical/repositories/appointments.repository.ts:138` |
 | `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/complete-appointment.use-case.ts:55` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover | `src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts:93` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
-| `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.resolveTargets → SurveysAssignmentsService.resolveServiceCatalogId → TargetsRepository.findOffering | `src/modules/surveys/repositories/targets.repository.ts:78` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_templates` | LEE | LEE | POR_SQL | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveFlexibleSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:309` |
 | `scheduling.slot_holds` | LEE | LEE | POR_SQL | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → ServiceSlotLifecycle.releaseServiceLeftover → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
-| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:143` |
-| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:93` |
+| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:98` |
 | `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:203` |
 | `surveys.survey_invitations` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:156` |
-| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:365` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.read → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:211` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.practitionerCandidates → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:222` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:222` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:233` |
 | `surveys.survey_versions` | LEE | LEE | DIRECTA | SchedulingBookingsController.complete → SchedulingBookingsService.complete → BookingStateTransitionHandler.complete → CompleteAppointmentUseCase.execute → SurveysBookingCompletedAdapter.onBookingCompleted → SurveysAssignmentsService.issueForCompletedBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.hasInvitationOfTemplate → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
 
 ### Parámetros
@@ -1475,7 +1552,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1492,7 +1569,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /scheduling/bookings/{id}/delay
+## 13. POST /scheduling/bookings/{id}/delay
 
 - **Origen:** CONTRATO
 - **Nombre:** Informar una demora sobre una cita
@@ -1509,7 +1586,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/delay` la atiende `SchedulingBookingsController.delay` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:559). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayBookingDto` (2 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayBooking`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 17 más.
+`POST /scheduling/bookings/{id}/delay` la atiende `SchedulingBookingsController.delay` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:559). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayBookingDto` (2 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayBooking`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 16 más.
 
 ### Requerimientos
 
@@ -1517,11 +1594,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:559` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:559` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1535,16 +1612,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -1552,17 +1628,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.resolveRecipient → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:168` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:171` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:245` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.delay → SchedulingDelayService.delayBooking → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:243` |
 
 ### Parámetros
 
@@ -1632,7 +1708,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 13. GET /scheduling/bookings/{id}/payment-receipts
+## 14. GET /scheduling/bookings/{id}/payment-receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los comprobantes de pago de una cita
@@ -1657,9 +1733,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:342` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:342` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1668,12 +1744,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.project → CommonPaymentReceiptFilesAdapter.describe | `src/modules/scheduling/infrastructure/adapters/common-payment-receipt-files.adapter.ts:92` |
 | `common.files` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.project → CommonPaymentReceiptFilesAdapter.describe | `src/modules/scheduling/infrastructure/adapters/common-payment-receipt-files.adapter.ts:85` |
 | `iam.users` | LEE | LEE | POR_SQL | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.project → SchedulingPaymentReceiptsRepository.findUserDisplayNames | `src/modules/scheduling/infrastructure/repositories/scheduling-payment-receipts.repository.ts:63` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
 | `scheduling.appointment_payment_receipts` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → SchedulingPaymentReceiptsRepository.findForBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-payment-receipts.repository.ts:14` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → PaymentReceiptAccess.loadForReviewer → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.listPaymentReceipts → SchedulingPaymentReceiptsService.list → ListPaymentReceiptsUseCase.execute → PaymentReceiptAccess.loadForReading → PaymentReceiptAccess.loadForReviewer → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -1730,7 +1806,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /scheduling/bookings/{id}/payment-receipts
+## 15. POST /scheduling/bookings/{id}/payment-receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Subir el comprobante de pago de una cita
@@ -1747,7 +1823,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.uploadPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:319). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `UploadPaymentReceiptDto` (4 campos, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.upload`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_payment_receipts. Actualiza community.public_profiles, iam.devices, messaging.notification_requests. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 21 más.
+`POST /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.uploadPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:319). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `UploadPaymentReceiptDto` (4 campos, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.upload`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_payment_receipts. Actualiza community.public_profiles, messaging.in_app_notifications, messaging.notification_requests. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 20 más.
 
 ### Requerimientos
 
@@ -1755,11 +1831,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:319` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:319` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1772,16 +1848,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -1789,13 +1864,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → PaymentReceiptAccess.loadForPatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → PaymentReceiptAccess.loadForPatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → PaymentReceiptAccess.loadForPatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → PaymentReceiptAccess.loadForPatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
@@ -1804,7 +1879,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `scheduling.appointment_payment_receipts` | ESCRIBE | GUARDA | POR_TIPO | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/upload-payment-receipt.use-case.ts:103` |
 | `scheduling.appointment_payment_states` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → SchedulingBookingsRepository.findPaymentStateForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:416` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:171` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.findResourceAccount | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:271` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.uploadPaymentReceipt → SchedulingPaymentReceiptsService.upload → UploadPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptUploaded → SchedulingNoticeRepository.findResourceAccount | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:269` |
 
 ### Parámetros
 
@@ -1890,7 +1965,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm
+## 16. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm
 
 - **Origen:** CONTRATO
 - **Nombre:** Confirmar un comprobante de pago
@@ -1907,7 +1982,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` la atiende `SchedulingBookingsController.confirmPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:393). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.confirm`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications y 2 más. Actualiza billing.invoices, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles y 23 más.
+`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` la atiende `SchedulingBookingsController.confirmPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:393). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.confirm`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications y 2 más. Actualiza billing.invoices, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_payment_receipts, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles y 22 más.
 
 ### Requerimientos
 
@@ -1915,9 +1990,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:393` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:393` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1938,16 +2013,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -1955,11 +2029,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.resolveRecipient → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.confirmPaymentReceipt → SchedulingPaymentReceiptsService.confirm → ConfirmPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
@@ -2029,7 +2103,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE}; ForbiddenException: La agenda indicada pertenece a otra organización. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ese comprobante ya se rechazó: no se puede confirmar. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)}; PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
@@ -2048,7 +2122,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content
+## 17. GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content
 
 - **Origen:** CONTRATO
 - **Nombre:** Descargar el archivo de un comprobante de pago
@@ -2073,9 +2147,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:364` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:364` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2083,12 +2157,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → CommonPaymentReceiptFilesAdapter.download → FileUploadService.downloadForAuthorizedContext → FileUploadService.serveCurrentVersion → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → CommonPaymentReceiptFilesAdapter.download → FileUploadService.downloadForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
 | `scheduling.appointment_payment_receipts` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.receiptOf → SchedulingPaymentReceiptsRepository.findOfBookingForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-payment-receipts.repository.ts:44` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → PaymentReceiptAccess.loadForReviewer → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.paymentReceiptContent → SchedulingPaymentReceiptsService.content → GetPaymentReceiptContentUseCase.execute → PaymentReceiptAccess.loadForReading → PaymentReceiptAccess.loadForReviewer → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -2129,7 +2203,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject
+## 18. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar un comprobante de pago
@@ -2146,7 +2220,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` la atiende `SchedulingBookingsController.rejectPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:415). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `RejectPaymentReceiptDto` (1 campo, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.reject`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 19 más.
+`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` la atiende `SchedulingBookingsController.rejectPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:415). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `RejectPaymentReceiptDto` (1 campo, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.reject`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_payment_receipts. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 18 más.
 
 ### Requerimientos
 
@@ -2154,11 +2228,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:415` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:415` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2171,16 +2245,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -2188,11 +2261,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.resolveRecipient → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
@@ -2200,7 +2273,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `scheduling.appointment_payment_receipts` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/reject-payment-receipt.use-case.ts:73` |
 | `scheduling.appointment_payment_receipts` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → PaymentReceiptAccess.receiptOf → SchedulingPaymentReceiptsRepository.findOfBookingForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-payment-receipts.repository.ts:44` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:171` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → PaymentReceiptAccess.loadForReviewer → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.rejectPaymentReceipt → SchedulingPaymentReceiptsService.reject → RejectPaymentReceiptUseCase.execute → BookingChangeNotifier.notifyReceiptReviewed → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:243` |
 
 ### Parámetros
 
@@ -2263,7 +2336,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE}; ForbiddenException: La agenda indicada pertenece a otra organización. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ese comprobante ya se confirmó: no se puede rechazar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2280,7 +2353,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. GET /scheduling/bookings/{id}/payment-state
+## 19. GET /scheduling/bookings/{id}/payment-state
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer el estado de pago de una cita
@@ -2305,9 +2378,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:299` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:299` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2316,7 +2389,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.invoices` | LEE | LEE | DIRECTA | SchedulingBookingsController.getPaymentState → SchedulingBookingsService.getPaymentState → GetPaymentStateUseCase.execute → BookingBillingBridge.linkOf → BillingBookingAdapter.findInvoice → InvoicesRepository.findById | `src/modules/billing/repositories/invoices.repository.ts:147` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.getPaymentState → SchedulingBookingsService.getPaymentState → GetPaymentStateUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
 | `scheduling.appointment_payment_states` | LEE | LEE | DIRECTA | SchedulingBookingsController.getPaymentState → SchedulingBookingsService.getPaymentState → GetPaymentStateUseCase.execute → SchedulingBookingsRepository.findPaymentState | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:456` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.getPaymentState → SchedulingBookingsService.getPaymentState → GetPaymentStateUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.getPaymentState → SchedulingBookingsService.getPaymentState → GetPaymentStateUseCase.execute → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -2348,7 +2421,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2364,7 +2437,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. PUT /scheduling/bookings/{id}/payment-state
+## 20. PUT /scheduling/bookings/{id}/payment-state
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar el estado de pago de una cita
@@ -2389,11 +2462,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:272` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:272` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2409,7 +2482,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | SchedulingBookingsController.setPaymentState → SchedulingBookingsService.setPaymentState → SetPaymentStateUseCase.execute → BookingBillingBridge.bill → BookingBillingBridge.encounterOf → ClinicalAppointmentsAdapter.findLatestEncounterIds → EncountersRepository.findLatestIdsByAppointmentIds | `src/modules/clinical/repositories/encounters.repository.ts:317` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.setPaymentState → SchedulingBookingsService.setPaymentState → SetPaymentStateUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
 | `scheduling.appointment_payment_states` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.setPaymentState → SchedulingBookingsService.setPaymentState → SetPaymentStateUseCase.execute → BookingBillingBridge.bill | `src/modules/scheduling/application/bookings/support/booking-billing-bridge.ts:123` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.setPaymentState → SchedulingBookingsService.setPaymentState → SetPaymentStateUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.setPaymentState → SchedulingBookingsService.setPaymentState → SetPaymentStateUseCase.execute → BookingBillingBridge.bill → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -2464,7 +2537,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía no se cobró.; PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar.; PreconditionFailedException: El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2482,7 +2555,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. POST /scheduling/bookings/{id}/propose-schedule
+## 21. POST /scheduling/bookings/{id}/propose-schedule
 
 - **Origen:** CONTRATO
 - **Nombre:** Proponer otro horario para la solicitud
@@ -2507,11 +2580,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:217` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:217` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2525,7 +2598,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts:107` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
 | `scheduling.booking_reschedules` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → SchedulingBookingsRepository.recordReschedule | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:783` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_rules` | LEE | LEE | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → ServiceSlotLifecycle.assertNotAService → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findRulesByTemplates | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:477` |
 | `scheduling.schedule_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.proposeSchedule → SchedulingBookingsService.proposeSchedule → ProposeScheduleUseCase.execute → ServiceSlotLifecycle.assertNotAService → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findTemplateById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:438` |
 
@@ -2578,7 +2651,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Cupo propuesto no encontrado |
 | 409 | `CONFLICT` | ConflictException: El cupo propuesto no tiene lugar |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida otra hora.; PreconditionFailedException: El horario propuesto es el que ya tiene la solicitud; PreconditionFailedException: Transición de estado de cita no permitida |
@@ -2596,7 +2669,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /scheduling/bookings/{id}/reject
+## 22. POST /scheduling/bookings/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar la solicitud de cita
@@ -2613,7 +2686,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/reject` la atiende `SchedulingBookingsController.reject` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:238). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RejectBookingDto` (1 campo, 1 obligatorio). Delega en `SchedulingBookingsService.reject`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 16 más.
+`POST /scheduling/bookings/{id}/reject` la atiende `SchedulingBookingsController.reject` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:238). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RejectBookingDto` (1 campo, 1 obligatorio). Delega en `SchedulingBookingsService.reject`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests y 15 más.
 
 ### Requerimientos
 
@@ -2621,11 +2694,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:238` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:238` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2635,9 +2708,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -2645,21 +2717,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:286` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:283` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:298` |
+| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:295` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_rules` | LEE | LEE | DIRECTA | SchedulingBookingsController.reject → SchedulingBookingsService.reject → BookingStateTransitionHandler.reject → RejectBookingUseCase.execute → CancelBookingUseCase.execute → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findRulesByTemplates | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:477` |
@@ -2727,7 +2799,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. POST /scheduling/bookings/{id}/reminders
+## 23. POST /scheduling/bookings/{id}/reminders
 
 - **Origen:** CONTRATO
 - **Nombre:** Programar recordatorios para la cita
@@ -2752,18 +2824,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:581` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:581` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.scheduleReminders → SchedulingWaitlistService.scheduleReminders → PostgresWaitlistAdapter.findBookingScheduleForUpdate → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.scheduleReminders → SchedulingWaitlistService.scheduleReminders → PostgresWaitlistAdapter.scheduleReminders → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.scheduleReminders → SchedulingWaitlistService.scheduleReminders → PostgresWaitlistAdapter.scheduleReminders → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.scheduleReminders → SchedulingWaitlistService.scheduleReminders → PostgresWaitlistAdapter.findBookingScheduleForUpdate → SchedulingBookingsRepository.findSlotById | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:227` |
 
 ### Parámetros
@@ -2836,7 +2908,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 23. POST /scheduling/bookings/{id}/request-info
+## 24. POST /scheduling/bookings/{id}/request-info
 
 - **Origen:** CONTRATO
 - **Nombre:** Pedir documentación u orden médica antes de aceptar
@@ -2861,11 +2933,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:189` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2876,7 +2948,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingBookingsController.requestInfo → SchedulingBookingsService.requestInfo → RequestBookingInfoUseCase.execute → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.requestInfo → SchedulingBookingsService.requestInfo → RequestBookingInfoUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/request-booking-info.use-case.ts:75` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.requestInfo → SchedulingBookingsService.requestInfo → RequestBookingInfoUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.requestInfo → SchedulingBookingsService.requestInfo → RequestBookingInfoUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.requestInfo → SchedulingBookingsService.requestInfo → RequestBookingInfoUseCase.execute → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -2927,7 +2999,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: Transición de estado de cita no permitida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2944,7 +3016,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /scheduling/bookings/{id}/reschedule
+## 25. POST /scheduling/bookings/{id}/reschedule
 
 - **Origen:** CONTRATO
 - **Nombre:** Reprogramar la cita a otro slot
@@ -2961,7 +3033,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/reschedule` la atiende `SchedulingBookingsController.reschedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:491). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `RescheduleBookingDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.reschedule`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 22 más.
+`POST /scheduling/bookings/{id}/reschedule` la atiende `SchedulingBookingsController.reschedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:491). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `RescheduleBookingDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.reschedule`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 21 más.
 
 ### Requerimientos
 
@@ -2969,11 +3041,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:491` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:491` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2987,16 +3059,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -3004,20 +3075,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingAccess.assertMayChangeBooking → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingAccess.assertMayChangeBooking → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts:189` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts:186` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
-| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts:177` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
+| `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts:174` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
 | `scheduling.booking_reschedules` | ESCRIBE | CREA | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingBookingsRepository.recordReschedule | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:783` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.reschedule → SchedulingBookingsService.reschedule → RescheduleBookingUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
@@ -3072,7 +3143,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Slot destino no encontrado |
 | 409 | `CONFLICT` | ConflictException: El slot destino no tiene cupos |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reprograma una cita vigente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida otra hora.; PreconditionFailedException: El slot destino es el mismo que el actual; PreconditionFailedException: El paciente ya tiene una cita confirmada a esa hora{clash.resourceName ? ` en «${…}.; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug… |
@@ -3095,7 +3166,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 25. POST /scheduling/bookings/{id}/start
+## 26. POST /scheduling/bookings/{id}/start
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar la atención
@@ -3120,9 +3191,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:446` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:446` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3135,7 +3206,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.appointments` | LEE | LEE | DIRECTA | SchedulingBookingsController.start → SchedulingBookingsService.start → BookingStateTransitionHandler.start → StartAppointmentUseCase.execute → ClinicalAppointmentSync.syncClinicalAppointment → ClinicalAppointmentsAdapter.updateStatus → AppointmentsRepository.findById | `src/modules/clinical/repositories/appointments.repository.ts:138` |
 | `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingBookingsController.start → SchedulingBookingsService.start → BookingStateTransitionHandler.start → StartAppointmentUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/start-appointment.use-case.ts:48` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingBookingsController.start → SchedulingBookingsService.start → BookingStateTransitionHandler.start → StartAppointmentUseCase.execute → BookingAccess.loadForOperation → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.start → SchedulingBookingsService.start → BookingStateTransitionHandler.start → StartAppointmentUseCase.execute → BookingAccess.loadForOperation → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingBookingsController.start → SchedulingBookingsService.start → BookingStateTransitionHandler.start → StartAppointmentUseCase.execute → BookingAccess.loadForOperation → BookingAccess.isOwnAgenda → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
 
@@ -3163,7 +3234,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {OTHER_AGENDA_MESSAGE} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -3180,7 +3251,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. GET /scheduling/confirmation-rules
+## 27. GET /scheduling/confirmation-rules
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las reglas de un tenant
@@ -3205,9 +3276,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3260,7 +3331,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /scheduling/confirmation-rules
+## 28. POST /scheduling/confirmation-rules
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una regla de confirmación
@@ -3285,10 +3356,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3372,7 +3443,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. POST /scheduling/confirmation-rules/{id}/activate
+## 29. POST /scheduling/confirmation-rules/{id}/activate
 
 - **Origen:** CONTRATO
 - **Nombre:** Reactivar una regla desactivada
@@ -3397,9 +3468,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:96` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3453,7 +3524,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /scheduling/confirmation-rules/{id}/deactivate
+## 30. POST /scheduling/confirmation-rules/{id}/deactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Desactivar una regla (sin borrado duro)
@@ -3478,9 +3549,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:119` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3534,7 +3605,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /scheduling/confirmation-rules/evaluate
+## 31. POST /scheduling/confirmation-rules/evaluate
 
 - **Origen:** CONTRATO
 - **Nombre:** Evaluar una solicitud de reserva contra las reglas vigentes
@@ -3559,10 +3630,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3638,7 +3709,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. GET /scheduling/exception-types
+## 32. GET /scheduling/exception-types
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los motivos de bloqueo de agenda
@@ -3663,8 +3734,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:536` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3708,7 +3779,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 32. DELETE /scheduling/exceptions/{id}
+## 33. DELETE /scheduling/exceptions/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Eliminar una excepción de disponibilidad
@@ -3733,9 +3804,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:608` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:608` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3782,7 +3853,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 33. PATCH /scheduling/exceptions/{id}
+## 34. PATCH /scheduling/exceptions/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar una excepción de disponibilidad
@@ -3807,11 +3878,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:580` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:580` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3892,7 +3963,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 34. POST /scheduling/holds/{holdToken}/confirm
+## 35. POST /scheduling/holds/{holdToken}/confirm
 
 - **Origen:** CONTRATO
 - **Nombre:** Confirmar la cita a partir de la reserva temporal
@@ -3917,11 +3988,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:717` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:717` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3931,14 +4002,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.appointments` | ESCRIBE | CREA | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.createClinicalAppointment → ClinicalAppointmentsAdapter.create → AppointmentsRepository.create | `src/modules/clinical/repositories/appointments.repository.ts:80` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1160` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingBookingsRepository.findPatientNames | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1159` |
 | `scheduling.appointment_bookings` | ESCRIBE | CREA | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:293` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.findPatientBookingsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:872` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking | `src/modules/scheduling/application/bookings/support/booking-materializer.ts:285` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingController.confirmBooking → SchedulingBookingsService.confirmBooking → ConfirmBookingUseCase.execute → BookingMaterializer.materializeBooking → SlotPolicyResolver.resolvePolicy → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
@@ -4034,7 +4105,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 35. POST /scheduling/holds/{holdToken}/request
+## 36. POST /scheduling/holds/{holdToken}/request
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar la cita a partir de la reserva temporal
@@ -4051,7 +4122,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/holds/{holdToken}/request` la atiende `SchedulingController.requestBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:747). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `RequestBookingDto` (4 campos, 3 obligatorios). Delega en `SchedulingBookingsService.requestBooking`. Crea filas en clinical.appointments, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_bookings, scheduling.appointment_reminders. Actualiza iam.devices, messaging.notification_requests, scheduling.bookable_slots, scheduling.slot_holds. Lee billing.service_catalog, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 20 más.
+`POST /scheduling/holds/{holdToken}/request` la atiende `SchedulingController.requestBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:747). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `RequestBookingDto` (4 campos, 3 obligatorios). Delega en `SchedulingBookingsService.requestBooking`. Crea filas en audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests y 3 más. Actualiza audit.appointment_bookings_history, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.slot_holds. Lee audit.appointment_bookings_history, billing.service_catalog, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 27 más.
 
 ### Requerimientos
 
@@ -4059,47 +4130,62 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:747` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:747` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `audit.appointment_bookings_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
+| `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
+| `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingServiceAgendaService.offeringOfSlot → SchedulingOfferingsRepository.findCatalogItem | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:124` |
 | `clinical.appointments` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.createClinicalAppointment → ClinicalAppointmentsAdapter.create → AppointmentsRepository.create | `src/modules/clinical/repositories/appointments.repository.ts:80` |
-| `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.messaging_providers` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
-| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
-| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `community.conversation_participants` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createParticipant | `src/modules/community/repositories/conversations.repository.ts:161` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:284` |
+| `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
+| `community.conversations` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
+| `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `directory.tenants` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
+| `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
+| `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → ClinicalAppointmentSync.careSpaceFor → PracticeCareSpaceDirectoryAdapter.describe | `src/modules/scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts:39` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
 | `scheduling.appointment_bookings` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:293` |
-| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingChangeNotifier.notifyRequest → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:168` |
-| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1364` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending | `src/modules/scheduling/application/bookings/support/displaced-requests-canceller.ts:93` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → SchedulingBookingsRepository.findBookingByIdForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:397` |
+| `scheduling.appointment_reminders` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.createReminder | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1363` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingProfessionalTimeService.assertRangeFree → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking | `src/modules/scheduling/application/bookings/support/booking-materializer.ts:285` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → FinishAutoConfirmedRequestUseCase.execute → DisplacedRequestsCanceller.cancelConflictingPending → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SlotPolicyResolver.resolvePolicy → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingServiceAgendaService.offeringOfSlot → SchedulingOfferingsRepository.findOfferingById | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:53` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.requestBooking → SchedulingBookingsService.requestBooking → RequestBookingUseCase.execute → BookingMaterializer.materializeBooking → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
@@ -4174,7 +4260,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:341` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:344` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:264` |
 | INTEGRACION | `test/integration/fx4-retirar-horario-publicado.int-spec.ts:197` |
 | INTEGRACION | `test/integration/fx7-motivo-visible-al-paciente.int-spec.ts:197` |
@@ -4187,7 +4273,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 36. POST /scheduling/internal/dispatch-reminders
+## 37. POST /scheduling/internal/dispatch-reminders
 
 - **Origen:** CONTRATO
 - **Nombre:** Despachar los recordatorios cuya hora ya llegó
@@ -4204,7 +4290,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/internal/dispatch-reminders` la atiende `SchedulingInternalController.dispatchReminders` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:102). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingWaitlistService.dispatchReminders`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_reminders. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.devices y 17 más.
+`POST /scheduling/internal/dispatch-reminders` la atiende `SchedulingInternalController.dispatchReminders` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:102). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingWaitlistService.dispatchReminders`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_reminders. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.email_verifications y 16 más.
 
 ### Requerimientos
 
@@ -4212,10 +4298,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4226,16 +4312,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -4243,11 +4328,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.resolveRecipient → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
@@ -4255,7 +4340,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `scheduling.appointment_reminders` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → PostgresWaitlistAdapter.markRemindersSent | `src/modules/scheduling/infrastructure/adapters/postgres-waitlist.adapter.ts:306` |
 | `scheduling.appointment_reminders` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → PostgresWaitlistAdapter.markRemindersSent | `src/modules/scheduling/infrastructure/adapters/postgres-waitlist.adapter.ts:302` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:171` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:245` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingInternalController.dispatchReminders → SchedulingWaitlistService.dispatchReminders → SchedulingAgendaNoticesService.notifyReminders → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:243` |
 
 ### Cuerpo — DTO `WorkerBatchDto` · `application/json`
 
@@ -4310,7 +4395,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 37. POST /scheduling/internal/expire-holds
+## 38. POST /scheduling/internal/expire-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Liberar las reservas temporales vencidas
@@ -4327,7 +4412,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/internal/expire-holds` la atiende `SchedulingInternalController.expireHolds` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:47). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.expireHolds`. Actualiza scheduling.bookable_slots, scheduling.slot_holds. Lee scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates, scheduling.slot_holds.
+`POST /scheduling/internal/expire-holds` la atiende `SchedulingInternalController.expireHolds` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:47). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.expireHolds`. Actualiza scheduling.bookable_slots, scheduling.slot_holds. Lee scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates, scheduling.slot_holds.
 
 ### Requerimientos
 
@@ -4335,15 +4420,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingInternalController.expireHolds → SchedulingBookingsService.expireHolds → ExpireHoldsUseCase.execute → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.confirmedBookings → SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:949` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingInternalController.expireHolds → SchedulingBookingsService.expireHolds → ExpireHoldsUseCase.execute → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.expireHolds → SchedulingBookingsService.expireHolds → ExpireHoldsUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/expire-holds.use-case.ts:47` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingInternalController.expireHolds → SchedulingBookingsService.expireHolds → ExpireHoldsUseCase.execute → SchedulingBookingsRepository.findSlotForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:212` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingInternalController.expireHolds → SchedulingBookingsService.expireHolds → ExpireHoldsUseCase.execute → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
@@ -4407,7 +4494,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 38. POST /scheduling/internal/promote-waitlist/{slotId}
+## 39. POST /scheduling/internal/promote-waitlist/{slotId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Promover candidatos de la lista de espera a un slot con cupo
@@ -4424,7 +4511,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/internal/promote-waitlist/{slotId}` la atiende `SchedulingInternalController.promoteWaitlist` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:82). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingWaitlistService.promoteWaitlist`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.waitlist_entries. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.devices y 15 más.
+`POST /scheduling/internal/promote-waitlist/{slotId}` la atiende `SchedulingInternalController.promoteWaitlist` (src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:82). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `WorkerBatchDto` (1 campo, 0 obligatorios). Delega en `SchedulingWaitlistService.promoteWaitlist`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.waitlist_entries. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.email_verifications y 14 más.
 
 ### Requerimientos
 
@@ -4432,11 +4519,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: slotId | `src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:82` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4447,16 +4534,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -4464,7 +4550,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -4472,7 +4558,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → SchedulingNoticeRepository.describeSlot → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → SchedulingNoticeRepository.describeSlot → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → PostgresWaitlistAdapter.findSlotCapacity → SchedulingBookingsRepository.findSlotById | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:227` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → SchedulingNoticeRepository.describeSlot → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:245` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → SchedulingAgendaNoticesService.notifySlotReleased → SchedulingNoticeRepository.describeSlot → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:243` |
 | `scheduling.waitlist_entries` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → PostgresWaitlistAdapter.markCandidatesFulfilled | `src/modules/scheduling/infrastructure/adapters/postgres-waitlist.adapter.ts:212` |
 | `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingInternalController.promoteWaitlist → SchedulingWaitlistService.promoteWaitlist → PostgresWaitlistAdapter.markCandidatesFulfilled | `src/modules/scheduling/infrastructure/adapters/postgres-waitlist.adapter.ts:210` |
 
@@ -4536,7 +4622,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 39. GET /scheduling/internal/waitlist-candidates
+## 40. GET /scheduling/internal/waitlist-candidates
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar slots con cupo libre y candidatos activos en espera
@@ -4561,15 +4647,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingInternalController.listWaitlistCandidates → SchedulingWaitlistService.findSlotsWithCandidates → PostgresWaitlistAdapter.findSlotsWithActiveCandidates → SchedulingBookingsRepository.findSlotsWithWaitlistCandidates | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1423` |
-| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingInternalController.listWaitlistCandidates → SchedulingWaitlistService.findSlotsWithCandidates → PostgresWaitlistAdapter.findSlotsWithActiveCandidates → SchedulingBookingsRepository.findSlotsWithWaitlistCandidates | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1406` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingInternalController.listWaitlistCandidates → SchedulingWaitlistService.findSlotsWithCandidates → PostgresWaitlistAdapter.findSlotsWithActiveCandidates → SchedulingBookingsRepository.findSlotsWithWaitlistCandidates | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1422` |
+| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingInternalController.listWaitlistCandidates → SchedulingWaitlistService.findSlotsWithCandidates → PostgresWaitlistAdapter.findSlotsWithActiveCandidates → SchedulingBookingsRepository.findSlotsWithWaitlistCandidates | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1405` |
 
 ### Parámetros
 
@@ -4611,14 +4697,90 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 40. GET /scheduling/resources
+## 41. GET /scheduling/my-resources
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar mis agendas y cómo reciben las solicitudes de consulta
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SchedulingAgendaController.listMine` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:65`
+
+### Qué es y para qué sirve (negocio)
+
+Listar mis agendas y cómo reciben las solicitudes de consulta. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`GET /scheduling/my-resources` la atiende `SchedulingAgendaController.listMine` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:65). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN. Delega en `ListMyResourcesUseCase.execute`. Lee scheduling.schedulable_resources.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:65` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingAgendaController.listMine → ListMyResourcesUseCase.execute → SchedulingAgendaRepository.findResources | `src/modules/scheduling/infrastructure/repositories/scheduling-agenda.repository.ts:91` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | query | Sí | `string` | Tenant dueño de las agendas |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyResourcesResponseDto>` · DTO `MyResourcesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<ResourceApprovalDto>` | Sí | — | — | — | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:43` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:28` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:31` |
+| `items[].requiresApproval` | `boolean` | Sí | — | — | Si las solicitudes de consulta esperan que el profesional las acepte | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:37` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 41 — Scheduling (agenda) — etapa `ctrl:SchedulingAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 42. GET /scheduling/resources
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los recursos agendables de un tenant
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingAgendaController.listResources` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:49`
+- **Implementación:** `SchedulingAgendaController.listResources` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:132`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4628,23 +4790,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/resources` la atiende `SchedulingAgendaController.listResources` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:49). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingAgendaService.listResources`. Lee common.addresses, practice.care_spaces, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, scheduling.schedulable_resources.
+`GET /scheduling/resources` la atiende `SchedulingAgendaController.listResources` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:132). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingAgendaService.listResources`. Lee common.addresses, practice.care_spaces, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:132` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | SchedulingAgendaController.listResources → SchedulingAgendaService.listResources → PracticeProfilesDirectoryAdapter.resolveSitesForResources → PractitionerSitesService.resolveSitesForResources → PractitionerSitesService.loadSites → PractitionerSitesService.projectSite | `src/modules/practice/services/practitioner-sites.service.ts:620` |
+| `common.addresses` | LEE | LEE | DIRECTA | SchedulingAgendaController.listResources → SchedulingAgendaService.listResources → PracticeProfilesDirectoryAdapter.resolveSitesForResources → PractitionerSitesService.resolveSitesForResources → PractitionerSitesService.loadSites → PractitionerSitesService.projectSite | `src/modules/practice/services/practitioner-sites.service.ts:622` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | SchedulingAgendaController.listResources → SchedulingAgendaService.listResources → PracticeProfilesDirectoryAdapter.resolveSitesForResources → PractitionerSitesService.resolveSitesForResources → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | SchedulingAgendaController.listResources → SchedulingAgendaService.listResources → PracticeProfilesDirectoryAdapter.resolveSitesForResources → PractitionerSitesService.resolveSitesForResources → PractitionerSitesService.loadSites → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
 | `practice.practices` | LEE | LEE | DIRECTA | SchedulingAgendaController.listResources → SchedulingAgendaService.listResources → PracticeProfilesDirectoryAdapter.resolveSitesForResources → PractitionerSitesService.resolveSitesForResources → PractitionerSitesService.loadSites → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
@@ -4711,7 +4873,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 41. POST /scheduling/resources
+## 43. POST /scheduling/resources
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de alta un recurso agendable
@@ -4736,10 +4898,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4861,7 +5023,104 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 42. POST /scheduling/resources/{id}/close-slots
+## 44. PATCH /scheduling/resources/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar un recurso agendable
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SchedulingAgendaController.updateResource` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:79`
+
+### Qué es y para qué sirve (negocio)
+
+Editar un recurso agendable. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /scheduling/resources/{id}` la atiende `SchedulingAgendaController.updateResource` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:79). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `SchedulingUpdateResourceDto` (1 campo, 0 obligatorios). Delega en `UpdateResourceUseCase.execute`. Actualiza scheduling.schedulable_resources. Lee scheduling.schedulable_resources.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `scheduling.schedulable_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingAgendaController.updateResource → UpdateResourceUseCase.execute | `src/modules/scheduling/application/catalog/use-cases/update-resource.use-case.ts:47` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingAgendaController.updateResource → UpdateResourceUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SchedulingUpdateResourceDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `requiresApproval` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si las solicitudes de consulta esperan que el profesional las acepte. Con `false` nacen confirmadas. La oferta de un servicio sigue mandando sobre su cupo. | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:22` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "requiresApproval": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ResourceApprovalDto>` · DTO `ResourceApprovalDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:28` |
+| `name` | `string` | Sí | — | — | — | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:31` |
+| `requiresApproval` | `boolean` | Sí | — | — | Si las solicitudes de consulta esperan que el profesional las acepte | `src/modules/scheduling/presentation/dto/resource-approval.dto.ts:37` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 41 — Scheduling (agenda) — etapa `ctrl:SchedulingAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 45. POST /scheduling/resources/{id}/close-slots
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
@@ -4878,7 +5137,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/close-slots` la atiende `SchedulingController.closeSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:450). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CloseSlotsDto` (4 campos, 2 obligatorios). Delega en `SchedulingCatalogService.closeSlots`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 18 más.
+`POST /scheduling/resources/{id}/close-slots` la atiende `SchedulingController.closeSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:450). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CloseSlotsDto` (4 campos, 2 obligatorios). Delega en `SchedulingCatalogService.closeSlots`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 12 más.
 
 ### Requerimientos
 
@@ -4886,11 +5145,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:450` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:450` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4899,10 +5158,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
-| `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -4910,29 +5166,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:286` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:283` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.describe → SchedulingCatalogRepository.findBookingsOfSlots | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:959` |
 | `scheduling.availability_exceptions` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → SchedulingCatalogRepository.createException | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:783` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute | `src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts:268` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → SchedulingCatalogRepository.findSlotsOfResourceForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:941` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
-| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_rules` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findRulesByTemplates | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:477` |
 | `scheduling.schedule_templates` | LEE | LEE | DIRECTA | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findTemplateById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:438` |
-| `scheduling.slot_holds` | LEE | LEE | POR_SQL | SchedulingController.closeSlots → SchedulingCatalogService.closeSlots → CloseSlotsUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 
 ### Parámetros
 
@@ -5012,7 +5265,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 43. POST /scheduling/resources/{id}/delay
+## 46. POST /scheduling/resources/{id}/delay
 
 - **Origen:** CONTRATO
 - **Nombre:** Informar una demora que alcanza a toda la agenda del recurso
@@ -5029,7 +5282,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/delay` la atiende `SchedulingController.delayResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:852). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayResourceDto` (4 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayResource`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 16 más.
+`POST /scheduling/resources/{id}/delay` la atiende `SchedulingController.delayResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:852). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayResourceDto` (4 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayResource`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, messaging.in_app_notifications, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 15 más.
 
 ### Requerimientos
 
@@ -5037,11 +5290,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:852` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:852` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5055,16 +5308,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -5072,15 +5324,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingDelayService.notify → MessagingAgendaNoticeAdapter.emitMany → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.resolveRecipient → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:442` |
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:435` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:440` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingNoticeRepository.findAffectedBookings | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:433` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.delayResource → SchedulingDelayService.delayResource → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 
 ### Parámetros
@@ -5155,7 +5407,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 44. GET /scheduling/resources/{id}/exceptions
+## 47. GET /scheduling/resources/{id}/exceptions
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las excepciones de disponibilidad de un recurso
@@ -5180,11 +5432,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:404` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:404` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5247,7 +5499,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 45. POST /scheduling/resources/{id}/exceptions
+## 48. POST /scheduling/resources/{id}/exceptions
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una excepción de disponibilidad
@@ -5264,7 +5516,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.createException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:548). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateExceptionDto` (6 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createException`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 18 más.
+`POST /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.createException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:548). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateExceptionDto` (6 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createException`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 12 más.
 
 ### Requerimientos
 
@@ -5272,11 +5524,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:548` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:548` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5285,10 +5537,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
-| `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -5296,29 +5545,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:286` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:283` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.describe → SchedulingCatalogRepository.findBookingsOfSlots | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:959` |
 | `scheduling.availability_exceptions` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → SchedulingCatalogRepository.createException | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:783` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute | `src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts:153` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → SchedulingCatalogRepository.findOpenSlotsInWindow | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1213` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
-| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
 | `scheduling.schedule_rules` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findRulesByTemplates | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:477` |
 | `scheduling.schedule_templates` | LEE | LEE | DIRECTA | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.isFlexible → SchedulingCatalogRepository.findTemplateById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:438` |
-| `scheduling.slot_holds` | LEE | LEE | POR_SQL | SchedulingController.createException → SchedulingCatalogService.createException → CreateExceptionUseCase.execute → CreateExceptionUseCase.cancelBookingsOfBlock → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ServiceSlotLifecycle.discardOneOffSlot → ServiceSlotLifecycle.reopenRetractedConsultationsOf → SchedulingServiceAgendaService.reopenSpan → SchedulingServiceAgendaService.reopen → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 
 ### Parámetros
 
@@ -5401,7 +5647,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 46. GET /scheduling/resources/{id}/flexible-availability
+## 49. GET /scheduling/resources/{id}/flexible-availability
 
 - **Origen:** CONTRATO
 - **Nombre:** Horas que se pueden pedir en un horario flexible
@@ -5426,18 +5672,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts:41` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.confirmedBookings → SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:949` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingFlexibleBookingService.offersOf → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SchedulingFlexibleController.availability → SchedulingFlexibleBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:242` |
@@ -5495,7 +5741,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 47. POST /scheduling/resources/{id}/flexible-holds
+## 50. POST /scheduling/resources/{id}/flexible-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Retener una hora de un horario flexible
@@ -5520,11 +5766,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts:63` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5532,12 +5778,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingFlexibleBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
 | `practice.practices` | LEE | LEE | POR_SQL | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingFlexibleBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingFlexibleBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.findOfPractitioner | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:31` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingFlexibleBookingService.assertPatientBelowCap → SchedulingBookingsRepository.countActiveBookingsForPatient | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:741` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | CREA | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingCatalogRepository.createSlot | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:806` |
 | `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingFlexibleController.placeHold → SchedulingFlexibleBookingService.placeHold → SchedulingFlexibleBookingService.offersOf → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
@@ -5618,7 +5864,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 48. POST /scheduling/resources/{id}/shift-slots
+## 51. POST /scheduling/resources/{id}/shift-slots
 
 - **Origen:** CONTRATO
 - **Nombre:** Correr los cupos de una agenda N minutos
@@ -5635,7 +5881,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/shift-slots` la atiende `SchedulingController.shiftSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:482). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `ShiftSlotsDto` (4 campos, 3 obligatorios). Delega en `SchedulingCatalogService.shiftSlots`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.devices y 16 más.
+`POST /scheduling/resources/{id}/shift-slots` la atiende `SchedulingController.shiftSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:482). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `ShiftSlotsDto` (4 campos, 3 obligatorios). Delega en `SchedulingCatalogService.shiftSlots`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, messaging.in_app_notifications, messaging.notification_requests, scheduling.bookable_slots. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.email_verifications y 15 más.
 
 ### Requerimientos
 
@@ -5643,11 +5889,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:482` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:482` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5658,16 +5904,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.conversations` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
 | `community.conversations` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:348` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityVisibilityService.assertActsAsProfile → CommunityVisibilityService.isHolder → CommunityOrganizationStaffService.canAdminister → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `directory.tenants` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → CommunityMessagingService.createSystemDirectConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:129` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.enqueueEmail → SchedulingNoticeRepository.findEmailForUser | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:138` |
-| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:156` |
+| `iam.users` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → MessagingAgendaNoticeAdapter.sendByChat → SupportAdminNoticeAdapter.notify → SupportAdminNoticeAdapter.getOrCreateRecipientProfile | `src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter.ts:163` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -5675,11 +5920,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.shiftSlots → SchedulingCatalogService.shiftSlots → ShiftSlotsUseCase.execute → SlotMoveNotifier.notifyOfMove → SchedulingNoticeRepository.findAccountForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:95` |
@@ -5763,7 +6008,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 49. GET /scheduling/resources/{id}/slots
+## 52. GET /scheduling/resources/{id}/slots
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-41-14: agenda publicada del recurso en una ventana
@@ -5788,11 +6033,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:122` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5867,7 +6112,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 50. GET /scheduling/resources/{id}/templates
+## 53. GET /scheduling/resources/{id}/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las plantillas de agenda de un recurso
@@ -5892,9 +6137,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:247` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:247` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5967,7 +6212,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 51. POST /scheduling/resources/{id}/templates
+## 54. POST /scheduling/resources/{id}/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar una plantilla de agenda con sus franjas
@@ -5992,11 +6237,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:214` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:214` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6130,7 +6375,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 52. GET /scheduling/resources/{resourceId}/waitlist
+## 55. GET /scheduling/resources/{resourceId}/waitlist
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar quiénes esperan turno en una agenda
@@ -6155,18 +6400,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:825` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: resourceId | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:825` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → PostgresWaitlistAdapter.findEntriesForResource → SchedulingNoticeRepository.findWaitlistByResource → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
-| `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → PostgresWaitlistAdapter.findEntriesForResource → SchedulingNoticeRepository.findWaitlistByResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:367` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → SchedulingWaitlistService.assertOperatesAgenda → PostgresWaitlistAdapter.findResourcePractitioner → SchedulingNoticeRepository.findResourcePractitionerProfileId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:412` |
-| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → PostgresWaitlistAdapter.findEntriesForResource → SchedulingNoticeRepository.findWaitlistByResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:353` |
+| `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → PostgresWaitlistAdapter.findEntriesForResource → SchedulingNoticeRepository.findWaitlistByResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:365` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → SchedulingWaitlistService.assertOperatesAgenda → PostgresWaitlistAdapter.findResourcePractitioner → SchedulingNoticeRepository.findResourcePractitionerProfileId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:410` |
+| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingController.listResourceWaitlist → SchedulingWaitlistService.listForResource → PostgresWaitlistAdapter.findEntriesForResource → SchedulingNoticeRepository.findWaitlistByResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:351` |
 
 ### Parámetros
 
@@ -6220,7 +6465,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 53. GET /scheduling/service-availability
+## 56. GET /scheduling/service-availability
 
 - **Origen:** CONTRATO
 - **Nombre:** Horarios donde cabe un servicio
@@ -6245,11 +6490,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | offeringId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6257,7 +6502,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceBookingService.visibleOffering → SchedulingOfferingsRepository.findCatalogItem | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:124` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.confirmedBookings → SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:949` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingOfferingsRepository.findLiveHoldsOfProfessional | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:159` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceAgendaService.bandsOfServices → SchedulingServiceAgendaService.policyOf → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.availability → SchedulingServiceBookingService.availability → SchedulingServiceBookingService.visibleOffering → SchedulingOfferingsRepository.findOfferingById | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:53` |
@@ -6315,7 +6560,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 54. GET /scheduling/service-offerings
+## 57. GET /scheduling/service-offerings
 
 - **Origen:** CONTRATO
 - **Nombre:** Los servicios que ofrece un profesional
@@ -6340,8 +6585,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6403,7 +6648,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. POST /scheduling/service-offerings
+## 58. POST /scheduling/service-offerings
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar cómo ofrezco un servicio
@@ -6428,10 +6673,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6528,7 +6773,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 56. PATCH /scheduling/service-offerings/{id}
+## 59. PATCH /scheduling/service-offerings/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar o apagar la oferta de un servicio
@@ -6553,11 +6798,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:95` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6652,7 +6897,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 57. POST /scheduling/service-offerings/{id}/holds
+## 60. POST /scheduling/service-offerings/{id}/holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Retener el turno de un servicio
@@ -6677,11 +6922,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:132` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts:132` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6690,12 +6935,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `billing.service_catalog` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingOfferingsRepository.findCatalogItem | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:124` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
 | `practice.practices` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.tenantsOfSites | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:55` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceBookingService.assertAffiliationCurrent → PractitionerAffiliationGateService.evaluate → ProfilesAffiliationsAdapter.findOfPractitioner | `src/modules/scheduling/infrastructure/adapters/profiles-affiliations.adapter.ts:31` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.confirmedBookings → SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:949` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceAgendaService.practitionerBusyTime → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceAgendaService.retract | `src/modules/scheduling/application/service-offerings/scheduling-service-agenda.service.ts:228` |
 | `scheduling.bookable_slots` | ESCRIBE | CREA | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingCatalogRepository.createSlot | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:806` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingServiceOfferingsController.placeHold → SchedulingServiceBookingService.placeHold → SchedulingServiceAgendaService.retract → SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:739` |
@@ -6779,14 +7024,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 58. GET /scheduling/slots
+## 61. GET /scheduling/slots
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar los cupos de una ventana
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingAgendaController.listSlots` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:63`
+- **Implementación:** `SchedulingAgendaController.listSlots` — `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:146`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -6796,18 +7041,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/slots` la atiende `SchedulingAgendaController.listSlots` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:63). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingAgendaService.listSlots`. Lee billing.service_catalog, scheduling.bookable_slots, scheduling.schedulable_resources.
+`GET /scheduling/slots` la atiende `SchedulingAgendaController.listSlots` (src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:146). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingAgendaService.listSlots`. Lee billing.service_catalog, scheduling.bookable_slots, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts:146` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6879,7 +7124,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 59. POST /scheduling/slots/{id}/holds
+## 62. POST /scheduling/slots/{id}/holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Reservar temporalmente un cupo del slot
@@ -6904,18 +7149,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:694` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:694` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → BookingAccess.assertMayActForPatient → ProfilesPatientRepresentationAdapter.assertMayActForPatient → PatientRepresentationService.assertMayActForPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute → SchedulingBookingsRepository.countActiveBookingsForPatient | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:741` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.placeHold → SchedulingBookingsService.placeHold → PlaceHoldUseCase.execute | `src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts:146` |
@@ -6981,7 +7226,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:254` |
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:335` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:338` |
 | INTEGRACION | `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts:258` |
 | INTEGRACION | `test/integration/fx4-retirar-horario-publicado.int-spec.ts:191` |
 | INTEGRACION | `test/integration/fx7-motivo-visible-al-paciente.int-spec.ts:192` |
@@ -6999,7 +7244,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 60. DELETE /scheduling/templates/{id}
+## 63. DELETE /scheduling/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una plantilla de agenda y soltar sus cupos libres
@@ -7016,7 +7261,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /scheduling/templates/{id}` la atiende `SchedulingController.retireTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:325). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.retireTemplate`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedule_templates. Borra de scheduling.bookable_slots, scheduling.slot_holds. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 14 más.
+`DELETE /scheduling/templates/{id}` la atiende `SchedulingController.retireTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:325). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.retireTemplate`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedule_templates. Borra de scheduling.bookable_slots, scheduling.slot_holds. Lee audit.appointment_bookings_history, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 13 más.
 
 ### Requerimientos
 
@@ -7024,9 +7269,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:325` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:325` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7035,8 +7280,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.appointment_bookings_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | ESCRIBE | CREA | POR_REGISTRO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
 | `audit.appointment_bookings_history` | LEE | LEE | POR_REGISTRO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.recordTransition → AuditBookingHistoryAdapter.append | `src/modules/scheduling/infrastructure/adapters/audit-booking-history.adapter.ts:23` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -7044,22 +7288,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → MessagingAgendaNoticeAdapter.emit → MessagingAgendaNoticeAdapter.deliver → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:230` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.describeBooking → SchedulingNoticeRepository.describeSite | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:228` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.announce → CancelBookingUseCase.announceChange → BookingChangeNotifier.notifyChange → SchedulingNoticeRepository.findResourceAccount → SchedulingNoticeRepository.findAccountForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:77` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.describe → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:286` |
+| `scheduling.appointment_bookings` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction | `src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts:283` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.findBookingsOfTemplate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:872` |
 | `scheduling.bookable_slots` | BORRA | BORRA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.retireTemplate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1054` |
 | `scheduling.bookable_slots` | ESCRIBE | ACTUALIZA | POR_TIPO | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.retireTemplate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1045` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.findSlotsOfTemplateForUpdate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1261` |
-| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1266` |
+| `scheduling.booking_cancellations` | ESCRIBE | CREA | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingBookingsRepository.createCancellation | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1265` |
 | `scheduling.booking_policies` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → BlockedBookingsCanceller.cancelAll → CancelBookingUseCase.cancelInTransaction → SchedulingCatalogRepository.findPolicyById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:385` |
 | `scheduling.booking_reschedules` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.retireTemplate | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1026` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.retireTemplate → SchedulingCatalogService.retireTemplate → RetireTemplateUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
@@ -7122,7 +7366,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 61. PATCH /scheduling/templates/{id}
+## 64. PATCH /scheduling/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar una plantilla de agenda ya publicada
@@ -7147,11 +7391,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:294` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:294` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7261,7 +7505,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 62. POST /scheduling/templates/{id}/generate-slots
+## 65. POST /scheduling/templates/{id}/generate-slots
 
 - **Origen:** CONTRATO
 - **Nombre:** Materializar los slots de la plantilla en una ventana
@@ -7286,18 +7530,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:370` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:370` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.confirmedBookings → SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:949` |
-| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1121` |
+| `scheduling.availability_exceptions` | LEE | LEE | POR_SQL | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingProfessionalTimeService.commitments → SchedulingProfessionalTimeService.busyTime → SchedulingBookingsRepository.findProfessionalBusyExceptionsOverlapping | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1120` |
 | `scheduling.bookable_slots` | ESCRIBE | CREA | DIRECTA | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingCatalogRepository.createSlot | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:806` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingCatalogRepository.findSlotsByTemplateInRange | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:1105` |
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.generateSlots → SchedulingCatalogService.generateSlots → GenerateSlotsUseCase.execute → SchedulingCatalogRepository.findResourceById | `src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts:339` |
@@ -7385,7 +7629,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 63. GET /scheduling/templates/{id}/live-bookings
+## 66. GET /scheduling/templates/{id}/live-bookings
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las citas vivas de una plantilla antes de retirarla
@@ -7410,9 +7654,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:355` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:355` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7477,7 +7721,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 64. POST /scheduling/templates/{id}/reactivate
+## 67. POST /scheduling/templates/{id}/reactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Reactivar un horario retirado
@@ -7502,9 +7746,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:266` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:266` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7557,7 +7801,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 65. GET /scheduling/waitlist
+## 68. GET /scheduling/waitlist
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las entradas de lista de espera de un paciente
@@ -7582,21 +7826,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:793` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile → SchedulingNoticeRepository.resolvePersonId | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:97` |
 | `profiles.persons` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient → SchedulingNoticeRepository.describeResource → SchedulingNoticeRepository.findDisplayNameForProfile | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:154` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:245` |
-| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:304` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient → SchedulingNoticeRepository.describeResource | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:243` |
+| `scheduling.waitlist_entries` | LEE | LEE | DIRECTA | SchedulingController.listWaitlist → SchedulingWaitlistService.listForPatient → PostgresWaitlistAdapter.findEntriesForPatient → SchedulingNoticeRepository.findWaitlistByPatient | `src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts:302` |
 
 ### Parámetros
 
@@ -7651,7 +7895,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 66. POST /scheduling/waitlist
+## 69. POST /scheduling/waitlist
 
 - **Origen:** CONTRATO
 - **Nombre:** Inscribir a un paciente en la lista de espera
@@ -7676,19 +7920,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:770` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → SchedulingWaitlistService.assertMaySeePatient → ProfilesPatientRepresentationAdapter.representsPatient → PatientRepresentationService.representsPatient → PatientRepresentationService.isOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.waitlist_entries` | ESCRIBE | CREA | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → PostgresWaitlistAdapter.enroll → SchedulingBookingsRepository.createWaitlistEntry | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1294` |
+| `scheduling.waitlist_entries` | ESCRIBE | CREA | DIRECTA | SchedulingController.enrollWaitlist → SchedulingWaitlistService.enroll → PostgresWaitlistAdapter.enroll → SchedulingBookingsRepository.createWaitlistEntry | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1293` |
 
 ### Cuerpo — DTO `CreateWaitlistEntryDto` · `application/json`
 
@@ -7749,7 +7993,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:398` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:401` |
 | INTEGRACION | `test/integration/waitlist-cupo-liberado.int-spec.ts:284` |
 | CONTROLADOR | `src/modules/scheduling/presentation/controllers/scheduling.controller.spec.ts:191` |
 
@@ -7760,7 +8004,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 ---
 
-## 67. GET /tenants/{tenantId}/agenda
+## 70. GET /tenants/{tenantId}/agenda
 
 - **Origen:** CONTRATO
 - **Nombre:** La agenda de la organización
@@ -7785,17 +8029,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/scheduling/presentation/controllers/tenant-agenda.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/scheduling/presentation/controllers/tenant-agenda.controller.ts:36` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantAgendaController.list → SchedulingTenantAgendaService.list → DirectoryTenantDirectoryAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantAgendaController.list → SchedulingTenantAgendaService.list → DirectoryTenantDirectoryAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `profiles.persons` | LEE | LEE | DIRECTA | TenantAgendaController.list → SchedulingTenantAgendaService.list → SchedulingTenantAgendaService.project → DirectoryTenantDirectoryAdapter.findDisplayNames | `src/modules/scheduling/infrastructure/adapters/directory-tenant-directory.adapter.ts:27` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | TenantAgendaController.list → SchedulingTenantAgendaService.list → SchedulingBookingsRepository.findTenantAgenda | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:700` |
 | `scheduling.bookable_slots` | LEE | LEE | DIRECTA | TenantAgendaController.list → SchedulingTenantAgendaService.list → SchedulingBookingsRepository.findTenantAgenda | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:710` |

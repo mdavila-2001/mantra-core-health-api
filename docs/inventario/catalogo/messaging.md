@@ -18,20 +18,20 @@
 | [delivery_reconciliation_runs](#delivery_reconciliation_runs) | Registra conciliaciones entre entregas internas y estados reportados por proveedores para detectar discrepancias. | 13 | 3 | 0 | COINCIDE |
 | [delivery_status_transitions](#delivery_status_transitions) | Preserva transiciones de estado de entregas para reconstruir su evolución hasta el resultado final. | 9 | 5 | 0 | COINCIDE |
 | [delivery_tracking_events](#delivery_tracking_events) | Mantiene eventos de seguimiento de mensajes recibidos desde canales y proveedores de comunicación. | 24 | 11 | 0 | COINCIDE |
-| [domain_events](#domain_events) | Conserva eventos de dominio que comunican cambios relevantes entre módulos del sistema médico. | 13 | 5 | 128 | COINCIDE |
+| [domain_events](#domain_events) | Conserva eventos de dominio que comunican cambios relevantes entre módulos del sistema médico. | 13 | 5 | 131 | COINCIDE |
 | [event_deliveries](#event_deliveries) | Registra entregas de eventos a suscriptores para conocer estado, reintentos y resultado de publicación. | 9 | 6 | 4 | COINCIDE |
 | [event_subscriptions](#event_subscriptions) | Define suscripciones de consumidores a eventos de dominio para dirigir actualizaciones a módulos interesados. | 15 | 6 | 1 | COINCIDE |
-| [in_app_notifications](#in_app_notifications) | Registra notificaciones visibles dentro de la aplicación para comunicar eventos a pacientes y profesionales. | 31 | 8 | 83 | COINCIDE |
-| [message_channels](#message_channels) | Cataloga canales de comunicación disponibles para enviar mensajes transaccionales y asistenciales. | 11 | 5 | 76 | COINCIDE |
-| [message_queues](#message_queues) | Cataloga colas usadas para desacoplar procesos y administrar entregas asíncronas. | 13 | 5 | 16 | COINCIDE |
-| [message_templates](#message_templates) | Define plantillas reutilizables para comunicaciones con pacientes, profesionales y organizaciones. | 16 | 8 | 51 | COINCIDE |
-| [messaging_providers](#messaging_providers) | Identifica proveedores que transportan mensajes por los canales habilitados. | 22 | 6 | 58 | COINCIDE |
-| [notification_deliveries](#notification_deliveries) | Mantiene intentos y resultados de entrega de notificaciones para verificar comunicaciones enviadas. | 36 | 8 | 95 | COINCIDE |
-| [notification_requests](#notification_requests) | Registra solicitudes de notificación y su contexto antes de seleccionar canal y proveedor de entrega. | 35 | 11 | 165 | COINCIDE |
-| [outbox_messages](#outbox_messages) | Mantiene mensajes salientes en la misma frontera transaccional que cambios de negocio para publicarlos sin perder eventos. | 20 | 7 | 257 | COINCIDE |
-| [provider_channel_configs](#provider_channel_configs) | Configura la relación entre un proveedor de mensajería y un canal para dirigir entregas. | 26 | 8 | 57 | COINCIDE |
-| [queued_jobs](#queued_jobs) | Representa trabajos encolados para ejecutar operaciones diferidas del sistema médico. | 22 | 7 | 66 | COINCIDE |
-| [recipient_preferences](#recipient_preferences) | Registra preferencias de destinatarios para respetar canales, horarios y elecciones de comunicación. | 13 | 8 | 75 | COINCIDE |
+| [in_app_notifications](#in_app_notifications) | Registra notificaciones visibles dentro de la aplicación para comunicar eventos a pacientes y profesionales. | 31 | 8 | 221 | COINCIDE |
+| [message_channels](#message_channels) | Cataloga canales de comunicación disponibles para enviar mensajes transaccionales y asistenciales. | 11 | 5 | 103 | COINCIDE |
+| [message_queues](#message_queues) | Cataloga colas usadas para desacoplar procesos y administrar entregas asíncronas. | 13 | 5 | 18 | COINCIDE |
+| [message_templates](#message_templates) | Define plantillas reutilizables para comunicaciones con pacientes, profesionales y organizaciones. | 16 | 8 | 54 | COINCIDE |
+| [messaging_providers](#messaging_providers) | Identifica proveedores que transportan mensajes por los canales habilitados. | 22 | 6 | 84 | COINCIDE |
+| [notification_deliveries](#notification_deliveries) | Mantiene intentos y resultados de entrega de notificaciones para verificar comunicaciones enviadas. | 36 | 8 | 123 | COINCIDE |
+| [notification_requests](#notification_requests) | Registra solicitudes de notificación y su contexto antes de seleccionar canal y proveedor de entrega. | 35 | 11 | 199 | COINCIDE |
+| [outbox_messages](#outbox_messages) | Mantiene mensajes salientes en la misma frontera transaccional que cambios de negocio para publicarlos sin perder eventos. | 20 | 7 | 263 | COINCIDE |
+| [provider_channel_configs](#provider_channel_configs) | Configura la relación entre un proveedor de mensajería y un canal para dirigir entregas. | 26 | 8 | 83 | COINCIDE |
+| [queued_jobs](#queued_jobs) | Representa trabajos encolados para ejecutar operaciones diferidas del sistema médico. | 22 | 7 | 72 | COINCIDE |
+| [recipient_preferences](#recipient_preferences) | Registra preferencias de destinatarios para respetar canales, horarios y elecciones de comunicación. | 13 | 8 | 103 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -860,7 +860,7 @@ Conserva eventos de dominio que comunican cambios relevantes entre módulos del 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: domain_events`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `DomainEvents` — `src/modules/messaging/entities/domain_events.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 3 FK salientes · 4 entrantes · 128 operaciones
+- **Resumen:** 13 columnas · 5 índices · 3 FK salientes · 4 entrantes · 131 operaciones
 
 #### Columnas
 
@@ -910,6 +910,7 @@ Conserva eventos de dominio que comunican cambios relevantes entre módulos del 
 | PATCH /accounting/infrastructure-items/{id} | CREA | DIRECTA |
 | POST /authz/care-relationships/{id}/respond | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | CREA | DIRECTA |
 | POST /automation/agent-runs/{id}/approvals | CREA | DIRECTA |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | CREA | DIRECTA |
 | POST /automation/agent-runs/{id}/steps | CREA | DIRECTA |
@@ -955,6 +956,8 @@ Conserva eventos de dominio que comunican cambios relevantes entre módulos del 
 | PATCH /org/user-assignments/{id} | CREA | DIRECTA |
 | PATCH /diagnostic-equipment/{id} | CREA | DIRECTA |
 | POST /diagnostic-equipment/{id}/resource | CREA | DIRECTA |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | CREA | DIRECTA |
+| POST /diagnostics/lab/orders | CREA | DIRECTA |
 | POST /graph/access-scopes | CREA | DIRECTA |
 | PATCH /graph/access-scopes/{id} | CREA | DIRECTA |
 | POST /graph/analytics/community-detection | CREA | DIRECTA |
@@ -1205,7 +1208,7 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: in_app_notifications`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `InAppNotifications` — `src/modules/messaging/entities/in_app_notifications.entity.ts`
-- **Resumen:** 31 columnas · 8 índices · 10 FK salientes · 0 entrantes · 83 operaciones
+- **Resumen:** 31 columnas · 8 índices · 10 FK salientes · 0 entrantes · 221 operaciones
 
 #### Columnas
 
@@ -1266,7 +1269,7 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 | `ix_in_app_notifications_tenant_id` | no | tenant_id | Soporta la clave foránea fk_in_app_notifications_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_in_app_notifications_channel_concept_id` | no | channel_concept_id | Soporta la clave foránea fk_in_app_notifications_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_in_app_notifications_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_in_app_notifications_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_in_app_notifications_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_in_app_notifications_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_in_app_notifications_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_in_app_notifications_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_in_app_notifications_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_in_app_notifications_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_in_app_notifications_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_in_app_notifications_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_in_app_notifications_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1275,88 +1278,226 @@ Registra notificaciones visibles dentro de la aplicación para comunicar eventos
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /authz/care-relationships/request | ACTUALIZA | POR_TIPO |
 | POST /authz/care-relationships/request | CREA | DIRECTA |
 | POST /authz/care-relationships/request | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | ACTUALIZA | POR_TIPO |
+| POST /authz/me/primary-practitioner-requests | CREA | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/{id}/close | CREA | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/check-in | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
+| POST /clinical/internal/prescription-expiry-notices | ACTUALIZA | POR_TIPO |
 | POST /clinical/internal/prescription-expiry-notices | CREA | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
+| POST /clinical/medication-requests/{id}/issue | ACTUALIZA | POR_TIPO |
 | POST /clinical/medication-requests/{id}/issue | CREA | DIRECTA |
 | POST /clinical/medication-requests/{id}/issue | LEE | DIRECTA |
+| POST /clinical/requisitions | ACTUALIZA | POR_TIPO |
 | POST /clinical/requisitions | CREA | DIRECTA |
 | POST /clinical/requisitions | LEE | DIRECTA |
+| POST /clinical/service-requests | ACTUALIZA | POR_TIPO |
 | POST /clinical/service-requests | CREA | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| POST /referrals | ACTUALIZA | POR_TIPO |
 | POST /referrals | CREA | DIRECTA |
+| POST /community/conversations/{conversationId}/messages | ACTUALIZA | POR_TIPO |
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | ACTUALIZA | POR_TIPO |
+| PATCH /community/groups/{groupId}/members/{member} | CREA | DIRECTA |
+| POST /community/groups/{groupId}/posts | ACTUALIZA | POR_TIPO |
+| POST /community/groups/{groupId}/posts | CREA | DIRECTA |
+| POST /consent/practitioner-access-requests | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests | CREA | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
-| POST /iam/auth/register-practitioner | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | ACTUALIZA | POR_TIPO |
+| POST /affiliation-invitations/redeem | CREA | DIRECTA |
+| POST /diagnostics/critical-results | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/critical-results | CREA | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/report-drafts/{id}/signature-request | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/reports/{reportId}/patient-release | CREA | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
+| POST /insurance-claims/{id}/patient-invoice | ACTUALIZA | POR_TIPO |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
+| POST /internal/notifications/{requestId}/deliver | ACTUALIZA | POR_TIPO |
 | POST /internal/notifications/{requestId}/deliver | CREA | DIRECTA |
+| POST /internal/notifications/in-app/release-due | ACTUALIZA | POR_TIPO |
+| POST /internal/notifications/in-app/release-due | LEE | DIRECTA |
 | POST /notifications/in-app/{id}/read | ACTUALIZA | POR_TIPO |
 | POST /notifications/in-app/{id}/read | LEE | DIRECTA |
 | POST /notifications/in-app/read-all | ACTUALIZA | POR_TIPO |
 | POST /notifications/in-app/read-all | LEE | DIRECTA |
 | GET /notifications/me | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | ACTUALIZA | POR_TIPO |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | ACTUALIZA | POR_TIPO |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | ACTUALIZA | POR_TIPO |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /visit-records | ACTUALIZA | POR_TIPO |
+| POST /visit-records | CREA | DIRECTA |
+| POST /visit-records | LEE | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | ACTUALIZA | POR_TIPO |
+| POST /visit-records/{visitRecordId}/rating | CREA | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | LEE | DIRECTA |
+| POST /visit-requests | ACTUALIZA | POR_TIPO |
+| POST /visit-requests | CREA | DIRECTA |
+| POST /visit-requests | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/accept | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/cancel | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/propose-time | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/reject | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/request-info | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | ACTUALIZA | POR_TIPO |
+| POST /visit-requests/{visitRequestId}/reschedule | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /internal/reservations/expire | ACTUALIZA | POR_TIPO |
+| POST /internal/reservations/expire | CREA | DIRECTA |
+| POST /internal/reservations/expire | LEE | DIRECTA |
+| GET /pharmacy/orders | ACTUALIZA | POR_TIPO |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
+| GET /pharmacy/orders/{id} | ACTUALIZA | POR_TIPO |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/confirm | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/confirm | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/dispense | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/dispense | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/ready | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/ready | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/reject | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/reject | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/review | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/review | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
+| GET /pharmacy/orders/me | ACTUALIZA | POR_TIPO |
 | GET /pharmacy/orders/me | CREA | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /procedure-cases/{id} | CREA | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | ACTUALIZA | POR_TIPO |
+| POST /procedure-cases/{id}/confirm | CREA | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | ACTUALIZA | POR_TIPO |
+| POST /procedure-cases/{id}/preoperative-assessments | CREA | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | ACTUALIZA | POR_TIPO |
 | POST /procedure-cases/{id}/preoperative-orders | CREA | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | ACTUALIZA | POR_TIPO |
+| POST /procedure-cases/{id}/team-members | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | ACTUALIZA | POR_TIPO |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
+| POST /admissions/{id}/claim | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/claim | CREA | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/request-info | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/request-info | CREA | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/suspend | CREA | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
 | POST /admissions/expire-sweep | CREA | DIRECTA |
+| POST /profiles/patients/me/dependent-requests | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/me/dependent-requests | CREA | DIRECTA |
 | POST /profiles/patients/me/dependent-requests | LEE | DIRECTA |
+| POST /profiles/patients/me/dependent-requests/{id}/accept | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/me/dependent-requests/{id}/accept | CREA | DIRECTA |
 | POST /profiles/patients/me/dependent-requests/{id}/accept | LEE | DIRECTA |
+| POST /profiles/patients/me/dependent-requests/{id}/reject | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/me/dependent-requests/{id}/reject | CREA | DIRECTA |
 | POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
+| POST /profiles/practitioners/{profileId}/affiliations | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/{profileId}/affiliations | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/withdraw | CREA | DIRECTA |
+| POST /profiles/practitioners/me/affiliations | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/affiliations | CREA | DIRECTA |
+| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | ACTUALIZA | POR_TIPO |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | CREA | DIRECTA |
+| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | ACTUALIZA | POR_TIPO |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | CREA | DIRECTA |
+| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | ACTUALIZA | POR_TIPO |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | CREA | DIRECTA |
+| POST /scheduling/appointments/direct | ACTUALIZA | POR_TIPO |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/payment-receipts | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | ACTUALIZA | POR_TIPO |
 | POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | ACTUALIZA | POR_TIPO |
 | POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | ACTUALIZA | POR_TIPO |
 | POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/close-slots | ACTUALIZA | POR_TIPO |
 | POST /scheduling/resources/{id}/close-slots | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/delay | ACTUALIZA | POR_TIPO |
 | POST /scheduling/resources/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/exceptions | ACTUALIZA | POR_TIPO |
 | POST /scheduling/resources/{id}/exceptions | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | ACTUALIZA | POR_TIPO |
 | POST /scheduling/resources/{id}/shift-slots | CREA | DIRECTA |
+| DELETE /scheduling/templates/{id} | ACTUALIZA | POR_TIPO |
 | DELETE /scheduling/templates/{id} | CREA | DIRECTA |
 
 #### Gobierno
@@ -1382,7 +1523,7 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_channels`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageChannels` — `src/modules/messaging/entities/message_channels.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 11 entrantes · 76 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 11 entrantes · 103 operaciones
 
 #### Columnas
 
@@ -1443,6 +1584,7 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
 | POST /authz/care-relationships/request | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
@@ -1455,14 +1597,20 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -1474,6 +1622,20 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | GET /notifications/preferences/me | LEE | DIRECTA |
 | PUT /notifications/preferences/me | LEE | DIRECTA |
 | POST /notifications/requests | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /visit-records | LEE | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | LEE | DIRECTA |
+| POST /visit-requests | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -1482,7 +1644,12 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | LEE | DIRECTA |
 | POST /admissions/{id}/reinstate | LEE | DIRECTA |
@@ -1494,6 +1661,7 @@ Cataloga canales de comunicación disponibles para enviar mensajes transaccional
 | POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
@@ -1540,7 +1708,7 @@ Cataloga colas usadas para desacoplar procesos y administrar entregas asíncrona
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_queues`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageQueues` — `src/modules/messaging/entities/message_queues.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 3 entrantes · 16 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 3 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -1596,10 +1764,12 @@ Cataloga colas usadas para desacoplar procesos y administrar entregas asíncrona
 | POST /internal/audio-assets/pregenerate | LEE | DIRECTA |
 | POST /common/files/upload | LEE | DIRECTA |
 | POST /internal/storage-lifecycle/audio/{assetId}/begin | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-logo | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | DIRECTA |
 | POST /internal/events/{domainEventId}/dispatch | LEE | DIRECTA |
@@ -1632,7 +1802,7 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_templates`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageTemplates` — `src/modules/messaging/entities/message_templates.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 3 entrantes · 51 operaciones
+- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 3 entrantes · 54 operaciones
 
 #### Columnas
 
@@ -1699,6 +1869,7 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
@@ -1707,6 +1878,7 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -1721,6 +1893,7 @@ Define plantillas reutilizables para comunicaciones con pacientes, profesionales
 | POST /admissions/expire-sweep | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
@@ -1767,7 +1940,7 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: messaging_providers`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessagingProviders` — `src/modules/messaging/entities/messaging_providers.entity.ts`
-- **Resumen:** 22 columnas · 6 índices · 6 FK salientes · 5 entrantes · 58 operaciones
+- **Resumen:** 22 columnas · 6 índices · 6 FK salientes · 5 entrantes · 84 operaciones
 
 #### Columnas
 
@@ -1834,6 +2007,7 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/care-relationships/request | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
@@ -1842,13 +2016,32 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /visit-records | LEE | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | LEE | DIRECTA |
+| POST /visit-requests | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -1857,7 +2050,12 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | LEE | DIRECTA |
 | POST /admissions/{id}/reinstate | LEE | DIRECTA |
@@ -1869,6 +2067,7 @@ Identifica proveedores que transportan mensajes por los canales habilitados.
 | POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
@@ -1915,7 +2114,7 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: notification_deliveries`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `NotificationDeliveries` — `src/modules/messaging/entities/notification_deliveries.entity.ts`
-- **Resumen:** 36 columnas · 8 índices · 9 FK salientes · 7 entrantes · 95 operaciones
+- **Resumen:** 36 columnas · 8 índices · 9 FK salientes · 7 entrantes · 123 operaciones
 
 #### Columnas
 
@@ -2003,6 +2202,7 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/care-relationships/request | CREA | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | CREA | DIRECTA |
 | POST /clinical/encounters/{id}/close | CREA | DIRECTA |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | CREA | DIRECTA |
@@ -2012,19 +2212,39 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 | POST /referrals | CREA | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | CREA | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| POST /community/groups/{groupId}/posts | CREA | DIRECTA |
+| POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | CREA | DIRECTA |
-| POST /iam/auth/register-practitioner | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
+| POST /diagnostics/critical-results | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | CREA | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | CREA | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | ACTUALIZA | POR_TIPO |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | CREA | DIRECTA |
+| POST /visit-records | CREA | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | CREA | DIRECTA |
+| POST /visit-requests | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | CREA | DIRECTA |
+| POST /internal/reservations/expire | CREA | DIRECTA |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | CREA | DIRECTA |
@@ -2033,7 +2253,12 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 | POST /pharmacy/orders/{id}/reject | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/review | CREA | DIRECTA |
 | GET /pharmacy/orders/me | CREA | DIRECTA |
+| PATCH /procedure-cases/{id} | CREA | DIRECTA |
+| POST /procedure-cases/{id}/confirm | CREA | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | CREA | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | CREA | DIRECTA |
 | POST /admissions/{id}/claim | CREA | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | CREA | DIRECTA |
@@ -2053,6 +2278,8 @@ Mantiene intentos y resultados de entrega de notificaciones para verificar comun
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | CREA | DIRECTA |
@@ -2121,7 +2348,7 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: notification_requests`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `NotificationRequests` — `src/modules/messaging/entities/notification_requests.entity.ts`
-- **Resumen:** 35 columnas · 11 índices · 16 FK salientes · 7 entrantes · 165 operaciones
+- **Resumen:** 35 columnas · 11 índices · 16 FK salientes · 7 entrantes · 199 operaciones
 
 #### Columnas
 
@@ -2216,6 +2443,7 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /accounting/practitioner/entries | CREA | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
 | POST /authz/care-relationships/request | CREA | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | CREA | DIRECTA |
 | POST /clinical/encounters/{id}/close | CREA | DIRECTA |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | CREA | DIRECTA |
@@ -2228,8 +2456,10 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /referrals | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
 | PATCH /community/groups/{groupId}/members/{member} | CREA | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | ACTUALIZA | POR_TIPO |
 | PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | CREA | DIRECTA |
+| POST /community/groups/{groupId}/posts | ACTUALIZA | POR_TIPO |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests | ACTUALIZA | POR_TIPO |
@@ -2237,10 +2467,17 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | ACTUALIZA | POR_TIPO |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | CREA | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | CREA | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| POST /diagnostics/critical-results | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | CREA | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
@@ -2254,8 +2491,10 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/auth/resend-verification | CREA | DIRECTA |
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | CREA | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | CREA | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
@@ -2274,6 +2513,20 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /notifications/requests | LEE | DIRECTA |
 | POST /webhooks/providers/{providerCode}/receipts | ACTUALIZA | POR_TIPO |
 | POST /webhooks/providers/{providerCode}/receipts | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | CREA | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | CREA | DIRECTA |
+| POST /visit-records | CREA | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | CREA | DIRECTA |
+| POST /visit-requests | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | CREA | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | CREA | DIRECTA |
+| POST /internal/reservations/expire | CREA | DIRECTA |
 | GET /pharmacy/orders | CREA | DIRECTA |
 | GET /pharmacy/orders/{id} | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | CREA | DIRECTA |
@@ -2282,7 +2535,12 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /pharmacy/orders/{id}/reject | CREA | DIRECTA |
 | POST /pharmacy/orders/{id}/review | CREA | DIRECTA |
 | GET /pharmacy/orders/me | CREA | DIRECTA |
+| PATCH /procedure-cases/{id} | CREA | DIRECTA |
+| POST /procedure-cases/{id}/confirm | CREA | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | CREA | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | CREA | DIRECTA |
 | POST /admissions/{id}/claim | CREA | DIRECTA |
 | POST /admissions/{id}/claim | ACTUALIZA | POR_TIPO |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
@@ -2310,6 +2568,9 @@ Registra solicitudes de notificación y su contexto antes de seleccionar canal y
 | POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
@@ -2400,7 +2661,7 @@ Mantiene mensajes salientes en la misma frontera transaccional que cambios de ne
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: outbox_messages`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `OutboxMessages` — `src/modules/messaging/entities/outbox_messages.entity.ts`
-- **Resumen:** 20 columnas · 7 índices · 5 FK salientes · 0 entrantes · 257 operaciones
+- **Resumen:** 20 columnas · 7 índices · 5 FK salientes · 0 entrantes · 263 operaciones
 
 #### Columnas
 
@@ -2467,6 +2728,8 @@ Mantiene mensajes salientes en la misma frontera transaccional que cambios de ne
 | POST /authz/care-relationships/{id}/respond | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | CREA | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | LEE | DIRECTA |
 | POST /automation/agent-runs/{id}/approvals | CREA | DIRECTA |
 | POST /automation/agent-runs/{id}/approvals | LEE | DIRECTA |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | CREA | DIRECTA |
@@ -2557,6 +2820,10 @@ Mantiene mensajes salientes en la misma frontera transaccional que cambios de ne
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
 | POST /diagnostic-equipment/{id}/resource | CREA | DIRECTA |
 | POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | CREA | DIRECTA |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | CREA | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
 | POST /graph/access-scopes | CREA | DIRECTA |
 | POST /graph/access-scopes | LEE | DIRECTA |
 | PATCH /graph/access-scopes/{id} | CREA | DIRECTA |
@@ -2740,7 +3007,7 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: provider_channel_configs`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `ProviderChannelConfigs` — `src/modules/messaging/entities/provider_channel_configs.entity.ts`
-- **Resumen:** 26 columnas · 8 índices · 12 FK salientes · 4 entrantes · 57 operaciones
+- **Resumen:** 26 columnas · 8 índices · 12 FK salientes · 4 entrantes · 83 operaciones
 
 #### Columnas
 
@@ -2812,6 +3079,7 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/care-relationships/request | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
@@ -2820,12 +3088,31 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /visit-records | LEE | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | LEE | DIRECTA |
+| POST /visit-requests | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -2834,7 +3121,12 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | LEE | DIRECTA |
 | POST /admissions/{id}/reinstate | LEE | DIRECTA |
@@ -2846,6 +3138,7 @@ Configura la relación entre un proveedor de mensajería y un canal para dirigir
 | POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
@@ -2892,7 +3185,7 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: queued_jobs`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `QueuedJobs` — `src/modules/messaging/entities/queued_jobs.entity.ts`
-- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 1 entrantes · 66 operaciones
+- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 1 entrantes · 72 operaciones
 
 #### Columnas
 
@@ -2980,8 +3273,16 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 | POST /internal/storage-lifecycle/audio/{assetId}/dispatch | LEE | DIRECTA |
 | POST /internal/storage-lifecycle/recover | ACTUALIZA | POR_TIPO |
 | POST /internal/storage-lifecycle/recover | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | CREA | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | CREA | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | ACTUALIZA | POR_TIPO |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-document | ACTUALIZA | POR_TIPO |
@@ -2992,8 +3293,6 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -3044,7 +3343,7 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: recipient_preferences`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `RecipientPreferences` — `src/modules/messaging/entities/recipient_preferences.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 75 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 103 operaciones
 
 #### Columnas
 
@@ -3096,6 +3395,7 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
 | POST /authz/care-relationships/request | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
@@ -3108,24 +3408,45 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | DIRECTA |
 | POST /org/support-staff | LEE | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/license-verification | LEE | DIRECTA |
 | POST /identity/me/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
+| POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
 | GET /notifications/preferences/me | LEE | DIRECTA |
 | PUT /notifications/preferences/me | CREA | DIRECTA |
 | PUT /notifications/preferences/me | LEE | DIRECTA |
 | POST /notifications/requests | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /visit-records | LEE | DIRECTA |
+| POST /visit-records/{visitRecordId}/rating | LEE | DIRECTA |
+| POST /visit-requests | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/accept | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reject | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | DIRECTA |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
@@ -3134,7 +3455,12 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | LEE | DIRECTA |
 | POST /admissions/{id}/reinstate | LEE | DIRECTA |
@@ -3146,6 +3472,7 @@ Registra preferencias de destinatarios para respetar canales, horarios y eleccio
 | POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |

@@ -61,7 +61,7 @@
 | 47 | GET | `/admin/portal/version` | Versión y tamaño del inventario publicado | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 48 | POST | `/internal/catalog/fit/run` | Corre la sonda de ajuste y espera su desenlace (worker) | ALTO | 7 | SYSTEM |
 | 49 | POST | `/internal/catalog/inventory/import` | Importa el inventario de la API a las tablas de operaciones y procesos (worker) | ALTO | 15 | SYSTEM |
-| 50 | POST | `/internal/catalog/scans/run-next` | Sonda: reclama y ejecuta el siguiente escaneo (worker) | MEDIO | 12 | SYSTEM |
+| 50 | POST | `/internal/catalog/scans/run-next` | Sonda: reclama y ejecuta el siguiente escaneo (worker) | MEDIO | 15 | SYSTEM |
 
 ---
 
@@ -93,7 +93,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:321` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -198,7 +198,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:353` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -298,7 +298,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:291` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -444,7 +444,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:200` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -517,7 +517,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:211` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -616,7 +616,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:386` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -687,7 +687,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -847,7 +847,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
 | CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -928,7 +928,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:138` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1007,7 +1007,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1083,7 +1083,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1230,7 +1230,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:242` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1305,7 +1305,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:160` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1378,7 +1378,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:170` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1452,7 +1452,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:180` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1552,7 +1552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:232` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1626,7 +1626,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1701,7 +1701,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:373` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1764,7 +1764,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:409` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1845,7 +1845,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:422` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1922,7 +1922,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:396` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1989,7 +1989,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:450` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2066,7 +2066,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:439` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2131,7 +2131,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:463` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2202,7 +2202,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481` |
 | CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2293,7 +2293,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:473` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2363,7 +2363,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:127` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2426,8 +2426,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2504,8 +2504,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2580,7 +2580,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:179` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:179` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2645,7 +2645,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:163` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:163` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2732,7 +2732,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:170` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:170` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2821,7 +2821,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:134` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:134` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2910,7 +2910,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:141` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:141` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3009,7 +3009,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:154` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:154` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3084,7 +3084,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:115` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3152,7 +3152,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:122` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:122` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3232,7 +3232,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:108` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:108` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3325,7 +3325,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:222` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:222` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3404,7 +3404,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:188` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:188` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3472,7 +3472,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:203` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:203` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3552,7 +3552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:195` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:195` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3634,7 +3634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:213` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:213` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3709,7 +3709,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:75` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:75` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3806,7 +3806,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:82` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:82` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3958,7 +3958,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:96` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:96` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4035,7 +4035,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...PORTAL_VIEW_ROLES | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:68` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:68` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4105,7 +4105,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4189,7 +4189,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4284,7 +4284,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
@@ -4293,12 +4293,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
 | `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:395` |
 | `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1342` |
 | `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:417` |

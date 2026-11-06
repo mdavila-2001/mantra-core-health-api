@@ -15,16 +15,16 @@
 | [api_key_scopes](#api_key_scopes) | Delimita permisos y ámbitos de claves API para restringir integraciones a operaciones autorizadas. | 7 | 2 | 0 | COINCIDE |
 | [api_keys](#api_keys) | Administra credenciales de integración por API para autenticar sistemas que intercambian datos con la plataforma médica. | 21 | 5 | 0 | COINCIDE |
 | [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 63 | COINCIDE |
-| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 123 | COINCIDE |
-| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 32 | COINCIDE |
+| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 21 | COINCIDE |
+| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 34 | COINCIDE |
 | [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 5 | COINCIDE |
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
 | [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 18 | COINCIDE |
-| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 36 | COINCIDE |
+| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 38 | COINCIDE |
 | [session_policies](#session_policies) | Fija por organización la duración de la sesión inactiva, la alerta de dispositivo nuevo, el horario permitido y el uso de reglas de IP y MFA, para todas las cuentas, su personal o un rol. | 15 | 7 | 0 | COINCIDE |
-| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 143 | COINCIDE |
-| [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 99 | COINCIDE |
-| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 185 | COINCIDE |
+| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 148 | COINCIDE |
+| [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 100 | COINCIDE |
+| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 202 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -591,6 +591,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /iam/auth/change-password | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/change-password | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
+| GET /iam/auth/identifier-exists | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
@@ -603,6 +604,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
 | POST /iam/auth/reset-password | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/reset-password | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | GET /iam/users | LEE | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | POST /iam/users | LEE | DIRECTA |
@@ -613,12 +615,12 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /iam/users/{id}/credentials/federated | CREA | DIRECTA |
 | POST /iam/users/{id}/credentials/federated | LEE | DIRECTA |
 | POST /iam/users/{id}/deactivate | ACTUALIZA | DIRECTA |
+| POST /iam/users/{id}/mfa-factors | LEE | DIRECTA |
 | POST /iam/users/{id}/reactivate | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/suspend | ACTUALIZA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
-| POST /iam/users/assisted-registration | LEE | DIRECTA |
 | POST /iam/users/search | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -637,9 +639,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
@@ -665,7 +665,7 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: devices`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Devices` — `src/modules/iam/entities/devices.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 123 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -711,9 +711,9 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_devices_device_fingerprint` | sí | device_fingerprint | Garantiza que no se repita la combinación (device_fingerprint) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «device_fingerprint», la primera columna del índice _(CONSULTA)_ |
-| `ix_devices_user_id` | no | user_id | Soporta la clave foránea fk_devices_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_devices_platform_concept_id` | no | platform_concept_id | Soporta la clave foránea fk_devices_platform_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_devices_device_fingerprint` | sí | device_fingerprint | Garantiza que no se repita la combinación (device_fingerprint) _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «device_fingerprint», la primera columna del índice _(CONSULTA)_ |
+| `ix_devices_user_id` | no | user_id | Soporta la clave foránea fk_devices_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_devices_platform_concept_id` | no | platform_concept_id | Soporta la clave foránea fk_devices_platform_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «platform_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_devices_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_devices_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_devices_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_devices_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -727,128 +727,26 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /authz/care-relationships/request | ACTUALIZA | POR_TIPO |
-| POST /authz/care-relationships/request | LEE | DIRECTA |
-| POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
-| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
-| POST /clinical/encounters/check-in | ACTUALIZA | POR_TIPO |
-| POST /clinical/encounters/check-in | LEE | DIRECTA |
-| POST /clinical/internal/prescription-expiry-notices | ACTUALIZA | POR_TIPO |
-| POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
-| POST /clinical/medication-requests/{id}/issue | ACTUALIZA | POR_TIPO |
-| POST /clinical/medication-requests/{id}/issue | LEE | DIRECTA |
-| POST /clinical/requisitions | ACTUALIZA | POR_TIPO |
-| POST /clinical/requisitions | LEE | DIRECTA |
-| POST /clinical/service-requests | ACTUALIZA | POR_TIPO |
-| POST /clinical/service-requests | LEE | DIRECTA |
-| POST /referrals | ACTUALIZA | POR_TIPO |
-| POST /referrals | LEE | DIRECTA |
-| POST /community/conversations/{conversationId}/messages | ACTUALIZA | POR_TIPO |
-| POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
-| POST /consent/practitioner-access-requests | ACTUALIZA | POR_TIPO |
-| POST /consent/practitioner-access-requests | LEE | DIRECTA |
-| POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
-| POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
-| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
-| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/login | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/login | CREA | DIRECTA |
+| POST /iam/auth/login | LEE | DIRECTA |
+| GET /iam/me/devices | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm | ACTUALIZA | POR_TIPO |
+| POST /iam/me/devices/{id}/confirm | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | GET /iam/users/{id}/devices | LEE | DIRECTA |
 | POST /iam/users/{id}/devices | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
-| POST /insurance-claims/{id}/patient-invoice | ACTUALIZA | POR_TIPO |
-| POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
-| POST /internal/notifications/{requestId}/deliver | ACTUALIZA | POR_TIPO |
-| POST /internal/notifications/{requestId}/deliver | LEE | DIRECTA |
+| POST /iam/users/{id}/devices | LEE | DIRECTA |
+| DELETE /notifications/native-push/token | ACTUALIZA | POR_TIPO |
+| DELETE /notifications/native-push/token | LEE | DIRECTA |
+| PUT /notifications/native-push/token | ACTUALIZA | POR_TIPO |
+| PUT /notifications/native-push/token | CREA | DIRECTA |
+| PUT /notifications/native-push/token | LEE | DIRECTA |
 | DELETE /notifications/web-push/subscription | ACTUALIZA | POR_TIPO |
 | DELETE /notifications/web-push/subscription | LEE | DIRECTA |
 | PUT /notifications/web-push/subscription | ACTUALIZA | POR_TIPO |
 | PUT /notifications/web-push/subscription | CREA | DIRECTA |
 | PUT /notifications/web-push/subscription | LEE | DIRECTA |
-| POST /internal/reservations/expire | LEE | DIRECTA |
-| GET /pharmacy/orders | ACTUALIZA | POR_TIPO |
-| GET /pharmacy/orders | LEE | DIRECTA |
-| GET /pharmacy/orders/{id} | ACTUALIZA | POR_TIPO |
-| GET /pharmacy/orders/{id} | LEE | DIRECTA |
-| POST /pharmacy/orders/{id}/confirm | ACTUALIZA | POR_TIPO |
-| POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
-| POST /pharmacy/orders/{id}/dispense | ACTUALIZA | POR_TIPO |
-| POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
-| POST /pharmacy/orders/{id}/ready | ACTUALIZA | POR_TIPO |
-| POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
-| POST /pharmacy/orders/{id}/reject | ACTUALIZA | POR_TIPO |
-| POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
-| POST /pharmacy/orders/{id}/review | ACTUALIZA | POR_TIPO |
-| POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
-| GET /pharmacy/orders/me | ACTUALIZA | POR_TIPO |
-| GET /pharmacy/orders/me | LEE | DIRECTA |
-| POST /procedure-cases/{id}/preoperative-orders | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
-| POST /admissions/{id}/claim | ACTUALIZA | POR_TIPO |
-| POST /admissions/{id}/claim | LEE | DIRECTA |
-| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
-| POST /admissions/{id}/decision | LEE | DIRECTA |
-| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
-| POST /admissions/{id}/reinstate | LEE | DIRECTA |
-| POST /admissions/{id}/request-info | ACTUALIZA | POR_TIPO |
-| POST /admissions/{id}/request-info | LEE | DIRECTA |
-| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
-| POST /admissions/{id}/suspend | LEE | DIRECTA |
-| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
-| POST /admissions/expire-sweep | LEE | DIRECTA |
-| POST /profiles/patients/me/dependent-requests | ACTUALIZA | POR_TIPO |
-| POST /profiles/patients/me/dependent-requests | LEE | DIRECTA |
-| POST /profiles/patients/me/dependent-requests/{id}/accept | ACTUALIZA | POR_TIPO |
-| POST /profiles/patients/me/dependent-requests/{id}/accept | LEE | DIRECTA |
-| POST /profiles/patients/me/dependent-requests/{id}/reject | ACTUALIZA | POR_TIPO |
-| POST /profiles/patients/me/dependent-requests/{id}/reject | LEE | DIRECTA |
-| POST /profiles/practitioners/{profileId}/affiliations | ACTUALIZA | POR_TIPO |
-| POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
-| POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
-| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
-| POST /profiles/practitioners/me/admission/withdraw | ACTUALIZA | POR_TIPO |
-| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
-| POST /profiles/practitioners/me/affiliations | ACTUALIZA | POR_TIPO |
-| POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | ACTUALIZA | POR_TIPO |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | ACTUALIZA | POR_TIPO |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | LEE | DIRECTA |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | ACTUALIZA | POR_TIPO |
-| POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | LEE | DIRECTA |
-| POST /scheduling/appointments/direct | ACTUALIZA | POR_TIPO |
-| POST /scheduling/appointments/direct | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/cancel | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/payment-receipts | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/reject | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
-| POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
-| POST /scheduling/holds/{holdToken}/request | ACTUALIZA | POR_TIPO |
-| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
-| POST /scheduling/internal/dispatch-reminders | ACTUALIZA | POR_TIPO |
-| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
-| POST /scheduling/internal/promote-waitlist/{slotId} | ACTUALIZA | POR_TIPO |
-| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/close-slots | ACTUALIZA | POR_TIPO |
-| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/delay | ACTUALIZA | POR_TIPO |
-| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/exceptions | ACTUALIZA | POR_TIPO |
-| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/shift-slots | ACTUALIZA | POR_TIPO |
-| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
-| DELETE /scheduling/templates/{id} | ACTUALIZA | POR_TIPO |
-| DELETE /scheduling/templates/{id} | LEE | DIRECTA |
 | POST /ts/location/pings/batch-ingest | LEE | DIRECTA |
 
 #### Gobierno
@@ -874,7 +772,7 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: email_verifications`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `EmailVerifications` — `src/modules/iam/entities/email_verifications.entity.ts`
-- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 32 operaciones
+- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 34 operaciones
 
 #### Columnas
 
@@ -930,6 +828,10 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 | POST /iam/auth/resend-verification | LEE | DIRECTA |
 | POST /iam/auth/verify-email | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/verify-email | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm | ACTUALIZA | POR_TIPO |
+| POST /iam/me/devices/{id}/confirm | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | CREA | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
@@ -947,9 +849,7 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
@@ -1214,7 +1114,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: security_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `SecurityEvents` — `src/modules/iam/entities/security_events.entity.ts`
-- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 36 operaciones
+- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -1271,6 +1171,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 | POST /iam/auth/reset-password | CREA | DIRECTA |
 | POST /iam/auth/sessions/purge | CREA | DIRECTA |
 | POST /iam/auth/token/refresh | CREA | DIRECTA |
+| POST /iam/me/devices/{id}/confirm | CREA | DIRECTA |
 | POST /iam/me/sessions/{id}/revoke | CREA | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | POST /iam/users/{id}/anonymize | CREA | DIRECTA |
@@ -1283,6 +1184,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 | GET /iam/users/{id}/lifecycle | LEE | POR_SQL |
 | POST /iam/users/{id}/lock | CREA | DIRECTA |
 | POST /iam/users/{id}/mfa-factors | CREA | DIRECTA |
+| POST /iam/users/{id}/mfa-factors | LEE | POR_SQL |
 | POST /iam/users/{id}/reactivate | CREA | DIRECTA |
 | POST /iam/users/{id}/reactivate | LEE | POR_SQL |
 | POST /iam/users/{id}/suspend | CREA | DIRECTA |
@@ -1394,7 +1296,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 7 entrantes · 143 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 7 entrantes · 148 operaciones
 
 #### Columnas
 
@@ -1474,8 +1376,10 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /authz/care-relationships/request | LEE | POR_SQL |
 | DELETE /authz/clinical-access-grants/{grantId} | LEE | POR_SQL |
 | POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | POR_SQL |
+| POST /authz/me/primary-practitioner-requests | LEE | POR_SQL |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | POR_SQL |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | POR_SQL |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | LEE | POR_SQL |
 | POST /authz/users/{userId}/access-reviews | LEE | POR_SQL |
 | GET /admin/bulk-imports/{id} | LEE | POR_SQL |
 | POST /admin/bulk-imports/{id}/confirm | LEE | POR_SQL |
@@ -1493,6 +1397,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /consent/me/consents/{id}/withdraw | LEE | POR_SQL |
 | POST /consent/practitioner-access-requests | LEE | POR_SQL |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | POR_SQL |
+| POST /consent/practitioner-access-requests/{id}/revoke | LEE | POR_SQL |
 | POST /iam/auth/change-password | ACTUALIZA | DIRECTA |
 | POST /iam/auth/change-password | LEE | DIRECTA |
 | POST /iam/auth/login | ACTUALIZA | DIRECTA |
@@ -1507,6 +1412,8 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /iam/auth/sessions/purge | ACTUALIZA | DIRECTA |
 | POST /iam/auth/token/refresh | ACTUALIZA | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
+| GET /iam/me/devices | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm | LEE | DIRECTA |
 | GET /iam/me/sessions | LEE | DIRECTA |
 | POST /iam/me/sessions/{id}/revoke | ACTUALIZA | DIRECTA |
 | POST /iam/me/sessions/{id}/revoke | LEE | DIRECTA |
@@ -1620,7 +1527,7 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: user_global_roles`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `UserGlobalRoles` — `src/modules/iam/entities/user_global_roles.entity.ts`
-- **Resumen:** 9 columnas · 5 índices · 5 FK salientes · 0 entrantes · 99 operaciones
+- **Resumen:** 9 columnas · 5 índices · 5 FK salientes · 0 entrantes · 100 operaciones
 
 #### Columnas
 
@@ -1700,6 +1607,7 @@ Asocia roles de alcance global a usuarios para resolver privilegios transversale
 | POST /clinical/medication-requests/{id}/sign | LEE | POR_SQL |
 | PATCH /clinical/observations/{id}/amend | LEE | POR_SQL |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | POR_SQL |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | POR_SQL |
 | GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
 | POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
 | GET /clinical/service-requests/{id} | LEE | POR_SQL |
@@ -1783,7 +1691,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 185 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 202 operaciones
 
 #### Columnas
 
@@ -4074,6 +3982,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /clinical/medication-requests/{id}/sign | LEE | POR_SQL |
 | PATCH /clinical/observations/{id}/amend | LEE | POR_SQL |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | POR_SQL |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | POR_SQL |
 | GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
 | POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
 | GET /clinical/service-requests/{id} | LEE | POR_SQL |
@@ -4099,6 +4008,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | POR_SQL |
 | PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | GET /approvals/pending | LEE | POR_SQL |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
@@ -4121,6 +4031,18 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /practitioner-delegates/{id}/accept | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
 | POST /support-engagement-requests | LEE | POR_SQL |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
 | GET /forms/instances | LEE | POR_SQL |
 | GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /iam/auth/activate | ACTUALIZA | POR_TIPO |
@@ -4136,6 +4058,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
 | POST /iam/auth/verify-email | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/verify-email | LEE | DIRECTA |
+| POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
 | GET /iam/users | LEE | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | GET /iam/users/{id} | LEE | DIRECTA |
@@ -4196,12 +4119,14 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
 | GET /scheduling/bookings/{id}/payment-receipts | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |

@@ -2614,9 +2614,9 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Agenda de un doctor asignado (403 si no hay vínculo activo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Devuelve como mucho `limit` turnos (500) por hora; con `truncated: true` el rango tenía más: acote `from`/`to` y vuelva a pedir. La lectura queda en la bitácora de acceso a datos.
 
-Contexto declarado en el controlador: Agenda de un doctor al que asiste (sólo con vínculo activo con él).
+Contexto declarado en el controlador: Agenda de un doctor al que asiste (sólo con vínculo activo con él). Devuelve el nombre de los pacientes: es una lectura de PHI y deja su asiento en `audit.data_access_log` (`@AccessLogged`, sin identificadores de paciente en el asiento). Lleva un tope de turnos y avisa con `truncated`.
 
 ### Descripción del sistema
 
@@ -2664,7 +2664,7 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<SupportAgendaResponseDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
 | 401 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
 | 403 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
@@ -2686,7 +2686,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "patientName": "Nombre de ejemplo"
     }
   ],
-  "count": 1
+  "count": 1,
+  "truncated": true,
+  "limit": 1
 }
 ```
 
@@ -2702,6 +2704,8 @@ Campos de la respuesta:
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | true = el rango tiene más turnos que `limit` y se devolvieron los primeros por hora; acote el rango y vuelva a pedir. | `true` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de turnos por respuesta. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

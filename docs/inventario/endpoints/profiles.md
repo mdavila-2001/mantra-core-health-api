@@ -3,9 +3,9 @@
 # Endpoints del módulo `profiles`
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
-- **Operaciones:** 85 (84 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 29 · MEDIO 13 · BAJO 43
-- **Tablas distintas que tocan:** 60
+- **Operaciones:** 86 (85 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 30 · MEDIO 12 · BAJO 44
+- **Tablas distintas que tocan:** 59
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/profiles.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,21 +15,21 @@
 | 1 | DESCONOCIDO | `/admissions` | — | BAJO | 0 | sesión (sin roles) |
 | 2 | GET | `/admissions` | Bandeja de admisiones | BAJO | 17 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 3 | GET | `/admissions/{id}` | Detalle de una admisión | BAJO | 18 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
-| 4 | POST | `/admissions/{id}/claim` | Tomar la admisión para revisarla | ALTO | 40 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
-| 5 | POST | `/admissions/{id}/decision` | Resolver la admisión: VERIFIED o REJECTED | ALTO | 50 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 4 | POST | `/admissions/{id}/claim` | Tomar la admisión para revisarla | ALTO | 39 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
+| 5 | POST | `/admissions/{id}/decision` | Resolver la admisión: VERIFIED o REJECTED | ALTO | 49 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 6 | GET | `/admissions/{id}/documents/{fileId}/content` | Contenido de un documento de la admisión (URL firmada) | BAJO | 12 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 7 | POST | `/admissions/{id}/documents/{fileId}/download-url` | URL firmada para abrir un documento de la admisión | BAJO | 12 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 8 | POST | `/admissions/{id}/items/{itemId}/review` | Revisar un ítem del checklist | MEDIO | 20 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
 | 9 | POST | `/admissions/{id}/reassign` | Pasar la revisión a otro revisor | ALTO | 27 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
-| 10 | POST | `/admissions/{id}/reinstate` | Reponer una verificación suspendida (devuelve el check) | MEDIO | 44 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 10 | POST | `/admissions/{id}/reinstate` | Reponer una verificación suspendida (devuelve el check) | MEDIO | 43 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 11 | POST | `/admissions/{id}/release` | Soltar una revisión tomada para que otro la tome | MEDIO | 20 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
-| 12 | POST | `/admissions/{id}/request-info` | Pedir información al médico | ALTO | 40 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
-| 13 | POST | `/admissions/{id}/suspend` | Suspender una verificación (quita el check) | MEDIO | 40 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
-| 14 | POST | `/admissions/expire-sweep` | Barrido de vencimientos | MEDIO | 25 | SYSTEM, SECURITY_ADMIN |
+| 12 | POST | `/admissions/{id}/request-info` | Pedir información al médico | ALTO | 39 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
+| 13 | POST | `/admissions/{id}/suspend` | Suspender una verificación (quita el check) | MEDIO | 39 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 14 | POST | `/admissions/expire-sweep` | Barrido de vencimientos | MEDIO | 24 | SYSTEM, SECURITY_ADMIN |
 | 15 | POST | `/admissions/search` | Bandeja de admisiones con los filtros en el cuerpo | BAJO | 17 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
 | 16 | GET | `/profiles/credentials` | Listar credenciales pendientes de verificación | BAJO | 1 | SECURITY_ADMIN |
 | 17 | POST | `/profiles/credentials/{credentialId}/verify` | Verificar credencial profesional | ALTO | 24 | SECURITY_ADMIN |
-| 18 | GET | `/profiles/patients` | UC-05-13: listado paginado de pacientes | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
+| 18 | GET | `/profiles/patients` | UC-05-13: listado paginado de pacientes | BAJO | 0 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
 | 19 | POST | `/profiles/patients` | Alta de persona y perfil de paciente | MEDIO | 4 | SECURITY_ADMIN |
 | 20 | GET | `/profiles/patients/{profileId}` | UC-05-14: ficha de filiación de un paciente (F-01) | BAJO | 3 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
 | 21 | POST | `/profiles/patients/{profileId}/identity-links` | Vincular identidad externa de paciente (MPI) | MEDIO | 5 | SECURITY_ADMIN |
@@ -43,9 +43,9 @@
 | 29 | PATCH | `/profiles/patients/me/addresses/{id}` | Corregir una dirección (cierra la vigente y abre otra) | ALTO | 4 | sesión (sin roles) |
 | 30 | PUT | `/profiles/patients/me/addresses/{id}/preferred` | Marcar la dirección que se ofrece primero | BAJO | 3 | sesión (sin roles) |
 | 31 | GET | `/profiles/patients/me/dependent-candidates` | Buscar por nombre a quién pedirle que deje representarla | BAJO | 5 | sesión (sin roles) |
-| 32 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 16 | sesión (sin roles) |
-| 33 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 15 | sesión (sin roles) |
-| 34 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
+| 32 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 15 | sesión (sin roles) |
+| 33 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
+| 34 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 13 | sesión (sin roles) |
 | 35 | GET | `/profiles/patients/me/dependent-requests/incoming` | Listar las solicitudes de dependiente recibidas | BAJO | 4 | sesión (sin roles) |
 | 36 | GET | `/profiles/patients/me/dependents` | Listar los dependientes a cargo del paciente autenticado | BAJO | 5 | sesión (sin roles) |
 | 37 | POST | `/profiles/patients/me/dependents` | Registrar un dependiente (menor o adulto mayor tutelado) | ALTO | 13 | sesión (sin roles) |
@@ -55,16 +55,16 @@
 | 41 | GET | `/profiles/patients/me/primary-practitioner` | Consultar el propio médico de cabecera | BAJO | 4 | sesión (sin roles) |
 | 42 | PUT | `/profiles/patients/me/primary-practitioner` | Elegir o cambiar el propio médico de cabecera | ALTO | 6 | sesión (sin roles) |
 | 43 | GET | `/profiles/patients/me/summary` | Consultar el resumen propio | BAJO | 3 | sesión (sin roles) |
-| 44 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | MEDIO | 8 | SECURITY_ADMIN |
+| 44 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | BAJO | 0 | SECURITY_ADMIN |
 | 45 | GET | `/profiles/patients/merge-events` | Listar eventos de fusión de pacientes | BAJO | 1 | SECURITY_ADMIN |
 | 46 | POST | `/profiles/patients/merge/{eventId}/reverse` | Revertir una fusión de pacientes | MEDIO | 6 | SECURITY_ADMIN |
-| 47 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
+| 47 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 0 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
 | 48 | POST | `/profiles/persons/{personId}/account-links` | Vincular cuenta de portal a una persona | MEDIO | 3 | SECURITY_ADMIN |
 | 49 | POST | `/profiles/persons/{personId}/decease` | Registrar defunción y anonimización de una persona | MEDIO | 4 | SECURITY_ADMIN |
 | 50 | GET | `/profiles/practitioners` | Listar profesionales para la guía, con sus especialidades | BAJO | 12 | sesión (sin roles) |
 | 51 | POST | `/profiles/practitioners` | Alta de profesional de salud (workforce generalista) | ALTO | 35 | SECURITY_ADMIN |
 | 52 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 27 | sesión (sin roles) |
-| 53 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
+| 53 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 24 | SECURITY_ADMIN |
 | 54 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
 | 55 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | BAJO | 16 | sesión (sin roles) |
 | 56 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | BAJO | 16 | sesión (sin roles) |
@@ -72,31 +72,32 @@
 | 58 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 16 | sesión (sin roles) |
 | 59 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 27 | sesión (sin roles) |
 | 60 | GET | `/profiles/practitioners/me/admission` | Estado de mi verificación | BAJO | 16 | sesión (sin roles) |
-| 61 | POST | `/profiles/practitioners/me/admission/resubmit` | Reenviar mi solicitud | ALTO | 38 | sesión (sin roles) |
-| 62 | POST | `/profiles/practitioners/me/admission/withdraw` | Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA) | ALTO | 32 | sesión (sin roles) |
-| 63 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
-| 64 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
-| 65 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 66 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 67 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | BAJO | 0 | sesión (sin roles) |
-| 68 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | BAJO | 0 | sesión (sin roles) |
-| 69 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | BAJO | 0 | sesión (sin roles) |
-| 70 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
-| 71 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
-| 72 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
-| 73 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 8 | sesión (sin roles) |
-| 74 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
-| 75 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
-| 76 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
-| 77 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
-| 78 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
-| 79 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | BAJO | 0 | sesión (sin roles) |
-| 80 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 16 | sesión (sin roles) |
-| 81 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
-| 82 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
-| 83 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 84 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 85 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 19 | sesión (sin roles) |
+| 61 | POST | `/profiles/practitioners/me/admission/resubmit` | Reenviar mi solicitud | ALTO | 37 | sesión (sin roles) |
+| 62 | POST | `/profiles/practitioners/me/admission/submit` | Enviarme a verificación | ALTO | 37 | sesión (sin roles) |
+| 63 | POST | `/profiles/practitioners/me/admission/withdraw` | Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA) | ALTO | 31 | sesión (sin roles) |
+| 64 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
+| 65 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 24 | sesión (sin roles) |
+| 66 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 67 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 68 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | BAJO | 0 | sesión (sin roles) |
+| 69 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | BAJO | 0 | sesión (sin roles) |
+| 70 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 71 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 72 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 73 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
+| 74 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 8 | sesión (sin roles) |
+| 75 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
+| 76 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
+| 77 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
+| 78 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 79 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | BAJO | 0 | sesión (sin roles) |
+| 80 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | BAJO | 0 | sesión (sin roles) |
+| 81 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 16 | sesión (sin roles) |
+| 82 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
+| 83 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
+| 84 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 18 | sesión (sin roles) |
+| 85 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 18 | sesión (sin roles) |
+| 86 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 18 | sesión (sin roles) |
 
 ---
 
@@ -125,8 +126,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/admissions.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -186,8 +187,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -203,7 +204,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsRepository.listPage | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:244` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:169` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:227` |
 | `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionReviewsRepository.findByAdmissions | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:101` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
@@ -310,9 +311,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -545,7 +546,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/{id}/claim` la atiende `AdmissionsController.claim` (src/modules/profiles/presentation/controllers/admissions.controller.ts:167). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `ClaimAdmissionDto` (1 campo, 1 obligatorio). Delega en `PractitionerAdmissionsService.claim`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, iam.users, messaging.message_channels y 19 más.
+`POST /admissions/{id}/claim` la atiende `AdmissionsController.claim` (src/modules/profiles/presentation/controllers/admissions.controller.ts:167). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `ClaimAdmissionDto` (1 campo, 1 obligatorio). Delega en `PractitionerAdmissionsService.claim`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, messaging.message_channels, messaging.message_templates y 18 más.
 
 ### Requerimientos
 
@@ -553,11 +554,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -568,9 +569,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
 | `common.files` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
 | `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -578,7 +578,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -832,7 +832,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/{id}/decision` la atiende `AdmissionsController.decide` (src/modules/profiles/presentation/controllers/admissions.controller.ts:286). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `DecideAdmissionDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.decide`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions y 2 más. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 23 más.
+`POST /admissions/{id}/decision` la atiende `AdmissionsController.decide` (src/modules/profiles/presentation/controllers/admissions.controller.ts:286). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `DecideAdmissionDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.decide`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza community.public_profiles, community.verified_badges, messaging.in_app_notifications, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions y 2 más. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 22 más.
 
 ### Requerimientos
 
@@ -840,11 +840,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -864,9 +864,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
 | `community.verified_badges` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -874,7 +873,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -1150,9 +1149,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1204,7 +1203,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:250` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:272` |
 
 ### Flujos
 
@@ -1237,9 +1236,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1325,11 +1324,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, itemId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1613,11 +1612,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1635,7 +1634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PersonAccountLinksRepository.hasActiveLink | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:127` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PersonAccountLinksRepository.hasActiveLink | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
 | `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
@@ -1882,7 +1881,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/{id}/reinstate` la atiende `AdmissionsController.reinstate` (src/modules/profiles/presentation/controllers/admissions.controller.ts:329). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.reinstate`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 23 más.
+`POST /admissions/{id}/reinstate` la atiende `AdmissionsController.reinstate` (src/modules/profiles/presentation/controllers/admissions.controller.ts:329). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.reinstate`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, messaging.in_app_notifications, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 22 más.
 
 ### Requerimientos
 
@@ -1890,11 +1889,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1914,9 +1913,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
 | `community.verified_badges` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -1924,7 +1922,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -2188,11 +2186,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2447,7 +2445,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/{id}/request-info` la atiende `AdmissionsController.requestInfo` (src/modules/profiles/presentation/controllers/admissions.controller.ts:237). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `RequestAdmissionInfoDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.requestInfo`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, iam.users, messaging.message_channels y 19 más.
+`POST /admissions/{id}/request-info` la atiende `AdmissionsController.requestInfo` (src/modules/profiles/presentation/controllers/admissions.controller.ts:237). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `RequestAdmissionInfoDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.requestInfo`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, messaging.message_channels, messaging.message_templates y 18 más.
 
 ### Requerimientos
 
@@ -2455,11 +2453,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2470,9 +2468,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
 | `common.files` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
 | `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -2480,7 +2477,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -2496,7 +2493,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
 | `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
-| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1495` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
 | `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo | `src/modules/profiles/application/services/practitioner-admissions.service.ts:431` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
@@ -2748,7 +2745,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/{id}/suspend` la atiende `AdmissionsController.suspend` (src/modules/profiles/presentation/controllers/admissions.controller.ts:310). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.suspend`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles, community.verified_badges, iam.devices y 21 más.
+`POST /admissions/{id}/suspend` la atiende `AdmissionsController.suspend` (src/modules/profiles/presentation/controllers/admissions.controller.ts:310). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.suspend`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, messaging.in_app_notifications, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles, community.verified_badges, iam.users y 20 más.
 
 ### Requerimientos
 
@@ -2756,11 +2753,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2776,9 +2773,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -2786,7 +2782,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -3042,7 +3038,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admissions/expire-sweep` la atiende `AdmissionsController.expireSweep` (src/modules/profiles/presentation/controllers/admissions.controller.ts:125). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `PractitionerAdmissionsService.expireSweep`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.contact_points, community.public_profiles, community.verified_badges, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 6 más.
+`POST /admissions/expire-sweep` la atiende `AdmissionsController.expireSweep` (src/modules/profiles/presentation/controllers/admissions.controller.ts:125). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `PractitionerAdmissionsService.expireSweep`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, messaging.in_app_notifications, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.contact_points, community.public_profiles, community.verified_badges, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests y 5 más.
 
 ### Requerimientos
 
@@ -3050,21 +3046,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:175` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:177` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -3072,7 +3067,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -3141,10 +3136,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3160,7 +3155,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsRepository.listPage | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:244` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:169` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:227` |
 | `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionReviewsRepository.findByAdmissions | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:101` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
@@ -3287,8 +3282,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:803` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3371,11 +3366,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:834` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3389,20 +3384,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1210` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1212` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
-| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1493` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1495` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
 | `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2249` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2250` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 
@@ -3480,7 +3475,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-13: listado paginado de pacientes
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `ProfilesPatientsController.searchPatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317`
 
@@ -3492,7 +3487,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/patients` la atiende `ProfilesPatientsController.searchPatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Delega en `ProfilesPatientsService.searchPatients`. Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`GET /profiles/patients` la atiende `ProfilesPatientsController.searchPatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Delega en `ProfilesPatientsService.searchPatients`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
@@ -3500,19 +3495,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:317` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:166` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:190` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Parámetros
 
@@ -3532,17 +3520,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PatientListItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:121` |
-| `items[].profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:20` |
-| `items[].personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:26` |
-| `items[].patientCode` | `string` | Sí | — | — | Código único de paciente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:32` |
-| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/read-patients.dto.ts:38` |
-| `items[].birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:44` |
-| `items[].personStatusConceptId` | `string` | No | formato uuid | — | Concept id del estado de la persona | `src/modules/profiles/presentation/dto/read-patients.dto.ts:53` |
-| `items[].deceased` | `boolean` | Sí | — | — | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `src/modules/profiles/presentation/dto/read-patients.dto.ts:62` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/read-patients.dto.ts:127` |
-| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:133` |
-| `nextCursor` | `object` | No | admite null | — | Cursor opaco para la página siguiente; `null` cuando no hay más | `src/modules/profiles/presentation/dto/read-patients.dto.ts:143` |
+| `items` | `array<PatientListItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:66` |
+| `items[].profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:16` |
+| `items[].personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:22` |
+| `items[].patientCode` | `string` | Sí | — | — | Código único de paciente | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:28` |
+| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:34` |
+| `items[].birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:40` |
+| `items[].personStatusConceptId` | `string` | No | formato uuid | — | Concept id del estado de la persona | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:49` |
+| `items[].deceased` | `boolean` | Sí | — | — | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:58` |
+| `items[].nationalIdMasked` | `string` | No | admite null | — | Documento enmascarado (sólo los últimos dígitos), para distinguir homónimos | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:67` |
+| `items[].hasAccount` | `boolean` | Sí | — | — | Si la persona tiene cuenta propia en la plataforma: sin ella, una solicitud de vinculación no le llega | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:74` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/read-patients.dto.ts:72` |
+| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:78` |
+| `nextCursor` | `object` | No | admite null | — | Cursor opaco para la página siguiente; `null` cuando no hay más | `src/modules/profiles/presentation/dto/read-patients.dto.ts:88` |
 
 ### Respuestas posibles
 
@@ -3551,7 +3541,6 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes; PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -3585,7 +3574,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients` la atiende `ProfilesPatientsController.registerPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePatientDto` (6 campos, 1 obligatorio). Delega en `ProfilesPatientsService.registerPatient`. Crea filas en profiles.patient_profiles, profiles.person_profiles, profiles.persons. Lee profiles.patient_profiles.
+`POST /profiles/patients` la atiende `ProfilesPatientsController.registerPatient` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePatientDto` (7 campos, 1 obligatorio). Delega en `ProfilesPatientsService.registerPatient`. Crea filas en profiles.patient_profiles, profiles.person_profiles, profiles.persons. Lee profiles.patient_profiles.
 
 ### Requerimientos
 
@@ -3593,17 +3582,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:455` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PatientProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:220` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PatientProfilesRepository.findByPatientCode | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:209` |
+| `profiles.patient_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PatientProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:284` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PatientProfilesRepository.findByPatientCode | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:273` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerPatient → ProfilesPatientsService.registerPatient → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
 
@@ -3611,12 +3600,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientCode` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único de paciente (patient_code, UK) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:23` |
-| `displayName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Nombre visible de la persona | `src/modules/profiles/presentation/dto/create-patient.dto.ts:32` |
-| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsDateString()` | Fecha de nacimiento (ISO 8601) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:43` |
-| `administrativeGenderConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de género administrativo | `src/modules/profiles/presentation/dto/create-patient.dto.ts:54` |
-| `sexAtBirthConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de sexo al nacer | `src/modules/profiles/presentation/dto/create-patient.dto.ts:65` |
-| `masterPatientIndexCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código MPI maestro (UK) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:77` |
+| `patientCode` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único de paciente (patient_code, UK) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:24` |
+| `displayName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Nombre visible de la persona | `src/modules/profiles/presentation/dto/create-patient.dto.ts:33` |
+| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsDateString()` | Fecha de nacimiento (ISO 8601) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:44` |
+| `administrativeGenderConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de género administrativo | `src/modules/profiles/presentation/dto/create-patient.dto.ts:55` |
+| `sexAtBirthConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de sexo al nacer | `src/modules/profiles/presentation/dto/create-patient.dto.ts:66` |
+| `masterPatientIndexCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código MPI maestro (UK) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:78` |
+| `allowHomonym` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT) | `src/modules/profiles/presentation/dto/create-patient.dto.ts:87` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3635,7 +3625,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "birthDate": "2026-07-31",
   "administrativeGenderConceptId": "00000000-0000-4000-8000-000000000001",
   "sexAtBirthConceptId": "00000000-0000-4000-8000-000000000001",
-  "masterPatientIndexCode": "CODIGO_EJEMPLO"
+  "masterPatientIndexCode": "CODIGO_EJEMPLO",
+  "allowHomonym": true
 }
 ```
 
@@ -3645,11 +3636,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `profileId` | `string` | Sí | formato uuid | — | Identificador asociado a profile. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:86` |
-| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:92` |
-| `patientCode` | `string` | Sí | — | — | Valor de patient code mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:98` |
-| `recordLinkageStatus` | `string` | Sí | formato uuid | — | Concept id del estado de vinculación | `src/modules/profiles/presentation/dto/create-patient.dto.ts:107` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:113` |
+| `profileId` | `string` | Sí | formato uuid | — | Identificador asociado a profile. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:96` |
+| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:102` |
+| `patientCode` | `string` | Sí | — | — | Valor de patient code mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:108` |
+| `recordLinkageStatus` | `string` | Sí | formato uuid | — | Concept id del estado de vinculación | `src/modules/profiles/presentation/dto/create-patient.dto.ts:117` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:123` |
 
 ### Respuestas posibles
 
@@ -3705,15 +3696,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:433` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getPatient → ProfilesPatientsService.getPatientById → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getPatient → ProfilesPatientsService.getPatientById → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.getPatient → ProfilesPatientsService.getPatientById → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.getPatient → ProfilesPatientsService.getPatientById → RelatedPersonsRepository.findActiveByPatient | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:98` |
 
@@ -3731,33 +3722,33 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `profileId` | `string` | Sí | formato uuid | — | Identificador asociado a profile. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:194` |
-| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:200` |
-| `patientCode` | `string` | Sí | — | — | Valor de patient code mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:206` |
-| `masterPatientIndexCode` | `string` | No | — | — | Valor de master patient index code mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:212` |
-| `displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:218` |
-| `birthDate` | `string` | No | formato date | — | Valor de birth date mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:224` |
-| `administrativeGenderConceptId` | `string` | No | formato uuid | — | Identificador asociado a administrative gender concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:230` |
-| `sexAtBirthConceptId` | `string` | No | formato uuid | — | Identificador asociado a sex at birth concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:236` |
-| `genderIdentityConceptId` | `string` | No | formato uuid | — | Identificador asociado a gender identity concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:242` |
-| `nationalityConceptId` | `string` | No | formato uuid | — | Identificador asociado a nationality concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:248` |
-| `preferredLanguageConceptId` | `string` | No | formato uuid | — | Identificador asociado a preferred language concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:254` |
-| `personStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a person status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:260` |
-| `vitalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a vital status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:266` |
-| `deceasedAt` | `string` | No | formato date-time | — | Valor de deceased at mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:272` |
-| `aboGroupConceptId` | `string` | No | formato uuid | — | Identificador asociado a abo group concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:278` |
-| `rhFactorConceptId` | `string` | No | formato uuid | — | Identificador asociado a rh factor concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:284` |
-| `insuranceStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a insurance status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
-| `clinicalLanguageConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical language concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:296` |
-| `recordLinkageStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a record linkage status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:302` |
-| `relatedPersons` | `array<RelatedPersonItemDto>` | Sí | — | — | Contactos y representantes registrados (UC-05-10) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:311` |
-| `relatedPersons[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:152` |
-| `relatedPersons[].displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:158` |
-| `relatedPersons[].relationshipConceptId` | `string` | No | formato uuid | — | Identificador asociado a relationship concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:164` |
-| `relatedPersons[].isEmergencyContact` | `boolean` | Sí | — | — | Valor de is emergency contact mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:170` |
-| `relatedPersons[].isLegalGuardian` | `boolean` | Sí | — | — | Valor de is legal guardian mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:176` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:317` |
-| `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:323` |
+| `profileId` | `string` | Sí | formato uuid | — | Identificador asociado a profile. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:139` |
+| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:145` |
+| `patientCode` | `string` | Sí | — | — | Valor de patient code mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:151` |
+| `masterPatientIndexCode` | `string` | No | — | — | Valor de master patient index code mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:157` |
+| `displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:163` |
+| `birthDate` | `string` | No | formato date | — | Valor de birth date mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:169` |
+| `administrativeGenderConceptId` | `string` | No | formato uuid | — | Identificador asociado a administrative gender concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:175` |
+| `sexAtBirthConceptId` | `string` | No | formato uuid | — | Identificador asociado a sex at birth concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:181` |
+| `genderIdentityConceptId` | `string` | No | formato uuid | — | Identificador asociado a gender identity concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:187` |
+| `nationalityConceptId` | `string` | No | formato uuid | — | Identificador asociado a nationality concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:193` |
+| `preferredLanguageConceptId` | `string` | No | formato uuid | — | Identificador asociado a preferred language concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:199` |
+| `personStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a person status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:205` |
+| `vitalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a vital status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:211` |
+| `deceasedAt` | `string` | No | formato date-time | — | Valor de deceased at mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:217` |
+| `aboGroupConceptId` | `string` | No | formato uuid | — | Identificador asociado a abo group concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:223` |
+| `rhFactorConceptId` | `string` | No | formato uuid | — | Identificador asociado a rh factor concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:229` |
+| `insuranceStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a insurance status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:235` |
+| `clinicalLanguageConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical language concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:241` |
+| `recordLinkageStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a record linkage status concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:247` |
+| `relatedPersons` | `array<RelatedPersonItemDto>` | Sí | — | — | Contactos y representantes registrados (UC-05-10) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:256` |
+| `relatedPersons[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:97` |
+| `relatedPersons[].displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:103` |
+| `relatedPersons[].relationshipConceptId` | `string` | No | formato uuid | — | Identificador asociado a relationship concept. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:109` |
+| `relatedPersons[].isEmergencyContact` | `boolean` | Sí | — | — | Valor de is emergency contact mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:115` |
+| `relatedPersons[].isLegalGuardian` | `boolean` | Sí | — | — | Valor de is legal guardian mantenido por la instancia. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:121` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:262` |
+| `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:268` |
 
 ### Respuestas posibles
 
@@ -3810,21 +3801,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:490` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2088` |
+| `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2002` |
 | `profiles.patient_identity_links` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientIdentityLinksRepository.create | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:78` |
 | `profiles.patient_identity_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientIdentityLinksRepository.findBySource | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:60` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2113` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2027` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 
 ### Parámetros
 
@@ -3927,19 +3918,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:563` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientPortalProxiesRepository.revokeActiveForProxyUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:502` |
-| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:168` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientPortalProxiesRepository.revokeActiveForProxyUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:406` |
+| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:71` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.related_persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.grantPortalProxy → ProfilesPatientsService.grantPortalProxy → RelatedPersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:57` |
 
 ### Parámetros
@@ -4045,17 +4036,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:543` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.addRelatedPerson → ProfilesPatientsService.addRelatedPerson → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.addRelatedPerson → ProfilesPatientsService.addRelatedPerson → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.addRelatedPerson → ProfilesPatientsService.addRelatedPerson → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.addRelatedPerson → ProfilesPatientsService.addRelatedPerson → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.addRelatedPerson → ProfilesPatientsService.addRelatedPerson → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
@@ -4162,8 +4153,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4177,8 +4168,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:311` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:215` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.emergencyReadContacts → RelatedPersonsRepository.listActiveEmergencyContactsOfPatient | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:111` |
@@ -4192,30 +4183,30 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:502` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:517` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:528` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:538` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:553` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:575` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:579` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:587` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:597` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:615` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:626` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:632` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:635` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:639` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:657` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:663` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -4223,7 +4214,7 @@ La operación no recibe cuerpo.
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -4231,49 +4222,49 @@ La operación no recibe cuerpo.
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:351` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:354` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:357` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:360` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:363` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:366` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:391` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:399` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:402` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:405` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:309` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:312` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:315` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:318` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:321` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:325` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:328` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:331` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:334` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:339` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:342` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:408` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:411` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:444` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:450` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:453` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:456` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:423` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:435` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:438` |
 
 ### Respuestas posibles
 
@@ -4328,10 +4319,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4349,12 +4340,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.declareCoverage → PatientCoveragesAdapter.isDeclared → CoverageRepository.findActiveByPatientAndOrder | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:96` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:311` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:215` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.rebuildDisplayName | `src/modules/profiles/application/services/profiles-patients.service.ts:1345` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.rebuildDisplayName | `src/modules/profiles/application/services/profiles-patients.service.ts:1360` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
-| `profiles.related_persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor | `src/modules/profiles/application/services/profiles-patients.service.ts:1709` |
+| `profiles.related_persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor | `src/modules/profiles/application/services/profiles-patients.service.ts:1724` |
 | `profiles.related_persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor → RelatedPersonsRepository.findActiveDeclaredGuardian | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:159` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 
@@ -4440,30 +4431,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:502` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:517` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:528` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:538` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:553` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:575` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:579` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:587` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:597` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:615` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:626` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:632` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:635` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:639` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:657` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:663` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -4471,7 +4462,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -4479,49 +4470,49 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:351` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:354` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:357` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:360` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:363` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:366` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:391` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:399` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:402` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:405` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:309` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:312` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:315` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:318` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:321` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:325` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:328` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:331` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:334` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:339` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:342` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:408` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:411` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:444` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:450` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:453` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:456` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:423` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:435` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:438` |
 
 ### Respuestas posibles
 
@@ -4576,15 +4567,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
@@ -4655,17 +4646,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `CreatePatientAddressDto` · `application/json`
@@ -4770,9 +4761,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4780,7 +4771,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookAdapter.close → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:148` |
 | `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -4858,11 +4849,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:74` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4870,7 +4861,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookAdapter.close → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:148` |
 | `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -4977,16 +4968,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:109` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -5063,16 +5054,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 30, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → PatientPortalProxiesRepository.searchRepresentableByName | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:450` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → PatientPortalProxiesRepository.searchRepresentableByName | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:450` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → PatientPortalProxiesRepository.searchRepresentableByName | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:354` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → PatientPortalProxiesRepository.searchRepresentableByName | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:354` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → DependentLinkRequestsService.ownPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listDependentCandidates → DependentLinkRequestsService.findCandidates → DependentLinkRequestsService.ownPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -5135,7 +5126,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/me/dependent-requests` la atiende `ProfilesDependentRequestsController.requestDependentLink` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RequestDependentLinkDto` (2 campos, 0 obligatorios). Delega en `DependentLinkRequestsService.request`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.patient_portal_proxies. Actualiza iam.devices. Lee common.identifiers, iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies y 3 más.
+`POST /profiles/patients/me/dependent-requests` la atiende `ProfilesDependentRequestsController.requestDependentLink` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RequestDependentLinkDto` (2 campos, 0 obligatorios). Delega en `DependentLinkRequestsService.request`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.patient_portal_proxies. Actualiza messaging.in_app_notifications. Lee common.identifiers, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies, profiles.patient_profiles y 2 más.
 
 ### Requerimientos
 
@@ -5143,7 +5134,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
@@ -5153,8 +5144,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkRequestsService.recipientByDocument → DependentLinkContextAdapter.findActiveDuplicate → IdentifiersRepository.findActiveDuplicate | `src/modules/common/repositories/identifiers.repository.ts:80` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -5163,9 +5153,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:168` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkRequestsService.ownPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.requestDependentLink → DependentLinkRequestsService.request → DependentLinkRequestsService.ownPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -5245,7 +5235,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/me/dependent-requests/{id}/accept` la atiende `ProfilesDependentRequestsController.acceptDependentLinkRequest` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AcceptDependentLinkRequestDto` (1 campo, 0 obligatorios). Delega en `DependentLinkRequestsService.accept`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.related_persons. Actualiza iam.devices. Lee iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies, profiles.patient_profiles y 2 más.
+`POST /profiles/patients/me/dependent-requests/{id}/accept` la atiende `ProfilesDependentRequestsController.acceptDependentLinkRequest` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159). Exige sesión; el controlador no declara roles. Valida el cuerpo como `AcceptDependentLinkRequestDto` (1 campo, 0 obligatorios). Delega en `DependentLinkRequestsService.accept`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.related_persons. Actualiza messaging.in_app_notifications. Lee messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links y 1 más.
 
 ### Requerimientos
 
@@ -5253,18 +5243,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
 | CUERPO | application/json; máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -5273,8 +5262,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.acceptDependentLinkRequest → DependentLinkRequestsService.accept → RelatedPersonsRepository.create | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:68` |
@@ -5358,7 +5347,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/me/dependent-requests/{id}/reject` la atiende `ProfilesDependentRequestsController.rejectDependentLinkRequest` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186). Exige sesión; el controlador no declara roles. Delega en `DependentLinkRequestsService.reject`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices. Lee iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies, profiles.patient_profiles y 2 más.
+`POST /profiles/patients/me/dependent-requests/{id}/reject` la atiende `ProfilesDependentRequestsController.rejectDependentLinkRequest` (src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186). Exige sesión; el controlador no declara roles. Delega en `DependentLinkRequestsService.reject`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.in_app_notifications. Lee messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links y 1 más.
 
 ### Requerimientos
 
@@ -5366,16 +5355,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -5384,8 +5372,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.notifyResponse → DependentLinkContextAdapter.emitInApp → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → PatientPortalProxiesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:355` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → PatientPortalProxiesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:259` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.rejectDependentLinkRequest → DependentLinkRequestsService.reject → DependentLinkRequestsService.pendingRequest → DependentLinkRequestsService.ownPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -5458,15 +5446,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → PatientPortalProxiesRepository.listPendingForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:398` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → PatientPortalProxiesRepository.listPendingForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:302` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → DependentLinkRequestsService.ownPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → DependentLinkRequestsService.ownPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesDependentRequestsController.listIncomingDependentLinkRequests → DependentLinkRequestsService.listIncoming → DependentLinkRequestsService.ownPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -5531,18 +5519,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:230` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:268` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:268` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:268` |
-| `profiles.persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:268` |
-| `profiles.related_persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:268` |
+| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:171` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:171` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:171` |
+| `profiles.persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:171` |
+| `profiles.related_persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnDependents → ProfilesPatientsService.getOwnDependents → PatientPortalProxiesRepository.listActiveDependentsOfUser | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:171` |
 
 ### Cuerpo
 
@@ -5552,18 +5540,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:24` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:31` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:35` |
-| `fullName` | `string` | Sí | — | — | Nombre para mostrar, ya compuesto | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:39` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:43` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:47` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:51` |
-| `ageYears` | `number` | No | — | — | Edad cumplida en años | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:62` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:66` |
-| `relationshipCode` | `string` | Sí | valores: CHILD, PARENT, SPOUSE, WARD, OTHER | — | Parentesco visto desde el dependiente | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:75` |
-| `relationshipDisplay` | `string` | Sí | — | — | Rótulo en castellano | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:79` |
-| `isLegalGuardian` | `boolean` | Sí | — | — | Si el vínculo afirma la tutela legal | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:89` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:25` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:32` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:36` |
+| `fullName` | `string` | Sí | — | — | Nombre para mostrar, ya compuesto | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:40` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:44` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:48` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:52` |
+| `ageYears` | `number` | No | — | — | Edad cumplida en años | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:63` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:67` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:74` |
+| `relationshipCode` | `string` | Sí | valores: CHILD, PARENT, SPOUSE, WARD, OTHER | — | Parentesco visto desde el dependiente | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:83` |
+| `relationshipDisplay` | `string` | Sí | — | — | Rótulo en castellano | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:87` |
+| `isLegalGuardian` | `boolean` | Sí | — | — | Si el vínculo afirma la tutela legal | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:97` |
 
 ### Respuestas posibles
 
@@ -5615,10 +5604,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:257` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5626,9 +5615,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PersonRecordsAdapter.findActiveDuplicate → IdentifiersRepository.findActiveDuplicate | `src/modules/common/repositories/identifiers.repository.ts:80` |
-| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:168` |
-| `profiles.patient_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PatientProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:220` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PatientPortalProxiesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:71` |
+| `profiles.patient_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PatientProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:284` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
@@ -5685,18 +5674,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:24` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:31` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:35` |
-| `fullName` | `string` | Sí | — | — | Nombre para mostrar, ya compuesto | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:39` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:43` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:47` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:51` |
-| `ageYears` | `number` | No | — | — | Edad cumplida en años | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:62` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:66` |
-| `relationshipCode` | `string` | Sí | valores: CHILD, PARENT, SPOUSE, WARD, OTHER | — | Parentesco visto desde el dependiente | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:75` |
-| `relationshipDisplay` | `string` | Sí | — | — | Rótulo en castellano | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:79` |
-| `isLegalGuardian` | `boolean` | Sí | — | — | Si el vínculo afirma la tutela legal | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:89` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:25` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:32` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:36` |
+| `fullName` | `string` | Sí | — | — | Nombre para mostrar, ya compuesto | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:40` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:44` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:48` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:52` |
+| `ageYears` | `number` | No | — | — | Edad cumplida en años | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:63` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:67` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:74` |
+| `relationshipCode` | `string` | Sí | valores: CHILD, PARENT, SPOUSE, WARD, OTHER | — | Parentesco visto desde el dependiente | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:83` |
+| `relationshipDisplay` | `string` | Sí | — | — | Rótulo en castellano | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:87` |
+| `isLegalGuardian` | `boolean` | Sí | — | — | Si el vínculo afirma la tutela legal | `src/modules/profiles/presentation/dto/dependent-summary.dto.ts:97` |
 
 ### Respuestas posibles
 
@@ -5751,8 +5741,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:207` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5766,8 +5756,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:311` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:215` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.emergencyReadContacts → RelatedPersonsRepository.listActiveEmergencyContactsOfPatient | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:111` |
@@ -5781,30 +5771,30 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:502` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:517` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:528` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:538` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:553` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:575` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:579` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:587` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:597` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:615` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:626` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:632` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:635` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:639` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:657` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:663` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -5812,7 +5802,7 @@ La operación no recibe cuerpo.
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -5820,49 +5810,49 @@ La operación no recibe cuerpo.
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:351` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:354` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:357` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:360` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:363` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:366` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:391` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:399` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:402` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:405` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:309` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:312` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:315` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:318` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:321` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:325` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:328` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:331` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:334` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:339` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:342` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:408` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:411` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:444` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:450` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:453` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:456` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:423` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:435` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:438` |
 
 ### Respuestas posibles
 
@@ -5915,10 +5905,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5934,8 +5924,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
-| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:311` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:215` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.emergencyReadContacts → RelatedPersonsRepository.listActiveEmergencyContactsOfPatient | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:111` |
@@ -5969,30 +5959,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:502` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:517` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:528` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:538` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:553` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:575` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:579` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:587` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:597` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:615` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:626` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:632` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:635` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:639` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:657` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:663` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -6000,7 +5990,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
@@ -6008,49 +5998,49 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:351` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:354` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:357` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:360` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:363` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:366` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:391` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:399` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:402` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:405` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:309` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:312` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:315` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:318` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:321` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:325` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:328` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:331` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:334` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:339` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:342` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:408` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:411` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:444` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:450` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:453` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:456` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:423` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:435` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:438` |
 
 ### Respuestas posibles
 
@@ -6104,8 +6094,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6114,7 +6104,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.present → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_primary_practitioners` | ESCRIBE | ACTUALIZA | POR_TIPO | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PatientPrimaryPractitionersRepository.close | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:66` |
 | `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
@@ -6177,8 +6167,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6186,7 +6176,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.present → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
@@ -6251,10 +6241,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6264,7 +6254,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.patient_primary_practitioners` | ESCRIBE | ACTUALIZA | POR_TIPO | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PatientPrimaryPractitionersRepository.close | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:66` |
 | `profiles.patient_primary_practitioners` | ESCRIBE | CREA | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PatientPrimaryPractitionersRepository.open | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:52` |
 | `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `SetPrimaryPractitionerDto` · `application/json`
@@ -6350,14 +6340,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnSummary → ProfilesPatientsService.getOwnSummary → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnSummary → ProfilesPatientsService.getOwnSummary → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnSummary → ProfilesPatientsService.getOwnSummary → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnSummary → ProfilesPatientsService.getOwnSummary → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -6369,13 +6359,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:131` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:137` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el resumen llega sin `patientCode`. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:146` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:155` |
-| `displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:161` |
-| `birthDate` | `string` | No | formato date-time | — | Valor de birth date mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:167` |
-| `personStatus` | `string` | Sí | formato uuid | — | Identificador asociado a person status concept. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:173` |
+| `personId` | `string` | Sí | formato uuid | — | Identificador asociado a person. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:141` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:147` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el resumen llega sin `patientCode`. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:156` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:165` |
+| `displayName` | `string` | No | — | — | Valor de display name mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:171` |
+| `birthDate` | `string` | No | formato date-time | — | Valor de birth date mantenido por la instancia. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:177` |
+| `personStatus` | `string` | Sí | formato uuid | — | Identificador asociado a person status concept. | `src/modules/profiles/presentation/dto/create-patient.dto.ts:183` |
 
 ### Respuestas posibles
 
@@ -6407,7 +6397,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** Fusionar pacientes duplicados
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `ProfilesPatientsController.mergePatients` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508`
 
@@ -6419,7 +6409,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/merge` la atiende `ProfilesPatientsController.mergePatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `MergePatientsDto` (3 campos, 2 obligatorios). Delega en `ProfilesPatientsService.mergePatients`. Crea filas en profiles.patient_merge_events. Actualiza profiles.patient_identity_links, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.persons, profiles.related_persons. Lee profiles.patient_profiles, profiles.persons.
+`POST /profiles/patients/merge` la atiende `ProfilesPatientsController.mergePatients` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `MergePatientsDto` (3 campos, 2 obligatorios). Delega en `ProfilesPatientsService.mergePatients`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
@@ -6427,23 +6417,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:508` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientIdentityLinksRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:103` |
-| `profiles.patient_merge_events` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientMergeEventsRepository.create | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:113` |
-| `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientPortalProxiesRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:529` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2198` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2208` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
-| `profiles.related_persons` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → RelatedPersonsRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:178` |
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
 ### Cuerpo — DTO `MergePatientsDto` · `application/json`
 
@@ -6493,9 +6474,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente sobreviviente no encontrado; ResourceNotFoundException: Paciente a fusionar no encontrado |
-| 409 | `CONFLICT` | ConflictException: El paciente ya fue fusionado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede fusionar un paciente consigo mismo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -6537,8 +6515,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:414` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6617,11 +6595,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: eventId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:525` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6629,9 +6607,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.patient_merge_events` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientMergeEventsRepository.create | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:113` |
 | `profiles.patient_merge_events` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientMergeEventsRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:56` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2339` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2346` |
+| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2165` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2172` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
 ### Parámetros
@@ -6705,7 +6683,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `ProfilesPatientsController.searchPatientsByBody` — `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386`
 
@@ -6717,7 +6695,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/patients/search` la atiende `ProfilesPatientsController.searchPatientsByBody` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `SearchPatientsQueryDto` (5 campos, 0 obligatorios). Lee common.identifiers, profiles.patient_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`POST /profiles/patients/search` la atiende `ProfilesPatientsController.searchPatientsByBody` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386). Exige sesión con alguno de los roles SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `SearchPatientsQueryDto` (5 campos, 0 obligatorios). No toca tablas relacionales: el handler no invoca ningún servicio.
 
 ### Requerimientos
 
@@ -6725,31 +6703,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:166` |
-| `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:190` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
+No toca tablas relacionales: el handler no invoca ningún servicio. _(automática; fuente: `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:386`)_
 
 ### Cuerpo — DTO `SearchPatientsQueryDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `q` | `string` | No | — | `@IsOptional()` | Texto a buscar en el código de paciente o el nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:79` |
-| `nationalId` | `string` | No | — | `@IsOptional()` | Documento de identidad exacto (`common.identifiers.value`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:86` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Departamento que expidió el documento; sólo tiene efecto junto a nationalId | `src/modules/profiles/presentation/dto/read-patients.dto.ts:96` |
-| `cursor` | `string` | No | — | `@IsOptional()` | Cursor opaco devuelto por la página anterior | `src/modules/profiles/presentation/dto/read-patients.dto.ts:103` |
-| `limit` | `number` | No | mínimo 1; máximo 500 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(500)` | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:112` |
+| `q` | `string` | No | — | `@IsOptional()` | Texto a buscar en el código de paciente o el nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:24` |
+| `nationalId` | `string` | No | — | `@IsOptional()` | Documento de identidad exacto (`common.identifiers.value`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:31` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Departamento que expidió el documento; sólo tiene efecto junto a nationalId | `src/modules/profiles/presentation/dto/read-patients.dto.ts:41` |
+| `cursor` | `string` | No | — | `@IsOptional()` | Cursor opaco devuelto por la página anterior | `src/modules/profiles/presentation/dto/read-patients.dto.ts:48` |
+| `limit` | `number` | No | mínimo 1; máximo 500 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(500)` | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:57` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -6775,17 +6746,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PatientListItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:121` |
-| `items[].profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:20` |
-| `items[].personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:26` |
-| `items[].patientCode` | `string` | Sí | — | — | Código único de paciente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:32` |
-| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/read-patients.dto.ts:38` |
-| `items[].birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:44` |
-| `items[].personStatusConceptId` | `string` | No | formato uuid | — | Concept id del estado de la persona | `src/modules/profiles/presentation/dto/read-patients.dto.ts:53` |
-| `items[].deceased` | `boolean` | Sí | — | — | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `src/modules/profiles/presentation/dto/read-patients.dto.ts:62` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/read-patients.dto.ts:127` |
-| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:133` |
-| `nextCursor` | `object` | No | admite null | — | Cursor opaco para la página siguiente; `null` cuando no hay más | `src/modules/profiles/presentation/dto/read-patients.dto.ts:143` |
+| `items` | `array<PatientListItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:66` |
+| `items[].profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:16` |
+| `items[].personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:22` |
+| `items[].patientCode` | `string` | Sí | — | — | Código único de paciente | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:28` |
+| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:34` |
+| `items[].birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:40` |
+| `items[].personStatusConceptId` | `string` | No | formato uuid | — | Concept id del estado de la persona | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:49` |
+| `items[].deceased` | `boolean` | Sí | — | — | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:58` |
+| `items[].nationalIdMasked` | `string` | No | admite null | — | Documento enmascarado (sólo los últimos dígitos), para distinguir homónimos | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:67` |
+| `items[].hasAccount` | `boolean` | Sí | — | — | Si la persona tiene cuenta propia en la plataforma: sin ella, una solicitud de vinculación no le llega | `src/modules/profiles/presentation/dto/patient-list-item.dto.ts:74` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/read-patients.dto.ts:72` |
+| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:78` |
+| `nextCursor` | `object` | No | admite null | — | Cursor opaco para la página siguiente; `null` cuando no hay más | `src/modules/profiles/presentation/dto/read-patients.dto.ts:88` |
 
 ### Respuestas posibles
 
@@ -6795,7 +6768,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes; PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -6837,17 +6809,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:472` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.supersedeActiveForUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:183` |
+| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.supersedeActiveForUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:241` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -6944,19 +6916,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:581` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PatientPortalProxiesRepository.revokeActiveForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:515` |
-| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonAccountLinksRepository.revokeActiveForPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:200` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.decease → ProfilesPatientsService.decease | `src/modules/profiles/application/services/profiles-patients.service.ts:2534` |
+| `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PatientPortalProxiesRepository.revokeActiveForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:419` |
+| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonAccountLinksRepository.revokeActiveForPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:258` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.decease → ProfilesPatientsService.decease | `src/modules/profiles/application/services/profiles-patients.service.ts:2360` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
 ### Parámetros
@@ -7051,25 +7023,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
-| `chart.document_records` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
-| `clinical.encounters` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
-| `clinical.medication_requests` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:105` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:105` |
+| `chart.clinical_note_headers` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:87` |
+| `chart.document_records` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:87` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:87` |
+| `clinical.medication_requests` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:87` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:103` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:103` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → HealthPractitionerProfilesRepository.findVisibleProfileIds | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:144` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:89` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:87` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAffiliationsRepository.findByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:100` |
-| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerSpecialtiesRepository.findCurrentSpecialtyPairs | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:211` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerSpecialtiesRepository.findCurrentSpecialtyPairs | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:236` |
 
 ### Parámetros
 
@@ -7165,10 +7137,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:360` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7335,11 +7307,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:269` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7355,16 +7327,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1394` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1395` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfileOwnershipService.assertOwnsPractitionerProfile → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1421` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1422` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1610` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1611` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -7508,21 +7480,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -7639,7 +7611,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/{profileId}/affiliations` la atiende `ProfilesPractitionersController.addAffiliationFor` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addAffiliationFor`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
+`POST /profiles/practitioners/{profileId}/affiliations` la atiende `ProfilesPractitionersController.addAffiliationFor` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addAffiliationFor`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza messaging.in_app_notifications, messaging.notification_requests. Lee directory.tenant_memberships, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 10 más.
 
 ### Requerimientos
 
@@ -7647,19 +7619,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:639` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:118` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:137` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -7667,7 +7638,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -7795,11 +7766,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:379` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7915,9 +7886,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:344` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7982,21 +7953,21 @@ La operación no recibe cuerpo.
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -8119,11 +8090,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:313` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8208,21 +8179,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -8345,11 +8316,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:661` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8357,7 +8328,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → ProfileOwnershipService.assertOwnsPractitionerProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.demotePrimary | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:228` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.demotePrimary | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:253` |
 | `profiles.practitioner_specialties` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:61` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → ProfessionalCredentialsRepository.findById | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:93` |
@@ -8463,9 +8434,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:219` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8530,21 +8501,21 @@ La operación no recibe cuerpo.
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -8669,10 +8640,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8688,16 +8659,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1394` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1395` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1421` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1422` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1610` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1611` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -8835,21 +8806,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -8957,7 +8928,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.get` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:46`
+- **Implementación:** `OwnAdmissionController.get` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:48`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -8967,16 +8938,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/admission` la atiende `OwnAdmissionController.get` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:46). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsReadService.own`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements, profiles.health_practitioner_profiles y 8 más.
+`GET /profiles/practitioners/me/admission` la atiende `OwnAdmissionController.get` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:48). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsReadService.own`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -8991,7 +8962,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:179` |
 | `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
@@ -9047,7 +9018,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:182` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:183` |
 
 ### Flujos
 
@@ -9062,7 +9033,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.resubmit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:58`
+- **Implementación:** `OwnAdmissionController.resubmit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9072,18 +9043,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/admission/resubmit` la atiende `OwnAdmissionController.resubmit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:58). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.resubmit`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+`POST /profiles/practitioners/me/admission/resubmit` la atiende `OwnAdmissionController.resubmit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:81). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.resubmit`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, messaging.message_channels, messaging.message_templates, messaging.messaging_providers y 16 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9094,8 +9065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
 | `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
 | `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -9103,7 +9073,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -9113,14 +9083,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:373` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:179` |
 | `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:366` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
 | `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1050` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1052` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:379` |
@@ -9202,7 +9172,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:183` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:184` |
 
 ### Flujos
 
@@ -9210,14 +9180,169 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 62. POST /profiles/practitioners/me/admission/withdraw
+## 62. POST /profiles/practitioners/me/admission/submit
+
+- **Origen:** CONTRATO
+- **Nombre:** Enviarme a verificación
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OwnAdmissionController.submit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:60`
+
+### Qué es y para qué sirve (negocio)
+
+Enviarme a verificación. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /profiles/practitioners/me/admission/submit` la atiende `OwnAdmissionController.submit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:60). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionSubmitService.submitOwn`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, messaging.message_channels, messaging.message_templates, messaging.messaging_providers y 16 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionSubmitService.emitReceived → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn | `src/modules/profiles/application/services/practitioner-admission-submit.service.ts:74` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:179` |
+| `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | OwnAdmissionController.submit → PractitionerAdmissionSubmitService.submitOwn → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Cuerpo — DTO `ResubmitAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `attested` | `boolean` | Sí | — | `@IsOptional()` `@IsBoolean()` | Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. | `src/modules/profiles/presentation/dto/admissions.dto.ts:493` |
+| `attestationVersion` | `string` | Sí | longitud máxima 32 | `@IsOptional()` `@IsString()` `@MaxLength(MAX_ATTESTATION_VERSION_LENGTH)` | Versión del texto de la declaración que se mostró. | `src/modules/profiles/presentation/dto/admissions.dto.ts:503` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OwnAdmissionDto>` · DTO `OwnAdmissionDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:446` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:447` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:448` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:449` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:450` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:452` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:454` |
+| `validUntil` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:456` |
+| `items` | `array<OwnAdmissionItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:458` |
+| `items[].type` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:417` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:418` |
+| `items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:419` |
+| `items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:421` |
+| `items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:422` |
+| `items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:425` |
+| `resubmissionCount` | `number` | Sí | — | — | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `src/modules/profiles/presentation/dto/admissions.dto.ts:462` |
+| `resubmissions` | `AdmissionResubmissionsDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:464` |
+| `resubmissions.used` | `number` | Sí | mínimo 0 | — | Reenvíos ya hechos. | `src/modules/profiles/presentation/dto/admissions.dto.ts:431` |
+| `resubmissions.max` | `number` | Sí | mínimo 0 | — | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `src/modules/profiles/presentation/dto/admissions.dto.ts:436` |
+| `resubmissions.remaining` | `number` | Sí | mínimo 0 | — | Reenvíos que quedan: `max - used`, nunca negativo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:441` |
+| `canResubmit` | `boolean` | Sí | — | — | El servidor decide: el estado admite reenviar y no se llegó al tope. | `src/modules/profiles/presentation/dto/admissions.dto.ts:469` |
+| `canWithdraw` | `boolean` | Sí | — | — | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `src/modules/profiles/presentation/dto/admissions.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya tiene una solicitud de verificación: reenvíela en lugar de abrir otra |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Debe aceptar la declaración para enviar la solicitud; PreconditionFailedException: Su perfil ya no está pendiente de verificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:207` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:OwnAdmissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 63. POST /profiles/practitioners/me/admission/withdraw
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OwnAdmissionController.withdraw` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81`
+- **Implementación:** `OwnAdmissionController.withdraw` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -9227,28 +9352,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/admission/withdraw` la atiende `OwnAdmissionController.withdraw` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsService.withdraw`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+`POST /profiles/practitioners/me/admission/withdraw` la atiende `OwnAdmissionController.withdraw` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:104). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsService.withdraw`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, messaging.message_channels, messaging.message_templates, messaging.messaging_providers y 16 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
-| `common.contact_points` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:175` |
+| `common.contact_points` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:177` |
 | `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
 | `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
 | `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -9256,7 +9380,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -9265,11 +9389,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:179` |
 | `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
 | `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
 | `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
-| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1093` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1095` |
 | `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
@@ -9325,7 +9449,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:188` |
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:189` |
 
 ### Flujos
 
@@ -9333,7 +9457,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 63. GET /profiles/practitioners/me/affiliations
+## 64. GET /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Historial laboral propio (instituciones donde trabajó)
@@ -9358,8 +9482,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:454` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9415,7 +9539,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 64. POST /profiles/practitioners/me/affiliations
+## 65. POST /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una afiliación institucional en el historial propio
@@ -9432,7 +9556,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.addOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnAffiliation`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza iam.devices, messaging.notification_requests. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 11 más.
+`POST /profiles/practitioners/me/affiliations` la atiende `ProfilesPractitionersController.addOwnAffiliation` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProfilesCreateAffiliationDto` (7 campos, 2 obligatorios). Delega en `ProfilesPractitionersService.addOwnAffiliation`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_affiliations. Actualiza messaging.in_app_notifications, messaging.notification_requests. Lee directory.tenant_memberships, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 10 más.
 
 ### Requerimientos
 
@@ -9440,18 +9564,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:466` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:118` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:137` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -9459,7 +9582,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -9558,7 +9681,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 65. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 66. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una afiliación del historial laboral propio
@@ -9583,9 +9706,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:519` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9633,7 +9756,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 66. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 67. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una afiliación del historial laboral propio
@@ -9658,11 +9781,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:492` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9670,7 +9793,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2861` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2862` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
 
 ### Parámetros
@@ -9753,7 +9876,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 67. POST /profiles/practitioners/me/credentials
+## 68. POST /profiles/practitioners/me/credentials
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
@@ -9778,10 +9901,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:547` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9869,7 +9992,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 68. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 69. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un título propio pendiente
@@ -9894,9 +10017,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -9938,7 +10061,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 69. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 70. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar un título propio pendiente de verificación
@@ -9963,11 +10086,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:571` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10045,7 +10168,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 70. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 71. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una matrícula propia pendiente de verificación
@@ -10070,9 +10193,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:781` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10114,7 +10237,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 71. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 72. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una matrícula propia pendiente de verificación
@@ -10139,11 +10262,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:758` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10209,7 +10332,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 72. GET /profiles/practitioners/me/linkable-organizations
+## 73. GET /profiles/practitioners/me/linkable-organizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar instituciones del padrón para declarar una afiliación
@@ -10234,8 +10357,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:422` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10294,7 +10417,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 73. GET /profiles/practitioners/me/onboarding
+## 74. GET /profiles/practitioners/me/onboarding
 
 - **Origen:** CONTRATO
 - **Nombre:** Qué le falta al profesional para completar su alta
@@ -10319,8 +10442,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10375,7 +10498,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 74. GET /profiles/practitioners/me/primary-patients
+## 75. GET /profiles/practitioners/me/primary-patients
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los pacientes que me eligieron como médico de cabecera
@@ -10400,8 +10523,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10459,7 +10582,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 75. GET /profiles/practitioners/me/signature-assets
+## 76. GET /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar las imágenes de firma y sello propias
@@ -10484,8 +10607,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:31` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10530,7 +10653,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 76. PUT /profiles/practitioners/me/signature-assets
+## 77. PUT /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar o quitar las imágenes de firma y sello propias
@@ -10555,10 +10678,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10627,7 +10750,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 77. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 78. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una especialidad propia pendiente de verificación
@@ -10652,9 +10775,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:736` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10696,7 +10819,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 78. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 79. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una especialidad propia pendiente de verificación
@@ -10721,11 +10844,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:709` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10787,7 +10910,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 79. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 80. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar una especialidad propia como la principal
@@ -10812,9 +10935,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:684` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10864,7 +10987,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 80. GET /profiles/practitioners/me/summary
+## 81. GET /profiles/practitioners/me/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil profesional propio (trayectoria y actividad)
@@ -10889,8 +11012,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -10949,21 +11072,21 @@ La operación no recibe cuerpo.
 | `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
 | `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
 | `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
-| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
-| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
-| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
-| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
-| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
+| `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:274` |
+| `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:277` |
+| `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:283` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:290` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:295` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:298` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:303` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
@@ -11065,7 +11188,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 81. GET /profiles/practitioners/specialty-counts
+## 82. GET /profiles/practitioners/specialty-counts
 
 - **Origen:** CONTRATO
 - **Nombre:** Contar profesionales visibles por especialidad
@@ -11090,15 +11213,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:200` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.countPractitionersBySpecialty → ProfilesPractitionersService.countPractitionersBySpecialty → HealthPractitionerProfilesRepository.findVisibleProfileIds | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:144` |
-| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.countPractitionersBySpecialty → ProfilesPractitionersService.countPractitionersBySpecialty → PractitionerSpecialtiesRepository.findCurrentSpecialtyPairs | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:211` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.countPractitionersBySpecialty → ProfilesPractitionersService.countPractitionersBySpecialty → PractitionerSpecialtiesRepository.findCurrentSpecialtyPairs | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:236` |
 
 ### Cuerpo
 
@@ -11135,7 +11258,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 82. GET /tenants/{tenantId}/practitioner-requests
+## 83. GET /tenants/{tenantId}/practitioner-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitudes de médicos que piden atender en la organización
@@ -11160,15 +11283,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.findSitesByTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:78` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:342` |
 | `profiles.persons` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:341` |
@@ -11224,7 +11347,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 83. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar la solicitud de un profesional
@@ -11241,7 +11364,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` la atiende `TenantPractitionerRequestsController.approve` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `ProfilesAffiliationsService.approve`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 4 más.
+`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` la atiende `TenantPractitionerRequestsController.approve` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `ProfilesAffiliationsService.approve`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 3 más.
 
 ### Requerimientos
 
@@ -11249,18 +11372,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:155` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -11268,7 +11390,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -11318,7 +11440,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 85. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar la solicitud de un profesional
@@ -11335,7 +11457,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` la atiende `TenantPractitionerRequestsController.reject` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RejectAffiliationDto` (1 campo, 0 obligatorios). Delega en `ProfilesAffiliationsService.reject`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 4 más.
+`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` la atiende `TenantPractitionerRequestsController.reject` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RejectAffiliationDto` (1 campo, 0 obligatorios). Delega en `ProfilesAffiliationsService.reject`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 3 más.
 
 ### Requerimientos
 
@@ -11343,20 +11465,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:155` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -11364,7 +11485,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -11430,7 +11551,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 85. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 86. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de baja un vínculo ya aprobado
@@ -11447,7 +11568,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` la atiende `TenantPractitionerRequestsController.revoke` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RejectAffiliationDto` (1 campo, 0 obligatorios). Delega en `ProfilesAffiliationsService.revoke`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 4 más.
+`POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` la atiende `TenantPractitionerRequestsController.revoke` (src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RejectAffiliationDto` (1 campo, 0 obligatorios). Delega en `ProfilesAffiliationsService.revoke`. Crea filas en directory.tenant_memberships, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.in_app_notifications, messaging.notification_requests, profiles.practitioner_affiliations. Lee directory.tenant_memberships, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 3 más.
 
 ### Requerimientos
 
@@ -11455,20 +11576,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:155` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
@@ -11476,7 +11596,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |

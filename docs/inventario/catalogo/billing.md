@@ -29,7 +29,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 9 | 67 | COINCIDE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 9 | 73 | COINCIDE |
 | [siat_simulated_invoices](#siat_simulated_invoices) | sin propósito | 26 | 4 | 15 | COINCIDE |
 | [siat_simulated_outbox](#siat_simulated_outbox) | sin propósito | 8 | 1 | 2 | COINCIDE |
 | [space_tariffs](#space_tariffs) | Define la tarifa vigente por uso de un espacio o categoría de cama (día-cama, quirófano por tiempo) por práctica, sin vigencias solapadas, para valorizar los cargos devengados. | 19 | 11 | 6 | COINCIDE |
@@ -1959,7 +1959,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 9 entrantes · 67 operaciones
+- **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 9 entrantes · 73 operaciones
 
 #### Columnas
 
@@ -2010,15 +2010,15 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_catalog_image_file_id` | no | image_file_id | Soporta la clave foránea fk_service_catalog_image_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_service_catalog_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_service_catalog_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_service_catalog_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_service_catalog_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «service_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_catalog_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_service_catalog_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_tax_code_id` | no | tax_code_id | Soporta la clave foránea fk_service_catalog_tax_code_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_income_account_id` | no | income_account_id | Soporta la clave foránea fk_service_catalog_income_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_service_catalog_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_service_catalog_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ux_service_catalog_practice_id_id` | sí | practice_id, id | Garantiza que no se repita la combinación (practice_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_service_catalog_practice_id_id` | sí | practice_id, id | Garantiza que no se repita la combinación (practice_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -2043,8 +2043,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | PATCH /billing/service-catalog/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
 | GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
+| POST /billing/service-catalog/import | CREA | DIRECTA |
+| POST /billing/service-catalog/import | LEE | DIRECTA |
 | POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
 | POST /billing/service-catalog/import-procedures | LEE | DIRECTA |
+| GET /billing/service-catalog/repository | LEE | POR_SQL |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
@@ -2096,6 +2099,9 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | POR_SQL |
+| GET /surveys/service-assignments | LEE | DIRECTA |
+| DELETE /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno

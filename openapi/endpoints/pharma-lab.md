@@ -2748,8 +2748,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 404 | `NOT_FOUND` | Visitador no encontrado en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | El visitador ya está desvinculado | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3162,8 +3165,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Producto no encontrado en el catálogo del laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharmacovigilance.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar un código de caso libre | Excepción explícita en src/modules/pharma_lab/services/pharmacovigilance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5182,6 +5188,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5983,9 +5992,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Propuesta no encontrada | Excepción explícita en src/modules/pharma_lab/services/pharma-social.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 404 | `NOT_FOUND` | Visitador no encontrado en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La propuesta ya fue resuelta | Excepción explícita en src/modules/pharma_lab/services/pharma-social.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La decisión debe ser aprobar o rechazar | Excepción explícita en src/modules/pharma_lab/services/pharma-social.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7276,12 +7288,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEDICAL_VISITOR. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
 | 404 | `NOT_FOUND` | Material informativo no encontrado en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | La cuenta no corresponde a un visitador médico | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 409 | `CONFLICT` | La visita ya fue registrada | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se registra una visita confirmada | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un visitador no puede compartir material que no está aprobado | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
 | 422 | `PRECONDITION_FAILED` | El material no estaba vigente en la fecha de la visita | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El visitador no tiene una vinculación activa con un laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio del visitador no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -7554,9 +7569,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Registro de visita no encontrado | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una calificación de esa naturaleza para la visita | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se califica una visita completada | Excepción explícita en src/modules/pharma_lab/services/visit-records.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8058,6 +8076,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEDICAL_VISITOR. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | La cuenta no corresponde a un visitador médico | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El visitador no está autorizado a representar alguno de los productos del temario | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los productos del temario está suspendido o retirado | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
@@ -8074,6 +8093,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El horario se superpone con otra visita ya registrada | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana de visita ya está completa | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | El horario se superpone con la agenda clínica del doctor | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8400,9 +8421,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 409 | `CONFLICT` | La transición solicitada no está permitida para el estado actual | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8529,11 +8553,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEDICAL_VISITOR, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | El doctor no tiene agenda de visitas habilitada | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 409 | `CONFLICT` | La transición solicitada no está permitida para el estado actual | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El plazo para reprogramar o cancelar venció (${cutoffHours} horas antes del inicio) | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8662,9 +8689,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 409 | `CONFLICT` | La transición solicitada no está permitida para el estado actual | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El doctor no recibe visitas de laboratorio | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | La visita debe solicitarse con al menos ${policy.minNoticeHours} horas de antelación | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | La duración máxima admitida es de ${policy.maxDurationMinutes} minutos | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
@@ -8798,9 +8828,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 409 | `CONFLICT` | La transición solicitada no está permitida para el estado actual | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8925,8 +8958,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -9057,6 +9093,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MEDICAL_VISITOR. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 404 | `NOT_FOUND` | La cuenta no corresponde a un visitador médico | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La solicitud está en un estado final y ya no admite cambios | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 409 | `CONFLICT` | La transición solicitada no está permitida para el estado actual | Excepción explícita en src/modules/pharma_lab/services/visit-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -9072,6 +9109,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El horario se superpone con otra visita ya registrada | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana de visita ya está completa | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 422 | `PRECONDITION_FAILED` | El horario se superpone con la agenda clínica del doctor | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

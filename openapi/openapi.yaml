@@ -13960,6 +13960,103 @@ paths:
       description: >-
         Imagen del logo para miembros de la organización. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/representatives/{role}/name:
+    patch:
+      description: >-
+        role: LEGAL_REPRESENTATIVE, GENERAL_MANAGER, COMMERCIAL_MANAGER o MARKETING_MANAGER. Recibe las mismas cuatro
+        partes que el registro.
+      operationId: TenantRepresentativesController_rename
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: role
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRepresentativeNameDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Corregir el nombre del representante legal o de una gerencia
+      tags:
+        - directory-tenants
+  /tenants/{tenantId}/branches/location-preview:
+    post:
+      description: >-
+        Acepta enlaces largos y los cortos maps.app.goo.gl. No guarda nada: sirve para mostrar el pin antes de crear la
+        sucursal.
+      operationId: BranchLocationController_preview
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveMapLinkDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Coordenadas de un enlace de Google Maps u OpenStreetMap
+      tags:
+        - directory-tenants
   /community/public-profiles:
     post:
       operationId: CommunitySocialController_createProfile
@@ -97210,6 +97307,39 @@ components:
           nullable: true
       required:
         - fileId
+      additionalProperties: false
+    UpdateRepresentativeNameDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Wendy
+        middleName:
+          type: string
+          maxLength: 100
+          example: Jennyfer
+        lastName:
+          type: string
+          maxLength: 100
+          example: Dávila
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Yamal
+      required:
+        - name
+        - lastName
+      additionalProperties: false
+    ResolveMapLinkDto:
+      type: object
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+          example: https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7
+      required:
+        - url
       additionalProperties: false
     CreatePublicProfileDto:
       type: object
