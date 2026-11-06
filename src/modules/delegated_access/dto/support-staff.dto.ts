@@ -360,4 +360,11 @@ export class SupportAgendaItemDto {
 export class SupportAgendaResponseDto {
   @ApiProperty({ type: [SupportAgendaItemDto] }) items!: SupportAgendaItemDto[];
   @ApiProperty() count!: number;
+  @ApiProperty({
+    description:
+      'true = el rango tiene más turnos que `limit` y se devolvieron los primeros por hora; acote el rango y vuelva a pedir.',
+  })
+  truncated!: boolean;
+  @ApiProperty({ description: 'Tope de turnos por respuesta.' })
+  limit!: number;
 }

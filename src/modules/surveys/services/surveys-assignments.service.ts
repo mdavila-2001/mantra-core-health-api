@@ -344,7 +344,7 @@ export class SurveysAssignmentsService {
           tx,
           booking,
         );
-        if (enforceAttendance && !operatesAnyAgenda(actor)) {
+        if (enforceAttendance && !operatesAnyAgenda(actor, tenantId)) {
           // Un profesional emite sólo las encuestas de lo que atendió. 404 y no
           // 403: una reserva ajena no se distingue de una inexistente.
           if (

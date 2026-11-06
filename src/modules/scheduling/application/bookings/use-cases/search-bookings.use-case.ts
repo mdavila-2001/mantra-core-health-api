@@ -40,9 +40,11 @@ import {
   isDelay,
 } from '../../../domain/booking/booking-history-reading';
 import {
+  attendsIn,
   isPatientActor,
   operatesAnyAgenda,
 } from '../../../domain/booking/agenda-actors';
+import { resolveAgendaOwnership } from '../support/agenda-ownership';
 
 /** UC-41-15: listado de citas por paciente, recurso y/o ventana temporal. */
 @Injectable()
@@ -104,7 +106,8 @@ export class SearchBookingsUseCase {
     // Una cuenta de paciente sólo lista lo suyo y lo de quienes representa. Sin
     // esto, el filtro por paciente era una enumeración de la agenda ajena a
     // quien supiera un uuid: los turnos de alguien dicen a qué médico va y por
-    // qué. No alcanza a quien atiende ni al mostrador — ver `isPatientActor`.
+    // qué. No alcanza a quien atiende ni al mostrador de ESTA organización — ver
+    // `isPatientActor`: a quien atiende se le acota más abajo a su agenda.
     if (filters.patientProfileId && actor) {
       await this.access.assertMayActForPatient(filters.patientProfileId, actor);
     }
@@ -130,7 +133,7 @@ export class SearchBookingsUseCase {
     // quien representa; el filtro por esos perfiles sigue siendo parte del
     // `where`. RLS se levanta para esta lectura y para ninguna otra.
     const acrossOrganizations =
-      isPatientActor(actor) &&
+      isPatientActor(actor, tenantId) &&
       Boolean(filters.patientProfileId) &&
       !filters.resourceId;
     if (acrossOrganizations) {
@@ -145,7 +148,7 @@ export class SearchBookingsUseCase {
     // de la cita de un dependiente se le muestra a quien lo pidió. Sólo se
     // pregunta a una cuenta de paciente: al mostrador y a quien atiende se les
     // decide por otro camino.
-    const representedPatients = isPatientActor(actor)
+    const representedPatients = isPatientActor(actor, tenantId)
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 
@@ -167,8 +170,8 @@ export class SearchBookingsUseCase {
           reason: SchedulingErrorReason.RESOURCE_NOT_AVAILABLE,
         },
       );
-      if (actor && !operatesAnyAgenda(actor)) {
-        if (actor.practitionerProfileId !== undefined) {
+      if (actor && !operatesAnyAgenda(actor, tenantId)) {
+        if (attendsIn(actor, tenantId)) {
           // Un profesional lista las citas de su propia agenda. Las de un
           // colega son datos clínicos de pacientes que no son los suyos.
           if (resource.resourceRefId !== actor.practitionerProfileId) {
@@ -215,7 +218,40 @@ export class SearchBookingsUseCase {
     // tope. La segunda no se ve en `rows.length` —el filtro pudo dejar menos de
     // `limit`— y callarla devolvería una agenda incompleta como si fuera toda.
     const truncated = rows.length > limit || fetchCapReached;
-    const page = rows.length > limit ? rows.slice(0, limit) : rows;
+    let page = rows.length > limit ? rows.slice(0, limit) : rows;
+
+    // Los recursos de la página, en lote y sólo si el actor es un profesional:
+    // deciden el motivo y (abajo) qué citas de un paciente le tocan.
+    const { owners: agendaOwners, ownResources } = await resolveAgendaOwnership(
+      em,
+      this.catalogRepo,
+      page.map(({ booking }) => booking),
+      actor?.practitionerProfileId,
+    );
+
+    // SEG V-1: quien atiende en esta organización lista por paciente sólo lo de
+    // SU agenda. Lo contrario es la enumeración de las citas de cualquier
+    // paciente de la organización (con qué colega y para qué). Si el paciente es
+    // el propio profesional o alguien a quien representa, ve todo lo suyo.
+    if (
+      actor &&
+      filters.patientProfileId &&
+      !filters.resourceId &&
+      attendsIn(actor, tenantId) &&
+      actor.patientProfileId !== filters.patientProfileId &&
+      !(await this.representation.representsPatient(
+        filters.patientProfileId,
+        actor,
+        em,
+      ))
+    ) {
+      page = page.filter(
+        ({ booking }) =>
+          booking.resourceId !== undefined &&
+          booking.resourceId !== null &&
+          ownResources.has(booking.resourceId),
+      );
+    }
 
     // Los motivos de la página, en **una** consulta (corrección #14): pedir el
     // historial cita por cita convertiría un listado de 100 en 101 consultas.
@@ -238,24 +274,6 @@ export class SearchBookingsUseCase {
       em,
       page.map(({ booking }) => booking.id),
     );
-
-    // Los recursos de la página, en lote y sólo si el actor es un profesional:
-    // es lo único que puede convertir «esta cita es de alguien» en «esta cita
-    // es MÍA» para decidir el motivo. Un paciente no los necesita.
-    const agendaOwners = new Map<string, string>();
-    if (actor?.practitionerProfileId !== undefined) {
-      const ids = [
-        ...new Set(
-          page
-            .map(({ booking }) => booking.resourceId)
-            .filter((id): id is string => id !== undefined),
-        ),
-      ];
-      for (const id of ids) {
-        const resource = await this.catalogRepo.findResourceById(em, id);
-        if (resource) agendaOwners.set(id, resource.resourceRefId);
-      }
-    }
 
     // La tipología de la página, en lote. Sólo las citas que llegaron a tener
     // contraparte clínica la tienen: una reserva sin confirmar no crea

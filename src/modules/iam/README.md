@@ -66,7 +66,7 @@ Los 14 casos de uso UC-01-xx originales. **No es la lista completa**: el módulo
 | --- | --- | --- | --- | --- |
 | 1 | `POST /iam/users` | Create user (+ password credential + initial role) | `SECURITY_ADMIN` | 201 |
 | 2 | `POST /iam/users/:id/credentials/federated` | Link federated credential | `SECURITY_ADMIN` | 201 |
-| 3 | `POST /iam/users/:id/mfa-factors` | Enroll / verify MFA factor | authenticated | 201 |
+| 3 | `POST /iam/users/:id/mfa-factors` | Enroll / verify MFA factor (enrolling your own requires re-authentication) | authenticated | 201 |
 | 4 | `POST /iam/auth/login` | Password login → tokens | `@Public` | 200 |
 | 5 | `POST /iam/users/:id/devices` | Register device | authenticated | 201 |
 | 6 | `POST /iam/auth/token/refresh` | Rotate refresh token (reuse detection) | `@Public` | 200 |
@@ -160,6 +160,12 @@ formulario en la memoria del proceso (`IamOnboardingDraftsService`).
 Admin operations require the `SECURITY_ADMIN` global role (`RolesGuard`). `login`
 and `token/refresh` are `@Public`. Self-service operations (MFA, devices,
 logout-all) only require authentication.
+
+**Segundo factor (MFA).**
+
+- *Alta de un factor propio con reautenticación.* `POST /iam/users/:id/mfa-factors` con `factorType` sobre la propia cuenta exige `currentPassword` (la contraseña actual) o `mfaCode` (el código vigente de un factor YA verificado). Sin ninguna, 422 `MFA_REAUTH_REQUIRED`; si no valen, 422 `MFA_REAUTH_FAILED` (con un evento de seguridad; es 422 y no 401 a propósito: el cliente cierra la sesión ante un 401 y aquí la sesión es válida). Así un token robado no basta para añadir un TOTP propio que el login aceptaría después. Confirmar un factor pendiente (`verify: true`) no la pide —el código del propio factor es la prueba— y un `SECURITY_ADMIN` que enrola sobre OTRA cuenta queda como estaba (no tiene con qué reautenticar al titular). No hay ruta para retirar un factor; la que se añada debe llamar a `IamMfaService.assertReauthenticated`.
+- *Códigos TOTP de un solo uso.* `IamTotpService.consume` guarda el último paso de tiempo aceptado por factor (`code-used` en `iam.security_events`, sin el código) y rechaza todo código cuyo paso no sea posterior (`afterTimeStep`), bajo un cerrojo por persona para que dos peticiones simultáneas con el mismo código no pasen las dos. Lo usan el desafío del login y la reautenticación con `mfaCode`.
+- *Desafío del login.* Sigue detrás de `AUTH_MFA_CHALLENGE_ENABLED` (apagada por defecto: un cliente que no sabe pedir el código quedaría fuera). Encenderla es una decisión de despliegue, no de este módulo.
 
 ## Logging
 

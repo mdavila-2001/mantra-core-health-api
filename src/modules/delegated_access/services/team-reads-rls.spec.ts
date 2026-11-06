@@ -142,6 +142,7 @@ describe('Mi equipo and secretary reads under RLS', () => {
         'doc-profile',
         new Date(query.from),
         new Date(query.to),
+        501,
       );
     });
 

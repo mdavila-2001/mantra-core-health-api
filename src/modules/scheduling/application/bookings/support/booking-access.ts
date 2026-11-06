@@ -19,9 +19,13 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import {
+  attendsIn,
   isPatientActor,
   operatesAnyAgenda,
 } from '../../../domain/booking/agenda-actors';
+
+const OTHER_AGENDA_MESSAGE =
+  'Esta cita es de otra agenda: solo la opera quien atiende en ella.';
 
 /**
  * Quién puede actuar sobre una cita, y sobre cuál.
@@ -53,14 +57,18 @@ export class BookingAccess {
    * @param patientProfileId - El paciente sobre el que se quiere actuar.
    * @param actor - Quien pide.
    * @param em - Transacción activa, si la hay.
+   * @param tenantId - Organización del recurso (p. ej. la de la cita). Sin ella,
+   *   la del contexto activo. El oficio de mostrador o de profesional se lee en
+   *   ESA organización, no en cualquiera donde el token traiga el rol.
    * @throws ForbiddenException si es una cuenta de paciente sin título sobre él.
    */
   async assertMayActForPatient(
     patientProfileId: string,
     actor: AuthenticatedUser,
     em?: EntityManager,
+    tenantId?: string,
   ): Promise<void> {
-    if (!isPatientActor(actor)) return;
+    if (!isPatientActor(actor, tenantId ?? getCurrentTenantId())) return;
     await this.representation.assertMayActForPatient(
       patientProfileId,
       actor,
@@ -98,27 +106,86 @@ export class BookingAccess {
       throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
     }
 
-    if (operatesAnyAgenda(actor)) {
+    if (operatesAnyAgenda(actor, booking.tenantId)) {
       return booking;
     }
 
-    const resource = booking.resourceId
-      ? await this.catalogRepo.findResourceById(tx, booking.resourceId)
-      : null;
-    const isOwnAgenda =
-      actor.practitionerProfileId !== undefined &&
-      resource !== null &&
-      resource.resourceRefId === actor.practitionerProfileId &&
-      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
-
-    if (!isOwnAgenda) {
+    if (!(await this.isOwnAgenda(tx, booking, actor))) {
       // Mismo mecanismo que usa `community` para «este perfil no es tuyo»: el
       // `ForbiddenException` de Nest, que el filtro traduce a 403 FORBIDDEN.
-      throw new ForbiddenException(
-        'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
-      );
+      throw new ForbiddenException(OTHER_AGENDA_MESSAGE);
     }
     return booking;
+  }
+
+  /** ¿La cita es de un recurso que es el perfil profesional de este actor? */
+  private async isOwnAgenda(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    if (actor.practitionerProfileId === undefined || !booking.resourceId) {
+      return false;
+    }
+    const resource = await this.catalogRepo.findResourceById(
+      tx,
+      booking.resourceId,
+    );
+    return (
+      resource !== null &&
+      resource !== undefined &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+    );
+  }
+
+  /**
+   * Quién puede cancelar o reprogramar ESTA cita (SEG V-1).
+   *
+   * Antes sólo se comprobaba el candado de representación, y era un no-op para
+   * todo el que tuviera `practitionerProfileId`: cualquier profesional cancelaba
+   * y movía las citas de un colega. Ahora, según la organización de la cita:
+   *  - mostrador/administración de agenda de ESA organización: su oficio es
+   *    operar cualquiera;
+   *  - cuenta de paciente (incluido el profesional o el mostrador de OTRA
+   *    organización): titular o apoderado (`assertMayActForPatient`);
+   *  - profesional de la organización: la cita de su propia agenda, o la suya o
+   *    de quien representa si él mismo es el paciente.
+   *
+   * @throws ForbiddenException si no cumple ninguna.
+   */
+  async assertMayChangeBooking(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const tenantId = booking.tenantId;
+    if (operatesAnyAgenda(actor, tenantId)) return;
+    if (!attendsIn(actor, tenantId)) {
+      await this.representation.assertMayActForPatient(
+        booking.patientProfileId,
+        actor,
+        tx,
+      );
+      return;
+    }
+    if (
+      actor.patientProfileId !== undefined &&
+      actor.patientProfileId === booking.patientProfileId
+    ) {
+      return;
+    }
+    if (await this.isOwnAgenda(tx, booking, actor)) return;
+    if (
+      await this.representation.representsPatient(
+        booking.patientProfileId,
+        actor,
+        tx,
+      )
+    ) {
+      return;
+    }
+    throw new ForbiddenException(OTHER_AGENDA_MESSAGE);
   }
 
   /**
@@ -153,7 +220,7 @@ export class BookingAccess {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (operatesAnyAgenda(actor)) return;
+    if (operatesAnyAgenda(actor, tenantId)) return;
 
     const verdict = await this.affiliations.evaluate(tenantId, actor);
     if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;

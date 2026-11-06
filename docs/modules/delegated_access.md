@@ -98,7 +98,11 @@ su token. Un vínculo que sólo aceptó el doctor no abre la membresía: da la a
 nada más del hospital (`organizationAccess: false` en `GET /me/support-access`); esa membresía no lee la estructura completa del hospital
 (`TenantAdministrationService.assertCanRead`). Lo que ve —hospitales, sedes, servicios, pisos y
 doctores— es `GET /me/support-access`, armado sólo con vínculos `ACTIVE`; la agenda de un doctor
-(`GET /me/support-agenda`) exige un vínculo activo con ese doctor en ese hospital. Al terminar el
+(`GET /me/support-agenda`) exige un vínculo activo con ese doctor en ese hospital. Esa agenda
+devuelve el nombre de los pacientes: la lectura queda en `audit.data_access_log` (`@AccessLogged`,
+tipo `SUPPORT_AGENDA`, sin identificadores de paciente en el asiento) y trae un tope de 500 turnos por
+respuesta; con más, `truncated: true` y `limit: 500` lo dicen y se devuelven los primeros por hora (se
+acota el rango y se vuelve a pedir). Al terminar el
 último vínculo vivo de un hospital, la membresía de apoyo se cierra. Los motivos y mensajes de los
 cuerpos no se guardan: las tablas no tienen columna para ellos.
 

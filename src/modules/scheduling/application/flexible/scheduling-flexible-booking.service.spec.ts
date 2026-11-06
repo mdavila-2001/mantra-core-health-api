@@ -482,4 +482,71 @@ describe('SchedulingFlexibleBookingService', () => {
       expect(ttl).toBeLessThanOrEqual(61_000);
     });
   });
+  /**
+   * SEG V-1 / S1-A4 · el oficio (mostrador, profesional) se lee en la
+   * organización activa: ni el rol de otra organización ni el perfil
+   * profesional global del token eximen del candado de representación.
+   */
+  describe('placeHold · el oficio se lee en la organización activa', () => {
+    const request = {
+      startAt: t(1, 8).toISOString(),
+      patientProfileId: PATIENT,
+    };
+    const doctorOfOther = {
+      id: 'user-medico',
+      roles: ['PATIENT', 'PRACTITIONER'],
+      scopedRoles: { [OTHER_TENANT]: ['PRACTITIONER'] },
+      practitionerProfileId: 'hp-1',
+      tenantIds: [TENANT, OTHER_TENANT],
+    } as any;
+    const deskOfOther = {
+      id: 'user-mostrador',
+      roles: ['PATIENT', 'SCHEDULING_AGENT'],
+      scopedRoles: { [OTHER_TENANT]: ['SCHEDULING_AGENT'] },
+      tenantIds: [TENANT, OTHER_TENANT],
+    } as any;
+    const deskHere = {
+      id: 'user-mostrador',
+      roles: ['SCHEDULING_AGENT'],
+      scopedRoles: { [TENANT]: ['SCHEDULING_AGENT'] },
+      tenantIds: [TENANT],
+    } as any;
+    const doctorHere = {
+      id: 'user-medico',
+      roles: ['PRACTITIONER'],
+      scopedRoles: { [TENANT]: ['PRACTITIONER'] },
+      practitionerProfileId: 'hp-1',
+      tenantIds: [TENANT],
+    } as any;
+
+    it('el médico de otra organización retiene como paciente: debe representarlo', async () => {
+      const d = build();
+      await inTenant(() => d.service.placeHold(SITE, request, doctorOfOther));
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        PATIENT,
+        doctorOfOther,
+      );
+    });
+
+    it('el mostrador de otra organización retiene como paciente: debe representarlo', async () => {
+      const d = build();
+      await inTenant(() => d.service.placeHold(SITE, request, deskOfOther));
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        PATIENT,
+        deskOfOther,
+      );
+    });
+
+    it('el mostrador de esta organización retiene para cualquiera, sin preguntar', async () => {
+      const d = build();
+      await inTenant(() => d.service.placeHold(SITE, request, deskHere));
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    it('quien atiende en esta organización retiene para sus pacientes, sin preguntar', async () => {
+      const d = build();
+      await inTenant(() => d.service.placeHold(SITE, request, doctorHere));
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+  });
 });

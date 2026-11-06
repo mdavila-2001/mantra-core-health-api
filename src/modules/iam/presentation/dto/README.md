@@ -9,7 +9,7 @@ fields — never secret hashes, raw refresh tokens beyond first issuance, or PHI
 | ----------------------------------- | ----------------- | -------------------------------------------------------------------- |
 | `CreateUserDto` / `UserResponseDto` | UC-01-01          | `email` is the login identity; response omits secrets.               |
 | `LinkFederatedCredentialDto`        | UC-01-02          | Provider + external subject.                                         |
-| `MfaFactorDto`                      | UC-01-03          | Dual-purpose: enroll (`factorType`) or verify (`verify`+`factorId`). |
+| `MfaFactorDto`                      | UC-01-03          | Dual-purpose: enroll (`factorType`, own account needs `currentPassword` or `mfaCode`) or verify (`verify`+`factorId`). |
 | `LoginDto` / `TokenResponseDto`     | UC-01-04          | Credentials in, token pair out.                                      |
 | `CreateDeviceDto`                   | UC-01-05          | Optional `trust` marks the device trusted.                           |
 | `RefreshTokenDto`                   | UC-01-06          | Raw refresh token; server hashes to look up.                         |

@@ -53,6 +53,13 @@ const PLATFORM_ADMIN_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
 const MAX_AGENDA_DAYS = 31;
 
 /**
+ * Turnos como máximo en una respuesta de agenda. Si el rango tiene más, la
+ * respuesta lo dice (`truncated`) y devuelve los primeros por hora: quien lee
+ * acota el rango y vuelve a pedir.
+ */
+const MAX_AGENDA_ITEMS = 500;
+
+/**
  * Secretarias (personal de apoyo hospitalario): pedir, ofrecer, aceptar,
  * rechazar y terminar vínculos, y el alcance que de ellos resulta.
  *
@@ -264,14 +271,24 @@ export class SupportStaffService {
             Reason.SUPPORT_SCOPE_DENIED,
           );
         }
-        const items = await this.links.findPractitionerAgenda(
+        // Se pide un turno de más: si llega, hay más de los que se devuelven y
+        // la respuesta lo dice en lugar de cortar en silencio.
+        const rows = await this.links.findPractitionerAgenda(
           tx,
           query.tenantId,
           role.practitionerProfileId,
           from,
           to,
+          MAX_AGENDA_ITEMS + 1,
         );
-        return { items, count: items.length };
+        const truncated = rows.length > MAX_AGENDA_ITEMS;
+        const items = truncated ? rows.slice(0, MAX_AGENDA_ITEMS) : rows;
+        return {
+          items,
+          count: items.length,
+          truncated,
+          limit: MAX_AGENDA_ITEMS,
+        };
       },
       { readOnly: true },
     );

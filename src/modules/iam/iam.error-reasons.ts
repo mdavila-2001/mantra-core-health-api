@@ -88,6 +88,10 @@ export enum IamErrorReason {
   MFA_CODE_INVALID = 'MFA_CODE_INVALID',
   /** Falta `factorType`, requerido para enrolar un factor MFA nuevo. */
   MFA_FACTOR_TYPE_REQUIRED_TO_ENROLL = 'MFA_FACTOR_TYPE_REQUIRED_TO_ENROLL',
+  /** Añadir un factor propio exige la contraseña actual o el código de un factor ya verificado. */
+  MFA_REAUTH_REQUIRED = 'MFA_REAUTH_REQUIRED',
+  /** La contraseña o el código presentados para reautenticar no valen. */
+  MFA_REAUTH_FAILED = 'MFA_REAUTH_FAILED',
 
   /** La credencial referida no existe para el usuario. */
   CREDENTIAL_NOT_FOUND = 'CREDENTIAL_NOT_FOUND',
