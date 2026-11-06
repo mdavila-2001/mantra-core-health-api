@@ -1,41 +1,41 @@
 {
-  "generatedAt": "2026-10-30T19:06:18.733Z",
+  "generatedAt": "2026-11-06T20:16:58.692Z",
   "note": "Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.",
   "files": [
     {
       "name": "monographs.part-001.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 28564940,
-      "sha256": "94173df8fa9cbf3769c5362da240e797573a1120eeab0a09ef50b9da05fbb3a3",
-      "rows": 817
+      "bytes": 28517280,
+      "sha256": "9b7eb2eec179b5faf67236439229a1e21da901e4251e8803b88905da4ae5ba36",
+      "rows": 800
     },
     {
       "name": "monographs.part-002.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 28359375,
-      "sha256": "4818ec832542778b49a850ab90f6613facf18eacadcd86bd9f9fbab207902c80",
-      "rows": 676
+      "bytes": 28308481,
+      "sha256": "ea063efaad51d69e206070814a0e2a9f1c9fc11361119f8d46d5518e4ea6c6c7",
+      "rows": 690
     },
     {
       "name": "monographs.part-003.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 40960374,
-      "sha256": "6dde7147547eb15c85ede63304d3262904690f4ef5d35feb2aa835139ce14f22",
-      "rows": 362
+      "bytes": 40866752,
+      "sha256": "bd61817d9aeaa6ad6ce02784cecd506d6382de9d1131f3d3e6b39ef07d95faed",
+      "rows": 360
     },
     {
       "name": "monographs.part-004.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 27801758,
-      "sha256": "b5c49be84a4c609560f385a058282796445d524607733420ee9b8e2fa5f0a5f0",
-      "rows": 687
+      "bytes": 27882482,
+      "sha256": "78a86726b7b30d05a1063dd4e50a9c53852bdbe3aae2fa0dba885050b8561ee7",
+      "rows": 658
     },
     {
       "name": "monographs.part-005.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 8007167,
-      "sha256": "cf3ee3fa5cd7710485474ce3ab04732061a5dbb6085cfb7eb2b515b175a56ac2",
-      "rows": 341
+      "bytes": 8536865,
+      "sha256": "758207c55fdab110660c9c10099682755e842d8ed830fb0e0762aa11f93b298d",
+      "rows": 375
     },
     {
       "name": "gsrs-entries.part-001.ndjson.gz",
@@ -47,8 +47,8 @@
     {
       "name": "monographs.meta.json.gz",
       "from": "out/monographs.meta.json",
-      "bytes": 34648,
-      "sha256": "09d7391244ea171c95b28255bafb358b39d8c71e69a1b2ff75b9b4c370eb3421",
+      "bytes": 50735,
+      "sha256": "9bdf42754f7230ece6d16b5d53dfaf59c144955609bd340a7b41e157b199a329",
       "rows": null
     },
     {
@@ -61,29 +61,29 @@
     {
       "name": "coverage.json.gz",
       "from": "out/coverage.json",
-      "bytes": 39059,
-      "sha256": "6583863345bff1753526bf234a399fad00c12796e89c014e3f98ab263bb8c142",
+      "bytes": 55319,
+      "sha256": "32ac6a9f6c10bab517c62233e47a27a30e7109d180a3748ac3ab699728295695",
       "rows": null
     },
     {
       "name": "coverage.md.gz",
       "from": "out/coverage.md",
-      "bytes": 1048,
-      "sha256": "a388a032ff3ffe36d676f0c1d1edf09425adef24644c33befd63e535e909a003",
+      "bytes": 1051,
+      "sha256": "368f1f2ed65453563736760476451dc5bc633499b7d5d6bd0e6d83fdc09e1b91",
       "rows": null
     },
     {
       "name": "validate-links.json.gz",
       "from": "out/validate-links.json",
-      "bytes": 474,
-      "sha256": "8c81848d1b8c1ef78d43b378df4afc03ab5e8c7ef06f197ad60f183d0b0eced0",
+      "bytes": 473,
+      "sha256": "e5bb4223e456163c997089d5e37fa338f51a26b714c9e2b0cb39847cb4b52a50",
       "rows": null
     },
     {
       "name": "load-plan.dry-run.json.gz",
       "from": "out/load-plan.dry-run.json",
-      "bytes": 205,
-      "sha256": "57a95df701ed173f0123833d4c79887904131261117eb79a64026c76331549bf",
+      "bytes": 207,
+      "sha256": "d99d29adeb687605c7f9ef3be760d8481af9041c0299d59cdcb75e79987757f2",
       "rows": null
     },
     {
@@ -152,7 +152,7 @@
   ],
   "ndjson": {
     "monographs": {
-      "sha256": "f2aa4b05ec70c49519124fbc68febd4d264df0d70c86671de84d602d6336fe44",
+      "sha256": "1603dcac4b1561381860fc3b584d1680f18fd8388a8be887fa83f874e3046013",
       "rows": 2883,
       "parts": 5
     },

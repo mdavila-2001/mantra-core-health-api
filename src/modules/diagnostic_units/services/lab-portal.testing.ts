@@ -187,6 +187,8 @@ const STUDY_ROWS = [
     props: {
       study_catalog_code: 'HEMOGRAMA',
       loinc_code: '57021-8',
+      catalog_version: '2026-10-31',
+      specimen: { codigo: 'SANGRE_EDTA', nombre: 'Sangre total (EDTA)' },
       section: { codigo: 'HEMATO', nombre: 'Hematología' },
     },
   },

@@ -6,18 +6,24 @@ con clase ATC (5 niveles), mecanismo, farmacocinética, indicaciones, posología
 advertencias, interacciones, reacciones adversas con frecuencia, embarazo y lactancia, sobredosis,
 formas y vías; todo lo clínico **literal** de una fuente oficial y citado.
 
-## Saturación (medida el 2026-10-30): no alcanzada
+## Saturación (medida el 2026-11-06): no alcanzada
 
-El catálogo **no está saturado**. Ninguna de las diez pasadas con fuente nueva aportó 0, y la regla de
-cierre pide dos pasadas seguidas con 0 ATC 5 **y** 0 secciones nuevas.
+El catálogo **no está saturado**. Ninguna de las once pasadas aportó 0, y la regla de cierre pide dos
+pasadas seguidas con 0 ATC 5 **y** 0 secciones nuevas.
 
 - **Pasada 10:** información de producto de la EMA en PDF. Con el extractor verificado aporta 0 ATC 5 y
   +3 671 secciones en castellano de medicamentos que no están en CIMA (ver «Pasada 10»).
+- **Pasada 11:** las tablas de esos mismos PDF, celda por celda. Aporta 0 ATC 5 y +172 secciones (−89:
+  ver «Pasada 11»).
 - **Fuentes libres y oficiales que quedan:** todas bloqueadas o fuera de licencia; detalle en
-  «Fuentes evaluadas sin pasada» y «Fuentes descartadas». Prueba del 2026-10-30:
+  «Fuentes evaluadas sin pasada» y «Fuentes descartadas». Prueba del 2026-11-06:
   - `www.minsalud.gob.bo` (Formulario Terapéutico Nacional): `curl: (52) Empty reply from server`.
-  - `api.pharmgkb.org`: «gateway answered 502 to CONNECT (policy denial or upstream failure)».
-  - `agemed.gob.bo`: responde, pero exige reCAPTCHA, que no se elude.
+  - `api.pharmgkb.org`: `curl: (56) CONNECT tunnel failed, response 502`.
+  - `rep.agemed.gob.bo/medicamentos-liname/index`: responde, pero carga
+    `https://www.google.com/recaptcha/api.js`; el reCAPTCHA no se elude.
+  - `www.canada.ca/en/transparency/terms.html` (licencia de Health Canada):
+    `curl: (92) HTTP/2 stream 1 was not closed cleanly: INTERNAL_ERROR (err 2)`; por HTTP/1.1,
+    `curl: (28) Operation timed out after 30001 milliseconds`.
 
 El estado está en el issue 824 (https://github.com/mdavila-2001/mantra-core-health-api/issues/824). Las
 cuatro decisiones del propietario están tomadas y se aplican como dice «Decisiones del propietario».
@@ -103,7 +109,7 @@ Deduplicación siempre por código, nunca por nombre:
 Cada pasada se mide contra la anterior armada con el **mismo código**, con flags `--no-cima`,
 `--no-ema`, `--no-eml`, `--no-dailymed`, `--no-lactmed`, `--no-livertox` y `--no-ema-pi`. La salida
 literal de cada pasada está en la descripción del PR que la incorporó: PR 710 (pasada 1), PR 730
-(pasadas 2–5), PR 835 (pasadas 6–9) y el PR de la pasada 10.
+(pasadas 2–5), PR 835 (pasadas 6–9), PR 1155 (pasada 10) y el de la pasada 11.
 
 | # | Hora (UTC) | Fuentes | ATC 5 nuevos con monografía | Secciones nuevas |
 |---|---|---|---:|---:|
@@ -118,9 +124,10 @@ literal de cada pasada está en la descripción del PR que la incorporó: PR 710
 | 8 | 18:56 | **LactMed (NICHD/NLM)**: secciones de lactancia, enlazadas por los UNII del registro | **+105** | **+4 586** |
 | 9 | 19:05 | **LiverTox (NIDDK/NLM)**: secciones de hepatotoxicidad, enlazadas por CAS → UNII (CAS PRIMARY del GSRS) | **+18** | **+1 836** |
 | 10 | 30-10 | **EMA, información de producto** (PDF en castellano, 1 397 medicamentos), por el ATC que asigna la EMA. Texto sólo de las secciones de extracción verificada; el resto, puntero al PDF oficial | **0** | **+3 671** |
+| 11 | 06-11 | **EMA, información de producto: tablas** de los mismos PDF, celda por celda (sin fuente nueva: las que quedan siguen bloqueadas o fuera de licencia) | **0** | **+172** (−89) |
 
 Las pasadas 8 y 9 se midieron sobre la 6, con granularidad por vía: la 7 no entra en `data/`. Las horas
-son del 2026-10-24 salvo la pasada 10.
+son del 2026-10-24 salvo las pasadas 10 y 11. La 11 se midió contra el `data/` de `dev` (la pasada 10).
 
 **Re-medición contra `dev` (2026-10-30).** Armado por vía con el código de `dev` (`61620b2a`) y comparado
 con su `data/`: 0 ATC 5 nuevos, 0 perdidos y 0 secciones nuevas. Las pasadas 6 y 7 ya estaban en `dev`
@@ -296,7 +303,92 @@ midió contra esa base.
 - **Riesgo residual:** un ToUnicode equivocado que los dos extractores leen igual. La comparación con
   CIMA no encontró ninguno.
 
-## Cobertura medida (tras la pasada 10, granularidad por vía)
+### Pasada 11 (EMA, tablas de la información de producto)
+
+Sin fuente nueva alcanzable, la pasada saca más de la que ya está autorizada: las secciones de la EMA
+que la pasada 10 dejaba como puntero «por tabla».
+
+- **Celdas (`py/ema_pi_extract.py`).** La geometría de la grilla dibujada sale de `pdfplumber` 0.11.10
+  (MIT; fija el mismo `pdfminer.six` 20260107), estrategia `lines`. El texto sigue saliendo del extractor
+  verificado: cada glifo va a la celda que contiene su centro. Una celda que abarca varias columnas o
+  filas lleva `colspan`/`rowspan`, sin expandir.
+- **Grilla que se descarta entera.** Sus líneas vuelven a ser filas marcadas `table`, como en la
+  pasada 10, y nada del texto se pierde. Se descarta si:
+  - algún glifo de su área no cae en ninguna celda (Peyona: el primer nº EU de la sección 8);
+  - un borde corta una palabra: dos glifos seguidos, sin espacio, en celdas distintas (Silodyx:
+    «EU/1/09/607/01» y «5»);
+  - está dentro de otra grilla o la contiene;
+  - una celda trae un título de sección: es un marco alrededor del texto (Imaavy, pág. 2; Constella,
+    5.3).
+
+  Una línea fuera de la grilla, pero a su altura, también queda marcada `table` (rótulos de una figura
+  vecina).
+- **Una sección con tabla se publica sólo si**, además de los controles 1, 3, 4 y 5 de la pasada 10:
+  - **Consenso por fila y por celda con `pdftotext -bbox`:** las palabras de poppler que caen en cada
+    fila y cada celda dan los mismos caracteres, con el criterio de la pasada 10. Ninguna palabra de la
+    página puede quedar fuera de toda fila y celda.
+  - **La tabla no está partida entre páginas:** una tabla al pie de una página seguida de otra al
+    principio de la siguiente puede ser la misma, con una celda en dos filas.
+  - **Ninguna celda tiene un trazo que no sea borde ni fondo de celda.**
+- **Cómo se publica:**
+  - `html` lleva `<table>` con las celdas en el orden del PDF y los superíndices de cada celda.
+  - `tables` lleva la matriz de celdas, en el formato de CIMA y openFDA (celda vacía = `null`).
+  - En `text`, las celdas van separadas por tabulador, las filas por salto de línea y las líneas de una
+    misma celda también por salto de línea.
+- **Comprobaciones sobre el corpus entero (1 397 PDF):**
+  - **Caracteres por página:** en las 45 134 páginas del anexo I, los caracteres no blancos de las filas
+    son exactamente los mismos que en la pasada 10.
+  - **Números EU de la sección 8:** ningún PDF pierde uno. 18 ganan los que la pasada 10 no leía.
+  - **Secciones publicables de la pasada 10 (23 618, fichas en CIMA o no):** 23 602 quedan con el mismo
+    texto y el mismo `html`. Las 16 restantes y otras 15 que pasan a publicarse tienen la misma causa:
+    en la pasada 10, una nota al pie numerada dentro de una tabla («5\tEl derrame pleural…», Glivec) se
+    tomaba por el título de la sección 5 o 6. El texto de la 4.9 o la 5.3 terminaba con «5.
+    PROPIEDADES FARMACOLÓGICAS» o «6. DATOS FARMACÉUTICOS». Ahora termina donde debe, y se publica o no
+    según coincida con `pdftotext`, que en 16 casos todavía arrastra el título.
+- **Fidelidad de las tablas, medida contra CIMA** (mismo nº de registro, misma sección, tablas en orden,
+  NFKC y sin espacios), sobre las secciones con tabla publicables:
+  - **Forma:** 463 de 542 tablas tienen la misma cantidad de filas y de celdas por fila que en CIMA.
+    Las otras 79 no se comparan celda por celda.
+  - **Celdas:** 8 922 de 9 479 idénticas (94,1 %).
+  - **Las 557 celdas distintas:**
+    - 241 son de versión: el texto de la celda del PDF está en el `pdftotext` del mismo PDF y el de
+      CIMA no.
+    - 6 se revisaron a mano: 5 son una llamada de nota (+, #, (P)) que CIMA no trae; en Senshio, el
+      PDF dice «Ensayo 15-50310» y CIMA «Ensayo 1».
+    - 310 no se deciden con el texto corrido de `pdftotext`, porque una celda de varias líneas queda
+      intercalada con sus vecinas. En todas, la celda coincide con las palabras de `pdftotext` en la
+      misma celda. Las diferencias más comunes son de carácter: «‐» (U+2010) de CIMA por «-» en el PDF
+      (190), «x» por «×» (21) y tildes.
+    - **Errores del extractor encontrados: 0.**
+  - **Texto fuera de las tablas, contra CIMA:** 679 diferencias de hasta 4 caracteres. 608 son de
+    versión, 0 del extractor y 71 no se deciden (en 42, un punto final que CIMA no trae). En todas, la
+    sección coincide con `pdftotext`.
+- **Resultado** (armado por vía, contra el `data/` de `dev`):
+  - **ATC 5 nuevos: 0.**
+  - **Secciones:** +172 nuevas, de 122 medicamentos (169 con tabla; 65 de posología, 4.2), y −89.
+  - **Las 89 perdidas:**
+    - 85 son de 11 medicamentos que sí están en CIMA. En la pasada 10 su sección 8 salía vacía (el
+      título lo tomaba una nota al pie de una tabla), y por eso se los trataba como fuera de CIMA. Con
+      sus nº EU leídos, el mismo documento entra por CIMA, como pide la regla de la pasada 10.
+    - 4 (Vijoice y Tabrecta) son secciones que terminaban con el título de la sección siguiente.
+  - **EMA (PDF):** 3 754 secciones de 344 medicamentos que no están en CIMA (405 con `html`, 169 con
+    tabla) y 475 punteros.
+  - **Monografías que cubren cada requisito con la EMA (PDF)** (`data/coverage.md.gz`, pasada 10 →
+    11): posología 129 → 162, mecanismo 63 → 89, farmacocinética 133 → 152, reacciones adversas 8 → 14,
+    advertencias 173 → 176, interacciones 160 → 159. Con al menos una sección: 237 → 235 (las fichas
+    que pasan a entrar por CIMA).
+  - **Secciones sin publicar** (medicamentos fuera de CIMA), por motivo:
+
+    | Motivo | Secciones |
+    |---|---:|
+    | Tabla partida entre páginas | 357 |
+    | Trazo dibujado dentro del texto o de una celda | 312 |
+    | `pdftotext` no coincide | 311 |
+    | Tabla sin celdas reconocidas | 292 |
+    | Guion de fin de línea | 250 |
+    | Glifo sin resolver | 16 |
+
+## Cobertura medida (tras la pasada 11, granularidad por vía)
 
 Universo ATC 5 conocido: **6 242** (sin cambios desde la pasada 5: las fuentes nuevas enlazan códigos
 que ya estaban en el universo). Monografías: **2 883**.
@@ -388,7 +480,7 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
 
 En un Postgres 16 desechable, con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
 (sin la API, sin DDL nuevo, nunca una base viva). Evidencia en
-la descripción de los PR 730, 835 y el de la pasada 10.
+la descripción de los PR 730, 835, 1155 (pasada 10) y el de la pasada 11.
 
 | Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas | Tiempo |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -410,16 +502,20 @@ la descripción de los PR 730, 835 y el de la pasada 10.
 | **Ídem, 2.ª** | 0 | 0 | 0 | 0 | 0 | 0 | — |
 | Ídem sobre la base de la pasada 10 sin texto (actualización) | 0 | 0 | 0 | 4 156 | 0 | 467 | — |
 | Ídem, otra vez | 0 | 0 | 0 | 0 | 0 | 0 | — |
+| **Pasada 11, 1.ª** (base nueva) | **3 959** | **3 943** | **3 945** | **103 762** | **429** | 0 | 32 s |
+| **Pasada 11, 2.ª** | 0 | 0 | 0 | 0 | 0 | 0 | 19 s |
+| Pasada 11 sobre la base de la pasada 10 con texto (actualización) | 0 | 0 | 0 | 549 | 0 | 471 | 19 s |
+| Ídem, otra vez | 0 | 0 | 0 | 0 | 0 | 0 | 19 s |
 
-- **Tamaño de `concept_properties`, recién cargado:** 342 MB con la pasada 5, 374 MB con la 9 y
-  384 MB con la 10 con texto verificado.
-- **Integridad del texto:** de las 81 075 secciones de la pasada 10, ninguna tiene un `textSha256`
-  distinto del sha256 del texto guardado. Las 3 671 de la EMA (PDF): 0 con U+FFFD, todas `professional`.
+- **Tamaño de `concept_properties`, recién cargado:** 342 MB con la pasada 5, 374 MB con la 9,
+  384 MB con la 10 con texto verificado y 386 MB con la 11.
+- **Integridad del texto:** de las 81 158 secciones de la pasada 11, ninguna tiene un `textSha256`
+  distinto del sha256 del texto guardado. Las 3 754 de la EMA (PDF): 0 con U+FFFD, todas `professional`.
 - **Atribuciones:** ninguna de LactMed ni de LiverTox carece de «Courtesy of the U.S. National Library
   of Medicine». La eEML no tiene filas de texto que atribuir: sus referencias llevan la licencia y su
   enlace.
-- **Corpus de `data/`:** 81 075 secciones, ninguna de la eEML y ninguna fuera de `professional`.
-- **Punteros sin texto:** en `pharmacology_external_documents`, 275 de DailyMed, 988 de la eEML y 491 de
+- **Corpus de `data/`:** 81 158 secciones, ninguna de la eEML y ninguna fuera de `professional`.
+- **Punteros sin texto:** en `pharmacology_external_documents`, 275 de DailyMed, 988 de la eEML y 475 de
   la EMA (PDF). Ninguno lleva texto.
 - **`validate-links`:** 429 de los 483 ATC 5 de `vademecum` tienen monografía y su `concept_map`.
 - **`drug-treatments`** (ya en `dev`): enlazados por RxCUI o UNII, sin base de datos.

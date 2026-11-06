@@ -74075,6 +74075,139 @@
         ]
       }
     },
+    "/diagnostics/patients/{patientProfileId}/reports/{reportId}": {
+      "get": {
+        "description": "Valores con unidad, rango de referencia e interpretación, conclusión, fecha de liberación y archivos de la versión liberada vigente. Un informe sin liberar responde 404.",
+        "operationId": "DiagnosticsOrdersController_getReleasedResult",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerDiagnosticResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sin acceso a la historia"
+          },
+          "404": {
+            "description": "No existe, no es de ese paciente u organización, o no está liberado"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resultado liberado de un informe del paciente",
+        "tags": [
+          "diagnostics-orders"
+        ]
+      }
+    },
+    "/diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content": {
+      "get": {
+        "description": "Autoriza por acceso a la historia, alcance de lectura, informe liberado del paciente y archivo de esa versión. Todo lo demás responde 404.",
+        "operationId": "DiagnosticsOrdersController_getReleasedResultFileContent",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bytes del archivo"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sin acceso a la historia"
+          },
+          "404": {
+            "description": "El informe no está disponible o el archivo no cuelga de su versión liberada"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar un archivo del resultado liberado",
+        "tags": [
+          "diagnostics-orders"
+        ]
+      }
+    },
     "/diagnostic-results/me": {
       "get": {
         "description": "Sólo versiones liberadas con visibilidad de paciente. Un informe redactado y no liberado no aparece.",
@@ -146286,6 +146419,11 @@
             "description": "Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)",
             "format": "uuid"
           },
+          "reasonConditionId": {
+            "type": "string",
+            "description": "Diagnóstico (clinical.conditions) que el estudio se pide para confirmar, descartar o seguir. Debe ser del mismo paciente que la orden (si no, o si no existe: 422 SERVICE_REQUEST_REASON_CONDITION_INVALID, sin distinguir el motivo)",
+            "format": "uuid"
+          },
           "codeConceptId": {
             "type": "string",
             "description": "Código del servicio pedido (concept id)",
@@ -146760,6 +146898,11 @@
           },
           "basedOn": {
             "$ref": "#/components/schemas/DiagnosisEvidenceDto"
+          },
+          "replacedByConditionId": {
+            "type": "string",
+            "description": "Sólo al refutar: diagnóstico (clinical.conditions) que reemplaza a éste. 422 CONDITION_REPLACEMENT_REQUIRES_REFUTED con CONFIRMED, 422 CONDITION_REPLACEMENT_SELF si es el mismo, 422 CONDITION_REPLACEMENT_INVALID si no existe o es de otro paciente",
+            "format": "uuid"
           },
           "onsetAt": {
             "type": "string",
@@ -159405,6 +159548,18 @@
             "type": "string",
             "nullable": true
           },
+          "sampleType": {
+            "type": "string",
+            "enum": [
+              "BLOOD",
+              "URINE",
+              "STOOL",
+              "FLUID",
+              "SWAB",
+              "OTHER"
+            ],
+            "description": "What is drawn from the patient, to browse by sample type"
+          },
           "suggestedPrice": {
             "nullable": true,
             "type": "object",
@@ -159433,6 +159588,7 @@
           "name",
           "loinc",
           "specimen",
+          "sampleType",
           "suggestedPrice",
           "offeredServiceId",
           "components"
@@ -159462,6 +159618,23 @@
           "items"
         ]
       },
+      "LabSampleTypeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "BLOOD"
+          },
+          "name": {
+            "type": "string",
+            "example": "Análisis de sangre"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
       "LabCatalogDto": {
         "type": "object",
         "properties": {
@@ -159471,18 +159644,32 @@
               "$ref": "#/components/schemas/LabCatalogSectionDto"
             }
           },
+          "sampleTypes": {
+            "description": "Sample types in display order (blood first)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabSampleTypeDto"
+            }
+          },
           "count": {
             "type": "number"
           },
           "priceRule": {
             "type": "string",
             "description": "How suggested prices were chosen"
+          },
+          "catalogVersion": {
+            "type": "string",
+            "nullable": true,
+            "description": "Version of the LOINC study catalog loaded in this database (laboratorio.json), or null when only the basic boot análisis are there: no sections, LOINC nor components until `yarn catalog:studies:load` runs"
           }
         },
         "required": [
           "sections",
+          "sampleTypes",
           "count",
-          "priceRule"
+          "priceRule",
+          "catalogVersion"
         ]
       },
       "LabCatalogImportDto": {
@@ -171820,6 +172007,11 @@
             "type": "string",
             "description": "Motivo del rechazo (obligatorio si REJECT)",
             "maxLength": 4000
+          },
+          "targetEncounterId": {
+            "type": "string",
+            "description": "Sólo con ACCEPT: atención (clinical.encounters) del tenant destino en la que se recibe al paciente. 422 REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED con REJECT; 422 REFERRAL_TARGET_ENCOUNTER_INVALID si no existe, es de otro paciente o de otro tenant",
+            "format": "uuid"
           }
         },
         "required": [
@@ -172148,6 +172340,11 @@
             "type": "string",
             "format": "date-time"
           },
+          "targetEncounterId": {
+            "type": "string",
+            "description": "Atención en la que el destino recibió al paciente. Ausente = no registrada",
+            "format": "uuid"
+          },
           "transfer": {
             "nullable": true,
             "type": "object",
@@ -172341,6 +172538,11 @@
           "counterReferralAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "targetEncounterId": {
+            "type": "string",
+            "description": "Atención en la que el destino recibió al paciente. Ausente = no registrada",
+            "format": "uuid"
           },
           "transfer": {
             "nullable": true,
@@ -175961,6 +176163,260 @@
         ],
         "additionalProperties": false
       },
+      "DiagnosticResultReferenceRangeDto": {
+        "type": "object",
+        "properties": {
+          "low": {
+            "type": "string",
+            "nullable": true
+          },
+          "high": {
+            "type": "string",
+            "nullable": true
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "low",
+          "high",
+          "text",
+          "unitConceptId",
+          "unit"
+        ]
+      },
+      "DiagnosticResultValueDto": {
+        "type": "object",
+        "properties": {
+          "observationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "valueKind": {
+            "type": "string",
+            "enum": [
+              "QUANTITY",
+              "DECIMAL",
+              "INTEGER",
+              "TEXT",
+              "BOOLEAN",
+              "CONCEPT",
+              "DATETIME",
+              "DATE"
+            ],
+            "nullable": true
+          },
+          "valueConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unitConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceRange": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiagnosticResultReferenceRangeDto"
+              }
+            ]
+          },
+          "interpretationConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "interpretationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "interpretation": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "observationId",
+          "codeConceptId",
+          "name",
+          "value",
+          "valueKind",
+          "valueConceptId",
+          "unitConceptId",
+          "unit",
+          "referenceRange",
+          "interpretationConceptId",
+          "interpretationCode",
+          "interpretation",
+          "statusConceptId",
+          "effectiveAt"
+        ]
+      },
+      "DiagnosticResultFileSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentRoleConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "presentationFormatConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ordinal": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fileId",
+          "name",
+          "contentRoleConceptId",
+          "presentationFormatConceptId",
+          "ordinal"
+        ]
+      },
+      "PractitionerDiagnosticResultDto": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceRequestId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "codeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codeDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNumber": {
+            "type": "number"
+          },
+          "clinicalStatusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "patientVisible": {
+            "type": "boolean"
+          },
+          "conclusionText": {
+            "type": "string",
+            "nullable": true
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticResultValueDto"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticResultFileSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "reportId",
+          "patientProfileId",
+          "serviceRequestId",
+          "codeConceptId",
+          "codeDisplay",
+          "categoryConceptId",
+          "versionId",
+          "versionNumber",
+          "clinicalStatusConceptId",
+          "issuedAt",
+          "releasedAt",
+          "patientVisible",
+          "conclusionText",
+          "values",
+          "files"
+        ]
+      },
       "PatientInsuranceSettlementExclusionDto": {
         "type": "object",
         "properties": {
@@ -176267,6 +176723,10 @@
             "type": "string"
           },
           "encounterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonConditionId": {
             "type": "string",
             "format": "uuid"
           },
