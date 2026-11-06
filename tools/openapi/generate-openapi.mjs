@@ -173,6 +173,9 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
   ['get', '/public/prescription-shares/{token}'],
   ['post', '/payments/gateway-webhooks'],
+  // FAQ publicadas de un profesional desde su ficha pública
+  // (`forms-faqs-public.controller.ts`, `@Public()`, 2026-11-06).
+  ['get', '/public/profiles/p/{slug}/faqs'],
 ];
 
 function markPublicOperations(document) {

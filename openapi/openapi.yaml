@@ -53014,6 +53014,403 @@ paths:
       description: >-
         Corregir valor con supersede y snapshot inmutable. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/question-scripts:
+    get:
+      operationId: FormsQuestionScriptsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar mis guiones de preguntas activos
+      tags:
+        - forms-question-scripts
+      description: >-
+        Listar mis guiones de preguntas activos. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: FormsQuestionScriptsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionScriptDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear un guion de preguntas
+      tags:
+        - forms-question-scripts
+      description: >-
+        Crear un guion de preguntas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /forms/question-scripts/{id}:
+    get:
+      operationId: FormsQuestionScriptsController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Leer un guion de preguntas propio
+      tags:
+        - forms-question-scripts
+      description: >-
+        Leer un guion de preguntas propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    patch:
+      operationId: FormsQuestionScriptsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestionScriptDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+      tags:
+        - forms-question-scripts
+      description: >-
+        Editar un guion propio (items reemplaza la lista; 409 si version no coincide). Requiere JWT y los roles o
+        alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: FormsQuestionScriptsController_archive
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Archivar un guion propio
+      tags:
+        - forms-question-scripts
+      description: >-
+        Archivar un guion propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs:
+    get:
+      operationId: FormsFaqsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar mis preguntas frecuentes, en orden
+      tags:
+        - forms-faqs
+      description: >-
+        Listar mis preguntas frecuentes, en orden. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: FormsFaqsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFaqDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Agregar una pregunta frecuente al final
+      tags:
+        - forms-faqs
+      description: >-
+        Agregar una pregunta frecuente al final. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs/order:
+    put:
+      operationId: FormsFaqsController_reorder
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderFaqsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reordenar mis preguntas frecuentes (lista completa)
+      tags:
+        - forms-faqs
+      description: >-
+        Reordenar mis preguntas frecuentes (lista completa). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs/{id}:
+    patch:
+      operationId: FormsFaqsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFaqDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar una pregunta frecuente propia
+      tags:
+        - forms-faqs
+      description: >-
+        Editar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: FormsFaqsController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrar una pregunta frecuente propia
+      tags:
+        - forms-faqs
+      description: >-
+        Borrar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /public/profiles/p/{slug}/faqs:
+    get:
+      description: >-
+        Sin sesión. Sólo las publicadas, por posición. Un slug inexistente, oculto o que no es de profesional responde
+        404.
+      operationId: FormsFaqsPublicController_list
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Preguntas frecuentes publicadas de un profesional
+      tags:
+        - forms-public
+      security: []
   /geo/tracked-subjects:
     post:
       operationId: GeoTrackedSubjectsController_enroll
@@ -86981,6 +87378,10 @@ tags:
     description: >-
       Operaciones del dominio funcional forms definition sets. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-faqs
+    description: >-
+      Operaciones del dominio funcional forms faqs. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: forms-fields
     description: >-
       Operaciones del dominio funcional forms fields. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -86993,6 +87394,14 @@ tags:
     description: >-
       Operaciones del dominio funcional forms me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-public
+    description: >-
+      Operaciones del dominio funcional forms public. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-question-scripts
+    description: >-
+      Operaciones del dominio funcional forms question scripts. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: forms-values
     description: >-
       Operaciones del dominio funcional forms values. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -123305,6 +123714,136 @@ components:
       required:
         - dataType
         - value
+      additionalProperties: false
+    QuestionScriptItemInputDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+          maxLength: 500
+        helpText:
+          type: object
+          maxLength: 1000
+          nullable: true
+        answerType:
+          type: string
+          enum:
+            - free_text
+            - yes_no
+            - single_choice
+            - multiple_choice
+            - number
+            - date
+        options:
+          nullable: true
+          description: Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise
+          type: array
+          items:
+            type: string
+        required:
+          type: boolean
+      required:
+        - questionText
+        - answerType
+        - required
+      additionalProperties: false
+    CreateQuestionScriptDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 160
+        description:
+          type: object
+          maxLength: 1600
+          nullable: true
+        specialtyCode:
+          type: object
+          maxLength: 64
+          nullable: true
+        items:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionScriptItemInputDto'
+      required:
+        - title
+        - items
+      additionalProperties: false
+    UpdateQuestionScriptDto:
+      type: object
+      properties:
+        version:
+          type: number
+          minimum: 1
+          description: Version the client last read
+        title:
+          type: string
+          maxLength: 160
+        description:
+          type: object
+          maxLength: 1600
+          nullable: true
+        specialtyCode:
+          type: object
+          maxLength: 64
+          nullable: true
+        items:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionScriptItemInputDto'
+      required:
+        - version
+      additionalProperties: false
+    CreateFaqDto:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 300
+        answer:
+          type: string
+          maxLength: 3000
+        category:
+          type: object
+          maxLength: 120
+          nullable: true
+        isPublished:
+          type: boolean
+          default: false
+      required:
+        - question
+        - answer
+      additionalProperties: false
+    ReorderFaqsDto:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - ids
+      additionalProperties: false
+    UpdateFaqDto:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 300
+        answer:
+          type: string
+          maxLength: 3000
+        category:
+          type: object
+          maxLength: 120
+          nullable: true
+        isPublished:
+          type: boolean
       additionalProperties: false
     CreateTrackedSubjectDto:
       type: object
