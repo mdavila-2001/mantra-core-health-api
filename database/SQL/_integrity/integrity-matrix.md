@@ -1,4 +1,4 @@
-# Matriz de integridad y concurrencia — SALUD v4.2.84 (módulo 33)
+# Matriz de integridad y concurrencia — SALUD v4.2.90 (módulo 33)
 
 El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación cross-dominio. Cada regla se implementa en la **migración de la tabla dueña** (su módulo) y se repite aquí como referencia. Extraído fielmente del `.puml`.
 
@@ -143,6 +143,13 @@ El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación 
 | `diagnostic_study_prices` | `VERSIONED, REFERENCE_ONLY` | **UK** schedule + offering + version; **EXCLUDE** no overlapping active effective periods; **CHECK** amounts >= 0 |
 | `diagnostic_units.diagnostic_equipment` | `REFERENCE_ONLY` | **CHECK_SQL** ck_diagnostic_equipment_ae_title \| "ae_title" IS NULL OR ("ae_title" ~ '^[\x20-\x7E]{1,16}$' AND btrim("ae_title") <> '' AND "ae_title" !~ '\\') |
 
+### Módulo 20 · `diagnostics`
+
+| Tabla | Estereotipo | Reglas declaradas |
+|-------|-------------|-------------------|
+| `diagnostics.report_drafts` | `REFERENCE_ONLY` | **CHECK_SQL** ck_report_drafts_visibility \| "patient_visibility_code" IN ('VISIBLE', 'HELD'); **CHECK_SQL** ck_report_drafts_status \| "status_code" IN ('DRAFT', 'PUBLISHED'); **CHECK_SQL** ck_report_drafts_published \| "status_code" = 'DRAFT' OR ("published_version_id" IS NOT NULL AND "published_at" IS NOT NULL AND "signer_profile_id" IS NOT NULL) |
+| `diagnostics.report_draft_files` | `REFERENCE_ONLY` | **CHECK_SQL** ck_report_draft_files_role \| "role_code" IN ('DOCUMENT', 'AUDIO', 'ANNEX') |
+
 ### Módulo 04 · `directory`
 
 | Tabla | Estereotipo | Reglas declaradas |
@@ -150,6 +157,7 @@ El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación 
 | `directory.affiliation_invitations` | `REFERENCE_ONLY` | **CHECK_SQL** ck_affiliation_invitations_uses \| ("max_uses" >= 1 AND "uses_count" >= 0 AND "uses_count" <= "max_uses") |
 | `directory.tenant_medical_facilities` | `REFERENCE_ONLY` | **CHECK_SQL** ck_tenant_medical_facilities_tax_identifier_format \| "tax_identifier_number" ~ '^[0-9][0-9-]{3,19}$'; **CHECK_SQL** ck_tenant_medical_facilities_registration_format \| "health_facility_registration_number" ~ '^[A-Za-z0-9./-]{3,50}$'; **CHECK_SQL** ck_tenant_medical_facilities_director_license \| char_length(btrim("medical_director_license_number")) BETWEEN 3 AND 50 |
 | `directory.tenant_medical_facility_sites` | `REFERENCE_ONLY` | **CHECK_SQL** ck_tenant_medical_facility_sites_kind_ordinal \| ("site_kind" = 'headquarters' AND "ordinal" = 0) OR ("site_kind" = 'branch' AND "ordinal" BETWEEN 1 AND 50); **CHECK_SQL** ck_tenant_medical_facility_sites_address_lines \| cardinality("address_lines") >= 1; **CHECK_SQL** ck_tenant_medical_facility_sites_geo \| (("latitude" IS NULL) = ("longitude" IS NULL)) AND ("latitude" IS NULL OR ("latitude" BETWEEN -90 AND 90 AND "longitude" BETWEEN -180 AND 180)) |
+| `directory.tenant_opening_hours` | `REFERENCE_ONLY` | **CHECK_SQL** ck_tenant_opening_hours_day_of_week \| "day_of_week" BETWEEN 1 AND 7; **CHECK_SQL** ck_tenant_opening_hours_shift_ordinal \| "shift_ordinal" BETWEEN 1 AND 2; **CHECK_SQL** ck_tenant_opening_hours_closes_after_opens \| "closes_at" > "opens_at"; **CHECK_SQL** ck_tenant_opening_hours_one_site \| ("branch_id" IS NULL OR "medical_facility_site_id" IS NULL) |
 
 ### Módulo 01 · `iam`
 
