@@ -139,7 +139,7 @@ export class Conditions {
   noteText?: string;
 
   /**
-   * v4294: el diagnóstico que reemplazó a éste cuando se descartó (diferencial
+   * v4295: el diagnóstico que reemplazó a éste cuando se descartó (diferencial
    * resuelto). Sólo en un diagnóstico refutado, del mismo paciente y distinto
    * de sí mismo; nulo en cualquier otro caso.
    */

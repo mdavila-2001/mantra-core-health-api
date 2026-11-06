@@ -260,7 +260,7 @@ export class ServiceRequestsService {
   }
 
   /**
-   * v4294: el diagnóstico que motiva el estudio tiene que existir y ser del
+   * v4295: el diagnóstico que motiva el estudio tiene que existir y ser del
    * mismo paciente que la orden. Responde 422 (la precondición que falla es
    * del cuerpo, como `MEDICATION_INDICATION_INVALID`), y un diagnóstico ajeno
    * responde igual que uno inexistente: distinguirlos diría que ese id existe
@@ -334,7 +334,7 @@ export class ServiceRequestsService {
         : this.em.transactional(work);
     return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
-      // v4294: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
+      // v4295: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
       await this.assertReasonConditionBelongsToPatient(tx, dto);
       // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
       const prepared = await this.detail.prepare(

@@ -137,7 +137,7 @@ export class ServiceRequests {
   formInstanceId?: string;
 
   /**
-   * v4294: el diagnóstico (`clinical.conditions`) que el estudio se pidió para
+   * v4295: el diagnóstico (`clinical.conditions`) que el estudio se pidió para
    * confirmar, descartar o seguir. Del mismo paciente que la orden; nulo si la
    * orden no declara motivo diagnóstico.
    */

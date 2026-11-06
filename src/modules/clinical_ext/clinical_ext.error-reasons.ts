@@ -77,7 +77,7 @@ export enum ClinicalExtErrorReason {
    */
   REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
 
-  // --- Red clínica (v4294) ---
+  // --- Red clínica (v4295) ---
   /** `targetEncounterId` sólo se admite al aceptar (`decision: ACCEPT`). */
   REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED = 'REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED',
   /**

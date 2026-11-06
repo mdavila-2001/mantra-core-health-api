@@ -147,7 +147,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     );
   });
 
-  it('v4294: la orden trae el diagnóstico para el que se pidió y, si es null, no trae el campo', async () => {
+  it('v4295: la orden trae el diagnóstico para el que se pidió y, si es null, no trae el campo', async () => {
     const { service, ordersRepo } = build();
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
       { ...order('o1'), reasonConditionId: 'cond-1' },

@@ -94,7 +94,7 @@ export interface CreateServiceRequestData {
   /** Tipo de hueso (`imaging-bone-type`). */
   boneTypeConceptId?: string;
   /**
-   * v4294: diagnóstico que motiva el estudio, ya validado contra el paciente.
+   * v4295: diagnóstico que motiva el estudio, ya validado contra el paciente.
    */
   reasonConditionId?: string;
   /**

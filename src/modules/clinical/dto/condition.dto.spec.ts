@@ -173,7 +173,7 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
   });
 });
 
-describe('VerifyConditionDto · replacedByConditionId (v4294)', () => {
+describe('VerifyConditionDto · replacedByConditionId (v4295)', () => {
   it('acepta el reemplazo como uuid opcional', async () => {
     expect(
       await errors(VerifyConditionDto, {

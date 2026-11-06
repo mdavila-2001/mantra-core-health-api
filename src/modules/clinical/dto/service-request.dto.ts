@@ -75,7 +75,7 @@ export class CreateServiceRequestDto extends ImagingFlatInputDto {
   formInstanceId?: string;
 
   /**
-   * v4294: el diagnóstico que el estudio se pide para confirmar, descartar o
+   * v4295: el diagnóstico que el estudio se pide para confirmar, descartar o
    * seguir.
    */
   @ApiPropertyOptional({
@@ -339,7 +339,7 @@ export class ServiceRequestResponseDto extends ServiceRequestImagingFlatDto {
   formInstanceId?: string | null;
 
   /**
-   * v4294: diagnóstico que motiva el estudio; ausente si la orden no lo declara.
+   * v4295: diagnóstico que motiva el estudio; ausente si la orden no lo declara.
    */
   @ApiPropertyOptional({
     description:
