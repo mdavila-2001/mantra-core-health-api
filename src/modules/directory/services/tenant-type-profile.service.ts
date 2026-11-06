@@ -452,7 +452,7 @@ export class TenantTypeProfileService {
         input.diagnosticUnit,
         actorUserId,
       );
-      // Laboratory and imaging (v4.2.91: imaging too, so its Branches screen
+      // Laboratory and imaging (v4.2.92: imaging too, so its Branches screen
       // starts with the head office on the map). An imaging unit declares no
       // branches (`assertProfileMatchesType`): for it only the central site.
       await this.registerDiagnosticCenterBranches(
@@ -557,7 +557,7 @@ export class TenantTypeProfileService {
   }
 
   /**
-   * The medical facility's sites in `directory.branches` (v4.2.91).
+   * The medical facility's sites in `directory.branches` (v4.2.92).
    *
    * What was declared stays in `tenant_medical_facility_sites` (it feeds the
    * verification and is not edited); this adds the same sites to the
@@ -565,7 +565,7 @@ export class TenantTypeProfileService {
    * maps and edits— like the pharmacy and laboratory sign-ups do. The central
    * site is the head office and each declared one a branch; the declared
    * address goes to the description. Opening hours stay on the declared sites.
-   * The v4.2.91 patch does the same for medical organizations created before.
+   * The v4.2.92 patch does the same for medical organizations created before.
    */
   private registerMedicalFacilityBranches(
     tx: EntityManager,
@@ -608,7 +608,7 @@ export class TenantTypeProfileService {
 
   /**
    * Las sucursales del laboratorio y la sede central de imagenología en
-   * `directory.branches` (P51, D-4; imagenología desde v4.2.91).
+   * `directory.branches` (P51, D-4; imagenología desde v4.2.92).
    *
    * La provisión de la unidad ya las creó como sedes de práctica y de unidad
    * (toma de muestras); esto las suma al registro de sucursales de la
