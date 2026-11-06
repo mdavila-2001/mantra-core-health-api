@@ -338,6 +338,13 @@ export class MedicationRequestItemDto {
   indicationText?: string;
 
   /**
+   * La receta que sustituyó a ésta (cambio de dosis o de fármaco). Ausente si
+   * no fue reemplazada. Lo usa la red clínica para encadenar las recetas.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  replacedByRequestId?: string;
+
+  /**
    * Valor de signed at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
