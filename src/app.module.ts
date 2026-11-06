@@ -113,6 +113,7 @@ import { DocumentStoreModule } from './modules/document_store/document_store.mod
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
 import { AuthThrottlerGuard } from './common/security/auth-throttler.guard';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
+import { NoStoreHeadersModule } from './common/http/no-store-headers.module';
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
@@ -166,6 +167,8 @@ import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module
     // Logging estructurado con pino para todas las capas. Va primero para que el
     // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.
     LoggingModule,
+    // `Cache-Control: no-store` por omisión (F3); lo declarado después gana.
+    NoStoreHeadersModule,
     // Trazas distribuidas. Global, como LoggingModule: cualquier dominio inyecta
     // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
     // primera línea de `main.ts`-, solo expone la API que lo consume.

@@ -61,6 +61,8 @@ corepack yarn start:dev
 
 Para levantar el stack local según Compose, el arranque recomendado es `corepack yarn docker:up` (purga la caché de build vieja y hace `docker compose up -d`). **Ojo:** Postgres, MongoDB y sus init jobs pertenecen al perfil `local-db`, así que un `docker compose up -d` a secas no los levanta (el compose está pensado también para bases gestionadas). Para un stack con bases locales: `docker compose --profile local-db up -d`; para sólo la infraestructura de datos y desarrollar la API con `start:dev`: `docker compose up -d postgres mongodb redis opensearch minio` (nombrarlos activa el perfil). Con `clamav` y `worker-files` rige el perfil `malware-scan`. Los comandos de Compose de este párrafo están leídos de `docker-compose.yml` y `package.json`; no se ejecutaron al escribirlo. Para Coolify, seguí [su guía específica](docs/operations/coolify.md); tiene configuración, migración y secretos distintos. El arranque de seeds se controla mediante `corepack yarn seed:boot`; `corepack yarn seed:datasets` ejecuta el extractor de catálogos bolivianos. Verificá el ambiente y los efectos del comando antes de usarlo en una base persistente.
 
+**Redis en Compose:** `docker-compose.yml` publica el puerto de Redis solo en `127.0.0.1` (`REDIS_BIND` lo cambia) y los tres manifiestos que lo levantan (`docker-compose.yml`, `docker-compose.coolify.yml` e `infra/resilience/data-stack/docker-compose.yml`) arrancan con `requirepass` cuando `REDIS_PASSWORD` está definida; la API y los workers leen la misma variable. Vacía, Redis queda sin autenticación: aceptable en una máquina de desarrollo, no en un servidor. Ver [Coolify](docs/operations/coolify.md).
+
 ## Comandos de verificación
 
 | Comando | Qué comprueba |

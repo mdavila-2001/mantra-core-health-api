@@ -26,7 +26,7 @@ Se documentan **1943 de 1943 endpoints** en **79 módulos**. La referencia compl
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
 | `data_catalog` | 50 | [Abrir referencia](endpoints/data-catalog.md) |
-| `delegated_access` | 44 | [Abrir referencia](endpoints/delegated-access.md) |
+| `delegated_access` | 45 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 24 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 33 | [Abrir referencia](endpoints/diagnostics.md) |
 | `directory` | 26 | [Abrir referencia](endpoints/directory.md) |

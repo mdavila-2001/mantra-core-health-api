@@ -64,7 +64,7 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [data_catalog](data-catalog.md) | 50 | `admin-catalog`, `admin-portal`, `data-catalog-governance`, `data-catalog-internal` | 7 |
-| [delegated_access](delegated-access.md) | 44 | `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-governance`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`, `delegated-access-support-staff` | 12 |
+| [delegated_access](delegated-access.md) | 45 | `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-governance`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`, `delegated-access-support-staff` | 12 |
 | [diagnostic_units](diagnostic-units.md) | 24 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 33 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
 | [directory](directory.md) | 26 | `directory-admin-tenants`, `directory-tenants` | 3 |
