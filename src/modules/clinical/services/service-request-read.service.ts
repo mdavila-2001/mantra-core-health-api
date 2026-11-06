@@ -10,6 +10,7 @@ import { ServiceRequests } from '../entities';
 import { ClinicalErrorReason } from '../clinical.error-reasons';
 import { DEFAULT_PERFORMER_SELECTION_CONCEPT } from '../performer-selection';
 import { analysisCategoryOf } from '../service-request-category';
+import { flatImagingOf } from '../service-request-imaging';
 import { CLIN } from '../clinical.concepts';
 import type { ServiceRequestResponseDto } from '../dto';
 import { ClinicalReadService } from './clinical-read.service';
@@ -91,6 +92,7 @@ export class ServiceRequestReadService {
         components: view?.components ?? [],
         componentsSpecified: view?.componentsSpecified ?? false,
         imaging: view?.imaging ?? null,
+        ...flatImagingOf(view?.imaging),
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: noteIds.get(sr.id) ?? [],
         status: sr.statusConceptId,

@@ -22,6 +22,15 @@ import type {
   ServiceRequestImagingDto,
 } from '../dto/service-request-detail.dto';
 import {
+  assertSpecimenImagingExclusive,
+  assertStructureFields,
+  hasImagingFields,
+  imagingViewOf,
+  mergeImagingInput,
+  type FlatImagingSource,
+  type ImagingInput,
+} from '../service-request-imaging';
+import {
   analysisCategoryOf,
   categoryConceptIdFor,
   type AnalysisCategory,
@@ -34,23 +43,16 @@ export interface StudyDetailInput {
   readonly categoryConceptId?: string;
   readonly specimenTypeConceptId?: string;
   readonly componentConceptIds?: string[];
-  readonly imaging?: {
-    modalityConceptId?: string;
-    bodySiteConceptId?: string;
-    lateralityConceptId?: string;
-    contrastConceptId?: string;
-  };
+  readonly imaging?: ImagingInput;
+  /** Los mismos datos de región en el nivel superior del alta (se unen a `imaging`). */
+  readonly flat?: FlatImagingSource;
 }
 
 /** El detalle validado, listo para escribir en la orden. */
-export interface PreparedStudyDetail {
+export interface PreparedStudyDetail extends Readonly<ImagingInput> {
   /** Categoría a guardar (la del alta, o la familia del catálogo si el alta no la trajo). */
   readonly categoryConceptId?: string;
   readonly specimenTypeConceptId?: string;
-  readonly modalityConceptId?: string;
-  readonly bodySiteConceptId?: string;
-  readonly lateralityConceptId?: string;
-  readonly contrastConceptId?: string;
   readonly componentConceptIds: string[];
 }
 
@@ -88,6 +90,10 @@ export class ServiceRequestDetailService {
     options: PrepareOptions = {},
   ): Promise<PreparedStudyDetail> {
     const enforce = options.catalog !== 'skip';
+    const imaging = mergeImagingInput({
+      ...input.flat,
+      imaging: input.imaging,
+    });
     const study = await this.catalog.findStudy(em, input.codeConceptId);
 
     // V1
@@ -136,6 +142,8 @@ export class ServiceRequestDetailService {
           'specimenTypeConceptId',
         );
       }
+      // Laboratorio con muestra: no admite además datos de imagen.
+      assertSpecimenImagingExclusive(input.specimenTypeConceptId, imaging);
       if (
         !(await this.catalog.isInValueSet(
           em,
@@ -189,12 +197,8 @@ export class ServiceRequestDetailService {
     }
 
     // V5–V9: imagen
-    const imaging = input.imaging;
-    const hasImagingFields =
-      imaging !== undefined &&
-      Object.values(imaging).some((value) => value !== undefined);
     if (category !== 'IMAGING') {
-      if (hasImagingFields) {
+      if (hasImagingFields(imaging)) {
         this.fail(
           StudyDetailReason.IMAGING_FIELDS_NOT_ALLOWED,
           'El detalle de imagen sólo se indica en órdenes de imagenología',
@@ -331,6 +335,11 @@ export class ServiceRequestDetailService {
       }
     }
 
+    // Estructura/malla del atlas 3D y tipo de hueso
+    await assertStructureFields(imaging, (valueSet, id) =>
+      this.catalog.isInValueSet(em, valueSet, id),
+    );
+
     return {
       categoryConceptId,
       specimenTypeConceptId: input.specimenTypeConceptId,
@@ -338,6 +347,9 @@ export class ServiceRequestDetailService {
       bodySiteConceptId,
       lateralityConceptId,
       contrastConceptId,
+      bodyStructureUberon: imaging?.bodyStructureUberon,
+      bodyMeshId: imaging?.bodyMeshId,
+      boneTypeConceptId: imaging?.boneTypeConceptId,
       componentConceptIds: components ?? [],
     };
   }
@@ -405,6 +417,7 @@ export class ServiceRequestDetailService {
         r.bodySiteConceptId,
         r.lateralityConceptId,
         r.contrastConceptId,
+        r.boneTypeConceptId,
       ]) {
         if (id) ids.add(id);
       }
@@ -416,12 +429,6 @@ export class ServiceRequestDetailService {
 
     for (const r of requests) {
       const rows = byRequest.get(r.id) ?? [];
-      const hasImaging = Boolean(
-        r.modalityConceptId ||
-        r.bodySiteConceptId ||
-        r.lateralityConceptId ||
-        r.contrastConceptId,
-      );
       result.set(r.id, {
         codeDisplay: name(r.codeConceptId) ?? 'Estudio',
         specimenTypeDisplay: name(r.specimenTypeConceptId),
@@ -431,18 +438,7 @@ export class ServiceRequestDetailService {
           ordinal: row.ordinal,
         })),
         componentsSpecified: rows.length > 0,
-        imaging: hasImaging
-          ? {
-              modalityConceptId: r.modalityConceptId ?? null,
-              modalityDisplay: name(r.modalityConceptId),
-              bodySiteConceptId: r.bodySiteConceptId ?? null,
-              bodySiteDisplay: name(r.bodySiteConceptId),
-              lateralityConceptId: r.lateralityConceptId ?? null,
-              lateralityDisplay: name(r.lateralityConceptId),
-              contrastConceptId: r.contrastConceptId ?? null,
-              contrastDisplay: name(r.contrastConceptId),
-            }
-          : null,
+        imaging: imagingViewOf(r, name),
       });
     }
     return result;

@@ -47,6 +47,7 @@ import {
   analysisCategoryOf,
   categoryConceptIdFor,
 } from '../service-request-category';
+import { detailColumnsOf, flatImagingOf } from '../service-request-imaging';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -313,6 +314,7 @@ export class ServiceRequestsService {
           specimenTypeConceptId: dto.specimenTypeConceptId,
           componentConceptIds: dto.componentConceptIds,
           imaging: dto.imaging,
+          flat: dto,
         },
         { catalog: options.catalog },
       );
@@ -383,11 +385,7 @@ export class ServiceRequestsService {
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
         requisitionId: options.requisitionId,
-        specimenTypeConceptId: prepared.specimenTypeConceptId,
-        modalityConceptId: prepared.modalityConceptId,
-        bodySiteConceptId: prepared.bodySiteConceptId,
-        lateralityConceptId: prepared.lateralityConceptId,
-        contrastConceptId: prepared.contrastConceptId,
+        ...detailColumnsOf(prepared),
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -485,6 +483,7 @@ export class ServiceRequestsService {
         components: view?.components ?? [],
         componentsSpecified: view?.componentsSpecified ?? false,
         imaging: view?.imaging ?? null,
+        ...flatImagingOf(view?.imaging),
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,
