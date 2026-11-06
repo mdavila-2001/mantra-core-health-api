@@ -49,61 +49,55 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 | 9 | 2026-10-24 | Búsqueda de repositorios de GitHub (≈60 consultas: MAUDE por categoría diagnóstica, GUDID, openFDA, R&L, EUA) y búsqueda web | **0** | 0 | 0 | `ivitskiy/hearingindex-data@ce1295f8` (34 audífonos de venta libre QUG/QUH/QUF/SCR, 874.33xx: prótesis, fuera de alcance; valores curados, no registros crudos); repos sólo de código (`batharr41/LotCheck-Engine`, `oxford-pharmacoepi/AccessGUDID`, `acarter881/accessgudid*` y otros 17); agregados sin filas por modelo (`JtrunzPHP/maude-monitor`, `Jeneidi/recallradar`, `jmaho24/maude-dashboard`); la búsqueda de GitHub cortó con 429 y no se insistió |
 | 10 | 2026-10-24 | Vías independientes: hosts oficiales FDA/NLM (vuelven a dar 403), proyectos de GitLab (`openfda`, `gudid`, `maude`, `510k`, `fda device`), paquetes PyPI (`pymaude`, `maude`, `pyfda` y 14 nombres más), búsqueda de conda | **0** | 0 | 0 | GitLab: sólo clientes de API de medicamentos y código (`OrenSource/gudid-go`, `leapbase/OpenFDAExplorer`, `f.veggeberg/open-fda-project`: ningún archivo de datos > 200 KB); PyPI: `pymaude` sin datos, `maude` y `pyfda` son otra cosa; la API de búsqueda de conda devuelve 403 |
 | 11 | 2026-10-24 | **Fuentes oficiales** (el propietario habilitó los hosts FDA/NLM): openFDA `device/classification`, `510k`, `pma`, `registrationlisting` y `udi` export 2026-10-21 (`fetch-official.mjs`, 58 archivos con sha256) y AccessGUDID Delimited Full Release 20261001 (bajado y probado; no se usa en el build porque openFDA `udi` es el mismo GUDID y más nuevo). Prioridad oficial > espejo. | **631 967 UDI-DI** (`fda-gudid`, de 3 130 a 635 097) + **104 PMA**; R&L: las 110 614 filas del espejo 2024 se reemplazan por 361 369 oficiales (id distinto: `registro|product code|nombre propietario` en vez de `registro|KEY_VAL|product code`; no son comparables 1 a 1) | 3 578 | 212 071 | Ninguna fuente descartada. 3 848 product codes fuera de alcance (igual que antes). 510(k)/De Novo: 0 nuevos (el oficial ya estaba cubierto por los espejos; ahora 72 175 filas tienen procedencia oficial y los espejos quedan en `extra.alsoIn`) |
+| 12 | 2026-11-06 | Export oficial nuevo de openFDA: `device/udi` 2026-11-03 (52 partes) y `510k`, `pma`, `classification`, `registrationlisting` 2026-11-02, bajados con `fetch-official.mjs` (57 archivos con sha256); espejos sin cambios | 1 974 (1 937 listados de R&L, 26 510(k), 11 PMA) | 46 | 832 | 1 057 registros de la pasada 11 ya no están en el export (1 051 listados de R&L dados de baja y 6 PMA cuyo id cambió porque su primer registro por nombre comercial es otro): salen del NDJSON. GUDID trae las mismas 635 097 UDI-DI de alcance diagnóstico que el export del 2026-10-21 (0 altas y 0 bajas; se actualiza la versión de cada fila) |
 
 **Saturación:** las pasadas 9 y 10 aportan 0 → se cumple el corte de «dos pasadas seguidas sin aportes» con la red de esta sesión. Las fuentes no cubiertas están detrás de hosts bloqueados (tabla «Huecos»). Con los dominios FDA/NLM habilitados, una pasada nueva empezaría por `fetch-official.mjs --gudid-delimited` (GUDID completo y nombres propietarios del R&L).
 
 **Pasada 11 (fuentes oficiales):** con los hosts FDA/NLM habilitados, `manifest.json → gaps` queda vacío. MAUDE, retiros, LIVD, CLIA, NAAT y la lista de IA siguen viniendo de espejos (esta región no tiene descargador oficial para ellas).
 
 <!-- coverage:start -->
-## Carga a una base
-
-`load-dx-device-types-us.mjs --apply`, medido el 2026-10-25 en un PostgreSQL 16.15 local desechable con el DDL de
-`database/SQL` sin tocar: de 3 270 product codes en alcance se cargan 3 268 (dos no tienen nombre publicado),
-con 29 230 propiedades, bajo el code system `fda-product-code`; la segunda corrida inserta 0 filas. Las
-1 098 516 filas de `out/` validan sin error contra el formato común que lee `master/`.
-
 ## Cobertura (generada por `coverage-report.mjs`)
 
 | | Cantidad |
 |---|---|
-| Registros (filas del NDJSON) | 1 098 516 |
+| Registros (filas del NDJSON) | 1 099 433 |
 | · `fda-gudid` | 635 097 |
-| · `fda-rl` | 361 369 |
-| · `fda-510k` | 71 955 |
+| · `fda-rl` | 362 255 |
+| · `fda-510k` | 71 981 |
 | · `fda-recall` | 13 692 |
 | · `fda-maude` | 12 930 |
-| · `fda-pma` | 2 750 |
+| · `fda-pma` | 2 755 |
 | · `cdc-livd-sars-cov-2` | 483 |
 | · `fda-denovo` | 240 |
 | UDI-DI (con modelo/versión) | 635 104 |
-| Fabricantes distintos (razón social normalizada exacta) | 20 148 |
-| Marcas distintas (fabricante + nombre comercial) | 293 608 |
-| Registros con país del fabricante | 433 564 |
-| Product codes vistos / incluidos / excluidos | 7 118 / 3 270 / 3 848 |
+| Fabricantes distintos (razón social normalizada exacta) | 20 184 |
+| Marcas distintas (fabricante + nombre comercial) | 293 925 |
+| Registros con país del fabricante | 434 476 |
+| Product codes vistos / incluidos / excluidos | 7 119 / 3 270 / 3 849 |
 
 ### Product codes por panel (incluidos / excluidos)
 
 | Panel | Incluidos | Excluidos | Registros de equipos |
 |---|---|---|---|
-| CH — Clinical Chemistry | 563 | 1 | 102 643 |
-| MI — Microbiology | 549 | 0 | 43 719 |
-| HE — Hematology | 405 | 23 | 54 713 |
-| IM — Immunology | 314 | 0 | 21 160 |
-| TX — Clinical Toxicology | 287 | 0 | 54 030 |
-| CV — Cardiovascular | 199 | 266 | 327 368 |
-| GU — Gastroenterology, Urology | 170 | 455 | 130 367 |
-| PA — Pathology | 156 | 0 | 58 838 |
-| RA — Radiology | 140 | 75 | 108 635 |
-| OP — Ophthalmic | 123 | 213 | 12 487 |
-| AN — Anesthesiology | 82 | 171 | 23 282 |
-| OB — Obstetrics/Gynecology | 81 | 196 | 51 692 |
-| NE — Neurology | 71 | 211 | 31 626 |
-| EN — Ear, Nose, Throat | 41 | 219 | 14 401 |
-| HO — General Hospital | 23 | 325 | 11 744 |
-| DE — Dental | 22 | 333 | 5 189 |
-| PM — Physical Medicine | 13 | 214 | 15 442 |
-| OR — Orthopedic | 12 | 322 | 25 631 |
-| SU — General, Plastic Surgery | 11 | 595 | 4 971 |
+| CH — Clinical Chemistry | 563 | 1 | 102 656 |
+| MI — Microbiology | 549 | 0 | 43 721 |
+| HE — Hematology | 405 | 23 | 54 750 |
+| IM — Immunology | 314 | 0 | 21 164 |
+| TX — Clinical Toxicology | 287 | 0 | 54 264 |
+| CV — Cardiovascular | 199 | 266 | 327 530 |
+| GU — Gastroenterology, Urology | 170 | 455 | 130 374 |
+| PA — Pathology | 156 | 0 | 58 806 |
+| RA — Radiology | 140 | 75 | 109 280 |
+| OP — Ophthalmic | 123 | 213 | 12 463 |
+| AN — Anesthesiology | 82 | 172 | 23 285 |
+| OB — Obstetrics/Gynecology | 81 | 196 | 51 696 |
+| NE — Neurology | 71 | 211 | 31 669 |
+| EN — Ear, Nose, Throat | 41 | 219 | 14 359 |
+| HO — General Hospital | 23 | 325 | 11 747 |
+| DE — Dental | 22 | 333 | 5 190 |
+| PM — Physical Medicine | 13 | 214 | 15 570 |
+| OR — Orthopedic | 12 | 322 | 25 357 |
+| SU — General, Plastic Surgery | 11 | 595 | 4 974 |
 | MG — Medical Genetics | 8 | 0 | 95 |
 | sin panel publicado | 0 | 229 | 0 |
 
@@ -132,7 +126,7 @@ con 29 230 propiedades, bajo el code system `fda-product-code`; la segunda corri
 | 868.1xxx | Subpart B — Diagnostic Devices | sí | 48 |
 | 868.2xxx | Subpart C — Monitoring Devices | sí | 34 |
 | 868.3xxx | Subpart D — Prosthetic Devices | no | 1 |
-| 868.5xxx | Subpart F — Therapeutic Devices | no | 134 |
+| 868.5xxx | Subpart F — Therapeutic Devices | no | 135 |
 | 868.6xxx | Subpart G — Miscellaneous | no | 13 |
 | 870.1xxx | Subpart B — Cardiovascular Diagnostic Devices | sí | 112 |
 | 870.2xxx | Subpart C — Cardiovascular Monitoring Devices | sí | 87 |
@@ -223,46 +217,46 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 
 | Product code | Nombre FDA | Registros |
 |---|---|---|
-| OEZ | Cardiovascular Procedure Kit | 71 476 |
+| OEZ | Cardiovascular Procedure Kit | 71 477 |
 | FDE | Laparoscopy Kit | 34 136 |
 | GCJ | Laparoscope, General & Plastic Surgery | 31 151 |
 | OEQ | Angiography/Angioplasty Kit | 27 789 |
-| NJT | Immunohistochemistry Reagents And Kits | 26 783 |
+| NJT | Immunohistochemistry Reagents And Kits | 26 786 |
 | OHD | Gynecological Laparoscopic Kit | 23 809 |
 | MVU | Reagents, Specific, Analyte | 23 342 |
-| DQY | Catheter, Percutaneous | 21 937 |
-| DYB | Introducer, Catheter | 19 938 |
-| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 18 522 |
+| DQY | Catheter, Percutaneous | 21 941 |
+| DYB | Introducer, Catheter | 19 940 |
+| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 18 526 |
 | OES | Cardiac Catheterization Kit | 15 558 |
-| NBH | Accessories, Arthroscopic | 15 296 |
-| ITX | Transducer, Ultrasonic, Diagnostic | 14 693 |
-| NWU | Endoscope Introducer Kit | 14 312 |
-| DQA | Oximeter | 14 047 |
-| DSA | Cable, Transducer And Electrode, Patient, (Including Connector) | 13 390 |
+| NBH | Accessories, Arthroscopic | 15 009 |
+| ITX | Transducer, Ultrasonic, Diagnostic | 14 831 |
+| NWU | Endoscope Introducer Kit | 14 313 |
+| DQA | Oximeter | 14 052 |
+| DSA | Cable, Transducer And Electrode, Patient, (Including Connector) | 13 401 |
 | OHM | Cesarean Section Tray | 13 382 |
-| DXQ | Blood Pressure Cuff | 12 585 |
-| IKD | Cable, Electrode | 12 543 |
-| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 11 387 |
-| DQO | Catheter, Intravascular, Diagnostic | 11 275 |
-| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 10 698 |
-| LLZ | System, Image Processing, Radiological | 10 622 |
-| PPM | General Purpose Reagent | 9 934 |
-| HRX | Arthroscope | 9 407 |
-| DQX | Wire, Guide, Catheter | 9 152 |
-| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 9 083 |
-| KNW | Instrument, Biopsy | 7 027 |
-| GXY | Electrode, Cutaneous | 6 892 |
-| FLL | Continuous Measurement Thermometer | 6 845 |
-| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 6 478 |
-| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 6 433 |
+| IKD | Cable, Electrode | 12 671 |
+| DXQ | Blood Pressure Cuff | 12 583 |
+| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 11 518 |
+| DQO | Catheter, Intravascular, Diagnostic | 11 277 |
+| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 10 830 |
+| LLZ | System, Image Processing, Radiological | 10 648 |
+| PPM | General Purpose Reagent | 9 942 |
+| HRX | Arthroscope | 9 420 |
+| DQX | Wire, Guide, Catheter | 9 155 |
+| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 9 077 |
+| KNW | Instrument, Biopsy | 7 019 |
+| GXY | Electrode, Cutaneous | 6 902 |
+| FLL | Continuous Measurement Thermometer | 6 834 |
+| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 6 482 |
+| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 6 421 |
 | GYC | Electrode, Cortical | 5 773 |
-| LNH | System, Nuclear Magnetic Resonance Imaging | 5 308 |
-| JAK | System, X-Ray, Tomography, Computed | 5 021 |
-| MNL | Accessories, Cleaning Brushes, For Endoscope | 5 009 |
-| DQK | Computer, Diagnostic, Programmable | 4 940 |
-| MOS | Coil, Magnetic Resonance, Specialty | 4 902 |
-| DPS | Electrocardiograph | 4 866 |
-| FMH | Container, Specimen, Sterile | 4 662 |
+| LNH | System, Nuclear Magnetic Resonance Imaging | 5 313 |
+| JAK | System, X-Ray, Tomography, Computed | 5 032 |
+| MNL | Accessories, Cleaning Brushes, For Endoscope | 4 994 |
+| DQK | Computer, Diagnostic, Programmable | 4 950 |
+| MOS | Coil, Magnetic Resonance, Specialty | 4 905 |
+| DPS | Electrocardiograph | 4 881 |
+| FMH | Container, Specimen, Sterile | 4 660 |
 
 ### Fabricantes con más registros
 
@@ -271,28 +265,28 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 | 798788741 | 3 |
 | 823404997 | 8 |
 | CARDINAL HEALTH 200 | 111 718 |
-| MEDLINE INDUSTRIES | 75 862 |
+| MEDLINE INDUSTRIES | 76 035 |
 | ROCHE DIAGNOSTICS OPERATIONS | 25 582 |
-| GE HEALTHCARE TECHNOLOGIES | 20 061 |
+| GE HEALTHCARE TECHNOLOGIES | 20 399 |
 | PHILIPS MEDICAL SYSTEMS INTERNATIONAL | 17 283 |
-| ABBOTT LABORATORIES | 14 380 |
-| MEDTRONIC | 14 119 |
-| MERIT MEDICAL SYSTEMS | 13 599 |
+| ABBOTT LABORATORIES | 14 384 |
+| MEDTRONIC | 14 120 |
+| MERIT MEDICAL SYSTEMS | 13 591 |
 | SIEMENS HEALTHCARE DIAGNOSTICS | 13 078 |
 | UNIMED MEDICAL SUPPLIES | 12 017 |
-| HANGZHOU ALLTEST BIOTECH | 10 170 |
+| HANGZHOU ALLTEST BIOTECH | 10 173 |
 | SOTERA HEALTH | 10 015 |
-| BECTON DICKINSON AND | 9 476 |
-| BECKMAN COULTER | 9 402 |
+| BECTON DICKINSON AND | 9 474 |
+| BECKMAN COULTER | 9 404 |
 | AGILENT TECHNOLOGIES | 7 494 |
 | NIHON KOHDEN | 7 292 |
 | SMITH AND NEPHEW | 7 278 |
 | AVID MEDICAL | 7 196 |
-| APK TECHNOLOGY | 6 603 |
-| BOSTON SCIENTIFIC | 6 521 |
+| APK TECHNOLOGY | 6 610 |
+| BOSTON SCIENTIFIC | 6 523 |
 | THERMO FISHER SCIENTIFIC | 6 324 |
 | PMT | 6 095 |
-| STRYKER | 6 055 |
+| STRYKER | 6 061 |
 | BEIJING DEMAX MEDICAL TECHNOLOGY | 5 724 |
 | BIO SB | 5 529 |
 | ELMED | 5 415 |
@@ -301,19 +295,19 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 | WELCH ALLYN | 5 251 |
 | MEDIVATORS | 5 200 |
 | AMERICAN CONTRACT SYSTEMS | 5 180 |
-| TELEFLEX | 4 642 |
+| TELEFLEX | 4 627 |
 | KARL STORZ AND KG | 4 545 |
 | AMERICAN DIAGNOSTIC | 4 404 |
 | BROSMED MEDICAL | 4 385 |
 | MICROBIOLOGICS | 4 308 |
-| STERIS | 4 141 |
 | QUIDELORTHO | 4 117 |
+| INTUITIVE SURGICAL | 4 062 |
 
 ### Clase de riesgo y estado
 
-Clase: `fda:2` 837 968 · `fda:1` 248 761 · `fda:3` 5 557 · `fda:U` 3 951 · `fda:N` 1 750 · `sin clase` 495 · `fda:f` 34.
+Clase: `fda:2` 839 082 · `fda:1` 248 547 · `fda:3` 5 559 · `fda:U` 3 970 · `fda:N` 1 746 · `sin clase` 495 · `fda:f` 34.
 
-Estado (verbatim de la fuente): In Commercial Distribution 576 638 · sin estado 374 782 · Substantially Equivalent 71 726 · Not in Commercial Distribution 58 459 · Terminated 8 288 · Ongoing 4 983 · APPR 1 446 · OK30 1 068 · Unknown 396 · Completed 281 · APRL 141 · Open, Classified 140.
+Estado (verbatim de la fuente): In Commercial Distribution 576 638 · sin estado 375 668 · Substantially Equivalent 71 752 · Not in Commercial Distribution 58 459 · Terminated 8 288 · Ongoing 4 983 · APPR 1 444 · OK30 1 070 · Unknown 396 · Completed 281 · APRL 141 · Open, Classified 140.
 
 ### Huecos
 

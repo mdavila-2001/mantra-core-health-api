@@ -84948,6 +84948,18 @@
   "url": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=SHI"
  },
  {
+  "productCode": "SHJ",
+  "deviceName": "Thrombectomy Whole Blood Return System",
+  "panel": "AN",
+  "deviceClass": "2",
+  "regulationNumber": "868.5830",
+  "include": false,
+  "rule": "subpart:868.5",
+  "reason": "21 CFR 868 Subpart F — Therapeutic Devices",
+  "classificationSource": "openfda:device/classification",
+  "url": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=SHJ"
+ },
+ {
   "productCode": "SHL",
   "deviceName": "Ear, Nose, And Throat Image Analyzer",
   "panel": "EN",

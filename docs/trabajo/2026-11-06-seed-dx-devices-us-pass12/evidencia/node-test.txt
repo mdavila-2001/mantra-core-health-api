@@ -1,0 +1,10 @@
+# node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"
+# tests 27
+# pass 27
+# fail 0
+exit=0
+# node --test "tools/terminology-import/test/*.test.mjs"  (regresión; yarn install con xlsx local, sin commitear)
+# tests 177
+# pass 176
+# fail 0
+exit=0

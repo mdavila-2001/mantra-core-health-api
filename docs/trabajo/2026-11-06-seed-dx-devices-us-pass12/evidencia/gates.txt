@@ -1,0 +1,11 @@
+# corepack yarn typecheck
+exit=0
+# corepack yarn lint
+✖ 129 problems (129 errors, 0 warnings)
+  116 errors and 0 warnings potentially fixable with the `--fix` option.
+
+exit=1
+# corepack yarn docs:links
+3001 enlaces internos verificados en 504 páginas.
+Sin enlaces rotos.
+exit=0
