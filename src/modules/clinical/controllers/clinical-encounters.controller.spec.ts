@@ -18,11 +18,14 @@ const actor = { id: 'user-1', roles: [] } as any;
 function build() {
   const episodesService = { open: mockFn() };
   const encountersService = { checkIn: mockFn(), close: mockFn() };
+  // El cierre pasa por EncounterCloseService, que además completa el turno.
+  const encounterClose = { close: mockFn() };
   const controller = new ClinicalEncountersController(
     episodesService as any,
     encountersService as any,
+    encounterClose as any,
   );
-  return { controller, episodesService, encountersService };
+  return { controller, episodesService, encountersService, encounterClose };
 }
 
 describe('ClinicalEncountersController', () => {
@@ -43,10 +46,11 @@ describe('ClinicalEncountersController', () => {
     expect(d.encountersService.checkIn).toHaveBeenCalledWith(dto, actor);
   });
 
-  it('delegates close (UC-08-14)', async () => {
+  it('delegates close (UC-08-14) to the close that also completes the booking', async () => {
     const d = build();
     await d.controller.close('enc1', { expectedRowVersion: 1 }, actor);
-    expect(d.encountersService.close).toHaveBeenCalledWith(
+    expect(d.encountersService.close).not.toHaveBeenCalled();
+    expect(d.encounterClose.close).toHaveBeenCalledWith(
       'enc1',
       { expectedRowVersion: 1 },
       actor,

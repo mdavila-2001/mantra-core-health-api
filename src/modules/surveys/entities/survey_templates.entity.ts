@@ -56,6 +56,20 @@ export class SurveyTemplates {
   ownerId?: string;
 
   /**
+   * Entrada del catálogo estándar (`STD_*`, `surveys-standard.catalog.ts`) de
+   * la que se materializó la plantilla al importarla a un servicio. Nula en las
+   * escritas a mano y en las de sistema. Única por tenant y dueño
+   * (`uq_survey_templates_practitioner_catalog_code`, v4.2.91): importar dos
+   * veces la misma entrada reutiliza la plantilla.
+   */
+  @Property({
+    fieldName: 'standard_catalog_code',
+    columnType: 'text',
+    nullable: true,
+  })
+  standardCatalogCode?: string;
+
+  /**
    * Título visible del instrumento.
    */
   @Property({ columnType: 'text' })

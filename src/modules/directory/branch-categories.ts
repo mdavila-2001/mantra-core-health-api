@@ -1,11 +1,11 @@
 /**
- * Categoría de una sede de `directory.branches` (v4.2.91, columna `branch_category`).
+ * Categoría de una sede de `directory.branches` (v4.2.92, columna `branch_category`).
  *
  * Sirve para etiquetar las sucursales de cualquier organización (farmacia,
  * laboratorio, imagenología, establecimiento médico) y verlas por oleadas:
  *
  * - `default`: sin clasificar. Es el valor por omisión de la columna y el de
- *   toda fila anterior a v4.2.91 que el backfill no reconoció.
+ *   toda fila anterior a v4.2.92 que el backfill no reconoció.
  * - `head_office`: casa matriz. **A lo sumo una por organización**; la base lo
  *   impone con `ux_branches_one_head_office` y el servicio lo adelanta con 409.
  * - `branch`: sucursal.
@@ -30,7 +30,7 @@ export const ONE_HEAD_OFFICE_INDEX = 'ux_branches_one_head_office';
  * le agrega `-2`, `-3`… y lo registra.
  *
  * Es la regla de las tres altas que crean sucursales (farmacia, laboratorio e
- * imagenología, establecimiento médico) y la del backfill del parche v4.2.91.
+ * imagenología, establecimiento médico) y la del backfill del parche v4.2.92.
  *
  * @param name - Nombre de la sede.
  * @param used - Códigos ya tomados dentro de la organización; se actualiza.

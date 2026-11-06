@@ -109,7 +109,7 @@ export class BranchesRepository {
     return em.find(Branches, { tenantId }, { orderBy: { code: 'ASC' } });
   }
 
-  /** La casa matriz de la organización, si ya tiene una (a lo sumo una, v4.2.91). */
+  /** La casa matriz de la organización, si ya tiene una (a lo sumo una, v4.2.92). */
   findHeadOffice(
     em: EntityManager,
     tenantId: string,

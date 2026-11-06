@@ -253,7 +253,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       // La central (con punto) y la sucursal siguen en `directory.branches`,
       // que es lo que lista el portal de la organización.
       expect(d.branches.create).toHaveBeenCalledTimes(2);
-      // v4.2.91: la central es la casa matriz y la declarada, una sucursal.
+      // v4.2.92: la central es la casa matriz y la declarada, una sucursal.
       expect(d.branches.create).toHaveBeenNthCalledWith(
         1,
         d.tx,

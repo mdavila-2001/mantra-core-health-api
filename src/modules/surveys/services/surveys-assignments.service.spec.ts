@@ -138,6 +138,8 @@ function activeTemplate(overrides: Record<string, unknown> = {}) {
     tenantId: TENANT,
     ownerPractitionerId: OWNER,
     statusConceptId: SURVEYS.TEMPLATE_ACTIVE,
+    // Desde el 06/11/2026 sólo se asocia y reparte lo importado del catálogo.
+    standardCatalogCode: 'STD_LAB_V1',
     ...overrides,
   };
 }
@@ -151,6 +153,26 @@ function completedBooking(overrides: Record<string, unknown> = {}) {
     bookableSlotId: 'slot-1',
     serviceConceptId: 'svc-1',
     statusConceptId: SCHED.BOOKING_COMPLETED,
+    ...overrides,
+  };
+}
+
+/** Reserva completada de un servicio (con oferta y copia del servicio). */
+function serviceBookingOf(overrides: Record<string, unknown> = {}) {
+  return completedBooking({
+    practitionerServiceOfferingId: 'off-1',
+    serviceSnapshot: { offeringId: 'off-1', serviceCatalogId: 'cat-1' },
+    ...overrides,
+  });
+}
+
+/** Asignación activa de servicio (`SERVICE`, el servicio del catálogo). */
+function serviceAssignment(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'asg-1',
+    surveyVersionId: 'ver-1',
+    targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+    targetId: 'cat-1',
     ...overrides,
   };
 }
@@ -185,6 +207,59 @@ describe('SurveysAssignmentsService', () => {
           targetTypeConceptId: TARGET_TYPE_BY_CODE.SERVICE,
           active: true,
         }),
+      );
+    });
+
+    it('rechaza asociar una encuesta escrita a mano (sólo del catálogo), sin escribir', async () => {
+      for (const targetType of [
+        'SERVICE',
+        'CARE_TYPE',
+        'APPOINTMENT',
+      ] as const) {
+        const d = build();
+        d.templatesRepo.findVersionById.mockResolvedValue(publishedVersion());
+        d.templatesRepo.findTemplateById.mockResolvedValue(
+          activeTemplate({ standardCatalogCode: undefined }),
+        );
+
+        const error = await withTenant(() =>
+          d.service.createAssignment(
+            {
+              surveyVersionId: 'ver-1',
+              targetType,
+              targetId: targetType === 'CARE_TYPE' ? undefined : 'svc-1',
+            },
+            actor,
+          ),
+        ).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect((error as DomainException).reason).toBe(
+          SurveysErrorReason.ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE,
+        );
+        expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+      }
+    });
+
+    it('fija el dueño de la plantilla en la asignación (copia que valida la base)', async () => {
+      const d = build();
+      d.templatesRepo.findVersionById.mockResolvedValue(publishedVersion());
+      d.templatesRepo.findTemplateById.mockResolvedValue(activeTemplate());
+
+      await withTenant(() =>
+        d.service.createAssignment(
+          {
+            surveyVersionId: 'ver-1',
+            targetType: 'SERVICE',
+            targetId: 'svc-1',
+          },
+          actor,
+        ),
+      );
+
+      expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ ownerPractitionerId: OWNER }),
       );
     });
 
@@ -320,7 +395,7 @@ describe('SurveysAssignmentsService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('es idempotente: no reemite lo ya emitido para la misma reserva (base y extensión)', async () => {
+    it('es idempotente: con la invitación de la reserva ya emitida no sale otra (aunque la previa traiga extensión)', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue(completedBooking());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
@@ -342,11 +417,11 @@ describe('SurveysAssignmentsService', () => {
       );
 
       expect(res.ids).toHaveLength(0);
-      expect(res.alreadyIssued).toBe(2);
+      expect(res.alreadyIssued).toBe(1);
       expect(d.invitationsRepo.create).not.toHaveBeenCalled();
     });
 
-    it('una versión del profesional ya emitida suelta no se repite; la base sí sale', async () => {
+    it('una invitación suelta anterior del profesional no impide la base: sale la base, sin extensión', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue(completedBooking());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
@@ -363,18 +438,18 @@ describe('SurveysAssignmentsService', () => {
       );
 
       expect(res.ids).toHaveLength(1);
-      expect(res.alreadyIssued).toBe(1);
+      expect(res.alreadyIssued).toBe(0);
       expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
       const [, data] = d.invitationsRepo.create.mock.calls[0];
       expect(data.surveyVersionId).toBe(BASE.versionId);
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
-    it('no emite la encuesta del profesional si la vigencia de la versión ya terminó (la base sí)', async () => {
+    it('no emite la encuesta importada si la vigencia de su versión ya terminó (sale la base de servicio)', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(serviceBookingOf());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
-        { id: 'asg-1', surveyVersionId: 'ver-1' },
+        serviceAssignment(),
       ]);
       d.templatesRepo.findVersionById.mockResolvedValue(
         publishedVersion({
@@ -393,11 +468,11 @@ describe('SurveysAssignmentsService', () => {
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
-    it('no emite la encuesta del profesional si la plantilla está desactivada (la base sí)', async () => {
+    it('no emite la encuesta importada si su plantilla está desactivada (sale la base de servicio)', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(serviceBookingOf());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
-        { id: 'asg-1', surveyVersionId: 'ver-1' },
+        serviceAssignment(),
       ]);
       d.templatesRepo.findVersionById.mockResolvedValue(publishedVersion());
       d.templatesRepo.findTemplateById.mockResolvedValue(
@@ -591,7 +666,7 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
     assignment: Record<string, unknown> = {},
   ) {
     d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
-      { id: 'asg-1', surveyVersionId: 'ver-1', ...assignment },
+      serviceAssignment(assignment),
     ]);
     d.templatesRepo.findVersionById.mockResolvedValue(publishedVersion());
     d.templatesRepo.findTemplateById.mockResolvedValue(activeTemplate());
@@ -650,10 +725,20 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
-    it('con encuesta del profesional emite UNA invitación: la base y la del médico detrás', async () => {
+    it('una consulta recibe SÓLO la base aunque el profesional tenga encuestas asociadas a sus consultas', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue(completedBooking());
-      withAssignment(d);
+      d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
+        {
+          id: 'asg-care',
+          surveyVersionId: 'ver-1',
+          targetTypeConceptId: SURVEYS.TARGET_CARE_TYPE,
+        },
+      ]);
+      d.templatesRepo.findVersionById.mockResolvedValue(publishedVersion());
+      d.templatesRepo.findTemplateById.mockResolvedValue(
+        activeTemplate({ standardCatalogCode: undefined }),
+      );
 
       const res = await withTenant(() =>
         d.service.issueForBooking({ appointmentBookingId: 'bkg-1' }, actor),
@@ -663,10 +748,27 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
       expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
       const [, data] = d.invitationsRepo.create.mock.calls[0];
       expect(data.surveyVersionId).toBe(BASE.versionId);
-      expect(data.extensionSurveyVersionId).toBe('ver-1');
+      expect(data.surveyAssignmentId).toBe(BASE.assignmentId);
+      expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
-    it('si aplican varias, la más específica viaja detrás de la base y las demás salen sueltas', async () => {
+    it('un servicio con la encuesta importada la recibe a ella, en lugar de la base', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(serviceBooking());
+      withAssignment(d);
+
+      const res = await withTenant(() =>
+        d.service.issueForBooking({ appointmentBookingId: 'bkg-1' }, actor),
+      );
+
+      expect(res.ids).toHaveLength(1);
+      const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe('ver-1');
+      expect(data.surveyAssignmentId).toBe('asg-1');
+      expect(data.extensionSurveyVersionId).toBeUndefined();
+    });
+
+    it('con varias asignaciones sale UNA invitación: la importada del servicio; la de consulta no se emite', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue(serviceBooking());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
@@ -692,18 +794,17 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
         d.service.issueForBooking({ appointmentBookingId: 'bkg-1' }, actor),
       );
 
-      expect(res.ids).toHaveLength(2);
-      const [[, base], [, loose]] = d.invitationsRepo.create.mock.calls;
-      expect(base.surveyVersionId).toBe(BASE.versionId);
-      expect(base.extensionSurveyVersionId).toBe('ver-svc');
-      expect(loose.surveyVersionId).toBe('ver-care');
-      expect(loose.surveyAssignmentId).toBe('asg-care');
-      expect(loose.extensionSurveyVersionId).toBeUndefined();
+      expect(res.ids).toHaveLength(1);
+      expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
+      const [, only] = d.invitationsRepo.create.mock.calls[0];
+      expect(only.surveyVersionId).toBe('ver-svc');
+      expect(only.surveyAssignmentId).toBe('asg-svc');
+      expect(only.extensionSurveyVersionId).toBeUndefined();
     });
 
     it('no reparte la encuesta de otro profesional aunque la asignación coincida con el destino', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(serviceBooking());
       withAssignment(d);
       d.templatesRepo.findTemplateById.mockResolvedValue(
         activeTemplate({ ownerPractitionerId: 'hp-otro' }),
@@ -715,12 +816,13 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
 
       expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
       const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe(BASE.versionId);
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
     it('si no se puede saber quién atendió, sólo sale la base', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(serviceBooking());
       withAssignment(d);
       d.targetsRepo.findPractitionerOfBooking.mockResolvedValue(null);
 
@@ -730,12 +832,13 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
 
       expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
       const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe(BASE.versionId);
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
 
     it('ignora la plantilla de sistema entre las asignaciones del profesional', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(serviceBooking());
       withAssignment(d);
       d.templatesRepo.findTemplateById.mockResolvedValue(
         activeTemplate({
@@ -749,6 +852,8 @@ describe('SurveysAssignmentsService · encuesta base y extensión del profesiona
       );
 
       const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe(BASE.versionId);
+      expect(data.surveyAssignmentId).toBe(BASE.assignmentId);
       expect(data.extensionSurveyVersionId).toBeUndefined();
     });
   });
@@ -1006,7 +1111,7 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
     });
 
   describe('I-2: entre dos asignaciones gana la más específica y, a igual especificidad, la más reciente', () => {
-    it('dos asignaciones SERVICE: la creada más tarde viaja detrás de la base y la anterior sale suelta', async () => {
+    it('dos asignaciones SERVICE importadas: sale sólo la creada más tarde, en lugar de la base', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue(svcBooking());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
@@ -1034,9 +1139,10 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
         d.service.issueForBooking({ appointmentBookingId: 'bkg-1' }, actor),
       );
 
-      const [[, base], [, loose]] = d.invitationsRepo.create.mock.calls;
-      expect(base.extensionSurveyVersionId).toBe('ver-nueva');
-      expect(loose.surveyVersionId).toBe('ver-vieja');
+      expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
+      const [, only] = d.invitationsRepo.create.mock.calls[0];
+      expect(only.surveyVersionId).toBe('ver-nueva');
+      expect(only.extensionSurveyVersionId).toBeUndefined();
     });
   });
 
@@ -1071,19 +1177,19 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
   describe('M-1: de una plantilla sólo se reparte su versión más alta', () => {
     it('dos versiones de la misma plantilla asignadas: sólo la más alta viaja', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(completedBooking());
+      d.tx.findOne.mockResolvedValue(svcBooking());
       d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
         {
           id: 'asg-v1',
           surveyVersionId: 'ver-1',
-          targetTypeConceptId: SURVEYS.TARGET_CARE_TYPE,
-          createdAt: new Date('2026-01-01'),
+          targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+          createdAt: new Date('2026-02-01'),
         },
         {
           id: 'asg-v2',
           surveyVersionId: 'ver-2',
-          targetTypeConceptId: SURVEYS.TARGET_CARE_TYPE,
-          createdAt: new Date('2026-02-01'),
+          targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+          createdAt: new Date('2026-01-01'),
         },
       ]);
       d.templatesRepo.findVersionById.mockImplementation(
@@ -1098,7 +1204,7 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
 
       expect(res.ids).toHaveLength(1);
       const [, data] = d.invitationsRepo.create.mock.calls[0];
-      expect(data.extensionSurveyVersionId).toBe('ver-2');
+      expect(data.surveyVersionId).toBe('ver-2');
     });
   });
 
@@ -1214,6 +1320,151 @@ describe('SurveysAssignmentsService · revisión adversarial de F3', () => {
         SCHED.BOOKING_COMPLETED,
         25,
       );
+    });
+  });
+});
+
+describe('SurveysAssignmentsService · encuesta por servicio y tenant de la reserva (06/11/2026)', () => {
+  const OTHER_TENANT = 'ten-2';
+
+  /** Reserva de servicio: lleva oferta y la copia congelada del servicio. */
+  function serviceBooking(overrides: Record<string, unknown> = {}) {
+    return completedBooking({
+      practitionerServiceOfferingId: 'off-1',
+      serviceSnapshot: { offeringId: 'off-1', serviceCatalogId: 'cat-1' },
+      ...overrides,
+    });
+  }
+
+  /** Asignación SERVICE activa de una plantilla importada del catálogo. */
+  function withCatalogAssignment(d: ReturnType<typeof build>) {
+    d.assignmentsRepo.listActiveByTargets.mockResolvedValue([
+      {
+        id: 'asg-std',
+        surveyVersionId: 'ver-std',
+        targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+        targetId: 'cat-1',
+      },
+    ]);
+    d.templatesRepo.findVersionById.mockResolvedValue(
+      publishedVersion({ id: 'ver-std', surveyTemplateId: 'tpl-std' }),
+    );
+    d.templatesRepo.findTemplateById.mockResolvedValue(
+      activeTemplate({ id: 'tpl-std', standardCatalogCode: 'STD_IMAGING_V1' }),
+    );
+  }
+
+  describe('la emisión del cierre usa el tenant de la reserva, no el de la sesión', () => {
+    it('una reserva de otro tenant que el actor cerró recibe su invitación en ESE tenant', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(
+        completedBooking({ tenantId: OTHER_TENANT }),
+      );
+
+      // La sesión de quien cerró está en TENANT; la reserva es de OTHER_TENANT.
+      const res = await withTenant(() =>
+        d.service.issueForCompletedBooking('bkg-1', actor),
+      );
+
+      expect(res.ids).toHaveLength(1);
+      expect(d.systemTemplates.ensureSystemTemplate).toHaveBeenCalledWith(
+        OTHER_TENANT,
+        'CONSULTATION',
+        actor.id,
+      );
+      const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.tenantId).toBe(OTHER_TENANT);
+    });
+
+    it('la emisión manual (POST /surveys/invitations) sigue acotada al tenant de la sesión', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(
+        completedBooking({ tenantId: OTHER_TENANT }),
+      );
+
+      await expect(
+        withTenant(() =>
+          d.service.issueForBooking({ appointmentBookingId: 'bkg-1' }, actor),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.invitationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una reserva inexistente responde 404 sin emitir', async () => {
+      const d = build();
+      d.targetsRepo.findBooking.mockResolvedValue(null);
+
+      await expect(
+        withTenant(() => d.service.issueForCompletedBooking('bkg-x', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.invitationsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('la encuesta del catálogo reemplaza a la base de servicio', () => {
+    it('emite UNA invitación con la encuesta importada, sin base ni extensión', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(serviceBooking());
+      withCatalogAssignment(d);
+
+      const res = await withTenant(() =>
+        d.service.issueForCompletedBooking('bkg-1', actor),
+      );
+
+      expect(res.ids).toHaveLength(1);
+      expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
+      const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe('ver-std');
+      expect(data.surveyAssignmentId).toBe('asg-std');
+      expect(data.extensionSurveyVersionId).toBeUndefined();
+    });
+
+    it('es idempotente: un reintento no emite la base ni repite la importada', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(serviceBooking());
+      withCatalogAssignment(d);
+      d.invitationsRepo.listByBooking.mockResolvedValue([
+        { id: 'inv-std', surveyVersionId: 'ver-std' },
+      ]);
+
+      const res = await withTenant(() =>
+        d.service.issueForCompletedBooking('bkg-1', actor),
+      );
+
+      expect(res).toEqual({ ids: [], alreadyIssued: 1 });
+      expect(d.invitationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una consulta (sin servicio) sigue recibiendo la base de consulta', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(completedBooking());
+      withCatalogAssignment(d);
+
+      await withTenant(() =>
+        d.service.issueForCompletedBooking('bkg-1', actor),
+      );
+
+      const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe(BASE.versionId);
+    });
+
+    it('una encuesta del profesional escrita a mano ya no se emite: sale la base de servicio sola', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(serviceBooking());
+      withCatalogAssignment(d);
+      d.templatesRepo.findTemplateById.mockResolvedValue(
+        activeTemplate({ id: 'tpl-std', standardCatalogCode: undefined }),
+      );
+
+      const res = await withTenant(() =>
+        d.service.issueForCompletedBooking('bkg-1', actor),
+      );
+
+      expect(res.ids).toHaveLength(1);
+      expect(d.invitationsRepo.create).toHaveBeenCalledTimes(1);
+      const [, data] = d.invitationsRepo.create.mock.calls[0];
+      expect(data.surveyVersionId).toBe(BASE.versionId);
+      expect(data.extensionSurveyVersionId).toBeUndefined();
     });
   });
 });
