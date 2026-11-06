@@ -21,6 +21,7 @@ import {
   isMimeTypeAllowedForCategory,
   loadStorageEnv,
   sniffMimeType,
+  getCurrentTenantId,
   type AuthenticatedUser,
   type FileStorageAdapter,
   type SniffedMimeType,
@@ -28,7 +29,7 @@ import {
 
 import { FileVersionsRepository, FilesRepository } from '../repositories';
 import { AttachableFileService } from './attachable-file.service';
-import { canActorReadOwnFile } from './file-access';
+import { canActorReadOwnFile, fileOwnerTenantId } from './file-access';
 import { FilesService } from './files.service';
 import type { Files } from '../entities';
 import type {
@@ -466,9 +467,10 @@ export class FileUploadService {
       throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     return this.publication.publish(
       { buffer: file.buffer, originalName: file.originalname, mimeType },
-      // This is the existing technical upload tenant, NOT proof of evidence ownership.
+      // Mismo tenant con el que `createFile` registra el archivo: la reserva y
+      // la fila tienen que coincidir. No prueba propiedad de evidencia.
       {
-        tenantId: SEED.tenantId,
+        tenantId: fileOwnerTenantId(actor, getCurrentTenantId(), SEED.tenantId),
         producer: actor ? 'common.upload' : 'common.anonymous-upload',
         targetId: randomUUID(),
       },

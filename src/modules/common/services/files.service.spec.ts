@@ -7,6 +7,8 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  SEED,
+  runWithTenant,
 } from '../../../common';
 import {
   CreateFileDerivativeDto,
@@ -134,6 +136,50 @@ describe('FilesService', () => {
       expect(fileVersionsRepo.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ recordedByUserId: undefined }),
+      );
+    });
+
+    // Con RLS_ENFORCE=true la política `tenant_isolation` exige que la fila sea
+    // del tenant de la petición: registrarla en DEFAULT daba 500 a toda subida
+    // de alguien que trabaja en su propia organización (farmacia, laboratorio).
+    it('registra el archivo en el tenant de la petición', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-org',
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      await runWithTenant('tenant-farmacia', () =>
+        service.createFile(createFileDto, actor),
+      );
+
+      expect(filesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tenantId: 'tenant-farmacia' }),
+      );
+    });
+
+    it('sin tenant en el contexto, o sin actor, usa el tenant DEFAULT', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({ id: 'file-x', createdAt: new Date() });
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      await service.createFile(createFileDto, actor);
+      // La pre-carga anónima se reclama sólo desde DEFAULT, haya o no contexto.
+      await runWithTenant('tenant-farmacia', () =>
+        service.createFile(createFileDto, null),
+      );
+
+      expect(filesRepo.create).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        expect.objectContaining({ tenantId: SEED.tenantId }),
+      );
+      expect(filesRepo.create).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        expect.objectContaining({ tenantId: SEED.tenantId }),
       );
     });
   });
