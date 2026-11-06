@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type, type TransformFnParams } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -16,18 +16,11 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-
-/** Recorta los blancos de los extremos; lo que no es texto pasa tal cual. */
-const trimmed = ({ value }: TransformFnParams): unknown =>
-  typeof value === 'string' ? value.trim() : value;
-
-/** Recorta cada línea de una lista de textos; lo que no es lista pasa tal cual. */
-const trimmedLines = ({ value }: TransformFnParams): unknown =>
-  Array.isArray(value)
-    ? value.map((line: unknown) =>
-        typeof line === 'string' ? line.trim() : line,
-      )
-    : value;
+import {
+  MedicalFacilitySiteDto,
+  trimmed,
+  trimmedLines,
+} from './medical-facility-site.dto';
 
 /**
  * NIT: dígitos y guiones, empezando por dígito (de 4 a 20 caracteres).
@@ -135,64 +128,6 @@ export class MedicalDirectorDto {
   @MinLength(7)
   @MaxLength(30)
   phone?: string;
-}
-
-/**
- * Una sede declarada del establecimiento: la casa central o una sucursal.
- *
- * Son datos declarados, no la práctica ni la sede operativa: esas se crean en
- * `medical-center-setup` cuando la plataforma verifica la organización, y estos
- * datos sirven para pre-llenarlo y para el equipo de verificación.
- *
- * ## Coordenadas: ambas o ninguna
- *
- * Mismo patrón que `OwnSiteAddressDto`: el `ValidateIf` mira las dos
- * propiedades y no lleva `@IsOptional()` (anularía la condición), así que
- * mandar una sola hace caer a la que falta en su validador y la petición
- * termina en 400. Media coordenada no ubica nada.
- */
-export class MedicalFacilitySiteDto {
-  /** Nombre de la sede, tal como la va a ver el equipo de verificación. */
-  @ApiProperty({ maxLength: 200, example: 'Sucursal Equipetrol' })
-  @Transform(trimmed)
-  @IsString()
-  @MinLength(1)
-  @MaxLength(200)
-  name!: string;
-
-  /** Líneas de la dirección (calle, número, referencia): de 1 a 10. */
-  @ApiProperty({
-    type: [String],
-    minItems: 1,
-    maxItems: 10,
-    example: ['Av. San Martín 123'],
-  })
-  @Transform(trimmedLines)
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(10)
-  @IsString({ each: true })
-  @MinLength(1, { each: true })
-  @MaxLength(500, { each: true })
-  addressLines!: string[];
-
-  /** Latitud del punto en el mapa; va junto con `longitude` o no va. */
-  @ApiPropertyOptional({ minimum: -90, maximum: 90, example: -17.78 })
-  @ValidateIf(
-    (dto: MedicalFacilitySiteDto) =>
-      dto.latitude !== undefined || dto.longitude !== undefined,
-  )
-  @IsLatitude()
-  latitude?: number;
-
-  /** Longitud del punto en el mapa; va junto con `latitude` o no va. */
-  @ApiPropertyOptional({ minimum: -180, maximum: 180, example: -63.18 })
-  @ValidateIf(
-    (dto: MedicalFacilitySiteDto) =>
-      dto.latitude !== undefined || dto.longitude !== undefined,
-  )
-  @IsLongitude()
-  longitude?: number;
 }
 
 /**

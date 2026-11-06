@@ -131313,6 +131313,34 @@
         ],
         "additionalProperties": false
       },
+      "OpeningHoursShiftDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 7,
+            "example": 1,
+            "description": "Día ISO-8601: 1 = lunes … 7 = domingo"
+          },
+          "opensAt": {
+            "type": "string",
+            "example": "08:00",
+            "description": "Apertura, HH:MM (00:00–23:59)"
+          },
+          "closesAt": {
+            "type": "string",
+            "example": "12:30",
+            "description": "Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura"
+          }
+        },
+        "required": [
+          "dayOfWeek",
+          "opensAt",
+          "closesAt"
+        ],
+        "additionalProperties": false
+      },
       "TerminologyCreateRelationshipDto": {
         "type": "object",
         "properties": {
@@ -133245,6 +133273,14 @@
             "type": "string",
             "maxLength": 2000,
             "example": "https://maps.google.com/?q=-17.78,-63.18"
+          },
+          "openingHours": {
+            "maxItems": 14,
+            "description": "Horario de atención semanal: hasta dos turnos por día, sin superponerse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHoursShiftDto"
+            }
           }
         },
         "required": [
@@ -133414,6 +133450,14 @@
             "minimum": -180,
             "maximum": 180,
             "example": -63.18
+          },
+          "openingHours": {
+            "maxItems": 14,
+            "description": "Horario de atención semanal: hasta dos turnos por día, sin superponerse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHoursShiftDto"
+            }
           }
         },
         "required": [
@@ -133487,6 +133531,14 @@
             "type": "string",
             "description": "Enlace de ubicación (http/https)",
             "maxLength": 2000
+          },
+          "openingHours": {
+            "maxItems": 14,
+            "description": "Horario de atención semanal: hasta dos turnos por día, sin superponerse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHoursShiftDto"
+            }
           }
         },
         "required": [
@@ -133659,6 +133711,14 @@
                 "$ref": "#/components/schemas/RegisterPharmacyBlockDto"
               }
             ]
+          },
+          "openingHours": {
+            "maxItems": 14,
+            "description": "Horario de atención semanal: hasta dos turnos por día, sin superponerse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpeningHoursShiftDto"
+            }
           }
         },
         "required": [

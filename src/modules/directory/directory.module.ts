@@ -23,6 +23,7 @@ import {
   DirectoryReadService,
   PharmacyOperatingRequirementsService,
   TenantDocumentCompletionService,
+  DeclaredBranchesService,
 } from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
@@ -32,6 +33,7 @@ import {
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
   TenantMedicalFacilitiesRepository,
+  TenantOpeningHoursRepository,
 } from './repositories';
 
 /**
@@ -89,7 +91,9 @@ import {
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
     TenantMedicalFacilitiesRepository,
+    TenantOpeningHoursRepository,
     // Servicios
+    DeclaredBranchesService,
     DirectoryTenantsService,
     DirectoryBranchesService,
     DirectoryMembershipsService,
@@ -115,6 +119,8 @@ import {
     DirectoryAuthorizationModule,
     BranchesRepository,
     TenantTypeProfileService,
+    // Sucursales y horario de atención del alta pública (farmacia, P50).
+    DeclaredBranchesService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,
     TenantTaxIdentifierService,
