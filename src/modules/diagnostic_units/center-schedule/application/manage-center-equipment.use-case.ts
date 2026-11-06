@@ -21,16 +21,19 @@ import { CenterContextService } from './center-context.service';
 import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 
 /**
- * The catalog types a device can be registered with. Mammography, densitometry
- * and CT are X-ray devices; MRI and sampling stations have no type in the
- * catalog yet, so they cannot be registered from here (422).
+ * The catalog type of a device, from the modality it attends: one type per
+ * modality, so every modality of the center screen can register its lines.
+ * A device registered before a type existed keeps its stored type until it
+ * is edited; capacity reads the modality, never the type.
  */
 const TYPE_OF_MODALITY: Readonly<Partial<Record<ModalityCode, string>>> = {
   ECO: DUNIT.EQUIPMENT_TYPE_ULTRASOUND,
   RX: DUNIT.EQUIPMENT_TYPE_XRAY,
-  MG: DUNIT.EQUIPMENT_TYPE_XRAY,
-  DXA: DUNIT.EQUIPMENT_TYPE_XRAY,
-  TC: DUNIT.EQUIPMENT_TYPE_XRAY,
+  MG: DUNIT.EQUIPMENT_TYPE_MAMMOGRAPHY,
+  DXA: DUNIT.EQUIPMENT_TYPE_BONE_DENSITOMETRY,
+  TC: DUNIT.EQUIPMENT_TYPE_CT,
+  RM: DUNIT.EQUIPMENT_TYPE_MRI,
+  LAB: DUNIT.EQUIPMENT_TYPE_SAMPLING_STATION,
 };
 
 const OUT_OF_SCOPE =
