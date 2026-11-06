@@ -11,3 +11,4 @@ export * from './tenant-tax-identifier.service';
 export * from './tenant-legal-representatives.service';
 export * from './pharmacy-operating-requirements.service';
 export * from './tenant-document-completion.service';
+export * from './declared-branches.service';
