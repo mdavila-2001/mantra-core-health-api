@@ -20,11 +20,13 @@ sólo la geometría de los bordes; el texto sigue siendo el de `literal_text`).
 Cada glifo va a la celda que contiene su centro; una fila de la página lleva
 `grid` con las celdas (texto, html, colspan/rowspan si la grilla no tiene el
 borde interior) y, por celda, `alt`: las palabras de `pdftotext -bbox` (poppler,
-otro extractor) cuyo centro cae en la misma celda. La tabla queda marcada si un
-glifo o una palabra de su área no cae en ninguna celda (`unassigned`), si está
-dentro de otra tabla (`nested`) o si una celda tiene un trazo que no es borde
-(`graphic`). Una «tabla» con un título de sección en una celda es un marco
-alrededor del texto: se descarta y sus líneas quedan como filas. Una línea dentro de una grilla que pdfplumber no reconoce como
+otro extractor) cuyo centro cae en la misma celda. Una grilla se descarta entera
+(sus líneas quedan como filas marcadas `table`, sin celdas, como sin grilla) si
+algún glifo de su área no cae en ninguna celda, si está dentro de otra o la
+contiene, o si una celda trae un título de sección (es un marco alrededor del
+texto, no una tabla). La tabla queda marcada si una palabra de pdftotext de su
+área no cae en ninguna celda (`altUnassigned`) o si una celda tiene un trazo que
+no es borde (`graphic`). Una línea dentro de una grilla que pdfplumber no reconoce como
 tabla, o fuera de la grilla pero a la altura de una tabla, sigue marcada
 `table`, sin celdas, y su sección no se publica.
 Cada fila lleva también `alt`: las palabras de `pdftotext -bbox` cuyo centro cae
@@ -547,18 +549,24 @@ def extract_pdf(symbol_path, pdf):
                 continue
             started = True
             page_words = words[n - 1] if n - 1 < len(words) else []
-            tables, pp = [], None
+            pp = None
+            same_coords = False
             if table_boxes(layout):
                 pp = plumber.pages[n - 1]
                 # Sólo con el mismo sistema de coordenadas en los dos (sin rotación ni origen corrido); si no, la tabla queda sin celdas.
-                if pp.rotation == 0 and tuple(round(v, 1) for v in pp.bbox) == (0.0, 0.0, round(layout.width, 1), round(layout.height, 1)) and layout.bbox[:2] == (0, 0):
-                    tables = grid_tables(pp, layout.height)
-            rows, alt_unassigned = page_rows(layout, tables, page_words)
-            frames = [i for i, t in enumerate(tables) if is_frame(t)]
-            if frames:
-                # Sin los marcos: sus líneas vuelven a ser filas, como si no hubiera grilla.
-                tables = [t for i, t in enumerate(grid_tables(pp, layout.height)) if i not in frames]
-                rows, alt_unassigned = page_rows(layout, tables, page_words)
+                same_coords = pp.rotation == 0 and tuple(round(v, 1) for v in pp.bbox) == (0.0, 0.0, round(layout.width, 1), round(layout.height, 1)) and layout.bbox[:2] == (0, 0)
+            # Una grilla que no se puede usar entera (un marco, una dentro de otra, o con glifos de su área fuera de toda celda) se
+            # descarta: sus líneas vuelven a ser filas (marcadas `table`), como si no hubiera grilla, y nada del texto se pierde.
+            dropped = set()
+            for _ in range(4):
+                kept = [(i, t) for i, t in enumerate(grid_tables(pp, layout.height)) if i not in dropped] if same_coords else []
+                rows, alt_unassigned = page_rows(layout, [t for _, t in kept], page_words)
+                bad = {i for i, t in kept if t['nested'] or t['unassigned'] or is_frame(t)}
+                if not bad:
+                    break
+                dropped |= bad
+            else:
+                rows, alt_unassigned = page_rows(layout, [], page_words)
             if pp is not None:
                 pp.close()
             pages.append({'page': n, 'rows': rows, **({'altUnassigned': alt_unassigned} if alt_unassigned else {})})

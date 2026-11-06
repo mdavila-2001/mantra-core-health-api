@@ -138,8 +138,9 @@ class GridTables(unittest.TestCase):
 
     def test_completitud_y_anidadas(self):
         self.assertTrue(all(not g.get('unassigned') for _, g in self.grids), 'todo glifo de una tabla cae en una celda')
-        nested = [p for p, g in self.grids if g.get('nested')]
-        self.assertEqual(nested, [9], 'la página 9 tiene una tabla dentro de otra: la exterior (la que recibe los glifos) queda marcada')
+        self.assertNotIn(9, [p for p, _ in self.grids], 'la página 9 tiene una tabla dentro de otra: las dos se descartan')
+        p9 = next(p for p in self.doc['pages'] if p['page'] == 9)['rows']
+        self.assertTrue(any(r['table'] and 'Creatinina sérica' in r['text'] for r in p9), 'sus líneas quedan como filas marcadas, con el texto')
 
     def test_filas_fuera_de_tabla_con_palabras_de_pdftotext(self):
         rows = [r for p in self.doc['pages'] for r in p['rows'] if 'grid' not in r]
