@@ -146,6 +146,10 @@ export enum ProfilesErrorReason {
   ADMISSION_RESUBMISSION_LIMIT = 'ADMISSION_RESUBMISSION_LIMIT',
   /** Reenviar exige aceptar la declaración (`attested: true` y su versión): faltó o fue `false`. */
   ADMISSION_ATTESTATION_REQUIRED = 'ADMISSION_ATTESTATION_REQUIRED',
+  /** Ya tiene una solicitud de verificación: se reenvía con `resubmit`, no se abre otra. */
+  ADMISSION_ALREADY_EXISTS = 'ADMISSION_ALREADY_EXISTS',
+  /** El perfil ya no está pendiente de verificación: no hay nada que enviar. */
+  ADMISSION_NOT_PENDING = 'ADMISSION_NOT_PENDING',
   /** La verificación ya venció: no se repone, se renueva. */
   ADMISSION_VALIDITY_LAPSED = 'ADMISSION_VALIDITY_LAPSED',
   /** El rol del actor no alcanza para esta acción de admisiones. */

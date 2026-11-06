@@ -1,0 +1,3426 @@
+{
+  "version": "2026-11-04",
+  "moneda": "BOB",
+  "regla": "INLASA 2026 primero; FONASA 2026 convertido a Bs sólo donde INLASA no tiene el análisis; sin equivalente, sin precio. Un componente toma precio sólo de una equivalencia revisada para ese componente; si no hay, queda sin precio.",
+  "fuentes": {
+    "INLASA": {
+      "nombre": "Listado de Servicios y Aranceles del INLASA 2026",
+      "url": "https://inlasa.gob.bo/servicios-y-aranceles-del-inlasa/",
+      "obtenido": "2026-10-01T22:09:50.226Z",
+      "sha256": "fba99edc21cf983141393f815a2e36fe791e37a163076dab6dbee066f8ffdc00"
+    },
+    "FONASA": {
+      "nombre": "Arancel FONASA 2026 MLE, Grupo 03 Laboratorio",
+      "url": "https://www.fonasa.gob.cl/wp-content/uploads/sites/3/2026/03/1-Libro-Arancel-MLE-2026.pdf",
+      "vigencia": "2026-03-16",
+      "sha256": "79b0021be23a702fb750022a6c85bca30a05b4430329bb7933a71c24e797cf6a",
+      "conversion": {
+        "fecha": "2026-10-01",
+        "clpPorUsd": 972.6,
+        "fuenteClp": "Dólar observado, Banco Central de Chile (SII), 01/10/2026",
+        "bobPorUsd": 12,
+        "fuenteBob": "Tipo de Cambio Oficial del Banco Central de Bolivia, vigente el 01/10/2026"
+      }
+    }
+  },
+  "equivalencias": {
+    "HEMOGRAMA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-030",
+      "nombre_fuente": "HEMOGRAMA COMPLETO",
+      "precio_bs": "60.00"
+    },
+    "HB_HTO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-029",
+      "nombre_fuente": "HEMOGLOBINA Y HEMATOCRITO",
+      "precio_bs": "33.00"
+    },
+    "RECUENTO_PLAQUETAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-047",
+      "nombre_fuente": "RECUENTO DE PLAQUETAS",
+      "precio_bs": "38.00"
+    },
+    "RECUENTO_LEUCOCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-065",
+      "nombre_fuente": "RECUENTO DE LEUCOCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.25"
+    },
+    "VSG": {
+      "fuente": "INLASA",
+      "codigo": "LAC-057",
+      "nombre_fuente": "VELOCIDAD DE ERITROSEDIMENTACIÓN GLOBULAR (VES)",
+      "precio_bs": "24.00"
+    },
+    "RETICULOCITOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-048",
+      "nombre_fuente": "RECUENTO DE RETICULOCITOS",
+      "precio_bs": "39.00"
+    },
+    "ELECTROFORESIS_HB": {
+      "fuente": "FONASA",
+      "codigo": "03-01-044",
+      "nombre_fuente": "ELECTROFORESIS DE HEMOGLOBINA",
+      "precio_bs": "67.00"
+    },
+    "HB_F": {
+      "fuente": "FONASA",
+      "codigo": "03-01-040",
+      "nombre_fuente": "HEMOGLOBINA FETAL CUANTITATIVA EN ERITROCITOS",
+      "precio_bs": "61.44"
+    },
+    "G6PD": {
+      "fuente": "FONASA",
+      "codigo": "03-01-017",
+      "nombre_fuente": "DESHIDROGENASA GLUCOSA-6-FOSFATO EN ERITROCITOS",
+      "precio_bs": "60.58"
+    },
+    "FRAGILIDAD_OSMOTICA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-070",
+      "nombre_fuente": "RESISTENCIA GLOBULAR OSMÓTICA",
+      "precio_bs": "42.32"
+    },
+    "MIELOGRAMA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-003",
+      "nombre_fuente": "ADENOGRAMA, MIELOGRAMA, C/U",
+      "precio_bs": "104.75"
+    },
+    "EOSINOFILOS_MOCO_NASAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-046",
+      "nombre_fuente": "RECUENTO DE EOSINOFILOS NASALES",
+      "precio_bs": "31.00"
+    },
+    "HIERRO_SERICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-031",
+      "nombre_fuente": "HIERRO SÉRICO",
+      "precio_bs": "39.00"
+    },
+    "FERRITINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-020",
+      "nombre_fuente": "FERRITINA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "185.00"
+    },
+    "TRANSFERRINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-054",
+      "nombre_fuente": "TRANSFERRINA",
+      "precio_bs": "106.00"
+    },
+    "PERFIL_FERRICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-032",
+      "nombre_fuente": "HIERRO SÉRICO Y TIBC",
+      "precio_bs": "66.00"
+    },
+    "HAPTOGLOBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-035",
+      "nombre_fuente": "HAPTOGLOBINA CUANTITATIVA",
+      "precio_bs": "60.21"
+    },
+    "ERITROPOYETINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-009",
+      "nombre_fuente": "ERITROPOYETINA",
+      "precio_bs": "74.28"
+    },
+    "TP_INR": {
+      "fuente": "INLASA",
+      "codigo": "LAC-051",
+      "nombre_fuente": "TIEMPO DE PROTROMBINA",
+      "precio_bs": "48.00"
+    },
+    "TTPA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-052",
+      "nombre_fuente": "TIEMPO PARCIAL DE TROMBOPLASTINA ACTIVADA (TTPA)",
+      "precio_bs": "54.00"
+    },
+    "TIEMPO_TROMBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-083",
+      "nombre_fuente": "TROMBINA, TIEMPO DE",
+      "precio_bs": "26.16"
+    },
+    "FIBRINOGENO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-015",
+      "nombre_fuente": "FIBRINOGENO",
+      "precio_bs": "54.00"
+    },
+    "DIMERO_D": {
+      "fuente": "INLASA",
+      "codigo": "LAC-017",
+      "nombre_fuente": "DIMERO-D",
+      "precio_bs": "163.00"
+    },
+    "TIEMPO_SANGRIA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-072",
+      "nombre_fuente": "TIEMPO DE SANGRÍA (NO INCLUYE DISPOSITIVO ASOCIADO)",
+      "precio_bs": "19.00"
+    },
+    "PRODUCTOS_DEGRADACION_FIBRINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-027",
+      "nombre_fuente": "FIBRINÓGENO, PRODUCTOS DE DEGRADACIÓN DEL",
+      "precio_bs": "63.54"
+    },
+    "FACTOR_V": {
+      "fuente": "FONASA",
+      "codigo": "03-01-024",
+      "nombre_fuente": "FACTOR V",
+      "precio_bs": "28.38"
+    },
+    "FACTOR_VII": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FACTOR_VIII": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FACTOR_IX": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FACTOR_X": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FACTOR_XI": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FACTOR_XII": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "INHIBIDOR_FACTOR_VIII": {
+      "fuente": "FONASA",
+      "codigo": "03-01-097",
+      "nombre_fuente": "INHIBIDOR DE FACTOR DE LA COAGULACIÓN",
+      "precio_bs": "1149.04"
+    },
+    "ANTITROMBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-008",
+      "nombre_fuente": "ANTITROMBINA III",
+      "precio_bs": "66.26"
+    },
+    "PROTEINA_C": {
+      "fuente": "FONASA",
+      "codigo": "03-01-091",
+      "nombre_fuente": "PROTEÍNA C FUNCIONAL",
+      "precio_bs": "394.69"
+    },
+    "PROTEINA_S": {
+      "fuente": "FONASA",
+      "codigo": "03-01-092",
+      "nombre_fuente": "PROTEÍNA S",
+      "precio_bs": "466.75"
+    },
+    "ANTICOAGULANTE_LUPICO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-007",
+      "nombre_fuente": "ANTICOAGULANTES CIRCULANTES O ANTICOAGULANTE LÚPICO",
+      "precio_bs": "66.26"
+    },
+    "RESISTENCIA_PROTEINA_C": {
+      "fuente": "FONASA",
+      "codigo": "03-01-093",
+      "nombre_fuente": "RESISTENCIA A LA PROTEÍNA C ACTIVADA",
+      "precio_bs": "293.89"
+    },
+    "ANTI_XA_HNF": {
+      "fuente": "FONASA",
+      "codigo": "03-01-049",
+      "nombre_fuente": "CUANTIFICACIÓN DE HEPARINA",
+      "precio_bs": "73.53"
+    },
+    "ANTI_XA_HBPM": {
+      "fuente": "FONASA",
+      "codigo": "03-01-049",
+      "nombre_fuente": "CUANTIFICACIÓN DE HEPARINA",
+      "precio_bs": "73.53"
+    },
+    "AGREGACION_PLAQUETARIA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-006",
+      "nombre_fuente": "AGREGACIÓN PLAQUETARIA CON DIFERENTES AGONISTAS",
+      "precio_bs": "61.32"
+    },
+    "GRUPO_RH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-027",
+      "nombre_fuente": "GRUPO SANGUÍNEO Y FACTOR RH",
+      "precio_bs": "50.00"
+    },
+    "COOMBS_DIRECTO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-042",
+      "nombre_fuente": "PRUEBA DE COOMBS DIRECTA",
+      "precio_bs": "35.00"
+    },
+    "COOMBS_INDIRECTO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-043",
+      "nombre_fuente": "PRUEBA DE COOMBS INDIRECTA",
+      "precio_bs": "35.00"
+    },
+    "IDENTIFICACION_ANTICUERPOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-051",
+      "nombre_fuente": "IDENTIFICACIÓN DE ANTICUERPOS IRREGULARES ERITROCITARIOS",
+      "precio_bs": "63.54"
+    },
+    "GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "GLUCOSA_AYUNAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "GLUCOSA_POSTPRANDIAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-026",
+      "nombre_fuente": "GLICEMIA POSTPRANDIAL",
+      "precio_bs": "63.00"
+    },
+    "CTOG": {
+      "fuente": "INLASA",
+      "codigo": "LAC-045",
+      "nombre_fuente": "PRUEBA DE TOLERANCIA A LA GLUCOSA",
+      "precio_bs": "108.00"
+    },
+    "CTOG_EMBARAZO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-045",
+      "nombre_fuente": "PRUEBA DE TOLERANCIA A LA GLUCOSA",
+      "precio_bs": "108.00"
+    },
+    "HBA1C": {
+      "fuente": "INLASA",
+      "codigo": "LAC-028",
+      "nombre_fuente": "HEMOGLOBINA A1C (GLICOHEMOGLOBINA)",
+      "precio_bs": "119.00"
+    },
+    "UREA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-038",
+      "nombre_fuente": "NITROGENO UREICO/UREA/NUS",
+      "precio_bs": "38.00"
+    },
+    "BUN": {
+      "fuente": "INLASA",
+      "codigo": "LAC-038",
+      "nombre_fuente": "NITROGENO UREICO/UREA/NUS",
+      "precio_bs": "38.00"
+    },
+    "CREATININA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-014",
+      "nombre_fuente": "CREATININA SÉRICA",
+      "precio_bs": "40.00"
+    },
+    "ACIDO_URICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-001",
+      "nombre_fuente": "ÁCIDO ÚRICO",
+      "precio_bs": "43.00"
+    },
+    "ALT": {
+      "fuente": "FONASA",
+      "codigo": "03-02-063",
+      "nombre_fuente": "TRANSAMINASAS, OXALACÉTICA (GOT/AST), PIRÚVICA (GPT/ALT), C/U",
+      "precio_bs": "23.44"
+    },
+    "AST": {
+      "fuente": "FONASA",
+      "codigo": "03-02-063",
+      "nombre_fuente": "TRANSAMINASAS, OXALACÉTICA (GOT/AST), PIRÚVICA (GPT/ALT), C/U",
+      "precio_bs": "23.44"
+    },
+    "FOSFATASA_ALCALINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-021",
+      "nombre_fuente": "FOSFATASA ALCALINA",
+      "precio_bs": "49.00"
+    },
+    "GGT": {
+      "fuente": "INLASA",
+      "codigo": "LAC-024",
+      "nombre_fuente": "GAMMA GLUTAMIL TRANSFERASA",
+      "precio_bs": "38.00"
+    },
+    "LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "BILIRRUBINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-005",
+      "nombre_fuente": "BILIRRUBINAS TOTAL Y FRACCIONADAS",
+      "precio_bs": "42.00"
+    },
+    "BILIRRUBINA_NEONATAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-012",
+      "nombre_fuente": "BILIRRUBINA TOTAL (PROC. AUT.)",
+      "precio_bs": "19.62"
+    },
+    "AMILASA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-004",
+      "nombre_fuente": "AMILASA EN SANGRE",
+      "precio_bs": "39.00"
+    },
+    "LIPASA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-073",
+      "nombre_fuente": "LIPASA EN SANGRE",
+      "precio_bs": "66.00"
+    },
+    "CK": {
+      "fuente": "INLASA",
+      "codigo": "LAC-011",
+      "nombre_fuente": "CREATIN KINASA (CK)",
+      "precio_bs": "54.00"
+    },
+    "COLINESTERASA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-021",
+      "nombre_fuente": "COLINESTERASA EN SUERO O PLASMA",
+      "precio_bs": "37.63"
+    },
+    "AMONIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-010",
+      "nombre_fuente": "AMONIO",
+      "precio_bs": "31.22"
+    },
+    "CERULOPLASMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-019",
+      "nombre_fuente": "CERULOPLASMINA",
+      "precio_bs": "46.76"
+    },
+    "ALFA1_ANTITRIPSINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-001",
+      "nombre_fuente": "ALFA -1- ANTITRIPSINA CUANTITATIVA",
+      "precio_bs": "67.98"
+    },
+    "LACTATO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-004",
+      "nombre_fuente": "LACTATO EN SANGRE",
+      "precio_bs": "51.57"
+    },
+    "OSMOLALIDAD_SERICA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-058",
+      "nombre_fuente": "OSMOLALIDAD EN SANGRE",
+      "precio_bs": "26.16"
+    },
+    "HOMOCISTEINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-086",
+      "nombre_fuente": "HOMOCISTEÍNA",
+      "precio_bs": "761.14"
+    },
+    "PERFIL_LIPIDICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-039",
+      "nombre_fuente": "PERFIL LIPIDICO",
+      "precio_bs": "138.00"
+    },
+    "COLESTEROL_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-010",
+      "nombre_fuente": "COLESTEROL TOTAL",
+      "precio_bs": "40.00"
+    },
+    "TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "HDL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-009",
+      "nombre_fuente": "HDL COLESTEROL",
+      "precio_bs": "48.00"
+    },
+    "APO_A1": {
+      "fuente": "FONASA",
+      "codigo": "03-02-070",
+      "nombre_fuente": "APOLIPOPROTEÍNAS (A1, B U OTRAS) C/U",
+      "precio_bs": "87.60"
+    },
+    "APO_B": {
+      "fuente": "FONASA",
+      "codigo": "03-02-070",
+      "nombre_fuente": "APOLIPOPROTEÍNAS (A1, B U OTRAS) C/U",
+      "precio_bs": "87.60"
+    },
+    "SODIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "POTASIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "CLORO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "BICARBONATO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-011",
+      "nombre_fuente": "BICARBONATO (PROC. AUT.)",
+      "precio_bs": "9.13"
+    },
+    "CALCIO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-007",
+      "nombre_fuente": "CALCIO SÉRICO",
+      "precio_bs": "36.00"
+    },
+    "CALCIO_IONICO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-081",
+      "nombre_fuente": "CALCIO IÓNICO. INCLUYE MEDICIÓN DE PH MÉTODO IÓN SELECTIVO. NO INCLUYE POINT OF CARE TESTING POCT",
+      "precio_bs": "31.46"
+    },
+    "FOSFORO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-022",
+      "nombre_fuente": "FOSFORO EN SANGRE",
+      "precio_bs": "63.00"
+    },
+    "MAGNESIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-056",
+      "nombre_fuente": "MAGNESIO EN SANGRE",
+      "precio_bs": "40.35"
+    },
+    "ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PREALBUMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-085",
+      "nombre_fuente": "PREALBUMINA",
+      "precio_bs": "384.58"
+    },
+    "PROTEINOGRAMA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-061",
+      "nombre_fuente": "ELECTROFORESIS DE PROTEÍNAS (INCLUYE CÓD. 03-02-100 Y 03-02-101 )",
+      "precio_bs": "79.58"
+    },
+    "INMUNOFIJACION": {
+      "fuente": "FONASA",
+      "codigo": "03-05-025",
+      "nombre_fuente": "INMUNOFIJACIÓN DE INMUNOGLOBULINA, C/U",
+      "precio_bs": "117.83"
+    },
+    "GASOMETRIA_ARTERIAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-046",
+      "nombre_fuente": "GASES Y EQUILIBRIO ÁCIDO BASE EN SANGRE (INCLUYE: PH, O2, CO2, EXCESO DE BASE Y BICARBONATO), TODOS O CADA UNO DE LOS PARÁMETROS",
+      "precio_bs": "49.60"
+    },
+    "GASOMETRIA_VENOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-046",
+      "nombre_fuente": "GASES Y EQUILIBRIO ÁCIDO BASE EN SANGRE (INCLUYE: PH, O2, CO2, EXCESO DE BASE Y BICARBONATO), TODOS O CADA UNO DE LOS PARÁMETROS",
+      "precio_bs": "49.60"
+    },
+    "LACTATO_ARTERIAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-004",
+      "nombre_fuente": "LACTATO EN SANGRE",
+      "precio_bs": "51.57"
+    },
+    "INSULINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-033",
+      "nombre_fuente": "INSULINA",
+      "precio_bs": "197.00"
+    },
+    "PEPTIDO_C": {
+      "fuente": "FONASA",
+      "codigo": "03-03-052",
+      "nombre_fuente": "PEPTIDO C",
+      "precio_bs": "571.38"
+    },
+    "TSH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-071",
+      "nombre_fuente": "TSH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "127.00"
+    },
+    "T4_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LAC-069",
+      "nombre_fuente": "T4 LIBRE POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T4_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-070",
+      "nombre_fuente": "T4 TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T3_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-068",
+      "nombre_fuente": "T3 TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T3_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LAC-067",
+      "nombre_fuente": "T3 LIBRE POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "ANTI_TPO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-077",
+      "nombre_fuente": "ANTI TPO POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "154.00"
+    },
+    "ANTI_TIROGLOBULINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-007",
+      "nombre_fuente": "ANTICUERPOS ESPECÍFICOS Y OTROS AUTOANTICUERPOS (ANTICUERPOS ANTITIROÍDEOS: ANTICUERPOS ANTIMICROSOMALES Y ANTITIROGLOBULINAS Y OTROS ANTICUERPOS: PROSTÁTICO, ESPERMIOS, ETC.) C/U",
+      "precio_bs": "76.62"
+    },
+    "TIROGLOBULINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-025",
+      "nombre_fuente": "TIROGLOBULINA",
+      "precio_bs": "89.57"
+    },
+    "TRAB": {
+      "fuente": "FONASA",
+      "codigo": "03-05-124",
+      "nombre_fuente": "RECEPTOR DE TIROTROPINA (TRAB), ANTICUERPOS ANTI",
+      "precio_bs": "435.41"
+    },
+    "CALCITONINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-053",
+      "nombre_fuente": "CALCITONINA",
+      "precio_bs": "579.64"
+    },
+    "TSH_NEONATAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-097",
+      "nombre_fuente": "HORMONA TIROESTIMULANTE, NEONATAL EN GSS",
+      "precio_bs": "284.76"
+    },
+    "CORTISOL_AM": {
+      "fuente": "FONASA",
+      "codigo": "03-03-006",
+      "nombre_fuente": "CORTISOL",
+      "precio_bs": "70.70"
+    },
+    "CORTISOL_PM": {
+      "fuente": "FONASA",
+      "codigo": "03-03-006",
+      "nombre_fuente": "CORTISOL",
+      "precio_bs": "70.70"
+    },
+    "CORTISOL_LIBRE_URINARIO": {
+      "fuente": "FONASA",
+      "codigo": "03-03-035",
+      "nombre_fuente": "CORTISOL LIBRE URINARIO",
+      "precio_bs": "71.68"
+    },
+    "CORTISOL_SALIVAL": {
+      "fuente": "FONASA",
+      "codigo": "03-03-056",
+      "nombre_fuente": "CORTISOL SALIVAL",
+      "precio_bs": "618.01"
+    },
+    "ACTH": {
+      "fuente": "FONASA",
+      "codigo": "03-03-001",
+      "nombre_fuente": "ADENOCORTICOTROFINA (ACTH)",
+      "precio_bs": "108.57"
+    },
+    "ALDOSTERONA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-002",
+      "nombre_fuente": "ALDOSTERONA",
+      "precio_bs": "89.57"
+    },
+    "RENINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-021",
+      "nombre_fuente": "RENINA",
+      "precio_bs": "112.52"
+    },
+    "DHEA_S": {
+      "fuente": "FONASA",
+      "codigo": "03-03-008",
+      "nombre_fuente": "DEHIDROEPIANDROSTERONA SULFATO (DHEA-S)",
+      "precio_bs": "88.22"
+    },
+    "17_OH_PROGESTERONA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-029",
+      "nombre_fuente": "17 - HIDROXIPROGESTERONA",
+      "precio_bs": "89.57"
+    },
+    "METANEFRINAS_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-050",
+      "nombre_fuente": "METANEFRINAS URINARIAS (INCLUYE DETERMINACIÓN DE METANEFRINA Y NORMETANEFRINA POR SEPARADO POR MÉTODOS CROMATOGRÁFICOS)",
+      "precio_bs": "536.34"
+    },
+    "CATECOLAMINAS_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-051",
+      "nombre_fuente": "CATECOLAMINAS URINARIAS (INCLUYE MEDICIÓN DE ADRENALINA, NORADRENALINA Y DOPAMINA POR SEPARADO POR MÉTODOS CROMATOGRÁFICOS)",
+      "precio_bs": "461.07"
+    },
+    "5_HIAA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-005",
+      "nombre_fuente": "ACIDO 5 HIDROXIINDOLACÉTICO CUANTITATIVO",
+      "precio_bs": "69.46"
+    },
+    "FSH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-063",
+      "nombre_fuente": "FSH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "133.00"
+    },
+    "LH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-064",
+      "nombre_fuente": "LH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "125.00"
+    },
+    "PROLACTINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-074",
+      "nombre_fuente": "PROLACTINA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "126.00"
+    },
+    "ESTRADIOL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-062",
+      "nombre_fuente": "ESTRADIOL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "133.00"
+    },
+    "PROGESTERONA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-065",
+      "nombre_fuente": "PROGESTERONA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "102.00"
+    },
+    "TESTOSTERONA_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-075",
+      "nombre_fuente": "TESTOSTERONA TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "126.00"
+    },
+    "TESTOSTERONA_LIBRE": {
+      "fuente": "FONASA",
+      "codigo": "03-03-023",
+      "nombre_fuente": "TESTOSTERONA LIBRE EN SANGRE",
+      "precio_bs": "82.67"
+    },
+    "SHBG": {
+      "fuente": "FONASA",
+      "codigo": "03-03-046",
+      "nombre_fuente": "SHBG (SEX-HORMONE BINDING GLOBULIN)",
+      "precio_bs": "160.39"
+    },
+    "ANDROSTENEDIONA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-003",
+      "nombre_fuente": "ANDROSTENEDIONA",
+      "precio_bs": "70.70"
+    },
+    "AMH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-076",
+      "nombre_fuente": "HORMONA ANTIMÜLLERIANA (AMH) POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "384.00"
+    },
+    "HCG_BETA_CUANTITATIVA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-061",
+      "nombre_fuente": "BHCG CUANTITATIVA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "130.00"
+    },
+    "PRUEBA_EMBARAZO_ORINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-049",
+      "nombre_fuente": "TEST DE EMBARAZO (PRUEBA RAPIDA)",
+      "precio_bs": "32.00"
+    },
+    "GH": {
+      "fuente": "FONASA",
+      "codigo": "03-03-007",
+      "nombre_fuente": "CRECIMIENTO, HORMONA DE (HGH) (SOMATOTROFINA)",
+      "precio_bs": "89.57"
+    },
+    "IGF1": {
+      "fuente": "FONASA",
+      "codigo": "03-03-047",
+      "nombre_fuente": "IGF1 O SOMATOMEDINA - C (INSULINE LIKE GROWTH FACTOR)",
+      "precio_bs": "172.73"
+    },
+    "PTH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-066",
+      "nombre_fuente": "PARATOHORMONA INTACTA (PTH) POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "PSA_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-018",
+      "nombre_fuente": "ELISA PARA PSA TOTAL",
+      "precio_bs": "96.00"
+    },
+    "PSA_LIBRE": {
+      "fuente": "FONASA",
+      "codigo": "03-05-104",
+      "nombre_fuente": "ANTÍGENO PROSTÁTICO TOTAL Y LIBRE",
+      "precio_bs": "304.63"
+    },
+    "CEA": {
+      "fuente": "INLASA",
+      "codigo": "CGM-022",
+      "nombre_fuente": "ANTÍGENO CARCINOEMBRIONARIO (CEA) POR ELISA",
+      "precio_bs": "219.00"
+    },
+    "AFP": {
+      "fuente": "INLASA",
+      "codigo": "CGM-018",
+      "nombre_fuente": "ALFAFETOPROTEÍNA (AFP) POR ELISA",
+      "precio_bs": "219.00"
+    },
+    "CA_125": {
+      "fuente": "INLASA",
+      "codigo": "CGM-021",
+      "nombre_fuente": "CA – 125 POR ELISA",
+      "precio_bs": "235.00"
+    },
+    "CA_19_9": {
+      "fuente": "INLASA",
+      "codigo": "CGM-020",
+      "nombre_fuente": "CA 19 – 9 POR ELISA",
+      "precio_bs": "259.00"
+    },
+    "CA_15_3": {
+      "fuente": "INLASA",
+      "codigo": "CGM-019",
+      "nombre_fuente": "CA 15 – 3 POR ELISA",
+      "precio_bs": "251.00"
+    },
+    "BETA2_MICROGLOBULINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-010",
+      "nombre_fuente": "BETA-2-MICROGLOBULINA",
+      "precio_bs": "101.79"
+    },
+    "CROMOGRANINA_A": {
+      "fuente": "FONASA",
+      "codigo": "03-05-098",
+      "nombre_fuente": "CROMOGRANINA A",
+      "precio_bs": "619.00"
+    },
+    "SANGRE_OCULTA_TAMIZAJE": {
+      "fuente": "FONASA",
+      "codigo": "03-08-062",
+      "nombre_fuente": "ANÁLISIS INMUNOQUÍMICO/INMUNOLÓGICO DE SANGRE OCULTA EN DEPOSICIONES",
+      "precio_bs": "178.53"
+    },
+    "TROPONINA_I": {
+      "fuente": "INLASA",
+      "codigo": "LAC-056",
+      "nombre_fuente": "TROPONINA I POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "202.00"
+    },
+    "BNP": {
+      "fuente": "FONASA",
+      "codigo": "03-03-055",
+      "nombre_fuente": "NT-PRO BNP O BNP",
+      "precio_bs": "676.00"
+    },
+    "NT_PROBNP": {
+      "fuente": "FONASA",
+      "codigo": "03-03-055",
+      "nombre_fuente": "NT-PRO BNP O BNP",
+      "precio_bs": "676.00"
+    },
+    "PCR": {
+      "fuente": "FONASA",
+      "codigo": "03-05-031",
+      "nombre_fuente": "PROTEÍNA C REACTIVA POR TÉCNICAS AUTOMATIZADAS",
+      "precio_bs": "76.99"
+    },
+    "PROCALCITONINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-096",
+      "nombre_fuente": "PROCALCITONINA",
+      "precio_bs": "551.76"
+    },
+    "FACTOR_REUMATOIDE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-020",
+      "nombre_fuente": "FACTOR REUMATOIDEO (FR)",
+      "precio_bs": "48.00"
+    },
+    "ASTO": {
+      "fuente": "INLASA",
+      "codigo": "LINM-008",
+      "nombre_fuente": "ANTIESTREPTOLISINA O (ASO)",
+      "precio_bs": "48.00"
+    },
+    "ANA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-005",
+      "nombre_fuente": "ANTICUERPOS ANTINUCLEARES ANA (IFI)",
+      "precio_bs": "100.00"
+    },
+    "ANTI_DNA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-036",
+      "nombre_fuente": "ANTICUERPOS anti-DNA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "ENA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-027",
+      "nombre_fuente": "LIA PARA ANTICUERPOS ANTINUCLEARES EXTRACTABLES (PERFIL ENA)",
+      "precio_bs": "400.00"
+    },
+    "ANTI_CCP": {
+      "fuente": "INLASA",
+      "codigo": "LINM-037",
+      "nombre_fuente": "ANTICUERPOS anti-CCP POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "C3": {
+      "fuente": "INLASA",
+      "codigo": "LINM-009",
+      "nombre_fuente": "COMPLEMENTO C3",
+      "precio_bs": "90.00"
+    },
+    "C4": {
+      "fuente": "INLASA",
+      "codigo": "LINM-010",
+      "nombre_fuente": "COMPLEMENTO C4",
+      "precio_bs": "90.00"
+    },
+    "CH50": {
+      "fuente": "FONASA",
+      "codigo": "03-05-013",
+      "nombre_fuente": "COMPLEMENTO HEMOLÍTICO (CH 50)",
+      "precio_bs": "95.25"
+    },
+    "ANCA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-082",
+      "nombre_fuente": "ANTICUERPOS ANTICITOPLASMA DE NEUTRÓFILOS (ANCA), (INCLUYE C-ANCA Y P-ANCA), POR IFI.",
+      "precio_bs": "205.43"
+    },
+    "ANTI_ENDOMISIO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-081",
+      "nombre_fuente": "ANTICUERPO ANTIENDOMISIO (EMA, ANTIMEMBRANA BASAL GLOMERULAR (GBM), ANTIRETICULINA, POR IFI C/U.",
+      "precio_bs": "143.62"
+    },
+    "HLA_B27": {
+      "fuente": "FONASA",
+      "codigo": "03-05-118",
+      "nombre_fuente": "HLA-B27 TIPIFICACIÓN (BIOLOGÍA MOLECULAR)",
+      "precio_bs": "1149.29"
+    },
+    "ANTI_MITOCONDRIALES": {
+      "fuente": "FONASA",
+      "codigo": "03-05-005",
+      "nombre_fuente": "ANTICUERPOS ANTINUCLEARES (ANA), ANTIMITOCONDRIALES, ANTI DNA (ADNA), ANTI MÚSCULO LISO, ANTICENTRÓMERO, U OTROS, C/U.",
+      "precio_bs": "95.99"
+    },
+    "ANTI_MUSCULO_LISO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-005",
+      "nombre_fuente": "ANTICUERPOS ANTINUCLEARES (ANA), ANTIMITOCONDRIALES, ANTI DNA (ADNA), ANTI MÚSCULO LISO, ANTICENTRÓMERO, U OTROS, C/U.",
+      "precio_bs": "95.99"
+    },
+    "ANTI_LKM1": {
+      "fuente": "FONASA",
+      "codigo": "03-05-085",
+      "nombre_fuente": "ANTICUERPOS ANTI LKM-1",
+      "precio_bs": "291.67"
+    },
+    "CRIOGLOBULINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-05-014",
+      "nombre_fuente": "CRIOGLOBULINAS, PRECIPITACIÓN EN FRÍO (CUALITATIVA) O CUANTITATIVA C/U",
+      "precio_bs": "16.16"
+    },
+    "SUBPOBLACIONES_CD4_CD8": {
+      "fuente": "FONASA",
+      "codigo": "03-05-091",
+      "nombre_fuente": "LINFOCITOS T (INCLUYE CD3, CD4, CD8). TÉCNICA CITOMETRÍA DE FLUJO",
+      "precio_bs": "369.28"
+    },
+    "IGE_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-039",
+      "nombre_fuente": "ELISA PARA Ig E",
+      "precio_bs": "86.00"
+    },
+    "IGE_D_PTERONYSSINUS": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_D_FARINAE": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_GATO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_PERRO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_CUCARACHA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_LECHE_VACA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_CLARA_HUEVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_YEMA_HUEVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_MANI": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_TRIGO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_SOYA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_CAMARON": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_PESCADO_BACALAO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_ALFA_LACTALBUMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_CASEINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_NUEZ": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_GRAMA_BERMUDA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_TIMOTHY": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_AMBROSIA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_OLIVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_ALTERNARIA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_ASPERGILLUS": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_LATEX": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_ABEJA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_AVISPA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "IGE_PENICILINA_G": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "EOSINOFILOS_ABS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-063",
+      "nombre_fuente": "RECUENTO DE EOSINÓFILOS (ABSOLUTO)",
+      "precio_bs": "12.46"
+    },
+    "HEPATITIS_A_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-006",
+      "nombre_fuente": "ANTICUERPOS IgM ANTI – HAV",
+      "precio_bs": "127.00"
+    },
+    "HEPATITIS_A_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-007",
+      "nombre_fuente": "ANTICUERPOS TOTALES ANTI – HAV (IgM-IgG)",
+      "precio_bs": "121.00"
+    },
+    "HBSAG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-016",
+      "nombre_fuente": "ELISA PARA HBsAg (ANTÍGENO DE SUPERFICIE – HEPATITIS B)",
+      "precio_bs": "105.00"
+    },
+    "ANTI_HBS": {
+      "fuente": "INLASA",
+      "codigo": "LINM-014",
+      "nombre_fuente": "ELISA PARA ANTICUERPOS ANTI ANTIGENO DE SUPERFICIE (ANTI HBs)",
+      "precio_bs": "130.00"
+    },
+    "ANTI_HBC_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-011",
+      "nombre_fuente": "ELISA PARA ANTI HBc (ANTICORE HEPATITIS B TOTALES)",
+      "precio_bs": "118.00"
+    },
+    "ANTI_HBC_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-012",
+      "nombre_fuente": "ELISA PARA ANTI HBc IgM (ANTICORE HEPATITIS B IgM)",
+      "precio_bs": "142.00"
+    },
+    "HBEAG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-015",
+      "nombre_fuente": "ELISA PARA HBeAg (ANTIGENO e HEPATITIS B)",
+      "precio_bs": "148.00"
+    },
+    "ANTI_HBE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-013",
+      "nombre_fuente": "ELISA PARA ANTICUERPOS e DE HEPATITIS B (ANTI HBe)",
+      "precio_bs": "148.00"
+    },
+    "ANTI_VHC": {
+      "fuente": "INLASA",
+      "codigo": "LINM-002",
+      "nombre_fuente": "ANTICUERPOS ANTI HCV (ELISA)",
+      "precio_bs": "167.00"
+    },
+    "VIH_AG_AC": {
+      "fuente": "FONASA",
+      "codigo": "03-06-112",
+      "nombre_fuente": "VIH, ANTICUERPOS Y ANTÍGENOS VIRALES, DETERM. DE H.I.V.",
+      "precio_bs": "91.67"
+    },
+    "VIH_PRUEBA_RAPIDA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-030",
+      "nombre_fuente": "PRUEBA RÁPIDA PARA VIH/SIDA",
+      "precio_bs": "80.00"
+    },
+    "HTLV": {
+      "fuente": "INLASA",
+      "codigo": "LINM-003",
+      "nombre_fuente": "ANTICUERPOS ANTI HTLV",
+      "precio_bs": "164.00"
+    },
+    "VDRL": {
+      "fuente": "FONASA",
+      "codigo": "03-06-042",
+      "nombre_fuente": "V.D.R.L.",
+      "precio_bs": "39.24"
+    },
+    "RPR": {
+      "fuente": "INLASA",
+      "codigo": "LINM-031",
+      "nombre_fuente": "PRUEBA RPR PARA SIFILIS",
+      "precio_bs": "55.00"
+    },
+    "TPHA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-041",
+      "nombre_fuente": "TREPONEMA PALLIDUM FTA - ABS, MHA-TP C/U",
+      "precio_bs": "63.05"
+    },
+    "FTA_ABS": {
+      "fuente": "FONASA",
+      "codigo": "03-06-041",
+      "nombre_fuente": "TREPONEMA PALLIDUM FTA - ABS, MHA-TP C/U",
+      "precio_bs": "63.05"
+    },
+    "SIFILIS_PRUEBA_RAPIDA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-029",
+      "nombre_fuente": "PRUEBA RAPIDA PARA SIFILIS",
+      "precio_bs": "95.00"
+    },
+    "TOXO_IGG": {
+      "fuente": "INLASA",
+      "codigo": "LEP-006",
+      "nombre_fuente": "ELISA PARA TOXOPLASMOSIS IgG",
+      "precio_bs": "106.00"
+    },
+    "TOXO_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LEP-005",
+      "nombre_fuente": "ELISA PARA TOXOPLASMOSIS IgM",
+      "precio_bs": "106.00"
+    },
+    "TOXO_AVIDEZ": {
+      "fuente": "INLASA",
+      "codigo": "LEP-007",
+      "nombre_fuente": "PRUEBA DE CONFIRMACION ELISA PARA IgG AVIDEZ TOXOPLASMOSIS",
+      "precio_bs": "116.00"
+    },
+    "RUBEOLA_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "RUBEOLA_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-038",
+      "nombre_fuente": "IgM ANTI VIRUS DE LA RUBEOLA POR ELISA",
+      "precio_bs": "164.00"
+    },
+    "CMV_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "CMV_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-026",
+      "nombre_fuente": "CMV IgM QUIMIOLUMINISCENCIA",
+      "precio_bs": "170.00"
+    },
+    "HERPES_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "HERPES_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-025",
+      "nombre_fuente": "HSV IgM QUIMIOLUMINISCENCIA",
+      "precio_bs": "170.00"
+    },
+    "EBV_VCA_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-056",
+      "nombre_fuente": "ELISA PARA EPSTEIN BARR VIRUS IgM",
+      "precio_bs": "125.00"
+    },
+    "MONOTEST": {
+      "fuente": "FONASA",
+      "codigo": "03-06-036",
+      "nombre_fuente": "MONONUCLEOSIS, REACCIÓN DE PAUL BUNNELL, ANTICUERPOS HETERÓFILOS O SIMILARES",
+      "precio_bs": "30.23"
+    },
+    "VARICELA_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "PARVOVIRUS_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-059",
+      "nombre_fuente": "ELISA PARA PARVOVIRUS B19 IgM",
+      "precio_bs": "125.00"
+    },
+    "COVID_ANTIGENO": {
+      "fuente": "FONASA",
+      "codigo": "03-06-271",
+      "nombre_fuente": "TEST RÁPIDO DE DETECCIÓN DE ANTÍGENOS SARS-COV-2 (INCLUYE TOMA DE MUESTRA)",
+      "precio_bs": "119.80"
+    },
+    "COVID_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "VSR_AG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-270",
+      "nombre_fuente": "ANTÍGENOS VIRALES DETERM. DE VIRUS SINCICIAL, POR CUALQUIER TÉCNICA",
+      "precio_bs": "74.77"
+    },
+    "ROTAVIRUS_AG": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-031",
+      "nombre_fuente": "ELISA PARA ANTIGENO DE ROTAVIRUS",
+      "precio_bs": "125.00"
+    },
+    "ADENOVIRUS_AG_HECES": {
+      "fuente": "FONASA",
+      "codigo": "03-06-070",
+      "nombre_fuente": "ANTÍGENOS VIRALES DETERM. DE (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLEX, RUBEOLA, INFLUENZA Y OTROS), (POR CUALQUIER TÉCNICA EJ: INMUNOFLUORESCENCIA), C/U",
+      "precio_bs": "70.70"
+    },
+    "DENGUE_NS1": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-027",
+      "nombre_fuente": "ELISA NS1 PARA DENGUE",
+      "precio_bs": "125.00"
+    },
+    "DENGUE_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-030",
+      "nombre_fuente": "ELISA PARA DENGUE IgM",
+      "precio_bs": "125.00"
+    },
+    "DENGUE_IGG": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-037",
+      "nombre_fuente": "ELISA PARA DENGUE IgG",
+      "precio_bs": "125.00"
+    },
+    "ZIKA_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-029",
+      "nombre_fuente": "ELISA PARA ZIKA IgM",
+      "precio_bs": "150.00"
+    },
+    "CHIKUNGUNYA_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-028",
+      "nombre_fuente": "ELISA PARA CHIKUNGUNYA IgM",
+      "precio_bs": "125.00"
+    },
+    "HANTAVIRUS_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-026",
+      "nombre_fuente": "ELISA PARA HANTAVIRUS IgM",
+      "precio_bs": "125.00"
+    },
+    "CHAGAS_ELISA": {
+      "fuente": "INLASA",
+      "codigo": "LEP-027",
+      "nombre_fuente": "ELISA CHAGAS",
+      "precio_bs": "125.00"
+    },
+    "CHAGAS_HAI": {
+      "fuente": "INLASA",
+      "codigo": "LEP-026",
+      "nombre_fuente": "HAI CHAGAS",
+      "precio_bs": "164.00"
+    },
+    "CHAGAS_IFI": {
+      "fuente": "INLASA",
+      "codigo": "LEP-028",
+      "nombre_fuente": "IFI PARA CHAGAS",
+      "precio_bs": "154.00"
+    },
+    "CHAGAS_RAPIDA": {
+      "fuente": "INLASA",
+      "codigo": "LEP-031",
+      "nombre_fuente": "PRUEBA RAPIDA PARA CHAGAS INMUNOCROMATOGRAFÍA",
+      "precio_bs": "88.00"
+    },
+    "BRUCELOSIS": {
+      "fuente": "FONASA",
+      "codigo": "03-06-033",
+      "nombre_fuente": "BRUCELLA ABORTUS, MELITENSIS Y SUIS, ANTICUERPOS, POR AGLUTINACIÓN O ELISA",
+      "precio_bs": "26.28"
+    },
+    "WIDAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-044",
+      "nombre_fuente": "REACCION DE WIDAL",
+      "precio_bs": "37.00"
+    },
+    "H_PYLORI_AG_HECES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-063",
+      "nombre_fuente": "TEST DE HELICOBACTER PYLORI EN DEPOSICIONES",
+      "precio_bs": "371.13"
+    },
+    "STREP_A_AG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-090",
+      "nombre_fuente": "TEST RÁPIDO DE DETECCIÓN DE STREPTOCOCCUS GRUPO A (PYOGENES)",
+      "precio_bs": "76.99"
+    },
+    "MYCOPLASMA_IGM": {
+      "fuente": "FONASA",
+      "codigo": "03-06-037",
+      "nombre_fuente": "MYCOPLASMA IGG, IGM, C/U.",
+      "precio_bs": "66.01"
+    },
+    "HIDATIDOSIS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-002",
+      "nombre_fuente": "ELISA IgG PARA HIDATIDOSIS",
+      "precio_bs": "109.00"
+    },
+    "CISTICERCOSIS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-001",
+      "nombre_fuente": "ELISA IgG PARA CISTICERCOSIS",
+      "precio_bs": "110.00"
+    },
+    "TOXOCARA": {
+      "fuente": "INLASA",
+      "codigo": "LEP-003",
+      "nombre_fuente": "ELISA IgG PARA TOXOCARA",
+      "precio_bs": "124.00"
+    },
+    "GALACTOMANANO": {
+      "fuente": "FONASA",
+      "codigo": "03-06-094",
+      "nombre_fuente": "ANTÍGENO GALACTOMANANO",
+      "precio_bs": "338.93"
+    },
+    "UROCULTIVO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-045",
+      "nombre_fuente": "UROCULTIVO RECUENTO DE COLONIA Y ANTIBIOGRAMA",
+      "precio_bs": "100.00"
+    },
+    "HEMOCULTIVO": {
+      "fuente": "FONASA",
+      "codigo": "03-06-091",
+      "nombre_fuente": "HEMOCULTIVO AUTOMATIZADO. INCLUYE ANTIBIOGRAMA CON CIM. 2 FRASCOS (COSTO NO INCLUIDO EN EL ARANCEL)",
+      "precio_bs": "223.69"
+    },
+    "COPROCULTIVO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-008",
+      "nombre_fuente": "COPROCULTIVO",
+      "precio_bs": "116.00"
+    },
+    "CULTIVO_ESPUTO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-011",
+      "nombre_fuente": "CULTIVO DE ESPUTO O EXUDADO BRONQUIAL",
+      "precio_bs": "132.00"
+    },
+    "CULTIVO_FARINGEO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-020",
+      "nombre_fuente": "CULTIVO SECRECIÓN FARINGEA",
+      "precio_bs": "130.00"
+    },
+    "CULTIVO_LCR": {
+      "fuente": "INLASA",
+      "codigo": "LBC-015",
+      "nombre_fuente": "CULTIVO DE LÍQUIDO CEFALORRAQUIDEO",
+      "precio_bs": "150.00"
+    },
+    "CULTIVO_HERIDA": {
+      "fuente": "INLASA",
+      "codigo": "LBC-050",
+      "nombre_fuente": "CULTIVO DE SECRECIONES / EXUDADOS",
+      "precio_bs": "130.00"
+    },
+    "CULTIVO_VAGINAL": {
+      "fuente": "INLASA",
+      "codigo": "LBC-013",
+      "nombre_fuente": "CULTIVO DE EXUDADO VAGINAL",
+      "precio_bs": "150.00"
+    },
+    "CULTIVO_URETRAL": {
+      "fuente": "INLASA",
+      "codigo": "LBC-014",
+      "nombre_fuente": "CULTIVO DE HISOPADO URETRAL",
+      "precio_bs": "140.00"
+    },
+    "CULTIVO_ENDOCERVICAL": {
+      "fuente": "INLASA",
+      "codigo": "LBC-050",
+      "nombre_fuente": "CULTIVO DE SECRECIONES / EXUDADOS",
+      "precio_bs": "130.00"
+    },
+    "CULTIVO_GBS": {
+      "fuente": "INLASA",
+      "codigo": "LBC-053",
+      "nombre_fuente": "CULTIVO PARA INVESTIGACIÓN DE S. agalactiae",
+      "precio_bs": "132.00"
+    },
+    "CULTIVO_GONOCOCO": {
+      "fuente": "FONASA",
+      "codigo": "03-06-016",
+      "nombre_fuente": "NEISSERIA GONORRHOEAE (GONOCOCO)",
+      "precio_bs": "37.51"
+    },
+    "CULTIVO_LIQUIDO_ESTERIL": {
+      "fuente": "INLASA",
+      "codigo": "LBC-017",
+      "nombre_fuente": "CULTIVO DE OTROS LIQUIDOS ORGANICOS",
+      "precio_bs": "138.00"
+    },
+    "CULTIVO_ANAEROBIOS": {
+      "fuente": "FONASA",
+      "codigo": "03-06-012",
+      "nombre_fuente": "CULTIVO PARA ANAEROBIOS (INCLUYE CÓD. 03-06-008)",
+      "precio_bs": "112.15"
+    },
+    "CULTIVO_OTICO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-022",
+      "nombre_fuente": "CULTIVO SECRECIÓN ÓTICA",
+      "precio_bs": "130.00"
+    },
+    "CULTIVO_OCULAR": {
+      "fuente": "INLASA",
+      "codigo": "LBC-012",
+      "nombre_fuente": "CULTIVO DE EXUDADO CONJUNTIVAL",
+      "precio_bs": "132.00"
+    },
+    "CULTIVO_HONGOS": {
+      "fuente": "INLASA",
+      "codigo": "LBC-018",
+      "nombre_fuente": "CULTIVO MICOLÓGICO",
+      "precio_bs": "215.00"
+    },
+    "KOH": {
+      "fuente": "INLASA",
+      "codigo": "LBC-035",
+      "nombre_fuente": "EXAMEN MICOLOGICO MICROSCOPICO",
+      "precio_bs": "50.00"
+    },
+    "CULTIVO_BK": {
+      "fuente": "INLASA",
+      "codigo": "LTB-002",
+      "nombre_fuente": "CULTIVO PARA M. TUBERCULOSIS (OGAWA 2 Tubos)",
+      "precio_bs": "157.00"
+    },
+    "BACILOSCOPIA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-002",
+      "nombre_fuente": "BACILOSCOPÍA ZIEHL-NEELSEN, C/U",
+      "precio_bs": "21.84"
+    },
+    "ANTIFUNGIGRAMA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-028",
+      "nombre_fuente": "ANTIFUNGIGRAMA (MÍNIMO 4 FÁRMACOS ANTIHONGOS)",
+      "precio_bs": "34.30"
+    },
+    "GRAM": {
+      "fuente": "INLASA",
+      "codigo": "LBC-044",
+      "nombre_fuente": "TINCIÓN GRAM",
+      "precio_bs": "40.00"
+    },
+    "FRESCO_VAGINAL": {
+      "fuente": "INLASA",
+      "codigo": "LBC-034",
+      "nombre_fuente": "EXAMEN EN FRESCO",
+      "precio_bs": "30.00"
+    },
+    "LEUCOCITOS_HECES": {
+      "fuente": "INLASA",
+      "codigo": "LEP-013",
+      "nombre_fuente": "CITOLOGÍA DE MOCO FECAL",
+      "precio_bs": "70.00"
+    },
+    "COPROPARASITOLOGICO": {
+      "fuente": "INLASA",
+      "codigo": "LEP-015",
+      "nombre_fuente": "COPROPARASITOLÓGICO SIMPLE",
+      "precio_bs": "50.00"
+    },
+    "COPROPARASITOLOGICO_SERIADO": {
+      "fuente": "INLASA",
+      "codigo": "LEP-014",
+      "nombre_fuente": "COPROPARASITOLÓGICO SERIADO",
+      "precio_bs": "90.00"
+    },
+    "SANGRE_OCULTA_HECES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-062",
+      "nombre_fuente": "ANÁLISIS INMUNOQUÍMICO/INMUNOLÓGICO DE SANGRE OCULTA EN DEPOSICIONES",
+      "precio_bs": "178.53"
+    },
+    "SANGRE_OCULTA_GUAYACO": {
+      "fuente": "FONASA",
+      "codigo": "03-08-004",
+      "nombre_fuente": "HEMORRAGIAS OCULTAS, (BENCIDINA, GUAYACO O TEST DE WEBER Y SIMILARES), CUALQUIER MÉTODO, C/MUESTRA",
+      "precio_bs": "14.93"
+    },
+    "CALPROTECTINA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-049",
+      "nombre_fuente": "CALPROTECTINA CUANTITATIVA POR ELISA",
+      "precio_bs": "580.01"
+    },
+    "ELASTASA_FECAL": {
+      "fuente": "FONASA",
+      "codigo": "03-08-007",
+      "nombre_fuente": "ELASTASA FECAL",
+      "precio_bs": "972.61"
+    },
+    "TEST_GRAHAM": {
+      "fuente": "INLASA",
+      "codigo": "LEP-020",
+      "nombre_fuente": "TÉCNICA DE GRAHAM",
+      "precio_bs": "45.00"
+    },
+    "GOTA_GRUESA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-053",
+      "nombre_fuente": "HEMOPARÁSITOS, DIAGNÓSTICO MICROSCÓPICO DE (MÍNIMO 10 FROTIS Y/O GOTAS GRUESAS, C/S EXAMEN DIRECTO AL FRESCO), CADA SESIÓN",
+      "precio_bs": "126.10"
+    },
+    "CHAGAS_MICROMETODO": {
+      "fuente": "INLASA",
+      "codigo": "LEP-029",
+      "nombre_fuente": "MICROMÉTODO PARA CHAGAS O MICROHEMATOCRITO PARA CHAGAS",
+      "precio_bs": "58.00"
+    },
+    "LEISHMANIA_FROTIS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-034",
+      "nombre_fuente": "FROTIS PARA LA DETECCIÓN DE LEISHMANIA",
+      "precio_bs": "62.00"
+    },
+    "ACAROS_PIEL": {
+      "fuente": "FONASA",
+      "codigo": "03-06-056",
+      "nombre_fuente": "RASPADO DE PIEL, EXAMEN MICROSCÓPICO DE ('ACAROTEST'): DE 6 A 10 PREPARACIONES",
+      "precio_bs": "50.34"
+    },
+    "PCR_SARS_COV_2": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-001",
+      "nombre_fuente": "RT-PCR EN TIEMPO REAL PARA SARS-CoV 2 (COVID-19)",
+      "precio_bs": "300.00"
+    },
+    "CARGA_VIRAL_VIH": {
+      "fuente": "FONASA",
+      "codigo": "03-06-086",
+      "nombre_fuente": "VIH, CARGA VIRAL",
+      "precio_bs": "848.00"
+    },
+    "CARGA_VIRAL_VHB": {
+      "fuente": "FONASA",
+      "codigo": "03-06-084",
+      "nombre_fuente": "HEPATITIS B, CARGA VIRAL",
+      "precio_bs": "1433.93"
+    },
+    "CARGA_VIRAL_VHC": {
+      "fuente": "FONASA",
+      "codigo": "03-06-085",
+      "nombre_fuente": "HEPATITIS C CARGA VIRAL. TÉCNICA PCR",
+      "precio_bs": "1595.56"
+    },
+    "VPH_ALTO_RIESGO": {
+      "fuente": "FONASA",
+      "codigo": "03-06-123",
+      "nombre_fuente": "VIRUS PAPILOMA HUMANO POR PCR CON GENOTIPIFICACIÓN DE PAPILOMA DE ALTO RIESGO DE CÁNCER CÉRVICO UTERINO TIPOS 16 Y 18",
+      "precio_bs": "347.19"
+    },
+    "CT_NG_PCR": {
+      "fuente": "FONASA",
+      "codigo": "03-06-097",
+      "nombre_fuente": "CHLAMYDIA TRACHOMATIS Y NEISSERIA GONORRHOEAE DETECCIÓN POR TÉCNICA DE BIOLOGÍA MOLECULAR",
+      "precio_bs": "536.34"
+    },
+    "MTB_GENEXPERT": {
+      "fuente": "INLASA",
+      "codigo": "LTB-005",
+      "nombre_fuente": "GENEXPERT M. TUBERCULOSIS",
+      "precio_bs": "750.00"
+    },
+    "CMV_CARGA_VIRAL": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-040",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA CITOMEGALOVIRUS",
+      "precio_bs": "300.00"
+    },
+    "EBV_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-044",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA EPSTEIN BARR VIRUS",
+      "precio_bs": "300.00"
+    },
+    "HSV_PCR_LCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-022",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA VIRUS HERPES SIMPLE 1 Y 2",
+      "precio_bs": "400.00"
+    },
+    "DENGUE_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-013",
+      "nombre_fuente": "RT-PCR EN TIEMPO REAL PARA VIRUS DENGUE",
+      "precio_bs": "300.00"
+    },
+    "ZIKA_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-014",
+      "nombre_fuente": "RT-PCR EN TIEMPO REAL PARA VIRUS ZIKA",
+      "precio_bs": "300.00"
+    },
+    "INFLUENZA_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-002",
+      "nombre_fuente": "RT-PCR EN TIEMPO REAL PARA DETECCION DE INFLUENZA A Y B",
+      "precio_bs": "300.00"
+    },
+    "PANEL_RESPIRATORIO_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-039",
+      "nombre_fuente": "PANEL VIRAL RESPIRATORIO POR PCR EN TIEMPO REAL",
+      "precio_bs": "700.00"
+    },
+    "LEISHMANIA_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LEP-036",
+      "nombre_fuente": "PCR PARA LEISHMANIASIS",
+      "precio_bs": "247.00"
+    },
+    "MPOX_PCR": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-021",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA VIRUELA SÍMICA",
+      "precio_bs": "300.00"
+    },
+    "DEPURACION_CREATININA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-016",
+      "nombre_fuente": "DEPURACIÓN DE CREATININA (CLEARENCE DE CREATININA)",
+      "precio_bs": "67.00"
+    },
+    "EGO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-019",
+      "nombre_fuente": "EXAMEN GENERAL DE ORINA",
+      "precio_bs": "29.00"
+    },
+    "TIRA_REACTIVA_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-023",
+      "nombre_fuente": "ORINA, FÍSICO-QUÍMICO ( ASPECTO, COLOR, DENSIDAD, PH; PROTEÍNAS, GLUCOSA, CUERPOS CETÓNICOS, UROBILINOGENO, BILIRRUBINA, HEMOGLOBINA Y NITRITOS, DETERMINACIÓN CUALITATIVA O SEMI CUANTITATIVA) TODOS O CADA UNO DE LOS PARÁMETROS (PROC. AUT.)",
+      "precio_bs": "17.64"
+    },
+    "SEDIMENTO_URINARIO": {
+      "fuente": "FONASA",
+      "codigo": "03-09-024",
+      "nombre_fuente": "SEDIMENTO DE ORINA (PROC. AUT.)",
+      "precio_bs": "13.94"
+    },
+    "PROTEINURIA_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-041",
+      "nombre_fuente": "PROTEINURIA DE 24 HORAS",
+      "precio_bs": "36.00"
+    },
+    "MICROALBUMINURIA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-036",
+      "nombre_fuente": "MICROALBUMINURIA",
+      "precio_bs": "94.00"
+    },
+    "CALCIO_ORINA_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-006",
+      "nombre_fuente": "CALCIO EN ORINA DE 24 HORAS",
+      "precio_bs": "36.00"
+    },
+    "ACIDO_URICO_ORINA_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-002",
+      "nombre_fuente": "ÁCIDO ÚRICO EN ORINA",
+      "precio_bs": "43.00"
+    },
+    "ANALISIS_CALCULO": {
+      "fuente": "FONASA",
+      "codigo": "03-09-009",
+      "nombre_fuente": "CÁLCULO URINARIO (EXAMEN FÍSICO Y QUÍMICO)",
+      "precio_bs": "61.57"
+    },
+    "OSMOLALIDAD_URINARIA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-025",
+      "nombre_fuente": "OSMOLALIDAD",
+      "precio_bs": "23.94"
+    },
+    "ADA_PLEURAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "ESPERMOGRAMA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-029",
+      "nombre_fuente": "ESPERMIOGRAMA (FÍSICO Y MICROSCÓPICO, CON O SIN OBSERVACIÓN HASTA 24 HORAS)",
+      "precio_bs": "60.09"
+    },
+    "BANDAS_OLIGOCLONALES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-020",
+      "nombre_fuente": "BANDAS OLIGOCLONALES (INCLUYE ELECTROFORESIS DE L.C.R., SUERO E INMUNOFIJACIÓN)",
+      "precio_bs": "330.41"
+    },
+    "NIVEL_LITIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-055",
+      "nombre_fuente": "LITIO EN SANGRE",
+      "precio_bs": "36.89"
+    },
+    "PLOMO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-084",
+      "nombre_fuente": "PLOMO EN SANGRE",
+      "precio_bs": "813.70"
+    },
+    "ARSENICO_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-034",
+      "nombre_fuente": "ARSENICO EN ORINA (MUESTRA AISLADA)",
+      "precio_bs": "596.67"
+    },
+    "CARBOXIHEMOGLOBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-083",
+      "nombre_fuente": "CARBOXIHEMOGLOBINA",
+      "precio_bs": "293.40"
+    },
+    "METAHEMOGLOBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-054",
+      "nombre_fuente": "METAHEMOGLOBINA",
+      "precio_bs": "19.49"
+    },
+    "VITAMINA_D_25OH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-072",
+      "nombre_fuente": "VITAMINA D POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "203.00"
+    },
+    "VITAMINA_B12": {
+      "fuente": "INLASA",
+      "codigo": "LAC-058",
+      "nombre_fuente": "VITAMINA B12",
+      "precio_bs": "189.00"
+    },
+    "ACIDO_FOLICO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-002",
+      "nombre_fuente": "ACIDO FÓLICO O FOLATOS",
+      "precio_bs": "63.42"
+    },
+    "VITAMINA_B6": {
+      "fuente": "FONASA",
+      "codigo": "03-02-080",
+      "nombre_fuente": "VITAMINA B6 POR HPLC",
+      "precio_bs": "655.03"
+    },
+    "COBRE": {
+      "fuente": "FONASA",
+      "codigo": "03-02-020",
+      "nombre_fuente": "COBRE EN SANGRE",
+      "precio_bs": "26.03"
+    },
+    "CARIOTIPO_SANGRE": {
+      "fuente": "INLASA",
+      "codigo": "CGM-002",
+      "nombre_fuente": "CARIOTIPO CON BANDEO GTG",
+      "precio_bs": "654.00"
+    },
+    "CARIOTIPO_LIQUIDO_AMNIOTICO": {
+      "fuente": "FONASA",
+      "codigo": "03-04-003",
+      "nombre_fuente": "CARIOTIPO EN FIBROBLASTOS POR CULTIVO DE TROFOBLASTO, LÍQUIDO AMNIÓTICO, PIEL U OTROS BANDEOS G Y EVENTUALMENTE Q, R, C, NOR",
+      "precio_bs": "769.90"
+    },
+    "MICROARRAY_CROMOSOMICO": {
+      "fuente": "FONASA",
+      "codigo": "03-04-016",
+      "nombre_fuente": "CARIOTIPO MOLECULAR (HIBRIDACIÓN GENÓMICA COMPARATIVA EN MICROMATRICES) 60K (INCLUYE LA EXTRACCIÓN DE ADN)",
+      "precio_bs": "10295.25"
+    },
+    "TEST_SUDOR": {
+      "fuente": "FONASA",
+      "codigo": "03-07-007",
+      "nombre_fuente": "TEST DEL SUDOR (PROCEDIMIENTO COMPLETO)",
+      "precio_bs": "198.40"
+    },
+    "PERFIL_PROSTATICO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-104",
+      "nombre_fuente": "ANTÍGENO PROSTÁTICO TOTAL Y LIBRE",
+      "precio_bs": "304.63"
+    }
+  },
+  "componentes": {
+    "17_OHP": {
+      "fuente": "FONASA",
+      "codigo": "03-03-029",
+      "nombre_fuente": "17 - HIDROXIPROGESTERONA",
+      "precio_bs": "89.57"
+    },
+    "ACIDO_URICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-001",
+      "nombre_fuente": "ÁCIDO ÚRICO",
+      "precio_bs": "43.00"
+    },
+    "ACIDO_URICO_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-002",
+      "nombre_fuente": "ÁCIDO ÚRICO EN ORINA",
+      "precio_bs": "43.00"
+    },
+    "ACL_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-05-084",
+      "nombre_fuente": "ANTICUERPOS ANTICARDIOLIPINAS (IGG, IGM), C/U",
+      "precio_bs": "163.23"
+    },
+    "ACL_IGM": {
+      "fuente": "FONASA",
+      "codigo": "03-05-084",
+      "nombre_fuente": "ANTICUERPOS ANTICARDIOLIPINAS (IGG, IGM), C/U",
+      "precio_bs": "163.23"
+    },
+    "AFP": {
+      "fuente": "INLASA",
+      "codigo": "CGM-018",
+      "nombre_fuente": "ALFAFETOPROTEÍNA (AFP) POR ELISA",
+      "precio_bs": "219.00"
+    },
+    "ALBUMINA_SUERO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "ALB_ORINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-036",
+      "nombre_fuente": "MICROALBUMINURIA",
+      "precio_bs": "94.00"
+    },
+    "ALDOSTERONA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-002",
+      "nombre_fuente": "ALDOSTERONA",
+      "precio_bs": "89.57"
+    },
+    "ALFA_LACTALBUMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "ALT": {
+      "fuente": "FONASA",
+      "codigo": "03-02-063",
+      "nombre_fuente": "TRANSAMINASAS, OXALACÉTICA (GOT/AST), PIRÚVICA (GPT/ALT), C/U",
+      "precio_bs": "23.44"
+    },
+    "ALTERNARIA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "AMBROSIA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "AMH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-076",
+      "nombre_fuente": "HORMONA ANTIMÜLLERIANA (AMH) POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "384.00"
+    },
+    "AMONIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-010",
+      "nombre_fuente": "AMONIO",
+      "precio_bs": "31.22"
+    },
+    "ANA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-005",
+      "nombre_fuente": "ANTICUERPOS ANTINUCLEARES ANA (IFI)",
+      "precio_bs": "100.00"
+    },
+    "ANDROSTENEDIONA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-003",
+      "nombre_fuente": "ANDROSTENEDIONA",
+      "precio_bs": "70.70"
+    },
+    "ANTICOAGULANTE_LUPICO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-007",
+      "nombre_fuente": "ANTICOAGULANTES CIRCULANTES O ANTICOAGULANTE LÚPICO",
+      "precio_bs": "66.26"
+    },
+    "ANTITROMBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-008",
+      "nombre_fuente": "ANTITROMBINA III",
+      "precio_bs": "66.26"
+    },
+    "ANTI_CCP": {
+      "fuente": "INLASA",
+      "codigo": "LINM-037",
+      "nombre_fuente": "ANTICUERPOS anti-CCP POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "ANTI_DNA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-036",
+      "nombre_fuente": "ANTICUERPOS anti-DNA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "ANTI_HBC_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-012",
+      "nombre_fuente": "ELISA PARA ANTI HBc IgM (ANTICORE HEPATITIS B IgM)",
+      "precio_bs": "142.00"
+    },
+    "ANTI_HBC_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-011",
+      "nombre_fuente": "ELISA PARA ANTI HBc (ANTICORE HEPATITIS B TOTALES)",
+      "precio_bs": "118.00"
+    },
+    "ANTI_HBE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-013",
+      "nombre_fuente": "ELISA PARA ANTICUERPOS e DE HEPATITIS B (ANTI HBe)",
+      "precio_bs": "148.00"
+    },
+    "ANTI_HBS": {
+      "fuente": "INLASA",
+      "codigo": "LINM-014",
+      "nombre_fuente": "ELISA PARA ANTICUERPOS ANTI ANTIGENO DE SUPERFICIE (ANTI HBs)",
+      "precio_bs": "130.00"
+    },
+    "ANTI_JO1": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_LA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_MPO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-107",
+      "nombre_fuente": "ANTICUERPOS ANTI-MPO (MIELOPEROXIDASA)",
+      "precio_bs": "499.20"
+    },
+    "ANTI_RNP": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_RO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_SCL70": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_SM": {
+      "fuente": "FONASA",
+      "codigo": "03-05-108",
+      "nombre_fuente": "ANTICUERPOS ANTI ANTÍGENOS NUCLEARES EXTRACTABLES (A-ENA): SM, RNP, SS-A/RO, SS-B/LA, SCL-70, JO-1). C/U",
+      "precio_bs": "286.49"
+    },
+    "ANTI_VHC": {
+      "fuente": "INLASA",
+      "codigo": "LINM-002",
+      "nombre_fuente": "ANTICUERPOS ANTI HCV (ELISA)",
+      "precio_bs": "167.00"
+    },
+    "APO_B": {
+      "fuente": "FONASA",
+      "codigo": "03-02-070",
+      "nombre_fuente": "APOLIPOPROTEÍNAS (A1, B U OTRAS) C/U",
+      "precio_bs": "87.60"
+    },
+    "ASPERGILLUS": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "AST": {
+      "fuente": "FONASA",
+      "codigo": "03-02-063",
+      "nombre_fuente": "TRANSAMINASAS, OXALACÉTICA (GOT/AST), PIRÚVICA (GPT/ALT), C/U",
+      "precio_bs": "23.44"
+    },
+    "ASTO": {
+      "fuente": "INLASA",
+      "codigo": "LINM-008",
+      "nombre_fuente": "ANTIESTREPTOLISINA O (ASO)",
+      "precio_bs": "48.00"
+    },
+    "AZUCARES_REDUCTORES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-001",
+      "nombre_fuente": "AZÚCARES REDUCTORES (BENEDICT-FEHLING O SIMILAR)",
+      "precio_bs": "14.44"
+    },
+    "B12": {
+      "fuente": "INLASA",
+      "codigo": "LAC-058",
+      "nombre_fuente": "VITAMINA B12",
+      "precio_bs": "189.00"
+    },
+    "B2GP1_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-05-105",
+      "nombre_fuente": "ANTICUERPOS ANTI-BETA 2 GLICOPROTEINA 1 (IGG, IGM), C/U",
+      "precio_bs": "507.34"
+    },
+    "B2GP1_IGM": {
+      "fuente": "FONASA",
+      "codigo": "03-05-105",
+      "nombre_fuente": "ANTICUERPOS ANTI-BETA 2 GLICOPROTEINA 1 (IGG, IGM), C/U",
+      "precio_bs": "507.34"
+    },
+    "BASOFILOS_ABS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-062",
+      "nombre_fuente": "RECUENTO DE BASÓFILOS (ABSOLUTO)",
+      "precio_bs": "13.33"
+    },
+    "BMP.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "BRUCELLA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-033",
+      "nombre_fuente": "BRUCELLA ABORTUS, MELITENSIS Y SUIS, ANTICUERPOS, POR AGLUTINACIÓN O ELISA",
+      "precio_bs": "26.28"
+    },
+    "BT": {
+      "fuente": "FONASA",
+      "codigo": "03-02-012",
+      "nombre_fuente": "BILIRRUBINA TOTAL (PROC. AUT.)",
+      "precio_bs": "19.62"
+    },
+    "BUN": {
+      "fuente": "INLASA",
+      "codigo": "LAC-038",
+      "nombre_fuente": "NITROGENO UREICO/UREA/NUS",
+      "precio_bs": "38.00"
+    },
+    "C3": {
+      "fuente": "INLASA",
+      "codigo": "LINM-009",
+      "nombre_fuente": "COMPLEMENTO C3",
+      "precio_bs": "90.00"
+    },
+    "C4": {
+      "fuente": "INLASA",
+      "codigo": "LINM-010",
+      "nombre_fuente": "COMPLEMENTO C4",
+      "precio_bs": "90.00"
+    },
+    "CA125": {
+      "fuente": "INLASA",
+      "codigo": "CGM-021",
+      "nombre_fuente": "CA – 125 POR ELISA",
+      "precio_bs": "235.00"
+    },
+    "CALCIO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-007",
+      "nombre_fuente": "CALCIO SÉRICO",
+      "precio_bs": "36.00"
+    },
+    "CALCIO_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-006",
+      "nombre_fuente": "CALCIO EN ORINA DE 24 HORAS",
+      "precio_bs": "36.00"
+    },
+    "CAMARON": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "CASEINA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "CHAGAS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-027",
+      "nombre_fuente": "ELISA CHAGAS",
+      "precio_bs": "125.00"
+    },
+    "CITOQUIMICO_ASCITICO.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_ASCITICO.ALBUMINA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-051",
+      "nombre_fuente": "ALBÚMINAS EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_ASCITICO.AMILASA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-045",
+      "nombre_fuente": "AMILASA EN LÍQUIDOS BIOLÓGICOS",
+      "precio_bs": "59.47"
+    },
+    "CITOQUIMICO_ASCITICO.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_ASCITICO.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_LCR.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_LCR.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_LCR.GRAM": {
+      "fuente": "INLASA",
+      "codigo": "LBC-044",
+      "nombre_fuente": "TINCIÓN GRAM",
+      "precio_bs": "40.00"
+    },
+    "CITOQUIMICO_LCR.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_PERICARDICO.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_PERICARDICO.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_PLEURAL.ADA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-050",
+      "nombre_fuente": "ADENOSINDEAMINASA EN SANGRE U OTRO FLUIDO BIOLÓGICO (ADA)",
+      "precio_bs": "67.24"
+    },
+    "CITOQUIMICO_PLEURAL.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_PLEURAL.PH": {
+      "fuente": "FONASA",
+      "codigo": "03-08-017",
+      "nombre_fuente": "PH EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS (PROC. AUT.)",
+      "precio_bs": "8.88"
+    },
+    "CITOQUIMICO_PLEURAL.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CITOQUIMICO_SINOVIAL.GLUCOSA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-015",
+      "nombre_fuente": "GLUCOSA EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "9.25"
+    },
+    "CITOQUIMICO_SINOVIAL.GRAM": {
+      "fuente": "INLASA",
+      "codigo": "LBC-044",
+      "nombre_fuente": "TINCIÓN GRAM",
+      "precio_bs": "40.00"
+    },
+    "CITOQUIMICO_SINOVIAL.PROTEINAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-050",
+      "nombre_fuente": "PROTEÍNAS TOTALES EN EXUDADOS, SECRECIONES Y OTROS LÍQUIDOS",
+      "precio_bs": "19.37"
+    },
+    "CK": {
+      "fuente": "INLASA",
+      "codigo": "LAC-011",
+      "nombre_fuente": "CREATIN KINASA (CK)",
+      "precio_bs": "54.00"
+    },
+    "CL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "CLARA_HUEVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "CL_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-012",
+      "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
+      "precio_bs": "19.99"
+    },
+    "CMP.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "CMP.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "CMP.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
+    "CMV_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "CMV_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-026",
+      "nombre_fuente": "CMV IgM QUIMIOLUMINISCENCIA",
+      "precio_bs": "170.00"
+    },
+    "CO2": {
+      "fuente": "FONASA",
+      "codigo": "03-02-011",
+      "nombre_fuente": "BICARBONATO (PROC. AUT.)",
+      "precio_bs": "9.13"
+    },
+    "COHB": {
+      "fuente": "FONASA",
+      "codigo": "03-02-083",
+      "nombre_fuente": "CARBOXIHEMOGLOBINA",
+      "precio_bs": "293.40"
+    },
+    "COL_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-010",
+      "nombre_fuente": "COLESTEROL TOTAL",
+      "precio_bs": "40.00"
+    },
+    "COOMBS_DIRECTO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-042",
+      "nombre_fuente": "PRUEBA DE COOMBS DIRECTA",
+      "precio_bs": "35.00"
+    },
+    "COOMBS_INDIRECTO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-043",
+      "nombre_fuente": "PRUEBA DE COOMBS INDIRECTA",
+      "precio_bs": "35.00"
+    },
+    "COPRO": {
+      "fuente": "INLASA",
+      "codigo": "LEP-015",
+      "nombre_fuente": "COPROPARASITOLÓGICO SIMPLE",
+      "precio_bs": "50.00"
+    },
+    "COPROLOGICO_FUNCIONAL.LEUCOCITOS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-013",
+      "nombre_fuente": "CITOLOGÍA DE MOCO FECAL",
+      "precio_bs": "70.00"
+    },
+    "CREATININA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-014",
+      "nombre_fuente": "CREATININA SÉRICA",
+      "precio_bs": "40.00"
+    },
+    "CREAT_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-013",
+      "nombre_fuente": "CREATININA EN ORINA",
+      "precio_bs": "40.00"
+    },
+    "CREAT_ORINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-013",
+      "nombre_fuente": "CREATININA EN ORINA",
+      "precio_bs": "40.00"
+    },
+    "CREAT_ORINA_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-013",
+      "nombre_fuente": "CREATININA EN ORINA",
+      "precio_bs": "40.00"
+    },
+    "CREAT_SERICA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-014",
+      "nombre_fuente": "CREATININA SÉRICA",
+      "precio_bs": "40.00"
+    },
+    "CRISTALES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-023",
+      "nombre_fuente": "ESTUDIO DE CRISTALES (CON LUZ POLARIZADA)",
+      "precio_bs": "22.21"
+    },
+    "CUCARACHA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "DENGUE_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-030",
+      "nombre_fuente": "ELISA PARA DENGUE IgM",
+      "precio_bs": "125.00"
+    },
+    "DENGUE_NS1": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-027",
+      "nombre_fuente": "ELISA NS1 PARA DENGUE",
+      "precio_bs": "125.00"
+    },
+    "DHEA_S": {
+      "fuente": "FONASA",
+      "codigo": "03-03-008",
+      "nombre_fuente": "DEHIDROEPIANDROSTERONA SULFATO (DHEA-S)",
+      "precio_bs": "88.22"
+    },
+    "D_FARINAE": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "D_PTERONYSSINUS": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "EGO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-019",
+      "nombre_fuente": "EXAMEN GENERAL DE ORINA",
+      "precio_bs": "29.00"
+    },
+    "EMA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-081",
+      "nombre_fuente": "ANTICUERPO ANTIENDOMISIO (EMA, ANTIMEMBRANA BASAL GLOMERULAR (GBM), ANTIRETICULINA, POR IFI C/U.",
+      "precio_bs": "143.62"
+    },
+    "EOSINOFILOS_ABS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-063",
+      "nombre_fuente": "RECUENTO DE EOSINÓFILOS (ABSOLUTO)",
+      "precio_bs": "12.46"
+    },
+    "ERITROCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-064",
+      "nombre_fuente": "RECUENTO DE ERITROCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.50"
+    },
+    "ESTRADIOL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-062",
+      "nombre_fuente": "ESTRADIOL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "133.00"
+    },
+    "FA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-021",
+      "nombre_fuente": "FOSFATASA ALCALINA",
+      "precio_bs": "49.00"
+    },
+    "FACTOR_VIII": {
+      "fuente": "FONASA",
+      "codigo": "03-01-025",
+      "nombre_fuente": "FACTORES VII, VIII, IX, X, XI, XII, XIII, C/U",
+      "precio_bs": "64.03"
+    },
+    "FENILALANINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-082",
+      "nombre_fuente": "FENILALANINA CUANTITATIVA EN GOTAS DE SANGRE SECA",
+      "precio_bs": "108.45"
+    },
+    "FERRITINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-020",
+      "nombre_fuente": "FERRITINA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "185.00"
+    },
+    "FIBRINOGENO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-015",
+      "nombre_fuente": "FIBRINOGENO",
+      "precio_bs": "54.00"
+    },
+    "FOLATO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-002",
+      "nombre_fuente": "ACIDO FÓLICO O FOLATOS",
+      "precio_bs": "63.42"
+    },
+    "FOSFORO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-022",
+      "nombre_fuente": "FOSFORO EN SANGRE",
+      "precio_bs": "63.00"
+    },
+    "FOSFORO_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-023",
+      "nombre_fuente": "FÓSFORO EN ORINA",
+      "precio_bs": "63.00"
+    },
+    "FR": {
+      "fuente": "INLASA",
+      "codigo": "LINM-020",
+      "nombre_fuente": "FACTOR REUMATOIDEO (FR)",
+      "precio_bs": "48.00"
+    },
+    "FSH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-063",
+      "nombre_fuente": "FSH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "133.00"
+    },
+    "GATO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "GGT": {
+      "fuente": "INLASA",
+      "codigo": "LAC-024",
+      "nombre_fuente": "GAMMA GLUTAMIL TRANSFERASA",
+      "precio_bs": "38.00"
+    },
+    "GLUCOSA_AYUNAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "GLU_BASAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "GOTA_GRUESA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-053",
+      "nombre_fuente": "HEMOPARÁSITOS, DIAGNÓSTICO MICROSCÓPICO DE (MÍNIMO 10 FROTIS Y/O GOTAS GRUESAS, C/S EXAMEN DIRECTO AL FRESCO), CADA SESIÓN",
+      "precio_bs": "126.10"
+    },
+    "GRAMA_BERMUDA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "GRASAS": {
+      "fuente": "FONASA",
+      "codigo": "03-08-003",
+      "nombre_fuente": "GRASAS NEUTRAS (SUDÁN III)",
+      "precio_bs": "8.27"
+    },
+    "GRUPO_RH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-027",
+      "nombre_fuente": "GRUPO SANGUÍNEO Y FACTOR RH",
+      "precio_bs": "50.00"
+    },
+    "HAPTOGLOBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-035",
+      "nombre_fuente": "HAPTOGLOBINA CUANTITATIVA",
+      "precio_bs": "60.21"
+    },
+    "HAV_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-006",
+      "nombre_fuente": "ANTICUERPOS IgM ANTI – HAV",
+      "precio_bs": "127.00"
+    },
+    "HB": {
+      "fuente": "FONASA",
+      "codigo": "03-01-038",
+      "nombre_fuente": "HEMOGLOBINA EN SANGRE TOTAL (PROC. AUT.)",
+      "precio_bs": "9.75"
+    },
+    "HBA1C": {
+      "fuente": "INLASA",
+      "codigo": "LAC-028",
+      "nombre_fuente": "HEMOGLOBINA A1C (GLICOHEMOGLOBINA)",
+      "precio_bs": "119.00"
+    },
+    "HBEAG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-015",
+      "nombre_fuente": "ELISA PARA HBeAg (ANTIGENO e HEPATITIS B)",
+      "precio_bs": "148.00"
+    },
+    "HBSAG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-016",
+      "nombre_fuente": "ELISA PARA HBsAg (ANTÍGENO DE SUPERFICIE – HEPATITIS B)",
+      "precio_bs": "105.00"
+    },
+    "HDL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-009",
+      "nombre_fuente": "HDL COLESTEROL",
+      "precio_bs": "48.00"
+    },
+    "HEMOGRAMA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-030",
+      "nombre_fuente": "HEMOGRAMA COMPLETO",
+      "precio_bs": "60.00"
+    },
+    "HEMOGRAMA.LEUCOCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-065",
+      "nombre_fuente": "RECUENTO DE LEUCOCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.25"
+    },
+    "HEMOGRAMA_SIN_FORMULA.LEUCOCITOS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-065",
+      "nombre_fuente": "RECUENTO DE LEUCOCITOS, ABSOLUTO (PROC. AUT.)",
+      "precio_bs": "9.25"
+    },
+    "HERPES_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "HERPES_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-025",
+      "nombre_fuente": "HSV IgM QUIMIOLUMINISCENCIA",
+      "precio_bs": "170.00"
+    },
+    "HIERRO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-031",
+      "nombre_fuente": "HIERRO SÉRICO",
+      "precio_bs": "39.00"
+    },
+    "HOMOCISTEINA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-086",
+      "nombre_fuente": "HOMOCISTEÍNA",
+      "precio_bs": "761.14"
+    },
+    "HTO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-036",
+      "nombre_fuente": "HEMATOCRITO (PROC. AUT.)",
+      "precio_bs": "9.75"
+    },
+    "IGA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-024",
+      "nombre_fuente": "INMUNOGLOBULINA A IgA",
+      "precio_bs": "90.00"
+    },
+    "IGA_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-024",
+      "nombre_fuente": "INMUNOGLOBULINA A IgA",
+      "precio_bs": "90.00"
+    },
+    "IGE_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-039",
+      "nombre_fuente": "ELISA PARA Ig E",
+      "precio_bs": "86.00"
+    },
+    "INMUNOGLOBULINAS.IGG": {
+      "fuente": "INLASA",
+      "codigo": "LINM-023",
+      "nombre_fuente": "INMUNOGLOBULINA G IgG",
+      "precio_bs": "90.00"
+    },
+    "INMUNOGLOBULINAS.IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-022",
+      "nombre_fuente": "INMUNOGLOBULINA M IgM",
+      "precio_bs": "90.00"
+    },
+    "INSULINA_BASAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-033",
+      "nombre_fuente": "INSULINA",
+      "precio_bs": "197.00"
+    },
+    "K": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "K_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-012",
+      "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
+      "precio_bs": "19.99"
+    },
+    "LDH_HEMOLISIS.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "LDH_SUERO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "LECHE_VACA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "LH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-064",
+      "nombre_fuente": "LH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "125.00"
+    },
+    "LINFOCITOS_ABS": {
+      "fuente": "FONASA",
+      "codigo": "03-01-066",
+      "nombre_fuente": "RECUENTO DE LINFOCITOS (ABSOLUTO)",
+      "precio_bs": "16.04"
+    },
+    "LIPASA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-073",
+      "nombre_fuente": "LIPASA EN SANGRE",
+      "precio_bs": "66.00"
+    },
+    "MAGNESIO": {
+      "fuente": "FONASA",
+      "codigo": "03-02-056",
+      "nombre_fuente": "MAGNESIO EN SANGRE",
+      "precio_bs": "40.35"
+    },
+    "MANI": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "METHB": {
+      "fuente": "FONASA",
+      "codigo": "03-01-054",
+      "nombre_fuente": "METAHEMOGLOBINA",
+      "precio_bs": "19.49"
+    },
+    "NA": {
+      "fuente": "FONASA",
+      "codigo": "03-02-032",
+      "nombre_fuente": "ELECTROLITOS PLASMÁTICOS (SODIO, POTASIO, CLORO) C/U",
+      "precio_bs": "16.29"
+    },
+    "NA_ORINA": {
+      "fuente": "FONASA",
+      "codigo": "03-09-012",
+      "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
+      "precio_bs": "19.99"
+    },
+    "NG": {
+      "fuente": "INLASA",
+      "codigo": "CGM-003",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA LA DETECCIÓN DE NEISSERIA GONORRHOEAE",
+      "precio_bs": "647.00"
+    },
+    "NS1": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-027",
+      "nombre_fuente": "ELISA NS1 PARA DENGUE",
+      "precio_bs": "125.00"
+    },
+    "NUEZ": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "OLIVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "PARASITOS": {
+      "fuente": "INLASA",
+      "codigo": "LEP-015",
+      "nombre_fuente": "COPROPARASITOLÓGICO SIMPLE",
+      "precio_bs": "50.00"
+    },
+    "PCR": {
+      "fuente": "FONASA",
+      "codigo": "03-05-031",
+      "nombre_fuente": "PROTEÍNA C REACTIVA POR TÉCNICAS AUTOMATIZADAS",
+      "precio_bs": "76.99"
+    },
+    "PERFIL_CARDIACO.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "PERFIL_DENGUE.IGG": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-037",
+      "nombre_fuente": "ELISA PARA DENGUE IgG",
+      "precio_bs": "125.00"
+    },
+    "PERFIL_DENGUE.IGM": {
+      "fuente": "INLASA",
+      "codigo": "LVIR-030",
+      "nombre_fuente": "ELISA PARA DENGUE IgM",
+      "precio_bs": "125.00"
+    },
+    "PERFIL_GERIATRICO.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_GERIATRICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_HEPATICO.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_HEPATICO.LDH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-034",
+      "nombre_fuente": "LACTATO DESHIDROGENASA (LDH)",
+      "precio_bs": "37.00"
+    },
+    "PERFIL_HEPATICO.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
+    "PERFIL_LIPIDICO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-039",
+      "nombre_fuente": "PERFIL LIPIDICO",
+      "precio_bs": "138.00"
+    },
+    "PERFIL_LIPIDICO.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "PERFIL_PANCREATICO.AMILASA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-004",
+      "nombre_fuente": "AMILASA EN SANGRE",
+      "precio_bs": "39.00"
+    },
+    "PERFIL_PANCREATICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PANCREATICO.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "PERFIL_PEDIATRICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PRENATAL.UROCULTIVO": {
+      "fuente": "INLASA",
+      "codigo": "LBC-045",
+      "nombre_fuente": "UROCULTIVO RECUENTO DE COLONIA Y ANTIBIOGRAMA",
+      "precio_bs": "100.00"
+    },
+    "PERFIL_PREQUIRURGICO.ELECTROLITOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-018",
+      "nombre_fuente": "ELECTROLITOS EN SANGRE (SODIO,POTASIO Y CLORO)",
+      "precio_bs": "203.00"
+    },
+    "PERFIL_PREQUIRURGICO.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_PROSTATICO.PSA_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-017",
+      "nombre_fuente": "ELISA PARA PSA LIBRE",
+      "precio_bs": "115.00"
+    },
+    "PERFIL_RENAL.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PERFIL_RENAL.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_RIESGO_CARDIOVASCULAR.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "PERFIL_RIESGO_CARDIOVASCULAR.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "PERRO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "PESCADO_BACALAO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "PH_HECES": {
+      "fuente": "FONASA",
+      "codigo": "03-08-006",
+      "nombre_fuente": "PH EN DEPOSICIONES",
+      "precio_bs": "8.27"
+    },
+    "PLAQUETAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-047",
+      "nombre_fuente": "RECUENTO DE PLAQUETAS",
+      "precio_bs": "38.00"
+    },
+    "PROGESTERONA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-065",
+      "nombre_fuente": "PROGESTERONA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "102.00"
+    },
+    "PROLACTINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-074",
+      "nombre_fuente": "PROLACTINA POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "126.00"
+    },
+    "PROTEINAS_SUERO": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
+    "PROTEINAS_TOTALES.ALBUMINA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-003",
+      "nombre_fuente": "ALBÚMINA",
+      "precio_bs": "34.00"
+    },
+    "PROTEINAS_TOTALES.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
+    "PROTEINA_C": {
+      "fuente": "FONASA",
+      "codigo": "03-01-091",
+      "nombre_fuente": "PROTEÍNA C FUNCIONAL",
+      "precio_bs": "394.69"
+    },
+    "PROTEINA_S": {
+      "fuente": "FONASA",
+      "codigo": "03-01-092",
+      "nombre_fuente": "PROTEÍNA S",
+      "precio_bs": "466.75"
+    },
+    "PROTEINOGRAMA.PROTEINAS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-040",
+      "nombre_fuente": "PROTEINAS TOTALES",
+      "precio_bs": "27.00"
+    },
+    "PROT_24H": {
+      "fuente": "INLASA",
+      "codigo": "LAC-041",
+      "nombre_fuente": "PROTEINURIA DE 24 HORAS",
+      "precio_bs": "36.00"
+    },
+    "PSA": {
+      "fuente": "INLASA",
+      "codigo": "LINM-018",
+      "nombre_fuente": "ELISA PARA PSA TOTAL",
+      "precio_bs": "96.00"
+    },
+    "PSA_LIBRE.PSA_LIBRE": {
+      "fuente": "INLASA",
+      "codigo": "LINM-017",
+      "nombre_fuente": "ELISA PARA PSA LIBRE",
+      "precio_bs": "115.00"
+    },
+    "PSA_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LINM-018",
+      "nombre_fuente": "ELISA PARA PSA TOTAL",
+      "precio_bs": "96.00"
+    },
+    "PTH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-066",
+      "nombre_fuente": "PARATOHORMONA INTACTA (PTH) POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "180.00"
+    },
+    "QUIMICA_SANGUINEA_BASICA.GLUCOSA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-025",
+      "nombre_fuente": "GLUCOSA EN SANGRE",
+      "precio_bs": "40.00"
+    },
+    "QUIMICA_SANGUINEA_BASICA.TRIGLICERIDOS": {
+      "fuente": "INLASA",
+      "codigo": "LAC-055",
+      "nombre_fuente": "TRIGLICÉRIDOS",
+      "precio_bs": "41.00"
+    },
+    "RENINA": {
+      "fuente": "FONASA",
+      "codigo": "03-03-021",
+      "nombre_fuente": "RENINA",
+      "precio_bs": "112.52"
+    },
+    "RETIC_PCT": {
+      "fuente": "INLASA",
+      "codigo": "LAC-048",
+      "nombre_fuente": "RECUENTO DE RETICULOCITOS",
+      "precio_bs": "39.00"
+    },
+    "RPCA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-093",
+      "nombre_fuente": "RESISTENCIA A LA PROTEÍNA C ACTIVADA",
+      "precio_bs": "293.89"
+    },
+    "RUBEOLA_IGG": {
+      "fuente": "FONASA",
+      "codigo": "03-06-069",
+      "nombre_fuente": "ANTICUERPOS VIRALES, DETERM. DE (SARS COV-2 IGM IGG), (ADENOVIRUS, CITOMEGALOVIRUS, HERPES SIMPLE, RUBÉOLA, INFLUENZA A Y B; VIRUS VARICELA-ZOSTER; VIRUS SINCICIAL RESPIRATORIO; PARAINFLUENZA 1, 2 Y 3; EPSTEIN BARR Y OTROS), C/U",
+      "precio_bs": "78.96"
+    },
+    "RUBEOLA_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LINM-038",
+      "nombre_fuente": "IgM ANTI VIRUS DE LA RUBEOLA POR ELISA",
+      "precio_bs": "164.00"
+    },
+    "SANGRE_OCULTA": {
+      "fuente": "FONASA",
+      "codigo": "03-08-062",
+      "nombre_fuente": "ANÁLISIS INMUNOQUÍMICO/INMUNOLÓGICO DE SANGRE OCULTA EN DEPOSICIONES",
+      "precio_bs": "178.53"
+    },
+    "SHBG": {
+      "fuente": "FONASA",
+      "codigo": "03-03-046",
+      "nombre_fuente": "SHBG (SEX-HORMONE BINDING GLOBULIN)",
+      "precio_bs": "160.39"
+    },
+    "SODIO_24H": {
+      "fuente": "FONASA",
+      "codigo": "03-09-012",
+      "nombre_fuente": "ELECTRÓLITOS (SODIO, POTASIO, CLORO) C/U, EN ORINA",
+      "precio_bs": "19.99"
+    },
+    "SOH": {
+      "fuente": "FONASA",
+      "codigo": "03-08-062",
+      "nombre_fuente": "ANÁLISIS INMUNOQUÍMICO/INMUNOLÓGICO DE SANGRE OCULTA EN DEPOSICIONES",
+      "precio_bs": "178.53"
+    },
+    "SOYA": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "T3L": {
+      "fuente": "INLASA",
+      "codigo": "LAC-067",
+      "nombre_fuente": "T3 LIBRE POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T3_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-068",
+      "nombre_fuente": "T3 TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T4L": {
+      "fuente": "INLASA",
+      "codigo": "LAC-069",
+      "nombre_fuente": "T4 LIBRE POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "T4_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-070",
+      "nombre_fuente": "T4 TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "123.00"
+    },
+    "TESTOSTERONA_LIBRE": {
+      "fuente": "FONASA",
+      "codigo": "03-03-023",
+      "nombre_fuente": "TESTOSTERONA LIBRE EN SANGRE",
+      "precio_bs": "82.67"
+    },
+    "TESTOSTERONA_TOTAL": {
+      "fuente": "INLASA",
+      "codigo": "LAC-075",
+      "nombre_fuente": "TESTOSTERONA TOTAL POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "126.00"
+    },
+    "TIEMPO_TROMBINA": {
+      "fuente": "FONASA",
+      "codigo": "03-01-083",
+      "nombre_fuente": "TROMBINA, TIEMPO DE",
+      "precio_bs": "26.16"
+    },
+    "TIMOTHY": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "TOXO_IGG": {
+      "fuente": "INLASA",
+      "codigo": "LEP-006",
+      "nombre_fuente": "ELISA PARA TOXOPLASMOSIS IgG",
+      "precio_bs": "106.00"
+    },
+    "TOXO_IGM": {
+      "fuente": "INLASA",
+      "codigo": "LEP-005",
+      "nombre_fuente": "ELISA PARA TOXOPLASMOSIS IgM",
+      "precio_bs": "106.00"
+    },
+    "TP": {
+      "fuente": "INLASA",
+      "codigo": "LAC-051",
+      "nombre_fuente": "TIEMPO DE PROTROMBINA",
+      "precio_bs": "48.00"
+    },
+    "TPHA": {
+      "fuente": "FONASA",
+      "codigo": "03-06-041",
+      "nombre_fuente": "TREPONEMA PALLIDUM FTA - ABS, MHA-TP C/U",
+      "precio_bs": "63.05"
+    },
+    "TP_SEG": {
+      "fuente": "INLASA",
+      "codigo": "LAC-051",
+      "nombre_fuente": "TIEMPO DE PROTROMBINA",
+      "precio_bs": "48.00"
+    },
+    "TRIGO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    },
+    "TSH": {
+      "fuente": "INLASA",
+      "codigo": "LAC-071",
+      "nombre_fuente": "TSH POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "127.00"
+    },
+    "TSH_NEONATAL": {
+      "fuente": "FONASA",
+      "codigo": "03-02-097",
+      "nombre_fuente": "HORMONA TIROESTIMULANTE, NEONATAL EN GSS",
+      "precio_bs": "284.76"
+    },
+    "TTPA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-052",
+      "nombre_fuente": "TIEMPO PARCIAL DE TROMBOPLASTINA ACTIVADA (TTPA)",
+      "precio_bs": "54.00"
+    },
+    "UREA": {
+      "fuente": "INLASA",
+      "codigo": "LAC-038",
+      "nombre_fuente": "NITROGENO UREICO/UREA/NUS",
+      "precio_bs": "38.00"
+    },
+    "VDRL": {
+      "fuente": "FONASA",
+      "codigo": "03-06-042",
+      "nombre_fuente": "V.D.R.L.",
+      "precio_bs": "39.24"
+    },
+    "VIH": {
+      "fuente": "FONASA",
+      "codigo": "03-06-112",
+      "nombre_fuente": "VIH, ANTICUERPOS Y ANTÍGENOS VIRALES, DETERM. DE H.I.V.",
+      "precio_bs": "91.67"
+    },
+    "VIT_D": {
+      "fuente": "INLASA",
+      "codigo": "LAC-072",
+      "nombre_fuente": "VITAMINA D POR QUIMIOLUMINISCENCIA",
+      "precio_bs": "203.00"
+    },
+    "VPH_AR": {
+      "fuente": "INLASA",
+      "codigo": "CGM-004",
+      "nombre_fuente": "PCR EN TIEMPO REAL PARA VIRUS PAPILOMA HUMANO DE ALTO RIESGO",
+      "precio_bs": "280.00"
+    },
+    "VSG": {
+      "fuente": "INLASA",
+      "codigo": "LAC-057",
+      "nombre_fuente": "VELOCIDAD DE ERITROSEDIMENTACIÓN GLOBULAR (VES)",
+      "precio_bs": "24.00"
+    },
+    "VWF_AG": {
+      "fuente": "FONASA",
+      "codigo": "03-01-089",
+      "nombre_fuente": "FACTOR VON WILLEBRAND ANTIGÉNICO (FVW:AG)",
+      "precio_bs": "127.45"
+    },
+    "VWF_RCO": {
+      "fuente": "FONASA",
+      "codigo": "03-01-090",
+      "nombre_fuente": "FACTOR VON WILLEBRAND ANTIGÉNICO COFACTOR RISTOCETINA (FVW:CORIS)",
+      "precio_bs": "120.54"
+    },
+    "YEMA_HUEVO": {
+      "fuente": "FONASA",
+      "codigo": "03-05-029",
+      "nombre_fuente": "INMUNOGLOBULINAS IGE, IGG ESPECÍFICAS, C/U",
+      "precio_bs": "66.75"
+    }
+  }
+}

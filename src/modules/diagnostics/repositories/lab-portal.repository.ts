@@ -5,6 +5,7 @@ import { DiagnosticReports, ServiceRequests } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { FileVersions, Files } from '../../common/entities';
 import {
+  DiagnosticServiceCategories,
   DiagnosticStudyOfferings,
   DiagnosticUnits,
 } from '../../diagnostic_units/entities';
@@ -230,5 +231,19 @@ export class LabPortalRepository {
       { diagnosticUnitId: unit.id },
       { orderBy: { updatedAt: 'DESC' } },
     );
+  }
+
+  /** Service categories of the tenant's diagnostic unit (read-only). */
+  async findCategories(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<DiagnosticServiceCategories[]> {
+    const unit = await em.findOne(
+      DiagnosticUnits,
+      { tenantId },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+    if (!unit) return [];
+    return em.find(DiagnosticServiceCategories, { diagnosticUnitId: unit.id });
   }
 }

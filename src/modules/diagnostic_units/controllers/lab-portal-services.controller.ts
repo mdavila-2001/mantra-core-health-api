@@ -18,15 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  Audited,
-  CurrentUser,
-  NotAudited,
-  type AuthenticatedUser,
-} from '../../../common';
-
-const NO_CATEGORY_WRITE =
-  'Never writes: the model has no lab categories table, the route answers 422/404.';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { LabStaffGuard } from '../../diagnostics/guards';
 import {
   LabCategoryNameDto,
@@ -45,7 +37,14 @@ import {
   LabServiceDraftDto,
 } from '../dto/lab-portal-service.dto';
 import { LabPortalCatalogService } from '../services/lab-portal-catalog.service';
+import { LabPortalCategoriesService } from '../services/lab-portal-categories.service';
 import { LabPortalImportService } from '../services/lab-portal-import.service';
+import { LabPortalStudyCatalogService } from '../services/lab-portal-study-catalog.service';
+import {
+  LabCatalogDto,
+  LabCatalogImportDto,
+  LabCatalogImportResultDto,
+} from '../dto/lab-portal-catalog.dto';
 
 /**
  * Lab portal catalog ("Precios"): services, categories and bulk import of the
@@ -64,12 +63,43 @@ import { LabPortalImportService } from '../services/lab-portal-import.service';
 export class LabPortalServicesController {
   /**
    * @param catalog - Catalog reads and writes.
+   * @param categories - Service categories of the lab.
    * @param importer - Bulk import.
+   * @param studyCatalog - Study catalog browsing and import (proceso 4.2).
    */
   constructor(
     private readonly catalog: LabPortalCatalogService,
+    private readonly categories: LabPortalCategoriesService,
     private readonly importer: LabPortalImportService,
+    private readonly studyCatalog: LabPortalStudyCatalogService,
   ) {}
+
+  @Get('catalog')
+  @ApiOperation({
+    summary: 'Catálogo de análisis (LOINC) con componentes y precio sugerido',
+  })
+  @ApiOkResponse({ type: LabCatalogDto })
+  studyCatalogItems(): Promise<LabCatalogDto> {
+    return this.studyCatalog.catalog();
+  }
+
+  @Audited({
+    action: 'LAB_CATALOG_IMPORTED',
+    entity: 'diagnostic_study_offering',
+  })
+  @Post('catalog/import')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Sumar análisis del catálogo, con sus componentes y precio sugerido',
+  })
+  @ApiOkResponse({ type: LabCatalogImportResultDto })
+  importCatalog(
+    @Body() dto: LabCatalogImportDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LabCatalogImportResultDto> {
+    return this.studyCatalog.importCatalog(dto, actor);
+  }
 
   @Get('services')
   @ApiOperation({ summary: 'Catálogo de servicios del laboratorio' })
@@ -144,41 +174,63 @@ export class LabPortalServicesController {
   }
 
   @Get('categories')
-  @ApiOperation({ summary: 'Categorías del laboratorio' })
+  @ApiOperation({ summary: 'Categorías del laboratorio, con su conteo' })
   @ApiOkResponse({ type: LabCategoryPageDto })
   listCategories(): Promise<LabCategoryPageDto> {
-    return this.catalog.listCategories();
+    return this.categories.list();
   }
 
-  @NotAudited(NO_CATEGORY_WRITE)
+  @Audited({
+    action: 'LAB_CATEGORY_CREATED',
+    entity: 'diagnostic_service_category',
+    entityId: 'result.id',
+  })
   @Post('categories')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Crear una categoría (422: el modelo no tiene dónde guardarla)',
+    summary:
+      'Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)',
   })
   @ApiOkResponse({ type: LabCategoryDto })
-  createCategory(@Body() _dto: LabCategoryNameDto): Promise<LabCategoryDto> {
-    return this.catalog.createCategory();
+  createCategory(
+    @Body() dto: LabCategoryNameDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LabCategoryDto> {
+    return this.categories.create(dto.name, actor);
   }
 
-  @NotAudited(NO_CATEGORY_WRITE)
+  @Audited({
+    action: 'LAB_CATEGORY_RENAMED',
+    entity: 'diagnostic_service_category',
+    entityId: 'param:id',
+  })
   @Patch('categories/:id')
-  @ApiOperation({ summary: 'Renombrar una categoría' })
+  @ApiOperation({
+    summary: 'Renombrar una categoría (409 si el nombre ya existe)',
+  })
   @ApiOkResponse({ type: LabCategoryDto })
   renameCategory(
-    @Param('id', ParseUUIDPipe) _id: string,
-    @Body() _dto: LabCategoryNameDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: LabCategoryNameDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<LabCategoryDto> {
-    return this.catalog.categoryNotFound();
+    return this.categories.rename(id, dto.name, actor);
   }
 
-  @NotAudited(NO_CATEGORY_WRITE)
+  @Audited({
+    action: 'LAB_CATEGORY_DELETED',
+    entity: 'diagnostic_service_category',
+    entityId: 'param:id',
+  })
   @Delete('categories/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Eliminar una categoría' })
+  @ApiOperation({
+    summary:
+      'Eliminar una categoría (409 mientras agrupe servicios no retirados)',
+  })
   deleteCategory(
-    @Param('id', ParseUUIDPipe) _id: string,
-  ): Promise<{ ok: boolean }> {
-    return this.catalog.categoryNotFound();
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ ok: true }> {
+    return this.categories.remove(id);
   }
 }

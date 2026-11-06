@@ -14,13 +14,13 @@ asignación de especialistas; más la reproyección del perfil público.
   find src/modules/diagnostic_units -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **5 controllers, 21 rutas HTTP, 10 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **5 controllers, 21 rutas HTTP, 11 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`CommunityModule`, `CommonModule`, `PracticeModule`).
 
-Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`, `diagnostic_price_schedules`, `diagnostic_study_components`, `diagnostic_study_offerings`, `diagnostic_study_prices`, `diagnostic_unit_accreditations`, `diagnostic_unit_practitioner_assignments`, `diagnostic_unit_sites`, `diagnostic_unit_specialties`, `diagnostic_units`.
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `diagnostic_equipment`, `diagnostic_price_schedules`, `diagnostic_service_categories`, `diagnostic_study_components`, `diagnostic_study_offerings`, `diagnostic_study_prices`, `diagnostic_unit_accreditations`, `diagnostic_unit_practitioner_assignments`, `diagnostic_unit_sites`, `diagnostic_unit_specialties`, `diagnostic_units`.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -74,7 +74,19 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 `diagnostic_units`, `diagnostic_unit_sites`, `diagnostic_unit_specialties`,
 `diagnostic_unit_accreditations`, `diagnostic_unit_practitioner_assignments`,
 `diagnostic_study_offerings`, `diagnostic_study_components`,
-`diagnostic_price_schedules`, `diagnostic_study_prices`, `diagnostic_equipment`.
+`diagnostic_price_schedules`, `diagnostic_study_prices`, `diagnostic_equipment`,
+`diagnostic_service_categories`.
+
+## Portal del laboratorio (`/diagnostics/lab/services`, `/categories`)
+
+Catálogo del laboratorio del tenant activo (sin id de laboratorio en la ruta; guard `LabStaffGuard`).
+Categorías: `GET/POST/PATCH/DELETE /diagnostics/lab/categories`, únicas por unidad sin distinguir
+mayúsculas (409 si el nombre ya existe). Una categoría que aún agrupa servicios no retirados no se borra
+(409, `DIAGNOSTIC_CATEGORY_IN_USE`); los retirados, invisibles en el portal, se desvinculan y la categoría
+se borra. Cada servicio lleva `categoryId`/`categoryName`, `sampleType` (texto libre en `specimen_description`,
+con el concepto de muestra como respaldo de lectura) y `available` («disponible hoy»). Un servicio con
+`available = false` conserva estado y precio pero sale del directorio público, de la búsqueda por cobertura
+y de la reserva de órdenes. La carga masiva acepta `categoryId` por fila y rechaza el de otro laboratorio.
 
 ## Business rules
 

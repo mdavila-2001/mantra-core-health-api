@@ -23,6 +23,7 @@ import { GetStudyAvailabilityUseCase } from '../application/get-study-availabili
 import { ListCenterBookingsUseCase } from '../application/list-center-bookings.use-case';
 import { SaveCenterScheduleUseCase } from '../application/save-center-schedule.use-case';
 import { SetEquipmentStatusUseCase } from '../application/set-equipment-status.use-case';
+import { ManageCenterEquipmentUseCase } from '../application/manage-center-equipment.use-case';
 import { CENTER_SCHEDULE_CONTROLLERS } from '../center-schedule.providers';
 
 /**
@@ -41,6 +42,11 @@ describe('center schedule routes (HTTP)', () => {
   const saver = { execute: ok('saved') };
   const equipment = { execute: ok('equipment') };
   const bookings = { execute: ok('bookings') };
+  const devices = {
+    create: ok('created'),
+    update: ok('edited'),
+    remove: ok('removed'),
+  };
   const availability = { execute: ok('availability') };
   const options = { execute: ok('options') };
   const booker = { execute: ok('booked') };
@@ -59,6 +65,7 @@ describe('center schedule routes (HTTP)', () => {
         { provide: SaveCenterScheduleUseCase, useValue: saver },
         { provide: SetEquipmentStatusUseCase, useValue: equipment },
         { provide: ListCenterBookingsUseCase, useValue: bookings },
+        { provide: ManageCenterEquipmentUseCase, useValue: devices },
         { provide: GetStudyAvailabilityUseCase, useValue: availability },
         { provide: GetBookingOptionsUseCase, useValue: options },
         { provide: BookOrderUseCase, useValue: booker },
@@ -139,6 +146,24 @@ describe('center schedule routes (HTTP)', () => {
     const path = `/diagnostic-units/${UNIT}/equipment/${ORDER}`;
     await http().patch(path).send({ status: 'MAINTENANCE' }).expect(200);
     await http().patch(path).send({ status: 'BROKEN' }).expect(400);
+  });
+
+  it('equipment CRUD: register, edit and remove a production line', async () => {
+    const base = `/diagnostic-units/${UNIT}/equipment`;
+    await http()
+      .post(base)
+      .send({ name: 'Ecógrafo 2', modalityCode: 'ECO' })
+      .expect(201, { tag: 'created' });
+    await http().post(base).send({ name: '' }).expect(400);
+    await http()
+      .post(base)
+      .send({ name: 'x', modalityCode: 'ECG' })
+      .expect(400);
+    await http()
+      .put(`${base}/${ORDER}`)
+      .send({ name: 'Ecógrafo B', modalityCode: null })
+      .expect(200, { tag: 'edited' });
+    await http().delete(`${base}/${ORDER}`).expect(200, { tag: 'removed' });
   });
 
   it('study availability is served on its own path', async () => {

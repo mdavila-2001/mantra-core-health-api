@@ -4,6 +4,8 @@ import { requireTenantId, ResourceNotFoundException } from '../../../common';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import {
+  DiagnosticStudyComponents,
+  DiagnosticServiceCategories,
   DiagnosticStudyOfferings,
   DiagnosticUnits,
   type DiagnosticPriceSchedules,
@@ -19,8 +21,12 @@ export interface LabPortalContext {
   /** The public standard price list the portal writes to; created on first price. */
   schedule: DiagnosticPriceSchedules | null;
   readonly offerings: DiagnosticStudyOfferings[];
+  /** The unit's own service categories (`diagnostic_service_categories`). */
+  readonly categories: DiagnosticServiceCategories[];
   /** Current price of each offering in `schedule`, by offering id. */
   readonly prices: Map<string, DiagnosticStudyPrices>;
+  /** Panel links (`diagnostic_study_components`) of the unit's offerings. */
+  readonly links: DiagnosticStudyComponents[];
   /** Specimen concept id -> display. */
   readonly specimens: Map<string, string>;
   /** Next free `version_number` of `schedule` (UK is per schedule), lazily read. */
@@ -66,9 +72,10 @@ export class LabPortalContextService {
   async load(em: EntityManager): Promise<LabPortalContext> {
     const unit = await this.unitOfTenant(em);
     const now = new Date();
-    const [schedules, offerings] = await Promise.all([
+    const [schedules, offerings, categories] = await Promise.all([
       this.readRepo.findCurrentPublicSchedules(em, unit.id, now),
       em.find(DiagnosticStudyOfferings, { diagnosticUnitId: unit.id }),
+      em.find(DiagnosticServiceCategories, { diagnosticUnitId: unit.id }),
     ]);
     const schedule =
       schedules
@@ -87,17 +94,26 @@ export class LabPortalContextService {
           .filter((id): id is string => Boolean(id)),
       ),
     ];
-    const [prices, concepts] = await Promise.all([
+    const [prices, concepts, links] = await Promise.all([
       schedule
         ? this.readRepo.findCurrentPrices(em, [schedule.id], offeringIds, now)
         : Promise.resolve([]),
       this.readRepo.findConcepts(em, specimenIds),
+      offeringIds.length === 0
+        ? Promise.resolve([])
+        : em.find(
+            DiagnosticStudyComponents,
+            { parentOfferingId: { $in: offeringIds } },
+            { orderBy: { ordinal: 'ASC' } },
+          ),
     ]);
     return {
       unit,
       schedule,
       offerings,
+      categories,
       prices: new Map(prices.map((p) => [p.diagnosticStudyOfferingId, p])),
+      links,
       specimens: new Map(concepts.map((c) => [c.id, c.display])),
     };
   }
@@ -113,6 +129,19 @@ export class LabPortalContextService {
       );
     }
     return offering;
+  }
+
+  /** Category of the context by id; another unit's or unknown id is a uniform 404. */
+  category(ctx: LabPortalContext, id: string): DiagnosticServiceCategories {
+    const category = ctx.categories.find((c) => c.id === id);
+    if (!category) {
+      throw new ResourceNotFoundException(
+        'Categoría no encontrada',
+        undefined,
+        REASON,
+      );
+    }
+    return category;
   }
 
   /** Offering whose code matches case-insensitively, other than `exceptId`. */

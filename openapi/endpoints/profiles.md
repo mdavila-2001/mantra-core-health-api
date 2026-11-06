@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 84 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 85 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `admissions`, `profiles-affiliations`, `profiles-patients`, `profiles-practitioner-admission`, `profiles-practitioners`, `profiles-primary-practitioner`
 - **Controladores:** `AdmissionsController`, `OwnAdmissionController`, `PatientAddressBookController`, `PractitionerSignatureAssetsController`, `PrimaryPractitionerController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
@@ -71,30 +71,31 @@ Referencia exhaustiva de 84 operación(es) del módulo `profiles`, derivada del 
 58. [PATCH /profiles/practitioners/me](#58-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
 59. [GET /profiles/practitioners/me/admission](#59-get-profiles-practitioners-me-admission) — Estado de mi verificación
 60. [POST /profiles/practitioners/me/admission/resubmit](#60-post-profiles-practitioners-me-admission-resubmit) — Reenviar mi solicitud
-61. [POST /profiles/practitioners/me/admission/withdraw](#61-post-profiles-practitioners-me-admission-withdraw) — Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
-62. [GET /profiles/practitioners/me/affiliations](#62-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-63. [POST /profiles/practitioners/me/affiliations](#63-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-64. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#64-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-65. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#65-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-66. [POST /profiles/practitioners/me/credentials](#66-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-67. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#67-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-68. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#68-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
-69. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#69-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
-70. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#70-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
-71. [GET /profiles/practitioners/me/linkable-organizations](#71-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-72. [GET /profiles/practitioners/me/onboarding](#72-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-73. [GET /profiles/practitioners/me/primary-patients](#73-get-profiles-practitioners-me-primary-patients) — Listar los pacientes que me eligieron como médico de cabecera
-74. [GET /profiles/practitioners/me/signature-assets](#74-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
-75. [PUT /profiles/practitioners/me/signature-assets](#75-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
-76. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#76-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
-77. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#77-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
-78. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#78-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-79. [GET /profiles/practitioners/me/summary](#79-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-80. [GET /profiles/practitioners/specialty-counts](#80-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-81. [GET /tenants/{tenantId}/practitioner-requests](#81-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-82. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#82-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-83. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#83-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-84. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#84-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+61. [POST /profiles/practitioners/me/admission/submit](#61-post-profiles-practitioners-me-admission-submit) — Enviarme a verificación
+62. [POST /profiles/practitioners/me/admission/withdraw](#62-post-profiles-practitioners-me-admission-withdraw) — Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+63. [GET /profiles/practitioners/me/affiliations](#63-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+64. [POST /profiles/practitioners/me/affiliations](#64-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+65. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#65-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+66. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#66-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+67. [POST /profiles/practitioners/me/credentials](#67-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+68. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#68-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+69. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#69-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
+70. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#70-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
+71. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#71-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
+72. [GET /profiles/practitioners/me/linkable-organizations](#72-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+73. [GET /profiles/practitioners/me/onboarding](#73-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+74. [GET /profiles/practitioners/me/primary-patients](#74-get-profiles-practitioners-me-primary-patients) — Listar los pacientes que me eligieron como médico de cabecera
+75. [GET /profiles/practitioners/me/signature-assets](#75-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
+76. [PUT /profiles/practitioners/me/signature-assets](#76-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
+77. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#77-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
+78. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#78-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
+79. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#79-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+80. [GET /profiles/practitioners/me/summary](#80-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+81. [GET /profiles/practitioners/specialty-counts](#81-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+82. [GET /tenants/{tenantId}/practitioner-requests](#82-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+83. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#83-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+84. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#84-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+85. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#85-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -13348,7 +13349,184 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /profiles/practitioners/me/admission/withdraw
+## 61. POST /profiles/practitioners/me/admission/submit
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioner-admission`
+- **Nombre:** Enviarme a verificación
+- **Operation ID:** `OwnAdmissionController_submit`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OwnAdmissionController.submit](../../src/modules/profiles/presentation/controllers/own-admission.controller.ts)
+
+### Descripción de negocio
+
+Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 422 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS (se reenvía con `resubmit`). Si el perfil no está pendiente: 422 ADMISSION_NOT_PENDING. Sin perfil profesional: 404 ADMISSION_NOT_FOUND.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/practitioners/me/admission/submit` en `OwnAdmissionController_submit`. El controlador delega en `PractitionerAdmissionSubmitService.submitOwn`. Valida el body como `ResubmitAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnAdmissionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ResubmitAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/practitioners/me/admission/submit HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `attested` | Sí | `boolean` | Sin restricción adicional declarada | Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. | `true` |
+| `attestationVersion` | Sí | `string` | longitud máxima 32 | Versión del texto de la declaración que se mostró. | `2026-10` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/practitioners/me/admission/submit HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnAdmissionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "validUntil": "valor-ejemplo",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "label": "valor-ejemplo",
+      "state": "PENDING",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "reasonCode": "ILEGIBLE"
+    }
+  ],
+  "resubmissionCount": 1,
+  "resubmissions": {
+    "used": 1,
+    "max": 1,
+    "remaining": 1
+  },
+  "canResubmit": true,
+  "canWithdraw": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items` | Sí | `array<OwnAdmissionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":"LICENSE","id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo","state":"PENDING","reasonText":"Texto descriptivo de ejemplo","reasonCode":"ILEGIBLE"}]` |
+| `items[].type` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `1` |
+| `resubmissions` | Sí | `AdmissionResubmissionsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"used":1,"max":1,"remaining":1}` |
+| `resubmissions.used` | Sí | `number` | mínimo 0 | Reenvíos ya hechos. | `1` |
+| `resubmissions.max` | Sí | `number` | mínimo 0 | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `1` |
+| `resubmissions.remaining` | Sí | `number` | mínimo 0 | Reenvíos que quedan: `max - used`, nunca negativo. | `1` |
+| `canResubmit` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: el estado admite reenviar y no se llegó al tope. | `true` |
+| `canWithdraw` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admission-submit.service.ts |
+| 409 | `CONFLICT` | Ya tiene una solicitud de verificación: reenvíela en lugar de abrir otra | Excepción explícita en src/modules/profiles/application/services/practitioner-admission-submit.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Debe aceptar la declaración para enviar la solicitud | Excepción explícita en src/modules/profiles/application/services/practitioner-admission-submit.service.ts |
+| 422 | `PRECONDITION_FAILED` | Su perfil ya no está pendiente de verificación | Excepción explícita en src/modules/profiles/application/services/practitioner-admission-submit.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/admission/submit"
+}
+```
+
+---
+
+## 62. POST /profiles/practitioners/me/admission/withdraw
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioner-admission`
@@ -13505,7 +13683,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /profiles/practitioners/me/affiliations
+## 63. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -13641,7 +13819,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. POST /profiles/practitioners/me/affiliations
+## 64. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -13808,7 +13986,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 65. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -13907,7 +14085,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 66. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14067,7 +14245,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. POST /profiles/practitioners/me/credentials
+## 67. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14226,7 +14404,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 68. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14323,7 +14501,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 69. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14449,7 +14627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 70. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14546,7 +14724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 71. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14662,7 +14840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. GET /profiles/practitioners/me/linkable-organizations
+## 72. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14788,7 +14966,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /profiles/practitioners/me/onboarding
+## 73. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -14907,7 +15085,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /profiles/practitioners/me/primary-patients
+## 74. GET /profiles/practitioners/me/primary-patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-primary-practitioner`
@@ -15031,7 +15209,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /profiles/practitioners/me/signature-assets
+## 75. GET /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15136,7 +15314,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. PUT /profiles/practitioners/me/signature-assets
+## 76. PUT /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15260,7 +15438,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 77. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15357,7 +15535,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 78. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15469,7 +15647,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 79. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15586,7 +15764,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /profiles/practitioners/me/summary
+## 80. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -15937,7 +16115,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /profiles/practitioners/specialty-counts
+## 81. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -16050,7 +16228,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /tenants/{tenantId}/practitioner-requests
+## 82. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -16180,7 +16358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 83. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -16280,7 +16458,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -16393,7 +16571,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 85. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`

@@ -36,6 +36,7 @@ const schedule: CenterSchedule = {
   general: GENERAL,
   modalities: [{ modalityCode: 'ECO', schedule: ECO }],
   studies: [{ studyCode: 'STUDY-ECO-OBSTETRICA', schedule: OBSTETRIC }],
+  equipment: [],
 };
 
 const device = (
@@ -46,6 +47,7 @@ const device = (
   name: 'x',
   manufacturer: null,
   model: null,
+  serialNumber: null,
   modalityCode,
   status,
   glossaryConceptId: null,
@@ -89,11 +91,15 @@ describe('validateSchedule', () => {
           schedule: week('08:00', '08:10', 30, [1]),
         },
       ],
+      equipment: [
+        { equipmentId: 'E1', schedule: { windows: [], slotMinutes: 20 } },
+      ],
     };
     expect(validateSchedule(bad).map((p) => p.field)).toEqual([
       'general',
       'ECO',
       'S1',
+      'E1',
     ]);
   });
 });

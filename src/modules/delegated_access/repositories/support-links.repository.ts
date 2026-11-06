@@ -613,13 +613,8 @@ export class SupportLinksRepository {
     }));
   }
 
-  /**
-   * La membresía viva (activa o invitada) de la secretaria en la organización,
-   * o una nueva `INVITED` con el rol acotado de apoyo.
-   *
-   * `INVITED` no cuenta para el token: mientras el vínculo no se acepte, la
-   * organización sigue cerrada para ella.
-   */
+  /** Live membership (active or pending support), else a new `INVITED` support
+   * one; a regular pending invitation is never taken over. */
   async findOrCreateMembership(
     em: EntityManager,
     userId: string,
@@ -631,9 +626,13 @@ export class SupportLinksRepository {
       {
         userId,
         tenantId,
-        statusConceptId: {
-          $in: [DIR.MEMBERSHIP_ACTIVE, DIR.MEMBERSHIP_INVITED],
-        },
+        $or: [
+          { statusConceptId: DIR.MEMBERSHIP_ACTIVE },
+          {
+            statusConceptId: DIR.MEMBERSHIP_INVITED,
+            tenantRoleConceptId: DIR.ROLE_SUPPORT,
+          },
+        ],
       },
       { orderBy: { createdAt: 'ASC' } },
     );

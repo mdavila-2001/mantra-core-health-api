@@ -18,4 +18,8 @@ export enum IdentityAssuranceErrorReason {
   ASSERTION_NOT_AVAILABLE = 'IDENTITY_ASSERTION_NOT_AVAILABLE',
   REVIEW_NOT_AVAILABLE = 'IDENTITY_REVIEW_NOT_AVAILABLE',
   ENDPOINT_NOT_AVAILABLE = 'IDENTITY_ENDPOINT_NOT_AVAILABLE',
+
+  // --- Self-service path ---
+  /** A practitioner must verify through the practitioner path, not the patient one. */
+  PRACTITIONER_IDENTITY_PATH_REQUIRED = 'IDENTITY_PRACTITIONER_PATH_REQUIRED',
 }

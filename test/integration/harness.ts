@@ -1371,7 +1371,7 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // ANTES de `practice.practices`: `pharmacies.primary_practice_site_id` y
   // `pharmacy_sites.practice_site_id` apuntan a las sedes de esa práctica.
   { table: 'pharmacy.pharmacies', column: 'tenant_id' },
-  // v4.2.88: el horario de atención apunta al tenant y a sus sucursales, así
+  // v4.2.90: el horario de atención apunta al tenant y a sus sucursales, así
   // que va antes que `directory.branches`.
   { table: 'directory.tenant_opening_hours', column: 'tenant_id' },
   { table: 'directory.branches', column: 'tenant_id' },

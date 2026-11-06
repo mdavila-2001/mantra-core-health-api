@@ -1,0 +1,13 @@
+  "inserted": {
+    "concepts": 0,
+    "definitionsFilled": 0,
+    "designations": 0,
+    "properties": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 0
+  },
+  "segundos": 2
+}

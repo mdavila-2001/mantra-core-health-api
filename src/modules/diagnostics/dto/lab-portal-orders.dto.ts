@@ -5,9 +5,11 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import {
   LAB_ORDER_ACTIONS,
@@ -24,16 +26,31 @@ const STATUSES: readonly LabOrderStatus[] = [
   'REJECTED',
 ];
 
+const REASON_REQUIRED: readonly LabOrderAction[] = ['CANCEL', 'REJECT'];
+const REASON_MESSAGE = 'Cuente por qué para continuar.';
+
 /** Body of `POST /diagnostics/lab/orders/:orderId/transitions`. */
 export class LabOrderTransitionDto {
   @ApiProperty({ enum: LAB_ORDER_ACTIONS })
   @IsIn(LAB_ORDER_ACTIONS)
   action!: LabOrderAction;
 
-  /** Why the order is rejected (kept with the specimen rejection). */
-  @ApiPropertyOptional({ maxLength: 1000 })
-  @IsOptional()
-  @IsString()
+  /**
+   * Why the order is cancelled or rejected. Mandatory for `CANCEL` and
+   * `REJECT`, on any order (imaging included); kept in the performer's event
+   * row and, for a rejection, with each specimen rejection.
+   */
+  @ApiPropertyOptional({
+    maxLength: 1000,
+    description:
+      'Required (non-blank) when action is CANCEL or REJECT; ignored by RECEIVE and PROCESS',
+  })
+  @ValidateIf(
+    (body: LabOrderTransitionDto) =>
+      REASON_REQUIRED.includes(body.action) || body.reason !== undefined,
+  )
+  @IsString({ message: REASON_MESSAGE })
+  @Matches(/\S/, { message: REASON_MESSAGE })
   @MaxLength(1000)
   reason?: string;
 }
@@ -54,6 +71,11 @@ export class LabOrderDto {
   @ApiProperty({ format: 'date-time' }) requestedAt!: string;
   @ApiProperty({ enum: STATUSES }) status!: LabOrderStatus;
   @ApiProperty({ type: String, nullable: true }) reason!: string | null;
+  @ApiProperty({
+    description:
+      'Whether REJECT applies now: a received order with an open specimen.',
+  })
+  canReject!: boolean;
   @ApiProperty({ type: [LabOrderFileDto] }) files!: LabOrderFileDto[];
 }
 

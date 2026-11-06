@@ -53,6 +53,8 @@ function build() {
   // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
   const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
   em.fork = mockFn(() => em);
+  // Cross-organization patient reads lift RLS with a raw `set_config` first.
+  em.execute = mockFn();
   const bookingsRepo = {
     findSlotForUpdate: mockFn(),
     findSlotById: mockFn(),
@@ -1404,6 +1406,243 @@ describe('SchedulingBookingsService', () => {
       expect(created.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
       // Sin `confirmed_at`: nadie se comprometió todavía.
       expect(created.confirmedAt).toBeUndefined();
+    });
+
+    describe('cuando la agenda no exige aceptación (v4.2.88)', () => {
+      /** El recurso del cupo: la agenda de un profesional. */
+      function withResource(
+        d: ReturnType<typeof build>,
+        requiresApproval: boolean,
+      ) {
+        withLiveHold(d);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-1',
+          timeZone: 'America/La_Paz',
+          requiresApproval,
+        });
+        // The finisher re-reads the booking it has to complete.
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          patientProfileId: PATIENT,
+          statusConceptId: requiresApproval
+            ? SCHED.BOOKING_PENDING_CONFIRMATION
+            : CONCEPTS.BOOKING_CONFIRMED,
+          confirmedAt: requiresApproval
+            ? undefined
+            : new Date('2026-11-05T12:00:00.000Z'),
+        });
+      }
+
+      const requestedBooking = {
+        bookingId: 'booking-1',
+        tenantId: request.tenantId,
+        patientProfileId: PATIENT,
+        resourceId: 'res-1',
+        slotId: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        resourceLabel: 'Dra. Rivas',
+      };
+
+      it('con la agenda exigiendo aceptación sigue el camino de siempre: pendiente', async () => {
+        const d = build();
+        withResource(d, true);
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          request,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+        expect((res as { confirmedAt?: string }).confirmedAt).toBeUndefined();
+        expect(d.bookingsRepo.createReminder).not.toHaveBeenCalled();
+        expect(d.historyRepo.append).not.toHaveBeenCalled();
+      });
+
+      it('sin un recurso que lo diga, pide aceptación: es lo que hacía siempre', async () => {
+        const d = build();
+        withLiveHold(d);
+        d.catalogRepo.findResourceById.mockResolvedValue(null);
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          request,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      });
+
+      it('con la agenda confirmando sola nace CONFIRMADA, con compromiso, cita reservada y recordatorios', async () => {
+        const d = build();
+        withResource(d, false);
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          request,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        expect((res as { confirmedAt?: string }).confirmedAt).toBe(
+          '2026-11-05T12:00:00.000Z',
+        );
+        const created = d.bookingsRepo.createBooking.mock.calls[0][1];
+        expect(created.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        expect(created.confirmedAt).toBeInstanceOf(Date);
+        const appointment = d.appointmentsRepo.create.mock.calls[0][1];
+        expect(appointment.statusConceptId).toBe(CLIN.APPOINTMENT_BOOKED);
+        // Víspera y dos horas antes, como al aceptar (P8).
+        expect(d.bookingsRepo.createReminder).toHaveBeenCalledTimes(2);
+        expect(res.remindersScheduled).toBe(2);
+      });
+
+      it('deja en el historial que la confirmó la agenda y no una persona', async () => {
+        const d = build();
+        withResource(d, false);
+
+        await d.service.requestBooking('hold-token', request, actor);
+
+        expect(d.historyRepo.append).toHaveBeenCalledTimes(1);
+        const [, entity, id, entry] = d.historyRepo.append.mock.calls[0];
+        expect(entity).toBe('appointment_bookings');
+        expect(id).toBe('booking-1');
+        expect(entry.operationConceptId).toBe(
+          SCHED.HISTORY_OP_STATE_TRANSITION,
+        );
+        expect(entry.dataSnapshot.fromStateConceptId).toBe(
+          SCHED.BOOKING_PENDING_CONFIRMATION,
+        );
+        expect(entry.dataSnapshot.toStateConceptId).toBe(
+          CONCEPTS.BOOKING_CONFIRMED,
+        );
+        expect(entry.dataSnapshot.reasonText).toMatch(/autom/i);
+      });
+
+      it('REGLA 2 · la que nace confirmada desplaza las otras solicitudes del paciente a esa hora', async () => {
+        const d = build();
+        withResource(d, false);
+        d.bookingsRepo.findPatientBookingsOverlapping
+          // REGLA 1: nada ya confirmado encima.
+          .mockResolvedValueOnce([])
+          // REGLA 2: otra solicitud pendiente con otro médico.
+          .mockResolvedValueOnce([
+            {
+              id: 'booking-2',
+              startAt: new Date(Date.now() + IN_ONE_HOUR),
+              endAt: new Date(Date.now() + 2 * IN_ONE_HOUR),
+              statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+              resourceName: 'Consultorio del Dr. Paz',
+            },
+          ]);
+        d.bookingsRepo.findBookingByIdForUpdate
+          .mockResolvedValueOnce({
+            id: 'booking-1',
+            bookableSlotId: SLOT_ID,
+            patientProfileId: PATIENT,
+            statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+            confirmedAt: new Date(),
+          })
+          .mockResolvedValueOnce({
+            id: 'booking-2',
+            bookableSlotId: 'slot-2',
+            statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+          });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.noticeRepo.describeBooking.mockResolvedValue(requestedBooking);
+        d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+        await d.service.requestBooking('hold-token', request, actor);
+
+        const cancellation = d.bookingsRepo.createCancellation.mock.calls[0][1];
+        expect(cancellation.bookingId).toBe('booking-2');
+        // Y al paciente se le avisa de cada una que dejó de ir: el aviso se
+        // redacta describiendo ESA cita, no la recién confirmada.
+        const described = d.noticeRepo.describeBooking.mock.calls.map(
+          ([, id]: any[]) => id,
+        );
+        expect(described).toContain('booking-2');
+        const cancelled = d.notices.emit.mock.calls.find(
+          ([notice]: any[]) => notice.payload.change === 'CANCELLED',
+        );
+        expect(cancelled).toBeDefined();
+        expect(cancelled[0].bodyText).toContain(
+          'le confirmaron otra cita a la misma hora',
+        );
+      });
+
+      it('al paciente le dice que su cita quedó confirmada, no que falta que la confirmen', async () => {
+        const d = build();
+        withResource(d, false);
+        d.noticeRepo.describeBooking.mockResolvedValue(requestedBooking);
+        d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+        d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Ana Flores');
+
+        await d.service.requestBooking('hold-token', request, actor);
+
+        const [notices] = d.notices.emitMany.mock.calls[0];
+        const toPatient = notices.find(
+          (a: any) => a.recipient.patientProfileId === PATIENT,
+        );
+        expect(toPatient.payload.change).toBe('ACCEPTED');
+        expect(toPatient.bodyText).toMatch(/confirmad/i);
+        expect(toPatient.bodyText).not.toMatch(/falta que lo confirmen/i);
+      });
+
+      it('al profesional le dice que le entró una cita confirmada y de dónde salió la confirmación', async () => {
+        const d = build();
+        withResource(d, false);
+        d.noticeRepo.describeBooking.mockResolvedValue(requestedBooking);
+        d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+        d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Ana Flores');
+
+        await d.service.requestBooking('hold-token', request, actor);
+
+        const [notices] = d.notices.emitMany.mock.calls[0];
+        const toPractitioner = notices.find(
+          (a: any) => a.recipient.userId === 'user-medico',
+        );
+        expect(toPractitioner.payload.change).toBe('ACCEPTED');
+        expect(toPractitioner.bodyText).toContain('Ana Flores');
+        expect(toPractitioner.bodyText).toMatch(/sin pasar por su revisión/i);
+        // No es una solicitud que responder: no se le pide aceptar nada.
+        expect(toPractitioner.bodyText).not.toMatch(/aceptarla o rechazarla/i);
+        expect(notices).toHaveLength(2);
+      });
+
+      it('la oferta del servicio manda sobre la agenda: con aprobación requerida sigue pendiente', async () => {
+        const d = build();
+        withResource(d, false);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+          openSlot({
+            capacity: 1,
+            remainingCapacity: 0,
+            endAt: new Date(Date.now() + 2 * IN_ONE_HOUR),
+            practitionerServiceOfferingId: 'oferta-1',
+          }),
+        );
+        d.serviceAgenda.offeringOfSlot.mockResolvedValue({
+          offering: {
+            id: 'oferta-1',
+            serviceCatalogId: 'cat-1',
+            minDurationMinutes: 30,
+            maxDurationMinutes: 45,
+            requiresApproval: true,
+          },
+          catalog: null,
+        });
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          request,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      });
     });
 
     describe('cuando el cupo es de un servicio (v4.2.40)', () => {
@@ -4920,7 +5159,9 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       );
     });
 
-    it('Límite: el paciente con representación vigente lista al dependiente, siempre con tenant', async () => {
+    // Since 81f14411 a patient lists their bookings across organizations: the
+    // tenant filter is dropped, the patient filter and the proxy check stay.
+    it('Límite: el paciente con representación vigente lista al dependiente en todas las organizaciones', async () => {
       const d = agenda(build());
       d.representation.assertMayActForPatient.mockResolvedValue(undefined);
 
@@ -4942,10 +5183,13 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       expect(d.bookingsRepo.findBookings).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          tenantId: SEARCH_TENANT,
+          tenantId: undefined,
           patientProfileId: 'pat-hijo',
         }),
         51,
+      );
+      expect(d.em.execute).toHaveBeenCalledWith(
+        "select set_config('app.system_context', 'true', true)",
       );
     });
 

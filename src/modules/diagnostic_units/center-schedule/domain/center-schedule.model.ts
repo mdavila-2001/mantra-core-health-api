@@ -50,6 +50,11 @@ export interface CenterSchedule {
     readonly studyCode: string;
     readonly schedule: ScheduleBlock;
   }[];
+  /** Own shift of a device (a production line); without one it follows its study. */
+  readonly equipment: {
+    readonly equipmentId: string;
+    readonly schedule: ScheduleBlock;
+  }[];
 }
 
 export interface CenterEquipment {
@@ -57,6 +62,7 @@ export interface CenterEquipment {
   readonly name: string;
   readonly manufacturer: string | null;
   readonly model: string | null;
+  readonly serialNumber: string | null;
   readonly modalityCode: ModalityCode | null;
   readonly status: EquipmentStatus;
   readonly glossaryConceptId: string | null;

@@ -24,6 +24,8 @@ export interface CreateTenantAffiliationDocumentData {
   readonly verificationStatusConceptId: string;
   readonly statusConceptId: string;
   /** Sólo se declara para el rol `TAX_IDENTIFIER_DOC` (el NIT que el formulario ya captura). */
+  /** The `common.identifiers` row the document backs (the tenant's NIT). */
+  readonly identifierId?: string;
   readonly documentNumber?: string;
   readonly registeredAt?: Date;
   readonly isRequiredForAffiliation?: boolean;
@@ -112,6 +114,7 @@ export class DirectoryTenantLegalRepository {
         documentTypeConceptId: data.documentTypeConceptId,
         issuingAuthorityConceptId: data.issuingAuthorityConceptId,
         fileId: data.fileId,
+        identifierId: data.identifierId,
         documentNumber: data.documentNumber,
         registeredAt: data.registeredAt,
         relatedPersonId: data.relatedPersonId,

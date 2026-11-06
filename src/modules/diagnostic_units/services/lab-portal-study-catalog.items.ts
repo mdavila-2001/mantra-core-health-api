@@ -1,0 +1,60 @@
+import { labReferencePrice } from '../../study_catalog/lab-reference-prices';
+import type {
+  ComponentRow,
+  StudyRow,
+} from '../../study_catalog/repositories/study-catalog.repository';
+import type {
+  LabCatalogComponentDto,
+  LabCatalogItemDto,
+} from '../dto/lab-portal-catalog.dto';
+
+/** A catalog análisis with the section it is listed under. */
+export type CatalogItem = LabCatalogItemDto & {
+  section: { code: string; name: string };
+};
+
+const text = (v: unknown): string | null => (typeof v === 'string' ? v : null);
+const named = (v: unknown, key: string): string | null =>
+  v && typeof v === 'object' ? text((v as Record<string, unknown>)[key]) : null;
+
+/** Pure: catalog rows and their direct components, with suggested prices, by concept. */
+export function toCatalogItems(
+  rows: readonly StudyRow[],
+  parts: readonly ComponentRow[],
+): Map<string, CatalogItem> {
+  const byPanel = new Map<string, LabCatalogComponentDto[]>();
+  for (const p of parts) {
+    const list = byPanel.get(p.parent_id) ?? [];
+    list.push({
+      conceptId: p.id,
+      code: p.code,
+      name: p.name,
+      loinc: text(p.props?.loinc_code),
+      unit: text(p.props?.unit_ucum),
+      suggestedPrice: labReferencePrice(p.code),
+    });
+    byPanel.set(p.parent_id, list);
+  }
+  return new Map(
+    rows.map((r) => {
+      const code = text(r.props?.study_catalog_code) ?? r.code;
+      return [
+        r.id,
+        {
+          conceptId: r.id,
+          code,
+          name: r.name,
+          loinc: text(r.props?.loinc_code),
+          specimen: named(r.props?.specimen, 'nombre'),
+          suggestedPrice: labReferencePrice(code),
+          offeredServiceId: null,
+          components: byPanel.get(r.id) ?? [],
+          section: {
+            code: named(r.props?.section, 'codigo') ?? 'OTROS',
+            name: named(r.props?.section, 'nombre') ?? 'Otros análisis',
+          },
+        },
+      ];
+    }),
+  );
+}

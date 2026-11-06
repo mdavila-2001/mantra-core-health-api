@@ -6173,6 +6173,235 @@
         "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/auth/identifier-exists": {
+      "get": {
+        "operationId": "IamIdentifierExistsController_check",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ORG_NAME"
+              ]
+            }
+          },
+          {
+            "name": "value",
+            "required": true,
+            "in": "query",
+            "description": "Organization name to check",
+            "schema": {
+              "maxLength": 320,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentifierExistsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Whether a national id, email or organization name has an account",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Whether a national id, email or organization name has an account. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/me/devices": {
+      "get": {
+        "operationId": "IamMyDevicesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los dispositivos donde inicié sesión",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Listar los dispositivos donde inicié sesión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/me/devices/{id}/confirm-code": {
+      "post": {
+        "operationId": "IamMyDevicesController_requestCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enviar a mi correo el código para verificar un dispositivo",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Enviar a mi correo el código para verificar un dispositivo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/me/devices/{id}/confirm": {
+      "post": {
+        "operationId": "IamMyDevicesController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verificar un dispositivo con el código del correo",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Verificar un dispositivo con el código del correo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/practitioners/me/admission": {
       "get": {
         "description": "Estados, qué falta y los mensajes dirigidos al médico. Nada del personal.",
@@ -6214,6 +6443,71 @@
           }
         ],
         "summary": "Estado de mi verificación",
+        "tags": [
+          "profiles-practitioner-admission"
+        ]
+      }
+    },
+    "/profiles/practitioners/me/admission/submit": {
+      "post": {
+        "description": "Abre la solicitud de quien tiene el perfil profesional pendiente y aún no tiene ninguna. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 422 ADMISSION_ATTESTATION_REQUIRED. Si ya tiene solicitud: 409 ADMISSION_ALREADY_EXISTS (se reenvía con `resubmit`). Si el perfil no está pendiente: 422 ADMISSION_NOT_PENDING. Sin perfil profesional: 404 ADMISSION_NOT_FOUND.",
+        "operationId": "OwnAdmissionController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResubmitAdmissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnAdmissionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enviarme a verificación",
         "tags": [
           "profiles-practitioner-admission"
         ]
@@ -11575,132 +11869,6 @@
         "description": "Definir una categoría de permiso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/authz/practitioners/me/access-requests": {
-      "get": {
-        "operationId": "AuthzPractitionerRequestsController_listAccessRequests",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccessRequestItemDto"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Solicitudes de acceso enviadas y recibidas",
-        "tags": [
-          "authz-practitioner-requests"
-        ],
-        "description": "Solicitudes de acceso enviadas y recibidas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/authz/practitioners/me/care-relationships/{id}/respond": {
-      "post": {
-        "operationId": "AuthzPractitionerRequestsController_respond",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RespondPrimaryCareRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthzStatusResultDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Aceptar o rechazar una solicitud de cabecera de un paciente",
-        "tags": [
-          "authz-practitioner-requests"
-        ],
-        "description": "Aceptar o rechazar una solicitud de cabecera de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
     "/authz/permissions": {
       "post": {
         "operationId": "AuthzCatalogController_createPermission",
@@ -13563,120 +13731,6 @@
         "description": "Quién ve mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/authz/me/access-requests": {
-      "get": {
-        "operationId": "AuthzMeController_listAccessRequests",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccessRequestItemDto"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mis solicitudes de acceso, recibidas y enviadas",
-        "tags": [
-          "authz-me"
-        ],
-        "description": "Mis solicitudes de acceso, recibidas y enviadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/authz/me/primary-practitioner-requests": {
-      "post": {
-        "operationId": "AuthzMeController_requestPrimaryPractitioner",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RequestPrimaryPractitionerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthzIdResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Pedir a un profesional que sea mi médico de cabecera",
-        "tags": [
-          "authz-me"
-        ],
-        "description": "Pedir a un profesional que sea mi médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
     "/authz/me/care-relationships/{id}/revoke": {
       "post": {
         "operationId": "AuthzMeController_revokeCareRelationship",
@@ -13789,6 +13843,120 @@
           "authz-me"
         ],
         "description": "Revocar uno de los accesos clínicos a mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/authz/me/access-requests": {
+      "get": {
+        "operationId": "AuthzMeController_listAccessRequests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessRequestItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mis solicitudes de acceso, recibidas y enviadas",
+        "tags": [
+          "authz-me"
+        ],
+        "description": "Mis solicitudes de acceso, recibidas y enviadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/authz/me/primary-practitioner-requests": {
+      "post": {
+        "operationId": "AuthzMeController_requestPrimaryPractitioner",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPrimaryPractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthzIdResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pedir a un profesional que sea mi médico de cabecera",
+        "tags": [
+          "authz-me"
+        ],
+        "description": "Pedir a un profesional que sea mi médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/authz/users/{userId}/role-assignments/{assignmentId}": {
@@ -14745,6 +14913,132 @@
         "tags": [
           "authz-catalog"
         ]
+      }
+    },
+    "/authz/practitioners/me/access-requests": {
+      "get": {
+        "operationId": "AuthzPractitionerRequestsController_listAccessRequests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessRequestItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Solicitudes de acceso enviadas y recibidas",
+        "tags": [
+          "authz-practitioner-requests"
+        ],
+        "description": "Solicitudes de acceso enviadas y recibidas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/authz/practitioners/me/care-relationships/{id}/respond": {
+      "post": {
+        "operationId": "AuthzPractitionerRequestsController_respond",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondPrimaryCareRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthzStatusResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aceptar o rechazar una solicitud de cabecera de un paciente",
+        "tags": [
+          "authz-practitioner-requests"
+        ],
+        "description": "Aceptar o rechazar una solicitud de cabecera de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/audit/data-access": {
@@ -18871,6 +19165,180 @@
           "directory-admin-tenants"
         ],
         "description": "Suspender un tenant con cascada de revocación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/tenants/me/membership-invitations": {
+      "get": {
+        "operationId": "MembershipInvitationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipInvitationListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pending organization invitations of the caller",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Pending organization invitations of the caller. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/tenants/me/membership-invitations/{membershipId}/accept": {
+      "post": {
+        "operationId": "MembershipInvitationsController_accept",
+        "parameters": [
+          {
+            "name": "membershipId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipInvitationDecisionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept an invitation: the membership turns active",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Accept an invitation: the membership turns active. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/tenants/me/membership-invitations/{membershipId}/decline": {
+      "post": {
+        "operationId": "MembershipInvitationsController_decline",
+        "parameters": [
+          {
+            "name": "membershipId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipInvitationDecisionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Decline an invitation: the membership ends",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Decline an invitation: the membership ends. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/tenants/me": {
@@ -24510,6 +24978,62 @@
           "community-groups"
         ],
         "description": "Temas de la comunidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "CommunityTopicsController_createTopic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un tema propio",
+        "tags": [
+          "community-groups"
+        ],
+        "description": "Crear un tema propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/community/posts/{postId}/polls": {
@@ -41576,6 +42100,611 @@
         ]
       }
     },
+    "/diagnostic-units/me/schedule": {
+      "get": {
+        "operationId": "CenterScheduleController_mySchedule",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterScheduleViewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule, studies and equipment of my center",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Schedule, studies and equipment of my center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-units/me/bookings": {
+      "get": {
+        "operationId": "CenterScheduleController_myBookings",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2026-11-04T04:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2026-11-05T04:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterBookingsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Appointments booked at my center, by start",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Appointments booked at my center, by start. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-units/{unitId}/schedule": {
+      "get": {
+        "operationId": "CenterScheduleController_schedule",
+        "parameters": [
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterScheduleViewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule, studies and equipment of a center",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Schedule, studies and equipment of a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "CenterScheduleController_saveSchedule",
+        "parameters": [
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCenterScheduleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterScheduleViewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "`details.affectedBookings`: booked appointments left outside."
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish the whole schedule of a center",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Publish the whole schedule of a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-units/{unitId}/equipment/{equipmentId}": {
+      "patch": {
+        "operationId": "CenterScheduleController_setEquipmentStatus",
+        "parameters": [
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "equipmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEquipmentStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterScheduleViewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a device operational or not",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Mark a device operational or not. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-units/{unitId}/study-availability": {
+      "get": {
+        "operationId": "StudyAvailabilityController_studyAvailability",
+        "parameters": [
+          {
+            "name": "unitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studyCode",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "example": "STUDY-ECO-ABD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "ISO instant; defaults to now.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "ISO instant; defaults to from + 14 days.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyAvailabilityDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Free starts of a study in a center",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Free starts of a study in a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-results/me/orders/{orderId}/booking-options": {
+      "get": {
+        "operationId": "OrderBookingController_bookingOptions",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderBookingOptionsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Centers that perform the study of my order",
+        "tags": [
+          "diagnostics-patient-results"
+        ],
+        "description": "Centers that perform the study of my order. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-results/me/orders/{orderId}/booking": {
+      "post": {
+        "operationId": "OrderBookingController_book",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderAppointmentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "`details.slotTaken`: the start filled up meanwhile; without it, the order already has an appointment."
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Book my order at a center, confirmed",
+        "tags": [
+          "diagnostics-patient-results"
+        ],
+        "description": "Book my order at a center, confirmed. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "OrderBookingController_cancel",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel the appointment of my order",
+        "tags": [
+          "diagnostics-patient-results"
+        ],
+        "description": "Cancel the appointment of my order. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/diagnostic-units": {
       "get": {
         "operationId": "DiagnosticUnitsController_list",
@@ -43179,6 +44308,599 @@
           "diagnostic-unit-accreditations"
         ],
         "description": "Renovar/registrar acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/services": {
+      "get": {
+        "operationId": "LabPortalServicesController_listServices",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "DRAFT",
+                "WITHDRAWN"
+              ]
+            }
+          },
+          {
+            "name": "available",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabServicePageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Catálogo de servicios del laboratorio",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Catálogo de servicios del laboratorio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "LabPortalServicesController_createService",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabServiceDraftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabServiceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dar de alta un servicio con su precio",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Dar de alta un servicio con su precio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/services/import": {
+      "post": {
+        "operationId": "LabPortalServicesController_importServices",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabImportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabImportResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Carga masiva por código, fila por fila",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Carga masiva por código, fila por fila. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/services/{id}": {
+      "patch": {
+        "operationId": "LabPortalServicesController_updateService",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabServiceChangesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabServiceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un servicio (un precio nuevo es una versión nueva)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Editar un servicio (un precio nuevo es una versión nueva). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "LabPortalServicesController_withdrawService",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabServiceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar un servicio (no se borra)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Retirar un servicio (no se borra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/categories": {
+      "get": {
+        "operationId": "LabPortalServicesController_listCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabCategoryPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Categorías del laboratorio",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Categorías del laboratorio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "LabPortalServicesController_createCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabCategoryNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabCategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una categoría (422: el modelo no tiene dónde guardarla)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Crear una categoría (422: el modelo no tiene dónde guardarla). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/categories/{id}": {
+      "patch": {
+        "operationId": "LabPortalServicesController_renameCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabCategoryNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabCategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Renombrar una categoría",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Renombrar una categoría. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "LabPortalServicesController_deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar una categoría",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Eliminar una categoría. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/pharmacies/{pharmacyId}/categories": {
@@ -54598,7 +56320,7 @@
         "description": "Listar el catálogo de servicios de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "post": {
-        "description": "La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.",
+        "description": "Exige serviceConceptId de un servicio del repositorio: no hay alta de texto libre. Código y nombre salen del repositorio. La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.",
         "operationId": "BillingServiceCatalogController_create",
         "parameters": [],
         "requestBody": {
@@ -54648,7 +56370,7 @@
             "bearer": []
           }
         ],
-        "summary": "Dar de alta un servicio en el catálogo maestro",
+        "summary": "Dar de alta en el catálogo un servicio del repositorio",
         "tags": [
           "billing-service-catalog"
         ]
@@ -54985,6 +56707,195 @@
           "billing-service-catalog"
         ],
         "description": "Listar el nomenclador de procedimientos (arancel de referencia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/billing/service-catalog/repository": {
+      "get": {
+        "operationId": "BillingServiceCatalogController_searchRepository",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialtyConceptId",
+            "required": false,
+            "in": "query",
+            "description": "Especialidad (uuid del concepto)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codeSystem",
+            "required": false,
+            "in": "query",
+            "description": "Fuente: código del sistema de códigos",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "practiceId",
+            "required": false,
+            "in": "query",
+            "description": "Práctica, para marcar lo ya importado",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar en el repositorio de servicios (para importar)",
+        "tags": [
+          "billing-service-catalog"
+        ],
+        "description": "Buscar en el repositorio de servicios (para importar). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/billing/service-catalog/repository/facets": {
+      "get": {
+        "operationId": "BillingServiceCatalogController_repositoryFacets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fuentes y especialidades del repositorio de servicios",
+        "tags": [
+          "billing-service-catalog"
+        ],
+        "description": "Fuentes y especialidades del repositorio de servicios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/billing/service-catalog/import": {
+      "post": {
+        "operationId": "BillingServiceCatalogController_importServices",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportServicesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Importar servicios del repositorio a mi catálogo",
+        "tags": [
+          "billing-service-catalog"
+        ],
+        "description": "Importar servicios del repositorio a mi catálogo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/admin/catalogs/services/scopes": {
@@ -72002,6 +73913,701 @@
           "diagnostics-reception"
         ],
         "description": "Detalle de una orden dirigida al tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/summary": {
+      "get": {
+        "operationId": "DiagnosticsLabPortalController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resumen del laboratorio del tenant activo",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Resumen del laboratorio del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/orders": {
+      "get": {
+        "description": "Órdenes con `performer_tenant_id` = tenant activo (laboratorio, anatomía patológica e imagen), de la más nueva a la más vieja, por páginas (`limit` 100 por defecto, hasta 500). `count` es el total del laboratorio; si quedan órdenes más viejas viene `nextCursor`.",
+        "operationId": "DiagnosticsLabPortalController_listOrders",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Órdenes derivadas al laboratorio, con su estado derivado",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/orders/{orderId}/transitions": {
+      "post": {
+        "operationId": "DiagnosticsLabPortalController_transition",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabOrderTransitionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "El estado actual no admite ese paso"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-targets": {
+      "get": {
+        "operationId": "DiagnosticsLabPortalController_listResultTargets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Órdenes procesadas a las que se puede adjuntar un resultado",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Órdenes procesadas a las que se puede adjuntar un resultado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-files": {
+      "get": {
+        "description": "Sin búsqueda por texto: puede ser un nombre de paciente y no viaja en la URL. Para buscar, `POST /diagnostics/lab/result-files/search`.",
+        "operationId": "DiagnosticsLabResultsController_listResultFiles",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PDF",
+                "IMAGE",
+                "VIDEO",
+                "AUDIO",
+                "TEXT",
+                "DICOM",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "orderId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeWithdrawn",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resultados subidos por el laboratorio",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/result-files/search": {
+      "post": {
+        "operationId": "DiagnosticsLabResultsController_searchResultFiles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabResultFileSearchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar entre los resultados subidos (filtros en el cuerpo)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Buscar entre los resultados subidos (filtros en el cuerpo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-files/{id}/content": {
+      "get": {
+        "operationId": "DiagnosticsLabResultsController_getResultContent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bytes del archivo"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar un resultado subido",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Descargar un resultado subido. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-files/{id}/withdrawal": {
+      "post": {
+        "operationId": "DiagnosticsLabResultsController_withdrawResult",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabResultWithdrawalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar un resultado subido por error (queda en el historial)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Retirar un resultado subido por error (queda en el historial). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-uploads": {
+      "post": {
+        "description": "Exige una orden procesada del tenant activo (409 si no lo está). El tamaño total no puede superar `FILE_STORAGE_MAX_SIZE_BYTES` (422).",
+        "operationId": "DiagnosticsLabUploadsController_start",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabResultUploadStartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Empezar la subida por partes de un resultado",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/result-uploads/{uploadId}/parts/{index}": {
+      "put": {
+        "description": "Otro Content-Type distinto de octet-stream es 415.",
+        "operationId": "DiagnosticsLabUploadsController_putPart",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mandar una parte (bytes crudos)",
+        "tags": [
+          "diagnostics-lab-portal"
+        ]
+      }
+    },
+    "/diagnostics/lab/result-uploads/{uploadId}/complete": {
+      "post": {
+        "operationId": "DiagnosticsLabUploadsController_complete",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cerrar la subida: guarda el archivo y lo publica en el informe",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Cerrar la subida: guarda el archivo y lo publica en el informe. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/lab/result-uploads/{uploadId}": {
+      "delete": {
+        "operationId": "DiagnosticsLabUploadsController_abort",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancelar una subida abierta",
+        "tags": [
+          "diagnostics-lab-portal"
+        ],
+        "description": "Cancelar una subida abierta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/education/courses/publish": {
@@ -109728,6 +112334,140 @@
         "description": "Evaluar una solicitud de reserva contra las reglas vigentes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/scheduling/my-resources": {
+      "get": {
+        "operationId": "SchedulingAgendaController_listMine",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "query",
+            "description": "Tenant dueño de las agendas",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyResourcesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar mis agendas y cómo reciben las solicitudes de consulta",
+        "tags": [
+          "scheduling-agenda"
+        ],
+        "description": "Listar mis agendas y cómo reciben las solicitudes de consulta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/scheduling/resources/{id}": {
+      "patch": {
+        "description": "Todo opcional; lo que no se manda se conserva. `requiresApproval: false` hace que las solicitudes de consulta nazcan confirmadas; la oferta de un servicio sigue mandando sobre su cupo.",
+        "operationId": "SchedulingAgendaController_updateResource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulingUpdateResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceApprovalDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un recurso agendable",
+        "tags": [
+          "scheduling-agenda"
+        ]
+      }
+    },
     "/scheduling/bookable-organizations": {
       "get": {
         "description": "Sólo identificador, nombre y cuántos profesionales y laboratorios tienen cupos por delante. Después se pide cada agenda con `X-Tenant-Id` de la organización elegida.",
@@ -109765,6 +112505,90 @@
         "tags": [
           "scheduling-agenda"
         ]
+      }
+    },
+    "/scheduling/bookable-resources": {
+      "get": {
+        "operationId": "SchedulingAgendaController_listBookableResources",
+        "parameters": [
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "PRACTITIONER",
+              "type": "string",
+              "enum": [
+                "PRACTITIONER",
+                "ROOM"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "example": "quispe",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones",
+        "tags": [
+          "scheduling-agenda"
+        ],
+        "description": "Listar, paginados, los profesionales o laboratorios con horarios de todas las organizaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/scheduling/slots": {
@@ -126399,6 +129223,10 @@
       "description": "Operaciones del dominio funcional diagnostics imaging. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "diagnostics-lab-portal",
+      "description": "Operaciones del dominio funcional diagnostics lab portal. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "diagnostics-laboratory",
       "description": "Operaciones del dominio funcional diagnostics laboratory. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -128012,6 +130840,10 @@
             "description": "Motivo del registro asistido (queda en la trazabilidad C-18)",
             "maxLength": 500
           },
+          "allowHomonym": {
+            "type": "boolean",
+            "description": "Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT)"
+          },
           "timeZone": {
             "type": "string",
             "description": "Zona horaria IANA del paciente"
@@ -128025,10 +130857,6 @@
             "type": "string",
             "description": "Id del usuario representante legal (dato mínimo si no hay representación formal)",
             "format": "uuid"
-          },
-          "allowHomonym": {
-            "type": "boolean",
-            "description": "Confirma que es otra persona aunque ya exista un paciente con el mismo nombre (evita el 409 POSSIBLE_DUPLICATE_PATIENT)"
           }
         },
         "required": [
@@ -130347,6 +133175,29 @@
           "currentPassword",
           "newPassword"
         ],
+        "additionalProperties": false
+      },
+      "IdentifierExistsResponseDto": {
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Whether an account already uses it"
+          }
+        },
+        "required": [
+          "exists"
+        ]
+      },
+      "ConfirmDeviceDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8
+          }
+        },
         "additionalProperties": false
       },
       "AdmissionCodeLabelDto": {
@@ -134708,22 +137559,6 @@
         },
         "additionalProperties": false
       },
-      "AuthzStatusResultDto": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "description": "true si la operación se aplicó"
-          },
-          "affected": {
-            "type": "number",
-            "description": "Nº de filas afectadas cuando aplica"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      },
       "CreatePermissionGrantDto": {
         "type": "object",
         "properties": {
@@ -135064,23 +137899,6 @@
         ],
         "additionalProperties": false
       },
-      "RespondPrimaryCareRequestDto": {
-        "type": "object",
-        "properties": {
-          "decision": {
-            "type": "string",
-            "description": "Decisión sobre la solicitud de cabecera",
-            "enum": [
-              "ACCEPT",
-              "REJECT"
-            ]
-          }
-        },
-        "required": [
-          "decision"
-        ],
-        "additionalProperties": false
-      },
       "CreateLegalRepresentationDto": {
         "type": "object",
         "properties": {
@@ -135153,29 +137971,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "AuthzIdResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string",
-            "description": "Concept id del estado del recurso",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "status",
-          "createdAt"
-        ]
       },
       "EvaluateDecisionDto": {
         "type": "object",
@@ -135250,6 +138045,124 @@
           "resource"
         ],
         "additionalProperties": false
+      },
+      "AccessRequestCounterpartDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "AccessRequestItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CABECERA",
+              "GRANULAR",
+              "ATENCION"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "SENT"
+            ]
+          },
+          "counterpart": {
+            "$ref": "#/components/schemas/AccessRequestCounterpartDto"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACTIVE",
+              "REJECTED",
+              "REVOKED",
+              "EXPIRED"
+            ]
+          },
+          "requestedSpecialtyConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorizedSpecialtyConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "direction",
+          "counterpart",
+          "requestedAt",
+          "decidedAt",
+          "status",
+          "requestedSpecialtyConceptIds",
+          "authorizedSpecialtyConceptIds"
+        ]
+      },
+      "RequestPrimaryPractitionerDto": {
+        "type": "object",
+        "properties": {
+          "practitionerProfileId": {
+            "type": "string",
+            "description": "Perfil del profesional elegido",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "practitionerProfileId"
+        ],
+        "additionalProperties": false
+      },
+      "AuthzIdResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "Concept id del estado del recurso",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ]
       },
       "UserRoleAssignmentDto": {
         "type": "object",
@@ -135693,87 +138606,6 @@
           "userId",
           "reviewerUserId",
           "reviewedAt"
-        ]
-      },
-      "AccessRequestCounterpartDto": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "displayName": {
-            "type": "string"
-          }
-        }
-      },
-      "AccessRequestItemDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "CABECERA",
-              "GRANULAR",
-              "ATENCION"
-            ]
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "RECEIVED",
-              "SENT"
-            ]
-          },
-          "counterpart": {
-            "$ref": "#/components/schemas/AccessRequestCounterpartDto"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "decidedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "ACTIVE",
-              "REJECTED",
-              "REVOKED",
-              "EXPIRED"
-            ]
-          },
-          "requestedSpecialtyConceptIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "authorizedSpecialtyConceptIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "kind",
-          "direction",
-          "counterpart",
-          "requestedAt",
-          "decidedAt",
-          "status",
-          "requestedSpecialtyConceptIds",
-          "authorizedSpecialtyConceptIds"
         ]
       },
       "AccessMapDto": {
@@ -137098,6 +139930,39 @@
           "summary",
           "roles",
           "modules"
+        ]
+      },
+      "RespondPrimaryCareRequestDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "description": "Decisión sobre la solicitud de cabecera",
+            "enum": [
+              "ACCEPT",
+              "REJECT"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false
+      },
+      "AuthzStatusResultDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "true si la operación se aplicó"
+          },
+          "affected": {
+            "type": "number",
+            "description": "Nº de filas afectadas cuando aplica"
+          }
+        },
+        "required": [
+          "ok"
         ]
       },
       "RecordDataAccessDto": {
@@ -138891,6 +141756,82 @@
         ],
         "additionalProperties": false
       },
+      "MembershipInvitationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The pending membership"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "STAFF",
+              "OTHER"
+            ]
+          },
+          "invitedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "tenantName",
+          "role",
+          "invitedAt"
+        ]
+      },
+      "MembershipInvitationListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipInvitationDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "MembershipInvitationDecisionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DECLINED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "status"
+        ]
+      },
       "UpdatePayerProfileDto": {
         "type": "object",
         "properties": {
@@ -140342,6 +143283,20 @@
         "required": [
           "authorProfileId",
           "bodyText"
+        ],
+        "additionalProperties": false
+      },
+      "CreateTopicDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "name"
         ],
         "additionalProperties": false
       },
@@ -146970,18 +149925,6 @@
           "requestId"
         ]
       },
-      "StatusResultDto": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "description": "true si la operación se aplicó"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      },
       "StatusEventListDto": {
         "type": "object",
         "properties": {
@@ -152317,6 +155260,590 @@
           "conversationId"
         ]
       },
+      "ScheduleWindowDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 7,
+            "example": 1
+          },
+          "startTime": {
+            "type": "string",
+            "example": "08:00",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "12:00",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          }
+        },
+        "required": [
+          "dayOfWeek",
+          "startTime",
+          "endTime"
+        ],
+        "additionalProperties": false
+      },
+      "ScheduleBlockDto": {
+        "type": "object",
+        "properties": {
+          "windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleWindowDto"
+            }
+          },
+          "slotMinutes": {
+            "type": "number",
+            "minimum": 5,
+            "maximum": 240,
+            "example": 30
+          }
+        },
+        "required": [
+          "windows",
+          "slotMinutes"
+        ],
+        "additionalProperties": false
+      },
+      "ModalityScheduleDto": {
+        "type": "object",
+        "properties": {
+          "modalityCode": {
+            "type": "string",
+            "enum": [
+              "ECO",
+              "RX",
+              "RM",
+              "TC",
+              "MG",
+              "DXA",
+              "LAB"
+            ]
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ScheduleBlockDto"
+          }
+        },
+        "required": [
+          "modalityCode",
+          "schedule"
+        ],
+        "additionalProperties": false
+      },
+      "StudyScheduleDto": {
+        "type": "object",
+        "properties": {
+          "studyCode": {
+            "type": "string",
+            "example": "STUDY-ECO-OBSTETRICA",
+            "maxLength": 100
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ScheduleBlockDto"
+          }
+        },
+        "required": [
+          "studyCode",
+          "schedule"
+        ],
+        "additionalProperties": false
+      },
+      "SaveCenterScheduleDto": {
+        "type": "object",
+        "properties": {
+          "general": {
+            "$ref": "#/components/schemas/ScheduleBlockDto"
+          },
+          "modalities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModalityScheduleDto"
+            }
+          },
+          "studies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudyScheduleDto"
+            }
+          }
+        },
+        "required": [
+          "general",
+          "modalities",
+          "studies"
+        ],
+        "additionalProperties": false
+      },
+      "CenterStudyDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "modalityCode": {
+            "type": "string",
+            "enum": [
+              "ECO",
+              "RX",
+              "RM",
+              "TC",
+              "MG",
+              "DXA",
+              "LAB"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "BOB"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "modalityCode",
+          "price",
+          "currency",
+          "preparation"
+        ]
+      },
+      "CenterEquipmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "manufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "modalityCode": {
+            "type": "string",
+            "enum": [
+              "ECO",
+              "RX",
+              "RM",
+              "TC",
+              "MG",
+              "DXA",
+              "LAB"
+            ],
+            "nullable": true,
+            "description": "`null`: does not limit appointments (an analyzer)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPERATIONAL",
+              "MAINTENANCE",
+              "OUT_OF_SERVICE"
+            ]
+          },
+          "glossaryConceptId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Always `null` for now."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "manufacturer",
+          "model",
+          "modalityCode",
+          "status",
+          "glossaryConceptId"
+        ]
+      },
+      "CenterScheduleViewDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LABORATORY",
+              "IMAGING"
+            ]
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/SaveCenterScheduleDto"
+          },
+          "studies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CenterStudyDto"
+            }
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CenterEquipmentDto"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "`null` while the center has never published a schedule."
+          },
+          "bookingsWithoutEquipment": {
+            "type": "number",
+            "description": "Future bookings left without an operational device."
+          }
+        },
+        "required": [
+          "unitId",
+          "unitName",
+          "kind",
+          "schedule",
+          "studies",
+          "equipment",
+          "updatedAt"
+        ]
+      },
+      "CenterBookingDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "nullable": true,
+            "description": "`null` for a booking made outside the order flow."
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "studyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "PENDING_CONFIRMATION",
+              "CONFIRMED",
+              "CHECKED_IN",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "bookingId",
+          "orderId",
+          "patientName",
+          "studyName",
+          "startsAt",
+          "endsAt",
+          "siteName",
+          "status"
+        ]
+      },
+      "CenterBookingsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CenterBookingDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "SetEquipmentStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPERATIONAL",
+              "MAINTENANCE",
+              "OUT_OF_SERVICE"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "StudyStartDto": {
+        "type": "object",
+        "properties": {
+          "startAt": {
+            "type": "string",
+            "example": "2026-11-05T12:00:00.000Z"
+          },
+          "endAt": {
+            "type": "string",
+            "example": "2026-11-05T12:30:00.000Z"
+          },
+          "remaining": {
+            "type": "number",
+            "description": "Places left in this slot."
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Patients per slot."
+          }
+        },
+        "required": [
+          "startAt",
+          "endAt",
+          "remaining",
+          "capacity"
+        ]
+      },
+      "StudyAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studyCode": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "STUDY",
+              "MODALITY",
+              "GENERAL"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudyStartDto"
+            }
+          }
+        },
+        "required": [
+          "unitId",
+          "studyCode",
+          "origin",
+          "items"
+        ]
+      },
+      "OrderBookingOptionDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true,
+            "description": "Straight line from the patient home; `null` if a location is missing."
+          },
+          "nextStartAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          },
+          "operationalEquipment": {
+            "type": "number",
+            "description": "Patients per slot for the modality."
+          }
+        },
+        "required": [
+          "unitId",
+          "unitName",
+          "addressText",
+          "price",
+          "currency",
+          "distanceKm",
+          "nextStartAt",
+          "preparation",
+          "operationalEquipment"
+        ]
+      },
+      "OrderBookingOptionsDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studyCode": {
+            "type": "string"
+          },
+          "studyName": {
+            "type": "string"
+          },
+          "modalityCode": {
+            "type": "string",
+            "enum": [
+              "ECO",
+              "RX",
+              "RM",
+              "TC",
+              "MG",
+              "DXA",
+              "LAB"
+            ]
+          },
+          "modalityLabel": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderBookingOptionDto"
+            }
+          }
+        },
+        "required": [
+          "orderId",
+          "studyCode",
+          "studyName",
+          "modalityCode",
+          "modalityLabel",
+          "options"
+        ]
+      },
+      "BookOrderDto": {
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startAt": {
+            "type": "string",
+            "example": "2026-11-05T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "unitId",
+          "startAt"
+        ],
+        "additionalProperties": false
+      },
+      "OrderAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "startAt": {
+            "type": "string"
+          },
+          "endAt": {
+            "type": "string"
+          },
+          "studyName": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "bookingId",
+          "unitId",
+          "unitName",
+          "addressText",
+          "startAt",
+          "endAt",
+          "studyName",
+          "price",
+          "currency",
+          "preparation"
+        ]
+      },
       "DiagnosticConceptDto": {
         "type": "object",
         "properties": {
@@ -153999,6 +157526,402 @@
             "format": "date-time"
           }
         },
+        "additionalProperties": false
+      },
+      "LabServiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "HEMOGRAMA"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Always null: the model has no lab categories"
+          },
+          "categoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sampleType": {
+            "type": "string",
+            "nullable": true
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "turnaroundHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiresMedicalOrder": {
+            "type": "boolean"
+          },
+          "homeCollection": {
+            "type": "boolean"
+          },
+          "price": {
+            "type": "string",
+            "example": "45.00"
+          },
+          "alovidaDiscountPercent": {
+            "type": "number",
+            "nullable": true,
+            "example": 10
+          },
+          "alovidaPrice": {
+            "type": "string",
+            "example": "40.50"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "BOB"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "WITHDRAWN"
+            ]
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Always true: the model has no availability column"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "categoryId",
+          "categoryName",
+          "sampleType",
+          "preparation",
+          "description",
+          "turnaroundHours",
+          "requiresMedicalOrder",
+          "homeCollection",
+          "price",
+          "alovidaDiscountPercent",
+          "alovidaPrice",
+          "currency",
+          "status",
+          "available",
+          "updatedAt"
+        ]
+      },
+      "LabServicePageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabServiceDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "LabServiceDraftDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sampleType": {
+            "type": "string",
+            "nullable": true,
+            "description": "Not persisted: no free-text column"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "turnaroundHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiresMedicalOrder": {
+            "type": "boolean"
+          },
+          "homeCollection": {
+            "type": "boolean"
+          },
+          "alovidaDiscountPercent": {
+            "type": "number",
+            "nullable": true,
+            "example": 10
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string",
+            "example": "HEMOGRAMA"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string",
+            "example": "45.00"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "price"
+        ],
+        "additionalProperties": false
+      },
+      "LabImportRowDto": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "number"
+          },
+          "service": {
+            "type": "object",
+            "description": "A LabServiceDraft"
+          }
+        },
+        "required": [
+          "line",
+          "service"
+        ],
+        "additionalProperties": false
+      },
+      "LabImportDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "CREATE_OR_UPDATE",
+              "UPDATE_ONLY"
+            ]
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabImportRowDto"
+            }
+          }
+        },
+        "required": [
+          "mode",
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "LabImportRowResultDto": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "number"
+          },
+          "code": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "UPDATED",
+              "UNCHANGED",
+              "REJECTED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "line",
+          "code",
+          "outcome",
+          "reason"
+        ]
+      },
+      "LabImportResultDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "number"
+          },
+          "updated": {
+            "type": "number"
+          },
+          "unchanged": {
+            "type": "number"
+          },
+          "rejected": {
+            "type": "number"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabImportRowResultDto"
+            }
+          }
+        },
+        "required": [
+          "created",
+          "updated",
+          "unchanged",
+          "rejected",
+          "rows"
+        ]
+      },
+      "LabServiceChangesDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sampleType": {
+            "type": "string",
+            "nullable": true,
+            "description": "Not persisted: no free-text column"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "turnaroundHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiresMedicalOrder": {
+            "type": "boolean"
+          },
+          "homeCollection": {
+            "type": "boolean"
+          },
+          "alovidaDiscountPercent": {
+            "type": "number",
+            "nullable": true,
+            "example": 10
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string",
+            "example": "45.00"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "WITHDRAWN"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "LabCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "serviceCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "serviceCount"
+        ]
+      },
+      "LabCategoryPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabCategoryDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "LabCategoryNameDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Hematología"
+          }
+        },
+        "required": [
+          "name"
+        ],
         "additionalProperties": false
       },
       "PharmacyCategoryItemDto": {
@@ -156046,13 +159969,16 @@
             "type": "boolean"
           },
           "priceFrom": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "priceTo": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "currency": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "pharmacyCount": {
             "type": "number"
@@ -156101,6 +160027,56 @@
           "uses"
         ]
       },
+      "PublicOfficialMedicineDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "holder": {
+            "type": "string",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "string",
+            "nullable": true
+          },
+          "dosageForm": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "atc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requiresPrescription": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "sourceName",
+          "atc",
+          "uses"
+        ]
+      },
       "PublicMedicationPageDto": {
         "type": "object",
         "properties": {
@@ -156124,6 +160100,12 @@
             "nullable": true,
             "example": "ibuprofeno"
           },
+          "officialProducts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicOfficialMedicineDto"
+            }
+          },
           "generatedAt": {
             "type": "string"
           }
@@ -156132,6 +160114,7 @@
           "items",
           "total",
           "groups",
+          "officialProducts",
           "generatedAt"
         ]
       },
@@ -157486,20 +161469,6 @@
         ],
         "additionalProperties": false
       },
-      "RequestPrimaryPractitionerDto": {
-        "type": "object",
-        "properties": {
-          "practitionerProfileId": {
-            "type": "string",
-            "description": "Perfil del profesional elegido",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "practitionerProfileId"
-        ],
-        "additionalProperties": false
-      },
       "DecidePractitionerAccessRequestDto": {
         "type": "object",
         "properties": {
@@ -157528,6 +161497,18 @@
           "decision"
         ],
         "additionalProperties": false
+      },
+      "StatusResultDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "true si la operación se aplicó"
+          }
+        },
+        "required": [
+          "ok"
+        ]
       },
       "RegisterEncounterInformedConsentDto": {
         "type": "object",
@@ -160485,12 +164466,13 @@
           },
           "code": {
             "type": "string",
-            "description": "Código interno del servicio",
-            "maxLength": 120
+            "description": "Obsoleto e ignorado: el código lo pone el repositorio",
+            "deprecated": true
           },
           "name": {
             "type": "string",
-            "description": "Nombre del servicio"
+            "description": "Obsoleto e ignorado: el nombre lo pone el repositorio",
+            "deprecated": true
           },
           "descriptionText": {
             "type": "string",
@@ -160503,7 +164485,7 @@
           },
           "serviceConceptId": {
             "type": "string",
-            "description": "Concepto de clasificación del servicio",
+            "description": "Concepto del repositorio de servicios (obligatorio). Buscarlo en GET /billing/service-catalog/repository",
             "format": "uuid"
           },
           "defaultPrice": {
@@ -160533,8 +164515,7 @@
         },
         "required": [
           "practiceId",
-          "code",
-          "name",
+          "serviceConceptId",
           "defaultPrice"
         ],
         "additionalProperties": false
@@ -160604,6 +164585,48 @@
             "nullable": true
           }
         },
+        "additionalProperties": false
+      },
+      "ImportServiceItemDto": {
+        "type": "object",
+        "properties": {
+          "conceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "defaultPrice": {
+            "type": "string",
+            "example": "250.00"
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "conceptId",
+          "defaultPrice"
+        ],
+        "additionalProperties": false
+      },
+      "ImportServicesDto": {
+        "type": "object",
+        "properties": {
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportServiceItemDto"
+            }
+          }
+        },
+        "required": [
+          "practiceId",
+          "items"
+        ],
         "additionalProperties": false
       },
       "AdminCreateServiceDto": {
@@ -167556,13 +171579,7 @@
               "STAFF",
               "SECRETARY",
               "ASSISTANT",
-              "NURSE",
               "BILLING",
-              "NURSE_SUPERVISOR",
-              "ADMISSION",
-              "HOUSEKEEPING",
-              "HOUSEKEEPING_SUPERVISOR",
-              "MAINTENANCE",
               "OR_MANAGER",
               "INFECTION_CONTROL",
               "UNIT_HEAD"
@@ -170240,6 +174257,106 @@
         },
         "required": [
           "scope"
+        ],
+        "additionalProperties": false
+      },
+      "LabOrderTransitionDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "RECEIVE",
+              "PROCESS",
+              "CANCEL",
+              "REJECT"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "LabResultFileSearchDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PDF",
+              "IMAGE",
+              "VIDEO",
+              "AUDIO",
+              "TEXT",
+              "DICOM",
+              "OTHER"
+            ]
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "includeWithdrawn": {
+            "type": "boolean"
+          },
+          "q": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "additionalProperties": false
+      },
+      "LabResultWithdrawalDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "LabResultUploadStartDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "contentType": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "sizeBytes": {
+            "type": "number",
+            "minimum": 1
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000
+          },
+          "notify": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "fileName",
+          "contentType",
+          "sizeBytes",
+          "orderId"
         ],
         "additionalProperties": false
       },
@@ -191209,6 +195326,51 @@
           "tenantId",
           "requestData"
         ],
+        "additionalProperties": false
+      },
+      "ResourceApprovalDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "requiresApproval": {
+            "type": "boolean",
+            "description": "Si las solicitudes de consulta esperan que el profesional las acepte"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "requiresApproval"
+        ]
+      },
+      "MyResourcesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceApprovalDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "SchedulingUpdateResourceDto": {
+        "type": "object",
+        "properties": {
+          "requiresApproval": {
+            "type": "boolean",
+            "description": "Si las solicitudes de consulta esperan que el profesional las acepte. Con `false` nacen confirmadas. La oferta de un servicio sigue mandando sobre su cupo."
+          }
+        },
         "additionalProperties": false
       },
       "CreateServiceOfferingDto": {

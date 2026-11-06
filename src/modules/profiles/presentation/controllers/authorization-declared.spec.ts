@@ -16,7 +16,7 @@ import { ProfilesPractitionersController } from './profiles-practitioners.contro
  * afuera—, esta prueba lo marca.
  */
 const DECLARED: ReadonlyArray<readonly [object, readonly string[]]> = [
-  [OwnAdmissionController, ['get', 'resubmit', 'withdraw']],
+  [OwnAdmissionController, ['get', 'submit', 'resubmit', 'withdraw']],
   [
     PatientAddressBookController,
     ['list', 'create', 'update', 'remove', 'prefer'],

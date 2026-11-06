@@ -239,12 +239,7 @@ export class InpatientCensusUseCases {
             'Su rol no permite cerrar el censo de esas unidades',
             {
               unitIds: denied,
-              requiredRoles: [
-                'ORG_ADMIN',
-                'SITE_ADMIN',
-                'NURSE_SUPERVISOR',
-                'ADMISSION',
-              ],
+              requiredRoles: ['ORG_ADMIN', 'SITE_ADMIN'],
             },
             'INFRA_ACTION_NOT_ALLOWED',
           );

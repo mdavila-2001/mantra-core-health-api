@@ -76,6 +76,7 @@ export function directoryRegistration(
     | 'typeProfile'
     | 'affiliationDocuments'
     | 'representatives'
+    | 'taxIdentifiers'
   >,
 ): DirectoryRegistrationAdapter {
   const pick = (key: keyof typeof d): never => (d[key] ?? blank()) as never;
@@ -89,5 +90,6 @@ export function directoryRegistration(
     pick('typeProfile'),
     pick('affiliationDocuments'),
     pick('representatives'),
+    (d.taxIdentifiers ?? { register: async () => 'identifier-tax' }) as never,
   );
 }

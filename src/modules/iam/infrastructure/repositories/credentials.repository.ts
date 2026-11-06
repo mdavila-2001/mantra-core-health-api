@@ -74,7 +74,8 @@ export class CredentialsRepository {
   /**
    * La credencial de contraseña activa para un identificador de **login**: el
    * sujeto exacto (documento o correo de alta) o, si es un correo, el mismo
-   * correo con otras mayúsculas o el correo de contacto de un paciente.
+   * correo con otras mayúsculas o el correo de contacto de un paciente o de una
+   * persona de apoyo (secretaria).
    *
    * El paciente se da de alta con su **documento** como sujeto y el correo queda
    * sólo como dato de contacto; sin este rodeo, la pantalla de ingreso —que
@@ -105,8 +106,15 @@ export class CredentialsRepository {
     if (bySubject.length === 1) return bySubject[0];
     if (bySubject.length > 1) return null;
 
+    // Patients and practitioners keep their email as an `OWNER_PATIENT` contact;
+    // support staff (a secretary created from «Mi equipo») keep it as an
+    // `OWNER_PERSON` contact, since they have no patient profile. Both count:
+    // only persons with an active account link resolve to a user below, so a
+    // third person a patient declared (also `OWNER_PERSON`) never logs anyone in.
     const contacts = await em.find(ContactPoints, {
-      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerTypeConceptId: {
+        $in: [CONCEPTS.OWNER_PATIENT, CONCEPTS.OWNER_PERSON],
+      },
       systemConceptId: CONCEPTS.CONTACT_EMAIL,
       value: { $ilike: email },
     });

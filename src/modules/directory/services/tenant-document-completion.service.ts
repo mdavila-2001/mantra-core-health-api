@@ -34,6 +34,7 @@ import {
 } from './pharmacy-operating-requirements.service';
 import { TenantAdministrationService } from './tenant-administration.service';
 import { TenantAffiliationDocumentsService } from './tenant-affiliation-documents.service';
+import { TenantTaxIdentifierService } from './tenant-tax-identifier.service';
 
 /** Campo del cuerpo → rol canónico, en el orden en que se persisten. */
 const FIELD_BY_ROLE: Readonly<
@@ -71,18 +72,6 @@ function legalEntityTypeCodeOf(
  */
 @Injectable()
 export class TenantDocumentCompletionService {
-  /**
-   * Inicializa la instancia y sus dependencias.
-   *
-   * @param em - Contexto de persistencia.
-   * @param tenantsRepo - Tenants.
-   * @param legalRepo - Representantes legales del tenant.
-   * @param tenantAdmin - Quién administra o lee la organización.
-   * @param concepts - Catálogos de documentos y roles de representación.
-   * @param documents - Reclamo y alta de cada documento.
-   * @param requirements - Qué está presentado y qué falta para operar.
-   * @param logger - Logger estructurado.
-   */
   constructor(
     private readonly em: EntityManager,
     private readonly tenantsRepo: TenantsRepository,
@@ -90,6 +79,7 @@ export class TenantDocumentCompletionService {
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly concepts: AffiliationDocumentConceptsService,
     private readonly documents: TenantAffiliationDocumentsService,
+    private readonly taxIdentifiers: TenantTaxIdentifierService,
     private readonly requirements: PharmacyOperatingRequirementsService,
     private readonly logger: PinoLogger,
   ) {
@@ -184,17 +174,27 @@ export class TenantDocumentCompletionService {
       const legalEntityType = legalEntityTypeCodeOf(
         tenant.legalEntityTypeConceptId,
       );
+      const nit = dto.taxIdentifier?.trim();
+      const taxIdentifierId = nit
+        ? await this.taxIdentifiers.register(tx, {
+            tenantId,
+            value: nit,
+            holderName: tenant.legalName,
+            actorUserId: actor.id,
+          })
+        : undefined;
       const documentIds: string[] = [];
       for (const { role, fileId } of declared) {
         if (role === 'POWER_OF_ATTORNEY_DOC') continue;
+        const isTax = role === 'TAX_IDENTIFIER_DOC';
         documentIds.push(
           await this.documents.attachDocument(tx, role, {
             tenantId,
             ownerUserId: actor.id,
             legalEntityType,
             fileId,
-            documentNumber:
-              role === 'TAX_IDENTIFIER_DOC' ? dto.taxIdentifier : undefined,
+            documentNumber: isTax ? dto.taxIdentifier : undefined,
+            identifierId: isTax ? taxIdentifierId : undefined,
           }),
         );
       }

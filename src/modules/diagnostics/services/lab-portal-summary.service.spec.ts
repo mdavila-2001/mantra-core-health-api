@@ -8,20 +8,36 @@ const day = (n: number) => new Date(`2026-11-0${n}T10:00:00Z`);
 
 describe('LabPortalSummaryService', () => {
   it('counts offerings, orders and files from real rows of the tenant', async () => {
-    const offering = (id: string, status: string, updated = day(1)) => ({
+    const offering = (
+      id: string,
+      status: string,
+      updated = day(1),
+      extra: Record<string, unknown> = {},
+    ) => ({
       id,
       statusConceptId: status,
       displayName: `Estudio ${id}`,
+      available: true,
       createdAt: day(1),
       updatedAt: updated,
+      ...extra,
     });
     const repo = {
       findOfferings: mockFn(async () => [
-        offering('o1', DUNIT.OFFERING_ACTIVE),
-        offering('o2', DUNIT.OFFERING_ACTIVE, day(3)),
-        offering('o3', DUNIT.OFFERING_DRAFT),
-        offering('o4', DUNIT.OFFERING_RETIRED),
+        offering('o1', DUNIT.OFFERING_ACTIVE, day(1), {
+          serviceCategoryId: 'c1',
+        }),
+        offering('o2', DUNIT.OFFERING_ACTIVE, day(3), {
+          serviceCategoryId: 'c1',
+          available: false,
+        }),
+        offering('o3', DUNIT.OFFERING_DRAFT, day(1), { available: false }),
+        offering('o4', DUNIT.OFFERING_RETIRED, day(1), {
+          serviceCategoryId: 'c1',
+          available: false,
+        }),
       ]),
+      findCategories: mockFn(async () => [{ id: 'c1', name: 'Hematología' }]),
     };
     const labels = {
       findTenantNames: mockFn(async () => new Map([[LAB, 'Lab Central']])),
@@ -70,16 +86,21 @@ describe('LabPortalSummaryService', () => {
     const summary = await service.summary(LAB);
     expect(snapshot.loadAll).toHaveBeenCalledWith(expect.anything(), LAB);
     expect(repo.findOfferings).toHaveBeenCalledWith(expect.anything(), LAB);
+    expect(repo.findCategories).toHaveBeenCalledWith(expect.anything(), LAB);
     expect(summary).toMatchObject({
       labName: 'Lab Central',
       published: 2,
       drafts: 1,
       withdrawn: 1,
-      unavailable: 0,
+      // o2 and o3 are switched off; the withdrawn o4 no longer counts.
+      unavailable: 2,
       ordersWithoutResults: 2,
       resultFiles: 1,
       resultBytes: 2048,
-      byCategory: [{ category: 'Sin categoría', count: 3 }],
+      byCategory: [
+        { categoryId: 'c1', category: 'Hematología', count: 2 },
+        { categoryId: null, category: 'Sin categoría', count: 1 },
+      ],
     });
     expect(summary.recentActivity.slice(0, 3).map((a) => a.kind)).toEqual([
       'RESULT_WITHDRAWN',
@@ -109,7 +130,10 @@ describe('LabPortalSummaryService', () => {
     };
     const service = new LabPortalSummaryService(
       { fork: () => ({}) } as any,
-      { findOfferings: mockFn(async () => []) } as any,
+      {
+        findOfferings: mockFn(async () => []),
+        findCategories: mockFn(async () => []),
+      } as any,
       { findTenantNames: mockFn(async () => new Map()) } as any,
       snapshot as any,
     );
@@ -118,6 +142,8 @@ describe('LabPortalSummaryService', () => {
       ordersWithoutResults: 3,
       resultFiles: 3,
       resultBytes: 60,
+      unavailable: 0,
+      byCategory: [],
     });
   });
 });

@@ -10,6 +10,7 @@ import {
   DeclaredBranchesService,
   TenantAffiliationDocumentsService,
   TenantLegalRepresentativesService,
+  TenantTaxIdentifierService,
   TenantTypeProfileService,
   type DeclaredBranchesInput,
   type OpeningHoursSite,
@@ -36,6 +37,7 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
     private readonly representatives: TenantLegalRepresentativesService,
+    private readonly taxIdentifiers: TenantTaxIdentifierService,
   ) {}
 
   createTenantMembership(tx: EntityManager, data: object) {
@@ -75,6 +77,13 @@ export class DirectoryRegistrationAdapter implements DirectoryRegistrationPort {
     shifts?: readonly OpeningHoursShiftDto[],
   ) {
     this.declaredBranches.recordShifts(tx, site, shifts);
+  }
+
+  registerTaxIdentifier(
+    tx: EntityManager,
+    input: Parameters<TenantTaxIdentifierService['register']>[1],
+  ) {
+    return this.taxIdentifiers.register(tx, input);
   }
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto) {

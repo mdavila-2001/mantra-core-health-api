@@ -174,6 +174,29 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
       code: 'DU_EQ_ULTRASOUND',
       display: 'Ultrasound equipment',
     },
+    // One device type per modality the center screen offers: without them an
+    // MRI scanner or a sampling station could not be registered, and
+    // mammography, densitometry and CT were stored as plain X-ray devices.
+    EQUIPMENT_TYPE_MRI: {
+      code: 'DU_EQ_MRI',
+      display: 'Magnetic resonance scanner',
+    },
+    EQUIPMENT_TYPE_CT: {
+      code: 'DU_EQ_CT',
+      display: 'Computed tomography scanner',
+    },
+    EQUIPMENT_TYPE_MAMMOGRAPHY: {
+      code: 'DU_EQ_MAMMOGRAPHY',
+      display: 'Mammography unit',
+    },
+    EQUIPMENT_TYPE_BONE_DENSITOMETRY: {
+      code: 'DU_EQ_BONE_DENSITOMETRY',
+      display: 'Bone densitometer',
+    },
+    EQUIPMENT_TYPE_SAMPLING_STATION: {
+      code: 'DU_EQ_SAMPLING_STATION',
+      display: 'Sample collection station',
+    },
     EQUIPMENT_OPERATIONAL: {
       code: 'DU_EQ_OPERATIONAL',
       display: 'Equipment operational',

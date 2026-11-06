@@ -3569,7 +3569,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `role` | No | `string` | valores: `STAFF`, `SECRETARY`, `ASSISTANT`, `NURSE`, `BILLING`, `NURSE_SUPERVISOR`, `ADMISSION`, `HOUSEKEEPING`, `HOUSEKEEPING_SUPERVISOR`, `MAINTENANCE`, `OR_MANAGER`, `INFECTION_CONTROL`, `UNIT_HEAD` | Rol de la asignación | `STAFF` |
+| `role` | No | `string` | valores: `STAFF`, `SECRETARY`, `ASSISTANT`, `BILLING`, `OR_MANAGER`, `INFECTION_CONTROL`, `UNIT_HEAD` | Rol de la asignación | `STAFF` |
 | `accessScope` | No | `string` | valores: `TENANT`, `PRACTICE`, `SITE`, `UNIT`, `SPACE` | Alcance de acceso | `TENANT` |
 | `practiceId` | No | `string` | formato `uuid` | Nodo de scope: práctica | `00000000-0000-4000-8000-000000000001` |
 | `practiceSiteId` | No | `string` | formato `uuid` | Nodo de scope: sede de práctica | `00000000-0000-4000-8000-000000000001` |

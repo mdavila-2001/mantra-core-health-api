@@ -113,10 +113,13 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
   let general: ScheduleBlock | null = null;
   const modalities = new Map<ModalityCode, ScheduleBlock>();
   const studies = new Map<string, ScheduleBlock>();
+  const equipment = new Map<string, ScheduleBlock>();
   for (const { name, block } of blocks.values()) {
     const scope = scopeOfTemplate(name);
     if (scope.level === 'GENERAL') general ??= block;
-    else if (scope.level === 'STUDY') {
+    else if (scope.level === 'EQUIPMENT') {
+      if (!equipment.has(scope.key)) equipment.set(scope.key, block);
+    } else if (scope.level === 'STUDY') {
       if (!studies.has(scope.key)) studies.set(scope.key, block);
     } else if (MODALITY_CODES.includes(scope.key as ModalityCode)) {
       const code = scope.key as ModalityCode;
@@ -131,6 +134,10 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
     })),
     studies: [...studies].map(([studyCode, schedule]) => ({
       studyCode,
+      schedule,
+    })),
+    equipment: [...equipment].map(([equipmentId, schedule]) => ({
+      equipmentId,
       schedule,
     })),
   };
@@ -165,9 +172,11 @@ export class CenterContextService {
     }
     const equipment = equipmentRows.map((e): CenterEquipment => ({
       id: e.id,
-      name: e.type_display ?? 'Equipo',
+      // What the center calls it (its model) before the catalog's type name.
+      name: e.model?.trim() || e.type_display || 'Equipo',
       manufacturer: e.manufacturer,
       model: e.model,
+      serialNumber: e.serial_number,
       // An analyzer processes samples in batches: it never limits a slot.
       modalityCode:
         e.type_concept_id === DUNIT.EQUIPMENT_TYPE_ANALYZER
@@ -177,14 +186,22 @@ export class CenterContextService {
       glossaryConceptId: null,
     }));
     const declared = rules.find((r) => r.capacity_per_slot !== null);
+    const loaded =
+      rules.length === 0 ? defaultSchedule(kind) : scheduleFrom(rules, kind);
+    // A shift of a device that left the center is not part of the schedule.
+    const schedule: CenterSchedule = {
+      ...loaded,
+      equipment: loaded.equipment.filter((s) =>
+        equipment.some((e) => e.id === s.equipmentId),
+      ),
+    };
     return {
       unit,
       kind,
       zone: resource?.time_zone ?? site?.time_zone ?? DEFAULT_TIME_ZONE,
       resourceId: resource?.id ?? null,
       site: site ?? null,
-      schedule:
-        rules.length === 0 ? defaultSchedule(kind) : scheduleFrom(rules, kind),
+      schedule,
       updatedAt: rules[0]?.updated_at ?? null,
       declaredCapacity: declared?.capacity_per_slot ?? 1,
       studies,

@@ -2554,7 +2554,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `role` | `string` | No | valores: STAFF, SECRETARY, ASSISTANT, NURSE, BILLING, NURSE_SUPERVISOR, ADMISSION, HOUSEKEEPING, HOUSEKEEPING_SUPERVISOR, MAINTENANCE, OR_MANAGER, INFECTION_CONTROL, UNIT_HEAD | `@IsOptional()` `@IsIn(ROLES)` | Rol de la asignación | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:30` |
+| `role` | `string` | No | valores: STAFF, SECRETARY, ASSISTANT, BILLING, OR_MANAGER, INFECTION_CONTROL, UNIT_HEAD | `@IsOptional()` `@IsIn(ROLES)` | Rol de la asignación | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:30` |
 | `accessScope` | `string` | No | valores: TENANT, PRACTICE, SITE, UNIT, SPACE | `@IsOptional()` `@IsIn(SCOPES)` | Alcance de acceso | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:38` |
 | `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:49` |
 | `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: sede de práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:60` |

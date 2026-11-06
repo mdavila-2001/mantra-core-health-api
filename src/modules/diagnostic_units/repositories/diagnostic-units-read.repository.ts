@@ -13,6 +13,7 @@ import {
   DiagnosticUnits,
 } from '../entities';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { PUBLIC_OFFERING } from './public-offering.where';
 
 /** Consultas que componen las dos lecturas públicas del módulo 23. */
 @Injectable()
@@ -94,10 +95,7 @@ export class DiagnosticUnitsReadRepository {
     if (unitIds.length === 0) return Promise.resolve([]);
     return em.find(
       DiagnosticStudyOfferings,
-      {
-        diagnosticUnitId: { $in: unitIds },
-        statusConceptId: DUNIT.OFFERING_ACTIVE,
-      },
+      { diagnosticUnitId: { $in: unitIds }, ...PUBLIC_OFFERING },
       { orderBy: { displayName: 'ASC' } },
     );
   }
@@ -228,7 +226,7 @@ export class DiagnosticUnitsReadRepository {
   ): Promise<string[]> {
     const rows = await em.find(
       DiagnosticStudyOfferings,
-      { studyCode, statusConceptId: DUNIT.OFFERING_ACTIVE },
+      { studyCode, ...PUBLIC_OFFERING },
       { fields: ['diagnosticUnitId'] },
     );
     return [...new Set(rows.map((row) => row.diagnosticUnitId))];
@@ -255,7 +253,7 @@ export class DiagnosticUnitsReadRepository {
       DiagnosticStudyOfferings,
       {
         studyConceptId: { $in: [...studyConceptIds] },
-        statusConceptId: DUNIT.OFFERING_ACTIVE,
+        ...PUBLIC_OFFERING,
       },
       { fields: ['diagnosticUnitId', 'studyConceptId'] },
     );

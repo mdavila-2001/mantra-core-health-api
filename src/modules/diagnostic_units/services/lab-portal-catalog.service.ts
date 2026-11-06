@@ -4,16 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { normalizeSearchText } from '../../../common/text/normalize-search-text';
-import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
+import { DUNIT } from '../diagnostic_units.concepts';
 import type { DiagnosticStudyOfferings } from '../entities';
 import type { LabServiceQueryDto } from '../dto/lab-portal-requests.dto';
 import type {
-  LabCategoryDto,
-  LabCategoryPageDto,
   LabServiceDto,
   LabServicePageDto,
 } from '../dto/lab-portal-responses.dto';
@@ -30,9 +28,7 @@ import {
   LabPortalWriterService,
   type LabServiceProblem,
 } from './lab-portal-writer.service';
-import { statusOf, toLabService } from './lab-portal.mapping';
-
-const REASON = DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE;
+import { parentOf, statusOf, toLabService } from './lab-portal.mapping';
 
 /**
  * The lab portal catalog ("Precios" screen): the active tenant's offerings,
@@ -61,21 +57,26 @@ export class LabPortalCatalogService {
   async list(query: LabServiceQueryDto): Promise<LabServicePageDto> {
     const ctx = await this.context.load(this.em.fork());
     const q = query.q ? normalizeSearchText(query.q) : '';
+    const shown = (o: DiagnosticStudyOfferings) =>
+      query.status
+        ? statusOf(o.statusConceptId) === query.status
+        : statusOf(o.statusConceptId) !== 'WITHDRAWN';
     const items = ctx.offerings
-      .filter((o) =>
-        query.status
-          ? statusOf(o.statusConceptId) === query.status
-          : statusOf(o.statusConceptId) !== 'WITHDRAWN',
-      )
+      .filter(shown)
       .filter(
         (o) =>
           q === '' ||
           normalizeSearchText(o.displayName).includes(q) ||
           normalizeSearchText(o.studyCode).includes(q),
       )
-      // No category is ever assigned and every service reads as available.
-      .filter(() => query.categoryId === undefined)
-      .filter(() => query.available !== false)
+      .filter(
+        (o) =>
+          query.categoryId === undefined ||
+          o.serviceCategoryId === query.categoryId,
+      )
+      .filter(
+        (o) => query.available === undefined || o.available === query.available,
+      )
       .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'))
       .map((o) => this.view(ctx, o));
     return { items, count: items.length };
@@ -136,32 +137,35 @@ export class LabPortalCatalogService {
     // Resolve inside the tenant's own unit first: another lab's id is a 404.
     this.context.offering(await this.context.load(this.em.fork()), id);
     await this.studies.retireOffering(id, actor);
+    await this.retireParts(id, actor.id);
     const ctx = await this.context.load(this.em.fork());
     return this.view(ctx, this.context.offering(ctx, id));
   }
 
-  /** `GET /diagnostics/lab/categories`: always empty (no categories table). */
-  async listCategories(): Promise<LabCategoryPageDto> {
-    await this.context.unitOfTenant(this.em.fork());
-    return { items: [], count: 0 };
-  }
-
-  /** `POST /diagnostics/lab/categories`: refused, there is nowhere to store it. */
-  async createCategory(): Promise<LabCategoryDto> {
-    await this.context.unitOfTenant(this.em.fork());
-    throw new PreconditionFailedException(
-      'Las categorías del laboratorio no se pueden guardar: el modelo no tiene dónde registrarlas.',
-    );
-  }
-
-  /** `PATCH`/`DELETE /diagnostics/lab/categories/:id`: no category exists. */
-  async categoryNotFound(): Promise<never> {
-    await this.context.unitOfTenant(this.em.fork());
-    throw new ResourceNotFoundException(
-      'Categoría no encontrada',
-      undefined,
-      REASON,
-    );
+  /**
+   * A withdrawn panel takes along the components that belong to it alone, so
+   * none stays published (directory, search) while the lab no longer sees it.
+   */
+  private async retireParts(
+    panelId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const ctx = await this.context.load(tx);
+      const parentsOf = (id: string) =>
+        ctx.links.filter((l) => l.componentOfferingId === id);
+      for (const link of ctx.links.filter(
+        (l) => l.parentOfferingId === panelId,
+      )) {
+        const part = ctx.offerings.find(
+          (o) => o.id === link.componentOfferingId,
+        );
+        if (!part || part.statusConceptId === DUNIT.OFFERING_RETIRED) continue;
+        if (parentsOf(part.id).length > 1) continue;
+        part.statusConceptId = DUNIT.OFFERING_RETIRED;
+        touch(part, actorUserId);
+      }
+    });
   }
 
   /** Response of one offering with its current price. */
@@ -172,7 +176,16 @@ export class LabPortalCatalogService {
     const sample = offering.specimenTypeConceptId
       ? (ctx.specimens.get(offering.specimenTypeConceptId) ?? null)
       : null;
-    return toLabService(offering, ctx.prices.get(offering.id), sample);
+    const category = ctx.categories.find(
+      (c) => c.id === offering.serviceCategoryId,
+    );
+    return toLabService(
+      offering,
+      ctx.prices.get(offering.id),
+      sample,
+      category?.name ?? null,
+      parentOf(ctx, offering.id),
+    );
   }
 
   /** Throws the HTTP form of a business problem. */

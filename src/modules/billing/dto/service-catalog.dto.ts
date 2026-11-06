@@ -32,25 +32,30 @@ export class CreateServiceCatalogItemDto {
   practiceId!: string;
 
   /**
-   * Valor de code mantenido por la instancia.
-   *
-   * Hasta 120: los servicios importados del arancel guardan el código del
-   * concepto como procedencia (`procedure:bo:BO_ARM_…`), y 4237 de los 4408
-   * pasan de 60 (el más largo, 71). Con 60 la importación respondía 400 en
-   * casi todos. La columna es `varchar` sin largo.
+   * Obsoleto: el código sale del concepto del repositorio. Se acepta por
+   * compatibilidad con clientes viejos y se ignora.
    */
-  @ApiProperty({ description: 'Código interno del servicio', maxLength: 120 })
+  @ApiPropertyOptional({
+    description: 'Obsoleto e ignorado: el código lo pone el repositorio',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MaxLength(120)
-  code!: string;
+  code?: string;
 
   /**
-   * Valor de name mantenido por la instancia.
+   * Obsoleto: el nombre sale del concepto del repositorio. Se acepta por
+   * compatibilidad con clientes viejos y se ignora.
    */
-  @ApiProperty({ description: 'Nombre del servicio' })
+  @ApiPropertyOptional({
+    description: 'Obsoleto e ignorado: el nombre lo pone el repositorio',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MaxLength(200)
-  name!: string;
+  name?: string;
 
   /**
    * Valor de description text mantenido por la instancia.
@@ -75,14 +80,19 @@ export class CreateServiceCatalogItemDto {
   imageFileId?: string;
 
   /**
-   * Identificador asociado a service concept.
+   * Concepto del repositorio de servicios. **Obligatorio**: no hay alta de
+   * texto libre (`GET /billing/service-catalog/repository` para buscarlo).
+   * Queda opcional en la validación para responder con el motivo de negocio
+   * (`SERVICE_CATALOG_CONCEPT_REQUIRED`) en vez de un 400 genérico.
    */
-  @ApiPropertyOptional({
-    description: 'Concepto de clasificación del servicio',
+  @ApiProperty({
+    description:
+      'Concepto del repositorio de servicios (obligatorio). Buscarlo en GET /billing/service-catalog/repository',
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  // `loose`: ver `ImportServiceItemDto.conceptId` (ids md5 de los importadores).
+  @IsUUID('loose')
   serviceConceptId?: string;
 
   /**

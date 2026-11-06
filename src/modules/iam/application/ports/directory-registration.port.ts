@@ -33,6 +33,8 @@ export interface RegistrationDocumentsInput {
   readonly ownerUserId: string;
   readonly legalEntityType?: string;
   readonly taxIdentifier?: string;
+  /** The NIT's `common.identifiers` row, linked from the tax document. */
+  readonly taxIdentifierId?: string;
   /** Rol canónico del documento → `fileId` ya subido. */
   readonly documents: Readonly<Record<string, string | undefined>>;
 }
@@ -65,6 +67,16 @@ export interface DirectoryRegistrationPort {
     site: OpeningHoursSite,
     shifts?: readonly OpeningHoursShiftDto[],
   ): void;
+  /** Records the tenant's NIT on its own, with or without its PDF; returns the identifier id. */
+  registerTaxIdentifier(
+    tx: EntityManager,
+    input: {
+      tenantId: string;
+      value: string;
+      holderName?: string;
+      actorUserId: string;
+    },
+  ): Promise<string>;
 
   assertProfileMatchesType(organization: RegisterOrganizationDetailsDto): void;
   declaredConcepts(

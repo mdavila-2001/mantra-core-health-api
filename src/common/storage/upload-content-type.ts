@@ -13,8 +13,15 @@
  * Lo que no se reconoce se rechaza, en vez de guardarse con un tipo genérico.
  */
 
+import {
+  AUDIO_MIME_TYPES,
+  sniffAudioMimeType,
+  type AudioMimeType,
+} from './audio-content-type';
+
 /** Tipos MIME que esta capa sabe reconocer por firma binaria. */
 export type SniffedMimeType =
+  | AudioMimeType
   | 'image/jpeg'
   | 'image/png'
   | 'image/webp'
@@ -153,6 +160,8 @@ export function sniffMimeType(buffer: Buffer): SniffedMimeType | undefined {
     if (signature.confirm && !signature.confirm(buffer)) continue;
     return signature.mimeType;
   }
+  const audio = sniffAudioMimeType(buffer);
+  if (audio) return audio;
   if (looksLikePlainText(buffer)) return 'text/plain';
   return undefined;
 }
@@ -168,6 +177,15 @@ export function isMimeTypeAllowedForCategory(
   category: 'DOCUMENT' | 'IMAGE',
   mimeType: SniffedMimeType,
 ): boolean {
+  // Chat voice notes upload as DOCUMENT. Audio is accepted only here, at
+  // upload: UPLOAD_MIME_ALLOWLIST stays audio-free so credentials and chart
+  // documents keep rejecting it when they associate a file.
+  if (
+    category === 'DOCUMENT' &&
+    AUDIO_MIME_TYPES.includes(mimeType as AudioMimeType)
+  ) {
+    return true;
+  }
   return UPLOAD_MIME_ALLOWLIST[category].includes(mimeType);
 }
 

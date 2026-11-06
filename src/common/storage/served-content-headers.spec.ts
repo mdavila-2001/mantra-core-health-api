@@ -46,6 +46,13 @@ describe('servedContentHeaders', () => {
     ).toBe(OPAQUE_MIME_TYPE);
   });
 
+  it('sirve el audio con su tipo real para que el reproductor lo decodifique', () => {
+    expect(servedContentHeaders('audio/webm')['Content-Type']).toBe(
+      'audio/webm',
+    );
+    expect(servedContentHeaders('audio/mp4')['Content-Type']).toBe('audio/mp4');
+  });
+
   it('sin nombre original igual declara la disposición', () => {
     expect(servedContentHeaders('text/plain')['Content-Disposition']).toBe(
       'attachment',

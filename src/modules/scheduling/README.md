@@ -112,8 +112,10 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | POST | `/scheduling/internal/expire-holds` | Internal | `expireHolds` | SYSTEM, SYSTEM_WORKER |
 | POST | `/scheduling/internal/promote-waitlist/:slotId` | Internal | `promoteWaitlist` | SYSTEM, SYSTEM_WORKER |
 | GET | `/scheduling/internal/waitlist-candidates` | Internal | `listWaitlistCandidates` | SYSTEM, SYSTEM_WORKER |
+| GET | `/scheduling/my-resources` | Agenda | `listMine` | PRACTITIONER, SCHEDULING_ADMIN |
 | GET | `/scheduling/resources` | Agenda | `listResources` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
 | POST | `/scheduling/resources` | Scheduling | `createResource` | SCHEDULING_ADMIN, PRACTITIONER |
+| PATCH | `/scheduling/resources/:id` | Agenda | `updateResource` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/close-slots` | Scheduling | `closeSlots` | SCHEDULING_ADMIN, PRACTITIONER |
 | POST | `/scheduling/resources/:id/delay` | Scheduling | `delayResource` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
 | GET | `/scheduling/resources/:id/exceptions` | Scheduling | `listExceptions` | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
@@ -156,6 +158,13 @@ no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
   2000 slots por ejecución para no generar lotes inmanejables (se avisa por log).
 - **Promoción de lista de espera**: marca candidatos, **no reserva por ellos**. La cita la confirma
   el paciente por el flujo normal.
+- **Quién acepta una solicitud** (v4.2.88): una solicitud del paciente nace pendiente salvo que lo
+  reservado no exija aceptación. Lo dice la oferta del servicio si el cupo es de un servicio y, si
+  no, la agenda (`schedulable_resources.requires_approval`, que el profesional cambia con
+  `PATCH /scheduling/resources/:id`). Cuando no hace falta, la cita nace confirmada y
+  `FinishAutoConfirmedRequestUseCase` deja lo mismo que una aceptación: el asiento del historial que
+  dice que fue automática, las solicitudes desplazadas (REGLA 2) y los avisos. Rige para las
+  solicitudes nuevas.
 
 ## Permissions
 
