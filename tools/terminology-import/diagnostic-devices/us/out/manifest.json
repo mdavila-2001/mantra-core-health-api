@@ -1,104 +1,104 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T15:13:05.362Z",
+ "generatedAt": "2026-11-06T20:52:10.659Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
   {
    "path": "fda-510k-0001.ndjson.gz",
    "source": "fda-510k",
-   "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec + openFDA device/510k export 2026-10-21 (https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip)",
-   "rows": 71955,
-   "bytes": 9948914,
-   "sha256": "416210c405681c4b9900cd8ae0dc7b4daf449d32ee42e673925f6b8311b56989"
+   "sourceVersion": "openFDA device/510k export 2026-11-02 (https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip)",
+   "rows": 71981,
+   "bytes": 9951013,
+   "sha256": "4f9b02b8960b1d478249b5df4c6e8a93a7ca0775c2622d75566ebc671b4a41e1"
   },
   {
    "path": "fda-denovo-0001.ndjson.gz",
    "source": "fda-denovo",
-   "sourceVersion": "openFDA device/510k export 2026-10-21 (https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip)",
+   "sourceVersion": "openFDA device/510k export 2026-11-02 (https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip)",
    "rows": 240,
-   "bytes": 40767,
-   "sha256": "172d1ccaec90f4e48f10dd7e7b49bd74ae7378fa75dc36eab8eeae91b8a5f9a3"
+   "bytes": 40765,
+   "sha256": "fa1c33a6e8d7ab53bae23bc7d2434297722d2162459e389aedc8d15e7d1171e3"
   },
   {
    "path": "fda-pma-0001.ndjson.gz",
    "source": "fda-pma",
-   "sourceVersion": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec + openFDA device/pma export 2026-10-21 (https://download.open.fda.gov/device/pma/device-pma-0001-of-0001.json.zip)",
-   "rows": 2750,
-   "bytes": 162112,
-   "sha256": "0a81bc70b733fd8cbbf0a3475f4c16fc664e98af7831ecd853948e4cb96e056c"
+   "sourceVersion": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec + openFDA device/pma export 2026-11-02 (https://download.open.fda.gov/device/pma/device-pma-0001-of-0001.json.zip)",
+   "rows": 2755,
+   "bytes": 162514,
+   "sha256": "93d9710e41e479d15a1c5ebe0852e3e9fdb7f15535861d184b46a3f758e8cae8"
   },
   {
    "path": "fda-rl-0001.ndjson.gz",
    "source": "fda-rl",
-   "sourceVersion": "openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
-   "rows": 141198,
-   "bytes": 4466352,
-   "sha256": "d7a332f765942a76253ab624c980632403f5ca8b1ef827c52315a91f53048b47"
+   "sourceVersion": "openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
+   "rows": 141185,
+   "bytes": 4453987,
+   "sha256": "471e4900414ee388921d5913030cfe27d920561f961c09c08f9cacb43f3a8212"
   },
   {
    "path": "fda-rl-0002.ndjson.gz",
    "source": "fda-rl",
-   "sourceVersion": "openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
-   "rows": 141369,
-   "bytes": 4592373,
-   "sha256": "518112222219abb488cbbc4c407e8946e6f512ffc48d7ee785e9a65767476c16"
+   "sourceVersion": "openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
+   "rows": 141387,
+   "bytes": 4595115,
+   "sha256": "c4af4b5ef9be4eeb1ce3585366bed1e7adcf22312bcbb1d43a9e4672817728f3"
   },
   {
    "path": "fda-rl-0003.ndjson.gz",
    "source": "fda-rl",
-   "sourceVersion": "openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-10-21 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
-   "rows": 78802,
-   "bytes": 2468147,
-   "sha256": "c36480d05b1ce1e39673ea689adf33dfd1f4bbb25ed0464fdff5a92428976ed5"
+   "sourceVersion": "openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip) + openFDA device/registrationlisting export 2026-11-02 (https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip)",
+   "rows": 79683,
+   "bytes": 2493161,
+   "sha256": "f2513135cc92bc88951ac8d1c704f988bf4b7044034de04aba3b63b5e376c704"
   },
   {
    "path": "fda-gudid-0001.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 114370,
-   "bytes": 10944387,
-   "sha256": "0e6cbe1cdcf6bfe555d0c2c5a5e281777922e1dce2b3a88bbf83cafedc5d139f"
+   "bytes": 11018041,
+   "sha256": "63194aa816290086c44bf77c24528a930c6c33568e7c6ce2fad9b365e82796ed"
   },
   {
    "path": "fda-gudid-0002.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 114100,
-   "bytes": 12712677,
-   "sha256": "d39a71bbca4004698ae3204f95255c62cc91211bccd4c9c134c84233db9cb269"
+   "bytes": 12771104,
+   "sha256": "9a3fed60345f7ae540e9473e7c978490e5c9f0a320c359da84de64e47465a1dd"
   },
   {
    "path": "fda-gudid-0003.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 113634,
-   "bytes": 10698090,
-   "sha256": "7f3c69b0eb16082bb556894744d96be386e00af71a2896c769cfb889810c82f6"
+   "bytes": 10760719,
+   "sha256": "a7784142a3b345f1df0e6696563c92e1947e0c0684dc5adc3be9826b6034a715"
   },
   {
    "path": "fda-gudid-0004.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 115180,
-   "bytes": 10142522,
-   "sha256": "ef9417a5d2496bc9abfd091596bdea0386e4459e3ba941317da90eb39e017ab3"
+   "bytes": 10199328,
+   "sha256": "25ccb95aea63864b221a476286cd8b53309a2ed3422f021057f49ca825f02667"
   },
   {
    "path": "fda-gudid-0005.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 116476,
-   "bytes": 10772272,
-   "sha256": "a4edf666ae4d934c144893336b58010abc795644e20810596b50c81fc34195fc"
+   "bytes": 10845427,
+   "sha256": "0a77b72b0f35728b9a41068b4c5d103cbd502672bcfb2f1659f6cf1f50a74f44"
   },
   {
    "path": "fda-gudid-0006.ndjson.gz",
    "source": "fda-gudid",
-   "sourceVersion": "openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-10-21 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
+   "sourceVersion": "openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip) + openFDA device/udi export 2026-11-03 (https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip)",
    "rows": 61337,
-   "bytes": 5958575,
-   "sha256": "ffb784cf9f5d476d2f5293405cc817a1f7281149f95be04a1fcebac88349ae72"
+   "bytes": 5987634,
+   "sha256": "c945aff078ef13bd3ed46c4eb0bf6ae26b6a98d59d2ec22c8bb72e5ecb97821a"
   },
   {
    "path": "fda-maude-0001.ndjson.gz",
@@ -130,7 +130,7 @@
   {
    "source": "openfda device/classification",
    "files": 1,
-   "records": 7096
+   "records": 7097
   },
   {
    "source": "mirror choiben314-510k-lineage",
@@ -157,18 +157,18 @@
   },
   {
    "source": "openfda device/510k",
-   "records": 176415,
-   "inScope": 72175
+   "records": 176529,
+   "inScope": 72221
   },
   {
    "source": "openfda device/pma",
-   "records": 57323,
+   "records": 57421,
    "inScope": 2743
   },
   {
    "source": "openfda device/registrationlisting",
-   "records": 336640,
-   "inScope": 450360
+   "records": 337116,
+   "inScope": 451392
   },
   {
    "source": "openfda device/udi",
@@ -801,468 +801,460 @@
  ],
  "official": [
   {
-   "url": "https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip",
-   "dest": "openfda/device/classification/device-classification-0001-of-0001.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 3279612,
-   "sha256": "0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d",
-   "fetchedAt": "2026-10-24T14:28:26.982Z"
-  },
-  {
-   "url": "https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip",
-   "dest": "openfda/device/510k/device-510k-0001-of-0001.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 249958165,
-   "sha256": "9014804dfa6fe659346742454860cfba0730c58c533750ecb1003f964a58a50c",
-   "fetchedAt": "2026-10-24T14:28:31.000Z"
-  },
-  {
-   "url": "https://download.open.fda.gov/device/pma/device-pma-0001-of-0001.json.zip",
-   "dest": "openfda/device/pma/device-pma-0001-of-0001.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 22215132,
-   "sha256": "9e0f723e5b6d7ebde5437b1ad224768cd25a5f8f0f0c927887aebe5217dd2806",
-   "fetchedAt": "2026-10-24T14:28:32.667Z"
-  },
-  {
-   "url": "https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip",
-   "dest": "openfda/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 63618668,
-   "sha256": "04fc669a9b057f6f12ad975f127a3418ff9fd60d567f9492ab3dc8137bb19257",
-   "fetchedAt": "2026-10-24T14:28:34.805Z"
-  },
-  {
-   "url": "https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip",
-   "dest": "openfda/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 22246432,
-   "sha256": "32c086571b37062f6930a577a731f7ccae7cdedbb12e9ccd63f9836ac4c2a14c",
-   "fetchedAt": "2026-10-24T14:28:35.087Z"
-  },
-  {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0001-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0001-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38680012,
-   "sha256": "e3aa647dfe65bb2c1c6db80f2f2ee3162dc58e892907c7c85ffcf3f16dc52b42",
-   "fetchedAt": "2026-10-24T14:28:36.812Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38509100,
+   "sha256": "f8575e1d55bd70f484272e0381ead95d1564170aada100ea7d60a73190a3b104",
+   "fetchedAt": "2026-11-06T20:39:38.804Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0002-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0002-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38260414,
-   "sha256": "ac7480a0b062358165a033da1662359d1ee87260bd1a6748a00a3aea44187197",
-   "fetchedAt": "2026-10-24T14:28:37.200Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38743347,
+   "sha256": "d003196b4bac451448a35c5b2a2b5e7b1545527336b9aa8a587c8f06d265cdb1",
+   "fetchedAt": "2026-11-06T20:39:40.596Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0003-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0003-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38699714,
-   "sha256": "8b40ab77bd95f7c4cc20eb41eff5c4b1d6d430bd84fba560fdc9d99c53373dbc",
-   "fetchedAt": "2026-10-24T14:28:37.752Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38361706,
+   "sha256": "57ce3a20b7d47d007651035b9c438f6fcc7f15151b4e1d8ab696934a37e8aa0a",
+   "fetchedAt": "2026-11-06T20:39:42.212Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0004-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0004-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38323204,
-   "sha256": "d618bf54c97780e727dfef9124df967471cb31386757318e330eb0214c9e2989",
-   "fetchedAt": "2026-10-24T14:28:38.182Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37809873,
+   "sha256": "ada42d40c2d99cd7cc7da7cfbc06e6b1c12090be41f05d638051e3fc495ac76d",
+   "fetchedAt": "2026-11-06T20:39:43.914Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0005-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0005-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37889773,
-   "sha256": "b22aad015a91fab357abff896ecd2f88f4cef4fdf7902e7c0bcbd0be06dea4b8",
-   "fetchedAt": "2026-10-24T14:28:38.704Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38509466,
+   "sha256": "085819b699815d21e5a2efda210e7d961a4e41587f3e4648932072155248fd1e",
+   "fetchedAt": "2026-11-06T20:39:45.563Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0006-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0006-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38093294,
-   "sha256": "337be92b9fe23972c20e81d87e7d586a63134ddb1165fbbe16d36b16878967bd",
-   "fetchedAt": "2026-10-24T14:28:39.077Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38793726,
+   "sha256": "db968d9197e3eb1e19cea0de045b391e49206df029a629ad5cd0c372a9228298",
+   "fetchedAt": "2026-11-06T20:39:47.302Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0007-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0007-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38488768,
-   "sha256": "a83ef253ef4cf3ea738c0cb777bf213dbc5e7e054a36156be410753e31d8ca22",
-   "fetchedAt": "2026-10-24T14:28:39.452Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38451775,
+   "sha256": "bf7be28b4515c72c6e6e9bddd888f3c791866b7b5a1885fdb5958acc6e7995fb",
+   "fetchedAt": "2026-11-06T20:39:48.994Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0008-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0008-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38728710,
-   "sha256": "2a0afbdcb56c36f505a245671720774358446aa2ad389dbce10b4cf05225fd4b",
-   "fetchedAt": "2026-10-24T14:28:39.887Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38519622,
+   "sha256": "d67375584b4fd69b7feaccbdba06a02e760d38c968aaa5aa98eb44b509528323",
+   "fetchedAt": "2026-11-06T20:39:50.745Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0009-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0009-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38650543,
-   "sha256": "0fd8230794903d749532f748c7f9109deb1cf3285b84c6a9be6695f93bde595f",
-   "fetchedAt": "2026-10-24T14:28:40.300Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38540258,
+   "sha256": "455f2ba254f56c3cd6a4b651ac96375274e5888c7128236c19177810736535dc",
+   "fetchedAt": "2026-11-06T20:39:52.444Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0010-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0010-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37910368,
-   "sha256": "655fd9c70e7b6575e8eab1e00f9d2094d51f4f977f7e754a1a8d22aa51e9d91e",
-   "fetchedAt": "2026-10-24T14:28:40.824Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37927625,
+   "sha256": "5f0ea2512f810c04ba046bc98d83110aa6cfc690b56ae4f6b82b40f38c2f8579",
+   "fetchedAt": "2026-11-06T20:39:54.152Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0011-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0011-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37839811,
-   "sha256": "2443cbfc6b7b4de8f4637d2dcf2e5893de2495a5ab83bf97c2a33a3c7173c262",
-   "fetchedAt": "2026-10-24T14:28:41.328Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38612906,
+   "sha256": "7dfbdbad945a4756a86f032f599c66841591cbf6dcd20fcd11bbcc9810dae18e",
+   "fetchedAt": "2026-11-06T20:39:55.921Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0012-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0012-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38654123,
-   "sha256": "545e752ef3769328b012f6873c7a06fa371f6d2719b5fc7e448a6d910cd792cf",
-   "fetchedAt": "2026-10-24T14:28:41.850Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38541143,
+   "sha256": "222088576e84fbb63897ce45ea13ffcb788b1e4cc31fd9fdd702e3a08f5d65d6",
+   "fetchedAt": "2026-11-06T20:39:57.584Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0013-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0013-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38378606,
-   "sha256": "88db2246d4180fa1cd2b540f74e2b50ad9119ece271fd9072e131bdcc1b34610",
-   "fetchedAt": "2026-10-24T14:28:42.220Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38630248,
+   "sha256": "1f440356f3e5e27aea282db64efa6d0cfd53d0bdf2ff3cb7f88b52e6cde8d9de",
+   "fetchedAt": "2026-11-06T20:39:59.282Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0014-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0014-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38831669,
-   "sha256": "5116041b3c096fdee7840e059aadc0a5efd7dc9f6d71ed00afac15eaf7efee92",
-   "fetchedAt": "2026-10-24T14:28:42.608Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38340456,
+   "sha256": "fa79b18873740007bd7671148f1f630d8e59d65a4c14243305c74ed1f572469c",
+   "fetchedAt": "2026-11-06T20:40:00.976Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0015-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0015-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37868185,
-   "sha256": "f4f51076678dff2644c9c9c97c96706d72633cd7ee3ca0e90186e143231022e4",
-   "fetchedAt": "2026-10-24T14:28:42.970Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38197631,
+   "sha256": "20640b1f77cb6170ceea874113e7955b6f0121e43ed160b7e91ce4254a13f88f",
+   "fetchedAt": "2026-11-06T20:40:02.678Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0016-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0016-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38008591,
-   "sha256": "5e8867c9040134682319ab221776599183ac6cb136835d699924019f64684e57",
-   "fetchedAt": "2026-10-24T14:28:43.409Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38276554,
+   "sha256": "0814b01996d07697560d082f0de7d7c52caaa657f10028206b09d29311eedf34",
+   "fetchedAt": "2026-11-06T20:40:04.379Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0017-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0017-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38257116,
-   "sha256": "f025c1ce02110ee7978432a32a322eeb8fd759649bf44e026c7c6173ee93d6ec",
-   "fetchedAt": "2026-10-24T14:28:43.835Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38711971,
+   "sha256": "728aa6d0957458f375df3e34ec0a3c4484636f4f8ec5ada85552fc9c1f0d591c",
+   "fetchedAt": "2026-11-06T20:40:06.198Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0018-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0018-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38800890,
-   "sha256": "a879377c1239a3a0b7e7d131ea1b075d38aa4b508707cdf907f96b8a7ec36bbc",
-   "fetchedAt": "2026-10-24T14:28:44.299Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38334879,
+   "sha256": "036e3d8172c258dac4dd137e80304658f08973b7fbf9cc5493feaf93f5a3236c",
+   "fetchedAt": "2026-11-06T20:40:07.899Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0019-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0019-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38411815,
-   "sha256": "67cbfb00fb36e71251ec33eb0a5ea60384866e63a29e86d362211d5256cf45a0",
-   "fetchedAt": "2026-10-24T14:28:44.670Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38413612,
+   "sha256": "dfbc4e1bd495d84b9143a9dd3eb32830b3ca871b94a702f9d27bb9ea8efb086e",
+   "fetchedAt": "2026-11-06T20:40:09.547Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0020-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0020-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38617136,
-   "sha256": "7cab0e2bc3afe8abdd17bcc7bde79d6797183546d715cb9d696cac03b26b1804",
-   "fetchedAt": "2026-10-24T14:28:45.223Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38364874,
+   "sha256": "f479d078223672c98558a26807c10db8efa693776084f6f689e58af823c0d3ae",
+   "fetchedAt": "2026-11-06T20:40:11.263Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0021-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0021-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37689855,
-   "sha256": "2c7594211fe13059f50f6c010d266586b8e3ee51f1686256595e48182e2dc720",
-   "fetchedAt": "2026-10-24T14:28:45.718Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38150088,
+   "sha256": "59250c939ba51131a6e3e4eeb456dd865745d9dd0672caeb59d342b7ab3d10c2",
+   "fetchedAt": "2026-11-06T20:40:12.964Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0022-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0022-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38434082,
-   "sha256": "61cb2394ab22dc2101bd2fa51c536f4f49eab7e1c18975070d81bb0fa85a1c3b",
-   "fetchedAt": "2026-10-24T14:28:46.239Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38579876,
+   "sha256": "02bc6444a84f6bc26336afe7d83299928d4b6e8862e983e45bf84fed8832d9bd",
+   "fetchedAt": "2026-11-06T20:40:14.699Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0023-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0023-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38609383,
-   "sha256": "aef7ef5f3336f282cc34abe444a72dbb623bd3ac679fdce6f65d1317deaed049",
-   "fetchedAt": "2026-10-24T14:28:46.603Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38627452,
+   "sha256": "d7bcc40354f9ac60d5c91ee093602a8b9fa64bcf31ebfe5a1027e2f2a6bf6c66",
+   "fetchedAt": "2026-11-06T20:40:16.390Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0024-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0024-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38361897,
-   "sha256": "8eb7ea7e20f48ad621290ce5000d13dfe9cb1d9104aa2eff3355e62380c6ccf5",
-   "fetchedAt": "2026-10-24T14:28:46.987Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38414614,
+   "sha256": "b035628bc33e86d112d353f40ea6ab575a32f60f12f1d87a16fd12bab9553c80",
+   "fetchedAt": "2026-11-06T20:40:18.222Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0025-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0025-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38352010,
-   "sha256": "0fbee0da42a124b27f516106b409a9a1d70ba5ad524ffc549676e21d0144e462",
-   "fetchedAt": "2026-10-24T14:28:47.373Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38459459,
+   "sha256": "286e5fe8d7e7a23cad3c6892d6b0faa67b257f2b6365fbac0527b0b0b35b0270",
+   "fetchedAt": "2026-11-06T20:40:19.907Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0026-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0026-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38052501,
-   "sha256": "3e00ec92602ea6c989f07a832eb05d8d9684fba0bf38866a6621d472856190ac",
-   "fetchedAt": "2026-10-24T14:28:47.750Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37985864,
+   "sha256": "65b0d398b394ec1548028071763600590093e15f0c135ee589ce17713948fd0c",
+   "fetchedAt": "2026-11-06T20:40:21.577Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0027-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0027-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38523350,
-   "sha256": "46cbaaf561be301ab9a96f94903035277d4017d0047e0c0be46091202c460639",
-   "fetchedAt": "2026-10-24T14:28:48.252Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38308689,
+   "sha256": "34bdafb49d41e0f94f4c980aa16e9abe8e3f053ecb250d58e09b122718326306",
+   "fetchedAt": "2026-11-06T20:40:23.291Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0028-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0028-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38318527,
-   "sha256": "5ad4cc777a8e840005a09f74305d057162ecad13695fc154d272ee13383c4553",
-   "fetchedAt": "2026-10-24T14:28:48.828Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38671337,
+   "sha256": "cc5f8639efb2b63ebdd9905fd9e50d8e81a2f36322417232e6fcf0a26b6e5e87",
+   "fetchedAt": "2026-11-06T20:40:24.996Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0029-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0029-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38111371,
-   "sha256": "56a4bd907656f53649f4bcd7bf866069c361b9b8aed4a8a8b9b64d338f3f7285",
-   "fetchedAt": "2026-10-24T14:28:49.250Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38170063,
+   "sha256": "62c9c4174a20ac34ced0f9bba9e20ae00b270f037c2c9d647c4536e286c2f1aa",
+   "fetchedAt": "2026-11-06T20:40:26.690Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0030-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0030-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38518807,
-   "sha256": "ca344e711c7381bcf155c5d13ca4417c29a2791f082112c7a3c7edcda3ac736a",
-   "fetchedAt": "2026-10-24T14:28:49.723Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38391776,
+   "sha256": "8b0aeddc2ad90d23103d20a088b9f95e8bd6f6e2828f98a12910de6786547595",
+   "fetchedAt": "2026-11-06T20:40:28.381Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0031-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0031-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38377867,
-   "sha256": "6b889f9a6e07ddb527f3a83b62b5a9e6285007852c737979a99152ae776ccc67",
-   "fetchedAt": "2026-10-24T14:28:50.105Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38509430,
+   "sha256": "5a822eafa08eb7bc67415f4d1f07e4d57a1bb3b5fe777286682a796c9aa61ed8",
+   "fetchedAt": "2026-11-06T20:40:30.191Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0032-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0032-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38227360,
-   "sha256": "eb4b645246464859b6a92a4b03387a055a94710efc7d1d77f3f5c4ce3bcdde8b",
-   "fetchedAt": "2026-10-24T14:28:50.606Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38609384,
+   "sha256": "cce004c260004b0242ed5ed45b097a148eee61db61614dc6c2a3eb6ad64bb9fc",
+   "fetchedAt": "2026-11-06T20:40:31.877Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0033-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0033-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38875412,
-   "sha256": "047aa4d4aa95c66ceeca1eba4f0c3627858c310579bfb413faba6ad90ff34980",
-   "fetchedAt": "2026-10-24T14:28:51.298Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38555044,
+   "sha256": "9b40a98124ae587368b3d742f96ae6dfd598c93303074cb03cc090b34879a763",
+   "fetchedAt": "2026-11-06T20:40:33.766Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0034-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0034-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38574478,
-   "sha256": "915d007daf0b5e9f2c2286e276a75cfdda12dd24cb68a11c726c065b0dd4e6d3",
-   "fetchedAt": "2026-10-24T14:28:51.793Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38382152,
+   "sha256": "88459aeb1cc412762d424c87be638da2d0260142429bc28fd1bb8412c51aaab3",
+   "fetchedAt": "2026-11-06T20:40:35.531Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0035-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0035-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38470706,
-   "sha256": "983eadea3dcaf20b0e14d3b2250f0f651a0a7fa3207c8dc832b7df38017ae556",
-   "fetchedAt": "2026-10-24T14:28:52.196Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38369777,
+   "sha256": "1b9b27beb8175b90433a05efaaec709ea2c499dad2a5f708e7e34f603de8493f",
+   "fetchedAt": "2026-11-06T20:40:37.215Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0036-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0036-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37787778,
-   "sha256": "6cbc126f474fa75a62cf98bc0d3bb99aab2d531b9707cde2684ccf43f7b35216",
-   "fetchedAt": "2026-10-24T14:28:52.718Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38300964,
+   "sha256": "581504cecad2df061f9d873b30afd5a5bee4260d82a37ce2188e4ec3472ae90a",
+   "fetchedAt": "2026-11-06T20:40:38.906Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0037-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0037-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38216353,
-   "sha256": "a599bc24e5cac05245b388a975de2a682a91e843782b4a8cc0fafe0bb9b9cfce",
-   "fetchedAt": "2026-10-24T14:28:53.245Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38200732,
+   "sha256": "fecf565c0f7dee7aa0f839b06675b97a21945914f7dec767935a38dc69126056",
+   "fetchedAt": "2026-11-06T20:40:40.597Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0038-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0038-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38615048,
-   "sha256": "3d501bc4ba7f76f1143219b2d9d1d59c9b054daa931065036fd0acea529e772e",
-   "fetchedAt": "2026-10-24T14:28:53.613Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38645801,
+   "sha256": "fd213a22e28c8b39bc0cd111e6f502d881b3f93cbbc030c94b3910d3d2b96883",
+   "fetchedAt": "2026-11-06T20:40:42.466Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0039-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0039-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38788565,
-   "sha256": "8349c1a1cf612094b7754ef3f67c519758b85f3f1bb234d3444df6192c19354e",
-   "fetchedAt": "2026-10-24T14:28:53.989Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38298052,
+   "sha256": "c3aeab905e7c968abf1f532ffbfe2c57c1a8d461297f68df8366e6be9c9f5cde",
+   "fetchedAt": "2026-11-06T20:40:44.161Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0040-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0040-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37728815,
-   "sha256": "20f25691e743985a30b9a47ad76f00c35a33ab314980ac789b79fb5b6d6e50c8",
-   "fetchedAt": "2026-10-24T14:28:54.435Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38647654,
+   "sha256": "0c3c25ea77e37b4d40044b61cfb97df0117833c179f174bec563c05c521fefad",
+   "fetchedAt": "2026-11-06T20:40:45.982Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0041-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0041-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38112036,
-   "sha256": "01d3171326149c8b794f9e57f0a4a68c75c2647b16281e49dd26529bdf7885ba",
-   "fetchedAt": "2026-10-24T14:28:54.965Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38408031,
+   "sha256": "93c9d6fc409b15ea4497d4b63db1a3074ae32dacc065794066edd7d396061873",
+   "fetchedAt": "2026-11-06T20:40:47.632Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0042-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0042-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38343619,
-   "sha256": "631f1be2dcab8c53edcbfc8dfebc9f4a634260ee344de8ffd05bedcd0bf64144",
-   "fetchedAt": "2026-10-24T14:28:55.371Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37888024,
+   "sha256": "a5f37a63679a68496e2bf4addb94a3b7a3d594e948beeb3a6278561b06e17540",
+   "fetchedAt": "2026-11-06T20:40:49.297Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0043-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0043-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38831764,
-   "sha256": "4b39a70e3ce46bef2649d1cf4a40e723e725fd86cbefbfbaf7bf315dc7921adb",
-   "fetchedAt": "2026-10-24T14:28:55.864Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38650827,
+   "sha256": "66d6b828a563030722d0f6734cbfc17b3c31fc277c85688636b92bb331767801",
+   "fetchedAt": "2026-11-06T20:40:51.002Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0044-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0044-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38758772,
-   "sha256": "127e697456c2d013ffa8b51f5c8a38f2c9370b8768018af4d262c787b2c8891e",
-   "fetchedAt": "2026-10-24T14:28:56.394Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38524392,
+   "sha256": "6f72290c94bbd368cc7dca9c27f6db24ca190211fa68dc4638d03000f238bff7",
+   "fetchedAt": "2026-11-06T20:40:52.748Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0045-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0045-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38493014,
-   "sha256": "44319094a88a1f2abdb479098802ee54458ccb2a82a897c326a150937c7806ce",
-   "fetchedAt": "2026-10-24T14:28:57.002Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38503408,
+   "sha256": "730307d4762a7c5a9cb99e8b5c72d791d290e39151d951479419f723329f4f63",
+   "fetchedAt": "2026-11-06T20:40:54.551Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0046-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0046-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38078331,
-   "sha256": "6855adf37d17be9e58b239a3399ee226eaabdef60d7b1ac8e44e5828d86428a2",
-   "fetchedAt": "2026-10-24T14:28:57.502Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37952961,
+   "sha256": "a5733248ec12847b0f3e288727228f1d254ab5ecaabf9a3806c4ba97fb41bf2a",
+   "fetchedAt": "2026-11-06T20:40:56.317Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0047-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0047-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 37637478,
-   "sha256": "5e4e0c8101fa3093aec5b6468fac051cd0b555ece719705a2e1184a993791783",
-   "fetchedAt": "2026-10-24T14:28:57.900Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38447968,
+   "sha256": "a076188331ec57d8443b5af70a949729fdef16d89277c8e29f0cd53342584264",
+   "fetchedAt": "2026-11-06T20:40:58.060Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0048-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0048-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38229370,
-   "sha256": "b0bb6cc3cda6531e9f96588359e355886194a0b109ee2680b29b26384e73fe3d",
-   "fetchedAt": "2026-10-24T14:28:58.411Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38499970,
+   "sha256": "38bf59df01c08a4b506bb912d1d4e0dab99f93a499bdcb19fd07874fdc35095c",
+   "fetchedAt": "2026-11-06T20:40:59.809Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0049-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0049-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38588116,
-   "sha256": "3f6825a748251c5aa3567630bc59ff3443a5a889459a3df6978a07474e550899",
-   "fetchedAt": "2026-10-24T14:28:59.004Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38513350,
+   "sha256": "d44658b90e16c7fb33f855a569f723bcc145809aa8551d6c8e66388b9d493b0f",
+   "fetchedAt": "2026-11-06T20:41:01.502Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0050-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0050-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38767020,
-   "sha256": "d849ae8a2df32ddd619dfffd6471085e4c0d53995b0f8c3c0439c9036fb58404",
-   "fetchedAt": "2026-10-24T14:28:59.376Z"
+   "exportDate": "2026-11-03",
+   "bytes": 38305541,
+   "sha256": "e43d6bdfb2dd8812d0c5f4fc121c837297bf35fb0a023c00c45a0efc2d9cd80b",
+   "fetchedAt": "2026-11-06T20:41:03.166Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0051-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0051-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 38222503,
-   "sha256": "fe59b3f62509838e41b41d0b13026e2214898e2b618061e7d2261581d11438d2",
-   "fetchedAt": "2026-10-24T14:28:59.753Z"
+   "exportDate": "2026-11-03",
+   "bytes": 37909972,
+   "sha256": "1ada2c114239313e4ddb1b57637bc7389e7b39f6facedf12fe451c11c7d9cb7c",
+   "fetchedAt": "2026-11-06T20:41:04.850Z"
   },
   {
    "url": "https://download.open.fda.gov/device/udi/device-udi-0052-of-0052.json.zip",
    "dest": "openfda/device/udi/device-udi-0052-of-0052.json.zip",
-   "exportDate": "2026-10-21",
-   "bytes": 31130900,
-   "sha256": "1e63423a4ddf7d7b7e0c061044a2d02f2db3aeef59065f297a99f03c846b1f9c",
-   "fetchedAt": "2026-10-24T14:29:00.059Z"
+   "exportDate": "2026-11-03",
+   "bytes": 31931338,
+   "sha256": "1f333713d60e66ab8b40b2d18f5847314612b5fb6410126cd12eef1367b24ffa",
+   "fetchedAt": "2026-11-06T20:41:06.361Z"
   },
   {
-   "url": "https://accessgudid.nlm.nih.gov/release_files/download/AccessGUDID_Delimited_Full_Release_20261001.zip",
-   "dest": "accessgudid/AccessGUDID_Delimited_Full_Release_20261001.zip",
-   "exportDate": "20261001",
-   "bytes": 424163444,
-   "sha256": "25b83b0db9fd952fc12c9a969602f3f9c1ceafdd4451e5314ed856b6dec6d9fd",
-   "fetchedAt": "2026-10-24T14:29:11.591Z"
+   "url": "https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip",
+   "dest": "openfda/device/510k/device-510k-0001-of-0001.json.zip",
+   "exportDate": "2026-11-02",
+   "bytes": 250140285,
+   "sha256": "adcd7db70191250208dcf6f91a5327032a73b31e7efd86c1c8b287c9c2e71de4",
+   "fetchedAt": "2026-11-06T20:41:16.350Z"
+  },
+  {
+   "url": "https://download.open.fda.gov/device/pma/device-pma-0001-of-0001.json.zip",
+   "dest": "openfda/device/pma/device-pma-0001-of-0001.json.zip",
+   "exportDate": "2026-11-02",
+   "bytes": 22264998,
+   "sha256": "98f0c2c51cfa3002b297e496c11b3b4e15df014f197bd4f1a3e4c1104827293c",
+   "fetchedAt": "2026-11-06T20:41:17.318Z"
+  },
+  {
+   "url": "https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip",
+   "dest": "openfda/device/classification/device-classification-0001-of-0001.json.zip",
+   "exportDate": "2026-11-02",
+   "bytes": 3285255,
+   "sha256": "0b491afee149c6d7d6796421a4a25fded9e2fee3e1c97e6f99dc222c2b42eee0",
+   "fetchedAt": "2026-11-06T20:41:17.589Z"
+  },
+  {
+   "url": "https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip",
+   "dest": "openfda/device/registrationlisting/device-registrationlisting-0001-of-0002.json.zip",
+   "exportDate": "2026-11-02",
+   "bytes": 64268257,
+   "sha256": "b3ce30e98691fc295e01a47c584f1060fd61712adc6218d4d1766ae02dd4d322",
+   "fetchedAt": "2026-11-06T20:41:20.182Z"
+  },
+  {
+   "url": "https://download.open.fda.gov/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip",
+   "dest": "openfda/device/registrationlisting/device-registrationlisting-0002-of-0002.json.zip",
+   "exportDate": "2026-11-02",
+   "bytes": 22519525,
+   "sha256": "fa3ac30cdbf30d8679d759bf33a1c248f74449e852309ceca660f218a5afb3dd",
+   "fetchedAt": "2026-11-06T20:41:21.216Z"
   }
  ]
 }
