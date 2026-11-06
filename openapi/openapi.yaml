@@ -49861,6 +49861,12 @@ paths:
             schema:
               $ref: '#/components/schemas/UpdateLabOrderDto'
       responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabOrderDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -121911,6 +121917,105 @@ components:
         - codeConceptId
         - category
       additionalProperties: false
+    LabOrderFileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        sizeBytes:
+          type: number
+      required:
+        - id
+        - fileName
+        - sizeBytes
+    LabOrderReportStateDto:
+      type: object
+      properties:
+        draftStatus:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+          nullable: true
+          description: Null when the tenant never opened a written report.
+        publishedVersionId:
+          type: string
+          format: uuid
+      required:
+        - draftStatus
+    LabOrderDto:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        studyName:
+          type: string
+        patientName:
+          type: string
+        requesterName:
+          type: string
+        requestedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - RECEIVED
+            - PROCESSED
+            - UPLOADED
+            - CANCELLED
+            - REJECTED
+        reason:
+          type: string
+          nullable: true
+        canReject:
+          type: boolean
+          description: 'Whether REJECT applies now: a received order with an open specimen.'
+        registeredByPerformer:
+          type: boolean
+        canEdit:
+          type: boolean
+        codeConceptId:
+          type: string
+          format: uuid
+        priorityConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        externalRequesterName:
+          type: string
+          nullable: true
+        externalRequesterLicense:
+          type: string
+          nullable: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabOrderFileDto'
+        report:
+          $ref: '#/components/schemas/LabOrderReportStateDto'
+      required:
+        - orderId
+        - studyName
+        - patientName
+        - requesterName
+        - requestedAt
+        - status
+        - reason
+        - canReject
+        - registeredByPerformer
+        - canEdit
+        - codeConceptId
+        - priorityConceptId
+        - externalRequesterName
+        - externalRequesterLicense
+        - files
+        - report
     LabOrderTransitionDto:
       type: object
       properties:

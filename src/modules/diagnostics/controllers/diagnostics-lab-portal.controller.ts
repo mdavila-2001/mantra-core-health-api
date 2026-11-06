@@ -14,6 +14,7 @@ import {
 import {
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -131,6 +132,7 @@ export class DiagnosticsLabPortalController {
       'Reemplaza el estudio, su detalle, la prioridad y el solicitante externo. ' +
       'Sólo órdenes con `canEdit`: las de un médico o las ya recibidas responden 409.',
   })
+  @ApiOkResponse({ type: LabOrderDto })
   @ApiConflictResponse({ description: 'La orden no es editable' })
   updateOrder(
     @Param('orderId', ParseUUIDPipe) orderId: string,
