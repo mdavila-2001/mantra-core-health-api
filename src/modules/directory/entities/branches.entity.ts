@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
+import type { BranchCategory } from '../branch-categories';
 
 /**
  * Mapea la entidad persistente asociada a `branches`.
@@ -71,6 +72,17 @@ export class Branches {
     nullable: true,
   })
   locationUrl?: string;
+
+  /**
+   * Categoría de la sede (v4.2.91): `default`, `head_office` (casa matriz, una
+   * por organización) o `branch`. Ver `branch-categories.ts`.
+   */
+  @Property({
+    fieldName: 'branch_category',
+    columnType: 'varchar(20)',
+    default: 'default',
+  })
+  branchCategory: BranchCategory = 'default';
 
   /**
    * Fecha y hora en que se creó el registro.

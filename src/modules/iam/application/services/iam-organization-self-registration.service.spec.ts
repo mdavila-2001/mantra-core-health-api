@@ -199,6 +199,23 @@ describe('IamOrganizationSelfRegistrationService', () => {
       // La central (con punto) y la sucursal siguen en `directory.branches`,
       // que es lo que lista el portal de la organización.
       expect(d.branches.create).toHaveBeenCalledTimes(2);
+      // v4.2.91: la central es la casa matriz y la declarada, una sucursal.
+      expect(d.branches.create).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({
+          code: 'CASA-CENTRAL',
+          branchCategory: 'head_office',
+        }),
+      );
+      expect(d.branches.create).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({
+          code: 'SUCURSAL-EQUIPETROL',
+          branchCategory: 'branch',
+        }),
+      );
     });
 
     it('sin bloque pharmacy, la central nace igual (sin dirección ni punto)', async () => {

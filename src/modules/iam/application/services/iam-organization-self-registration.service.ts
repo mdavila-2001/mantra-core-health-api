@@ -21,6 +21,10 @@ import {
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../../directory/directory.concepts';
 import {
+  branchCodeFromName,
+  type BranchCategory,
+} from '../../../directory/branch-categories';
+import {
   countryConceptForLegalEntityType,
   resolveLegalEntityType,
 } from '../../../../common/constants/legal-entity-types';
@@ -580,26 +584,14 @@ export class IamOrganizationSelfRegistrationService {
     const block = dto.organization.pharmacy;
     if (!block) return;
     const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
+    const codeOf = (name: string): string => branchCodeFromName(name, used);
     const add = (item: {
       name: string;
       latitude?: number;
       longitude?: number;
       description?: string;
       locationUrl?: string;
+      category: BranchCategory;
     }): void => {
       this.directory.createBranch(tx, {
         tenantId,
@@ -614,17 +606,21 @@ export class IamOrganizationSelfRegistrationService {
           item.longitude !== undefined ? String(item.longitude) : undefined,
         description: item.description,
         locationUrl: item.locationUrl,
+        branchCategory: item.category,
         actorUserId,
       });
     };
+    // La casa central es la casa matriz; cada sucursal declarada, una sucursal (v4.2.91).
     if (block.latitude !== undefined && block.longitude !== undefined) {
       add({
         name: 'Casa central',
         latitude: block.latitude,
         longitude: block.longitude,
+        category: 'head_office',
       });
     }
-    for (const branch of block.branches ?? []) add(branch);
+    for (const branch of block.branches ?? [])
+      add({ ...branch, category: 'branch' });
   }
 
   /**

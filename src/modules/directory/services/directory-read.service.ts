@@ -417,6 +417,7 @@ export class DirectoryReadService {
       latitude: branch.latitude == null ? undefined : Number(branch.latitude),
       longitude:
         branch.longitude == null ? undefined : Number(branch.longitude),
+      category: branch.branchCategory,
       createdAt: branch.createdAt,
     }));
     return { items, count: items.length };

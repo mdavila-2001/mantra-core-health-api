@@ -19,6 +19,7 @@ import {
   type TenantTypeCode,
 } from '../directory.concepts';
 import { BranchesRepository } from '../repositories/branches.repository';
+import { branchCodeFromName, type BranchCategory } from '../branch-categories';
 import { TenantMedicalFacilitiesRepository } from '../repositories/tenant-medical-facilities.repository';
 import {
   LEGAL_ENTITY_TYPE_BY_CODE,
@@ -454,17 +455,16 @@ export class TenantTypeProfileService {
         input.diagnosticUnit,
         actorUserId,
       );
-      if (
-        resolveDiagnosticUnitType(input.diagnosticUnit) ===
-        DUNIT.UNIT_TYPE_LABORATORY
-      ) {
-        this.registerLaboratoryBranches(
-          tx,
-          tenantId,
-          input.diagnosticUnit,
-          actorUserId,
-        );
-      }
+      // Laboratorio e imagenología (v4.2.91: también imagenología, para que su
+      // pantalla Sucursales arranque con la casa matriz en el mapa). Una unidad
+      // de imágenes no declara sucursales (`assertProfileMatchesType`), así que
+      // para ella esto sólo registra la sede central.
+      this.registerDiagnosticCenterBranches(
+        tx,
+        tenantId,
+        input.diagnosticUnit,
+        actorUserId,
+      );
       return provisioned.unitId;
     }
 
@@ -543,11 +543,67 @@ export class TenantTypeProfileService {
     (facility.branches ?? []).forEach((branch, index) =>
       addSite('branch', index + 1, branch),
     );
+    this.registerMedicalFacilityBranches(tx, tenantId, facility, actorUserId);
     return created.id;
   }
 
   /**
-   * Las sucursales del laboratorio en `directory.branches` (P51, D-4).
+   * Las sedes del establecimiento médico en `directory.branches` (v4.2.91).
+   *
+   * Lo declarado queda en `tenant_medical_facility_sites` (alimenta la
+   * verificación y no se edita); esto suma esas mismas sedes al registro de
+   * sucursales de la organización, el que lista, etiqueta, ubica en el mapa y
+   * edita la pantalla Sucursales (`GET /tenants/{id}/branches`), igual que el
+   * alta de farmacia y la de laboratorio. La casa central entra como casa
+   * matriz y cada sucursal como sucursal. Las direcciones declaradas van a la
+   * descripción. El parche v4.2.91 hace lo mismo con las organizaciones
+   * médicas dadas de alta antes.
+   *
+   * @param tx - Transacción del alta.
+   * @param tenantId - Tenant recién creado.
+   * @param facility - Bloque `medicalFacility` ya validado.
+   * @param actorUserId - Autor de las filas.
+   */
+  private registerMedicalFacilityBranches(
+    tx: EntityManager,
+    tenantId: string,
+    facility: MedicalFacilityDto,
+    actorUserId: string,
+  ): void {
+    const used = new Set<string>();
+    const add = (
+      site: {
+        name?: string;
+        addressLines: string[];
+        latitude?: number;
+        longitude?: number;
+      },
+      category: BranchCategory,
+    ): void => {
+      const name = site.name ?? MEDICAL_FACILITY_HEADQUARTERS_DEFAULT_NAME;
+      const address = site.addressLines.join(', ').trim();
+      this.branchesRepo.create(tx, {
+        tenantId,
+        code: branchCodeFromName(name, used),
+        name,
+        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.CLINIC,
+        statusConceptId: DIR.BRANCH_ACTIVE,
+        latitude:
+          site.latitude !== undefined ? String(site.latitude) : undefined,
+        longitude:
+          site.longitude !== undefined ? String(site.longitude) : undefined,
+        description: address === '' ? undefined : address.slice(0, 1000),
+        branchCategory: category,
+        actorUserId,
+      });
+    };
+    if (facility.headquarters) add(facility.headquarters, 'head_office');
+    for (const branch of facility.branches ?? []) add(branch, 'branch');
+  }
+
+  /**
+   * Las sucursales del laboratorio y la sede central de imagenología en
+   * `directory.branches` (P51, D-4; imagenología desde v4.2.91).
    *
    * La provisión de la unidad ya las creó como sedes de práctica y de unidad
    * (toma de muestras); esto las suma al registro de sucursales de la
@@ -563,27 +619,14 @@ export class TenantTypeProfileService {
    * @param unit - Bloque `diagnosticUnit` declarado.
    * @param actorUserId - Autor de las filas.
    */
-  private registerLaboratoryBranches(
+  private registerDiagnosticCenterBranches(
     tx: EntityManager,
     tenantId: string,
     unit: DiagnosticUnitProfileDto,
     actorUserId: string,
   ): void {
     const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
+    const codeOf = (name: string): string => branchCodeFromName(name, used);
     const timeZone = unit.primarySite?.timeZone;
     const add = (item: {
       name: string;
@@ -591,6 +634,7 @@ export class TenantTypeProfileService {
       longitude?: number;
       description?: string;
       locationUrl?: string;
+      category: BranchCategory;
     }): void => {
       this.branchesRepo.create(tx, {
         tenantId,
@@ -605,15 +649,18 @@ export class TenantTypeProfileService {
           item.longitude !== undefined ? String(item.longitude) : undefined,
         description: item.description,
         locationUrl: item.locationUrl,
+        branchCategory: item.category,
         actorUserId,
       });
     };
+    // La sede central es la casa matriz; cada sucursal declarada, una sucursal (v4.2.91).
     const central = unit.primarySite?.address;
     if (central?.latitude !== undefined && central.longitude !== undefined) {
       add({
         name: unit.primarySite?.name ?? 'Sede central',
         latitude: central.latitude,
         longitude: central.longitude,
+        category: 'head_office',
       });
     }
     for (const branch of unit.branches ?? []) {
@@ -623,6 +670,7 @@ export class TenantTypeProfileService {
         longitude: branch.address?.longitude,
         description: branch.description,
         locationUrl: branch.locationUrl,
+        category: 'branch',
       });
     }
   }
