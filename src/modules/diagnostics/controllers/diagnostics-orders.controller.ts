@@ -23,6 +23,7 @@ import {
   Roles,
   requireTenantId,
   AccessLogged,
+  servedContentHeaders,
 } from '../../../common';
 import {
   DiagnosticsOrdersService,
@@ -176,13 +177,16 @@ export class DiagnosticsOrdersController {
       reportId,
       fileId,
     );
-    res.setHeader('Content-Type', content.mimeType);
-    if (content.originalName) {
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
-      );
+    // El archivo lo subió un laboratorio: `servedContentHeaders` no confía en
+    // el `mimeType` persistido (lista cerrada, `attachment` salvo imágenes
+    // rasterizadas, `nosniff`), igual que la mensajería. `no-store`: es un
+    // informe clínico y no debe quedar en cachés intermedias.
+    for (const [name, value] of Object.entries(
+      servedContentHeaders(content.mimeType, content.originalName),
+    )) {
+      res.setHeader(name, value);
     }
+    res.setHeader('Cache-Control', 'private, no-store');
     res.send(content.buffer);
   }
 }

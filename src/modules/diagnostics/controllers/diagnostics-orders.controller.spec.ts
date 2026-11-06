@@ -91,7 +91,39 @@ describe('DiagnosticsOrdersController', () => {
       'Content-Disposition',
       "attachment; filename*=UTF-8''informe%20final.pdf",
     );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'X-Content-Type-Options',
+      'nosniff',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Cache-Control',
+      'private, no-store',
+    );
     expect(res.send).toHaveBeenCalled();
+  });
+
+  it('un archivo declarado como HTML sale opaco y como descarga, no se abre en línea', async () => {
+    const d = build();
+    d.results.getReleasedResultFileContent.mockResolvedValue({
+      buffer: Buffer.from('<script>alert(1)</script>'),
+      mimeType: 'text/html',
+      originalName: null,
+    });
+    const res = { setHeader: mockFn(), send: mockFn() };
+
+    await runWithTenant('t1', () =>
+      d.controller.getReleasedResultFileContent('p1', 'r1', 'f1', res as any),
+    );
+
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/octet-stream',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Disposition',
+      expect.stringMatching(/^attachment/),
+    );
+    expect(res.setHeader).not.toHaveBeenCalledWith('Content-Type', 'text/html');
   });
 
   it.each([
