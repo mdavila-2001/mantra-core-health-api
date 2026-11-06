@@ -558,7 +558,7 @@ export class ConditionsService {
   }
 
   /**
-   * v4292: el reemplazo de un diagnóstico descartado (diferencial resuelto).
+   * v4294: el reemplazo de un diagnóstico descartado (diferencial resuelto).
    *
    * Sólo al refutar, nunca el propio diagnóstico, y del mismo paciente. Un
    * diagnóstico ajeno responde igual que uno inexistente, para que la ruta no

@@ -27,6 +27,9 @@ const MANO = 'site-mano';
 const TORAX = 'site-torax';
 const IZQ = 'lat-izq';
 const CONTRASTE = 'contrast-iv';
+// Doble: el value set `bone-type` lo materializa la API desde DYNAMIC_ENUM_CATALOG; acá se declara con un miembro.
+const HUESO_LARGO = 'bone-long';
+const UBERON_MANO = 'UBERON:0002398';
 
 const STUDIES: Record<string, StudyCatalogEntry> = {
   [HEMOGRAMA]: {
@@ -59,6 +62,7 @@ const SETS: Record<StudyValueSetCode, string[]> = {
   'service-request-imaging-modality': [MOD_RX, MOD_TC],
   'imaging-body-structure': [MANO, TORAX],
   'imaging-contrast': [CONTRASTE],
+  'bone-type': [HUESO_LARGO],
   'specimen-type': [TUBO],
   'condition-laterality': [IZQ],
 };
@@ -347,6 +351,300 @@ describe('ServiceRequestDetailService.prepare', () => {
       );
       // La modalidad obligatoria se evalúa antes que el contraste.
       expect(d.reason).toBe(StudyDetailReason.MODALITY_REQUIRED);
+    });
+  });
+
+  describe('región marcada en el modelo 3D (Uberon, malla, tipo de hueso)', () => {
+    it('correcto: estructura, malla y tipo de hueso viajan hasta lo preparado', async () => {
+      const { service } = build();
+      const out = await service.prepare(em, {
+        codeConceptId: RX_MANO,
+        imaging: {
+          bodySiteConceptId: MANO,
+          bodyStructureUberon: UBERON_MANO,
+          bodyMeshId: 'BP44',
+          boneTypeConceptId: HUESO_LARGO,
+        },
+      });
+      expect(out).toMatchObject({
+        bodyStructureUberon: UBERON_MANO,
+        bodyMeshId: 'BP44',
+        boneTypeConceptId: HUESO_LARGO,
+        bodySiteConceptId: MANO,
+      });
+    });
+
+    it('la estructura UBERON no reemplaza a la región: sigue siendo BODY_SITE_REQUIRED y la lateralidad exige región', async () => {
+      const { service } = build();
+      const sinRegion = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: { bodyStructureUberon: UBERON_MANO },
+        }),
+      );
+      expect(sinRegion.reason).toBe(StudyDetailReason.BODY_SITE_REQUIRED);
+      const lateralidad = await failure(
+        service.prepare(
+          em,
+          {
+            codeConceptId: 'rx-heredado',
+            categoryConceptId: DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+            imaging: {
+              bodyStructureUberon: UBERON_MANO,
+              lateralityConceptId: IZQ,
+            },
+          },
+          { catalog: 'skip' },
+        ),
+      );
+      expect(lateralidad.reason).toBe(
+        StudyDetailReason.LATERALITY_REQUIRES_BODY_SITE,
+      );
+    });
+
+    it('los campos planos del alta se unen a imaging y valen igual', async () => {
+      const { service } = build();
+      const out = await service.prepare(em, {
+        codeConceptId: RX_MANO,
+        flat: {
+          bodyStructureUberon: UBERON_MANO,
+          boneTypeConceptId: HUESO_LARGO,
+        },
+        imaging: { bodySiteConceptId: MANO },
+      });
+      expect(out).toMatchObject({
+        bodySiteConceptId: MANO,
+        bodyStructureUberon: UBERON_MANO,
+        boneTypeConceptId: HUESO_LARGO,
+      });
+    });
+
+    it('un campo plano que contradice el de imaging: 422 IMAGING_FIELD_CONFLICT', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          flat: { bodySiteConceptId: TORAX },
+          imaging: { bodySiteConceptId: MANO },
+        }),
+      );
+      expect(d).toMatchObject({
+        reason: StudyDetailReason.IMAGING_FIELD_CONFLICT,
+        field: 'bodySiteConceptId',
+      });
+    });
+
+    it('muestra más campos planos de imagen también son excluyentes', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: GLICEMIA,
+          specimenTypeConceptId: TUBO,
+          flat: { bodyMeshId: 'BP44' },
+        }),
+      );
+      expect(d.reason).toBe(
+        StudyDetailReason.SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE,
+      );
+    });
+
+    it('límite: 12 dígitos pasan, 13 no', async () => {
+      const { service } = build();
+      await expect(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: {
+            bodySiteConceptId: MANO,
+            bodyStructureUberon: 'UBERON:123456789012',
+          },
+        }),
+      ).resolves.toBeDefined();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: {
+            bodySiteConceptId: MANO,
+            bodyStructureUberon: 'UBERON:1234567890123',
+          },
+        }),
+      );
+      expect(d.reason).toBe(StudyDetailReason.BODY_STRUCTURE_FORMAT_INVALID);
+    });
+
+    it.each([
+      'uberon:1',
+      'UBERON:',
+      'UBERON:abc',
+      'BP3D:44',
+      'FMA:37463',
+      'UBERON:1 ',
+      '',
+    ])('inválido: estructura %p', async (bad) => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: { bodySiteConceptId: MANO, bodyStructureUberon: bad },
+        }),
+      );
+      expect(d).toMatchObject({
+        reason: StudyDetailReason.BODY_STRUCTURE_FORMAT_INVALID,
+        field: 'imaging.bodyStructureUberon',
+      });
+    });
+
+    it.each(['BP 44', '', 'BP44;drop', 'x'.repeat(65)])(
+      'inválido: malla %p',
+      async (bad) => {
+        const { service } = build();
+        const d = await failure(
+          service.prepare(em, {
+            codeConceptId: RX_MANO,
+            imaging: { bodySiteConceptId: MANO, bodyMeshId: bad },
+          }),
+        );
+        expect(d.reason).toBe(StudyDetailReason.BODY_MESH_ID_FORMAT_INVALID);
+      },
+    );
+
+    it('límite: malla de 64 caracteres pasa', async () => {
+      const { service } = build();
+      await expect(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: { bodySiteConceptId: MANO, bodyMeshId: 'a'.repeat(64) },
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('el tipo de hueso exige región o estructura UBERON', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: { boneTypeConceptId: HUESO_LARGO },
+        }),
+      );
+      // Un estudio de imagen del catálogo exige la región antes que el hueso.
+      expect(d.reason).toBe(StudyDetailReason.BODY_SITE_REQUIRED);
+      const sinCatalogo = await failure(
+        service.prepare(
+          em,
+          {
+            codeConceptId: 'rx-heredado',
+            categoryConceptId: DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+            imaging: { boneTypeConceptId: HUESO_LARGO },
+          },
+          { catalog: 'skip' },
+        ),
+      );
+      expect(sinCatalogo.reason).toBe(
+        StudyDetailReason.BONE_TYPE_REQUIRES_BODY_STRUCTURE,
+      );
+    });
+
+    it('la estructura UBERON alcanza como ubicación para el tipo de hueso; la malla sola no', async () => {
+      const { service } = build();
+      const base = {
+        codeConceptId: 'rx-heredado',
+        categoryConceptId: DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+      };
+      const out = await service.prepare(
+        em,
+        {
+          ...base,
+          imaging: {
+            bodyStructureUberon: UBERON_MANO,
+            boneTypeConceptId: HUESO_LARGO,
+          },
+        },
+        { catalog: 'skip' },
+      );
+      expect(out.boneTypeConceptId).toBe(HUESO_LARGO);
+      const d = await failure(
+        service.prepare(
+          em,
+          {
+            ...base,
+            imaging: { bodyMeshId: 'BP44', boneTypeConceptId: HUESO_LARGO },
+          },
+          { catalog: 'skip' },
+        ),
+      );
+      expect(d.reason).toBe(
+        StudyDetailReason.BONE_TYPE_REQUIRES_BODY_STRUCTURE,
+      );
+    });
+
+    it('el tipo de hueso debe ser del value set bone-type', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          imaging: {
+            bodySiteConceptId: MANO,
+            boneTypeConceptId: 'no-es-un-hueso',
+          },
+        }),
+      );
+      expect(d).toMatchObject({
+        reason: StudyDetailReason.BONE_TYPE_NOT_IN_CATALOG,
+        field: 'imaging.boneTypeConceptId',
+        catalog: 'bone-type',
+      });
+    });
+
+    it('en laboratorio, la estructura o el hueso son campos de imagen no permitidos', async () => {
+      const { service } = build();
+      for (const imaging of [
+        { bodyStructureUberon: UBERON_MANO },
+        { bodyMeshId: 'BP44' },
+        { boneTypeConceptId: HUESO_LARGO },
+      ]) {
+        const d = await failure(
+          service.prepare(em, { codeConceptId: GLICEMIA, imaging }),
+        );
+        expect(d.reason).toBe(StudyDetailReason.IMAGING_FIELDS_NOT_ALLOWED);
+      }
+    });
+
+    it('laboratorio con muestra y datos de imagen: 422 SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: GLICEMIA,
+          specimenTypeConceptId: TUBO,
+          imaging: { bodyMeshId: 'BP44' },
+        }),
+      );
+      expect(d).toMatchObject({
+        reason: StudyDetailReason.SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE,
+        field: 'specimenTypeConceptId',
+      });
+    });
+
+    it('imagen con muestra: sigue siendo SPECIMEN_NOT_ALLOWED_FOR_CATEGORY (motivo existente, sin cambio)', async () => {
+      const { service } = build();
+      const d = await failure(
+        service.prepare(em, {
+          codeConceptId: RX_MANO,
+          specimenTypeConceptId: TUBO,
+          imaging: { bodyMeshId: 'BP44' },
+        }),
+      );
+      expect(d.reason).toBe(
+        StudyDetailReason.SPECIMEN_NOT_ALLOWED_FOR_CATEGORY,
+      );
+    });
+
+    it('un imaging vacío no choca con la muestra', async () => {
+      const { service } = build();
+      const out = await service.prepare(em, {
+        codeConceptId: GLICEMIA,
+        specimenTypeConceptId: TUBO,
+        imaging: {},
+      });
+      expect(out.specimenTypeConceptId).toBe(TUBO);
     });
   });
 

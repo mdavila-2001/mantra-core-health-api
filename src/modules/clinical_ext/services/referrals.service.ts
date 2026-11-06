@@ -461,7 +461,7 @@ export class ReferralsService {
   }
 
   /**
-   * v4292: la atención de llegada tiene que ser del paciente de la derivación
+   * v4294: la atención de llegada tiene que ser del paciente de la derivación
    * y del tenant destino que acepta (el que la escribe). Inexistente, de otro
    * paciente o de otro tenant responden igual (422): distinguirlos diría que
    * ese id existe en otra historia u otra organización.

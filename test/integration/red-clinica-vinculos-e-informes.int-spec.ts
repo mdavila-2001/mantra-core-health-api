@@ -54,13 +54,13 @@ import {
 import { seedNetwork, type Network } from './red-clinica.network';
 
 /**
- * Patient clinical network (v4.2.92) against PostgreSQL with FORCED RLS and a
+ * Patient clinical network (v4.2.94) against PostgreSQL with FORCED RLS and a
  * runtime role (no BYPASSRLS): the three links and their 422s, and the
  * released result a practitioner opens by id, which must follow exactly the
  * visibility of `GET /diagnostics/patients/:id/orders` (read scope, and the
  * laboratory-custodied report of an own order) with the single 404 otherwise.
  *
- * Applies `2026-11-06_v4292_red_clinica_vinculos.sql` (idempotent). Fixture
+ * Applies `2026-11-06_v4294_red_clinica_vinculos.sql` (idempotent). Fixture
  * rows are synthetic, marked with `RED-<suffix>`, and removed at the end.
  * Prerequisites in `red-clinica.fixture.ts`.
  */
@@ -72,7 +72,7 @@ const quiet = {
 } as never;
 const FULL: ClinicalReadScope = { kind: 'FULL' };
 
-describe('red clínica v4.2.92 · vínculos e informe del profesional (RLS forzado)', () => {
+describe('red clínica v4.2.94 · vínculos e informe del profesional (RLS forzado)', () => {
   const mark = `RED-${randomUUID().slice(0, 8)}`;
   const previous = [process.env.RLS_ENFORCE, process.env.DB_APP_USER];
   let owner: pg.Client;
@@ -142,7 +142,7 @@ describe('red clínica v4.2.92 · vínculos e informe del profesional (RLS forza
     owner = new pg.Client(OWNER);
     await owner.connect();
     seed = new Seeder(owner, mark);
-    await seed.patch('2026-11-06_v4292_red_clinica_vinculos.sql');
+    await seed.patch('2026-11-06_v4294_red_clinica_vinculos.sql');
     const { rows } = await owner.query(
       'select 1 from terminology.catalog_concepts where id = any($1)',
       [

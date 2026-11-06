@@ -429,7 +429,7 @@ export class RespondReferralDto {
   rejectReason?: string;
 
   /**
-   * v4292: la atención en la que el destino recibe al paciente. Sólo al
+   * v4294: la atención en la que el destino recibe al paciente. Sólo al
    * aceptar; tiene que ser del mismo paciente y del tenant destino que acepta.
    */
   @ApiPropertyOptional({
@@ -658,7 +658,7 @@ export class ReferralResponseDto {
   counterReferralAt?: Date;
 
   /**
-   * v4292: la atención en la que el destino recibió al paciente; ausente si
+   * v4294: la atención en la que el destino recibió al paciente; ausente si
    * no se registró.
    */
   @ApiPropertyOptional({

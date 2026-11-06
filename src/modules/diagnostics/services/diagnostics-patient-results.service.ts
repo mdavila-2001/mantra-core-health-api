@@ -3,6 +3,7 @@ import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site
 import { ServiceRequestDetailService } from '../../clinical/services/service-request-detail.service';
 import { summaryOf } from './diagnostics-reception.service';
 import { analysisCategoryOf } from '../../clinical/service-request-category';
+import { flatImagingOf } from '../../clinical/service-request-imaging';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -244,6 +245,7 @@ export class DiagnosticsPatientResultsService {
         components: view?.components ?? [],
         componentsSpecified: view?.componentsSpecified ?? false,
         imaging: view?.imaging ?? null,
+        ...flatImagingOf(view?.imaging),
         summary: summaryOf(codeDisplay, view),
         ...(settlements.get(order.id) ?? unavailableSettlement()),
         encounterId: order.encounterId,

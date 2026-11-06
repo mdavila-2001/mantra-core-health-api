@@ -137,7 +137,7 @@ export class ServiceRequests {
   formInstanceId?: string;
 
   /**
-   * v4292: el diagnóstico (`clinical.conditions`) que el estudio se pidió para
+   * v4294: el diagnóstico (`clinical.conditions`) que el estudio se pidió para
    * confirmar, descartar o seguir. Del mismo paciente que la orden; nulo si la
    * orden no declara motivo diagnóstico.
    */
@@ -227,4 +227,30 @@ export class ServiceRequests {
    */
   @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   contrastConceptId?: string;
+
+  /**
+   * Estructura UBERON marcada en el modelo 3D del cuerpo.
+   */
+  @Property({
+    fieldName: 'body_structure_uberon',
+    columnType: 'varchar(64)',
+    nullable: true,
+  })
+  bodyStructureUberon?: string;
+
+  /**
+   * Malla (FMA/BP) marcada en el modelo 3D del cuerpo.
+   */
+  @Property({
+    fieldName: 'body_mesh_id',
+    columnType: 'varchar(64)',
+    nullable: true,
+  })
+  bodyMeshId?: string;
+
+  /**
+   * Identificador asociado a bone type concept.
+   */
+  @Property({ fieldName: 'bone_type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  boneTypeConceptId?: string;
 }

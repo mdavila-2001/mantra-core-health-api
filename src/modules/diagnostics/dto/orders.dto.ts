@@ -31,7 +31,7 @@ export class DiagnosticOrderSummaryDto {
   /** P43: instancia del formulario médico de la que salió la orden, si salió de uno. */
   @ApiPropertyOptional({ format: 'uuid' }) formInstanceId?: string;
 
-  /** v4292: diagnóstico que el estudio se pidió para confirmar, descartar o seguir; ausente si no lo declara. */
+  /** v4294: diagnóstico que el estudio se pidió para confirmar, descartar o seguir; ausente si no lo declara. */
   @ApiPropertyOptional({ format: 'uuid' }) reasonConditionId?: string;
 
   /** Qué se pidió (concept id). */

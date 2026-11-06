@@ -220,7 +220,7 @@ export class Referrals {
   counterReferralAt?: Date;
 
   /**
-   * v4292: la atención (`clinical.encounters`) en la que el destino recibió al
+   * v4294: la atención (`clinical.encounters`) en la que el destino recibió al
    * paciente. La escribe sólo el destino, al aceptar la derivación.
    */
   @Property({ fieldName: 'target_encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters

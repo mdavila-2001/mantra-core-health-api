@@ -7,6 +7,7 @@ import { Type } from 'class-transformer';
 import {
   ServiceRequestComponentDto,
   ServiceRequestImagingDto,
+  ServiceRequestImagingFlatDto,
 } from '../../clinical/dto/service-request-detail.dto';
 import { IsDate, IsUUID } from 'class-validator';
 import {
@@ -110,7 +111,10 @@ export class PatientDiagnosticResultsResponseDto {
  * reimplementarse en la pantalla sin arriesgar mostrar un borrador como
  * resultado.
  */
-export class PatientOrderSummaryDto implements PatientSettlementProjection {
+export class PatientOrderSummaryDto
+  extends ServiceRequestImagingFlatDto
+  implements PatientSettlementProjection
+{
   @ApiProperty({ nullable: true, type: PatientInsuranceSettlementDto })
   insuranceSettlement!: PatientSettlementProjection['insuranceSettlement'];
 
@@ -156,7 +160,7 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
 
   /**
-   * El diagnóstico propio para el que se pidió (v4292). Ausente si no se
+   * El diagnóstico propio para el que se pidió (v4294). Ausente si no se
    * indicó. Sólo el id: el portal lo resuelve contra los diagnósticos que el
    * paciente ya ve en su resumen, así que no revela nada que no tenga.
    */

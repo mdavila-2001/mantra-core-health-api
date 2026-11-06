@@ -115,7 +115,7 @@ describe('DirectoryBranchesService', () => {
     });
   });
 
-  describe('categoría de la sede (v4.2.91)', () => {
+  describe('categoría de la sede (v4.2.92)', () => {
     const activeTenant = { statusConceptId: CONCEPTS.TENANT_ACTIVE };
 
     it('sin categoría, crea la sede como default', async () => {

@@ -74,7 +74,7 @@ export class Branches {
   locationUrl?: string;
 
   /**
-   * Categoría de la sede (v4.2.91): `default`, `head_office` (casa matriz, una
+   * Categoría de la sede (v4.2.92): `default`, `head_office` (casa matriz, una
    * por organización) o `branch`. Ver `branch-categories.ts`.
    */
   @Property({

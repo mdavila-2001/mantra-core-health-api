@@ -200,7 +200,7 @@ describe('CreateServiceRequestDto · ejecutor de la orden', () => {
   });
 });
 
-describe('CreateServiceRequestDto — reasonConditionId (v4292)', () => {
+describe('CreateServiceRequestDto — reasonConditionId (v4294)', () => {
   it('acepta el diagnóstico que motiva el estudio como uuid opcional', async () => {
     expect(
       await validateCreation(dtoBase({ reasonConditionId: REPORT })),
@@ -211,5 +211,65 @@ describe('CreateServiceRequestDto — reasonConditionId (v4292)', () => {
     expect(
       await validateCreation(dtoBase({ reasonConditionId: 'cond-1' })),
     ).toEqual(['reasonConditionId']);
+  });
+});
+
+describe('CreateServiceRequestDto · región marcada en el modelo 3D', () => {
+  const UUID = '55555555-5555-4555-8555-555555555555';
+
+  it('acepta los campos planos y el mismo detalle dentro de imaging', async () => {
+    const flat = {
+      modalityConceptId: UUID,
+      bodySiteConceptId: UUID,
+      lateralityConceptId: UUID,
+      bodyStructureUberon: 'UBERON:0002398',
+      bodyMeshId: 'BP44',
+      boneTypeConceptId: UUID,
+    };
+    expect(await validateCreation(dtoBase(flat))).toEqual([]);
+    expect(await validateCreation(dtoBase({ imaging: flat }))).toEqual([]);
+  });
+
+  it.each([
+    'modalityConceptId',
+    'bodySiteConceptId',
+    'lateralityConceptId',
+    'boneTypeConceptId',
+  ])('un %s mal formado se rechaza (400)', async (field) => {
+    expect(
+      await validateCreation(dtoBase({ [field]: 'no-es-uuid' })),
+    ).toContain(field);
+  });
+
+  it('un boneTypeConceptId mal formado dentro de imaging también', async () => {
+    const errors = await validate(
+      plainToInstance(
+        CreateServiceRequestDto,
+        dtoBase({ imaging: { boneTypeConceptId: 'x' } }),
+      ),
+      { whitelist: true, forbidNonWhitelisted: true },
+    );
+    expect(propertiesWithError(errors)).toContain('imaging');
+  });
+
+  it('acota la estructura y la malla a 64 caracteres y exige texto', async () => {
+    expect(
+      await validateCreation(dtoBase({ bodyMeshId: 'a'.repeat(64) })),
+    ).toEqual([]);
+    expect(
+      await validateCreation(dtoBase({ bodyMeshId: 'a'.repeat(65) })),
+    ).toContain('bodyMeshId');
+    expect(
+      await validateCreation(dtoBase({ bodyStructureUberon: 'u'.repeat(65) })),
+    ).toContain('bodyStructureUberon');
+    expect(await validateCreation(dtoBase({ bodyMeshId: 44 }))).toContain(
+      'bodyMeshId',
+    );
+  });
+
+  it('sigue rechazando campos no declarados (lista blanca)', async () => {
+    expect(await validateCreation(dtoBase({ boneName: 'fémur' }))).toContain(
+      'boneName',
+    );
   });
 });

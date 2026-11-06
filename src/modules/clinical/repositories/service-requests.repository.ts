@@ -87,8 +87,14 @@ export interface CreateServiceRequestData {
   lateralityConceptId?: string;
   /** Contraste (`imaging-contrast`). */
   contrastConceptId?: string;
+  /** Estructura marcada en el atlas 3D (`UBERON:<n>` o `FMA:<n>`). */
+  bodyStructureUberon?: string;
+  /** Malla marcada en el atlas 3D. */
+  bodyMeshId?: string;
+  /** Tipo de hueso (`imaging-bone-type`). */
+  boneTypeConceptId?: string;
   /**
-   * v4292: diagnóstico que motiva el estudio, ya validado contra el paciente.
+   * v4294: diagnóstico que motiva el estudio, ya validado contra el paciente.
    */
   reasonConditionId?: string;
   /**
@@ -148,6 +154,9 @@ export class ServiceRequestsRepository {
         bodySiteConceptId: data.bodySiteConceptId,
         lateralityConceptId: data.lateralityConceptId,
         contrastConceptId: data.contrastConceptId,
+        bodyStructureUberon: data.bodyStructureUberon,
+        bodyMeshId: data.bodyMeshId,
+        boneTypeConceptId: data.boneTypeConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

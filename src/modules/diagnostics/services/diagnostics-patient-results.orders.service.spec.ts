@@ -147,7 +147,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     );
   });
 
-  it('v4292: la orden trae el diagnóstico para el que se pidió y, si es null, no trae el campo', async () => {
+  it('v4294: la orden trae el diagnóstico para el que se pidió y, si es null, no trae el campo', async () => {
     const { service, ordersRepo } = build();
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
       { ...order('o1'), reasonConditionId: 'cond-1' },
@@ -267,6 +267,10 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
               lateralityDisplay: 'Izquierda',
               contrastConceptId: null,
               contrastDisplay: null,
+              bodyStructureUberon: 'UBERON:0002398',
+              bodyMeshId: 'BP44',
+              boneTypeConceptId: 'bt',
+              boneTypeDisplay: 'Hueso largo',
             },
           },
         ],
@@ -292,6 +296,18 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     ]);
     expect(img.summary).toBe('Radiografía de mano · Mano · Izquierda');
     expect(img.imaging?.modalityDisplay).toBe('Rayos X');
+    // La región también viaja en el nivel superior (la lee el visor 3D).
+    expect(img).toMatchObject({
+      bodyStructureUberon: 'UBERON:0002398',
+      bodyMeshId: 'BP44',
+      boneTypeConceptId: 'bt',
+      boneTypeDisplay: 'Hueso largo',
+      bodySiteDisplay: 'Mano',
+      lateralityDisplay: 'Izquierda',
+    });
+    // Laboratorio: sin detalle de imagen no aparece ninguna clave plana.
+    expect(lab).not.toHaveProperty('bodyMeshId');
+    expect(lab).not.toHaveProperty('boneTypeConceptId');
     // Una orden anterior al detalle: campos nulos/vacíos, nunca ausentes.
     expect(viejo).toMatchObject({
       requisitionId: null,

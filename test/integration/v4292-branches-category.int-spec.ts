@@ -11,19 +11,19 @@ import { TenantsRepository } from '../../src/modules/directory/repositories/tena
 import { DirectoryBranchesService } from '../../src/modules/directory/services/directory-branches.service';
 
 /**
- * v4.2.91 — la categoría de la sede (`directory.branches.branch_category`)
+ * v4.2.92 — la categoría de la sede (`directory.branches.branch_category`)
  * contra PostgreSQL real: alta, edición, lectura y la casa matriz única, tanto
  * por la comprobación del servicio como por el índice `ux_branches_one_head_office`
  * cuando dos pedidos se cruzan.
  *
  * La autorización por membresía tiene su propio spec; acá el doble la deja pasar.
- * Datos sintéticos marcados con `V4291-<sufijo>`, creados y retirados por la prueba.
+ * Datos sintéticos marcados con `V4292-<sufijo>`, creados y retirados por la prueba.
  */
-describe('v4.2.91 · categoría de la sede (DB real)', () => {
+describe('v4.2.92 · categoría de la sede (DB real)', () => {
   let orm: MikroORM;
   let service: DirectoryBranchesService;
   const branchesRepo = new BranchesRepository();
-  const mark = `V4291-${randomUUID().slice(0, 8)}`;
+  const mark = `V4292-${randomUUID().slice(0, 8)}`;
   const tenantId = randomUUID();
   const actorId = randomUUID();
   const actor = { id: actorId, roles: ['SECURITY_ADMIN'] } as never;

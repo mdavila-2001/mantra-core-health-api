@@ -6,11 +6,15 @@
  * paciente. Qué hacen y con qué datos es asunto de ellos; la agenda sólo
  * declara **que** pasó.
  *
- * Regla del puerto: **no lanza**. Se invoca después de confirmada la
- * transacción de cierre, así que un fallo del otro contexto no puede deshacer
- * la atención ni convertir el cierre en un error para quien lo hizo: el
- * adaptador registra el fallo y devuelve. Tiene que ser idempotente, porque
- * nada impide que se invoque dos veces para la misma reserva.
+ * Regla del puerto: **no lanza**. Se invoca cuando terminó la transacción de
+ * cierre del caso de uso. Esa transacción está confirmada si la petición no
+ * tiene una propia; con `RLS_ENFORCE=true` la petición entera es una
+ * transacción y lo es recién al responder, así que el adaptador trabaja en un
+ * savepoint de ella. En los dos casos, un fallo del otro contexto no puede
+ * deshacer la atención ni convertir el cierre en un error para quien lo hizo:
+ * el adaptador descarta su savepoint, registra el fallo y devuelve. Tiene que
+ * ser idempotente, porque nada impide que se invoque dos veces para la misma
+ * reserva.
  */
 
 import type { AuthenticatedUser } from '../../../../common';

@@ -316,7 +316,7 @@ export class VerifyConditionDto {
   basedOn?: DiagnosisEvidenceDto;
 
   /**
-   * v4292: al refutar, el diagnóstico que reemplaza a éste (diferencial
+   * v4294: al refutar, el diagnóstico que reemplaza a éste (diferencial
    * resuelto). Sólo con `outcome: REFUTED`, distinto del propio y del mismo
    * paciente; el servicio responde 422 si no.
    */

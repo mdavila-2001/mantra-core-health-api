@@ -18,3 +18,5 @@ export type {
   CreateResponseData,
   CreateAnswerData,
 } from './responses.repository';
+export { StandardTemplatesRepository } from './standard-templates.repository';
+export type { CreateImportedTemplateData } from './standard-templates.repository';

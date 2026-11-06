@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `surveys`
 
-Referencia exhaustiva de 19 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-catalog`, `surveys-insights`, `surveys-patient`, `surveys-templates`
-- **Controladores:** `SurveysAssignmentsController`, `SurveysCatalogController`, `SurveysInsightsController`, `SurveysPatientController`, `SurveysTemplatesController`
+- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-catalog`, `surveys-insights`, `surveys-patient`, `surveys-service-assignments`, `surveys-templates`
+- **Controladores:** `SurveysAssignmentsController`, `SurveysCatalogController`, `SurveysInsightsController`, `SurveysPatientController`, `SurveysServiceAssignmentsController`, `SurveysTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -18,18 +18,22 @@ Referencia exhaustiva de 19 operación(es) del módulo `surveys`, derivada del c
 5. [GET /surveys/me/invitations](#5-get-surveys-me-invitations) — Ver mis cuestionarios
 6. [GET /surveys/me/invitations/{id}](#6-get-surveys-me-invitations-id) — Abrir un cuestionario para responderlo
 7. [POST /surveys/me/invitations/{id}/responses](#7-post-surveys-me-invitations-id-responses) — Responder el cuestionario
-8. [GET /surveys/templates](#8-get-surveys-templates) — Listar mis encuestas
-9. [POST /surveys/templates](#9-post-surveys-templates) — Crear una encuesta para pacientes
-10. [GET /surveys/templates/{id}](#10-get-surveys-templates-id) — Ver una encuesta y su cuestionario
-11. [PATCH /surveys/templates/{id}](#11-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
-12. [POST /surveys/templates/{id}/deactivate](#12-post-surveys-templates-id-deactivate) — Desactivar la encuesta
-13. [POST /surveys/templates/{id}/questions](#13-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
-14. [DELETE /surveys/templates/{id}/questions/{questionId}](#14-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
-15. [PATCH /surveys/templates/{id}/questions/{questionId}](#15-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
-16. [PUT /surveys/templates/{id}/questions/order](#16-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
-17. [GET /surveys/templates/{id}/responses](#17-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
-18. [POST /surveys/templates/{id}/versions](#18-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
-19. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#19-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
+8. [GET /surveys/service-assignments](#8-get-surveys-service-assignments) — Ver la encuesta de cada uno de mis servicios
+9. [DELETE /surveys/service-assignments/{serviceId}](#9-delete-surveys-service-assignments-serviceid) — Quitar la encuesta de un servicio
+10. [PUT /surveys/service-assignments/{serviceId}](#10-put-surveys-service-assignments-serviceid) — Asociar a un servicio una encuesta del catálogo estándar
+11. [GET /surveys/standard-catalog](#11-get-surveys-standard-catalog) — Ver el catálogo estándar de encuestas
+12. [GET /surveys/templates](#12-get-surveys-templates) — Listar mis encuestas
+13. [POST /surveys/templates](#13-post-surveys-templates) — Crear una encuesta para pacientes
+14. [GET /surveys/templates/{id}](#14-get-surveys-templates-id) — Ver una encuesta y su cuestionario
+15. [PATCH /surveys/templates/{id}](#15-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
+16. [POST /surveys/templates/{id}/deactivate](#16-post-surveys-templates-id-deactivate) — Desactivar la encuesta
+17. [POST /surveys/templates/{id}/questions](#17-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
+18. [DELETE /surveys/templates/{id}/questions/{questionId}](#18-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
+19. [PATCH /surveys/templates/{id}/questions/{questionId}](#19-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
+20. [PUT /surveys/templates/{id}/questions/order](#20-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
+21. [GET /surveys/templates/{id}/responses](#21-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
+22. [POST /surveys/templates/{id}/versions](#22-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
+23. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#23-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
 
 ---
 
@@ -44,7 +48,7 @@ Referencia exhaustiva de 19 operación(es) del módulo `surveys`, derivada del c
 
 ### Descripción de negocio
 
-Asociar una encuesta a una consulta o servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Sólo asocia plantillas importadas del catálogo estándar. La cita médica usa siempre la encuesta base del sistema y un servicio se asocia con PUT /surveys/service-assignments/{serviceId}.
 
 Contexto declarado en el controlador: Asocia una versión publicada a una consulta o a un servicio.
 
@@ -107,13 +111,13 @@ Content-Type: application/json
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 201 | Recurso creado o acción registrada correctamente. | `Promise<IdResponseDto>` | No |
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<IdResponseDto>` | Sí |
 | 400 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 401 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 403 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 422 | SURVEY_ASSIGNMENT_REQUIRES_CATALOG_TEMPLATE: la plantilla se escribió a mano (no viene del catálogo estándar) y ya no se reparte. También SURVEY_ASSIGNMENT_SERVICE_NOT_OFFERED y SURVEY_ASSIGNMENT_CARE_TYPE_UNSUPPORTED. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
@@ -145,6 +149,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una asignación activa de esa versión a ese destino | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se puede asignar una versión publicada | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se asocian encuestas del catálogo estándar: importe una a su servicio desde «Encuestas por servicio»; la cita médica usa la encuesta base del sistema | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 422 | `PRECONDITION_FAILED` | El único tipo de atención que se puede asociar es «consulta»: asigne la encuesta por servicio, por cita concreta o a todas sus consultas | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 422 | `PRECONDITION_FAILED` | Usted no ofrece ese servicio: declárelo en sus servicios antes de asociarle una encuesta | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -706,7 +711,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -837,7 +841,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 404 | `NOT_FOUND` | Cuestionario no encontrado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -981,7 +984,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 409 | `CONFLICT` | Este cuestionario ya fue respondido | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 409 | `CONFLICT` | La respuesta ya fue registrada para este cuestionario | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1015,7 +1017,572 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /surveys/templates
+## 8. GET /surveys/service-assignments
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-service-assignments`
+- **Nombre:** Ver la encuesta de cada uno de mis servicios
+- **Operation ID:** `SurveysServiceAssignmentsController_listServiceAssignments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysServiceAssignmentsController.listServiceAssignments](../../src/modules/surveys/controllers/surveys-service-assignments.controller.ts)
+
+### Descripción de negocio
+
+Ver la encuesta de cada uno de mis servicios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La cita médica (fija) y los servicios del profesional con su encuesta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /surveys/service-assignments` en `SurveysServiceAssignmentsController_listServiceAssignments`. El controlador delega en `SurveysServiceAssignmentsService.listServiceAssignments`. No recibe body. El tipo de retorno estático es `Promise<ServiceSurveyAssignmentsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /surveys/service-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /surveys/service-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceSurveyAssignmentsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceSurveyAssignmentsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "consultation": {
+    "system": true,
+    "title": "Cita médica",
+    "templateTitle": "Encuesta de su consulta médica",
+    "questionCount": 12,
+    "replaceable": false,
+    "questions": [
+      {
+        "position": 1,
+        "text": "valor-ejemplo",
+        "answerType": "TEXT",
+        "required": true,
+        "options": [
+          "valor-ejemplo"
+        ],
+        "scaleMin": 1,
+        "scaleMax": 1
+      }
+    ]
+  },
+  "services": [
+    {
+      "serviceId": "00000000-0000-4000-8000-000000000001",
+      "serviceName": "Ecografía abdominal",
+      "serviceKind": "IMAGING",
+      "assignment": {
+        "assignmentId": "00000000-0000-4000-8000-000000000001",
+        "catalogCode": "STD_IMAGING_V1",
+        "title": "valor-ejemplo",
+        "templateId": "00000000-0000-4000-8000-000000000001",
+        "versionId": "00000000-0000-4000-8000-000000000001",
+        "assignedAt": "2026-07-31T12:00:00.000Z"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `consultation` | Sí | `ConsultationSurveyRowDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"system":true,"title":"Cita médica","templateTitle":"Encuesta de su consulta médica","questionCount":12,"replaceable":false,"questions":[{"position":1,"text":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]}` |
+| `consultation.system` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `consultation.title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Cita médica` |
+| `consultation.templateTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Encuesta de su consulta médica` |
+| `consultation.questionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `12` |
+| `consultation.replaceable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `consultation.questions` | Sí | `array<BaseSurveyQuestionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"position":1,"text":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
+| `consultation.questions[].position` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `consultation.questions[].text` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `consultation.questions[].answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Sin descripción específica en el contrato OpenAPI. | `TEXT` |
+| `consultation.questions[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `consultation.questions[].options` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `consultation.questions[].scaleMin` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `consultation.questions[].scaleMax` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `services` | Sí | `array<ServiceSurveyRowDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"serviceId":"00000000-0000-4000-8000-000000000001","serviceName":"Ecografía abdominal","serviceKind":"IMAGING","assignment":{"assignmentId":"00000000-0000-4000-8000-000000000001","catalogCode":"STD_IMAGING_V1","title":"valor-ejemplo","templateId":"00000000-0000-4000-8000-000000000001","versionId":"00000000-0000-4000-8000-000000000001","assignedAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `services[].serviceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `services[].serviceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ecografía abdominal` |
+| `services[].serviceKind` | Sí | `string` | valores: `CONSULTATION`, `PROCEDURE`, `LAB`, `IMAGING`, `TELEMEDICINE`, `THERAPY`, `HOME_CARE`, `PHARMACY`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `IMAGING` |
+| `services[].assignment` | Sí | `ServiceSurveyAssignmentDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"assignmentId":"00000000-0000-4000-8000-000000000001","catalogCode":"STD_IMAGING_V1","title":"valor-ejemplo","templateId":"00000000-0000-4000-8000-000000000001","versionId":"00000000-0000-4000-8000-000000000001","assignedAt":"2026-07-31T12:00:00.000Z"}` |
+| `services[].assignment.assignmentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `services[].assignment.catalogCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `STD_IMAGING_V1` |
+| `services[].assignment.title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `services[].assignment.templateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `services[].assignment.versionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `services[].assignment.assignedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-service-assignments.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/service-assignments"
+}
+```
+
+---
+
+## 9. DELETE /surveys/service-assignments/{serviceId}
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-service-assignments`
+- **Nombre:** Quitar la encuesta de un servicio
+- **Operation ID:** `SurveysServiceAssignmentsController_removeServiceSurvey`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysServiceAssignmentsController.removeServiceSurvey](../../src/modules/surveys/controllers/surveys-service-assignments.controller.ts)
+
+### Descripción de negocio
+
+Quitar la encuesta de un servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quita la encuesta del servicio: vuelve a la base de servicio del sistema.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /surveys/service-assignments/{serviceId}` en `SurveysServiceAssignmentsController_removeServiceSurvey`. El controlador delega en `SurveysServiceAssignmentsService.removeServiceSurvey`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `serviceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /surveys/service-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `serviceId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /surveys/service-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | El servicio vuelve a la encuesta base de servicio. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | SURVEY_SERVICE_NOT_OWNED: el servicio no es suyo. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-service-assignments.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/service-assignments/{serviceId}"
+}
+```
+
+---
+
+## 10. PUT /surveys/service-assignments/{serviceId}
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-service-assignments`
+- **Nombre:** Asociar a un servicio una encuesta del catálogo estándar
+- **Operation ID:** `SurveysServiceAssignmentsController_importServiceSurvey`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysServiceAssignmentsController.importServiceSurvey](../../src/modules/surveys/controllers/surveys-service-assignments.controller.ts)
+
+### Descripción de negocio
+
+Asociar a un servicio una encuesta del catálogo estándar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Importa una plantilla del catálogo al servicio, reemplazando la anterior.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /surveys/service-assignments/{serviceId}` en `SurveysServiceAssignmentsController_importServiceSurvey`. El controlador delega en `SurveysServiceAssignmentsService.importServiceSurvey`. Valida el body como `ImportServiceSurveyDto` y consume `application/json`. El tipo de retorno estático es `Promise<ServiceSurveyRowDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `serviceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ImportServiceSurveyDto`; los campos opcionales se omiten.
+
+```http
+PUT /surveys/service-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "catalogCode": "STD_IMAGING_V1"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `serviceId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `catalogCode` | Sí | `string` | longitud máxima 64; patrón `^STD_[A-Z0-9_]+$`; patrón runtime `/^STD_[A-Z0-9_]+$/` | Sin descripción específica en el contrato OpenAPI. | `STD_IMAGING_V1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /surveys/service-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "catalogCode": "STD_IMAGING_V1"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 403 | SURVEY_SERVICE_NOT_OWNED: el servicio no es suyo. | `Promise<ServiceSurveyRowDto>` | No |
+| 404 | SURVEY_CATALOG_CODE_UNKNOWN: el código no está en el catálogo. | `Promise<ServiceSurveyRowDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceSurveyRowDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceSurveyRowDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "serviceId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Ecografía abdominal",
+  "serviceKind": "IMAGING",
+  "assignment": {
+    "assignmentId": "00000000-0000-4000-8000-000000000001",
+    "catalogCode": "STD_IMAGING_V1",
+    "title": "valor-ejemplo",
+    "templateId": "00000000-0000-4000-8000-000000000001",
+    "versionId": "00000000-0000-4000-8000-000000000001",
+    "assignedAt": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `serviceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ecografía abdominal` |
+| `serviceKind` | Sí | `string` | valores: `CONSULTATION`, `PROCEDURE`, `LAB`, `IMAGING`, `TELEMEDICINE`, `THERAPY`, `HOME_CARE`, `PHARMACY`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `IMAGING` |
+| `assignment` | Sí | `ServiceSurveyAssignmentDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"assignmentId":"00000000-0000-4000-8000-000000000001","catalogCode":"STD_IMAGING_V1","title":"valor-ejemplo","templateId":"00000000-0000-4000-8000-000000000001","versionId":"00000000-0000-4000-8000-000000000001","assignedAt":"2026-07-31T12:00:00.000Z"}` |
+| `assignment.assignmentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignment.catalogCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `STD_IMAGING_V1` |
+| `assignment.title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `assignment.templateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignment.versionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignment.assignedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Esa plantilla no está en el catálogo estándar | Excepción explícita en src/modules/surveys/services/surveys-service-assignments.service.ts |
+| 409 | `CONFLICT` | El servicio ya tiene una encuesta activa: vuelva a intentarlo | Excepción explícita en src/modules/surveys/services/surveys-service-assignments.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-service-assignments.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/service-assignments/{serviceId}"
+}
+```
+
+---
+
+## 11. GET /surveys/standard-catalog
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-service-assignments`
+- **Nombre:** Ver el catálogo estándar de encuestas
+- **Operation ID:** `SurveysServiceAssignmentsController_getCatalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysServiceAssignmentsController.getCatalog](../../src/modules/surveys/controllers/surveys-service-assignments.controller.ts)
+
+### Descripción de negocio
+
+Ver el catálogo estándar de encuestas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El catálogo estándar de encuestas por tipo de servicio. No es `GET /surveys/catalog`: esa ruta ya lista las encuestas base y las propias del profesional (`SurveysCatalogController`) y tiene consumidores.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /surveys/standard-catalog` en `SurveysServiceAssignmentsController_getCatalog`. El controlador delega en `SurveysServiceAssignmentsService.getCatalog`. No recibe body. El tipo de retorno estático es `StandardSurveyCatalogDto`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /surveys/standard-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /surveys/standard-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `StandardSurveyCatalogDto` | Sí |
+| 400 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+| 401 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+| 403 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+| 429 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+| 500 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+| 504 | Consulta completada correctamente. | `StandardSurveyCatalogDto` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StandardSurveyCatalogDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "code": "STD_IMAGING_V1",
+      "title": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "serviceKinds": [
+        "CONSULTATION"
+      ],
+      "source": {
+        "instrument": "CAHPS Clinician & Group Survey 3.0",
+        "license": "Dominio público (AHRQ)",
+        "url": "https://example.com/recurso"
+      },
+      "additionalSources": [
+        {
+          "instrument": "CAHPS Clinician & Group Survey 3.0",
+          "license": "Dominio público (AHRQ)",
+          "url": "https://example.com/recurso"
+        }
+      ],
+      "questions": [
+        {
+          "text": "valor-ejemplo",
+          "answerType": "TEXT",
+          "required": true,
+          "options": [
+            "valor-ejemplo"
+          ],
+          "scaleMin": 1,
+          "scaleMax": 1,
+          "dimension": "espera"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<StandardSurveyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"STD_IMAGING_V1","title":"valor-ejemplo","description":"Texto descriptivo de ejemplo","serviceKinds":["CONSULTATION"],"source":{"instrument":"CAHPS Clinician & Group Survey 3.0","license":"Dominio público (AHRQ)","url":"https://example.com/recurso"},"additionalSources":[{"instrument":"CAHPS Clinician & Group Survey 3.0","license":"Dominio público (AHRQ)","url":"https://example.com/recurso"}],"questions":[{"text":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1,"dimension":"espera"}]}]` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `STD_IMAGING_V1` |
+| `items[].title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].serviceKinds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["CONSULTATION"]` |
+| `items[].source` | Sí | `StandardSurveySourceDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"instrument":"CAHPS Clinician & Group Survey 3.0","license":"Dominio público (AHRQ)","url":"https://example.com/recurso"}` |
+| `items[].source.instrument` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CAHPS Clinician & Group Survey 3.0` |
+| `items[].source.license` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Dominio público (AHRQ)` |
+| `items[].source.url` | Sí | `string` | formato `uri` | Sin descripción específica en el contrato OpenAPI. | `https://example.com/recurso` |
+| `items[].additionalSources` | Sí | `array<StandardSurveySourceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"instrument":"CAHPS Clinician & Group Survey 3.0","license":"Dominio público (AHRQ)","url":"https://example.com/recurso"}]` |
+| `items[].additionalSources[].instrument` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CAHPS Clinician & Group Survey 3.0` |
+| `items[].additionalSources[].license` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Dominio público (AHRQ)` |
+| `items[].additionalSources[].url` | Sí | `string` | formato `uri` | Sin descripción específica en el contrato OpenAPI. | `https://example.com/recurso` |
+| `items[].questions` | Sí | `array<StandardSurveyQuestionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"text":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1,"dimension":"espera"}]` |
+| `items[].questions[].text` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].questions[].answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Sin descripción específica en el contrato OpenAPI. | `TEXT` |
+| `items[].questions[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].questions[].options` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].questions[].scaleMin` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].questions[].scaleMax` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].questions[].dimension` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `espera` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/standard-catalog"
+}
+```
+
+---
+
+## 12. GET /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1125,7 +1692,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /surveys/templates
+## 13. POST /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1257,7 +1824,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /surveys/templates/{id}
+## 14. GET /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1414,7 +1981,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /surveys/templates/{id}
+## 15. PATCH /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1545,7 +2112,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /surveys/templates/{id}/deactivate
+## 16. POST /surveys/templates/{id}/deactivate
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1658,7 +2225,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /surveys/templates/{id}/questions
+## 17. POST /surveys/templates/{id}/questions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1823,7 +2390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. DELETE /surveys/templates/{id}/questions/{questionId}
+## 18. DELETE /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1939,7 +2506,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PATCH /surveys/templates/{id}/questions/{questionId}
+## 19. PATCH /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2085,7 +2652,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /surveys/templates/{id}/questions/order
+## 20. PUT /surveys/templates/{id}/questions/order
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2219,7 +2786,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /surveys/templates/{id}/responses
+## 21. GET /surveys/templates/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2343,7 +2910,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /surveys/templates/{id}/versions
+## 22. POST /surveys/templates/{id}/versions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2462,7 +3029,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 23. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`

@@ -7,6 +7,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { RolesGuard } from '../../../common/auth/roles.guard';
+import { ClinicalRecordAccessGuard } from '../guards/clinical-record-access.guard';
 import { ClinicalOrdersController } from './clinical-orders.controller';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -95,6 +99,80 @@ describe('ClinicalOrdersController', () => {
       'dr1',
       {},
       actor,
+    );
+  });
+});
+
+/**
+ * Matriz negativa del alta con región 3D / tipo de hueso: agregar campos al
+ * cuerpo no cambia quién puede crear la orden. Los guards son los reales; sólo
+ * el servicio de lectura del expediente es un doble (su política tiene spec propio).
+ */
+describe('POST /clinical/service-requests · autorización con la región 3D', () => {
+  const handler = (ClinicalOrdersController.prototype as any)
+    .createServiceRequest;
+  const withRegion = {
+    custodianTenantId: 't1',
+    patientProfileId: 'p-ajeno',
+    codeConceptId: 'c1',
+    bodySiteConceptId: 's1',
+    bodyStructureUberon: 'UBERON:0002398',
+    bodyMeshId: 'BP44',
+    boneTypeConceptId: 'b1',
+  };
+
+  function rolesContext(user: unknown) {
+    return {
+      getHandler: () => handler,
+      getClass: () => ClinicalOrdersController,
+      switchToHttp: () => ({ getRequest: () => ({ user }) }),
+    } as any;
+  }
+  const rolesGuard = new RolesGuard(new Reflector());
+
+  it('rol insuficiente (paciente, administrativo): 403', () => {
+    for (const roles of [['PATIENT'], ['RECEPTIONIST'], []]) {
+      expect(() =>
+        rolesGuard.canActivate(rolesContext({ id: 'u', roles })),
+      ).toThrow(ForbiddenException);
+    }
+  });
+
+  it('sin sujeto autenticado no pasa el guard de roles', () => {
+    expect(() => rolesGuard.canActivate(rolesContext(undefined))).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('un clínico o profesional con rol sí pasa a la política del expediente', () => {
+    for (const role of ['CLINICIAN', 'PRACTITIONER']) {
+      expect(
+        rolesGuard.canActivate(rolesContext({ id: 'u', roles: [role] })),
+      ).toBe(true);
+    }
+  });
+
+  it('paciente ajeno o de otro tenant: el guard del expediente responde 403 aunque el cuerpo traiga la región', async () => {
+    const readService = {
+      assertCanWriteHistory: mockFn().mockRejectedValue(
+        new ForbiddenException(),
+      ),
+    };
+    const guard = new ClinicalRecordAccessGuard(readService as any, {} as any);
+    const request = {
+      user: { id: 'u', roles: ['PRACTITIONER'] },
+      params: {},
+      method: 'POST',
+      body: withRegion,
+    };
+    await expect(
+      guard.canActivate({
+        switchToHttp: () => ({ getRequest: () => request }),
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
+      'p-ajeno',
+      request.user,
     );
   });
 });

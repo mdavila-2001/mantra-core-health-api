@@ -19,7 +19,7 @@ export interface DeclaredBranch {
   readonly description?: string;
   readonly locationUrl?: string;
   readonly openingHours?: readonly OpeningHoursShiftDto[];
-  /** v4.2.91: head office, branch or (unsaid) default. */
+  /** v4.2.92: head office, branch or (unsaid) default. */
   readonly category?: BranchCategory;
   /** `OFFICE` unless said; the medical organization's sites are `CLINIC`. */
   readonly branchType?: 'CLINIC' | 'OFFICE';

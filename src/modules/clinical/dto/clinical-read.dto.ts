@@ -183,7 +183,7 @@ export class ConditionItemDto {
   verification?: ConditionVerificationDto | null;
 
   /**
-   * v4292: el diagnóstico que reemplazó a éste al refutarlo (diferencial
+   * v4294: el diagnóstico que reemplazó a éste al refutarlo (diferencial
    * resuelto). Ausente si no fue reemplazado.
    */
   @ApiPropertyOptional({

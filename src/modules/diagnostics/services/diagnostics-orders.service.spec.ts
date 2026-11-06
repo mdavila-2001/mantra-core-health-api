@@ -276,7 +276,7 @@ describe('DiagnosticsOrdersService', () => {
     });
   });
 
-  describe('reasonConditionId (v4292)', () => {
+  describe('reasonConditionId (v4294)', () => {
     it('la orden trae el diagnóstico que la motiva y, si es null, no trae el campo', async () => {
       const d = build();
       d.repo.findOrdersByPatient.mockResolvedValue([

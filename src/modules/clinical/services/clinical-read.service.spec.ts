@@ -371,7 +371,7 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     expect(summary.encounters[0].rowVersion).toBe(3);
   });
 
-  it('v4292: la condición trae el diagnóstico que la reemplazó y, si es null, no trae el campo', async () => {
+  it('v4294: la condición trae el diagnóstico que la reemplazó y, si es null, no trae el campo', async () => {
     const d = build();
     d.vacio.findByPatient
       .mockResolvedValueOnce([

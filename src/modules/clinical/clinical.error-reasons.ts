@@ -95,13 +95,13 @@ export enum ClinicalErrorReason {
   BASED_ON_NOTE_ENCOUNTER_MISMATCH = 'BASED_ON_NOTE_ENCOUNTER_MISMATCH',
   /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
   SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
-  /** v4292: `reasonConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
+  /** v4294: `reasonConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
   SERVICE_REQUEST_REASON_CONDITION_INVALID = 'SERVICE_REQUEST_REASON_CONDITION_INVALID',
-  /** v4292: `replacedByConditionId` sólo se admite al refutar (`outcome: REFUTED`). */
+  /** v4294: `replacedByConditionId` sólo se admite al refutar (`outcome: REFUTED`). */
   CONDITION_REPLACEMENT_REQUIRES_REFUTED = 'CONDITION_REPLACEMENT_REQUIRES_REFUTED',
-  /** v4292: un diagnóstico no puede reemplazarse a sí mismo. */
+  /** v4294: un diagnóstico no puede reemplazarse a sí mismo. */
   CONDITION_REPLACEMENT_SELF = 'CONDITION_REPLACEMENT_SELF',
-  /** v4292: `replacedByConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
+  /** v4294: `replacedByConditionId` no existe o es de otro paciente (indistinguibles a propósito). */
   CONDITION_REPLACEMENT_INVALID = 'CONDITION_REPLACEMENT_INVALID',
   /** F5b: el punto de toma no es un punto disponible de la sede sugerida (422). */
   COLLECTION_POINT_INVALID = 'COLLECTION_POINT_INVALID',
@@ -158,6 +158,19 @@ export const StudyDetailReason = {
   CONTRAST_NOT_IN_CATALOG: 'CONTRAST_NOT_IN_CATALOG',
   /** V9: contraste sin modalidad. */
   CONTRAST_REQUIRES_MODALITY: 'CONTRAST_REQUIRES_MODALITY',
+  /** V3/V5: la orden trae muestra y datos de imagen a la vez. */
+  SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE:
+    'SPECIMEN_AND_IMAGING_FIELDS_EXCLUSIVE',
+  /** V5: un dato de imagen viaja en el nivel superior y en `imaging` con valores distintos. */
+  IMAGING_FIELD_CONFLICT: 'IMAGING_FIELD_CONFLICT',
+  /** V7: `bodyStructureUberon` no tiene la forma `UBERON:<n>` ni `FMA:<n>`. */
+  BODY_STRUCTURE_FORMAT_INVALID: 'BODY_STRUCTURE_FORMAT_INVALID',
+  /** V7: `bodyMeshId` no es un identificador alfanumérico acotado. */
+  BODY_MESH_ID_FORMAT_INVALID: 'BODY_MESH_ID_FORMAT_INVALID',
+  /** V7: tipo de hueso sin región ni estructura corporal. */
+  BONE_TYPE_REQUIRES_BODY_STRUCTURE: 'BONE_TYPE_REQUIRES_BODY_STRUCTURE',
+  /** V7: el tipo de hueso no es de `imaging-bone-type`. */
+  BONE_TYPE_NOT_IN_CATALOG: 'BONE_TYPE_NOT_IN_CATALOG',
   /** V10: antiduplicación (se reutilizan los de `service-requests.service`). */
   DUPLICATE_STUDY_DETECTED: 'DUPLICATE_STUDY_DETECTED',
   /** Requisición: la misma `Idempotency-Key` con un cuerpo distinto. */

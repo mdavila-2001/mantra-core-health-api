@@ -846,7 +846,7 @@ describe('TenantTypeProfileService', () => {
       );
     });
 
-    it('registra sólo la sede central de una unidad de imágenes, como casa matriz (v4.2.91)', async () => {
+    it('registra sólo la sede central de una unidad de imágenes, como casa matriz (v4.2.92)', async () => {
       const { service, branchesRepo, tx } = build();
 
       await service.materializeProfile(
@@ -871,7 +871,7 @@ describe('TenantTypeProfileService', () => {
         'actor-1',
       );
 
-      // Antes de v4.2.91 imagenología no entraba al registro de sucursales y su
+      // Antes de v4.2.92 imagenología no entraba al registro de sucursales y su
       // pantalla Sucursales arrancaba vacía; ahora la sede central es la casa matriz.
       expect(branchesRepo.create).toHaveBeenCalledTimes(1);
       expect(branchesRepo.create).toHaveBeenCalledWith(
@@ -1112,7 +1112,7 @@ describe('TenantTypeProfileService', () => {
       expect(order).toEqual(['create', 'flush', 'site', 'site', 'site']);
     });
 
-    it('suma las sedes declaradas al registro de sucursales: casa central como casa matriz (v4.2.91)', async () => {
+    it('suma las sedes declaradas al registro de sucursales: casa central como casa matriz (v4.2.92)', async () => {
       const { service, branchesRepo, tx } = build();
 
       await service.materializeProfile(

@@ -903,7 +903,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
   });
 });
 
-describe('ConditionsService.verify · replacedByConditionId (v4292)', () => {
+describe('ConditionsService.verify · replacedByConditionId (v4294)', () => {
   const medical = {
     id: 'user-1',
     roles: ['PRACTITIONER'],

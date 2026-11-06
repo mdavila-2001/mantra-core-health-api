@@ -48,6 +48,7 @@ import {
   analysisCategoryOf,
   categoryConceptIdFor,
 } from '../service-request-category';
+import { detailColumnsOf, flatImagingOf } from '../service-request-imaging';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -259,7 +260,7 @@ export class ServiceRequestsService {
   }
 
   /**
-   * v4292: el diagnóstico que motiva el estudio tiene que existir y ser del
+   * v4294: el diagnóstico que motiva el estudio tiene que existir y ser del
    * mismo paciente que la orden. Responde 422 (la precondición que falla es
    * del cuerpo, como `MEDICATION_INDICATION_INVALID`), y un diagnóstico ajeno
    * responde igual que uno inexistente: distinguirlos diría que ese id existe
@@ -333,7 +334,7 @@ export class ServiceRequestsService {
         : this.em.transactional(work);
     return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
-      // v4292: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
+      // v4294: el diagnóstico que motiva el estudio, del mismo paciente; 422 antes de escribir.
       await this.assertReasonConditionBelongsToPatient(tx, dto);
       // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
       const prepared = await this.detail.prepare(
@@ -344,6 +345,7 @@ export class ServiceRequestsService {
           specimenTypeConceptId: dto.specimenTypeConceptId,
           componentConceptIds: dto.componentConceptIds,
           imaging: dto.imaging,
+          flat: dto,
         },
         { catalog: options.catalog },
       );
@@ -416,11 +418,7 @@ export class ServiceRequestsService {
         duplicateOverrideReason: decision.duplicateOverrideReason,
         reasonConditionId: dto.reasonConditionId,
         requisitionId: options.requisitionId,
-        specimenTypeConceptId: prepared.specimenTypeConceptId,
-        modalityConceptId: prepared.modalityConceptId,
-        bodySiteConceptId: prepared.bodySiteConceptId,
-        lateralityConceptId: prepared.lateralityConceptId,
-        contrastConceptId: prepared.contrastConceptId,
+        ...detailColumnsOf(prepared),
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -521,6 +519,7 @@ export class ServiceRequestsService {
         components: view?.components ?? [],
         componentsSpecified: view?.componentsSpecified ?? false,
         imaging: view?.imaging ?? null,
+        ...flatImagingOf(view?.imaging),
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,
