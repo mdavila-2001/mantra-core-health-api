@@ -26,10 +26,12 @@ import {
 import { LabPortalPricingService } from './lab-portal-pricing.service';
 import { LabPortalWriterService } from './lab-portal-writer.service';
 import {
+  catalogVersionOf,
   toCatalogItems,
   type CatalogItem as Item,
 } from './lab-portal-study-catalog.items';
 import { parentOf, statusOf } from './lab-portal.mapping';
+import { LAB_SAMPLE_TYPES } from './lab-sample-types';
 
 /** The whole lab catalog is ~530 análisis: one page holds it. */
 const CATALOG_PAGE = 1000;
@@ -61,7 +63,13 @@ export class LabPortalStudyCatalogService {
   async catalog(): Promise<LabCatalogDto> {
     const em = this.em.fork();
     const ctx = await this.context.load(em);
-    const items = await this.items(em);
+    const { items, catalogVersion } = await this.read(em);
+    if (catalogVersion === null) {
+      this.logger.warn(
+        { operation: 'diagnostic_units.lab_portal.catalog.not_loaded' },
+        'LOINC study catalog not loaded: run `yarn catalog:studies:load`',
+      );
+    }
     const sections = new Map<string, LabCatalogSectionDto>();
     for (const { section, ...item } of items.values()) {
       // A withdrawn panel is not in the price list: it can be added again.
@@ -75,8 +83,10 @@ export class LabPortalStudyCatalogService {
       sections: [...sections.values()].sort((a, b) =>
         a.name.localeCompare(b.name, 'es'),
       ),
+      sampleTypes: LAB_SAMPLE_TYPES.map(({ code, name }) => ({ code, name })),
       count: items.size,
       priceRule: LAB_REFERENCE_PRICE_SOURCES.rule,
+      catalogVersion,
     };
   }
 
@@ -85,7 +95,7 @@ export class LabPortalStudyCatalogService {
     dto: LabCatalogImportDto,
     actor: AuthenticatedUser,
   ): Promise<LabCatalogImportResultDto> {
-    const items = await this.items(this.em.fork());
+    const { items } = await this.read(this.em.fork());
     const rows = await this.em.transactional(async (tx) => {
       const ctx = await this.context.load(tx);
       const out: LabCatalogImportRowDto[] = [];
@@ -249,7 +259,9 @@ export class LabPortalStudyCatalogService {
   }
 
   /** Every LAB análisis of the catalog with its components and suggested prices, by concept. */
-  private async items(em: EntityManager): Promise<Map<string, Item>> {
+  private async read(
+    em: EntityManager,
+  ): Promise<{ items: Map<string, Item>; catalogVersion: string | null }> {
     const rows = await this.studies.findPage(em, {
       family: 'LAB',
       tokens: [],
@@ -259,6 +271,9 @@ export class LabPortalStudyCatalogService {
       em,
       rows.map((r) => r.id),
     );
-    return toCatalogItems(rows, parts);
+    return {
+      items: toCatalogItems(rows, parts),
+      catalogVersion: catalogVersionOf(rows),
+    };
   }
 }
