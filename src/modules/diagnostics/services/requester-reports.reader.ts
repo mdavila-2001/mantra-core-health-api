@@ -51,38 +51,11 @@ export class RequesterReportsReader {
     filter: ScopeFilter | null,
   ): Promise<IssuedOrderReports> {
     return readWithSystemRls(this.em, async (em) => {
-      const base = { custodianTenantId: tenantId, patientProfileId };
-      // Each order with the tenant it was addressed to: only that performer's report counts.
-      const ordersOf = (where: FilterQuery<ServiceRequests>) =>
-        em.find(ServiceRequests, where, {
-          fields: ['id', 'performerTenantId'],
-        });
-      const ofOrders = (
-        orders: readonly Pick<ServiceRequests, 'id' | 'performerTenantId'>[],
-      ) => {
-        const pairs = orders
-          .filter(
-            (o) => o.performerTenantId && o.performerTenantId !== tenantId,
-          )
-          .map((o) => ({
-            serviceRequestId: o.id,
-            custodianTenantId: o.performerTenantId as string,
-          }));
-        // Released reports only: a draft or a held-back header is not the requester's to see.
-        return pairs.length
-          ? {
-              patientProfileId,
-              currentReleasedVersionId: { $ne: null },
-              $or: pairs,
-            }
-          : null;
-      };
-      const visible = ofOrders(
-        await ordersOf(
-          filter
-            ? { ...base, ...visibleWhere(filter, ORDER_SCOPE_COLUMNS) }
-            : base,
-        ),
+      const visible = await this.issuedWhere(
+        em,
+        tenantId,
+        patientProfileId,
+        filter,
       );
       const rows = visible
         ? await em.find(DiagnosticReports, visible, {
@@ -91,13 +64,76 @@ export class RequesterReportsReader {
           })
         : [];
       if (!filter) return { rows, hidden: 0 };
-      const all = ofOrders(await ordersOf(base));
+      const all = await this.issuedWhere(em, tenantId, patientProfileId, null);
       const [total, shown] = await Promise.all([
         all ? em.count(DiagnosticReports, all) : 0,
         visible ? em.count(DiagnosticReports, visible) : 0,
       ]);
       return { rows, hidden: Math.max(total - shown, 0) };
     });
+  }
+
+  /**
+   * Runs `work` on one report of an order this tenant issued, in the same
+   * bounded system window and under the same rule as {@link ofIssuedOrders}:
+   * a report that list would not show is never reached.
+   *
+   * @returns `null` when the report is not one of those.
+   */
+  readIssued<T>(
+    tenantId: string,
+    patientProfileId: string,
+    reportId: string,
+    filter: ScopeFilter | null,
+    work: (em: EntityManager, report: DiagnosticReports) => Promise<T>,
+  ): Promise<{ value: T } | null> {
+    return readWithSystemRls(this.em, async (em) => {
+      const where = await this.issuedWhere(
+        em,
+        tenantId,
+        patientProfileId,
+        filter,
+      );
+      const report = where
+        ? await em.findOne(DiagnosticReports, {
+            $and: [{ id: reportId }, where],
+          })
+        : null;
+      return report ? { value: await work(em, report) } : null;
+    });
+  }
+
+  /**
+   * Predicate of the released reports, custodied by each order's performer,
+   * that hang from the orders of this tenant the scope lets through.
+   */
+  private async issuedWhere(
+    em: EntityManager,
+    tenantId: string,
+    patientProfileId: string,
+    filter: ScopeFilter | null,
+  ): Promise<FilterQuery<DiagnosticReports> | null> {
+    const base = { custodianTenantId: tenantId, patientProfileId };
+    // Each order with the tenant it was addressed to: only that performer's report counts.
+    const orders = await em.find(
+      ServiceRequests,
+      filter ? { ...base, ...visibleWhere(filter, ORDER_SCOPE_COLUMNS) } : base,
+      { fields: ['id', 'performerTenantId'] },
+    );
+    const pairs = orders
+      .filter((o) => o.performerTenantId && o.performerTenantId !== tenantId)
+      .map((o) => ({
+        serviceRequestId: o.id,
+        custodianTenantId: o.performerTenantId as string,
+      }));
+    // Released reports only: a draft or a held-back header is not the requester's to see.
+    return pairs.length
+      ? {
+          patientProfileId,
+          currentReleasedVersionId: { $ne: null },
+          $or: pairs,
+        }
+      : null;
   }
 
   /**

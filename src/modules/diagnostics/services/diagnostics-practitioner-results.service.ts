@@ -7,20 +7,24 @@ import {
 } from '../../../common';
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
-import type { Observations } from '../../clinical/entities';
-import {
-  ClinicalRefsRepository,
-  DiagnosticOrdersRepository,
-  ReportsRepository,
-} from '../repositories';
+import { DiagnosticReports } from '../../clinical/entities';
+import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
+import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
+import { ClinicalRefsRepository, ReportsRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
 import type {
   DiagnosticResultValueDto,
   PractitionerDiagnosticResultDto,
-  ResultValueKind,
 } from '../dto';
-import type { DiagnosticReportVersions } from '../entities';
+import { ownReportsWhere } from './chart-report-visibility';
+import { RequesterReportsReader } from './requester-reports.reader';
+import {
+  conceptIdsOf,
+  currentRelease,
+  rangeByObservation,
+  toResultValue,
+} from './practitioner-result.values';
 
 /**
  * El resultado liberado de un informe, leído por quien atiende al paciente.
@@ -30,15 +34,17 @@ import type { DiagnosticReportVersions } from '../entities';
  * La pregunta «¿puede este actor leer la historia de este paciente?» la
  * contesta `ClinicalRecordAccessGuard` en el controlador, igual que en
  * `GET /diagnostics/patients/:id/orders`: este servicio no la repite. Lo que sí
- * decide es que el informe pedido sea **de ese paciente, de la organización
- * activa y esté liberado** — el mismo acotamiento por tenant y paciente con el
- * que la lista de órdenes lo encuentra.
+ * decide es que el informe pedido sea **uno que esa lista le mostraría** (mismo
+ * alcance de lectura, mismo predicado: `ownReportsWhere` para los que custodia
+ * la organización activa y `RequesterReportsReader` para los que custodia el
+ * laboratorio de una orden propia) **y esté liberado**.
  *
  * ## Por qué todo lo que no cumple es el mismo 404
  *
- * Inexistente, de otro paciente, de otra organización o sin versión liberada
- * responden igual, con el mismo mensaje y `reason`: distinguirlos le diría a
- * quien pregunta que un UUID existe o que hay un borrador en curso.
+ * Inexistente, de otro paciente, de otra organización, fuera del alcance de
+ * lectura o sin versión liberada responden igual, con el mismo mensaje y
+ * `reason`: distinguirlos le diría a quien pregunta que un UUID existe o que
+ * hay un borrador en curso.
  *
  * ## Qué es «liberado» acá
  *
@@ -54,17 +60,19 @@ export class DiagnosticsPractitionerResultsService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia.
-   * @param ordersRepo - Informes del circuito diagnóstico.
    * @param reportsRepo - Versiones, eventos de liberación, archivos y resultados.
    * @param refsRepo - Observaciones, rangos, archivos y conceptos de otros dominios.
+   * @param scopeFilter - Alcance de lectura hecho filtro, como en la lista.
+   * @param requesterReports - Informes de órdenes propias que custodia el laboratorio.
    * @param logger - Registro estructurado.
    * @param fileUpload - Bytes de un archivo ya autorizado por contexto.
    */
   constructor(
     private readonly em: EntityManager,
-    private readonly ordersRepo: DiagnosticOrdersRepository,
     private readonly reportsRepo: ReportsRepository,
     private readonly refsRepo: ClinicalRefsRepository,
+    private readonly scopeFilter: ClinicalScopeFilterService,
+    private readonly requesterReports: RequesterReportsReader,
     private readonly logger: PinoLogger,
     private readonly fileUpload?: FileUploadService,
   ) {
@@ -77,27 +85,36 @@ export class DiagnosticsPractitionerResultsService {
    * @param custodianTenantId - Tenant del contexto.
    * @param patientProfileId - Paciente de la ruta (ya autorizado por el guard).
    * @param reportId - Informe pedido.
+   * @param scope - Alcance de lectura que resolvió el guard, como en la lista.
    * @returns La versión liberada con sus valores y archivos.
-   * @throws ResourceNotFoundException si no existe, no es de ese paciente o
-   *   tenant, o no tiene versión liberada.
+   * @throws ResourceNotFoundException si la lista no lo mostraría o no tiene
+   *   versión liberada.
    */
   async getReleasedResult(
     custodianTenantId: string,
     patientProfileId: string,
     reportId: string,
+    scope: ClinicalReadScope,
   ): Promise<PractitionerDiagnosticResultDto> {
     this.logger.info(
       { operation: 'diagnostics.practitioner-result.read', reportId },
       'Leyendo el resultado liberado de un informe',
     );
-    const em = this.em.fork();
-    const { report, version, release } = await this.requireReleased(
-      em,
+    return this.readVisible(
       custodianTenantId,
       patientProfileId,
       reportId,
+      scope,
+      (em, report) => this.project(em, report),
     );
+  }
 
+  /** The released version of a visible report, with its values and files. */
+  private async project(
+    em: EntityManager,
+    report: DiagnosticReports,
+  ): Promise<PractitionerDiagnosticResultDto> {
+    const { version, release } = await this.requireReleased(em, report);
     const [links, reportFiles] = await Promise.all([
       this.reportsRepo.findResultsByVersions(em, [version.id]),
       this.reportsRepo.findFilesByVersions(em, [version.id]),
@@ -113,64 +130,20 @@ export class DiagnosticsPractitionerResultsService {
     ]);
 
     const observationById = new Map(observations.map((o) => [o.id, o]));
-    const rangeByObservation = new Map<string, (typeof ranges)[number]>();
-    for (const range of ranges) {
-      if (range.observationComponentId) continue;
-      if (!rangeByObservation.has(range.observationId)) {
-        rangeByObservation.set(range.observationId, range);
-      }
-    }
+    const rangeOf = rangeByObservation(ranges);
     const fileNameById = new Map(
       files.map((file) => [file.id, file.originalName ?? null]),
     );
-
-    const conceptIds: string[] = [report.codeConceptId];
-    for (const o of observations) {
-      conceptIds.push(o.codeConceptId);
-      if (o.quantityUnitConceptId) conceptIds.push(o.quantityUnitConceptId);
-      if (o.interpretationConceptId) conceptIds.push(o.interpretationConceptId);
-      if (o.valueConceptId) conceptIds.push(o.valueConceptId);
-    }
-    for (const range of rangeByObservation.values()) {
-      if (range.unitConceptId) conceptIds.push(range.unitConceptId);
-    }
-    const labels = await this.refsRepo.findConceptLabels(em, conceptIds);
-    const display = (id?: string | null): string | null =>
-      id ? (labels.get(id)?.display ?? null) : null;
+    const labels = await this.refsRepo.findConceptLabels(em, [
+      report.codeConceptId,
+      ...conceptIdsOf(observations, rangeOf.values()),
+    ]);
 
     const values: DiagnosticResultValueDto[] = [];
     for (const link of links) {
       const o = observationById.get(link.observationId);
       // Un enlace a una observación que ya no se puede leer no se inventa.
-      if (!o) continue;
-      const range = rangeByObservation.get(o.id);
-      const { value, valueKind } = valueOf(o, display);
-      values.push({
-        observationId: o.id,
-        codeConceptId: o.codeConceptId,
-        name: display(o.codeConceptId),
-        value,
-        valueKind,
-        valueConceptId: o.valueConceptId ?? null,
-        unitConceptId: o.quantityUnitConceptId ?? null,
-        unit: display(o.quantityUnitConceptId),
-        referenceRange: range
-          ? {
-              low: range.lowValue ?? null,
-              high: range.highValue ?? null,
-              text: range.text ?? null,
-              unitConceptId: range.unitConceptId ?? null,
-              unit: display(range.unitConceptId),
-            }
-          : null,
-        interpretationConceptId: o.interpretationConceptId ?? null,
-        interpretationCode: o.interpretationConceptId
-          ? (labels.get(o.interpretationConceptId)?.code ?? null)
-          : null,
-        interpretation: display(o.interpretationConceptId),
-        statusConceptId: o.statusConceptId,
-        effectiveAt: o.effectiveStartAt ?? null,
-      });
+      if (o) values.push(toResultValue(o, rangeOf.get(o.id), labels));
     }
 
     return {
@@ -178,7 +151,7 @@ export class DiagnosticsPractitionerResultsService {
       patientProfileId: report.patientProfileId,
       serviceRequestId: report.serviceRequestId ?? null,
       codeConceptId: report.codeConceptId,
-      codeDisplay: display(report.codeConceptId),
+      codeDisplay: labels.get(report.codeConceptId)?.display ?? null,
       categoryConceptId: report.categoryConceptId ?? null,
       versionId: version.id,
       versionNumber: version.versionNumber,
@@ -205,14 +178,15 @@ export class DiagnosticsPractitionerResultsService {
    *
    * Autoriza por contexto antes de pedir los bytes (contrato de
    * `downloadForAuthorizedContext`): el guard ya decidió el acceso a la
-   * historia del paciente; acá se exige que el informe sea de ese paciente y
-   * tenant, esté liberado y que el archivo cuelgue de esa versión. Todo lo que
-   * no cumpla es el mismo 404.
+   * historia del paciente; acá se exige que el informe sea uno que la lista le
+   * mostraría, esté liberado y que el archivo cuelgue de esa versión. Todo lo
+   * que no cumpla es el mismo 404.
    *
    * @param custodianTenantId - Tenant del contexto.
    * @param patientProfileId - Paciente de la ruta.
    * @param reportId - Informe.
    * @param fileId - Archivo del informe.
+   * @param scope - Alcance de lectura que resolvió el guard.
    * @returns Bytes y tipo MIME.
    */
   async getReleasedResultFileContent(
@@ -220,62 +194,85 @@ export class DiagnosticsPractitionerResultsService {
     patientProfileId: string,
     reportId: string,
     fileId: string,
+    scope: ClinicalReadScope,
   ): Promise<FileContentDto> {
-    const em = this.em.fork();
-    const { version } = await this.requireReleased(
-      em,
+    return this.readVisible(
       custodianTenantId,
       patientProfileId,
       reportId,
-    );
-    const files = await this.reportsRepo.findFilesByVersions(em, [version.id]);
-    if (!files.some((file) => file.fileId === fileId)) {
-      throw notFound(reportId);
-    }
-    if (!this.fileUpload) {
-      throw new PreconditionFailedException(
-        'La descarga de archivos no está disponible',
-      );
-    }
-    this.logger.info(
-      {
-        operation: 'diagnostics.practitioner-result.file.content',
-        reportId,
-        fileId,
+      scope,
+      async (em, report) => {
+        const { version } = await this.requireReleased(em, report);
+        const files = await this.reportsRepo.findFilesByVersions(em, [
+          version.id,
+        ]);
+        if (!files.some((file) => file.fileId === fileId)) {
+          throw notFound(reportId);
+        }
+        if (!this.fileUpload) {
+          throw new PreconditionFailedException(
+            'La descarga de archivos no está disponible',
+          );
+        }
+        this.logger.info(
+          {
+            operation: 'diagnostics.practitioner-result.file.content',
+            reportId,
+            fileId,
+          },
+          'Quien atiende descarga un archivo de un resultado liberado',
+        );
+        // Inside `work`: a laboratory-custodied file is read in the same bounded window.
+        return this.fileUpload.downloadForAuthorizedContext(
+          fileId,
+          'diagnostics.practitioner-result.file.content',
+        );
       },
-      'Quien atiende descarga un archivo de un resultado liberado',
-    );
-    return this.fileUpload.downloadForAuthorizedContext(
-      fileId,
-      'diagnostics.practitioner-result.file.content',
     );
   }
 
   /**
-   * El informe con su versión liberada vigente y el evento que la liberó.
-   *
-   * @param em - Contexto de persistencia.
-   * @param custodianTenantId - Tenant del contexto.
-   * @param patientProfileId - Paciente de la ruta.
-   * @param reportId - Informe pedido.
-   * @returns Informe, versión y evento.
-   * @throws ResourceNotFoundException en cualquier otro caso.
+   * Runs `work` on the report only if the chart list would show it to this
+   * reader: one the tenant custodies under the scope (`ownReportsWhere`), or
+   * one the laboratory custodies for an order of this tenant, read in the
+   * reader's bounded system window. Anything else is the single 404.
    */
-  private async requireReleased(
-    em: EntityManager,
+  private async readVisible<T>(
     custodianTenantId: string,
     patientProfileId: string,
     reportId: string,
-  ) {
-    const report = await this.ordersRepo.findReportById(em, reportId);
-    if (
-      !report ||
-      report.custodianTenantId !== custodianTenantId ||
-      report.patientProfileId !== patientProfileId
-    ) {
-      throw notFound(reportId);
-    }
+    scope: ClinicalReadScope,
+    work: (em: EntityManager, report: DiagnosticReports) => Promise<T>,
+  ): Promise<T> {
+    const em = this.em.fork();
+    const filter = await this.scopeFilter.build(em, patientProfileId, scope);
+    const own = await em.findOne(DiagnosticReports, {
+      $and: [
+        { id: reportId },
+        ownReportsWhere(custodianTenantId, patientProfileId, filter),
+      ],
+    });
+    if (own) return work(em, own);
+    const issued = await this.requesterReports.readIssued(
+      custodianTenantId,
+      patientProfileId,
+      reportId,
+      filter,
+      work,
+    );
+    if (!issued) throw notFound(reportId);
+    return issued.value;
+  }
 
+  /**
+   * La versión liberada vigente de un informe visible y el evento que la liberó.
+   *
+   * @param em - Contexto de persistencia.
+   * @param report - Informe ya resuelto por {@link readVisible}.
+   * @returns Versión y evento.
+   * @throws ResourceNotFoundException si no tiene versión liberada.
+   */
+  private async requireReleased(em: EntityManager, report: DiagnosticReports) {
     const versions = await this.reportsRepo.findVersionsByReports(em, [
       report.id,
     ]);
@@ -283,28 +280,11 @@ export class DiagnosticsPractitionerResultsService {
       em,
       versions.map((version) => version.id),
     );
-    // Los eventos llegan del más nuevo al más viejo: el primero de cada versión
-    // es la decisión vigente.
-    const lastEvent = new Map<string, (typeof releases)[number]>();
-    for (const event of releases) {
-      const versionId = event.diagnosticReportVersionId;
-      if (versionId === undefined || lastEvent.has(versionId)) continue;
-      lastEvent.set(versionId, event);
-    }
-
-    let chosen: DiagnosticReportVersions | undefined;
-    for (const version of versions) {
-      const event = lastEvent.get(version.id);
-      if (event?.actionConceptId !== DIAG.RELEASE_ACTION_RELEASE) continue;
-      if (!chosen || version.versionNumber > chosen.versionNumber) {
-        chosen = version;
-      }
-    }
-    const release = chosen ? lastEvent.get(chosen.id) : undefined;
+    const { chosen, release } = currentRelease(versions, releases);
     if (!chosen || !release) {
-      throw notFound(reportId);
+      throw notFound(report.id);
     }
-    return { report, version: chosen, release };
+    return { version: chosen, release };
   }
 }
 
@@ -315,38 +295,4 @@ function notFound(reportId: string): ResourceNotFoundException {
     { reportId },
     DiagnosticsErrorReason.DIAGNOSTICS_RESOURCE_NOT_AVAILABLE,
   );
-}
-
-/**
- * El valor de la observación como texto, y de qué columna salió.
- *
- * Una observación lleva un único tipo de valor (contrato de
- * `ObservationsService`); se toma el primero presente en este orden.
- */
-function valueOf(
-  o: Observations,
-  display: (id?: string | null) => string | null,
-): { value: string | null; valueKind: ResultValueKind | null } {
-  if (o.quantityValue != null)
-    return { value: o.quantityValue, valueKind: 'QUANTITY' };
-  if (o.valueDecimal != null)
-    return { value: o.valueDecimal, valueKind: 'DECIMAL' };
-  if (o.valueInteger != null)
-    return { value: String(o.valueInteger), valueKind: 'INTEGER' };
-  if (o.valueText != null) return { value: o.valueText, valueKind: 'TEXT' };
-  if (o.valueBoolean != null)
-    return { value: String(o.valueBoolean), valueKind: 'BOOLEAN' };
-  if (o.valueConceptId)
-    return { value: display(o.valueConceptId), valueKind: 'CONCEPT' };
-  if (o.valueDatetime)
-    return {
-      value: new Date(o.valueDatetime).toISOString(),
-      valueKind: 'DATETIME',
-    };
-  if (o.valueDate)
-    return {
-      value: new Date(o.valueDate).toISOString().slice(0, 10),
-      valueKind: 'DATE',
-    };
-  return { value: null, valueKind: null };
 }

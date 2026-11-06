@@ -12,6 +12,7 @@ import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scop
 import { ClinicalScopeRepository } from '../../clinical/repositories/clinical-scope.repository';
 import { ClinicalScopeFilterService } from '../../clinical/services/clinical-scope-filter.service';
 import { RequesterReportsReader } from './requester-reports.reader';
+import { OWN_REPORT_SCOPE_COLUMNS } from './chart-report-visibility';
 
 /**
  * Cara de lectura del circuito diagnóstico (laboratorio e imagenología).
@@ -103,7 +104,7 @@ export class DiagnosticsOrdersService {
             entity: DiagnosticReports,
             base: { custodianTenantId, patientProfileId },
             filter,
-            columns: { user: 'createdByUserId', encounter: 'encounterId' },
+            columns: OWN_REPORT_SCOPE_COLUMNS,
             orderBy: { createdAt: 'DESC' },
             limit: over,
           }),

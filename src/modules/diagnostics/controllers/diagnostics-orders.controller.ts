@@ -108,11 +108,13 @@ export class DiagnosticsOrdersController {
    * archivos.
    *
    * Misma puerta que la lista de órdenes (`ClinicalRecordAccessGuard`, 403 sin
-   * acceso a la historia). Pasada la puerta, inexistente, de otro paciente, de
-   * otra organización o sin versión liberada responden el mismo 404.
+   * acceso a la historia) y mismo alcance de lectura: pasada la puerta, lo que
+   * la lista no mostraría (inexistente, de otro paciente u organización, fuera
+   * del alcance) o sin versión liberada responde el mismo 404.
    *
    * @param patientProfileId - Paciente cuya historia se lee.
    * @param reportId - Informe pedido.
+   * @param scope - Alcance que resolvió el guard.
    * @returns La versión liberada con sus valores y archivos.
    */
   @Get(':patientProfileId/reports/:reportId')
@@ -138,11 +140,13 @@ export class DiagnosticsOrdersController {
   getReleasedResult(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @Param('reportId', ParseUUIDPipe) reportId: string,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<PractitionerDiagnosticResultDto> {
     return this.results.getReleasedResult(
       requireTenantId(),
       patientProfileId,
       reportId,
+      scope ?? IPS_ONLY_READ_SCOPE,
     );
   }
 
@@ -153,6 +157,7 @@ export class DiagnosticsOrdersController {
    * @param reportId - Informe.
    * @param fileId - Archivo del informe.
    * @param res - Respuesta cruda: se envían bytes, no JSON.
+   * @param scope - Alcance que resolvió el guard.
    */
   @Get(':patientProfileId/reports/:reportId/files/:fileId/content')
   @UseGuards(ClinicalRecordAccessGuard)
@@ -165,8 +170,8 @@ export class DiagnosticsOrdersController {
   @ApiOperation({
     summary: 'Descargar un archivo del resultado liberado',
     description:
-      'Autoriza por acceso a la historia, informe liberado del paciente y ' +
-      'archivo de esa versión. Todo lo demás responde 404.',
+      'Autoriza por acceso a la historia, alcance de lectura, informe ' +
+      'liberado del paciente y archivo de esa versión. Todo lo demás responde 404.',
   })
   @ApiOkResponse({ description: 'Bytes del archivo' })
   @ApiForbiddenResponse({ description: 'Sin acceso a la historia' })
@@ -179,12 +184,14 @@ export class DiagnosticsOrdersController {
     @Param('reportId', ParseUUIDPipe) reportId: string,
     @Param('fileId', ParseUUIDPipe) fileId: string,
     @Res() res: Response,
+    @ClinicalReadScopeParam() scope?: ClinicalReadScope,
   ): Promise<void> {
     const content = await this.results.getReleasedResultFileContent(
       requireTenantId(),
       patientProfileId,
       reportId,
       fileId,
+      scope ?? IPS_ONLY_READ_SCOPE,
     );
     // El archivo lo subió un laboratorio: `servedContentHeaders` no confía en
     // el `mimeType` persistido (lista cerrada, `attachment` salvo imágenes

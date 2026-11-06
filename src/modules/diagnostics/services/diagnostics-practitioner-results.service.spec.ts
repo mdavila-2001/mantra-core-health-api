@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { DiagnosticsPractitionerResultsService } from './diagnostics-practitioner-results.service';
 import { DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
+import type { ClinicalReadScope } from '../../clinical/domain/clinical-read-scope';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -10,6 +11,12 @@ const PATIENT = 'p1';
 const REPORT = 'r1';
 const FILE = 'f-pdf';
 const RELEASED_AT = new Date('2026-11-01T10:00:00Z');
+const FULL: ClinicalReadScope = { kind: 'FULL' };
+const CARDIO: ClinicalReadScope = {
+  kind: 'SPECIALTIES',
+  specialtyConceptIds: ['c-cardio'],
+};
+const FILTER = { profileIds: ['hp1'], userIds: ['u1'], encounterIds: [] };
 
 /**
  * Construye el servicio con un informe de laboratorio liberado: una versión 1
@@ -21,6 +28,8 @@ function build(
     report?: Record<string, unknown> | null;
     releases?: Record<string, unknown>[];
     versions?: Record<string, unknown>[];
+    /** Report the laboratory custodies for an order of this tenant. */
+    issued?: Record<string, unknown>;
   } = {},
 ) {
   const report =
@@ -53,8 +62,38 @@ function build(
       recordedAt: RELEASED_AT,
     },
   ];
-  const em = { fork: mockFn().mockReturnValue({}) };
-  const ordersRepo = { findReportById: mockFn().mockResolvedValue(report) };
+  // The own-report lookup: tenant and patient as `ownReportsWhere` asks them.
+  const forked = {
+    findOne: mockFn().mockImplementation(async (_cls: unknown, where: any) => {
+      const [{ id }, own] = where.$and;
+      return report &&
+        report.id === id &&
+        !own.$or &&
+        report.custodianTenantId === own.custodianTenantId &&
+        report.patientProfileId === own.patientProfileId
+        ? report
+        : null;
+    }),
+  };
+  const em = { fork: mockFn().mockReturnValue(forked) };
+  const systemEm = { system: true };
+  const scopeFilter = {
+    build: mockFn().mockImplementation(
+      async (_em: unknown, _p: string, scope: ClinicalReadScope) =>
+        scope.kind === 'FULL' ? null : FILTER,
+    ),
+  };
+  const requesterReports = {
+    readIssued: mockFn().mockImplementation(
+      async (
+        _t: string,
+        _p: string,
+        _r: string,
+        _f: unknown,
+        work: (em: unknown, report: unknown) => Promise<unknown>,
+      ) => (opts.issued ? { value: await work(systemEm, opts.issued) } : null),
+    ),
+  };
   const reportsRepo = {
     findVersionsByReports: mockFn().mockResolvedValue(versions),
     findReleaseEventsByVersions: mockFn().mockResolvedValue(releases),
@@ -148,13 +187,22 @@ function build(
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new DiagnosticsPractitionerResultsService(
     em as any,
-    ordersRepo as any,
     reportsRepo as any,
     refsRepo as any,
+    scopeFilter as any,
+    requesterReports as any,
     logger as any,
     fileUpload as any,
   );
-  return { service, reportsRepo, refsRepo, fileUpload };
+  return {
+    service,
+    reportsRepo,
+    refsRepo,
+    fileUpload,
+    forked,
+    systemEm,
+    requesterReports,
+  };
 }
 
 /** Comprueba el 404 único de esta lectura. */
@@ -174,7 +222,12 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
   it('devuelve la versión liberada con valores, conclusión y archivos', async () => {
     const { service } = build();
 
-    const result = await service.getReleasedResult(TENANT, PATIENT, REPORT);
+    const result = await service.getReleasedResult(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FULL,
+    );
 
     expect(result).toMatchObject({
       reportId: REPORT,
@@ -205,7 +258,12 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
   it('da forma a cada valor: cantidad, unidad, rango e interpretación', async () => {
     const { service } = build();
 
-    const { values } = await service.getReleasedResult(TENANT, PATIENT, REPORT);
+    const { values } = await service.getReleasedResult(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FULL,
+    );
 
     // La observación enlazada que no se puede leer no aparece.
     expect(values.map((v) => v.observationId)).toEqual(['o-glu', 'o-hiv']);
@@ -257,7 +315,12 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
       ],
     });
 
-    const result = await service.getReleasedResult(TENANT, PATIENT, REPORT);
+    const result = await service.getReleasedResult(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FULL,
+    );
 
     expect(result.patientVisible).toBe(false);
   });
@@ -304,7 +367,12 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
       ],
     });
 
-    const result = await service.getReleasedResult(TENANT, PATIENT, REPORT);
+    const result = await service.getReleasedResult(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FULL,
+    );
 
     // v3 es un borrador posterior sin liberar: no se muestra.
     expect(result).toMatchObject({
@@ -319,7 +387,9 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
   it('inexistente → 404', async () => {
     const { service, reportsRepo } = build({ report: null });
 
-    await expectNotFound(service.getReleasedResult(TENANT, PATIENT, REPORT));
+    await expectNotFound(
+      service.getReleasedResult(TENANT, PATIENT, REPORT, FULL),
+    );
     expect(reportsRepo.findVersionsByReports).not.toHaveBeenCalled();
   });
 
@@ -327,7 +397,7 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
     const { service, reportsRepo } = build();
 
     await expectNotFound(
-      service.getReleasedResult(TENANT, 'otro-paciente', REPORT),
+      service.getReleasedResult(TENANT, 'otro-paciente', REPORT, FULL),
     );
     expect(reportsRepo.findVersionsByReports).not.toHaveBeenCalled();
   });
@@ -336,14 +406,16 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
     const { service } = build();
 
     await expectNotFound(
-      service.getReleasedResult('otro-tenant', PATIENT, REPORT),
+      service.getReleasedResult('otro-tenant', PATIENT, REPORT, FULL),
     );
   });
 
   it('sin versión liberada → el mismo 404, sin leer valores', async () => {
     const { service, reportsRepo, refsRepo } = build({ releases: [] });
 
-    await expectNotFound(service.getReleasedResult(TENANT, PATIENT, REPORT));
+    await expectNotFound(
+      service.getReleasedResult(TENANT, PATIENT, REPORT, FULL),
+    );
     expect(reportsRepo.findResultsByVersions).not.toHaveBeenCalled();
     expect(refsRepo.findObservations).not.toHaveBeenCalled();
   });
@@ -360,7 +432,71 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResult', () => {
       ],
     });
 
-    await expectNotFound(service.getReleasedResult(TENANT, PATIENT, REPORT));
+    await expectNotFound(
+      service.getReleasedResult(TENANT, PATIENT, REPORT, FULL),
+    );
+  });
+});
+
+describe('DiagnosticsPractitionerResultsService · same visibility as the chart list', () => {
+  it('under a SPECIALTIES scope it looks the report up with the list predicate', async () => {
+    const { service, forked, requesterReports } = build();
+
+    await expectNotFound(
+      service.getReleasedResult(TENANT, PATIENT, REPORT, CARDIO),
+    );
+    // Same columns as the list's own-report page: author account, else encounter.
+    expect(forked.findOne).toHaveBeenCalledWith(expect.anything(), {
+      $and: [
+        { id: REPORT },
+        {
+          custodianTenantId: TENANT,
+          patientProfileId: PATIENT,
+          $or: [{ createdByUserId: { $in: ['u1'] } }],
+        },
+      ],
+    });
+    expect(requesterReports.readIssued).toHaveBeenCalledWith(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FILTER,
+      expect.any(Function),
+    );
+  });
+
+  it('a laboratory-custodied report of an own order is read inside the reader window', async () => {
+    const issued = {
+      id: REPORT,
+      patientProfileId: PATIENT,
+      custodianTenantId: 'lab',
+      serviceRequestId: 'sr1',
+      codeConceptId: 'c-panel',
+    };
+    const { service, reportsRepo, systemEm, fileUpload } = build({
+      report: null,
+      issued,
+    });
+
+    const result = await service.getReleasedResult(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FULL,
+    );
+    await service.getReleasedResultFileContent(
+      TENANT,
+      PATIENT,
+      REPORT,
+      FILE,
+      FULL,
+    );
+
+    expect(result).toMatchObject({ reportId: REPORT, versionId: 'v1' });
+    expect(reportsRepo.findVersionsByReports).toHaveBeenCalledWith(systemEm, [
+      REPORT,
+    ]);
+    expect(fileUpload.downloadForAuthorizedContext).toHaveBeenCalled();
   });
 });
 
@@ -373,6 +509,7 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResultFileContent', (
       PATIENT,
       REPORT,
       FILE,
+      FULL,
     );
 
     expect(content.mimeType).toBe('application/pdf');
@@ -386,7 +523,13 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResultFileContent', (
     const { service, fileUpload } = build();
 
     await expectNotFound(
-      service.getReleasedResultFileContent(TENANT, PATIENT, REPORT, 'ajeno'),
+      service.getReleasedResultFileContent(
+        TENANT,
+        PATIENT,
+        REPORT,
+        'ajeno',
+        FULL,
+      ),
     );
     expect(fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
   });
@@ -394,7 +537,13 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResultFileContent', (
   it('informe de otro paciente o sin liberar → 404 sin pedir bytes', async () => {
     const other = build();
     await expectNotFound(
-      other.service.getReleasedResultFileContent(TENANT, 'otro', REPORT, FILE),
+      other.service.getReleasedResultFileContent(
+        TENANT,
+        'otro',
+        REPORT,
+        FILE,
+        FULL,
+      ),
     );
     expect(
       other.fileUpload.downloadForAuthorizedContext,
@@ -402,7 +551,13 @@ describe('DiagnosticsPractitionerResultsService.getReleasedResultFileContent', (
 
     const draft = build({ releases: [] });
     await expectNotFound(
-      draft.service.getReleasedResultFileContent(TENANT, PATIENT, REPORT, FILE),
+      draft.service.getReleasedResultFileContent(
+        TENANT,
+        PATIENT,
+        REPORT,
+        FILE,
+        FULL,
+      ),
     );
     expect(
       draft.fileUpload.downloadForAuthorizedContext,

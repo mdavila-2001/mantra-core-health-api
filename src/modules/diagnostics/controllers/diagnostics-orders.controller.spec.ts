@@ -94,12 +94,48 @@ describe('DiagnosticsOrdersController', () => {
     );
   });
 
-  it('el resultado liberado delega con tenant, paciente e informe', async () => {
+  it('el resultado liberado delega con tenant, paciente, informe y el alcance del guard', async () => {
     const d = build();
 
-    await runWithTenant('t1', () => d.controller.getReleasedResult('p1', 'r1'));
+    await runWithTenant('t1', () =>
+      d.controller.getReleasedResult('p1', 'r1', FULL),
+    );
 
-    expect(d.results.getReleasedResult).toHaveBeenCalledWith('t1', 'p1', 'r1');
+    expect(d.results.getReleasedResult).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      'r1',
+      FULL,
+    );
+  });
+
+  it('sin alcance resuelto el resultado y su descarga leen el más restrictivo', async () => {
+    const d = build();
+    const res = { setHeader: mockFn(), send: mockFn() };
+
+    await runWithTenant('t1', async () => {
+      await d.controller.getReleasedResult('p1', 'r1');
+      await d.controller.getReleasedResultFileContent(
+        'p1',
+        'r1',
+        'f1',
+        res as any,
+      );
+    });
+
+    expect(d.results.getReleasedResult).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      'r1',
+      IPS_ONLY_READ_SCOPE,
+    );
+    expect(d.results.getReleasedResultFileContent).toHaveBeenCalledWith(
+      't1',
+      'p1',
+      'r1',
+      'f1',
+      IPS_ONLY_READ_SCOPE,
+    );
   });
 
   it('la descarga envía los bytes con su tipo y nombre', async () => {
@@ -107,7 +143,13 @@ describe('DiagnosticsOrdersController', () => {
     const res = { setHeader: mockFn(), send: mockFn() };
 
     await runWithTenant('t1', () =>
-      d.controller.getReleasedResultFileContent('p1', 'r1', 'f1', res as any),
+      d.controller.getReleasedResultFileContent(
+        'p1',
+        'r1',
+        'f1',
+        res as any,
+        FULL,
+      ),
     );
 
     expect(d.results.getReleasedResultFileContent).toHaveBeenCalledWith(
@@ -115,6 +157,7 @@ describe('DiagnosticsOrdersController', () => {
       'p1',
       'r1',
       'f1',
+      FULL,
     );
     expect(res.setHeader).toHaveBeenCalledWith(
       'Content-Type',
