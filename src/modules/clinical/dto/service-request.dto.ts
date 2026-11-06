@@ -75,6 +75,21 @@ export class CreateServiceRequestDto extends ImagingFlatInputDto {
   formInstanceId?: string;
 
   /**
+   * v4295: el diagnóstico que el estudio se pide para confirmar, descartar o
+   * seguir.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Diagnóstico (clinical.conditions) que el estudio se pide para confirmar, ' +
+      'descartar o seguir. Debe ser del mismo paciente que la orden (si no, o si no ' +
+      'existe: 422 SERVICE_REQUEST_REASON_CONDITION_INVALID, sin distinguir el motivo)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  reasonConditionId?: string;
+
+  /**
    * Identificador asociado a code concept.
    */
   @ApiProperty({
@@ -322,6 +337,16 @@ export class ServiceRequestResponseDto extends ServiceRequestImagingFlatDto {
     nullable: true,
   })
   formInstanceId?: string | null;
+
+  /**
+   * v4295: diagnóstico que motiva el estudio; ausente si la orden no lo declara.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara',
+    format: 'uuid',
+  })
+  reasonConditionId?: string;
 
   /**
    * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.

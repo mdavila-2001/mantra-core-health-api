@@ -68,6 +68,7 @@ import {
   DiagnosticsMediaQualityService,
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
+  DiagnosticsPractitionerResultsService,
   DiagnosticsReceptionService,
   DiagnosticsWorklistService,
   DiagnosticsScopeService,
@@ -154,6 +155,7 @@ import {
     DiagnosticsMediaQualityService,
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
+    DiagnosticsPractitionerResultsService,
     DiagnosticsReceptionService,
     DiagnosticsWorklistService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.

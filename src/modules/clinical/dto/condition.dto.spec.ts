@@ -172,3 +172,25 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
     ).toEqual(['decidedByProfileId', 'verificationStatusConceptId']);
   });
 });
+
+describe('VerifyConditionDto · replacedByConditionId (v4295)', () => {
+  it('acepta el reemplazo como uuid opcional', async () => {
+    expect(
+      await errors(VerifyConditionDto, {
+        outcome: 'REFUTED',
+        reasonText: 'x',
+        replacedByConditionId: OTHER,
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un reemplazo que no es uuid', async () => {
+    expect(
+      await errors(VerifyConditionDto, {
+        outcome: 'REFUTED',
+        reasonText: 'x',
+        replacedByConditionId: 'cond-2',
+      }),
+    ).toEqual(['replacedByConditionId']);
+  });
+});

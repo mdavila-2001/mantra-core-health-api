@@ -935,6 +935,9 @@ describe('AuthzCareRelationshipsService', () => {
       );
       expect(active.getStatus()).toBe(409);
       expect(active.details).toBeUndefined();
+      expect(active.reason).toBe(
+        AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
+      );
       expect(d.careRepo.findActiveInTenant).toHaveBeenCalledWith(
         d.tx,
         'pat-1',
@@ -949,6 +952,9 @@ describe('AuthzCareRelationshipsService', () => {
       );
       expect(pending.getStatus()).toBe(409);
       expect(pending.details).toBeUndefined();
+      expect(pending.reason).toBe(
+        AuthzErrorReason.CARE_RELATIONSHIP_REQUEST_ALREADY_PENDING,
+      );
       expect(d.careRepo.findPendingInTenant).toHaveBeenCalledWith(
         d.tx,
         'pat-1',

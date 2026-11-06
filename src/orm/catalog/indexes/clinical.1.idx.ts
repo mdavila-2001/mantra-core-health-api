@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 1/2).
- * 180 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 181 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes1: readonly IndexTuple[] = [
@@ -60,6 +60,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['conditions', 'ix_conditions_laterality_concept_id', ['laterality_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_clinical_course_concept_id', ['clinical_course_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['conditions', 'ix_conditions_replaced_by_condition_id', ['replaced_by_condition_id'], false, 'btree'],
   ['conditions', 'ix_conditions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_custodian_tenant_id_updated_at', ['custodian_tenant_id', 'updated_at desc'], false, 'btree'],

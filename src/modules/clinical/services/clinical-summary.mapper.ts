@@ -56,6 +56,9 @@ export function toConditionItem(
     verification: verificationFromSnapshot(
       verificationHistory.get(row.id)?.dataSnapshot,
     ),
+    ...(row.replacedByConditionId
+      ? { replacedByConditionId: row.replacedByConditionId }
+      : {}),
     createdAt: row.createdAt,
   };
 }
@@ -95,6 +98,11 @@ export function toMedicationRequestItem(
     patientInstructionsText: row.patientInstructionsText,
     indicationConditionId: row.indicationConditionId,
     indicationText: row.indicationText,
+    // La receta que sustituyó a ésta (reemplazo de medicación): ausente si
+    // no la hay, con el mismo criterio que `replacedByConditionId`.
+    ...(row.replacedByRequestId
+      ? { replacedByRequestId: row.replacedByRequestId }
+      : {}),
     signedAt: row.signedAt,
     issuedAt: row.issuedAt,
     createdAt: row.createdAt,

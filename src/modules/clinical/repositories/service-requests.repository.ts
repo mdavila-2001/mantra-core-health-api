@@ -94,6 +94,10 @@ export interface CreateServiceRequestData {
   /** Tipo de hueso (`imaging-bone-type`). */
   boneTypeConceptId?: string;
   /**
+   * v4295: diagnóstico que motiva el estudio, ya validado contra el paciente.
+   */
+  reasonConditionId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -143,6 +147,7 @@ export class ServiceRequestsRepository {
           : {}),
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
+        reasonConditionId: data.reasonConditionId,
         requisitionId: data.requisitionId,
         specimenTypeConceptId: data.specimenTypeConceptId,
         modalityConceptId: data.modalityConceptId,

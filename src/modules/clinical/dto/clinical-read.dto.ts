@@ -183,6 +183,17 @@ export class ConditionItemDto {
   verification?: ConditionVerificationDto | null;
 
   /**
+   * v4295: el diagnóstico que reemplazó a éste al refutarlo (diferencial
+   * resuelto). Ausente si no fue reemplazado.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado',
+    format: 'uuid',
+  })
+  replacedByConditionId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })
@@ -332,6 +343,13 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ nullable: true })
   indicationText?: string;
+
+  /**
+   * La receta que sustituyó a ésta (cambio de dosis o de fármaco). Ausente si
+   * no fue reemplazada. Lo usa la red clínica para encadenar las recetas.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  replacedByRequestId?: string;
 
   /**
    * Valor de signed at mantenido por la instancia.
