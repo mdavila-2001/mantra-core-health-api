@@ -10,7 +10,7 @@ import { ForbiddenException } from '@nestjs/common';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsService } from './profiles-patients.service';
-import { PROF } from '../../profiles.concepts';
+import { BIRTH_SEX_CONCEPT_BY_CODE, PROF } from '../../profiles.concepts';
 import { CONCEPTS, SEED } from '../../../../common';
 import {
   ConflictException,
@@ -2632,6 +2632,7 @@ describe('ProfilesPatientsService', () => {
           relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
           is_legal_guardian: true,
           national_id: null,
+          sex_at_birth_concept_id: BIRTH_SEX_CONCEPT_BY_CODE.MALE,
         },
       ]);
 
@@ -2644,6 +2645,8 @@ describe('ProfilesPatientsService', () => {
         relationshipCode: 'CHILD',
         relationshipDisplay: 'Hijo/a',
         isLegalGuardian: true,
+        // The body-map silhouette of a dependent's booking needs this.
+        sexAtBirth: 'MALE',
       });
       // La edad la calcula el servidor: dejarla al navegador daría edades
       // distintas según la hora del aparato.
@@ -2674,6 +2677,8 @@ describe('ProfilesPatientsService', () => {
           relationship_concept_id: null,
           is_legal_guardian: null,
           national_id: null,
+          // Unmapped concept: must stay absent, not leak a uuid.
+          sex_at_birth_concept_id: 'concepto-sin-mapa',
         },
         {
           proxy_id: 'proxy-sin-nombre',
@@ -2688,6 +2693,7 @@ describe('ProfilesPatientsService', () => {
           relationship_concept_id: null,
           is_legal_guardian: null,
           national_id: null,
+          sex_at_birth_concept_id: null,
         },
       ]);
 

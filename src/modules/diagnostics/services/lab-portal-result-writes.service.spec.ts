@@ -3,7 +3,9 @@ import { LockMode } from '@mikro-orm/core';
 import { ConflictException } from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { DIAG } from '../diagnostics.concepts';
+import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
 import { LabPortalResultWritesService } from './lab-portal-result-writes.service';
+import { reportAlreadyPublished } from './report-immutability.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 const LAB = 'lab-1';
@@ -28,7 +30,7 @@ const file = (fileId: string, reportId: string, status = 'AVAILABLE'): any => ({
   withdrawnReason: status === 'WITHDRAWN' ? 'error' : null,
 });
 
-function build(view: any) {
+function build(view: any, published = false) {
   const tx = {
     flush: mockFn(async () => undefined),
     nativeUpdate: mockFn(async () => 1),
@@ -59,6 +61,11 @@ function build(view: any) {
     })),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const immutability = {
+    assertWritable: mockFn(async () => {
+      if (published) throw reportAlreadyPublished();
+    }),
+  };
   const service = new LabPortalResultWritesService(
     em as any,
     repo as any,
@@ -67,6 +74,7 @@ function build(view: any) {
     orders as any,
     reads as any,
     logger as any,
+    immutability as any,
   );
   return {
     service,
@@ -77,6 +85,7 @@ function build(view: any) {
     reads,
     version,
     newReport,
+    immutability,
   };
 }
 
@@ -233,5 +242,34 @@ describe('LabPortalResultWritesService', () => {
     );
     // The locked re-read is the second `locate`, the first one found the report.
     expect(t.reads.locate.mock.invocationCallOrder[1]).toBeGreaterThan(lockAt);
+  });
+
+  it('attach: a report published through the draft flow is 409 and writes nothing', async () => {
+    const t = build(baseView({ reports: [{ id: 'r1' }] }), true);
+    const error = await t.service
+      .attach(LAB, 'sr-1', 'f2', null, actor)
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ConflictException);
+    expect((error as ConflictException).reason).toBe(
+      DiagnosticsErrorReason.REPORT_ALREADY_PUBLISHED,
+    );
+    expect(t.immutability.assertWritable).toHaveBeenCalledWith(
+      'r1',
+      expect.anything(),
+    );
+    expect(t.reports.createVersion).not.toHaveBeenCalled();
+  });
+
+  it('withdraw: a report published through the draft flow is 409 and writes nothing', async () => {
+    const t = build(
+      baseView({ reports: [{ id: 'r1' }], files: [file('f1', 'r1')] }),
+      true,
+    );
+    await expect(
+      t.service.withdraw(LAB, 'f1', 'error', actor),
+    ).rejects.toMatchObject({
+      reason: DiagnosticsErrorReason.REPORT_ALREADY_PUBLISHED,
+    });
+    expect(t.reports.createVersion).not.toHaveBeenCalled();
   });
 });

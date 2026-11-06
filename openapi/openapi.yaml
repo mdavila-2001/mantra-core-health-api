@@ -49921,6 +49921,496 @@ paths:
       description: >-
         Cancelar una subida abierta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/signers:
+    get:
+      operationId: DiagnosticsReportDraftsController_listSigners
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Profesionales que pueden firmar informes
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Profesionales que pueden firmar informes. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts:
+    post:
+      operationId: DiagnosticsReportDraftsController_open
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportDraftDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Abrir (u obtener) el borrador del informe de una orden
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Abrir (u obtener) el borrador del informe de una orden. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}:
+    get:
+      operationId: DiagnosticsReportDraftsController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrador del informe
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Borrador del informe. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+    put:
+      operationId: DiagnosticsReportDraftsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportDraftDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Guardar el borrador (409 si cambió o ya se publicó)
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Guardar el borrador (409 si cambió o ya se publicó). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}/files:
+    post:
+      operationId: DiagnosticsReportDraftsController_attachFile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachReportDraftFileDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Adjuntar documento, audio o anexo al borrador
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Adjuntar documento, audio o anexo al borrador. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}/files/{draftFileId}:
+    delete:
+      operationId: DiagnosticsReportDraftsController_removeFile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: draftFileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Quitar un archivo del borrador
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Quitar un archivo del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}/preview:
+    post:
+      operationId: DiagnosticsReportPublishController_preview
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: application/pdf
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Vista previa en PDF con marca de agua «BORRADOR»
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Vista previa en PDF con marca de agua «BORRADOR». Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}/publish:
+    post:
+      operationId: DiagnosticsReportPublishController_publish
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishReportDraftDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: 'Publicar el informe: versión inmutable, PDF oficial y liberación'
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Publicar el informe: versión inmutable, PDF oficial y liberación. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-drafts/{id}/signature-request:
+    post:
+      description: >-
+        Solo el firmante publica con su propia firma (403 REPORT_SIGNER_MUST_PUBLISH para cualquier otro); quien prepara
+        el borrador le avisa con esta ruta.
+      operationId: DiagnosticsReportPublishController_requestSignature
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Pedir al firmante elegido que revise y publique con su firma
+      tags:
+        - diagnostics-report-drafts
+  /diagnostics/reports/{reportId}/patient-release:
+    post:
+      operationId: DiagnosticsReportReleaseController_releaseToPatient
+      parameters:
+        - name: reportId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Liberar al paciente un resultado retenido
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Liberar al paciente un resultado retenido. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/report-issuer-settings:
+    get:
+      operationId: DiagnosticsReportReleaseController_getSettings
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Firma, sello y responsable de los informes
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Firma, sello y responsable de los informes. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    put:
+      operationId: DiagnosticsReportReleaseController_setSettings
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportIssuerSettingsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cambiar firma, sello y responsable (OWNER/ADMIN)
+      tags:
+        - diagnostics-report-drafts
+      description: >-
+        Cambiar firma, sello y responsable (OWNER/ADMIN). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /public/diagnostic-reports/{versionId}/verify:
+    get:
+      description: 'Sin autenticación y sin PHI: estado, fecha de emisión, emisor, estudio y SHA-256.'
+      operationId: DiagnosticsReportVerifyPublicController_verify
+      parameters:
+        - name: versionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportVerificationDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: El informe no existe o no es oficial
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Verificar la autenticidad de un informe diagnóstico
+      tags:
+        - diagnostics-public
+      security: []
   /education/courses/publish:
     post:
       description: La duración se deriva de la suma de las lecciones.
@@ -86037,10 +86527,18 @@ tags:
     description: >-
       Operaciones del dominio funcional diagnostics patient results. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: diagnostics-public
+    description: >-
+      Operaciones del dominio funcional diagnostics public. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: diagnostics-reception
     description: >-
       Operaciones del dominio funcional diagnostics reception. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: diagnostics-report-drafts
+    description: >-
+      Operaciones del dominio funcional diagnostics report drafts. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: diagnostics-reports
     description: >-
       Operaciones del dominio funcional diagnostics reports. Consulte el catálogo Markdown de endpoints para payloads
@@ -86950,6 +87448,28 @@ components:
             $ref: '#/components/schemas/ConceptPropertyInputDto'
       required:
         - value
+      additionalProperties: false
+    OpeningHoursShiftDto:
+      type: object
+      properties:
+        dayOfWeek:
+          type: number
+          minimum: 1
+          maximum: 7
+          example: 1
+          description: 'Día ISO-8601: 1 = lunes … 7 = domingo'
+        opensAt:
+          type: string
+          example: '08:00'
+          description: Apertura, HH:MM (00:00–23:59)
+        closesAt:
+          type: string
+          example: '12:30'
+          description: Cierre, HH:MM; 24:00 cierra el día. Posterior a la apertura
+      required:
+        - dayOfWeek
+        - opensAt
+        - closesAt
       additionalProperties: false
     TerminologyCreateRelationshipDto:
       type: object
@@ -88452,6 +88972,12 @@ components:
           type: string
           maxLength: 2000
           example: https://maps.google.com/?q=-17.78,-63.18
+        openingHours:
+          maxItems: 14
+          description: 'Horario de atención semanal: hasta dos turnos por día, sin superponerse'
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHoursShiftDto'
       required:
         - name
       additionalProperties: false
@@ -88581,6 +89107,12 @@ components:
           minimum: -180
           maximum: 180
           example: -63.18
+        openingHours:
+          maxItems: 14
+          description: 'Horario de atención semanal: hasta dos turnos por día, sin superponerse'
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHoursShiftDto'
       required:
         - name
         - addressLines
@@ -88637,6 +89169,12 @@ components:
           type: string
           description: Enlace de ubicación (http/https)
           maxLength: 2000
+        openingHours:
+          maxItems: 14
+          description: 'Horario de atención semanal: hasta dos turnos por día, sin superponerse'
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHoursShiftDto'
       required:
         - name
       additionalProperties: false
@@ -88782,6 +89320,12 @@ components:
           description: 'Sólo para PHARMACY: dirección y punto de la casa central y sucursales'
           allOf:
             - $ref: '#/components/schemas/RegisterPharmacyBlockDto'
+        openingHours:
+          maxItems: 14
+          description: 'Horario de atención semanal: hasta dos turnos por día, sin superponerse'
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHoursShiftDto'
       required:
         - code
         - legalName
@@ -90786,6 +91330,14 @@ components:
           description: Edad cumplida en años
         nationalId:
           type: string
+        sexAtBirth:
+          type: string
+          description: Sexo asignado al nacer
+          enum:
+            - MALE
+            - FEMALE
+            - INTERSEX
+            - UNKNOWN
         relationshipCode:
           type: string
           description: Parentesco visto desde el dependiente
@@ -120384,6 +120936,115 @@ components:
         - sizeBytes
         - orderId
       additionalProperties: false
+    CreateReportDraftDto:
+      type: object
+      properties:
+        serviceRequestId:
+          type: string
+          format: uuid
+      required:
+        - serviceRequestId
+      additionalProperties: false
+    UpdateReportDraftDto:
+      type: object
+      properties:
+        rowVersion:
+          type: number
+        body:
+          type: object
+          additionalProperties: true
+          description: '`{ version: 1, blocks: Block[] }`'
+        signerProfileId:
+          type: string
+          format: uuid
+          nullable: true
+        patientVisibility:
+          type: string
+          enum:
+            - VISIBLE
+            - HELD
+      required:
+        - rowVersion
+        - body
+        - signerProfileId
+        - patientVisibility
+      additionalProperties: false
+    AttachReportDraftFileDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum:
+            - DOCUMENT
+            - AUDIO
+            - ANNEX
+      required:
+        - fileId
+        - role
+      additionalProperties: false
+    PublishReportDraftDto:
+      type: object
+      properties:
+        rowVersion:
+          type: number
+        confirmIrreversible:
+          type: boolean
+          enum:
+            - true
+      required:
+        - rowVersion
+        - confirmIrreversible
+      additionalProperties: false
+    UpdateReportIssuerSettingsDto:
+      type: object
+      properties:
+        signatureFileId:
+          type: string
+          format: uuid
+          nullable: true
+        sealFileId:
+          type: string
+          format: uuid
+          nullable: true
+        responsibleName:
+          type: string
+          nullable: true
+          maxLength: 120
+        responsibleTitle:
+          type: string
+          nullable: true
+          maxLength: 120
+      required:
+        - signatureFileId
+        - sealFileId
+        - responsibleName
+        - responsibleTitle
+      additionalProperties: false
+    ReportVerificationDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PUBLISHED
+        issuedAt:
+          type: string
+          format: date-time
+        issuerName:
+          type: string
+        studyName:
+          type: string
+        contentHash:
+          type: string
+      required:
+        - status
+        - issuedAt
+        - issuerName
+        - studyName
+        - contentHash
     LessonDto:
       type: object
       properties:

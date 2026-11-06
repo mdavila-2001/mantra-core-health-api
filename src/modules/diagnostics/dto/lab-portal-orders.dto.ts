@@ -62,6 +62,17 @@ export class LabOrderFileDto {
   @ApiProperty() sizeBytes!: number;
 }
 
+/** Where the written report of the order stands for this tenant. */
+export class LabOrderReportStateDto {
+  @ApiProperty({
+    enum: ['DRAFT', 'PUBLISHED'],
+    nullable: true,
+    description: 'Null when the tenant never opened a written report.',
+  })
+  draftStatus!: 'DRAFT' | 'PUBLISHED' | null;
+  @ApiPropertyOptional({ format: 'uuid' }) publishedVersionId?: string;
+}
+
 /** One order of the performer tenant with its derived state. */
 export class LabOrderDto {
   @ApiProperty({ format: 'uuid' }) orderId!: string;
@@ -77,6 +88,8 @@ export class LabOrderDto {
   })
   canReject!: boolean;
   @ApiProperty({ type: [LabOrderFileDto] }) files!: LabOrderFileDto[];
+  @ApiProperty({ type: LabOrderReportStateDto })
+  report!: LabOrderReportStateDto;
 }
 
 /** Query of `GET /diagnostics/lab/orders`. */
