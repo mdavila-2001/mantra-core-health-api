@@ -12,7 +12,9 @@ import {
   DeliveryReceipts,
   InAppNotifications,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
+import { DIR } from '../../directory/directory.concepts';
+import { TenantMemberships } from '../../directory/entities';
 
 /**
  * Describe el contrato estructural de create notification request data.
@@ -848,6 +850,31 @@ export class NotificationsRepository {
       relatedResourceId,
       statusConceptId: unreadStatusConceptId,
     });
+  }
+
+  /**
+   * Active tenants of an account, oldest first: the ones whose bell can show it a
+   * notice. `directory.tenant_memberships` is under RLS, so call it in a system step.
+   *
+   * @param em - Transaction in a system step.
+   * @param userId - The account.
+   * @returns The tenant ids.
+   */
+  async listActiveTenantIds(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string[]> {
+    const memberships = await em.find(
+      TenantMemberships,
+      {
+        userId,
+        statusConceptId: {
+          $in: [DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE],
+        },
+      },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+    return [...new Set(memberships.map((m) => m.tenantId))];
   }
 
   /**
