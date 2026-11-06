@@ -48,6 +48,7 @@ describe('v4.2.92 · categoría de la sede (DB real)', () => {
       new TenantsRepository(),
       { assertCanAdminister: async () => undefined } as never,
       quiet,
+      { resolve: async () => undefined },
     );
 
   beforeAll(async () => {
