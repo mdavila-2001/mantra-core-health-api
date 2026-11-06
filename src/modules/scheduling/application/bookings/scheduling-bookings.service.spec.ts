@@ -53,6 +53,8 @@ function build() {
   // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
   const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
   em.fork = mockFn(() => em);
+  // Cross-organization patient reads lift RLS with a raw `set_config` first.
+  em.execute = mockFn();
   const bookingsRepo = {
     findSlotForUpdate: mockFn(),
     findSlotById: mockFn(),
@@ -5157,7 +5159,9 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       );
     });
 
-    it('Límite: el paciente con representación vigente lista al dependiente, siempre con tenant', async () => {
+    // Since 81f14411 a patient lists their bookings across organizations: the
+    // tenant filter is dropped, the patient filter and the proxy check stay.
+    it('Límite: el paciente con representación vigente lista al dependiente en todas las organizaciones', async () => {
       const d = agenda(build());
       d.representation.assertMayActForPatient.mockResolvedValue(undefined);
 
@@ -5179,10 +5183,13 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       expect(d.bookingsRepo.findBookings).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          tenantId: SEARCH_TENANT,
+          tenantId: undefined,
           patientProfileId: 'pat-hijo',
         }),
         51,
+      );
+      expect(d.em.execute).toHaveBeenCalledWith(
+        "select set_config('app.system_context', 'true', true)",
       );
     });
 

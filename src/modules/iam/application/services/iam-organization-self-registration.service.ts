@@ -15,7 +15,6 @@ import {
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
-  BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
   MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
@@ -357,6 +356,13 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // Horario de atención de la casa central: el tenant ya está volcado.
+      this.directory.recordOpeningHours(
+        tx,
+        { tenantId: tenant.id, actorUserId: user.id },
+        dto.organization.openingHours,
+      );
+
       // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
       // registro sanitario, el director y las sedes declaradas. La respuesta lo
       // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
@@ -372,7 +378,7 @@ export class IamOrganizationSelfRegistrationService {
       // `directory.branches`). One transaction: no pharmacy without sites.
       let pharmacyId: string | undefined;
       if (dto.organization.tenantType === 'PHARMACY') {
-        this.createPharmacyBranches(tx, tenant.id, dto, user.id);
+        await this.registerPharmacyBranches(tx, tenant.id, dto, user.id);
         const block = dto.organization.pharmacy;
         const provisioned = await this.pharmacies.provision(
           tx,
@@ -568,63 +574,33 @@ export class IamOrganizationSelfRegistrationService {
   }
 
   /**
-   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada.
-   * El código sale del nombre, en mayúsculas y sin repetirse dentro del alta.
+   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada,
+   * con el horario de atención de cada sucursal.
    */
-  private createPharmacyBranches(
+  private registerPharmacyBranches(
     tx: EntityManager,
     tenantId: string,
     dto: RegisterOrganizationDto,
     actorUserId: string,
-  ): void {
+  ): Promise<void> {
     const block = dto.organization.pharmacy;
-    if (!block) return;
-    const used = new Set<string>();
-    const codeOf = (name: string): string => {
-      const base =
-        name
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 90) || 'SUCURSAL';
-      let code = base;
-      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
-      used.add(code);
-      return code;
-    };
-    const add = (item: {
-      name: string;
-      latitude?: number;
-      longitude?: number;
-      description?: string;
-      locationUrl?: string;
-    }): void => {
-      this.directory.createBranch(tx, {
-        tenantId,
-        code: codeOf(item.name),
-        name: item.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
-        statusConceptId: DIR.BRANCH_ACTIVE,
-        timeZone: dto.organization.timeZone,
-        latitude:
-          item.latitude !== undefined ? String(item.latitude) : undefined,
-        longitude:
-          item.longitude !== undefined ? String(item.longitude) : undefined,
-        description: item.description,
-        locationUrl: item.locationUrl,
-        actorUserId,
-      });
-    };
-    if (block.latitude !== undefined && block.longitude !== undefined) {
-      add({
-        name: 'Casa central',
-        latitude: block.latitude,
-        longitude: block.longitude,
-      });
-    }
-    for (const branch of block.branches ?? []) add(branch);
+    if (!block) return Promise.resolve();
+    const headquarters =
+      block.latitude !== undefined && block.longitude !== undefined
+        ? [
+            {
+              name: 'Casa central',
+              latitude: block.latitude,
+              longitude: block.longitude,
+            },
+          ]
+        : [];
+    return this.directory.registerDeclaredBranches(tx, {
+      tenantId,
+      timeZone: dto.organization.timeZone,
+      actorUserId,
+      branches: [...headquarters, ...(block.branches ?? [])],
+    });
   }
 
   /**

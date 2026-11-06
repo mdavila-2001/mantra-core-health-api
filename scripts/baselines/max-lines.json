@@ -1783,9 +1783,6 @@
     "src/modules/system_ops/dto/governance-catalog.dto.ts": {
       "lineas": 331
     },
-    "src/common/dto/medical-facility.dto.ts": {
-      "lineas": 330
-    },
     "src/modules/accounting/repositories/liability.repository.ts": {
       "lineas": 329
     },
