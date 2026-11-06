@@ -15473,6 +15473,57 @@ paths:
       description: >-
         Presencia de los demás participantes. Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+  /community/conversations/{conversationId}/messages/{messageId}/reaction:
+    put:
+      operationId: CommunityMessageReactionsController_react
+      parameters:
+        - name: conversationId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: messageId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactToMessageDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reaccionar a un mensaje (una reacción por perfil)
+      tags:
+        - community-messaging
+      description: >-
+        Reaccionar a un mensaje (una reacción por perfil). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /community/reports:
     post:
       operationId: CommunityModerationController_report
@@ -28289,6 +28340,156 @@ paths:
       description: >-
         Mark a device operational or not. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+    put:
+      operationId: CenterScheduleController_editEquipment
+      parameters:
+        - name: unitId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: equipmentId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CenterEquipmentInputDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CenterScheduleViewDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: 'Edit a device: name, maker, serial, modality'
+      tags:
+        - diagnostic-units
+      description: >-
+        Edit a device: name, maker, serial, modality. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: CenterScheduleController_removeEquipment
+      parameters:
+        - name: unitId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: equipmentId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CenterScheduleViewDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 'Already referenced: mark it out of service instead.'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Remove a device registered by mistake
+      tags:
+        - diagnostic-units
+      description: >-
+        Remove a device registered by mistake. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{unitId}/equipment:
+    post:
+      operationId: CenterScheduleController_addEquipment
+      parameters:
+        - name: unitId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CenterEquipmentInputDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CenterScheduleViewDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Register a device (a production line)
+      tags:
+        - diagnostic-units
+      description: >-
+        Register a device (a production line). Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /diagnostic-units/{unitId}/study-availability:
     get:
       operationId: StudyAvailabilityController_studyAvailability
@@ -29537,6 +29738,80 @@ paths:
       description: >-
         Renovar/registrar acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/lab/catalog:
+    get:
+      operationId: LabPortalServicesController_studyCatalogItems
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabCatalogDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Catálogo de análisis (LOINC) con componentes y precio sugerido
+      tags:
+        - diagnostics-lab-portal
+      description: >-
+        Catálogo de análisis (LOINC) con componentes y precio sugerido. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/lab/catalog/import:
+    post:
+      operationId: LabPortalServicesController_importCatalog
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabCatalogImportDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabCatalogImportResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Sumar análisis del catálogo, con sus componentes y precio sugerido
+      tags:
+        - diagnostics-lab-portal
+      description: >-
+        Sumar análisis del catálogo, con sus componentes y precio sugerido. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostics/lab/services:
     get:
       operationId: LabPortalServicesController_listServices
@@ -29794,12 +30069,12 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: Categorías del laboratorio
+      summary: Categorías del laboratorio, con su conteo
       tags:
         - diagnostics-lab-portal
       description: >-
-        Categorías del laboratorio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
-        respuestas de error usan el envelope ErrorResponse.
+        Categorías del laboratorio, con su conteo. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: LabPortalServicesController_createCategory
       parameters: []
@@ -29836,12 +30111,12 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: 'Crear una categoría (422: el modelo no tiene dónde guardarla)'
+      summary: Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)
       tags:
         - diagnostics-lab-portal
       description: >-
-        Crear una categoría (422: el modelo no tiene dónde guardarla). Requiere JWT y los roles o alcances declarados
-        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas). Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostics/lab/categories/{id}:
     patch:
       operationId: LabPortalServicesController_renameCategory
@@ -29886,12 +30161,12 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: Renombrar una categoría
+      summary: Renombrar una categoría (409 si el nombre ya existe)
       tags:
         - diagnostics-lab-portal
       description: >-
-        Renombrar una categoría. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
-        de error usan el envelope ErrorResponse.
+        Renombrar una categoría (409 si el nombre ya existe). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     delete:
       operationId: LabPortalServicesController_deleteCategory
       parameters:
@@ -29923,12 +30198,102 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: Eliminar una categoría
+      summary: Eliminar una categoría (409 mientras agrupe servicios no retirados)
       tags:
         - diagnostics-lab-portal
       description: >-
-        Eliminar una categoría. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
-        de error usan el envelope ErrorResponse.
+        Eliminar una categoría (409 mientras agrupe servicios no retirados). Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/study-catalog:
+    get:
+      description: >-
+        Orden alfabético sin tildes. `q` exige que todas sus palabras aparezcan en el nombre, un sinónimo, el código o
+        un componente. Paginación por cursor.
+      operationId: StudyCatalogController_list
+      parameters:
+        - name: family
+          required: false
+          in: query
+          schema:
+            enum:
+              - LAB
+              - IMAGING
+              - CARDIO
+              - PATHOLOGY
+              - PROCEDURE
+            type: string
+        - name: q
+          required: false
+          in: query
+          description: Texto libre (hasta 100 caracteres)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: 1 a 100; por omisión 25
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Catálogo de estudios pedibles, con búsqueda y paginación
+      tags:
+        - study-catalog
+  /clinical/study-catalog/{conceptId}:
+    get:
+      description: >-
+        Componentes anidados (laboratorio), muestra sugerida y elegibles, modalidad, regiones permitidas, lateralidad,
+        contraste y avisos de licencia (LOINC, DICOM, SNOMED, RadLex, UBERON). 404 si el concepto no es un estudio del
+        catálogo.
+      operationId: StudyCatalogController_detail
+      parameters:
+        - name: conceptId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Detalle de un estudio del catálogo
+      tags:
+        - study-catalog
   /pharmacies/{pharmacyId}/categories:
     get:
       operationId: PharmacyController_listCategories
@@ -49159,6 +49524,11 @@ paths:
         - diagnostics-lab-portal
   /diagnostics/lab/orders/{orderId}/transitions:
     post:
+      description: >-
+        CANCEL (desde DRAFT o RECEIVED) y REJECT (desde RECEIVED) valen para toda orden, imagenología incluida, y exigen
+        `reason`: el ejecutor agrega un evento propio (`service_request_performer_events`) sin tocar la orden del
+        solicitante. Una orden cancelada o rechazada deja de poder reservarse. Un paso que el estado no admite responde
+        409.
       operationId: DiagnosticsLabPortalController_transition
       parameters:
         - name: orderId
@@ -49198,9 +49568,6 @@ paths:
       summary: Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL)
       tags:
         - diagnostics-lab-portal
-      description: >-
-        Un paso del camino de la orden (RECEIVE, PROCESS, REJECT, CANCEL). Requiere JWT y los roles o alcances
-        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostics/lab/result-targets:
     get:
       operationId: DiagnosticsLabPortalController_listResultTargets
@@ -85161,96 +85528,6 @@ paths:
       summary: Reconciliar el manifiesto canónico contra el vectorial
       tags:
         - vector_rag
-  /clinical/study-catalog:
-    get:
-      description: >-
-        Orden alfabético sin tildes. `q` exige que todas sus palabras aparezcan en el nombre, un sinónimo, el código o
-        un componente. Paginación por cursor.
-      operationId: StudyCatalogController_list
-      parameters:
-        - name: family
-          required: false
-          in: query
-          schema:
-            enum:
-              - LAB
-              - IMAGING
-              - CARDIO
-              - PATHOLOGY
-              - PROCEDURE
-            type: string
-        - name: q
-          required: false
-          in: query
-          description: Texto libre (hasta 100 caracteres)
-          schema:
-            type: string
-        - name: cursor
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: limit
-          required: false
-          in: query
-          description: 1 a 100; por omisión 25
-          schema:
-            type: number
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '504':
-          $ref: '#/components/responses/GatewayTimeout'
-      security:
-        - bearer: []
-      summary: Catálogo de estudios pedibles, con búsqueda y paginación
-      tags:
-        - study-catalog
-  /clinical/study-catalog/{conceptId}:
-    get:
-      description: >-
-        Componentes anidados (laboratorio), muestra sugerida y elegibles, modalidad, regiones permitidas, lateralidad,
-        contraste y avisos de licencia (LOINC, DICOM, SNOMED, RadLex, UBERON). 404 si el concepto no es un estudio del
-        catálogo.
-      operationId: StudyCatalogController_detail
-      parameters:
-        - name: conceptId
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '504':
-          $ref: '#/components/responses/GatewayTimeout'
-      security:
-        - bearer: []
-      summary: Detalle de un estudio del catálogo
-      tags:
-        - study-catalog
 info:
   title: ALOVIDA Health API
   description: >-
@@ -96311,6 +96588,20 @@ components:
         - profileId
         - q
       additionalProperties: false
+    ReactToMessageDto:
+      type: object
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        emoji:
+          type: string
+          nullable: true
+          maxLength: 32
+      required:
+        - profileId
+        - emoji
+      additionalProperties: false
     CreateReportDto:
       type: object
       properties:
@@ -105585,6 +105876,18 @@ components:
         - studyCode
         - schedule
       additionalProperties: false
+    EquipmentScheduleDto:
+      type: object
+      properties:
+        equipmentId:
+          type: string
+          format: uuid
+        schedule:
+          $ref: '#/components/schemas/ScheduleBlockDto'
+      required:
+        - equipmentId
+        - schedule
+      additionalProperties: false
     SaveCenterScheduleDto:
       type: object
       properties:
@@ -105598,6 +105901,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StudyScheduleDto'
+        equipment:
+          description: Devices with a shift of their own; the rest follow their study. Omitted = none.
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentScheduleDto'
       required:
         - general
         - modalities
@@ -105751,6 +106059,11 @@ components:
             - CHECKED_IN
             - IN_PROGRESS
             - COMPLETED
+        equipmentId:
+          type: string
+          nullable: true
+          format: uuid
+          description: Device (production line) that attends it; `null` when no open line can.
       required:
         - bookingId
         - orderId
@@ -105760,6 +106073,7 @@ components:
         - endsAt
         - siteName
         - status
+        - equipmentId
     CenterBookingsDto:
       type: object
       properties:
@@ -105783,6 +106097,36 @@ components:
             - OUT_OF_SERVICE
       required:
         - status
+      additionalProperties: false
+    CenterEquipmentInputDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Ecógrafo sala 2
+          maxLength: 200
+        manufacturer:
+          type: string
+          nullable: true
+          maxLength: 200
+        serialNumber:
+          type: string
+          nullable: true
+          maxLength: 200
+        modalityCode:
+          type: string
+          enum:
+            - ECO
+            - RX
+            - RM
+            - TC
+            - MG
+            - DXA
+            - LAB
+          nullable: true
+          description: '`null`: an analyzer, which never limits appointments.'
+      required:
+        - name
       additionalProperties: false
     StudyStartDto:
       type: object
@@ -107195,6 +107539,191 @@ components:
           description: Nueva vigencia hasta
           format: date-time
       additionalProperties: false
+    LabSuggestedPriceDto:
+      type: object
+      properties:
+        source:
+          type: string
+          enum:
+            - INLASA
+            - FONASA
+        sourceCode:
+          type: string
+          example: LAC-030
+        sourceName:
+          type: string
+        priceBs:
+          type: string
+          example: '60.00'
+      required:
+        - source
+        - sourceCode
+        - sourceName
+        - priceBs
+    LabCatalogComponentDto:
+      type: object
+      properties:
+        conceptId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: HEMOGRAMA.HB
+        name:
+          type: string
+        loinc:
+          type: string
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+        suggestedPrice:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/LabSuggestedPriceDto'
+      required:
+        - conceptId
+        - code
+        - name
+        - loinc
+        - unit
+        - suggestedPrice
+    LabCatalogItemDto:
+      type: object
+      properties:
+        conceptId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: HEMOGRAMA
+        name:
+          type: string
+        loinc:
+          type: string
+          nullable: true
+        specimen:
+          type: string
+          nullable: true
+        suggestedPrice:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/LabSuggestedPriceDto'
+        offeredServiceId:
+          type: string
+          nullable: true
+          format: uuid
+          description: The lab service already made from this item, if any
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabCatalogComponentDto'
+      required:
+        - conceptId
+        - code
+        - name
+        - loinc
+        - specimen
+        - suggestedPrice
+        - offeredServiceId
+        - components
+    LabCatalogSectionDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: HEMATO
+        name:
+          type: string
+          example: Hematología
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabCatalogItemDto'
+      required:
+        - code
+        - name
+        - items
+    LabCatalogDto:
+      type: object
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabCatalogSectionDto'
+        count:
+          type: number
+        priceRule:
+          type: string
+          description: How suggested prices were chosen
+      required:
+        - sections
+        - count
+        - priceRule
+    LabCatalogImportDto:
+      type: object
+      properties:
+        conceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - conceptIds
+      additionalProperties: false
+    LabCatalogImportRowDto:
+      type: object
+      properties:
+        conceptId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          enum:
+            - CREATED
+            - LINKED
+            - REPUBLISHED
+            - SKIPPED
+            - REJECTED
+          description: 'LINKED: a free-form service with the same code now points to the catalog item'
+        serviceId:
+          type: string
+          nullable: true
+          format: uuid
+        reason:
+          type: string
+          nullable: true
+      required:
+        - conceptId
+        - outcome
+        - serviceId
+        - reason
+    LabCatalogImportResultDto:
+      type: object
+      properties:
+        created:
+          type: number
+        republished:
+          type: number
+        linked:
+          type: number
+        skipped:
+          type: number
+        rejected:
+          type: number
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabCatalogImportRowDto'
+      required:
+        - created
+        - republished
+        - linked
+        - skipped
+        - rejected
+        - rows
     LabServiceDto:
       type: object
       properties:
@@ -107206,16 +107735,36 @@ components:
           example: HEMOGRAMA
         name:
           type: string
+        kind:
+          type: string
+          enum:
+            - SERVICE
+            - MODALITY
+          description: 'MODALITY: the generic placeholder created per modality at registration; it is not priced.'
+        parentId:
+          type: string
+          nullable: true
+          format: uuid
+          description: Panel this service is a component of
+        catalogConceptId:
+          type: string
+          nullable: true
+          format: uuid
+          description: Study catalog concept; null for free-form services
+        hasPrice:
+          type: boolean
+          description: False until a price version exists
         categoryId:
           type: string
           nullable: true
-          description: 'Always null: the model has no lab categories'
+          description: Category of the lab, or null when the service has none
         categoryName:
           type: string
           nullable: true
         sampleType:
           type: string
           nullable: true
+          description: The lab's free text (`specimen_description`); falls back to the display of the specimen concept
         preparation:
           type: string
           nullable: true
@@ -107231,13 +107780,16 @@ components:
           type: boolean
         price:
           type: string
+          nullable: true
           example: '45.00'
+          description: null when the service has no current price
         alovidaDiscountPercent:
           type: number
           nullable: true
           example: 10
         alovidaPrice:
           type: string
+          nullable: true
           example: '40.50'
         currency:
           type: string
@@ -107251,7 +107803,7 @@ components:
             - WITHDRAWN
         available:
           type: boolean
-          description: 'Always true: the model has no availability column'
+          description: '"Available today" switch of the service'
         updatedAt:
           type: string
           format: date-time
@@ -107259,6 +107811,10 @@ components:
         - id
         - code
         - name
+        - kind
+        - parentId
+        - catalogConceptId
+        - hasPrice
         - categoryId
         - categoryName
         - sampleType
@@ -107293,10 +107849,13 @@ components:
           type: string
           format: uuid
           nullable: true
+          description: >-
+            A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as
+            non-existent.
         sampleType:
           type: string
           nullable: true
-          description: 'Not persisted: no free-text column'
+          description: Sample type as free text, stored in `specimen_description`; blank or null clears it
         preparation:
           type: string
           nullable: true
@@ -107316,6 +107875,9 @@ components:
           example: 10
         available:
           type: boolean
+          description: >-
+            "Available today": false hides the service from the public directory, the coverage search and order booking;
+            it keeps its status and price
         code:
           type: string
           example: HEMOGRAMA
@@ -107412,10 +107974,13 @@ components:
           type: string
           format: uuid
           nullable: true
+          description: >-
+            A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as
+            non-existent.
         sampleType:
           type: string
           nullable: true
-          description: 'Not persisted: no free-text column'
+          description: Sample type as free text, stored in `specimen_description`; blank or null clears it
         preparation:
           type: string
           nullable: true
@@ -107435,6 +108000,9 @@ components:
           example: 10
         available:
           type: boolean
+          description: >-
+            "Available today": false hides the service from the public directory, the coverage search and order booking;
+            it keeps its status and price
         code:
           type: string
         name:
@@ -107459,6 +108027,7 @@ components:
           type: string
         serviceCount:
           type: number
+          description: Services of the category that are not withdrawn
       required:
         - id
         - name
@@ -119753,6 +120322,7 @@ components:
         reason:
           type: string
           maxLength: 1000
+          description: Required (non-blank) when action is CANCEL or REJECT; ignored by RECEIVE and PROCESS
       required:
         - action
       additionalProperties: false

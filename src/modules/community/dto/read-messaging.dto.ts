@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
+import { MessageReactionDto } from './message-reaction.dto';
 import { PractitionerVerificationDto } from '../../profiles/presentation/dto/practitioner-verification.dto';
 import {
   IsInt,
@@ -313,17 +314,16 @@ export class DirectMessageDto {
   @ApiPropertyOptional()
   isEdited?: boolean | null;
 
-  /**
-   * Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con
-   * `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se
-   * eliminó este mensaje» en su lugar y no un hueco que descoloca las citas.
-   */
+  /** When it was deleted (F4.5); still travels, with body and attachment in `null`. */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   deletedAt?: Date | null;
 
   /** Cuándo se envió. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   sentAt?: Date | null;
+
+  @ApiPropertyOptional({ type: () => MessageReactionDto, isArray: true }) // v4.2.91
+  reactions?: MessageReactionDto[];
 }
 
 /** Página de mensajes de una conversación. */

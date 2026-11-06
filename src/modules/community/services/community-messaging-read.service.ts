@@ -36,6 +36,8 @@ import type {
   DirectMessages,
   PublicProfiles,
 } from '../entities';
+import { CommunityMessageReactionsService } from './community-message-reactions.service';
+import { toDirectMessageDto } from './direct-message.mapper';
 
 /**
  * Tope de conversaciones que se resuelven de una vez para armar la bandeja.
@@ -80,6 +82,7 @@ export class CommunityMessagingReadService {
     private readonly files: FileUploadService,
     private readonly verifications: PractitionerVerificationReader,
     private readonly logger: PinoLogger,
+    private readonly reactions: CommunityMessageReactionsService,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
   }
@@ -496,7 +499,10 @@ export class CommunityMessagingReadService {
       : await this.threadPeers(em, conversationId, profileId);
 
     return {
-      items: page.map((message) => this.toDto(message)),
+      items: await this.reactions.attach(
+        em,
+        page.map((m) => this.toDto(m)),
+      ),
       count: page.length,
       limit: options.limit,
       nextCursor:
@@ -647,20 +653,7 @@ export class CommunityMessagingReadService {
    * citas que apuntaban a él siguen sabiendo a qué apuntaban.
    */
   private toDto(message: DirectMessages): DirectMessageDto {
-    const deleted =
-      message.deletedAt !== undefined && message.deletedAt !== null;
-    return {
-      id: message.id,
-      conversationId: message.conversationId,
-      senderProfileId: message.senderProfileId,
-      replyToMessageId: message.replyToMessageId ?? null,
-      contentTypeConceptId: message.contentTypeConceptId,
-      bodyText: deleted ? null : (message.bodyText ?? null),
-      attachmentFileId: deleted ? null : (message.attachmentFileId ?? null),
-      isEdited: message.isEdited ?? null,
-      deletedAt: message.deletedAt ?? null,
-      sentAt: message.sentAt ?? null,
-    };
+    return toDirectMessageDto(message);
   }
 
   /**

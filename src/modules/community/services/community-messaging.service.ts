@@ -47,13 +47,13 @@ import type { DirectMessages } from '../entities';
 /**
  * Cuánto tiempo después de enviarlo se puede editar un mensaje (F4.5).
  *
- * Cinco minutos: lo que alcanza para corregir una dosis mal tecleada y no para
+ * Quince minutos, como WhatsApp (pedido del 06/11/2026): alcanza para corregir una dosis mal tecleada y no para
  * reescribir una indicación que la otra persona ya leyó y siguió.
  *
  * El cliente aplica la misma regla para no ofrecer un botón que va a fallar,
  * pero la barrera es ésta: una pantalla no autoriza nada.
  */
-export const EDIT_WINDOW_MS = 5 * 60_000;
+export const EDIT_WINDOW_MS = 15 * 60_000;
 
 /**
  * Clave del lock de «conversación directa entre estos dos», independiente del
@@ -1041,7 +1041,7 @@ export class CommunityMessagingService {
     const elapsed = Date.now() - sent.getTime();
     if (elapsed > EDIT_WINDOW_MS) {
       throw new PreconditionFailedException(
-        'Pasaron más de 5 minutos: el mensaje ya no se puede editar',
+        'Pasaron más de 15 minutos: el mensaje ya no se puede editar',
         {
           conversationId,
           messageId,
