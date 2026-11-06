@@ -135278,6 +135278,16 @@
           "nationalId": {
             "type": "string"
           },
+          "sexAtBirth": {
+            "type": "string",
+            "description": "Sexo asignado al nacer",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ]
+          },
           "relationshipCode": {
             "type": "string",
             "description": "Parentesco visto desde el dependiente",
