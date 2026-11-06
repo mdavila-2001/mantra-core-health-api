@@ -23,7 +23,7 @@ import { CIMA_SECTIONS } from './lib/sections.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex, uniiForCas } from './lib/gsrs.mjs';
 import { EMA_LICENSE, emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
-import { cimaNregCandidates, comparisonKey, emaPiPointer, emaPiSection, emaPiSlug, emaPiUrl, extractorsAgree, fidelityKey, isVerifiedSection, keyDiff, piMonographSections, piSmpcs, piSmpcsFromRows } from './lib/ema-pi.mjs';
+import { cimaNregCandidates, comparisonKey, emaPiPointer, emaPiSection, emaPiSlug, emaPiUrl, fidelityKey, gridMatrix, isVerifiedSection, keyDiff, piMonographSections, piSmpcs, piSmpcsFromRows, sectionConsensus, withheldReason } from './lib/ema-pi.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
 import { emlReference, isCurrentRecommendation } from './lib/eml.mjs';
 import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
@@ -348,7 +348,7 @@ async function main() {
   // extracción contra CIMA. Si no está, se publican las secciones verificadas y el resto queda en el puntero.
   const emaPiPointers = new Map();
   const emaPiByAtc = new Map();
-  const emaPiStats = { medicines: 0, withoutPdf: 0, extractError: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, pointers: 0, verifiedSections: 0, withheldSections: 0, consensus: { compared: 0, agree: 0 }, fidelity: {}, smallDiffs: [] };
+  const emaPiStats = { medicines: 0, withoutPdf: 0, extractError: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, pointers: 0, verifiedSections: 0, withheldSections: 0, consensus: { compared: 0, agree: 0 }, fidelity: {}, smallDiffs: [], tableFidelity: { sections: 0, tables: 0, sameShape: 0, cells: 0, identicalCells: 0, verifiedSections: 0, verifiedTables: 0, verifiedSameShape: 0, verifiedCells: 0, verifiedIdenticalCells: 0, cellDiffs: [] }, withheldBy: {}, verifiedWithTables: 0 };
   if (!NO_EMA_PI && emaRaw) {
     const cimaNregs = new Set(inputs.products.map((p) => String(p.nregistro)));
     for (const r of emaRecords(emaRaw.rows).filter((x) => isHumanAuthorised(x) && x.atc5.length)) {
@@ -376,7 +376,7 @@ async function main() {
         const twin = other.length === smpcs.length ? other[idx] : null;
         for (const [n, sec] of sm.sections) {
           const o = twin?.sections.get(n);
-          sec.consensus = Boolean(o?.text) && extractorsAgree(sec.text, o.text);
+          sec.consensus = sectionConsensus(sec, o);
           if (CIMA_SECTIONS[n] && sec.text) {
             emaPiStats.consensus.compared++;
             if (sec.consensus) emaPiStats.consensus.agree++;
@@ -390,10 +390,44 @@ async function main() {
         const nreg = inCima.find((n) => existsSync(ftPath(n)));
         const doc = nreg ? readCimaDoc(nreg) : null;
         if (!doc) continue;
-        const cimaText = new Map(cimaSections(doc.doc, { product: { nregistro: nreg } }, doc.retrievedAt).map((s) => [s.section.number, fidelityKey(s.text)]));
+        const cimaSecs = cimaSections(doc.doc, { product: { nregistro: nreg } }, doc.retrievedAt);
+        const cimaText = new Map(cimaSecs.map((s) => [s.section.number, fidelityKey(s.text)]));
+        const cimaTables = new Map(cimaSecs.map((s) => [s.section.number, s.tables ?? []]));
         const sm = smpcs.find((x) => x.euNumbers.some((eu) => cimaNregCandidates(eu).includes(nreg))) ?? smpcs[0];
         for (const s of piMonographSections(sm)) {
           if (!cimaText.has(s.number)) continue;
+          // Tablas: celda por celda contra las tablas de la misma sección en CIMA (en orden, celdas no vacías).
+          if (s.tables.length && cimaTables.get(s.number).length) {
+            const tf = emaPiStats.tableFidelity;
+            const ok = isVerifiedSection(s);
+            tf.sections++;
+            if (ok) tf.verifiedSections++;
+            s.tables.forEach((g, ti) => {
+              const ct = cimaTables.get(s.number)[ti];
+              if (!ct) return;
+              const mine = gridMatrix(g).rows.map((row) => row.filter((c) => c.text != null).map((c) => fidelityKey(c.text)));
+              const theirs = ct.rows.map((row) => row.filter((c) => c.text != null).map((c) => fidelityKey(c.text)));
+              const same = mine.length === theirs.length && mine.every((row, i) => row.length === theirs[i].length);
+              tf.tables++;
+              if (same) tf.sameShape++;
+              if (ok) {
+                tf.verifiedTables++;
+                if (same) tf.verifiedSameShape++;
+              }
+              if (!same) return;
+              mine.forEach((row, i) =>
+                row.forEach((k, j) => {
+                  const eq = k === theirs[i][j];
+                  tf.cells++;
+                  if (eq) tf.identicalCells++;
+                  if (!ok) return;
+                  tf.verifiedCells++;
+                  if (eq) tf.verifiedIdenticalCells++;
+                  else tf.cellDiffs.push({ medicine: r.name, slug, nregistro: nreg, section: s.number, table: ti, row: i, cell: j, cima: theirs[i][j], pdf: k });
+                }),
+              );
+            });
+          }
           const f = (emaPiStats.fidelity[s.number] ??= { compared: 0, identical: 0, verified: 0, verifiedIdentical: 0 });
           const same = cimaText.get(s.number) === fidelityKey(s.text);
           f.compared++;
@@ -429,6 +463,10 @@ async function main() {
         const ptr = emaPiPointer(r, sm, { url, retrievedAt, license: EMA_LICENSE });
         const verified = piMonographSections(sm).filter(isVerifiedSection);
         emaPiStats.withheldSections += piMonographSections(sm).length - verified.length;
+        for (const s of piMonographSections(sm)) {
+          const why = withheldReason(s);
+          if (why) emaPiStats.withheldBy[why] = (emaPiStats.withheldBy[why] ?? 0) + 1;
+        }
         for (const code of r.atc5) {
           if (!emaPiPointers.has(code)) emaPiPointers.set(code, []);
           emaPiPointers.get(code).push(ptr);
@@ -516,6 +554,7 @@ async function main() {
       present.add(k);
       sections.push(assertSection(structuredClone(s)));
       emaPiStats.verifiedSections++;
+      if (s.tables.length) emaPiStats.verifiedWithTables++;
     }
     const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? []), ...(emaPiPointers.get(code) ?? [])];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {

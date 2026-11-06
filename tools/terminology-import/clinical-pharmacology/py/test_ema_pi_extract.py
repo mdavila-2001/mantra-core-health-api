@@ -112,5 +112,53 @@ class VectorSymbol(unittest.TestCase):
         self.assertFalse(any(r.get('incomplete') for r in rows), 'todos los glifos de la página llegan a las filas')
 
 
+class GridTables(unittest.TestCase):
+    """Tablas de Deferasirox Accord (4.2): celdas de la grilla, texto literal por celda y palabras de pdftotext en la misma celda."""
+
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as out:
+            path = x.extract((SYMBOL, out, os.path.join(FIX, 'deferasirox-accord_es.pdf')))
+            with open(path, encoding='utf-8') as f:
+                cls.doc = json.load(f)
+        cls.grids = [(p['page'], r['grid']) for p in cls.doc['pages'] for r in p['rows'] if 'grid' in r]
+
+    def test_celdas_de_la_dosis_inicial(self):
+        page, g = self.grids[0]
+        self.assertEqual(page, 4)
+        first = g['rows'][0]
+        self.assertEqual([(c['text'], c.get('colspan')) for c in first], [('Dosis inicial recomendada', 4)], 'fila de título: una celda que abarca las 4 columnas')
+        self.assertEqual([c['text'] for c in g['rows'][2]][:2], ['>1 000 μg/l', 'o'])
+        self.assertEqual(g['rows'][2][3]['text'], '14 mg/kg/día')
+        self.assertTrue(all(c['alt'] == c['text'] for c in g['rows'][2] if '\n' not in c['text']), 'pdftotext ve las mismas palabras en cada celda')
+
+    def test_celda_de_varias_lineas(self):
+        _, g = self.grids[1]
+        self.assertEqual(g['rows'][1][0]['text'].split('\n')[0], 'Persistentemente > 2 500', 'las líneas de una celda se unen con salto de línea')
+
+    def test_completitud_y_anidadas(self):
+        self.assertTrue(all(not g.get('unassigned') for _, g in self.grids), 'todo glifo de una tabla cae en una celda')
+        nested = [p for p, g in self.grids if g.get('nested')]
+        self.assertEqual(nested, [9], 'la página 9 tiene una tabla dentro de otra: la exterior (la que recibe los glifos) queda marcada')
+
+    def test_filas_fuera_de_tabla_con_palabras_de_pdftotext(self):
+        rows = [r for p in self.doc['pages'] for r in p['rows'] if 'grid' not in r]
+        self.assertTrue(all('alt' in r for r in rows))
+        row = next(r for r in rows if '(≥ 7 ml/kg/mes de concentrado de hematíes)' in r['text'])
+        self.assertIn('7 ml/kg/mes', row['alt'])
+
+
+class CellBorders(unittest.TestCase):
+    TABLE = {'bbox': (0, 0, 200, 100), 'cells': [{'bbox': (0, 50, 100, 100)}, {'bbox': (100, 50, 200, 100)}, {'bbox': (0, 0, 200, 50)}]}
+
+    def test_borde_y_fondo(self):
+        self.assertTrue(x._on_border((0, 49.6, 200, 50.4), self.TABLE), 'línea horizontal sobre el borde entre filas')
+        self.assertTrue(x._on_border((99.5, 50, 100.5, 100), self.TABLE), 'línea vertical entre columnas')
+        self.assertTrue(x._on_border((0, 50, 100, 100), self.TABLE), 'fondo del tamaño de la celda')
+
+    def test_trazo_dentro_de_la_celda(self):
+        self.assertFalse(x._on_border((40, 70, 46, 78), self.TABLE), 'un símbolo dibujado dentro de la celda no es borde')
+
+
 if __name__ == '__main__':
     unittest.main()

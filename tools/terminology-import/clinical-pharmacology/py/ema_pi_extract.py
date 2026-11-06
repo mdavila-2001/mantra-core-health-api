@@ -15,8 +15,19 @@ Por carácter (sobre pdfminer.six, versión fijada en requirements.txt):
     en NFKC (espacio, Omega, mu: se emite esa forma, p. ej. μ U+03BC); si no
     (Delta, barra de fracción) o el valor es «Corporate Use», U+FFFD. Cualquier
     otro carácter del área privada, o un glifo sin Unicode, también es U+FFFD.
-Por línea: marca `table` si cae dentro de una grilla dibujada (bordes LTRect/
-LTLine agrupados), porque el texto plano no conserva la estructura de una tabla.
+Tablas: las celdas salen de la grilla dibujada (pdfplumber, estrategia `lines`:
+sólo la geometría de los bordes; el texto sigue siendo el de `literal_text`).
+Cada glifo va a la celda que contiene su centro; una fila de la página lleva
+`grid` con las celdas (texto, html, colspan/rowspan si la grilla no tiene el
+borde interior) y, por celda, `alt`: las palabras de `pdftotext -bbox` (poppler,
+otro extractor) cuyo centro cae en la misma celda. La tabla queda marcada si un
+glifo o una palabra de su área no cae en ninguna celda (`unassigned`), si está
+dentro de otra tabla (`nested`) o si una celda tiene un trazo que no es borde
+(`graphic`). Una línea dentro de una grilla que pdfplumber no reconoce como
+tabla sigue marcada `table`, sin celdas, y su sección no se publica.
+Cada fila lleva también `alt`: las palabras de `pdftotext -bbox` cuyo centro cae
+en la fila (fuera de las tablas); la página lleva `altUnassigned` con las
+palabras que no caen en ninguna fila ni celda.
 Los superíndices y subíndices (más chicos y con la línea base corrida, p. ej. el
 9 de «10⁹/l») no caben en el texto plano: la fila lleva además `html` con
 <sup>/<sub>, como el HTML de CIMA.
@@ -35,18 +46,22 @@ Uso: python3 -I ema_pi_extract.py <symbol.txt> <salida-dir> <pdf>...
 """
 import json
 import os
+import re
+import subprocess
 import sys
 import unicodedata
 from multiprocessing import Pool
 
 from pdfminer.converter import PDFPageAggregator
-from html import escape
+from html import escape, unescape
 from statistics import median
 
 from pdfminer.layout import LAParams, LTAnno, LTChar, LTCurve, LTFigure, LTLine, LTRect, LTTextBox, LTTextLine
 from pdfminer.pdffont import PDFUnicodeNotDefined
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
+
+import pdfplumber
 
 REPLACEMENT = '�'
 SYMBOLIC_NAMES = ('symbol', 'wingding', 'webding', 'dingbat', 'mtextra', 'mt extra', 'marlett')
@@ -165,8 +180,14 @@ def table_boxes(page):
 
 def line_markup(ln):
     """Texto de la línea y, si tiene superíndices o subíndices, su HTML con <sup>/<sub> (si no, None)."""
-    chars = [c for c in ln if isinstance(c, LTChar)]
-    text = ln.get_text().rstrip('\n')
+    return markup(list(ln))
+
+
+def markup(items):
+    """Texto de una secuencia de glifos (de una línea o del tramo de una línea en una celda) y su HTML con <sup>/<sub>, o None."""
+    items = [i for i in items if isinstance(i, (LTChar, LTAnno))]
+    chars = [c for c in items if isinstance(c, LTChar)]
+    text = ''.join(i.get_text() for i in items).rstrip('\n')
     if not chars:
         return text, None
     sizes = {}
@@ -175,9 +196,7 @@ def line_markup(ln):
     dom = max(sizes, key=sizes.get)
     base = median(c.y0 for c in chars if round(c.size, 1) == dom)
     out, cur, buf, marked = [], None, [], False
-    for item in ln:
-        if not isinstance(item, (LTChar, LTAnno)):
-            continue
+    for item in items:
         kind = None
         if isinstance(item, LTChar) and item.size < 0.85 * dom:
             if item.y0 > base + 0.15 * dom:
@@ -220,12 +239,125 @@ def count_chars(container):
     return n
 
 
-def page_rows(page):
+GRID_SETTINGS = {'vertical_strategy': 'lines', 'horizontal_strategy': 'lines'}
+
+
+def _boundaries(values):
+    """Coordenadas de bordes de la grilla, fusionando las que distan 1 pt o menos."""
+    reps = []
+    for v in sorted(values):
+        if not reps or v - reps[-1] > 1.0:
+            reps.append(v)
+    return reps
+
+
+def _nearest(reps, v):
+    return min(range(len(reps)), key=lambda i: abs(reps[i] - v))
+
+
+def grid_tables(plumber_page, height):
+    """
+    Tablas de la grilla dibujada (pdfplumber, sólo geometría) en coordenadas de pdfminer (origen abajo). Cada celda
+    lleva su fila y columna en la grilla y, si abarca más de una, su rowspan/colspan (la grilla no tiene ese borde).
+    """
+    tables = []
+    for t in plumber_page.find_tables(GRID_SETTINGS):
+        cells = [(c[0], height - c[3], c[2], height - c[1]) for c in t.cells]
+        if not cells:
+            continue
+        xs = _boundaries({v for c in cells for v in (c[0], c[2])})
+        ys = list(reversed(_boundaries({v for c in cells for v in (c[1], c[3])})))  # de arriba hacia abajo
+        out = []
+        for c in cells:
+            col, row = _nearest(xs, c[0]), _nearest(ys, c[3])
+            out.append({
+                'bbox': c, 'row': row, 'col': col,
+                'colspan': max(1, _nearest(xs, c[2]) - col), 'rowspan': max(1, _nearest(ys, c[1]) - row),
+                'frags': [], 'alt': [], 'graphic': False,
+            })
+        b = t.bbox
+        tables.append({'bbox': (b[0], height - b[3], b[2], height - b[1]), 'cells': out, 'nested': False, 'unassigned': 0, 'altUnassigned': 0})
+    inside = lambda a, b: a[0] >= b[0] - 1 and a[1] >= b[1] - 1 and a[2] <= b[2] + 1 and a[3] <= b[3] + 1
+    for a in tables:
+        for b in tables:
+            if a is not b and inside(a['bbox'], b['bbox']):
+                a['nested'] = b['nested'] = True
+    return tables
+
+
+def _inside(box, x, y, pad=0.0):
+    return box[0] - pad <= x <= box[2] + pad and box[1] - pad <= y <= box[3] + pad
+
+
+def _cell_at(table, x, y):
+    for c in table['cells']:
+        if _inside(c['bbox'], x, y):
+            return c
+    return None
+
+
+def _on_border(g, table):
+    """Un trazo que es borde de una celda (línea fina sobre un lado) o su fondo (rectángulo del tamaño de la celda o de la tabla)."""
+    horizontal, vertical = g[3] - g[1] <= 2.0, g[2] - g[0] <= 2.0
+    for c in table['cells'] + [{'bbox': table['bbox']}]:
+        b = c['bbox']
+        if horizontal and min(abs((g[1] + g[3]) / 2 - b[1]), abs((g[1] + g[3]) / 2 - b[3])) <= 2.0 and g[0] < b[2] and g[2] > b[0]:
+            return True
+        if vertical and min(abs((g[0] + g[2]) / 2 - b[0]), abs((g[0] + g[2]) / 2 - b[2])) <= 2.0 and g[1] < b[3] and g[3] > b[1]:
+            return True
+        if all(abs(u - v) <= 2.0 for u, v in zip(g, b)):
+            return True
+    return False
+
+
+def _visual_lines(frags):
+    """Tramos de una celda → líneas de arriba hacia abajo (solapamiento vertical ≥ 0,5), cada una de izquierda a derecha."""
+    lines = []
+    for f in sorted(frags, key=lambda f: (-(f['y0'] + f['y1']) / 2, f['x0'])):
+        best = None
+        for ln in lines[-3:]:
+            ov = min(f['y1'], ln['y1']) - max(f['y0'], ln['y0'])
+            h = min(f['y1'] - f['y0'], ln['y1'] - ln['y0']) or 1.0
+            if ov / h >= 0.5:
+                best = ln
+        if best is None:
+            lines.append({'y0': f['y0'], 'y1': f['y1'], 'frags': [f]})
+        else:
+            best['frags'].append(f)
+            best['y0'], best['y1'] = min(best['y0'], f['y0']), max(best['y1'], f['y1'])
+    return [sorted(ln['frags'], key=lambda f: f['x0']) for ln in lines]
+
+
+def _cell_out(c):
+    """Celda → `{text, html?, colspan?, rowspan?, graphic?, alt}`: líneas unidas con salto de línea, tramos de una línea con tabulador."""
+    lines = _visual_lines(c['frags'])
+    texts, htmls, marked = [], [], False
+    for ln in lines:
+        parts = [markup(f['items']) for f in ln]
+        texts.append('\t'.join(t.strip() if i else t.rstrip() for i, (t, _) in enumerate(parts)))
+        htmls.append('\t'.join((h if h else escape(t)).strip() if i else (h if h else escape(t)).rstrip() for i, (t, h) in enumerate(parts)))
+        marked = marked or any(h for _, h in parts)
+    out = {'text': '\n'.join(texts)}
+    if marked:
+        out['html'] = '<br>'.join(htmls)
+    if c['colspan'] > 1:
+        out['colspan'] = c['colspan']
+    if c['rowspan'] > 1:
+        out['rowspan'] = c['rowspan']
+    if c['graphic']:
+        out['graphic'] = True
+    out['alt'] = ' '.join(c['alt'])
+    return out
+
+
+def page_rows(page, tables=(), words=()):
     """
     Filas de texto de arriba hacia abajo. Una línea entra en la fila con la que más se solapa en vertical (al menos
     la mitad de la menor de las dos alturas): así un número de sección o una viñeta dibujados en otra columna, con
     la línea base apenas corrida, quedan en su fila y no en la anterior. Dentro de la fila, de izquierda a derecha,
     unidas con tabulador.
+    Las líneas dentro de una tabla de la grilla (`tables`, de `grid_tables`) no forman filas: cada glifo va a su celda
+    y la tabla ocupa una fila con `grid`. `words` (de `pdftotext -bbox`) se reparten por celda y por fila en `alt`.
     """
     lines = [ln for ln in text_lines(page) if ln.get_text().strip()]
     emitted = sum(1 for ln in lines for c in ln if isinstance(c, LTChar))
@@ -234,48 +366,139 @@ def page_rows(page):
     incomplete = emitted + blank != total
     lines.sort(key=lambda l: (-(l.y0 + l.y1) / 2, l.x0))
     boxes = table_boxes(page)
-    rows = []  # cada fila: {'y0', 'y1', 'parts': [(x0, texto, en_tabla)]}
+    rows = []  # cada fila: {'y0', 'y1', 'parts': [(x0, texto, en_tabla)]} o, la de una tabla, {'y0', 'y1', 'grid'}
     for ln in lines:
+        cx, cy = (ln.x0 + ln.x1) / 2, (ln.y0 + ln.y1) / 2
+        grid = next((t for t in tables if _inside(t['bbox'], cx, cy)), None)
+        if grid is not None:
+            cur, buf = None, []
+
+            def flush():
+                while buf and isinstance(buf[-1], LTAnno):
+                    buf.pop()
+                if cur is not None and buf:
+                    cs = [i for i in buf if isinstance(i, LTChar)]
+                    cur['frags'].append({'items': list(buf), 'x0': min(i.x0 for i in cs), 'y0': min(i.y0 for i in cs), 'y1': max(i.y1 for i in cs)})
+
+            for item in ln:
+                if isinstance(item, LTChar):
+                    c = _cell_at(grid, (item.x0 + item.x1) / 2, (item.y0 + item.y1) / 2)
+                    if c is None:
+                        grid['unassigned'] += 1
+                    if c is not cur:
+                        flush()
+                        cur, buf = c, []
+                    if c is not None:
+                        buf.append(item)
+                elif isinstance(item, LTAnno) and cur is not None:
+                    buf.append(item)
+            flush()
+            continue
         best, best_ov = None, 0.0
         for r in rows[-3:]:
             ov = min(ln.y1, r['y1']) - max(ln.y0, r['y0'])
             h = min(ln.y1 - ln.y0, r['y1'] - r['y0']) or 1.0
             if ov / h >= 0.5 and ov / h > best_ov:
                 best, best_ov = r, ov / h
-        cx, cy = (ln.x0 + ln.x1) / 2, (ln.y0 + ln.y1) / 2
         in_table = any(b[0] - 1 <= cx <= b[2] + 1 and b[1] - 1 <= cy <= b[3] + 1 for b in boxes)
         text, html = line_markup(ln)
         part = (ln.x0, text.rstrip(), in_table, html.rstrip() if html else None)
         if best is None:
-            rows.append({'y0': ln.y0, 'y1': ln.y1, 'x0': ln.x0, 'x1': ln.x1, 'parts': [part]})
+            rows.append({'y0': ln.y0, 'y1': ln.y1, 'x0': ln.x0, 'x1': ln.x1, 'parts': [part], 'alt': []})
         else:
             best['parts'].append(part)
             best['y0'], best['y1'] = min(best['y0'], ln.y0), max(best['y1'], ln.y1)
             best['x0'], best['x1'] = min(best['x0'], ln.x0), max(best['x1'], ln.x1)
+    for t in tables:
+        if any(c['frags'] for c in t['cells']):
+            rows.append({'y0': t['bbox'][1], 'y1': t['bbox'][3], 'x0': t['bbox'][0], 'x1': t['bbox'][2], 'grid': t})
     rows.sort(key=lambda r: -(r['y0'] + r['y1']) / 2)
+    # Palabras del otro extractor: a la celda o a la fila que contiene su centro; las que no caen en ninguna se cuentan.
+    alt_unassigned = 0
+    for w in words:
+        wx, wy = (w[0] + w[2]) / 2, (w[1] + w[3]) / 2
+        grid = next((t for t in tables if _inside(t['bbox'], wx, wy)), None)
+        if grid is not None:
+            c = _cell_at(grid, wx, wy)
+            if c is None:
+                grid['altUnassigned'] += 1
+            else:
+                c['alt'].append(w[4])
+            continue
+        r = next((r for r in rows if 'grid' not in r and r['y0'] - 1 <= wy <= r['y1'] + 1 and r['x0'] - 2 <= wx <= r['x1'] + 2), None)
+        if r is None:
+            alt_unassigned += 1
+        else:
+            r['alt'].append(w[4])
     # Trazos fuera de las grillas de tabla: si caen dentro de la franja de una fila, la fila puede tener un símbolo dibujado.
-    strokes = [el.bbox for el in page if isinstance(el, (LTRect, LTLine, LTCurve)) and el.width < page.width * 0.9]
-    strokes = [g for g in strokes if not any(b[0] - 1 <= g[0] and g[2] <= b[2] + 1 and b[1] - 1 <= g[1] and g[3] <= b[3] + 1 for b in boxes)]
-    # Un subrayado (trazo horizontal fino de al menos 12 pt) no es un símbolo: no marca la fila.
+    all_strokes = [el.bbox for el in page if isinstance(el, (LTRect, LTLine, LTCurve)) and el.width < page.width * 0.9]
     curves = [el.bbox for el in page if isinstance(el, LTCurve) and not isinstance(el, (LTRect, LTLine))]
-    strokes = [g for g in strokes if g in curves or not (g[3] - g[1] <= 1.5 and g[2] - g[0] >= 12)]
+    # Un subrayado (trazo horizontal fino de al menos 12 pt) no es un símbolo: no marca la fila ni la celda.
+    underline = lambda g: g not in curves and g[3] - g[1] <= 1.5 and g[2] - g[0] >= 12
+    strokes = [g for g in all_strokes if not any(b[0] - 1 <= g[0] and g[2] <= b[2] + 1 and b[1] - 1 <= g[1] and g[3] <= b[3] + 1 for b in boxes)]
+    strokes = [g for g in strokes if not underline(g)]
+    # Dentro de una tabla de la grilla, un trazo que no es borde ni fondo de una celda marca la celda donde cae.
+    for t in tables:
+        for g in all_strokes:
+            gx, gy = (g[0] + g[2]) / 2, (g[1] + g[3]) / 2
+            if _inside(t['bbox'], gx, gy, 1.0) and not _on_border(g, t) and not underline(g):
+                c = _cell_at(t, gx, gy)
+                if c is not None:
+                    c['graphic'] = True
     for r in rows:
-        r['graphic'] = any(r['y0'] - 1 <= (g[1] + g[3]) / 2 <= r['y1'] + 1 and g[0] <= r['x1'] + 10 and g[2] >= r['x0'] - 10 for g in strokes)
+        if 'grid' not in r:
+            r['graphic'] = any(r['y0'] - 1 <= (g[1] + g[3]) / 2 <= r['y1'] + 1 and g[0] <= r['x1'] + 10 and g[2] >= r['x0'] - 10 for g in strokes)
     out = []
     for r in rows:
+        if 'grid' in r:
+            t = r['grid']
+            matrix = {}
+            for c in sorted(t['cells'], key=lambda c: (c['row'], c['col'])):
+                matrix.setdefault(c['row'], []).append(_cell_out(c))
+            grid = {'rows': [matrix[k] for k in sorted(matrix)]}
+            for flag in ('nested', 'unassigned', 'altUnassigned'):
+                if t[flag]:
+                    grid[flag] = t[flag]
+            text = '\n'.join('\t'.join(c['text'] for c in row) for row in grid['rows'])
+            out.append({'text': text, 'y': r['y0'], 'table': True, 'html': None, 'graphic': False, 'grid': grid})
+            continue
         parts = sorted(r['parts'], key=lambda p: p[0])
         text = parts[0][1] + ''.join('\t' + p[1].strip() for p in parts[1:])
         html = None
         if any(p[3] for p in parts):
             hs = [p[3] if p[3] else escape(p[1]) for p in parts]
             html = hs[0] + ''.join('\t' + h.strip() for h in hs[1:])
-        out.append({'text': text, 'y': r['y0'], 'table': any(p[2] for p in parts), 'html': html, 'graphic': r['graphic']})
-    if out and out[-1]['text'].strip().isdigit() and out[-1]['y'] < 90:
+        out.append({'text': text, 'y': r['y0'], 'table': any(p[2] for p in parts), 'html': html, 'graphic': r['graphic'], 'alt': ' '.join(r['alt'])})
+    if out and 'grid' not in out[-1] and out[-1]['text'].strip().isdigit() and out[-1]['y'] < 90:
         out.pop()
-    return [
-        {'text': r['text'], 'table': r['table'], **({'html': r['html']} if r['html'] else {}), **({'graphic': True} if r['graphic'] else {}), **({'incomplete': True} if incomplete else {})}
-        for r in out
-    ]
+    rows_out = []
+    for r in out:
+        row = {'text': r['text'], 'table': r['table']}
+        if r['html']:
+            row['html'] = r['html']
+        if r['graphic']:
+            row['graphic'] = True
+        if incomplete:
+            row['incomplete'] = True
+        if 'grid' in r:
+            row['grid'] = r['grid']
+        elif words:
+            row['alt'] = r['alt']
+        rows_out.append(row)
+    return rows_out, alt_unassigned
+
+
+PDFTOTEXT_WORD = re.compile(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>')
+
+
+def pdftotext_words(pdf):
+    """`pdftotext -bbox` (poppler) → por página, palabras `(x0, y0, x1, y1, texto)` en coordenadas de pdfminer."""
+    xml = subprocess.run(['pdftotext', '-bbox', '-enc', 'UTF-8', pdf, '-'], check=True, capture_output=True).stdout.decode('utf-8')
+    pages = []
+    for chunk in xml.split('<page ')[1:]:
+        height = float(re.search(r'height="([\d.]+)"', chunk).group(1))
+        pages.append([(float(a), height - float(d), float(c), height - float(b), unescape(t)) for a, b, c, d, t in PDFTOTEXT_WORD.findall(chunk)])
+    return pages
 
 
 def extract(args):
@@ -299,16 +522,27 @@ def extract_pdf(symbol_path, pdf):
     rsrc = PDFResourceManager()
     dev = LiteralAggregator(rsrc, table, LAParams(all_texts=True))
     interp = PDFPageInterpreter(rsrc, dev)
+    words = pdftotext_words(pdf)
     pages, started, chars, unresolved = [], False, 0, 0
-    with open(pdf, 'rb') as f:
+    with open(pdf, 'rb') as f, pdfplumber.open(pdf) as plumber:
         for n, p in enumerate(PDFPage.get_pages(f), start=1):
             interp.process_page(p)
-            rows = page_rows(dev.get_result())
+            layout = dev.get_result()
+            rows, _ = page_rows(layout)
             texts = [r['text'].strip() for r in rows]
             if not started and 'ANEXO I' not in texts:
                 continue
             started = True
-            pages.append({'page': n, 'rows': rows})
+            page_words = words[n - 1] if n - 1 < len(words) else []
+            tables = []
+            if table_boxes(layout):
+                pp = plumber.pages[n - 1]
+                # Sólo con el mismo sistema de coordenadas en los dos (sin rotación ni origen corrido); si no, la tabla queda sin celdas.
+                if pp.rotation == 0 and tuple(round(v, 1) for v in pp.bbox) == (0.0, 0.0, round(layout.width, 1), round(layout.height, 1)) and layout.bbox[:2] == (0, 0):
+                    tables = grid_tables(pp, layout.height)
+                pp.close()
+            rows, alt_unassigned = page_rows(layout, tables, page_words)
+            pages.append({'page': n, 'rows': rows, **({'altUnassigned': alt_unassigned} if alt_unassigned else {})})
             for r in rows:
                 chars += len(r['text'])
                 unresolved += r['text'].count(REPLACEMENT)
