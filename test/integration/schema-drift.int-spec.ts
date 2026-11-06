@@ -84,13 +84,15 @@ describe('F09 · el comprobador de deriva encuentra la deriva (integración)', (
   // live base through their patches; the versioned DDL (`yarn db:vendor`) must
   // declare them too, or a base rebuilt from `database/SQL` diverges from the
   // one in production.
-  it('el DDL versionado declara las tablas de los parches v4.2.89 y v4.2.90', async () => {
+  it('el DDL versionado declara las tablas de los parches v4.2.89, v4.2.90 y v4.2.91', async () => {
     const informe = await comprobar();
     for (const tabla of [
       'diagnostics.report_drafts',
       'diagnostics.report_draft_files',
       'diagnostics.report_issuer_settings',
       'directory.tenant_opening_hours',
+      // v4.2.91: reactions to chat messages (patch already in dev, DDL vendored 06/11).
+      'community.message_reactions',
     ]) {
       expect(informe.tablasNoDeclaradas).not.toContain(tabla);
       expect(informe.tablasFaltantes).not.toContain(tabla);
