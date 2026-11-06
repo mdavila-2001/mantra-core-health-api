@@ -765,6 +765,86 @@ describe('Encuesta por servicio y cierre de la consulta (integración real)', ()
     });
   });
 
+  describe('una encuesta escrita a mano en un servicio (anterior al catálogo)', () => {
+    let legacyAssignment: string;
+
+    it('no se informa como vigente: la emisión no la manda y el servicio usa la base', async () => {
+      // Así quedó en la base una asociación anterior al catálogo.
+      const template = randomUUID();
+      const version = randomUUID();
+      legacyAssignment = randomUUID();
+      await sql(
+        `INSERT INTO surveys.survey_templates (id, tenant_id, owner_practitioner_id, title,
+           status_concept_id, created_at, updated_at)
+         VALUES ($1, $2, $3, 'Satisfacción con el servicio', $4, now(), now())`,
+        [template, TENANT, DOCTOR, SURVEYS.TEMPLATE_ACTIVE],
+      );
+      await sql(
+        `INSERT INTO surveys.survey_versions (id, survey_template_id, version_number,
+           publication_status_concept_id, response_window_days, created_at, updated_at)
+         VALUES ($1, $2, 1, $3, 30, now(), now())`,
+        [version, template, SURVEYS.VERSION_PUBLISHED],
+      );
+      await sql(
+        `INSERT INTO surveys.survey_assignments (id, survey_version_id, tenant_id,
+           target_type_concept_id, target_id, active, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, true, now(), now())`,
+        [
+          legacyAssignment,
+          version,
+          TENANT,
+          SURVEYS.TARGET_SERVICE,
+          ids.catalog,
+        ],
+      );
+
+      const listed = await inTenant(() =>
+        services().byService.listServiceAssignments(doctor),
+      );
+      expect(listed.services[0].assignment).toBeNull();
+
+      const booking = await insertBooking();
+      await inTenant(() =>
+        services().assignments.issueForCompletedBooking(booking, doctor),
+      );
+      expect(await invitationsOf(booking)).toEqual([
+        expect.objectContaining({
+          survey_version_id: systemSurveyIds(TENANT, 'SERVICE').versionId,
+          extension_survey_version_id: null,
+        }),
+      ]);
+    });
+
+    it('importar una del catálogo la reemplaza: la escrita a mano queda inactiva y la vigente es la importada', async () => {
+      const row = await inTenant(() =>
+        services().byService.importServiceSurvey(
+          ids.catalog,
+          { catalogCode: 'STD_IMAGING_V1' },
+          doctor,
+        ),
+      );
+      expect(row.assignment).toMatchObject({ catalogCode: 'STD_IMAGING_V1' });
+
+      const [legacy] = await rows(
+        'SELECT active FROM surveys.survey_assignments WHERE id = $1',
+        [legacyAssignment],
+      );
+      expect(legacy.active).toBe(false);
+      const listed = await inTenant(() =>
+        services().byService.listServiceAssignments(doctor),
+      );
+      expect(listed.services[0].assignment).toMatchObject({
+        assignmentId: row.assignment!.assignmentId,
+        catalogCode: 'STD_IMAGING_V1',
+      });
+
+      // Y para no arrastrar estado a lo que sigue, se quita.
+      await inTenant(() =>
+        services().byService.removeServiceSurvey(ids.catalog, doctor),
+      );
+    });
+  });
+
   // Con `RLS_ENFORCE=true` la petición entera es UNA transacción, como rol
   // `mantra_app` (sin BYPASSRLS) y con `app.current_tenant_id` fijado
   // (`TenantContextInterceptor`). Se reproduce eso con el parche real de RLS

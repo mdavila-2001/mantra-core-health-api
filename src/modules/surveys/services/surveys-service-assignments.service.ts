@@ -176,8 +176,13 @@ export class SurveysServiceAssignmentsService {
           practitionerProfileId,
           [serviceId],
         );
+        // Ya es la única activa: nada que cambiar. Si conviven otras (una
+        // escrita a mano anterior al catálogo), se reemplazan todas.
         const current = previous[0];
-        if (current && current.version.id === imported.versionId) {
+        if (
+          previous.length === 1 &&
+          current.version.id === imported.versionId
+        ) {
           await tx.flush();
           return row(toAssignmentDto(current));
         }
