@@ -1139,6 +1139,7 @@ export class ProfilesPatientsService {
         birthDate: dto.birthDate,
         ageYears: ageInYears(dto.birthDate),
         ...(dto.nationalId === undefined ? {} : { nationalId: dto.nationalId }),
+        ...(dto.sexAtBirth === undefined ? {} : { sexAtBirth: dto.sexAtBirth }),
         relationshipCode: relation.code,
         relationshipDisplay: relation.display,
         isLegalGuardian: true,
@@ -1161,6 +1162,11 @@ export class ProfilesPatientsService {
       row.relationship_concept_id ?? '',
     );
     const age = ageInYears(row.birth_date);
+    // An unmapped concept stays absent rather than leaking a raw uuid.
+    const sexAtBirth =
+      row.sex_at_birth_concept_id === null
+        ? undefined
+        : BIRTH_SEX_CODE_BY_CONCEPT[row.sex_at_birth_concept_id];
     return {
       id: row.proxy_id,
       patientProfileId: row.patient_profile_id,
@@ -1181,6 +1187,7 @@ export class ProfilesPatientsService {
       ...(row.birth_date === null ? {} : { birthDate: row.birth_date }),
       ...(age === undefined ? {} : { ageYears: age }),
       ...(row.national_id === null ? {} : { nationalId: row.national_id }),
+      ...(sexAtBirth === undefined ? {} : { sexAtBirth }),
       relationshipCode: relation.code,
       relationshipDisplay: relation.display,
       isLegalGuardian: row.is_legal_guardian ?? false,

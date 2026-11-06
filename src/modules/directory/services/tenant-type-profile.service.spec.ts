@@ -820,6 +820,7 @@ describe('TenantTypeProfileService', () => {
           name: 'Casa central',
           latitude: '-17.78',
           longitude: '-63.18',
+          branchCategory: 'head_office',
         }),
       );
       expect(branchesRepo.create).toHaveBeenNthCalledWith(
@@ -831,17 +832,21 @@ describe('TenantTypeProfileService', () => {
           locationUrl: 'https://maps.example/norte',
           latitude: '-17.7',
           longitude: '-63.1',
+          branchCategory: 'branch',
         }),
       );
       // Mismo nombre dos veces: el código no se repite dentro del alta.
       expect(branchesRepo.create).toHaveBeenNthCalledWith(
         3,
         tx,
-        expect.objectContaining({ code: 'SUCURSAL-NORTE-2' }),
+        expect.objectContaining({
+          code: 'SUCURSAL-NORTE-2',
+          branchCategory: 'branch',
+        }),
       );
     });
 
-    it('no registra sucursales de directorio para una unidad de imágenes', async () => {
+    it('registra sólo la sede central de una unidad de imágenes, como casa matriz (v4.2.91)', async () => {
       const { service, branchesRepo, tx } = build();
 
       await service.materializeProfile(
@@ -866,7 +871,20 @@ describe('TenantTypeProfileService', () => {
         'actor-1',
       );
 
-      expect(branchesRepo.create).not.toHaveBeenCalled();
+      // Antes de v4.2.91 imagenología no entraba al registro de sucursales y su
+      // pantalla Sucursales arrancaba vacía; ahora la sede central es la casa matriz.
+      expect(branchesRepo.create).toHaveBeenCalledTimes(1);
+      expect(branchesRepo.create).toHaveBeenCalledWith(
+        tx,
+        expect.objectContaining({
+          tenantId: 'tenant-8',
+          code: 'SEDE-CENTRAL',
+          name: 'Sede central',
+          latitude: '-17.78',
+          longitude: '-63.18',
+          branchCategory: 'head_office',
+        }),
+      );
     });
 
     it('no crea la unidad si DIAGNOSTIC_CENTER no declaró diagnosticUnit', async () => {
@@ -1092,6 +1110,47 @@ describe('TenantTypeProfileService', () => {
       );
 
       expect(order).toEqual(['create', 'flush', 'site', 'site', 'site']);
+    });
+
+    it('suma las sedes declaradas al registro de sucursales: casa central como casa matriz (v4.2.91)', async () => {
+      const { service, branchesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, medicalFacility: facility },
+        'owner-1',
+      );
+
+      const branches = branchesRepo.create.mock.calls.map(
+        ([, data]: [unknown, Record<string, unknown>]) => data,
+      );
+      expect(branches).toEqual([
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          code: 'CASA-CENTRAL',
+          name: 'Casa central',
+          description: 'Av. San Martín 123',
+          latitude: '-17.78',
+          longitude: '-63.18',
+          branchCategory: 'head_office',
+          actorUserId: 'owner-1',
+        }),
+        expect.objectContaining({
+          code: 'SUCURSAL-EQUIPETROL',
+          name: 'Sucursal Equipetrol',
+          description: 'Calle 1, Edificio 2',
+          latitude: '-17.7',
+          longitude: '-63.1',
+          branchCategory: 'branch',
+        }),
+        expect.objectContaining({
+          code: 'SUCURSAL-NORTE',
+          latitude: undefined,
+          longitude: undefined,
+          branchCategory: 'branch',
+        }),
+      ]);
     });
 
     it('la casa central lleva ordinal 0 y las sucursales 1..n en el orden declarado', async () => {

@@ -10,6 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { BRANCH_CATEGORIES, type BranchCategory } from '../branch-categories';
 
 /** Tipos de branch aceptados en la creación (mapeados a concept ids). */
 export type BranchTypeCode = 'CLINIC' | 'OFFICE';
@@ -105,4 +106,13 @@ export class CreateBranchDto {
   @MaxLength(2000)
   @Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })
   locationUrl?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Categoría de la sede: default (sin clasificar), head_office (casa matriz, una por organización) o branch (sucursal). Por omisión, default.',
+    enum: BRANCH_CATEGORIES,
+  })
+  @IsOptional()
+  @IsIn(BRANCH_CATEGORIES)
+  category?: BranchCategory;
 }

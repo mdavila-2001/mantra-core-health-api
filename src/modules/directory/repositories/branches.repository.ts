@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Branches } from '../entities';
 import { createdBy } from '../../../common';
+import {
+  DEFAULT_BRANCH_CATEGORY,
+  type BranchCategory,
+} from '../branch-categories';
 
 /** Datos para dar de alta una branch. */
 export interface CreateBranchData {
@@ -39,6 +43,8 @@ export interface CreateBranchData {
   longitude?: string;
   description?: string;
   locationUrl?: string;
+  /** Categoría de la sede; `default` si no se dice. */
+  branchCategory?: BranchCategory;
   /**
    * Identificador asociado a actor user.
    */
@@ -86,6 +92,7 @@ export class BranchesRepository {
         longitude: data.longitude,
         description: data.description,
         locationUrl: data.locationUrl,
+        branchCategory: data.branchCategory ?? DEFAULT_BRANCH_CATEGORY,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -100,5 +107,13 @@ export class BranchesRepository {
    */
   findByTenant(em: EntityManager, tenantId: string): Promise<Branches[]> {
     return em.find(Branches, { tenantId }, { orderBy: { code: 'ASC' } });
+  }
+
+  /** La casa matriz de la organización, si ya tiene una (a lo sumo una, v4.2.91). */
+  findHeadOffice(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<Branches | null> {
+    return em.findOne(Branches, { tenantId, branchCategory: 'head_office' });
   }
 }

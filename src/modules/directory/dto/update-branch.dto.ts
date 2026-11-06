@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -10,6 +11,7 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import { BRANCH_CATEGORIES, type BranchCategory } from '../branch-categories';
 
 /**
  * Cuerpo de `PATCH /tenants/:tenantId/branches/:branchId`. `null` borra el dato;
@@ -53,4 +55,13 @@ export class UpdateBranchDto {
   @Min(-180)
   @Max(180)
   longitude?: number | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Categoría de la sede: default, head_office (casa matriz, una por organización) o branch.',
+    enum: BRANCH_CATEGORIES,
+  })
+  @IsOptional()
+  @IsIn(BRANCH_CATEGORIES)
+  category?: BranchCategory;
 }

@@ -17,6 +17,7 @@ import { FileUploadService } from '../../common/services';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
+import { toDirectMessageDto } from './direct-message.mapper';
 import type { FileContentDto } from '../../common/dto';
 import { CommunityErrorReason } from '../community.error-reasons';
 import { PractitionerVerificationReader } from '../../profiles/application/services/practitioner-verification-reader.service';
@@ -27,7 +28,6 @@ import type {
   ConversationPeerDto,
   ConversationPageDto,
   ConversationPresenceDto,
-  DirectMessageDto,
   DirectMessagePageDto,
 } from '../dto';
 import type {
@@ -36,6 +36,7 @@ import type {
   DirectMessages,
   PublicProfiles,
 } from '../entities';
+import { CommunityMessageReactionsService } from './community-message-reactions.service';
 
 /**
  * Tope de conversaciones que se resuelven de una vez para armar la bandeja.
@@ -80,6 +81,7 @@ export class CommunityMessagingReadService {
     private readonly files: FileUploadService,
     private readonly verifications: PractitionerVerificationReader,
     private readonly logger: PinoLogger,
+    private readonly reactions: CommunityMessageReactionsService,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
   }
@@ -496,7 +498,10 @@ export class CommunityMessagingReadService {
       : await this.threadPeers(em, conversationId, profileId);
 
     return {
-      items: page.map((message) => this.toDto(message)),
+      items: await this.reactions.attach(
+        em,
+        page.map((message) => toDirectMessageDto(message)),
+      ),
       count: page.length,
       limit: options.limit,
       nextCursor:
@@ -513,7 +518,7 @@ export class CommunityMessagingReadService {
         : {
             pinnedMessage:
               pinnedMessage && !pinnedMessage.deletedAt
-                ? this.toDto(pinnedMessage)
+                ? toDirectMessageDto(pinnedMessage)
                 : null,
           }),
     };
@@ -639,28 +644,6 @@ export class CommunityMessagingReadService {
         verification: null,
       }
     );
-  }
-
-  /**
-   * Un mensaje como viaja al cliente. Uno eliminado va **sin** cuerpo ni
-   * adjunto pero con su lugar: el hilo pinta «Se eliminó este mensaje» y las
-   * citas que apuntaban a él siguen sabiendo a qué apuntaban.
-   */
-  private toDto(message: DirectMessages): DirectMessageDto {
-    const deleted =
-      message.deletedAt !== undefined && message.deletedAt !== null;
-    return {
-      id: message.id,
-      conversationId: message.conversationId,
-      senderProfileId: message.senderProfileId,
-      replyToMessageId: message.replyToMessageId ?? null,
-      contentTypeConceptId: message.contentTypeConceptId,
-      bodyText: deleted ? null : (message.bodyText ?? null),
-      attachmentFileId: deleted ? null : (message.attachmentFileId ?? null),
-      isEdited: message.isEdited ?? null,
-      deletedAt: message.deletedAt ?? null,
-      sentAt: message.sentAt ?? null,
-    };
   }
 
   /**

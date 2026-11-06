@@ -23,6 +23,7 @@ import {
   type MessagingProfileAccess,
 } from '../services/community-visibility.service';
 import { CommunityPresenceService } from '../services/community-presence.service';
+import type { MessageContentType } from '../message-content-type';
 
 /** Un mensaje directo, tal como lo devuelve la lectura REST (`DirectMessageDto`). */
 export interface GatewayMessagePayload {
@@ -31,6 +32,7 @@ export interface GatewayMessagePayload {
   senderProfileId: string;
   replyToMessageId?: string | null;
   contentTypeConceptId: string;
+  contentType?: MessageContentType;
   bodyText?: string | null;
   attachmentFileId?: string | null;
   isEdited?: boolean | null;

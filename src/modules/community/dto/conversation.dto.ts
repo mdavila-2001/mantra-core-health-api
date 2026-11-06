@@ -9,7 +9,13 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  MESSAGE_CONTENT_TYPES,
+  type MessageContentType,
+} from '../message-content-type';
 
 /**
  * Cuerpo de `POST /community/conversations`. Endpoint de bootstrap de mensajería:
@@ -52,8 +58,17 @@ export class SendMessageDto {
   /**
    * Valor de body text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Texto del mensaje', maxLength: 4000 })
-  @IsOptional()
+  @ApiPropertyOptional({
+    description:
+      'Texto del mensaje. Vacío o en blanco equivale a no mandarlo; obligatorio si no hay adjunto',
+    maxLength: 4000,
+  })
+  // An attachment without caption arrives as `''`: it means "no text", not an
+  // invalid text. A message still needs text or an attachment.
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' && value.trim() === '' ? undefined : value,
+  )
+  @ValidateIf((o: SendMessageDto) => o.bodyText != null || !o.attachmentFileId)
   @IsString()
   @MinLength(1)
   @MaxLength(4000)
@@ -63,12 +78,13 @@ export class SendMessageDto {
    * Valor de content type mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Tipo de contenido',
-    enum: ['TEXT', 'MEDIA'],
+    description:
+      'Tipo de contenido. STICKER: un sticker propio (imagen), exige adjunto',
+    enum: MESSAGE_CONTENT_TYPES,
   })
   @IsOptional()
-  @IsIn(['TEXT', 'MEDIA'])
-  contentType?: 'TEXT' | 'MEDIA';
+  @IsIn(MESSAGE_CONTENT_TYPES)
+  contentType?: MessageContentType;
 
   /**
    * Identificador asociado a reply to message.
@@ -88,7 +104,10 @@ export class SendMessageDto {
     description: 'Archivo adjunto (common.files)',
     format: 'uuid',
   })
-  @IsOptional()
+  @ValidateIf(
+    (o: SendMessageDto) =>
+      o.contentType === 'STICKER' || o.attachmentFileId != null,
+  )
   @IsUUID()
   attachmentFileId?: string;
 }
