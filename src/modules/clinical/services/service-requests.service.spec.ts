@@ -1061,6 +1061,7 @@ describe('ServiceRequestsService · reasonConditionId (v4291)', () => {
     expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
       id: 'cond-1',
       patientProfileId: 'p1',
+      custodianTenantId: 't1',
     });
     expect(
       d.serviceRequestsRepo.create.mock.calls[0][1].reasonConditionId,
@@ -1088,5 +1089,23 @@ describe('ServiceRequestsService · reasonConditionId (v4291)', () => {
     );
     expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
     expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+  });
+
+  it('422 igual que uno inexistente si el diagnóstico es del paciente pero de otro tenant', async () => {
+    const d = setup();
+    // La base sólo lo encuentra en t2: el filtro por custodio lo deja afuera.
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) =>
+      where.custodianTenantId === undefined || where.custodianTenantId === 't2'
+        ? { id: where.id, patientProfileId: where.patientProfileId }
+        : null,
+    );
+    const err = await d.service
+      .create({ ...registration, reasonConditionId: 'cond-otro-tenant' }, actor)
+      .catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(PreconditionFailedException);
+    expect((err as any).getResponse().reason).toBe(
+      'SERVICE_REQUEST_REASON_CONDITION_INVALID',
+    );
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
   });
 });

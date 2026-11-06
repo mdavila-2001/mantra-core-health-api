@@ -599,9 +599,12 @@ export class ConditionsService {
         ClinicalErrorReason.CONDITION_REPLACEMENT_SELF,
       );
     }
+    // Mismo custodio que el diagnóstico descartado: uno de otro tenant
+    // responde el mismo 422 que uno inexistente.
     const replacement = await tx.findOne(Conditions, {
       id: replacementId,
       patientProfileId: condition.patientProfileId,
+      custodianTenantId: condition.custodianTenantId,
     });
     if (!replacement) {
       throw new PreconditionFailedException(

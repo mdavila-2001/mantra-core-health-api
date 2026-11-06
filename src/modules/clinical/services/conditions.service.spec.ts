@@ -932,7 +932,9 @@ describe('ConditionsService.verify · replacedByConditionId (v4291)', () => {
   async function reasonOf(promise: Promise<unknown>): Promise<string> {
     const err = await promise.catch((e: unknown) => e);
     expect(err).toBeInstanceOf(PreconditionFailedException);
-    return (err as PreconditionFailedException).getResponse()['reason'];
+    return (
+      (err as PreconditionFailedException).getResponse() as { reason: string }
+    ).reason;
   }
 
   it('al refutar, guarda el reemplazo del mismo paciente, lo devuelve y lo sella en el historial', async () => {
@@ -949,11 +951,34 @@ describe('ConditionsService.verify · replacedByConditionId (v4291)', () => {
     expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
       id: 'cond-2',
       patientProfileId: 'p1',
+      custodianTenantId: 't1',
     });
     expect(res.replacedByConditionId).toBe('cond-2');
     expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_REFUTED);
     const revision = d.historyRepo.append.mock.calls[0][3];
     expect(revision.dataSnapshot.replacedByConditionId).toBe('cond-2');
+  });
+
+  it('422 CONDITION_REPLACEMENT_INVALID si el reemplazo es del paciente pero de otro tenant', async () => {
+    const d = setup();
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) =>
+      where.custodianTenantId === undefined || where.custodianTenantId === 't2'
+        ? { id: where.id, patientProfileId: where.patientProfileId }
+        : null,
+    );
+    expect(
+      await reasonOf(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'REFUTED',
+            reasonText: 'Descartado',
+            replacedByConditionId: 'cond-otro-tenant',
+          },
+          medical,
+        ),
+      ),
+    ).toBe('CONDITION_REPLACEMENT_INVALID');
   });
 
   it('sin reemplazo el campo queda ausente de la respuesta', async () => {

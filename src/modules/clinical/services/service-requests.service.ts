@@ -237,9 +237,12 @@ export class ServiceRequestsService {
     dto: CreateServiceRequestDto,
   ): Promise<void> {
     if (dto.reasonConditionId === undefined) return;
+    // Mismo custodio que la orden, igual que `assertEncounterBelongsToPatient`:
+    // un diagnóstico de otro tenant responde el mismo 422 que uno inexistente.
     const condition = await tx.findOne(Conditions, {
       id: dto.reasonConditionId,
       patientProfileId: dto.patientProfileId,
+      custodianTenantId: dto.custodianTenantId,
     });
     if (!condition) {
       throw new PreconditionFailedException(
