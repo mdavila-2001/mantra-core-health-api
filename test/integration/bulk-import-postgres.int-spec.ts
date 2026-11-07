@@ -1,6 +1,3 @@
-import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { MikroORM } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import pg from 'pg';
@@ -9,7 +6,6 @@ import {
   BulkImportStatus,
   RowOutcome,
 } from '../../src/modules/bulk_import/bulk-import.constants';
-import type { BatchRecord } from '../../src/modules/bulk_import/ports/bulk-import.ports';
 import { MikroBulkImportSqlRunner } from '../../src/modules/bulk_import/repositories/bulk-import-sql.port';
 import { PostgresBatchRepository } from '../../src/modules/bulk_import/repositories/postgres-batch.repository';
 import { exampleRow } from '../../src/modules/bulk_import/schema/field-schema';
@@ -31,78 +27,25 @@ import {
   TEST_ENGINE_STATUS,
 } from '../../src/modules/bulk_import/testing/harness';
 
+import { TENANT_A, TENANT_B, USER, batch } from './bulk-import-batch.fixture';
+import { createScratchDb, type ScratchDb } from './bulk-import-scratch-db';
+
 /**
  * Batch repository against REAL PostgreSQL.
  *
- * Requires `BULK_IMPORT_IT_DB_URL`; without it the suite FAILS (never skips). It must be a SUPERUSER url of a DISPOSABLE
- * database (the suite recreates `system_ops`, `directory`, `iam` and
- * `delegated_access` stubs). It applies the real patch
- * `database/SQL/patches/2026-10-31_v4281_cargas_masivas.sql` and then runs the
- * repository as the non-superuser role `mantra_app`, so FORCE RLS is in effect.
+ * The suite creates its OWN throwaway database (`bulk_import_test_<hex>`) on the
+ * server given by `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD` (a superuser or a
+ * role with CREATEDB and CREATEROLE), applies the real patch
+ * `database/SQL/patches/2026-10-31_v4281_cargas_masivas.sql` there, runs the
+ * repository as a non-superuser role (FORCE RLS in effect) and drops both at the
+ * end. It never runs DDL on the configured `DB_NAME`. Guards live in
+ * `disposable-database.ts` (`assertOwnDisposableDatabase`, `assertServerIdentity`).
  *
- * Real here: tables, FKs, CHECKs, unique confirm key, RLS, MikroORM runner.
- * Stubs: `directory.tenants`, `iam.users`, `delegated_access.four_eyes_requests`
- * (id-only prerequisites of the patch). The engine test uses declared fakes for
- * the user/clinical writers; persistence is the real repository.
+ * Real: tables, FKs, CHECKs, unique confirm key, RLS, MikroORM runner. Stubs:
+ * id-only prerequisites of the patch and the declared user/clinical fakes.
  */
-const ADMIN_URL = process.env.BULK_IMPORT_IT_DB_URL;
-
-const TENANT_A = randomUUID();
-const TENANT_B = randomUUID();
-const USER = randomUUID();
-const APP_PASSWORD = 'bulk_it_app';
-
-function appUrl(): string {
-  const u = new URL(ADMIN_URL as string);
-  u.username = 'mantra_app';
-  u.password = APP_PASSWORD;
-  return u.toString();
-}
-
-function batch(tenantId: string, over: Partial<BatchRecord> = {}): BatchRecord {
-  const now = new Date().toISOString();
-  return {
-    id: randomUUID(),
-    tenantId,
-    kind: 'usuario-personal-organizacion',
-    kindVersion: '1',
-    group: 'USERS',
-    status: BulkImportStatus.VALIDATED,
-    createdByUserId: USER,
-    createdAt: now,
-    updatedAt: now,
-    declaration: { reason: 'prueba' },
-    source: { format: 'csv', byteSize: 120 },
-    counts: { total: 3, valid: 2, rejected: 1 },
-    fileIssues: [],
-    previewIssues: [{ row: 3, field: 'email', code: 'INVALID' } as never],
-    issuesTotal: 1,
-    rejectedRows: [
-      {
-        row: 3,
-        outcome: RowOutcome.REJECTED,
-        reason: 'X' as never,
-        field: 'email',
-      },
-    ],
-    rows: [
-      {
-        row: 1,
-        data: { email: 'a@example.test' } as never,
-        rowKey: 'a'.repeat(64),
-      },
-      {
-        row: 2,
-        data: { email: 'b@example.test' } as never,
-        rowKey: 'b'.repeat(64),
-      },
-    ],
-    processedRows: 0,
-    ...over,
-  };
-}
-
 describe('PostgresBatchRepository · PostgreSQL real', () => {
+  let scratch: ScratchDb;
   let admin: pg.Pool;
   const orms: MikroORM[] = [];
   let repo: PostgresBatchRepository;
@@ -110,7 +53,7 @@ describe('PostgresBatchRepository · PostgreSQL real', () => {
   async function newRepo(): Promise<PostgresBatchRepository> {
     const orm = await MikroORM.init({
       driver: PostgreSqlDriver,
-      clientUrl: appUrl(),
+      clientUrl: scratch.appUrl,
       entities: [],
       discovery: { warnWhenNoEntities: false },
     });
@@ -121,35 +64,8 @@ describe('PostgresBatchRepository · PostgreSQL real', () => {
   }
 
   beforeAll(async () => {
-    if (!ADMIN_URL) {
-      throw new Error(
-        'BULK_IMPORT_IT_DB_URL is required (disposable superuser database)',
-      );
-    }
-    admin = new pg.Pool({ connectionString: ADMIN_URL });
-    await admin.query(`
-      DROP SCHEMA IF EXISTS system_ops, delegated_access, iam, directory CASCADE;
-      CREATE SCHEMA directory; CREATE SCHEMA iam; CREATE SCHEMA delegated_access;
-      CREATE SCHEMA system_ops;
-      CREATE TABLE directory.tenants (id uuid PRIMARY KEY);
-      CREATE TABLE iam.users (id uuid PRIMARY KEY);
-      CREATE TABLE delegated_access.four_eyes_requests (id uuid PRIMARY KEY, tenant_id uuid NOT NULL);
-      DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mantra_app') THEN
-          CREATE ROLE mantra_app LOGIN PASSWORD '${APP_PASSWORD}';
-        END IF;
-      END $$;
-      GRANT USAGE ON SCHEMA system_ops TO mantra_app;
-    `);
-    await admin.query(
-      readFileSync(
-        join(
-          process.cwd(),
-          'database/SQL/patches/2026-10-31_v4281_cargas_masivas.sql',
-        ),
-        'utf8',
-      ),
-    );
+    scratch = await createScratchDb();
+    admin = scratch.admin;
     await admin.query('INSERT INTO directory.tenants VALUES ($1), ($2)', [
       TENANT_A,
       TENANT_B,
@@ -160,7 +76,7 @@ describe('PostgresBatchRepository · PostgreSQL real', () => {
 
   afterAll(async () => {
     await Promise.all(orms.map((o) => o.close(true)));
-    await admin?.end();
+    await scratch?.dispose();
   });
 
   const personalDataRows = async () =>
@@ -212,7 +128,7 @@ describe('PostgresBatchRepository · PostgreSQL real', () => {
   });
 
   it('RLS: sin organización fijada el rol de la aplicación no ve filas', async () => {
-    const app = new pg.Pool({ connectionString: appUrl() });
+    const app = new pg.Pool({ connectionString: scratch.appUrl });
     try {
       const { rows } = await app.query(
         'SELECT count(*)::int AS n FROM system_ops.bulk_import_batches',
