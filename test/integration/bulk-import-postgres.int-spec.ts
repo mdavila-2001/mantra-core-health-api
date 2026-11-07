@@ -34,7 +34,7 @@ import {
 /**
  * Batch repository against REAL PostgreSQL.
  *
- * Opt-in: `BULK_IMPORT_IT_DB_URL` must be a SUPERUSER url of a DISPOSABLE
+ * Requires `BULK_IMPORT_IT_DB_URL`; without it the suite FAILS (never skips). It must be a SUPERUSER url of a DISPOSABLE
  * database (the suite recreates `system_ops`, `directory`, `iam` and
  * `delegated_access` stubs). It applies the real patch
  * `database/SQL/patches/2026-10-31_v4281_cargas_masivas.sql` and then runs the
@@ -46,7 +46,6 @@ import {
  * the user/clinical writers; persistence is the real repository.
  */
 const ADMIN_URL = process.env.BULK_IMPORT_IT_DB_URL;
-const describeIfDb = ADMIN_URL ? describe : describe.skip;
 
 const TENANT_A = randomUUID();
 const TENANT_B = randomUUID();
@@ -103,7 +102,7 @@ function batch(tenantId: string, over: Partial<BatchRecord> = {}): BatchRecord {
   };
 }
 
-describeIfDb('PostgresBatchRepository · PostgreSQL real', () => {
+describe('PostgresBatchRepository · PostgreSQL real', () => {
   let admin: pg.Pool;
   const orms: MikroORM[] = [];
   let repo: PostgresBatchRepository;
@@ -122,6 +121,11 @@ describeIfDb('PostgresBatchRepository · PostgreSQL real', () => {
   }
 
   beforeAll(async () => {
+    if (!ADMIN_URL) {
+      throw new Error(
+        'BULK_IMPORT_IT_DB_URL is required (disposable superuser database)',
+      );
+    }
     admin = new pg.Pool({ connectionString: ADMIN_URL });
     await admin.query(`
       DROP SCHEMA IF EXISTS system_ops, delegated_access, iam, directory CASCADE;
